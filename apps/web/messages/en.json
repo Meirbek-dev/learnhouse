@@ -59,6 +59,7 @@
             "author": "Author"
         },
         "LocaleSwitcher": {
+            "selectLanguage": "Select Language",
             "label": "Language",
             "en": "English",
             "ru": "Russian"
