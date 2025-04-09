@@ -117,6 +117,41 @@
             "general": "General",
             "access": "Access",
             "content": "Content"
+        },
+        "UserAccountSettings": {
+            "title": "Account Settings",
+            "general": "General",
+            "profile": "Profile",
+            "password": "Password",
+            "generalSection": {
+                "title": "Account Settings",
+                "description": "Manage your account details and preferences",
+                "email": "Email",
+                "emailPlaceholder": "Enter your email",
+                "emailChangeWarning": "Changing your email will require you to sign in again",
+                "username": "Username",
+                "usernamePlaceholder": "Enter your username",
+                "firstName": "First Name",
+                "firstNamePlaceholder": "Enter your first name",
+                "lastName": "Last Name",
+                "lastNamePlaceholder": "Enter your last name",
+                "bio": "Bio",
+                "bioPlaceholder": "Tell us about yourself",
+                "charactersLeft": "characters left",
+                "language": "Language",
+                "profilePicture": "Profile Picture",
+                "changeAvatar": "Change Avatar",
+                "recommendedSize": "Recommended size: 100x100",
+                "saving": "Saving...",
+                "saveChanges": "Save Changes",
+                "additionalDetails": "Additional Details",
+                "clearAll": "Clear All",
+                "addDetail": "Add Detail",
+                "newDetail": "New Detail",
+                "addGeneralInfo": "Add General Info",
+                "addAcademicInfo": "Add Academic Info",
+                "addProfessionalInfo": "Add Professional Info"
+            }
         }
     },
     "NewCollectionPage": {

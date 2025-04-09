@@ -47,6 +47,7 @@ import { useDebounce } from '@/hooks/useDebounce'
 import LanguageSwitcher from '@components/Utils/LocaleSwitcher'
 import { getUserLocale } from '@/i18n/locale'
 import { type Locale } from '@/i18n/config'
+import { useTranslations } from 'next-intl'
 
 const SUPPORTED_FILES = constructAcceptValue(['image'])
 
@@ -273,6 +274,7 @@ const UserEditForm = ({
   profilePicture,
   currentLocale,
 }: UserEditFormProps) => {
+  const t = useTranslations('DashPage.UserAccountSettings.generalSection')
   // Memoize template handlers
   const templateHandlers = useMemo(
     () =>
@@ -322,24 +324,22 @@ const UserEditForm = ({
     <Form>
       <div className="flex flex-col gap-0">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
-          <h1 className="font-bold text-xl text-gray-800">Account Settings</h1>
-          <h2 className="text-gray-500 text-md">
-            Manage your personal information and preferences
-          </h2>
+          <h1 className="font-bold text-xl text-gray-800">{t('title')}</h1>
+          <h2 className="text-gray-500 text-md">{t('description')}</h2>
         </div>
 
         <div className="flex flex-col lg:flex-row mt-0 mx-5 my-5 gap-8">
           {/* Profile Information Section */}
           <div className="flex-1 min-w-0 space-y-4">
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 value={values.email}
                 onChange={handleChange}
-                placeholder="Your email address"
+                placeholder={t('emailPlaceholder')}
               />
               {touched.email && errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -347,21 +347,19 @@ const UserEditForm = ({
               {values.email !== values.email && (
                 <div className="flex items-center space-x-2 mt-2 text-amber-600 bg-amber-50 p-2 rounded-md">
                   <AlertTriangle size={16} />
-                  <span className="text-sm">
-                    You will be logged out after changing your email
-                  </span>
+                  <span className="text-sm">{t('emailChangeWarning')}</span>
                 </div>
               )}
             </div>
 
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('username')}</Label>
               <Input
                 id="username"
                 name="username"
                 value={values.username}
                 onChange={handleChange}
-                placeholder="Your username"
+                placeholder={t('usernamePlaceholder')}
               />
               {touched.username && errors.username && (
                 <p className="text-red-500 text-sm mt-1">{errors.username}</p>
@@ -369,13 +367,13 @@ const UserEditForm = ({
             </div>
 
             <div>
-              <Label htmlFor="first_name">First Name</Label>
+              <Label htmlFor="first_name">{t('firstName')}</Label>
               <Input
                 id="first_name"
                 name="first_name"
                 value={values.first_name}
                 onChange={handleChange}
-                placeholder="Your first name"
+                placeholder={t('firstNamePlaceholder')}
               />
               {touched.first_name && errors.first_name && (
                 <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
@@ -383,13 +381,13 @@ const UserEditForm = ({
             </div>
 
             <div>
-              <Label htmlFor="last_name">Last Name</Label>
+              <Label htmlFor="last_name">{t('lastName')}</Label>
               <Input
                 id="last_name"
                 name="last_name"
                 value={values.last_name}
                 onChange={handleChange}
-                placeholder="Your last name"
+                placeholder={t('lastNamePlaceholder')}
               />
               {touched.last_name && errors.last_name && (
                 <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
@@ -398,9 +396,9 @@ const UserEditForm = ({
 
             <div>
               <Label htmlFor="bio">
-                Bio
+                {t('bio')}
                 <span className="text-gray-500 text-sm ml-2">
-                  ({400 - (values.bio?.length || 0)} characters left)
+                  ({400 - (values.bio?.length || 0)} {t('charactersLeft')})
                 </span>
               </Label>
               <Textarea
@@ -408,7 +406,7 @@ const UserEditForm = ({
                 name="bio"
                 value={values.bio}
                 onChange={handleChange}
-                placeholder="Tell us about yourself"
+                placeholder={t('bioPlaceholder')}
                 className="min-h-[150px]"
                 maxLength={400}
               />
@@ -417,13 +415,13 @@ const UserEditForm = ({
               )}
             </div>
             <div>
-              <Label>Language</Label>
+              <Label>{t('language')}</Label>
               <LanguageSwitcher currentLocale={currentLocale} />
             </div>
             <div className="space-y-4">
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
-                  <Label>Additional Details</Label>
+                  <Label>{t('additionalDetails')}</Label>
                   <div className="flex gap-2">
                     <Button
                       type="button"
@@ -434,7 +432,7 @@ const UserEditForm = ({
                         setFieldValue('details', {})
                       }}
                     >
-                      Clear All
+                      {t('clearAll')}
                     </Button>
                     <Button
                       type="button"
@@ -445,14 +443,14 @@ const UserEditForm = ({
                         const id = `detail-${Date.now()}`
                         newDetails[id] = {
                           id,
-                          label: 'New Detail',
+                          label: t('newDetail'),
                           icon: '',
                           text: '',
                         }
                         setFieldValue('details', newDetails)
                       }}
                     >
-                      Add Detail
+                      {t('addDetail')}
                     </Button>
                   </div>
                 </div>
@@ -485,7 +483,9 @@ const UserEditForm = ({
                       {key === 'professional' && (
                         <Building2 className="w-4 h-4" />
                       )}
-                      Add {key.charAt(0).toUpperCase() + key.slice(1)}
+                      {t(
+                        `add${key.charAt(0).toUpperCase() + key.slice(1)}Info`
+                      )}
                     </Button>
                   ))}
                 </div>
@@ -522,7 +522,7 @@ const UserEditForm = ({
           <div className="lg:w-80 w-full">
             <div className="bg-gray-50/50 p-6 rounded-lg nice-shadow h-full">
               <div className="flex flex-col items-center space-y-6">
-                <Label className="font-bold">Profile Picture</Label>
+                <Label className="font-bold">{t('profilePicture')}</Label>
                 {profilePicture.error && (
                   <div className="flex items-center bg-red-200 rounded-md text-red-950 px-4 py-2 text-sm">
                     <FileWarning size={16} className="mr-2" />
@@ -571,13 +571,13 @@ const UserEditForm = ({
                       className="w-full"
                     >
                       <UploadCloud size={16} className="mr-2" />
-                      Change Avatar
+                      {t('changeAvatar')}
                     </Button>
                   </>
                 )}
                 <div className="flex items-center text-xs text-gray-500">
                   <Info size={13} className="mr-2" />
-                  <p>Recommended size 100x100</p>
+                  <p>{t('recommendedSize')}</p>
                 </div>
               </div>
             </div>
@@ -589,7 +589,7 @@ const UserEditForm = ({
             disabled={isSubmitting}
             className="bg-black text-white hover:bg-black/90"
           >
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
+            {isSubmitting ? t('saving') : t('saveChanges')}
           </Button>
         </div>
       </div>

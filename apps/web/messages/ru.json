@@ -117,6 +117,41 @@
             "general": "Общее",
             "access": "Доступ",
             "content": "Контент"
+        },
+        "UserAccountSettings": {
+            "title": "Настройки аккаунта",
+            "general": "Общее",
+            "profile": "Профиль",
+            "password": "Пароль",
+            "generalSection": {
+                "email": "Электронная почта",
+                "username": "Имя пользователя",
+                "firstName": "Имя",
+                "lastName": "Фамилия",
+                "bio": "Биография",
+                "profilePicture": "Изображение профиля",
+                "changeAvatar": "Изменить аватар",
+                "recommendedSize": "Рекомендуемый размер: 100x100",
+                "saveChanges": "Сохранить изменения",
+                "title": "Настройки аккаунта",
+                "description": "Управление данными и настройками вашего аккаунта",
+                "emailPlaceholder": "Введите вашу электронную почту",
+                "emailChangeWarning": "Изменение электронной почты потребует повторного входа",
+                "usernamePlaceholder": "Введите имя пользователя",
+                "firstNamePlaceholder": "Введите ваше имя",
+                "lastNamePlaceholder": "Введите вашу фамилию",
+                "bioPlaceholder": "Расскажите о себе",
+                "charactersLeft": "символов осталось",
+                "language": "Язык",
+                "saving": "Сохранение...",
+                "additionalDetails": "Дополнительная информация",
+                "clearAll": "Очистить все",
+                "addDetail": "Добавить информацию",
+                "newDetail": "Новая информация",
+                "addGeneralInfo": "Добавить общую информацию",
+                "addAcademicInfo": "Добавить академическую информацию",
+                "addProfessionalInfo": "Добавить профессиональную информацию"
+            }
         }
     },
     "NewCollectionPage": {

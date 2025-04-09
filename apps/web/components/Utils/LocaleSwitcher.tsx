@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { useTranslations } from 'next-intl'
@@ -22,13 +21,14 @@ interface LanguageSwitcherProps {
   className?: string
 }
 
+// TODO: the thing's buggy
 export function LanguageSwitcher({
   currentLocale,
   className,
 }: LanguageSwitcherProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const t = useTranslations('Components.LanguageSwitcher')
+  const t = useTranslations('Components.LocaleSwitcher')
 
   const onSelectChange = async (newLocale: Locale) => {
     startTransition(async () => {
