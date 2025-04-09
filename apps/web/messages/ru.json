@@ -1,0 +1,162 @@
+{
+    "General": {
+        "course": "Курс",
+        "courses": "Курсы",
+        "collection": "Коллекция",
+        "collections": "Коллекции",
+        "trail": "Путь",
+        "home": "Главная",
+        "noContentYet": "Пока нет контента",
+        "madeWith": "Сделано с помощью",
+        "retry": "Повторить",
+        "loading": "Загрузка..."
+    },
+    "Components": {
+        "Button": {
+            "newCourse": "Новый курс ",
+            "newCollecction": "Новая коллекция "
+        },
+        "CourseThumbnail": {
+            "editContent": "Редактировать контент",
+            "settings": "Настройки",
+            "delete": "Удалить курс",
+            "toastDeleteSuccess": "Курс успешно удален",
+            "toastDeleteError": "Не удалось удалить курс"
+        },
+        "CreateCourseModal": {
+            "createCourse": "Создать курс",
+            "schemaNameRequired": "Требуется название курса",
+            "schemaNameMax": "Должно быть 100 символов или меньше",
+            "schemaDescriptionMax": "Должно быть 1000 символов или меньше",
+            "toastLoading": "Создание курса...",
+            "toastSuccess": "Курс успешно создан",
+            "toastError": "Не удалось создать курс",
+            "toastErrorUnsplash": "Не удалось загрузить изображение из Unsplash",
+            "labelName": "Название курса",
+            "labelDescription": "Описание",
+            "labelThumbnail": "Миниатюра курса",
+            "thumbnailUpload": "Загрузить изображение",
+            "thumbnailChoose": "Выбрать из галереи",
+            "labelLearnings": "Чему научит курс (Что вы будете преподавать)?",
+            "placeholderLearnings": "Нажмите Enter для добавления...",
+            "labelTags": "Теги курса",
+            "placeholderTags": "Нажмите Enter для добавления...",
+            "labelVisibility": "Видимость курса",
+            "placeholderVisibility": "Выберите видимость",
+            "visibilityItemPublic": "Публичный (Доступен для просмотра в интернете)",
+            "visibilityItemPrivate": "Приватный (Доступен только пользователям)"
+        },
+        "CourseActions": {
+            "youOwnThisCourse": "Вы владеете этим курсом",
+            "fullAccess": "Вы приобрели этот курс и имеете полный доступ ко всему контенту.",
+            "paidCourse": "Платный курс",
+            "requiresPurchase": "Для доступа к контенту этого курса требуется покупка.",
+            "purchaseCourse": "Купить курс",
+            "selectPaymentOption": "Выберите способ оплаты для доступа к этому курсу",
+            "authenticateToStart": "Авторизуйтесь, чтобы начать курс",
+            "leaveCourse": "Покинуть курс",
+            "startCourse": "Начать курс",
+            "author": "Автор"
+        },
+        "LocaleSwitcher": {
+            "label": "Язык",
+            "en": "Английский",
+            "ru": "Русский"
+        }
+    },
+    "HomePage": {
+        "Collections": {
+            "title": "Коллекции",
+            "noContent": "Пока нет коллекций",
+            "noContentUserAdmin": "Создайте коллекции, чтобы сгруппировать курсы"
+        },
+        "Courses": {
+            "title": "Курсы",
+            "noContent": "Пока нет курсов",
+            "noContentUserAdmin": "Создайте курсы, чтобы добавить контент"
+        }
+    },
+    "NotFoundPage": {
+        "message": "Приносим извинения за неудобства. Похоже, вы пытаетесь<br></br> получить доступ к странице, которая была удалена или никогда не существовала",
+        "button": "Вернуться на главную страницу"
+    },
+    "SignupPage": {
+        "signUp": "Зарегистрироваться",
+        "invited": "Вас пригласили присоединиться",
+        "hi": "Привет",
+        "join": "присоединиться",
+        "inviteCodeRequired": "Для присоединения требуется код приглашения",
+        "submit": "Отправить"
+    },
+    "DashPage": {
+        "Card": {
+            "Courses": {
+                "title": "Курсы",
+                "description": "Создавайте и управляйте курсами, главами и заданиями"
+            },
+            "Organization": {
+                "title": "Организация",
+                "description": "Настройте общие параметры вашей организации"
+            },
+            "Users": {
+                "title": "Пользователи",
+                "description": "Управляйте пользователями и ролями вашей организации"
+            },
+            "AccountSettings": {
+                "title": "Настройки аккаунта",
+                "description": "Настройте ваши личные данные, пароли, электронную почту"
+            }
+        },
+        "LearnhouseUniversity": "Университет LearnHouse",
+        "Courses": {
+            "title": "Курсы",
+            "noCourses": "Пока нет курсов",
+            "noCoursesavailable": "Пока нет доступных курсов",
+            "createACourse": "Создайте курс, чтобы добавить контент",
+            "general": "Общее",
+            "access": "Доступ",
+            "content": "Контент"
+        }
+    },
+    "NewCollectionPage": {
+        "title": "Создать новую коллекцию",
+        "description": "Сгруппируйте ваши курсы в коллекцию, чтобы их было легче найти и управлять ими.",
+        "labelName": "Название коллекции",
+        "placeholderName": "Введите название коллекции",
+        "labelVisibility": "Видимость",
+        "visibilityPublic": "Публичная коллекция - видна всем",
+        "visibilityPrivate": "Приватная коллекция - видна только участникам организации",
+        "labelDescription": "Описание",
+        "placeholderDescription": "Введите описание коллекции",
+        "labelSelectCourses": "Выберите курсы",
+        "noCourses": "Нет доступных курсов. Сначала создайте курсы.",
+        "selectedCourses": "Выбранные курсы",
+        "cancel": "Отмена",
+        "create": "Создать коллекцию",
+        "creating": "Создание...",
+        "toastNameError": "Пожалуйста, введите название коллекции",
+        "toastDescriptionError": "Пожалуйста, введите описание",
+        "toastCoursesError": "Пожалуйста, выберите хотя бы один курс",
+        "toastSuccess": "Коллекция успешно создана!",
+        "toastError": "Не удалось создать коллекцию. Пожалуйста, попробуйте снова.",
+        "errorLoadingCourses": "Не удалось загрузить курсы. Пожалуйста, попробуйте позже."
+    },
+    "CoursesPage": {
+        "title": "Курсы",
+        "createCourseTitle": "Создать курс",
+        "createCourseDescription": "Создать новый курс",
+        "noCourses": "Пока нет курсов",
+        "noCoursesAvailable": "Пока нет доступных курсов",
+        "createACourse": "Создайте курс, чтобы добавить контент"
+    },
+    "CoursePage": {
+        "about": "О курсе",
+        "whatYouWillLearn": "Чему вы научитесь",
+        "courseLessons": "Уроки курса",
+        "activities": "Задания",
+        "page": "Страница",
+        "video": "Видео",
+        "document": "Документ",
+        "assignment": "Задание"
+    }
+}

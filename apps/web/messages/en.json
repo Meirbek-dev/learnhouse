@@ -1,0 +1,162 @@
+{
+    "General": {
+        "course": "Course",
+        "courses": "Courses",
+        "collection": "Collection",
+        "collections": "Collections",
+        "trail": "Trail",
+        "home": "Home",
+        "noContentYet": "No content yet",
+        "madeWith": "Made with",
+        "retry": "Retry",
+        "loading": "Loading..."
+    },
+    "Components": {
+        "Button": {
+            "newCourse": "New Course ",
+            "newCollecction": "New Collection "
+        },
+        "CourseThumbnail": {
+            "editContent": "Edit content",
+            "settings": "Settings",
+            "delete": "Delete Course",
+            "toastDeleteSuccess": "Course deleted successfully",
+            "toastDeleteError": "Failed to delete course"
+        },
+        "CreateCourseModal": {
+            "createCourse": "Create Course",
+            "schemaNameRequired": "Course name is required",
+            "schemaNameMax": "Must be 100 characters or less",
+            "schemaDescriptionMax": "Must be 1000 characters or less",
+            "toastLoading": "Creating course...",
+            "toastSuccess": "Course created successfully",
+            "toastError": "Failed to create course",
+            "toastErrorUnsplash": "Failed to load image from Unsplash",
+            "labelName": "Course Name",
+            "labelDescription": "Description",
+            "labelThumbnail": "Course Thumbnail",
+            "thumbnailUpload": "Upload Image",
+            "thumbnailChoose": "Choose from gallery",
+            "labelLearnings": "Course Learnings (What will you teach)?",
+            "placeholderLearnings": "Enter to add...",
+            "labelTags": "Course Tags",
+            "placeholderTags": "Enter to add...",
+            "labelVisibility": "Course Visibility",
+            "placeholderVisibility": "Select Visibility",
+            "visibilityItemPublic": "Public (Available to see on the internet)",
+            "visibilityItemPrivate": "Private (Private to users)"
+        },
+        "CourseActions": {
+            "youOwnThisCourse": "You Own This Course",
+            "fullAccess": "You have purchased this course and have full access to all content.",
+            "paidCourse": "Paid Course",
+            "requiresPurchase": "This course requires purchase to access its content.",
+            "purchaseCourse": "Purchase Course",
+            "selectPaymentOption": "Select a payment option to access this course",
+            "authenticateToStart": "Authenticate to start course",
+            "leaveCourse": "Leave Course",
+            "startCourse": "Start Course",
+            "author": "Author"
+        },
+        "LocaleSwitcher": {
+            "label": "Language",
+            "en": "English",
+            "ru": "Russian"
+        }
+    },
+    "HomePage": {
+        "Collections": {
+            "title": "Collections",
+            "noContent": "No collections yet",
+            "noContentUserAdmin": "Create collections to group courses together"
+        },
+        "Courses": {
+            "title": "Courses",
+            "noContent": "No courses yet",
+            "noContentUserAdmin": "Create courses to add content"
+        }
+    },
+    "NotFoundPage": {
+        "message": "We are very sorry for the inconvenience. It looks like you're trying to<br></br>access a page that has been deleted or never existed before",
+        "button": "Go back to the home page"
+    },
+    "SignupPage": {
+        "signUp": "Sign up",
+        "invited": "You've been invited to join",
+        "hi": "Hi",
+        "join": "join",
+        "inviteCodeRequired": "An invite code is required to join",
+        "submit": "Submit"
+    },
+    "DashPage": {
+        "Card": {
+            "Courses": {
+                "title": "Courses",
+                "description": "Create and manage courses, chapters and activities"
+            },
+            "Organization": {
+                "title": "Organization",
+                "description": "Configure your Organization general settings"
+            },
+            "Users": {
+                "title": "Users",
+                "description": "Manage your Organization's users, roles"
+            },
+            "AccountSettings": {
+                "title": "Account Settings",
+                "description": "Configure your personal settings, passwords, email"
+            }
+        },
+        "LearnhouseUniversity": "LearnHouse University",
+        "Courses": {
+            "title": "Courses",
+            "noCourses": "No courses yet",
+            "noCoursesavailable": "No courses available yet",
+            "createACourse": "Create a course to add content",
+            "general": "General",
+            "access": "Access",
+            "content": "Content"
+        }
+    },
+    "NewCollectionPage": {
+        "title": "Create New Collection",
+        "description": "Group your courses together in a collection to make them easier to find and manage.",
+        "labelName": "Collection Name",
+        "placeholderName": "Enter collection name",
+        "labelVisibility": "Visibility",
+        "visibilityPublic": "Public Collection - Visible to everyone",
+        "visibilityPrivate": "Private Collection - Only visible to organization members",
+        "labelDescription": "Description",
+        "placeholderDescription": "Enter collection description",
+        "labelSelectCourses": "Select Courses",
+        "noCourses": "No courses available. Create some courses first.",
+        "selectedCourses": "Selected courses",
+        "cancel": "Cancel",
+        "create": "Create Collection",
+        "creating": "Creating...",
+        "toastNameError": "Please enter a collection name",
+        "toastDescriptionError": "Please enter a description",
+        "toastCoursesError": "Please select at least one course",
+        "toastSuccess": "Collection created successfully!",
+        "toastError": "Failed to create collection. Please try again.",
+        "errorLoadingCourses": "Failed to load courses. Please try again later."
+    },
+    "CoursesPage": {
+        "title": "Courses",
+        "createCourseTitle": "Create Course",
+        "createCourseDescription": "Create a new course",
+        "noCourses": "No courses yet",
+        "noCoursesAvailable": "No courses available yet",
+        "createACourse": "Create a course to add content"
+    },
+    "CoursePage": {
+        "about": "About",
+        "whatYouWillLearn": "What you will learn",
+        "courseLessons": "Course Lessons",
+        "activities": "Activities",
+        "page": "Page",
+        "video": "Video",
+        "document": "Document",
+        "assignment": "Assignment"
+    }
+}
