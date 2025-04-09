@@ -108,6 +108,12 @@
                 "description": "Настройте ваши личные данные, пароли, электронную почту"
             }
         },
+        "Assignments": {
+            "title": "Задания"
+        },
+        "Payments": {
+            "title": "Платежи"
+        },
         "LearnhouseUniversity": "Университет LearnHouse",
         "Courses": {
             "title": "Курсы",

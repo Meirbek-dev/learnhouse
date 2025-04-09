@@ -1,16 +1,31 @@
-'use client';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Backpack, Book, ChevronRight, CreditCard, School, User, Users } from 'lucide-react'
+'use client'
+import {
+  Backpack,
+  Book,
+  ChevronRight,
+  CreditCard,
+  School,
+  User,
+  Users,
+} from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 type BreadCrumbsProps = {
-  type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments'
+  type:
+    | 'courses'
+    | 'user'
+    | 'users'
+    | 'org'
+    | 'orgusers'
+    | 'assignments'
+    | 'payments'
   last_breadcrumb?: string
 }
 
 function BreadCrumbs(props: BreadCrumbsProps) {
-  const org = useOrg() as any
+  const t = useTranslations('DashPage')
 
   return (
     <div>
@@ -21,7 +36,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
             <div className="flex space-x-2 items-center">
               {' '}
               <Book className="text-gray" size={14}></Book>
-              <Link href="/dash/courses">Courses</Link>
+              <Link href="/dash/courses">{t('Courses.title')}</Link>
             </div>
           ) : (
             ''
@@ -30,7 +45,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
             <div className="flex space-x-2 items-center">
               {' '}
               <Backpack className="text-gray" size={14}></Backpack>
-              <Link href="/dash/assignments">Assignments</Link>
+              <Link href="/dash/assignments">{t('Assignments.title')}</Link>
             </div>
           ) : (
             ''
@@ -40,7 +55,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
               {' '}
               <User className="text-gray" size={14}></User>
               <Link href="/dash/user-account/settings/general">
-                Account Settings
+                {t('UserAccountSettings.title')}
               </Link>
             </div>
           ) : (
@@ -50,7 +65,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
             <div className="flex space-x-2 items-center">
               {' '}
               <Users className="text-gray" size={14}></Users>
-              <Link href="/dash/users/settings/users">Organization users</Link>
+              <Link href="/dash/users/settings/users">{t('Card.Users.title')}</Link>
             </div>
           ) : (
             ''
@@ -60,7 +75,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
             <div className="flex space-x-2 items-center">
               {' '}
               <School className="text-gray" size={14}></School>
-              <Link href="/dash/users">Organization Settings</Link>
+              <Link href="/dash/users">{t('Card.Organization.title')}</Link>
             </div>
           ) : (
             ''
@@ -69,7 +84,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
             <div className="flex space-x-2 items-center">
               {' '}
               <CreditCard className="text-gray" size={14}></CreditCard>
-              <Link href="/dash/payments">Payments</Link>
+              <Link href="/dash/payments">{t('Payments.title')}</Link>
             </div>
           ) : (
             ''
