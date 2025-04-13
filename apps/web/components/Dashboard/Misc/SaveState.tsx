@@ -12,6 +12,7 @@ import React, { useEffect } from 'react'
 import { mutate } from 'swr'
 import { updateCourse } from '@services/courses/courses'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 function SaveState(props: { orgslug: string }) {
   const course = useCourse() as any
@@ -20,6 +21,8 @@ function SaveState(props: { orgslug: string }) {
   const saved = course ? course.isSaved : true
   const dispatchCourse = useCourseDispatch() as any
   const course_structure = course.courseStructure
+  const t = useTranslations('Common')
+  const tNotify = useTranslations('Notifications')
 
   const saveCourseState = async () => {
     // Course  order
@@ -109,7 +112,7 @@ function SaveState(props: { orgslug: string }) {
       ) : (
         <div className="text-gray-600 flex space-x-2 items-center antialiased">
           <Timer size={15} />
-          <div>Unsaved changes</div>
+          <div>{tNotify('unsavedChanges')}</div>
         </div>
       )}
       <div
@@ -122,7 +125,7 @@ function SaveState(props: { orgslug: string }) {
         onClick={saveCourseState}
       >
         {saved ? <Check size={20} /> : <SaveAllIcon size={20} />}
-        {saved ? <div className="">Saved</div> : <div className="">Save</div>}
+        {saved ? <div className="">{t('saved')}</div> : <div className="">{t('save')}</div>}
       </div>
     </div>
   )

@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 import { BarLoader } from 'react-spinners'
 import useSWR from 'swr'
+import { useTranslations } from 'next-intl'
 
 const validate = (values: any) => {
   const errors: any = {}
@@ -47,6 +48,8 @@ const validate = (values: any) => {
 }
 
 function AccountCreation() {
+  const t = useTranslations('Install.AccountCreation');
+  const generalT = useTranslations('General');
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -99,11 +102,12 @@ function AccountCreation() {
     <div>
       <FormLayout onSubmit={formik.handleSubmit}>
         <FormField name="email">
-          <FormLabelAndMessage label="Email" message={formik.errors.email} />
+          <FormLabelAndMessage label={t('emailLabel')} message={formik.errors.email} />
           <Form.Control asChild>
             <Input
               onChange={formik.handleChange}
               value={formik.values.email}
+              placeholder={t('emailPlaceholder')}
               type="email"
               required
             />
@@ -112,7 +116,7 @@ function AccountCreation() {
         {/* for password  */}
         <FormField name="password">
           <FormLabelAndMessage
-            label="Password"
+            label={t('passwordLabel')}
             message={formik.errors.password}
           />
 
@@ -120,6 +124,7 @@ function AccountCreation() {
             <Input
               onChange={formik.handleChange}
               value={formik.values.password}
+              placeholder={t('passwordPlaceholder')}
               type="password"
               required
             />
@@ -128,7 +133,7 @@ function AccountCreation() {
         {/* for confirm password  */}
         <FormField name="confirmPassword">
           <FormLabelAndMessage
-            label="Confirm Password"
+            label={t('confirmPasswordLabel')}
             message={formik.errors.confirmPassword}
           />
 
@@ -136,6 +141,7 @@ function AccountCreation() {
             <Input
               onChange={formik.handleChange}
               value={formik.values.confirmPassword}
+              placeholder={t('confirmPasswordPlaceholder')}
               type="password"
               required
             />
@@ -144,7 +150,7 @@ function AccountCreation() {
         {/* for username  */}
         <FormField name="username">
           <FormLabelAndMessage
-            label="Username"
+            label={t('usernameLabel')}
             message={formik.errors.username}
           />
 
@@ -152,6 +158,7 @@ function AccountCreation() {
             <Input
               onChange={formik.handleChange}
               value={formik.values.username}
+              placeholder={t('usernamePlaceholder')}
               type="text"
               required
             />
@@ -168,7 +175,7 @@ function AccountCreation() {
                   color="#ffffff"
                 />
               ) : (
-                'Create Admin Account'
+                t('createAdminButton')
               )}
             </ButtonBlack>
           </Form.Submit>

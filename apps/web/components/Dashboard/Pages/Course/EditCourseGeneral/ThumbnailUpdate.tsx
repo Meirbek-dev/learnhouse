@@ -8,6 +8,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import React, { useState } from 'react'
 import { mutate } from 'swr'
 import UnsplashImagePicker from './UnsplashImagePicker'
+import { useTranslations } from 'next-intl'
 
 function ThumbnailUpdate() {
   const course = useCourse() as any
@@ -17,6 +18,7 @@ function ThumbnailUpdate() {
   const [isLoading, setIsLoading] = React.useState(false) as any
   const [error, setError] = React.useState('') as any
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
+  const t = useTranslations('CourseEdit.General.Thumbnail')
 
   const handleFileChange = async (event: any) => {
     const file = event.target.files[0]
@@ -81,7 +83,7 @@ function ThumbnailUpdate() {
             <div className="flex justify-center items-center">
               <div className="font-bold animate-pulse antialiased items-center bg-green-200 text-gray text-sm rounded-md px-4 py-2 mt-4 flex">
                 <ArrowBigUpDash size={16} className="mr-2" />
-                <span>Uploading</span>
+                <span>{t('uploading')}</span>
               </div>
             </div>
           ) : (
@@ -97,14 +99,14 @@ function ThumbnailUpdate() {
                 onClick={() => document.getElementById('fileInput')?.click()}
               >
                 <UploadCloud size={16} className="mr-2" />
-                <span>Upload Image</span>
+                <span>{t('uploadImageButton')}</span>
               </button>
               <button
                 className="font-bold antialiased items-center text-gray text-sm rounded-md px-4 mt-6 flex"
                 onClick={() => setShowUnsplashPicker(true)}
               >
                 <ImageIcon size={16} className="mr-2" />
-                <span>Choose from Gallery</span>
+                <span>{t('chooseFromGalleryButton')}</span>
               </button>
             </div>
           )}

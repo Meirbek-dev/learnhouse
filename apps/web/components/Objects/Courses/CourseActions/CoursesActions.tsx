@@ -14,7 +14,7 @@ import CoursePaidOptions from './CoursePaidOptions'
 import { checkPaidAccess } from '@services/payments/payments'
 import { applyForContributor } from '@services/courses/courses'
 import toast from 'react-hot-toast'
-import { useContributorStatus } from '../../../../hooks/useContributorStatus'
+import { useContributorStatus } from '../../../useContributorStatus'
 
 interface Author {
   user: {
@@ -94,7 +94,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: b
   const displayedAvatars = authors.slice(0, 3)
   const displayedNames = authors.slice(0, 2)
   const remainingCount = Math.max(0, authors.length - 3)
-  
+
   // Consistent sizes for both avatars and badge
   const avatarSize = isMobile ? 72 : 86
   const borderSize = "border-4"
@@ -102,7 +102,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: b
   return (
     <div className="flex flex-col items-center space-y-4 px-2 py-2">
       <div className="text-[12px] text-neutral-400 font-semibold self-start">Authors</div>
-      
+
       {/* Avatars row */}
       <div className="flex justify-center -space-x-6 relative">
         {displayedAvatars.map((author, index) => (
@@ -125,14 +125,14 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: b
           </div>
         ))}
         {remainingCount > 0 && (
-          <div 
+          <div
             className="relative"
             style={{ zIndex: 0 }}
           >
-            <div 
+            <div
               className="flex items-center justify-center bg-neutral-100 text-neutral-600 font-medium rounded-full border-4 border-white shadow-sm"
-              style={{ 
-                width: `${avatarSize}px`, 
+              style={{
+                width: `${avatarSize}px`,
                 height: `${avatarSize}px`,
                 fontSize: isMobile ? '14px' : '16px'
               }}
@@ -233,7 +233,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
           session.data?.tokens?.access_token
         )
         setHasAccess(response.has_access)
-        
+
       } catch (error) {
         console.error('Failed to check course access')
         toast.error('Failed to check course access. Please try again later.')
@@ -256,7 +256,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
     const loadingToast = toast.loading(
       isStarted ? 'Leaving course...' : 'Starting course...'
     )
-    
+
     try {
       if (isStarted) {
         await removeCourse('course_' + courseuuid, orgslug, session.data?.tokens?.access_token)
@@ -267,11 +267,11 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
         await startCourse('course_' + courseuuid, orgslug, session.data?.tokens?.access_token)
         await revalidateTags(['courses'], orgslug)
         toast.success('Successfully started the course', { id: loadingToast })
-        
+
         // Get the first activity from the first chapter
         const firstChapter = course.chapters?.[0]
         const firstActivity = firstChapter?.activities?.[0]
-        
+
         if (firstActivity) {
           // Redirect to the first activity
           router.push(
@@ -303,12 +303,12 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
 
     setIsContributeLoading(true)
     const loadingToast = toast.loading('Submitting contributor application...')
-    
+
     try {
       const data = {
         message: "I would like to contribute to this course."
       }
-      
+
       await applyForContributor('course_' + courseuuid, data, session.data?.tokens?.access_token)
       await revalidateTags(['courses'], orgslug)
       await refetch()
@@ -330,7 +330,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
     if (contributorStatus === 'INACTIVE' || course.open_to_contributors !== true) {
       return null;
     }
-    
+
     if (!session.data?.user) {
       return (
         <button
@@ -429,7 +429,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
             </p>
           </div>
         )}
-        
+
         {!hasAccess && (
           <>
             <Modal

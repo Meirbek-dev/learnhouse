@@ -8,8 +8,11 @@ import { getOwnedCourses } from '@services/payments/payments'
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import { BookOpen, Package2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 function OwnedCoursesPage() {
+  const t = useTranslations('DashPage.Courses')
+  const generalT = useTranslations('General')
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -20,7 +23,7 @@ function OwnedCoursesPage() {
   )
 
   if (isLoading) return <PageLoading />
-  if (error) return <div>Error loading owned courses</div>
+  if (error) return <div>{generalT('error')}</div>
 
   return (
     <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10 pt-5 ">
@@ -28,8 +31,8 @@ function OwnedCoursesPage() {
         <div className="flex items-center gap-4">
           <Package2 className="w-8 h-8 text-gray-800" />
           <div className="flex flex-col -space-y-1">
-            <h1 className="font-bold text-xl text-gray-800">My Courses</h1>
-            <h2 className="text-gray-500 text-md">Courses you have purchased or subscribed to</h2>
+            <h1 className="font-bold text-xl text-gray-800">{t('myCourses')}</h1>
+            <h2 className="text-gray-500 text-md">{t('purchasedCourses')}</h2>
           </div>
         </div>
       </div>
@@ -48,10 +51,10 @@ function OwnedCoursesPage() {
                 <BookOpen className="w-12 h-12 mx-auto text-gray-400" />
               </div>
               <h2 className="text-xl font-bold text-gray-600 mb-2">
-                No purchased courses
+                {t('noPurchasedCourses')}
               </h2>
               <p className="text-md text-gray-400">
-                You haven't purchased any courses yet
+                {t('noPurchasedCoursesDesc')}
               </p>
             </div>
           </div>

@@ -9,6 +9,7 @@ import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEd
 import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages'
 import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials'
 import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding'
+import { useTranslations } from 'next-intl';
 
 export type OrgParams = {
   subpage: string
@@ -22,17 +23,18 @@ interface TabItem {
 }
 
 const SETTING_TABS: TabItem[] = [
-  { id: 'general', label: 'General', icon: TextIcon },
-  { id: 'landing', label: 'Landing Page', icon: LayoutDashboardIcon },
-  { id: 'previews', label: 'Images & Previews', icon: ImageIcon },
-  { id: 'socials', label: 'Socials', icon: Share2Icon },
+  { id: 'general', label: 'general', icon: TextIcon },
+  { id: 'landing', label: 'landing', icon: LayoutDashboardIcon },
+  { id: 'previews', label: 'previews', icon: ImageIcon },
+  { id: 'socials', label: 'socials', icon: Share2Icon },
 ]
 
-function TabLink({ tab, isActive, orgslug }: { 
-  tab: TabItem, 
-  isActive: boolean, 
-  orgslug: string 
+function TabLink({ tab, isActive, orgslug }: {
+  tab: TabItem,
+  isActive: boolean,
+  orgslug: string
 }) {
+  const t = useTranslations('DashPage.OrgSettings');
   return (
     <Link href={getUriWithOrg(orgslug, '') + `/dash/org/settings/${tab.id}`}>
       <div
@@ -42,7 +44,7 @@ function TabLink({ tab, isActive, orgslug }: {
       >
         <div className="flex items-center space-x-2.5 mx-2.5">
           <tab.icon size={16} />
-          <div>{tab.label}</div>
+          <div>{t(tab.label)}</div>
         </div>
       </div>
     </Link>
@@ -50,23 +52,24 @@ function TabLink({ tab, isActive, orgslug }: {
 }
 
 function OrgPage(props: { params: Promise<OrgParams> }) {
+  const t = useTranslations('DashPage.OrgSettings');
   const params = use(props.params);
   const [H1Label, setH1Label] = React.useState('')
   const [H2Label, setH2Label] = React.useState('')
 
   function handleLabels() {
     if (params.subpage == 'general') {
-      setH1Label('General')
-      setH2Label('Manage your organization settings')
+      setH1Label(t('generalTitle'))
+      setH2Label(t('generalDescription'))
     } else if (params.subpage == 'previews') {
-      setH1Label('Previews')
-      setH2Label('Manage your organization previews')
+      setH1Label(t('previewsTitle'))
+      setH2Label(t('previewsDescription'))
     } else if (params.subpage == 'socials') {
-      setH1Label('Socials')
-      setH2Label('Manage your organization social media links')
+      setH1Label(t('socialsTitle'))
+      setH2Label(t('socialsDescription'))
     } else if (params.subpage == 'landing') {
-      setH1Label('Landing Page')
-      setH2Label('Customize your organization landing page')
+      setH1Label(t('landingTitle'))
+      setH2Label(t('landingDescription'))
     }
   }
 

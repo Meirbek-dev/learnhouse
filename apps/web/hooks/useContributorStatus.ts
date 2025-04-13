@@ -21,12 +21,12 @@ export function useContributorStatus(courseUuid: string) {
         'course_' + courseUuid,
         session.data?.tokens?.access_token
       );
-      
+
       if (response && response.data) {
         const currentUser = response.data.find(
           (contributor: any) => contributor.user_id === session.data.user.id
         );
-        
+
         if (currentUser) {
           setContributorStatus(currentUser.authorship_status as ContributorStatus);
         } else {
@@ -48,4 +48,4 @@ export function useContributorStatus(courseUuid: string) {
   }, [checkContributorStatus, session.data?.user]);
 
   return { contributorStatus, isLoading, refetch: checkContributorStatus };
-} 
+}

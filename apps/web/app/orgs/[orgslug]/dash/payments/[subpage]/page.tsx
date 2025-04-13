@@ -11,6 +11,7 @@ import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/Paym
 import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage'
 import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage'
 import useFeatureFlag from '@components/Hooks/useFeatureFlag'
+import { useTranslations } from 'next-intl'
 
 export type PaymentsParams = {
   subpage: string
@@ -19,6 +20,7 @@ export type PaymentsParams = {
 
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
   const params = use(props.params);
+  const t = useTranslations('DashPage.Payments')
   const session = useLHSession() as any
   const org = useOrg() as any
   const subpage = params.subpage || 'customers'
@@ -32,23 +34,23 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
     switch (subpage) {
       case 'customers':
         return {
-          h1: 'Customers',
-          h2: 'View and manage your customer information'
+          h1: t('customers'),
+          h2: t('customerInfo')
         }
       case 'paid-products':
         return {
-          h1: 'Paid Products',
-          h2: 'Manage your paid products and pricing'
+          h1: t('paidProducts'),
+          h2: t('paidProductsInfo')
         }
       case 'configuration':
         return {
-          h1: 'Payment Configuration',
-          h2: 'Set up and manage your payment gateway'
+          h1: t('configuration'),
+          h2: t('configurationInfo')
         }
       default:
         return {
-          h1: 'Payments',
-          h2: 'Overview of your payment settings and transactions'
+          h1: t('title'),
+          h2: t('overview')
         }
     }
   }
@@ -57,9 +59,9 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
     return (
       <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center p-4">
         <div className="bg-white p-6 rounded-lg shadow-md text-center max-w-md">
-          <h2 className="text-xl font-bold mb-4">Payments Not Available</h2>
-          <p className="text-gray-600">The payments feature is not enabled for this organization.</p>
-          <p className="text-gray-600 mt-2">Please contact your administrator to enable payments.</p>
+          <h2 className="text-xl font-bold mb-4">{t('notAvailable')}</h2>
+          <p className="text-gray-600">{t('notEnabledMessage')}</p>
+          <p className="text-gray-600 mt-2">{t('contactAdmin')}</p>
         </div>
       </div>
     )
@@ -85,19 +87,19 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
           <TabLink
             href={getUriWithOrg(params.orgslug, '/dash/payments/customers')}
             icon={<Users size={16} />}
-            label="Customers"
+            label={t('customers')}
             isActive={subpage === 'customers'}
           />
           <TabLink
             href={getUriWithOrg(params.orgslug, '/dash/payments/paid-products')}
             icon={<Gem size={16} />}
-            label="Products & Subscriptions"
+            label={t('productsSubscriptions')}
             isActive={subpage === 'paid-products'}
           />
           <TabLink
             href={getUriWithOrg(params.orgslug, '/dash/payments/configuration')}
             icon={<Settings size={16} />}
-            label="Configuration"
+            label={t('configuration')}
             isActive={subpage === 'configuration'}
           />
         </div>

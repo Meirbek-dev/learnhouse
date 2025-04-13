@@ -10,8 +10,10 @@ import toast from 'react-hot-toast'
 import { verifyStripeConnection } from '@services/payments/payments'
 import Image from 'next/image'
 import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import { useTranslations } from 'next-intl'
 
 function StripeConnectCallback() {
+  const t = useTranslations('Stripe')
   const router = useRouter()
   const searchParams = useSearchParams()
   const session = useLHSession() as any
@@ -26,7 +28,7 @@ function StripeConnectCallback() {
         const orgId = state?.split('=')[1] // Extract org_id value after '='
 
         if (!code || !orgId) {
-          throw new Error('Missing required parameters')
+          throw new Error(t('missingParameters'))
         }
 
         const response = await verifyStripeConnection(
@@ -35,43 +37,35 @@ function StripeConnectCallback() {
           session?.data?.tokens?.access_token
         )
 
-        // Wait for 1 second to show processing state
         await new Promise(resolve => setTimeout(resolve, 1000))
-        
+
         setStatus('success')
-        setMessage('Successfully connected to Stripe!')
-        
-        // Close the window after 2 seconds of showing success
+        setMessage(t('connectionSuccess'))
+
         setTimeout(() => {
           window.close()
         }, 2000)
-        
+
       } catch (error) {
         console.error('Error verifying Stripe connection:', error)
         setStatus('error')
-        setMessage('Failed to complete Stripe connection')
-        toast.error('Failed to connect to Stripe')
+        setMessage(t('connectionFailed'))
+        toast.error(t('connectError'))
       }
     }
 
     if (session) {
       verifyConnection()
     }
-  }, [session, router, searchParams])
+  }, [session, router, searchParams, t])
 
   return (
     <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
       <div className="flex flex-col items-center">
         <div className="mb-10">
-          <Image
-            quality={100}
-            width={50}
-            height={50}
-            src={learnhouseIcon}
-            alt=""
-          />
+          <Image quality={100} width={50} height={50} src={learnhouseIcon} alt="" />
         </div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -83,11 +77,9 @@ function StripeConnectCallback() {
               <>
                 <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
                 <h2 className="text-xl font-semibold text-gray-800">
-                  Completing Stripe Connection
+                  {t('completing')}
                 </h2>
-                <p className="text-gray-500">
-                  Please wait while we finish setting up your Stripe integration...
-                </p>
+                <p className="text-gray-500">{t('pleaseWait')}</p>
               </>
             )}
 
@@ -97,9 +89,7 @@ function StripeConnectCallback() {
                   <Check className="h-8 w-8 text-green-600" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800">{message}</h2>
-                <p className="text-gray-500">
-                  You can now return to the dashboard to start using payments.
-                </p>
+                <p className="text-gray-500">{t('returnToDashboard')}</p>
               </>
             )}
 
@@ -109,9 +99,7 @@ function StripeConnectCallback() {
                   <AlertTriangle className="h-8 w-8 text-red-600" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800">{message}</h2>
-                <p className="text-gray-500">
-                  Please try again or contact support if the problem persists.
-                </p>
+                <p className="text-gray-500">{t('tryAgainOrContact')}</p>
               </>
             )}
           </div>
@@ -121,4 +109,4 @@ function StripeConnectCallback() {
   )
 }
 
-export default StripeConnectCallback 
+export default StripeConnectCallback

@@ -11,8 +11,10 @@ import { Loader2, Image as ImageIcon } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import Image from 'next/image'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
+import { useTranslations } from 'next-intl'
 
 function NewCollection(params: any) {
+  const t = useTranslations('NewCollectionPage')
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -22,7 +24,11 @@ function NewCollection(params: any) {
   const [selectedCourses, setSelectedCourses] = React.useState([]) as any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
-  const { data: courses, error: error, isLoading } = useSWR(
+  const {
+    data: courses,
+    error: error,
+    isLoading,
+  } = useSWR(
     `${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/10`,
     (url) => swrFetcher(url, access_token)
   )
@@ -44,19 +50,19 @@ function NewCollection(params: any) {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
-    
+
     if (!name.trim()) {
-      toast.error('Please enter a collection name')
+      toast.error(t('toast.missingName'))
       return
     }
 
     if (!description.trim()) {
-      toast.error('Please enter a description')
+      toast.error(t('toast.missingDescription'))
       return
     }
 
     if (selectedCourses.length === 0) {
-      toast.error('Please select at least one course')
+      toast.error(t('toast.noCoursesSelected'))
       return
     }
 
@@ -71,10 +77,10 @@ function NewCollection(params: any) {
       }
       await createCollection(collection, session.data?.tokens?.access_token)
       await revalidateTags(['collections'], org.slug)
-      toast.success('Collection created successfully!')
+      toast.success(t('toast.success'))
       router.push(getUriWithOrg(orgslug, '/collections'))
     } catch (error) {
-      toast.error('Failed to create collection. Please try again.')
+      toast.error(t('toast.failure'))
     } finally {
       setIsSubmitting(false)
     }
@@ -83,7 +89,9 @@ function NewCollection(params: any) {
   if (error) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
-        <div className="text-red-500">Failed to load courses. Please try again later.</div>
+        <div className="text-red-500">
+          {t('errorLoadingCourses')}
+        </div>
       </div>
     )
   }
@@ -92,19 +100,23 @@ function NewCollection(params: any) {
     <div className="max-w-2xl mx-auto py-12 px-4">
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Create New Collection</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {t('title')}
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Group your courses together in a collection to make them easier to find and manage.
+            {t('description')}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Collection Name</span>
+              <span className="text-sm font-medium text-gray-700">
+                {t('nameLabel')}
+              </span>
               <input
                 type="text"
-                placeholder="Enter collection name"
+                placeholder={t('namePlaceholder')}
                 value={name}
                 onChange={handleNameChange}
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
@@ -113,21 +125,29 @@ function NewCollection(params: any) {
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Visibility</span>
+              <span className="text-sm font-medium text-gray-700">
+                {t('visibilityLabel')}
+              </span>
               <select
                 onChange={handleVisibilityChange}
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 defaultValue={isPublic}
               >
-                <option value="true">Public Collection - Visible to everyone</option>
-                <option value="false">Private Collection - Only visible to organization members</option>
+                <option value="true">
+                  {t('visibilityPublic')}
+                </option>
+                <option value="false">
+                  {t('visibilityPrivate')}
+                </option>
               </select>
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Description</span>
+              <span className="text-sm font-medium text-gray-700">
+                {t('descriptionLabel')}
+              </span>
               <textarea
-                placeholder="Enter collection description"
+                placeholder={t('descriptionPlaceholder')}
                 value={description}
                 onChange={handleDescriptionChange}
                 rows={4}
@@ -137,13 +157,17 @@ function NewCollection(params: any) {
             </label>
 
             <div className="space-y-2">
-              <span className="text-sm font-medium text-gray-700">Select Courses</span>
+              <span className="text-sm font-medium text-gray-700">
+                {t('selectCoursesLabel')}
+              </span>
               {isLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
                 </div>
               ) : courses?.length === 0 ? (
-                <p className="text-sm text-gray-500 py-4">No courses available. Create some courses first.</p>
+                <p className="text-sm text-gray-500 py-4">
+                  {t('noCoursesAvailable')}
+                </p>
               ) : (
                 <div className="mt-2 border border-gray-200 rounded-lg bg-gray-50">
                   <div className="max-h-[400px] overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
@@ -159,10 +183,15 @@ function NewCollection(params: any) {
                           value={course.id}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setSelectedCourses([...selectedCourses, course.id])
+                              setSelectedCourses([
+                                ...selectedCourses,
+                                course.id,
+                              ])
                             } else {
                               setSelectedCourses(
-                                selectedCourses.filter((id: any) => id !== course.id)
+                                selectedCourses.filter(
+                                  (id: any) => id !== course.id
+                                )
                               )
                             }
                           }}
@@ -171,7 +200,11 @@ function NewCollection(params: any) {
                         <div className="relative w-24 h-16 rounded-md overflow-hidden bg-gray-100 shrink-0">
                           {course.thumbnail_image ? (
                             <img
-                              src={getCourseThumbnailMediaDirectory(org.org_uuid, course.course_uuid, course.thumbnail_image)}
+                              src={getCourseThumbnailMediaDirectory(
+                                org.org_uuid,
+                                course.course_uuid,
+                                course.thumbnail_image
+                              )}
                               alt={course.name}
                               className="object-cover"
                             />
@@ -182,9 +215,13 @@ function NewCollection(params: any) {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-medium text-gray-900 truncate">{course.name}</h3>
+                          <h3 className="text-sm font-medium text-gray-900 truncate">
+                            {course.name}
+                          </h3>
                           {course.description && (
-                            <p className="mt-1 text-xs text-gray-500 line-clamp-2">{course.description}</p>
+                            <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                              {course.description}
+                            </p>
                           )}
                         </div>
                       </label>
@@ -192,7 +229,7 @@ function NewCollection(params: any) {
                   </div>
                   <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
                     <p className="text-xs text-gray-500">
-                      Selected courses: {selectedCourses.length}
+                      {t('selectedCount', { count: selectedCourses.length })}
                     </p>
                   </div>
                 </div>
@@ -206,7 +243,7 @@ function NewCollection(params: any) {
               onClick={() => router.back()}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition"
             >
-              Cancel
+              {t('cancelButton')}
             </button>
             <button
               type="submit"
@@ -214,7 +251,7 @@ function NewCollection(params: any) {
               className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-xs hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              <span>{isSubmitting ? 'Creating...' : 'Create Collection'}</span>
+              <span>{isSubmitting ? t('creatingButton') : t('createButton')}</span>
             </button>
           </div>
         </form>

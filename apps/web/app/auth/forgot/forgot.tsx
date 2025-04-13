@@ -16,6 +16,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useRouter } from 'next/navigation'
 import { useFormik } from 'formik'
 import { sendResetLink } from '@services/auth/auth'
+import { useTranslations } from 'next-intl'
 
 const validate = (values: any) => {
     const errors: any = {}
@@ -26,11 +27,12 @@ const validate = (values: any) => {
         errors.email = 'Invalid email address'
     }
 
-
     return errors
 }
 
 function ForgotPasswordClient() {
+    const t = useTranslations('Auth.Forgot')
+    const generalT = useTranslations('General')
     const org = useOrg() as any;
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const router = useRouter()
@@ -47,7 +49,7 @@ function ForgotPasswordClient() {
             setIsSubmitting(true)
             let res = await sendResetLink(values.email, org?.id)
             if (res.status == 200) {
-                setMessage(res.data + ', please check your email')
+                setMessage(t('checkEmail'))
                 setIsSubmitting(false)
             } else {
                 setError(res.data.detail)
@@ -86,7 +88,7 @@ function ForgotPasswordClient() {
                                         org?.org_uuid,
                                         org?.logo_image
                                     )}`}
-                                    alt="Learnhouse"
+                                    alt={org?.name}
                                     style={{ width: 'auto', height: 70 }}
                                     className="rounded-xl shadow-xl inset-0 ring-1 ring-inset ring-black/10 bg-white"
                                 />
@@ -106,10 +108,9 @@ function ForgotPasswordClient() {
             </div>
             <div className="left-login-part bg-white flex flex-row">
                 <div className="login-form m-auto w-72">
-                    <h1 className="text-2xl font-bold mb-4">Forgot Password</h1>
+                    <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
                     <p className="text-sm mb-4">
-                        Enter your email address and we will send you a link to reset your
-                        password
+                        {t('enterEmailMessage')}
                     </p>
 
                     {error && (
@@ -121,13 +122,13 @@ function ForgotPasswordClient() {
                     {message && (
                         <div className="flex justify-center bg-green-200 rounded-md text-green-950 space-x-2 items-center p-4 transition-all shadow-xs">
                             <Info size={18} />
-                            <div className="font-bold text-sm">{message}</div>
+                            <div className="font-bold text-sm">{t('checkEmail')}</div>
                         </div>
                     )}
                     <FormLayout onSubmit={formik.handleSubmit}>
                         <FormField name="email">
                             <FormLabelAndMessage
-                                label="Email"
+                                label={t('email')}
                                 message={formik.errors.email}
                             />
                             <Form.Control asChild>
@@ -136,13 +137,14 @@ function ForgotPasswordClient() {
                                     value={formik.values.email}
                                     type="email"
                                     required
+                                    placeholder={t('emailPlaceholder')}
                                 />
                             </Form.Control>
                         </FormField>
-                        <div className="flex  py-4">
+                        <div className="flex py-4">
                             <Form.Submit asChild>
                                 <button className="w-full bg-black text-white font-bold text-center p-2 rounded-md shadow-md hover:cursor-pointer">
-                                    {isSubmitting ? 'Loading...' : 'Send Reset Link'}
+                                    {isSubmitting ? generalT('loading') : t('sendResetLink')}
                                 </button>
                             </Form.Submit>
                         </div>

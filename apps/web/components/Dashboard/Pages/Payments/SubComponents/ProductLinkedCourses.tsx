@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { mutate } from 'swr';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import LinkCourseModal from './LinkCourseModal';
+import { useTranslations } from 'next-intl';
 
 interface ProductLinkedCoursesProps {
   productId: string;
@@ -18,13 +19,15 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const session = useLHSession() as any;
   const org = useOrg() as any;
+  const t = useTranslations('Payments.LinkedCourses');
+  const tNotify = useTranslations('Notifications');
 
   const fetchLinkedCourses = async () => {
     try {
       const response = await getCoursesLinkedToProduct(org.id, productId, session.data?.tokens?.access_token);
       setLinkedCourses(response.data || []);
     } catch (error) {
-      toast.error('Failed to fetch linked courses');
+      toast.error(tNotify('errors.fetchLinkedCoursesFailed'));
     }
   };
 
@@ -34,12 +37,12 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
       if (response.success) {
         await fetchLinkedCourses();
         mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
-        toast.success('Course unlinked successfully');
+        toast.success(tNotify('courseUnlinkedSuccess'));
       } else {
-        toast.error(response.data?.detail || 'Failed to unlink course');
+        toast.error(response.data?.detail || tNotify('errors.unlinkCourseFailed'));
       }
     } catch (error) {
-      toast.error('Failed to unlink course');
+      toast.error(tNotify('errors.unlinkCourseFailed'));
     }
   };
 
@@ -52,12 +55,12 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   return (
     <div className="mt-4">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-sm font-semibold text-gray-700">Linked Courses</h3>
+        <h3 className="text-sm font-semibold text-gray-700">{t('title')}</h3>
         <Modal
           isDialogOpen={isLinkModalOpen}
           onOpenChange={setIsLinkModalOpen}
-          dialogTitle="Link Course to Product"
-          dialogDescription="Select a course to link to this product"
+          dialogTitle={t('linkModalTitle')}
+          dialogDescription={t('linkModalDescription')}
           dialogContent={
             <LinkCourseModal
               productId={productId}
@@ -70,7 +73,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
           dialogTrigger={
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Plus size={16} />
-              <span>Link Course</span>
+              <span>{t('linkCourseButton')}</span>
             </Button>
           }
         />
@@ -80,7 +83,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
         {linkedCourses.length === 0 ? (
           <div className="text-sm text-gray-500 flex items-center gap-2">
             <BookOpen size={16} />
-            <span>No courses linked yet</span>
+            <span>{t('noCoursesLinked')}</span>
           </div>
         ) : (
           linkedCourses.map((course) => (
@@ -103,4 +106,4 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
       </div>
     </div>
   );
-} 
+}

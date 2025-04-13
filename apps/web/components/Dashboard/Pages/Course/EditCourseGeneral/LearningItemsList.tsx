@@ -3,6 +3,7 @@ import { Plus, X, Link as LinkIcon, Smile } from 'lucide-react';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { Input } from '@components/ui/input';
+import { useTranslations } from 'next-intl';
 
 interface LearningItem {
   id: string;
@@ -28,6 +29,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const linkInputFieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('CourseEdit.General.LearningItems');
 
   // Add a new empty item
   const addItem = () => {
@@ -39,14 +41,14 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     const newItems = [...items, newItem];
     setItems(newItems);
     onChange(JSON.stringify(newItems));
-    
+
     // Focus the newly added item after render
     setTimeout(() => {
       if (inputRefs.current[newItem.id]) {
         inputRefs.current[newItem.id]?.focus();
         setFocusedItemId(newItem.id);
       }
-      
+
       // Scroll to the bottom when a new item is added
       if (scrollContainerRef.current && newItems.length > 5) {
         scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
@@ -98,7 +100,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         initializedRef.current = true;
       }
     }
-  }, [value]);
+  }, [value, onChange]);
 
   // Restore focus after re-render if an item was focused
   useEffect(() => {
@@ -114,14 +116,14 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           inputRefs.current[focusedItemId]?.focus();
         }
       }
-      
+
       // Scroll the focused item into view if needed
       if (items.length > 5 && scrollContainerRef.current) {
         const focusedElement = document.getElementById(`learning-item-${focusedItemId}`);
         if (focusedElement) {
           const containerRect = scrollContainerRef.current.getBoundingClientRect();
           const elementRect = focusedElement.getBoundingClientRect();
-          
+
           // Check if the element is outside the visible area
           if (elementRect.top < containerRect.top || elementRect.bottom > containerRect.bottom) {
             focusedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -175,7 +177,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       items.map(item => (item.id === id ? { ...item, emoji } : item))
     );
     setShowEmojiPicker(null);
-    
+
     // Restore focus to the text input after emoji selection
     setTimeout(() => {
       if (inputRefs.current[id]) {
@@ -208,7 +210,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     // We'll use a small delay to allow other focus events to occur first
     setTimeout(() => {
       // Only clear if we're not focusing another input in this component
-      if (!document.activeElement || 
+      if (!document.activeElement ||
           !document.activeElement.classList.contains('learning-item-input')) {
         setFocusedItemId(null);
       }
@@ -232,11 +234,11 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     <div className="space-y-2">
       {items.length === 0 && (
         <div className="text-center py-3 text-gray-500 bg-gray-50/50 rounded-lg text-sm">
-          No learning items added yet. Click the button below to add one.
+          {t('noItems')}
         </div>
       )}
-      
-      <div 
+
+      <div
         ref={scrollContainerRef}
         className={`space-y-2 ${isScrollable ? 'max-h-[350px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent' : ''}`}
       >
@@ -253,24 +255,24 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
               >
                 <span>{item.emoji}</span>
               </button>
-              
+
               <Input
                 ref={setInputRef(item.id)}
                 value={item.text}
                 onChange={(e) => updateItemText(item.id, e.target.value)}
                 onFocus={() => handleInputFocus(item.id)}
                 onBlur={handleInputBlur}
-                placeholder="Enter learning item..."
+                placeholder={t('placeholder')}
                 className="grow border-0 bg-transparent focus-visible:ring-0 px-0 h-8 text-sm learning-item-input"
               />
-              
+
               {item.link && (
                 <div className="text-xs text-blue-500 flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded">
                   <LinkIcon size={12} />
                   <span className="truncate max-w-[100px]">{item.link}</span>
                 </div>
               )}
-              
+
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -286,23 +288,23 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                     }, 0);
                   }}
                   className="text-gray-400 hover:text-blue-500 transition-colors"
-                  title={item.link ? "Edit link" : "Add link"}
+                  title={item.link ? t('editLinkTooltip') : t('addLinkTooltip')}
                 >
                   <LinkIcon size={15} />
                 </button>
-                
+
                 <button
                   type="button"
                   onClick={() => removeItem(item.id)}
                   className="text-gray-300 hover:text-gray-500 transition-colors"
-                  aria-label="Remove item"
-                  title="Remove item"
+                  aria-label={t('removeItemAriaLabel')}
+                  title={t('removeItemTooltip')}
                 >
                   <X size={15} />
                 </button>
               </div>
             </div>
-            
+
             {showEmojiPicker === item.id && (
               <div ref={pickerRef} className="absolute z-10 mt-1 left-0">
                 <Picker
@@ -316,7 +318,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                 />
               </div>
             )}
-            
+
             {showLinkInput === item.id && (
               <div ref={linkInputRef} className="mt-1 p-2 bg-white border border-gray-200 rounded-lg shadow-xs">
                 <Input
@@ -325,7 +327,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                   onChange={(e) => updateItemLink(item.id, e.target.value)}
                   onFocus={() => handleInputFocus(item.id)}
                   onBlur={handleInputBlur}
-                  placeholder="Enter URL..."
+                  placeholder={t('linkInputPlaceholder')}
                   className="w-full text-sm learning-item-input"
                   autoFocus
                 />
@@ -334,17 +336,17 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           </div>
         ))}
       </div>
-      
+
       <button
         type="button"
         onClick={addItem}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors mt-2"
       >
         <Plus size={16} className="text-blue-500" />
-        <span>Add learning item</span>
+        <span>{t('addItemButton')}</span>
       </button>
     </div>
   );
 };
 
-export default LearningItemsList; 
+export default LearningItemsList;

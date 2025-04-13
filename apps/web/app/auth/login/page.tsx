@@ -1,6 +1,7 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import LoginClient from './login'
 import { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string }>
@@ -9,16 +10,15 @@ type MetadataProps = {
 
 export async function generateMetadata(params: MetadataProps): Promise<Metadata> {
   const orgslug = (await params.searchParams).orgslug
-  
-  //const orgslug = params.orgslug
-  // Get Org context information
+  const t = await getTranslations('Auth.Login')
+
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 0,
     tags: ['organizations'],
   })
 
   return {
-    title: 'Login' + ` — ${org.name}`,
+    title: t('title', { orgName: org.name }),
   }
 }
 

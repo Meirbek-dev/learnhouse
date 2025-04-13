@@ -5,8 +5,10 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
+import { useTranslations } from 'next-intl'
 
 function GetStarted() {
+  const t = useTranslations('Install.GetStarted');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const {
@@ -46,12 +48,12 @@ function GetStarted() {
   if (error)
     return (
       <div className="flex py-10 justify-center items-center space-x-3">
-        <h1>Start a new installation</h1>
+        <h1>{t('newInstallationTitle')}</h1>
         <div
           onClick={startInstallation}
           className="p-3  font-bold bg-green-200 text-green-900 rounded-lg hover:cursor-pointer"
         >
-          Start
+          {t('startButton')}
         </div>
       </div>
     )
@@ -61,18 +63,18 @@ function GetStarted() {
     return (
       <div>
         <div className="flex py-10 justify-center items-center space-x-3">
-          <h1>You already started an installation</h1>
+          <h1>{t('existingInstallationTitle')}</h1>
           <div
             onClick={redirectToStep}
             className="p-3  font-bold bg-orange-200 text-orange-900 rounded-lg hover:cursor-pointer"
           >
-            Continue
+            {t('continueButton')}
           </div>
           <div
             onClick={startInstallation}
             className="p-3  font-bold bg-green-200 text-green-900 rounded-lg hover:cursor-pointer"
           >
-            Start
+            {t('startButton')}
           </div>
         </div>
       </div>

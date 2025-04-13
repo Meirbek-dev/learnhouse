@@ -1,3 +1,4 @@
+'use client';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -11,8 +12,10 @@ import EvaluateAssignment from './Modals/EvaluateAssignment';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import { useTranslations } from 'next-intl';
 
 function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: string }) {
+    const t = useTranslations('DashPage.Assignments');
     const session = useLHSession() as any;
     const access_token = session?.data?.tokens?.access_token;
 
@@ -39,7 +42,7 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                 <div className='flex-1'>
                     <div className='flex w-fit mx-auto px-3.5 py-1 bg-rose-600/80 space-x-2 my-5 items-center text-sm font-bold text-white rounded-full'>
                         <X size={18} />
-                        <h3>Late</h3>
+                        <h3>{t('late')}</h3>
                     </div>
                     <div className='flex flex-col gap-4'>
                         {renderSubmissions('LATE')}
@@ -48,7 +51,7 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                 <div className='flex-1'>
                     <div className='flex w-fit mx-auto px-3.5 py-1 bg-amber-600/80 space-x-2 my-5 items-center text-sm font-bold text-white rounded-full'>
                         <SendHorizonal size={18} />
-                        <h3>Submitted</h3>
+                        <h3>{t('submitted')}</h3>
                     </div>
                     <div className='flex flex-col gap-4'>
                         {renderSubmissions('SUBMITTED')}
@@ -57,19 +60,20 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                 <div className='flex-1'>
                     <div className='flex w-fit mx-auto px-3.5 py-1 bg-emerald-600/80 space-x-2 my-5 items-center text-sm font-bold text-white rounded-full'>
                         <UserCheck size={18} />
-                        <h3>Graded</h3>
+                        <h3>{t('graded')}</h3>
                     </div>
                     <div className='flex flex-col gap-4'>
                         {renderSubmissions('GRADED')}
                     </div>
                 </div>
-
             </div>
         </div>
     );
 }
 
 function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
+    const t = useTranslations('DashPage.Assignments');
+    const generalT = useTranslations('General');
     const session = useLHSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const [gradeSudmissionModal, setGradeSubmissionModal] = React.useState({
@@ -82,16 +86,11 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
         (url) => swrFetcher(url, access_token)
     );
 
-    useEffect(() => {
-        console.log(user);
-    }
-        , [session, user]);
-
     return (
         <div className='flex flex-row bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)] nice-shadow rounded-lg p-4 w-[350px] mx-auto'>
             <div className='flex flex-col space-y-2 w-full'>
                 <div className='flex justify-between w-full'>
-                    <h2 className='uppercase text-slate-400 text-xs tracking-tight font-semibold'>Submission</h2>
+                    <h2 className='uppercase text-slate-400 text-xs tracking-tight font-semibold'>{t('submission')}</h2>
                     <p className='uppercase text-xs tracking-tight font-semibold'>
                         {new Date(submission.creation_date).toLocaleDateString('en-UK', {
                             year: 'numeric',
@@ -114,7 +113,6 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
                         </div>
                     </div>
                     <div className='flex flex-col'>
-
                         <Modal
                             isDialogOpen={gradeSudmissionModal.open && gradeSudmissionModal.submission_id === submission.submission_uuid}
                             onOpenChange={(open: boolean) => setGradeSubmissionModal({ open, submission_id: submission.submission_uuid })}
@@ -129,11 +127,11 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
                                     </AssignmentsTaskProvider>
                                 </AssignmentProvider>
                             }
-                            dialogTitle={`Evaluate @${user?.username}`}
-                            dialogDescription="Evaluate the submission"
+                            dialogTitle={t('evaluateUser', { username: user?.username })}
+                            dialogDescription={t('evaluateSubmission')}
                             dialogTrigger={
                                 <div className='bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded text-xs cursor-pointer'>
-                                    Evaluate
+                                    {generalT('evaluate')}
                                 </div>
                             }
                         />

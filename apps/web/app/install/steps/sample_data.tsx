@@ -8,8 +8,10 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import useSWR from 'swr'
+import { useTranslations } from 'next-intl'
 
 function SampleData() {
+  const t = useTranslations('Install.SampleData');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const {
@@ -35,12 +37,12 @@ function SampleData() {
 
   return (
     <div className="flex py-10 justify-center items-center space-x-3">
-      <h1>Install Sample data on your organization </h1>
+      <h1>{t('title')}</h1>
       <div
         onClick={createSampleData}
         className="p-3  font-bold bg-purple-200 text-pruple-900 rounded-lg hover:cursor-pointer"
       >
-        Start
+        {t('startButton')}
       </div>
     </div>
   )

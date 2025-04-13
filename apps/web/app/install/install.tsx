@@ -4,8 +4,11 @@ import { INSTALL_STEPS } from './steps/steps'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { useTranslations } from 'next-intl'
 
 function InstallClient() {
+  const t = useTranslations('Install')
+
   return (
     <GeneralWrapperStyled>
       <Suspense>
@@ -18,6 +21,7 @@ function InstallClient() {
 }
 
 const Stepscomp = () => {
+  const t = useTranslations('Install')
   const searchParams = useSearchParams()
   const router = useRouter()
   const step: any = parseInt(searchParams.get('step') || '0')
@@ -41,7 +45,7 @@ const Stepscomp = () => {
         </div>
         <div className="steps flex space-x-2 justify-center text-sm p-3 bg-slate-50 rounded-full w-fit m-auto px-10">
           <div className="flex space-x-8">
-            {stepsState.map((step, index) => (
+            {stepsState.map((stepConfig, index) => (
               <div
                 key={index}
                 className={`flex items-center cursor-pointer space-x-2`}
@@ -54,7 +58,7 @@ const Stepscomp = () => {
                 >
                   {index}
                 </div>
-                <div>{step.name}</div>
+                <div>{t(`steps.${stepConfig.id}`)}</div>
               </div>
             ))}
           </div>
@@ -62,7 +66,7 @@ const Stepscomp = () => {
       </div>
 
       <div className="flex pt-8 flex-col">
-        <h1 className="font-bold text-3xl">{stepsState[stepNumber].name}</h1>
+        <h1 className="font-bold text-3xl">{t(`steps.${stepsState[stepNumber].id}`)}</h1>
         <div className="pt-8">{stepsState[stepNumber].component}</div>
       </div>
     </div>

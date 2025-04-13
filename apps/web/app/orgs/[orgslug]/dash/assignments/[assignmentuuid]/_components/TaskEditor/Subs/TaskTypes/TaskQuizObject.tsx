@@ -7,6 +7,7 @@ import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
+import { useTranslations } from 'next-intl';
 
 type QuizSchema = {
     questionText: string;
@@ -43,6 +44,8 @@ type Submission = {
 };
 
 function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectProps) {
+    const t = useTranslations('DashPage.Assignments.TaskQuizObject');
+    const generalT = useTranslations('General');
     const session = useLHSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const assignmentTaskState = useAssignmentsTask() as any;
@@ -79,7 +82,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
             updatedQuestions[qIndex].options.splice(oIndex, 1);
             setQuestions(updatedQuestions);
         } else {
-            toast.error('Cannot delete the last option. At least one option is required.');
+            toast.error(t('optionDeleteError'));
         }
     };
 
@@ -114,9 +117,9 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
             assignmentTaskStateHook({
                 type: 'reload',
             });
-            toast.success('Task saved successfully');
+            toast.success(t('saveSuccess'));
         } else {
-            toast.error('Error saving task, please retry later.');
+            toast.error(t('saveError'));
         }
     };
     /* TEACHER VIEW CODE */
@@ -204,7 +207,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                 const existingSubmission = userSubmissions.submissions.find(
                     submission => submission.questionUUID === question.questionUUID && submission.optionUUID === option.optionUUID
                 );
-                
+
                 return existingSubmission || {
                     questionUUID: question.questionUUID || '',
                     optionUUID: option.optionUUID || '',
@@ -232,11 +235,11 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                 assignmentTaskStateHook({
                     type: 'reload',
                 });
-                toast.success('Task saved successfully');
+                toast.success(t('saveSuccess'));
                 setShowSavingDisclaimer(false);
                 setUserSubmissions(updatedUserSubmissions);
             } else {
-                toast.error('Error saving task, please retry later.');
+                toast.error(t('saveError'));
             }
         }
     };
@@ -287,15 +290,15 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                 assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid,
                 task_submission: userSubmissions,
                 grade: finalGrade,
-                task_submission_grade_feedback: 'Auto graded by system',
+                task_submission_grade_feedback: t('autoGraded'),
             };
 
             const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token);
             if (res) {
                 getAssignmentTaskSubmissionFromIdentifiedUserUI();
-                toast.success(`Task graded successfully with ${finalGrade} points`);
+                toast.success(t('gradeSuccess', { finalGrade }));
             } else {
-                toast.error('Error grading task, please retry later.');
+                toast.error(t('gradeError'));
             }
         }
     }
@@ -338,7 +341,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                     <input
                                         value={question.questionText}
                                         onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
-                                        placeholder="Question"
+                                        placeholder={t('questionPlaceholder')}
                                         className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
                                     />
                                 ) : (
@@ -370,7 +373,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                                     type="text"
                                                     value={option.text}
                                                     onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
-                                                    placeholder="Option"
+                                                    placeholder={t('optionPlaceholder')}
                                                     className="w-full mx-2 px-3 pr-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
                                                 />
                                             ) : (
@@ -387,9 +390,9 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                                     >
                                                         {option.assigned_right_answer ? <Check size={12} className="mx-auto" /> : <X size={12} className="mx-auto" />}
                                                         {option.assigned_right_answer ? (
-                                                            <p className="mx-auto font-bold text-xs">True</p>
+                                                            <p className="mx-auto font-bold text-xs">{generalT('true')}</p>
                                                         ) : (
-                                                            <p className="mx-auto font-bold text-xs">False</p>
+                                                            <p className="mx-auto font-bold text-xs">{generalT('false')}</p>
                                                         )}
                                                     </div>
                                                     <div
@@ -408,16 +411,16 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                                     >
                                                         {option.assigned_right_answer ? <Check size={12} className="mx-auto" /> : <X size={12} className="mx-auto" />}
                                                         {option.assigned_right_answer ? (
-                                                            <p className="mx-auto font-bold text-xs">Marked as True</p>
+                                                            <p className="mx-auto font-bold text-xs">{t('markedAsTrue')}</p>
                                                         ) : (
-                                                            <p className="mx-auto font-bold text-xs">Marked as False</p>
+                                                            <p className="mx-auto font-bold text-xs">{t('markedAsFalse')}</p>
                                                         )}
                                                     </div>
 
                                                 </>
                                             )}
                                             {view === 'student' && (
-                                                <div 
+                                                <div
                                                     className={`w-[20px] flex-none flex items-center h-[20px] rounded-lg ${
                                                         userSubmissions.submissions.find(
                                                             (submission) =>
@@ -444,7 +447,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                             )}
                                             {view === 'grading' && (
                                                 <>
-                                                   
+
                                                     <div className={`w-[20px] flex-none flex items-center h-[20px] rounded-lg ${
                                                         userSubmissions.submissions.find(
                                                             (submission) =>
@@ -494,7 +497,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                             onClick={addQuestion}
                         >
                             <PlusCircle size={14} className="inline-block" />
-                            <span>Add Question</span>
+                            <span>{t('addQuestion')}</span>
                         </div>
                     </div>
                 )}
@@ -504,7 +507,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     else {
         return <div className='flex flex-row space-x-2 text-sm items-center'>
             <Info size={12} />
-            <p>No questions found</p>
+            <p>{t('noQuestionsFound')}</p>
         </div>;
     }
 }

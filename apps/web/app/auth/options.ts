@@ -95,7 +95,7 @@ export const nextAuthOptions = {
       if (token?.user?.tokens) {
         const tokenExpiry = token.user.tokens.expiry || 0;
         const fiveMinutes = 5 * 60 * 1000;
-        
+
         if (Date.now() + fiveMinutes >= tokenExpiry) {
           const RefreshedToken = await getNewAccessTokenUsingRefreshTokenServer(
             token?.user?.tokens?.refresh_token
@@ -121,7 +121,7 @@ export const nextAuthOptions = {
         // Cache the session for 5 minutes to avoid frequent API calls
         const cacheKey = `user_session_${token.user.tokens.access_token}`;
         let cachedSession = global.sessionCache?.[cacheKey];
-        
+
         if (cachedSession && Date.now() - cachedSession.timestamp < 5 * 60 * 1000) {
           return cachedSession.data;
         }

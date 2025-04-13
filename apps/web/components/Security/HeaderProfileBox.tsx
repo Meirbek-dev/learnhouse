@@ -9,11 +9,13 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithoutOrg } from '@services/config/config'
 import Tooltip from '@components/Objects/StyledElements/Tooltip/Tooltip'
+import { useTranslations } from 'next-intl'
 
 export const HeaderProfileBox = () => {
   const session = useLHSession() as any
   const isUserAdmin = useAdminStatus()
   const org = useOrg() as any
+  const t = useTranslations('Header')
 
   useEffect(() => { }
     , [session])
@@ -25,10 +27,10 @@ export const HeaderProfileBox = () => {
           <ul className="flex space-x-3 items-center">
             <li>
               <Link
-                href={{ pathname: getUriWithoutOrg('/login'), query: org ? { orgslug: org.slug } : null }} >Login</Link>
+                href={{ pathname: getUriWithoutOrg('/login'), query: org ? { orgslug: org.slug } : null }} >{t('login')}</Link>
             </li>
             <li className="bg-black rounded-lg shadow-md p-2 px-3 text-white">
-              <Link href={{ pathname: getUriWithoutOrg('/signup'), query: org ? { orgslug: org.slug } : null }}>Sign up</Link>
+              <Link href={{ pathname: getUriWithoutOrg('/signup'), query: org ? { orgslug: org.slug } : null }}>{t('signUp')}</Link>
             </li>
           </ul>
         </UnidentifiedArea>
@@ -38,12 +40,12 @@ export const HeaderProfileBox = () => {
           <div className="flex items-center space-x-2">
             <div className='flex items-center space-x-2' >
               <p className='text-sm capitalize'>{session.data.user.username}</p>
-              {isUserAdmin.isAdmin && <div className="text-[10px] bg-rose-300 px-2 font-bold rounded-md shadow-inner py-1">ADMIN</div>}
+              {isUserAdmin.isAdmin && <div className="text-[10px] bg-rose-300 px-2 font-bold rounded-md shadow-inner py-1">{t('adminBadge')}</div>}
             </div>
 
             <div className="flex items-center space-x-2">
-              <Tooltip 
-                content={"Your Owned Courses"}
+              <Tooltip
+                content={t('tooltips.ownedCourses')}
                 sideOffset={15}
                 side="bottom"
               >
@@ -51,8 +53,8 @@ export const HeaderProfileBox = () => {
                   <Package2 size={14} />
                 </Link>
               </Tooltip>
-              <Tooltip 
-                content={"Your Settings"}
+              <Tooltip
+                content={t('tooltips.yourSettings')}
                 sideOffset={15}
                 side="bottom"
               >

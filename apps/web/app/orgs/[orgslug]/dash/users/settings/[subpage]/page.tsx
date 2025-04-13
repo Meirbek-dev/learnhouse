@@ -146,7 +146,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
               </div>
             </div>
           </Link>
-          
+
         </div>
       </div>
       <motion.div

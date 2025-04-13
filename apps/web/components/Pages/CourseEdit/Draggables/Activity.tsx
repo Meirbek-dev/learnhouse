@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { deleteActivity, updateActivity } from '@services/courses/activities'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 interface ModifiedActivityInterface {
   activityId: string
@@ -33,6 +34,7 @@ function Activity(props: any) {
   const [selectedActivity, setSelectedActivity] = React.useState<
     string | undefined
   >(undefined)
+  const t = useTranslations('CourseEdit')
 
   async function removeActivity() {
     await deleteActivity(props.activity.id, session.data?.tokens?.access_token)
@@ -50,7 +52,7 @@ function Activity(props: any) {
         ...props.activity,
         name: modifiedActivity.activityName,
       }
-      
+
       await updateActivity(modifiedActivityCopy, activityId, session.data?.tokens?.access_token)
       await mutate(`${getAPIUrl()}chapters/meta/course_${props.courseid}`)
       await revalidateTags(['courses'], props.orgslug)
@@ -79,7 +81,7 @@ function Activity(props: any) {
                 <div className="flex space-x-2 items-center">
                   <Video size={16} />{' '}
                   <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full mx-auto justify-center align-middle">
-                    Video
+                    {t('activityTypes.video')}
                   </div>{' '}
                 </div>
               </>
@@ -91,7 +93,7 @@ function Activity(props: any) {
                     <File size={16} />{' '}
                   </div>
                   <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full">
-                    Document
+                    {t('activityTypes.document')}
                   </div>{' '}
                 </div>
               </>
@@ -101,7 +103,7 @@ function Activity(props: any) {
                 <div className="flex space-x-2 items-center">
                   <Sparkles size={16} />{' '}
                   <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full">
-                    Dynamic
+                    {t('activityTypes.dynamic')}
                   </div>{' '}
                 </div>
               </>
@@ -114,7 +116,7 @@ function Activity(props: any) {
                 <input
                   type="text"
                   className="bg-transparent outline-hidden text-xs text-gray-500"
-                  placeholder="Activity name"
+                  placeholder={t('activityNamePlaceholder')}
                   value={
                     modifiedActivity
                       ? modifiedActivity?.activityName
@@ -181,9 +183,9 @@ function Activity(props: any) {
           <div className="flex flex-row pr-3 space-x-1 items-center">
             <MoreVertical size={15} className="text-gray-300" />
             <ConfirmationModal
-              confirmationMessage="Are you sure you want to delete this activity ?"
-              confirmationButtonText="Delete Activity"
-              dialogTitle={'Delete ' + props.activity.name + ' ?'}
+              confirmationMessage={t('deleteActivityConfirmation')}
+              confirmationButtonText={t('deleteActivityButton')}
+              dialogTitle={t('deleteActivityTitle', { name: props.activity.name })}
               dialogTrigger={
                 <div
                   className=" hover:cursor-pointer p-1 px-5 bg-red-600 rounded-md"

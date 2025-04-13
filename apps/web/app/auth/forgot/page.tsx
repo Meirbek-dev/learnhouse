@@ -1,9 +1,13 @@
 import React from 'react'
 import ForgotPasswordClient from './forgot'
 import { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'LearnHouse - Forgot Password',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Auth.Forgot');
+  return {
+    title: t('title'),
+  }
 }
 
 function ForgotPasswordPage() {

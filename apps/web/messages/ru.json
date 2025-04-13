@@ -9,12 +9,38 @@
         "noContentYet": "Пока нет контента",
         "madeWith": "Сделано с помощью",
         "retry": "Повторить",
-        "loading": "Загрузка..."
+        "loading": "Загрузка...",
+        "error": "Ошибка",
+        "success": "Успех",
+        "info": "Информация",
+        "warning": "Предупреждение",
+        "delete": "Удалить",
+        "edit": "Редактировать",
+        "save": "Сохранить",
+        "submit": "Отправить",
+        "cancel": "Отмена",
+        "close": "Закрыть",
+        "download": "Скачать",
+        "upload": "Загрузить",
+        "true": "Верно",
+        "false": "Неверно",
+        "yes": "Да",
+        "no": "Нет",
+        "preview": "Предпросмотр",
+        "general": "Общее",
+        "content": "Содержимое",
+        "settings": "Настройки",
+        "title": "Название",
+        "description": "Описание",
+        "hint": "Подсказка",
+        "back": "Назад",
+        "next": "Далее",
+        "finish": "Завершить"
     },
     "Components": {
         "Button": {
             "newCourse": "Новый курс ",
-            "newCollecction": "Новая коллекция "
+            "newCollection": "Новая коллекция "
         },
         "CourseThumbnail": {
             "editContent": "Редактировать контент",
@@ -63,7 +89,7 @@
             "label": "Язык",
             "en": "Английский",
             "ru": "Русский",
-            "kz":"Казахский",
+            "kz": "Казахский",
             "sp": "Испанский",
             "fr": "Французский"
         }
@@ -81,7 +107,7 @@
         }
     },
     "NotFoundPage": {
-        "message": "Приносим извинения за неудобства. Похоже, вы пытаетесь<br></br> получить доступ к странице, которая была удалена или никогда не существовала",
+        "message": "Приносим извинения за неудобства. Похоже, вы пытаетесь получить доступ к странице, которая была удалена или никогда не существовала",
         "button": "Вернуться на главную страницу"
     },
     "SignupPage": {
@@ -112,10 +138,126 @@
             }
         },
         "Assignments": {
-            "title": "Задания"
+            "title": "Задания",
+            "tasks": "Задачи",
+            "late": "Просрочено",
+            "submitted": "Сдано",
+            "graded": "Оценено",
+            "submission": "Сдача",
+            "evaluate": "Оценить",
+            "evaluateUser": "Оценить {username}",
+            "evaluateSubmission": "Оценить эту сдачу",
+            "addQuestion": "Добавить вопрос",
+            "noQuestionsFound": "Вопросов не найдено",
+            "questionPlaceholder": "Введите текст вопроса",
+            "optionPlaceholder": "Введите текст варианта ответа",
+            "markedAsTrue": "Отмечено как Верно",
+            "markedAsFalse": "Отмечено как Неверно",
+            "NewTaskModal": {
+                "reminderToast": "При редактировании/добавлении задач убедитесь, что вы Сняли с публикации ваше Задание, чтобы избежать проблем у студентов. Вы можете Опубликовать его снова, когда будете готовы.",
+                "createSuccess": "Задача успешно создана",
+                "quizTitle": "Тест",
+                "quizDescription": "Вопросы с вариантами ответов",
+                "fileSubmissionTitle": "Сдача файла",
+                "fileSubmissionDescription": "Студенты могут сдавать файлы для этой задачи",
+                "formTitle": "Форма",
+                "formDescription": "Формы для заполнения студентами",
+                "formNotSupported": "Формы пока не поддерживаются"
+            },
+            "TaskFileObject": {
+                "authRequiredUpload": "Требуется аутентификация. Пожалуйста, войдите, чтобы загрузить файлы.",
+                "authRequiredSubmit": "Требуется аутентификация. Пожалуйста, войдите, чтобы сдать задание.",
+                "errorSaving": "Ошибка сохранения задачи, пожалуйста, попробуйте позже.",
+                "teacherViewInfo": "Пользователь сможет сдать файл для этой задачи, вы сможете проверить его во вкладке 'Сдачи'",
+                "gradingViewInfo": "Пожалуйста, скачайте файл и оцените его вручную, затем введите оценку выше",
+                "allowedFormats": "Допустимые форматы: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+                "signInToUpload": "Пожалуйста, войдите, чтобы загрузить файлы",
+                "submitFile": "Сдать файл",
+                "gradeRangeError": "Оценка не может быть больше {maxGradeValue} баллов",
+                "gradedByTeacher": "Оценено преподавателем: @{username}",
+                "gradeSuccess": "Задача успешно оценена на {grade} баллов",
+                "gradeError": "Ошибка оценки задачи, пожалуйста, попробуйте позже."
+            },
+            "TaskQuizObject": {
+                "optionDeleteError": "Нельзя удалить последний вариант ответа. Требуется хотя бы один вариант.",
+                "saveSuccess": "Задача успешно сохранена",
+                "saveError": "Ошибка сохранения задачи, пожалуйста, попробуйте позже.",
+                "autoGraded": "Автоматически оценено системой",
+                "gradeSuccess": "Задача успешно оценена на {finalGrade} баллов",
+                "gradeError": "Ошибка оценки задачи, пожалуйста, попробуйте позже."
+            },
+            "TaskGeneralEdit": {
+                "gradeValidationError": "Значение должно быть между 20 и 100",
+                "updateSuccess": "Задача успешно обновлена",
+                "updateError": "Ошибка обновления задачи, пожалуйста, попробуйте позже.",
+                "referenceFile": "Справочный файл",
+                "allowedFormats": "Допустимые форматы: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+                "maxGradeValue": "Максимальная оценка",
+                "refFileUpdateSuccess": "Справочный файл успешно обновлен",
+                "changeRefFile": "Изменить справочный файл"
+            },
+            "TaskEditor": {
+                "deleteSuccess": "Задача успешно удалена",
+                "deleteError": "Ошибка удаления задачи, пожалуйста, попробуйте позже.",
+                "deleteTask": "Удалить задачу",
+                "noTaskSelected": "Задача не выбрана"
+            },
+            "Tasks": {
+                "addTask": "Добавить задачу",
+                "addTaskModalTitle": "Добавить задачу к заданию",
+                "addTaskModalDescription": "Создать новую задачу для этого задания"
+            },
+            "EvaluateModal": {
+                "taskLabel": "Задача {index}",
+                "refDoc": "Справочный документ",
+                "rejectSuccess": "Задание успешно отклонено",
+                "rejectAssignment": "Отклонить задание",
+                "setFinalGrade": "Установить итоговую оценку",
+                "markAsDone": "Отметить Активность как Выполненную для пользователя",
+                "gradeFinalSuccess": "{message}",
+                "gradeFinalError": "{message}",
+                "markDoneSuccess": "{message}",
+                "markDoneError": "{message}"
+            },
+            "AssignmentPage": {
+                "desktopOnlyTitle": "Только для компьютера",
+                "desktopOnlyMessage1": "Эта страница доступна только с компьютера.",
+                "desktopOnlyMessage2": "Пожалуйста, переключитесь на компьютер для просмотра и управления заданием.",
+                "editor": "Редактор",
+                "submissions": "Сдачи",
+                "published": "Опубликовано",
+                "unpublished": "Не опубликовано",
+                "editDetailsTooltip": "Редактировать детали задания",
+                "previewTooltip": "Предпросмотр задания как студент",
+                "unpublishTooltip": "Сделать ваше задание недоступным для студентов",
+                "publishTooltip": "Сделать ваше задание публичным и доступным для студентов",
+                "updateLoading": "Обновление задания...",
+                "updateSuccess": "Задание успешно обновлено",
+                "updateError": "Ошибка обновления задания, пожалуйста, попробуйте позже.",
+                "assignmentTools": "Инструменты Задания"
+            },
+            "HomePage": {
+                "course": "Курс",
+                "courseEditor": "Редактор курса",
+                "assignment": "Задание",
+                "editor": "Редактор",
+                "submissions": "Сдачи",
+                "noAssignments": "Для этого курса нет доступных заданий, создайте задания в редакторе курса"
+            }
         },
         "Payments": {
-            "title": "Платежи"
+            "title": "Платежи",
+            "overview": "Обзор",
+            "customers": "Клиенты",
+            "customerInfo": "Просмотр и управление информацией о клиентах",
+            "paidProducts": "Платные продукты",
+            "paidProductsInfo": "Управление платными продуктами и ценами",
+            "configuration": "Настройка платежей",
+            "configurationInfo": "Настройка и управление платежным шлюзом",
+            "notAvailable": "Платежи недоступны",
+            "notEnabledMessage": "Функция платежей не включена для этой организации.",
+            "contactAdmin": "Пожалуйста, свяжитесь с администратором для включения платежей.",
+            "productsSubscriptions": "Продукты и Подписки"
         },
         "LearnhouseUniversity": "Университет LearnHouse",
         "Courses": {
@@ -125,7 +267,26 @@
             "createACourse": "Создайте курс, чтобы добавить контент",
             "general": "Общее",
             "access": "Доступ",
-            "content": "Контент"
+            "content": "Контент",
+            "myCourses": "Мои курсы",
+            "purchasedCourses": "Купленные курсы",
+            "noPurchasedCourses": "Нет купленных курсов",
+            "noPurchasedCoursesDesc": "Вы еще не приобрели ни одного курса",
+            "error": "Ошибка загрузки курсов",
+            "CoursePage": {
+                "general": "Общее",
+                "content": "Содержимое",
+                "access": "Доступ",
+                "contributors": "Участники"
+            },
+            "HomePageClient": {
+                "courses": "Курсы",
+                "createCourse": "Создать курс",
+                "createCourseDescription": "Создать новый курс",
+                "noCourses": "Пока нет курсов",
+                "noCoursesAvailable": "Пока нет доступных курсов",
+                "createACourse": "Создайте курс, чтобы добавить контент"
+            }
         },
         "UserAccountSettings": {
             "title": "Настройки аккаунта",
@@ -133,26 +294,26 @@
             "profile": "Профиль",
             "password": "Пароль",
             "generalSection": {
-                "email": "Электронная почта",
-                "username": "Имя пользователя",
-                "firstName": "Имя",
-                "lastName": "Фамилия",
-                "bio": "Биография",
-                "profilePicture": "Изображение профиля",
-                "changeAvatar": "Изменить аватар",
-                "recommendedSize": "Рекомендуемый размер: 100x100",
-                "saveChanges": "Сохранить изменения",
                 "title": "Настройки аккаунта",
                 "description": "Управление данными и настройками вашего аккаунта",
+                "email": "Электронная почта",
                 "emailPlaceholder": "Введите вашу электронную почту",
                 "emailChangeWarning": "Изменение электронной почты потребует повторного входа",
+                "username": "Имя пользователя",
                 "usernamePlaceholder": "Введите имя пользователя",
+                "firstName": "Имя",
                 "firstNamePlaceholder": "Введите ваше имя",
+                "lastName": "Фамилия",
                 "lastNamePlaceholder": "Введите вашу фамилию",
+                "bio": "Биография",
                 "bioPlaceholder": "Расскажите о себе",
                 "charactersLeft": "символов осталось",
                 "language": "Язык",
+                "profilePicture": "Изображение профиля",
+                "changeAvatar": "Изменить аватар",
+                "recommendedSize": "Рекомендуемый размер: 100x100",
                 "saving": "Сохранение...",
+                "saveChanges": "Сохранить изменения",
                 "additionalDetails": "Дополнительная информация",
                 "clearAll": "Очистить все",
                 "addDetail": "Добавить информацию",
@@ -161,6 +322,37 @@
                 "addAcademicInfo": "Добавить академическую информацию",
                 "addProfessionalInfo": "Добавить профессиональную информацию"
             }
+        },
+        "OrgSettings": {
+            "general": "Общие",
+            "landing": "Лендинг",
+            "previews": "Изображения и Превью",
+            "socials": "Соцсети",
+            "generalTitle": "Общие",
+            "generalDescription": "Управление настройками вашей организации",
+            "previewsTitle": "Превью",
+            "previewsDescription": "Управление превью вашей организации",
+            "socialsTitle": "Соцсети",
+            "socialsDescription": "Управление ссылками на соцсети вашей организации",
+            "landingTitle": "Лендинг",
+            "landingDescription": "Настройте лендинг вашей организации"
+        },
+        "UserSettings": {
+            "users": "Пользователи",
+            "signups": "Регистрации и Коды приглашений",
+            "add": "Пригласить участников",
+            "usergroups": "Группы пользователей",
+            "usersTitle": "Пользователи",
+            "usersDescription": "Управляйте пользователями вашей организации, назначайте роли и разрешения",
+            "signupsTitle": "Регистрации и Коды приглашений",
+            "signupsDescription": "Выберите, откуда пользователи могут присоединяться к вашей организации",
+            "addTitle": "Пригласить участников",
+            "addDescription": "Пригласите участников присоединиться к вашей организации",
+            "usergroupsTitle": "Группы пользователей",
+            "usergroupsDescription": "Создавайте и управляйте группами пользователей",
+            "desktopOnlyTitle": "Только для компьютера",
+            "desktopOnlyMessage1": "Эта страница доступна только с компьютера.",
+            "desktopOnlyMessage2": "Пожалуйста, переключитесь на компьютер для просмотра и управления настройками пользователей."
         }
     },
     "NewCollectionPage": {
@@ -203,5 +395,87 @@
         "video": "Видео",
         "document": "Документ",
         "assignment": "Задание"
+    },
+    "Auth": {
+        "Layout": {
+            "orgNotSpecified": "Организация не указана",
+            "accessFromOrg": "Пожалуйста, перейдите на эту страницу через организацию"
+        },
+        "Login": {
+            "title": "Вход — {orgName}",
+            "loginTo": "Войти в",
+            "email": "Email",
+            "password": "Пароль",
+            "forgotPassword": "Забыли пароль?",
+            "loading": "Загрузка...",
+            "login": "Войти",
+            "or": "или",
+            "signup": "Зарегистрироваться",
+            "signInWithGoogle": "Войти через Google",
+            "wrongCredentials": "Неверный email или пароль"
+        },
+        "Forgot": {
+            "title": "Восстановление пароля",
+            "enterEmailMessage": "Введите email для получения ссылки сброса пароля",
+            "email": "Email",
+            "loading": "Загрузка...",
+            "sendResetLink": "Отправить ссылку",
+            "checkEmail": "Проверьте email для получения ссылки сброса пароля"
+        },
+        "Reset": {
+            "title": "Сброс пароля",
+            "enterResetDetails": "Введите email и код сброса для изменения пароля",
+            "email": "Email",
+            "resetCode": "Код сброса",
+            "newPassword": "Новый пароль",
+            "confirmPassword": "Подтвердите пароль",
+            "loading": "Загрузка...",
+            "changePassword": "Изменить пароль",
+            "success": "Пароль успешно изменен",
+            "loginAgain": "Пожалуйста, войдите снова с новым паролем"
+        },
+        "Signup": {
+            "title": "Регистрация — {orgName}",
+            "invitedToJoin": "Вас пригласили присоединиться к",
+            "hi": "Привет",
+            "joinQuestion": "хотите присоединиться к {orgName}?",
+            "join": "Присоединиться",
+            "inviteCodeRequired": "Для присоединения к {orgName} требуется код приглашения",
+            "enterInviteCode": "Введите код приглашения",
+            "submit": "Отправить",
+            "email": "Email",
+            "password": "Пароль",
+            "username": "Имя пользователя",
+            "bio": "О себе",
+            "loading": "Загрузка...",
+            "createAccount": "Создать аккаунт",
+            "createAccountAndJoin": "Создать аккаунт и присоединиться",
+            "signInWithGoogle": "Войти через Google",
+            "accountCreated": "Ваш аккаунт успешно создан",
+            "loginToAccount": "Войти в аккаунт"
+        }
+    },
+    "Install": {
+        "title": "LearnHouse Installation",
+        "description": "Configure your LearnHouse instance",
+        "steps": {
+            "INSTALL_STATUS": "Get Started",
+            "ORGANIZATION_CREATION": "Organization Setup",
+            "DEFAULT_ELEMENTS": "Default Elements",
+            "ACCOUNT_CREATION": "Account Creation",
+            "SAMPLE_DATA": "Sample Data",
+            "FINISH": "Finish",
+            "DISABLING_INSTALLATION_MODE": "Completing Setup"
+        }
+    },
+    "Stripe": {
+        "missingParameters": "Отсутствуют параметры для верификации подключения Stripe.",
+        "connectionSuccess": "Подключение успешно!",
+        "connectionFailed": "Подключение не удалось.",
+        "connectError": "Ошибка подключения аккаунта Stripe",
+        "completing": "Завершение подключения...",
+        "pleaseWait": "Пожалуйста, подождите, пока мы безопасно подключаем ваш аккаунт Stripe.",
+        "returnToDashboard": "Теперь вы можете вернуться в панель управления.",
+        "tryAgainOrContact": "Пожалуйста, попробуйте снова или свяжитесь с поддержкой, если проблема не решена."
     }
 }

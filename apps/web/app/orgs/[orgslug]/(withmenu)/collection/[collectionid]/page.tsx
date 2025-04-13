@@ -54,7 +54,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const CollectionPage = async (params: any) => {
-  const t = await getTranslations('General')
+  const t = await getTranslations('CollectionPage')
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
   const org = await getOrganizationContextInfo((await params.params).orgslug, {
@@ -74,7 +74,7 @@ const CollectionPage = async (params: any) => {
 
   return (
     <GeneralWrapperStyled>
-      <h2 className="text-sm font-bold text-gray-400">{t('collection')}</h2>
+      <h2 className="text-sm font-bold text-gray-400">{t('typeLabel')}</h2>
       <h1 className="text-3xl font-bold">{col.name}</h1>
       <br />
       <div className="home_courses flex flex-wrap">

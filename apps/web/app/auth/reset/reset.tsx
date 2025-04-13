@@ -16,6 +16,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useFormik } from 'formik'
 import { resetPassword } from '@services/auth/auth'
+import { useTranslations } from 'next-intl'
 
 const validate = (values: any) => {
     const errors: any = {}
@@ -45,6 +46,8 @@ const validate = (values: any) => {
 }
 
 function ResetPasswordClient() {
+    const t = useTranslations('Auth.Reset')
+    const generalT = useTranslations('General')
     const org = useOrg() as any;
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const searchParams = useSearchParams()
@@ -67,7 +70,7 @@ function ResetPasswordClient() {
             setIsSubmitting(true)
             let res = await resetPassword(values.email, values.new_password, org?.id, values.reset_code)
             if (res.status == 200) {
-                setMessage(res.data + ', please login')
+                setMessage(res.data + t('success'))
                 setIsSubmitting(false)
             } else {
                 setError(res.data.detail)
@@ -107,7 +110,7 @@ function ResetPasswordClient() {
                                         org?.org_uuid,
                                         org?.logo_image
                                     )}`}
-                                    alt="Learnhouse"
+                                    alt={org?.name}
                                     style={{ width: 'auto', height: 70 }}
                                     className="rounded-xl shadow-xl inset-0 ring-1 ring-inset ring-black/10 bg-white"
                                 />
@@ -127,9 +130,9 @@ function ResetPasswordClient() {
             </div>
             <div className="left-login-part bg-white flex flex-row">
                 <div className="login-form m-auto w-72">
-                    <h1 className="text-2xl font-bold mb-4">Reset Password</h1>
+                    <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
                     <p className="text-sm mb-4">
-                        Enter your email and reset code to reset your password
+                        {t('enterResetDetails')}
                     </p>
 
                     {error && (
@@ -142,17 +145,17 @@ function ResetPasswordClient() {
                         <div className="flex flex-col gap-2">
                             <div className="flex justify-center bg-green-200 rounded-md text-green-950 space-x-2 items-center p-4 transition-all shadow-xs">
                                 <Info size={18} />
-                                <div className="font-bold text-sm">{message}</div>
+                                <div className="font-bold text-sm">{t('success')}</div>
                             </div>
                             <Link href={getUriWithoutOrg('/login?orgslug=' + org.slug)} className="text-center text-sm text-blue-600 hover:text-blue-800">
-                                Please login again with your new password
+                                {t('loginAgain')}
                             </Link>
                         </div>
                     )}
                     <FormLayout onSubmit={formik.handleSubmit}>
                         <FormField name="email">
                             <FormLabelAndMessage
-                                label="Email"
+                                label={t('email')}
                                 message={formik.errors.email}
                             />
                             <Form.Control asChild>
@@ -160,13 +163,14 @@ function ResetPasswordClient() {
                                     onChange={formik.handleChange}
                                     value={formik.values.email}
                                     type="email"
+                                    placeholder={t('emailPlaceholder')}
                                 />
                             </Form.Control>
                         </FormField>
 
                         <FormField name="reset_code">
                             <FormLabelAndMessage
-                                label="Reset Code"
+                                label={t('resetCode')}
                                 message={formik.errors.reset_code}
                             />
                             <Form.Control asChild>
@@ -174,13 +178,14 @@ function ResetPasswordClient() {
                                     onChange={formik.handleChange}
                                     value={formik.values.reset_code}
                                     type="text"
+                                    placeholder={t('resetCodePlaceholder')}
                                 />
                             </Form.Control>
                         </FormField>
 
                         <FormField name="new_password">
                             <FormLabelAndMessage
-                                label="New Password"
+                                label={t('newPassword')}
                                 message={formik.errors.new_password}
                             />
                             <Form.Control asChild>
@@ -188,13 +193,14 @@ function ResetPasswordClient() {
                                     onChange={formik.handleChange}
                                     value={formik.values.new_password}
                                     type="password"
+                                    placeholder={t('newPasswordPlaceholder')}
                                 />
                             </Form.Control>
                         </FormField>
 
                         <FormField name="confirm_password">
                             <FormLabelAndMessage
-                                label="Confirm Password"
+                                label={t('confirmPassword')}
                                 message={formik.errors.confirm_password}
                             />
                             <Form.Control asChild>
@@ -202,6 +208,7 @@ function ResetPasswordClient() {
                                     onChange={formik.handleChange}
                                     value={formik.values.confirm_password}
                                     type="password"
+                                    placeholder={t('confirmPasswordPlaceholder')}
                                 />
                             </Form.Control>
                         </FormField>
@@ -210,7 +217,7 @@ function ResetPasswordClient() {
                         <div className="flex  py-4">
                             <Form.Submit asChild>
                                 <button className="w-full bg-black text-white font-bold text-center p-2 rounded-md shadow-md hover:cursor-pointer">
-                                    {isSubmitting ? 'Loading...' : 'Change Password'}
+                                    {isSubmitting ? generalT('loading') : t('changePassword')}
                                 </button>
                             </Form.Submit>
                         </div>

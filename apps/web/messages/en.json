@@ -9,12 +9,38 @@
         "noContentYet": "No content yet",
         "madeWith": "Made with",
         "retry": "Retry",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "info": "Info",
+        "warning": "Warning",
+        "delete": "Delete",
+        "edit": "Edit",
+        "save": "Save",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "close": "Close",
+        "download": "Download",
+        "upload": "Upload",
+        "true": "True",
+        "false": "False",
+        "yes": "Yes",
+        "no": "No",
+        "preview": "Preview",
+        "general": "General",
+        "content": "Content",
+        "settings": "Settings",
+        "title": "Title",
+        "description": "Description",
+        "hint": "Hint",
+        "back": "Back",
+        "next": "Next",
+        "finish": "Finish"
     },
     "Components": {
         "Button": {
             "newCourse": "New Course ",
-            "newCollecction": "New Collection "
+            "newCollection": "New Collection "
         },
         "CourseThumbnail": {
             "editContent": "Edit content",
@@ -62,7 +88,10 @@
             "selectLanguage": "Select Language",
             "label": "Language",
             "en": "English",
-            "ru": "Russian"
+            "ru": "Russian",
+            "kz": "Kazakh",
+            "sp": "Spanish",
+            "fr": "French"
         }
     },
     "HomePage": {
@@ -78,7 +107,7 @@
         }
     },
     "NotFoundPage": {
-        "message": "We are very sorry for the inconvenience. It looks like you're trying to<br></br>access a page that has been deleted or never existed before",
+        "message": "We are very sorry for the inconvenience. It looks like you're trying to access a page that has been deleted or never existed before",
         "button": "Go back to the home page"
     },
     "SignupPage": {
@@ -109,10 +138,126 @@
             }
         },
         "Assignments": {
-            "title": "Assignments"
+            "title": "Assignments",
+            "tasks": "Tasks",
+            "late": "Late",
+            "submitted": "Submitted",
+            "graded": "Graded",
+            "submission": "Submission",
+            "evaluate": "Evaluate",
+            "evaluateUser": "Evaluate {username}",
+            "evaluateSubmission": "Evaluate this submission",
+            "addQuestion": "Add Question",
+            "noQuestionsFound": "No questions found",
+            "questionPlaceholder": "Enter question text",
+            "optionPlaceholder": "Enter option text",
+            "markedAsTrue": "Marked as True",
+            "markedAsFalse": "Marked as False",
+            "NewTaskModal": {
+                "reminderToast": "When editing/adding your tasks, make sure to Unpublish your Assignment to avoid any issues with students, you can Publish it again when you are ready.",
+                "createSuccess": "Task created successfully",
+                "quizTitle": "Quiz",
+                "quizDescription": "Questions with multiple choice answers",
+                "fileSubmissionTitle": "File submission",
+                "fileSubmissionDescription": "Students can submit files for this task",
+                "formTitle": "Form",
+                "formDescription": "Forms for students to fill out",
+                "formNotSupported": "Forms are not yet supported"
+            },
+            "TaskFileObject": {
+                "authRequiredUpload": "Authentication required. Please sign in to upload files.",
+                "authRequiredSubmit": "Authentication required. Please sign in to submit your task.",
+                "errorSaving": "Error saving task, please retry later.",
+                "teacherViewInfo": "User will be able to submit a file for this task, you'll be able to review it in the Submissions Tab",
+                "gradingViewInfo": "Please download the file and grade it manually, then input the grade above",
+                "allowedFormats": "Allowed formats: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+                "signInToUpload": "Please sign in to upload files",
+                "submitFile": "Submit File",
+                "gradeRangeError": "Grade cannot be more than {maxGradeValue} points",
+                "gradedByTeacher": "Graded by teacher : @{username}",
+                "gradeSuccess": "Task graded successfully with {grade} points",
+                "gradeError": "Error grading task, please retry later."
+            },
+            "TaskQuizObject": {
+                "optionDeleteError": "Cannot delete the last option. At least one option is required.",
+                "saveSuccess": "Task saved successfully",
+                "saveError": "Error saving task, please retry later.",
+                "autoGraded": "Auto graded by system",
+                "gradeSuccess": "Task graded successfully with {finalGrade} points",
+                "gradeError": "Error grading task, please retry later."
+            },
+            "TaskGeneralEdit": {
+                "gradeValidationError": "Value should be between 20 and 100",
+                "updateSuccess": "Task updated successfully",
+                "updateError": "Error updating task, please retry later.",
+                "referenceFile": "Reference file",
+                "allowedFormats": "Allowed formats : pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+                "maxGradeValue": "Max Grade Value",
+                "refFileUpdateSuccess": "Reference file updated successfully",
+                "changeRefFile": "Change Reference File"
+            },
+            "TaskEditor": {
+                "deleteSuccess": "Task deleted successfully",
+                "deleteError": "Error deleting task, please retry later.",
+                "deleteTask": "Delete Task",
+                "noTaskSelected": "No Task Selected"
+            },
+            "Tasks": {
+                "addTask": "Add Task",
+                "addTaskModalTitle": "Add an Assignment Task",
+                "addTaskModalDescription": "Create a new task for this assignment"
+            },
+            "EvaluateModal": {
+                "taskLabel": "Task {index}",
+                "refDoc": "Reference Document",
+                "rejectSuccess": "Assignment rejected successfully",
+                "rejectAssignment": "Reject Assignment",
+                "setFinalGrade": "Set final grade",
+                "markAsDone": "Mark Activity as Done for User",
+                "gradeFinalSuccess": "{message}",
+                "gradeFinalError": "{message}",
+                "markDoneSuccess": "{message}",
+                "markDoneError": "{message}"
+            },
+            "AssignmentPage": {
+                "desktopOnlyTitle": "Desktop Only",
+                "desktopOnlyMessage1": "This page is only accessible from a desktop device.",
+                "desktopOnlyMessage2": "Please switch to a desktop to view and manage the assignment.",
+                "editor": "Editor",
+                "submissions": "Submissions",
+                "published": "Published",
+                "unpublished": "Unpublished",
+                "editDetailsTooltip": "Edit Assignment Details",
+                "previewTooltip": "Preview the Assignment as a student",
+                "unpublishTooltip": "Make your Assignment unavailable for students",
+                "publishTooltip": "Make your Assignment public and available for students",
+                "updateLoading": "Updating assignment...",
+                "updateSuccess": "The assignment has been updated successfully",
+                "updateError": "Error updating assignment, please retry later.",
+                "assignmentTools": "Assignment Tools"
+            },
+            "HomePage": {
+                "course": "Course",
+                "courseEditor": "Course Editor",
+                "assignment": "Assignment",
+                "editor": "Editor",
+                "submissions": "Submissions",
+                "noAssignments": "No assignments available for this course, create course assignments from the course editor"
+            }
         },
         "Payments": {
-            "title": "Payments"
+            "title": "Payments",
+            "overview": "Overview",
+            "customers": "Customers",
+            "customerInfo": "View and manage your customer information",
+            "paidProducts": "Paid Products",
+            "paidProductsInfo": "Manage your paid products and pricing",
+            "configuration": "Payment Configuration",
+            "configurationInfo": "Set up and manage your payment gateway",
+            "notAvailable": "Payments Not Available",
+            "notEnabledMessage": "The payments feature is not enabled for this organization.",
+            "contactAdmin": "Please contact your administrator to enable payments.",
+            "productsSubscriptions": "Products & Subscriptions"
         },
         "LearnhouseUniversity": "LearnHouse University",
         "Courses": {
@@ -122,7 +267,26 @@
             "createACourse": "Create a course to add content",
             "general": "General",
             "access": "Access",
-            "content": "Content"
+            "content": "Content",
+            "myCourses": "My Courses",
+            "purchasedCourses": "Your purchased courses",
+            "noPurchasedCourses": "No Purchased Courses",
+            "noPurchasedCoursesDesc": "You haven't purchased any courses yet",
+            "error": "Error loading courses",
+            "CoursePage": {
+                "general": "General",
+                "content": "Content",
+                "access": "Access",
+                "contributors": "Contributors"
+            },
+            "HomePageClient": {
+                "courses": "Courses",
+                "createCourse": "Create Course",
+                "createCourseDescription": "Create a new course",
+                "noCourses": "No courses yet",
+                "noCoursesAvailable": "No courses available yet",
+                "createACourse": "Create a course to add content"
+            }
         },
         "UserAccountSettings": {
             "title": "Account Settings",
@@ -158,6 +322,37 @@
                 "addAcademicInfo": "Add Academic Info",
                 "addProfessionalInfo": "Add Professional Info"
             }
+        },
+        "OrgSettings": {
+            "general": "General",
+            "landing": "Landing Page",
+            "previews": "Images & Previews",
+            "socials": "Socials",
+            "generalTitle": "General",
+            "generalDescription": "Manage your organization settings",
+            "previewsTitle": "Previews",
+            "previewsDescription": "Manage your organization previews",
+            "socialsTitle": "Socials",
+            "socialsDescription": "Manage your organization social media links",
+            "landingTitle": "Landing Page",
+            "landingDescription": "Customize your organization landing page"
+        },
+        "UserSettings": {
+            "users": "Users",
+            "signups": "Signups & Invite Codes",
+            "add": "Invite Members",
+            "usergroups": "UserGroups",
+            "usersTitle": "Users",
+            "usersDescription": "Manage your organization users, assign roles and permissions",
+            "signupsTitle": "Signups & Invite Codes",
+            "signupsDescription": "Choose from where users can join your organization",
+            "addTitle": "Invite Members",
+            "addDescription": "Invite members to join your organization",
+            "usergroupsTitle": "UserGroups",
+            "usergroupsDescription": "Create and manage user groups",
+            "desktopOnlyTitle": "Desktop Only",
+            "desktopOnlyMessage1": "This page is only accessible from a desktop device.",
+            "desktopOnlyMessage2": "Please switch to a desktop to view and manage user settings."
         }
     },
     "NewCollectionPage": {
@@ -200,5 +395,87 @@
         "video": "Video",
         "document": "Document",
         "assignment": "Assignment"
+    },
+    "Auth": {
+        "Layout": {
+            "orgNotSpecified": "Organization not specified",
+            "accessFromOrg": "Please access this page from an organization"
+        },
+        "Login": {
+            "title": "Login — {orgName}",
+            "loginTo": "Login to",
+            "email": "Email",
+            "password": "Password",
+            "forgotPassword": "Forgot Password?",
+            "loading": "Loading...",
+            "login": "Login",
+            "or": "or",
+            "signup": "Sign up",
+            "signInWithGoogle": "Sign in with Google",
+            "wrongCredentials": "Wrong email or password"
+        },
+        "Forgot": {
+            "title": "Forgot Password",
+            "enterEmailMessage": "Enter your email to receive a reset link",
+            "email": "Email",
+            "loading": "Loading...",
+            "sendResetLink": "Send Reset Link",
+            "checkEmail": "Check your email for the reset link"
+        },
+        "Reset": {
+            "title": "Reset Password",
+            "enterResetDetails": "Enter your email and reset code to reset your password",
+            "email": "Email",
+            "resetCode": "Reset Code",
+            "newPassword": "New Password",
+            "confirmPassword": "Confirm Password",
+            "loading": "Loading...",
+            "changePassword": "Change Password",
+            "success": "Password reset successfully",
+            "loginAgain": "Please login again with your new password"
+        },
+        "Signup": {
+            "title": "Sign up — {orgName}",
+            "invitedToJoin": "You've been invited to join",
+            "hi": "Hi",
+            "joinQuestion": "would you like to join {orgName}?",
+            "join": "Join",
+            "inviteCodeRequired": "An invite code is required to join {orgName}",
+            "enterInviteCode": "Enter invite code",
+            "submit": "Submit",
+            "email": "Email",
+            "password": "Password",
+            "username": "Username",
+            "bio": "Bio",
+            "loading": "Loading...",
+            "createAccount": "Create an account",
+            "createAccountAndJoin": "Create account & Join",
+            "signInWithGoogle": "Sign in with Google",
+            "accountCreated": "Your account was successfully created",
+            "loginToAccount": "Login to your account"
+        }
+    },
+    "Install": {
+        "title": "LearnHouse Installation",
+        "description": "Configure your LearnHouse instance",
+        "steps": {
+            "INSTALL_STATUS": "Get Started",
+            "ORGANIZATION_CREATION": "Organization Setup",
+            "DEFAULT_ELEMENTS": "Default Elements",
+            "ACCOUNT_CREATION": "Account Creation",
+            "SAMPLE_DATA": "Sample Data",
+            "FINISH": "Finish",
+            "DISABLING_INSTALLATION_MODE": "Completing Setup"
+        }
+    },
+    "Stripe": {
+        "missingParameters": "Missing parameters to verify Stripe connection.",
+        "connectionSuccess": "Connection Successful!",
+        "connectionFailed": "Connection Failed.",
+        "connectError": "Error connecting Stripe account",
+        "completing": "Completing Connection...",
+        "pleaseWait": "Please wait while we securely connect your Stripe account.",
+        "returnToDashboard": "You can now return to the dashboard.",
+        "tryAgainOrContact": "Please try again or contact support if the issue persists."
     }
 }

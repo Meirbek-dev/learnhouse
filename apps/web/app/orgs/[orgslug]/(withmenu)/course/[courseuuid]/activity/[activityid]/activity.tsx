@@ -27,7 +27,7 @@ import { mutate } from 'swr'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { useMediaQuery } from 'usehooks-ts'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
-import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
+import { useContributorStatus } from '../../../../../../../../components/useContributorStatus'
 import { useTranslations } from 'next-intl'
 
 interface ActivityClientProps {

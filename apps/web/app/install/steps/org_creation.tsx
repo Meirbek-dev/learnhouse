@@ -15,6 +15,7 @@ import { createNewOrgInstall, updateInstall } from '@services/install/install'
 import { useRouter } from 'next/navigation'
 import { Check } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 const validate = (values: any) => {
   const errors: any = {}
@@ -41,6 +42,7 @@ const validate = (values: any) => {
 }
 
 function OrgCreation() {
+  const t = useTranslations('Install.OrgCreation');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const {
@@ -86,11 +88,12 @@ function OrgCreation() {
     <div>
       <FormLayout onSubmit={formik.handleSubmit}>
         <FormField name="name">
-          <FormLabelAndMessage label="Name" message={formik.errors.name} />
+          <FormLabelAndMessage label={t('nameLabel')} message={formik.errors.name} />
           <Form.Control asChild>
             <Input
               onChange={formik.handleChange}
               value={formik.values.name}
+              placeholder={t('namePlaceholder')}
               type="text"
               required
             />
@@ -99,7 +102,7 @@ function OrgCreation() {
 
         <FormField name="description">
           <FormLabelAndMessage
-            label="Description"
+            label={t('descriptionLabel')}
             message={formik.errors.description}
           />
 
@@ -107,6 +110,7 @@ function OrgCreation() {
             <Input
               onChange={formik.handleChange}
               value={formik.values.description}
+              placeholder={t('descriptionPlaceholder')}
               type="text"
               required
             />
@@ -114,12 +118,13 @@ function OrgCreation() {
         </FormField>
 
         <FormField name="slug">
-          <FormLabelAndMessage label="Slug" message={formik.errors.slug} />
+          <FormLabelAndMessage label={t('slugLabel')} message={formik.errors.slug} />
 
           <Form.Control asChild>
             <Input
               onChange={formik.handleChange}
               value={formik.values.slug}
+              placeholder={t('slugPlaceholder')}
               type="text"
               required
             />
@@ -127,12 +132,13 @@ function OrgCreation() {
         </FormField>
         {/* for username  */}
         <FormField name="email">
-          <FormLabelAndMessage label="Email" message={formik.errors.email} />
+          <FormLabelAndMessage label={t('emailLabel')} message={formik.errors.email} />
 
           <Form.Control asChild>
             <Input
               onChange={formik.handleChange}
               value={formik.values.email}
+              placeholder={t('emailPlaceholder')}
               type="email"
               required
             />
@@ -149,7 +155,7 @@ function OrgCreation() {
                   color="#ffffff"
                 />
               ) : (
-                'Create Organization'
+                t('createOrgButton')
               )}
             </ButtonBlack>
           </Form.Submit>
@@ -158,7 +164,7 @@ function OrgCreation() {
         {isSubmitted && (
           <div className="flex space-x-3">
             {' '}
-            <Check /> Organization Created Successfully
+            <Check /> {t('orgCreatedSuccess')}
           </div>
         )}
       </FormLayout>

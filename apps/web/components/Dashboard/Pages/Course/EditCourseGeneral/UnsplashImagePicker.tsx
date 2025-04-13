@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createApi } from 'unsplash-js';
-import { Search, X, Cpu, Briefcase, GraduationCap, Heart, Palette, Plane, Utensils, 
-  Dumbbell, Music, Shirt, Book, Building, Bike, Camera, Microscope, Coins, Coffee, Gamepad, 
+import { Search, X, Cpu, Briefcase, GraduationCap, Heart, Palette, Plane, Utensils,
+  Dumbbell, Music, Shirt, Book, Building, Bike, Camera, Microscope, Coins, Coffee, Gamepad,
   Flower} from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useTranslations } from 'next-intl';
 
 const unsplash = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
@@ -45,6 +46,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
   const [images, setImages] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('CourseEdit.General.UnsplashPicker');
 
   const fetchImages = useCallback(async (searchQuery: string, pageNum: number) => {
     setLoading(true);
@@ -105,7 +107,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
             type="text"
             value={query}
             onChange={handleSearch}
-            placeholder="Search for images..."
+            placeholder={t('searchPlaceholder')}
             className="w-full p-2 pl-10 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -137,13 +139,13 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
             </div>
           ))}
         </div>
-        {loading && <p className="text-center mt-4">Loading...</p>}
+        {loading && <p className="text-center mt-4">{t('loading')}</p>}
         {!loading && images.length > 0 && (
           <button
             onClick={handleLoadMore}
             className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            Load More
+            {t('loadMoreButton')}
           </button>
         )}
       </div>
@@ -152,7 +154,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
 
   return (
     <Modal
-      dialogTitle="Choose an image from Unsplash"
+      dialogTitle={t('modalTitle')}
       dialogContent={modalContent}
       onOpenChange={onClose}
       isDialogOpen={isOpen}

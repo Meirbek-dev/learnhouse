@@ -5,6 +5,7 @@ import CoursesHome from './client'
 import { nextAuthOptions } from 'app/auth/options'
 import { getServerSession } from 'next-auth'
 import { getOrgCourses } from '@services/courses/courses'
+import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string }>
@@ -12,6 +13,7 @@ type MetadataProps = {
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  const t = await getTranslations('General');
   const params = await props.params;
   // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
@@ -21,9 +23,9 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // SEO
   return {
-    title: 'Courses — ' + org.name,
+    title: `${t('courses')} — ${org.name}`,
     description: org.description,
-    keywords: `${org.name}, ${org.description}, courses, learning, education, online learning, edu, online courses, ${org.name} courses`,
+    keywords: `${org.name}, ${org.description}, ${t('courses')}, learning, education, online learning, edu, online courses, ${org.name} ${t('courses')}`,
     robots: {
       index: true,
       follow: true,
@@ -35,7 +37,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       },
     },
     openGraph: {
-      title: 'Courses — ' + org.name,
+      title: `${t('courses')} — ${org.name}`,
       description: org.description,
       type: 'website',
     },

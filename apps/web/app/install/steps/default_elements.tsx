@@ -5,8 +5,10 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import useSWR from 'swr'
+import { useTranslations } from 'next-intl'
 
 function DefaultElements() {
+  const t = useTranslations('Install.DefaultElements');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const {
@@ -38,12 +40,12 @@ function DefaultElements() {
 
   return (
     <div className="flex py-10 justify-center items-center space-x-3">
-      <h1>Install Default Elements </h1>
+      <h1>{t('title')}</h1>
       <div
         onClick={createDefElementsAndUpdateInstall}
         className="p-3  font-bold bg-gray-200 text-gray-900 rounded-lg hover:cursor-pointer"
       >
-        Install
+        {t('installButton')}
       </div>
     </div>
   )

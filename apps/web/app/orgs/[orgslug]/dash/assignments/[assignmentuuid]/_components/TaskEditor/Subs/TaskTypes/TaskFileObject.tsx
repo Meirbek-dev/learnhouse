@@ -9,6 +9,7 @@ import { Cloud, Download, File, Info, Loader, UploadCloud } from 'lucide-react'
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
 
 type FileSchema = {
     fileUUID: string;
@@ -22,6 +23,7 @@ type TaskFileObjectProps = {
 };
 
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: TaskFileObjectProps) {
+    const t = useTranslations('DashPage.Assignments.TaskFileObject');
     const session = useLHSession() as any;
     const org = useOrg() as any;
     const access_token = session?.data?.tokens?.access_token;
@@ -47,7 +49,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     const handleFileChange = async (event: any) => {
         // Check if user is authenticated
         if (!access_token) {
-            setError('Authentication required. Please sign in to upload files.');
+            setError(t('authRequiredUpload'));
             return;
         }
 
@@ -83,7 +85,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
             // Silently fail if not authenticated
             return;
         }
-        
+
         if (assignmentTaskUUID) {
             const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token);
             if (res.success) {
@@ -102,7 +104,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     const submitFC = async () => {
         // Check if user is authenticated
         if (!access_token) {
-            toast.error('Authentication required. Please sign in to submit your task.');
+            toast.error(t('authRequiredSubmit'));
             return;
         }
 
@@ -122,7 +124,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                 toast.success('Task saved successfully');
                 setShowSavingDisclaimer(false);
             } else {
-                toast.error('Error saving task, please retry later.');
+                toast.error(t('errorSaving'));
             }
         }
     };
@@ -132,7 +134,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
             // Silently fail if not authenticated
             return;
         }
-        
+
         if (assignmentTaskUUID) {
             const res = await getAssignmentTask(assignmentTaskUUID, access_token);
             if (res.success) {
@@ -160,7 +162,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
             // Silently fail if not authenticated
             return;
         }
-        
+
         if (assignmentTaskUUID && user_id) {
             const res = await getAssignmentTaskSubmissionsUser(assignmentTaskUUID, user_id, assignment.assignment_object.assignment_uuid, access_token);
             if (res.success) {
@@ -180,25 +182,25 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     async function gradeCustomFC(grade: number) {
         if (assignmentTaskUUID) {
             if (grade > assignmentTaskOutsideProvider.max_grade_value) {
-                toast.error(`Grade cannot be more than ${assignmentTaskOutsideProvider.max_grade_value} points`);
+                toast.error(t('gradeRangeError', { maxGradeValue: assignmentTaskOutsideProvider.max_grade_value }));
                 return;
             }
-            
-    
+
+
             // Save the grade to the server
             const values = {
                 assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid,
                 task_submission: userSubmissions,
                 grade: grade,
-                task_submission_grade_feedback: 'Graded by teacher : @' + session.data.user.username,
+                task_submission_grade_feedback: t('gradedByTeacher', { username: session.data.user.username }),
             };
-    
+
             const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token);
             if (res) {
                 getAssignmentTaskSubmissionFromIdentifiedUserUI();
-                toast.success(`Task graded successfully with ${grade} points`);
+                toast.success(t('gradeSuccess', { grade }));
             } else {
-                toast.error('Error grading task, please retry later.');
+                toast.error(t('gradeError'));
             }
         }
     }
@@ -226,14 +228,14 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
             {view === 'teacher' && (
                 <div className='flex flex-col sm:flex-row py-5 sm:py-6 text-xs sm:text-sm justify-center mx-auto space-y-2 sm:space-y-0 sm:space-x-3 text-slate-600 px-4 sm:px-2 text-center sm:text-left bg-slate-50 rounded-lg border border-slate-100'>
                     <Info size={18} className="mx-auto sm:mx-0 text-slate-500" />
-                    <p>User will be able to submit a file for this task, you'll be able to review it in the Submissions Tab</p>
+                    <p>{t('teacherViewInfo')}</p>
                 </div>
             )}
             {view === 'custom-grading' && (
                 <div className='flex flex-col space-y-4 w-full px-2 sm:px-0'>
                     <div className='flex flex-col sm:flex-row py-5 sm:py-6 text-xs sm:text-sm justify-center mx-auto space-y-2 sm:space-y-0 sm:space-x-3 text-slate-600 px-4 sm:px-2 text-center sm:text-left bg-slate-50 rounded-lg border border-slate-100'>
                         <Download size={18} className="mx-auto sm:mx-0 text-slate-500" />
-                        <p>Please download the file and grade it manually, then input the grade above</p>
+                        <p>{t('gradingViewInfo')}</p>
                     </div>
                     {userSubmissions.fileUUID && !isLoading && assignmentTaskUUID && (
                         <Link
@@ -275,7 +277,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                                         <div className='flex space-x-2 mt-2 items-center'>
                                             <File size={18} className="text-emerald-500" />
                                             <div className='font-medium text-xs sm:text-sm uppercase break-all'>
-                                                {localUploadFile.name.length > 20 
+                                                {localUploadFile.name.length > 20
                                                     ? `${localUploadFile.name.slice(0, 10)}...${localUploadFile.name.slice(-10)}`
                                                     : localUploadFile.name}
                                             </div>
@@ -298,13 +300,13 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                                 )}
                                 <div className='flex flex-col sm:flex-row pt-5 font-medium space-y-1 sm:space-y-0 sm:space-x-2 text-xs items-center text-slate-500 text-center sm:text-left bg-slate-50 rounded-lg px-3 py-2 mt-5 border border-slate-100 w-full sm:w-auto'>
                                     <Info size={15} className="mx-auto sm:mx-0 text-slate-400" />
-                                    <p>Allowed formats: pdf, docx, mp4, jpg, jpeg, png, pptx, zip</p>
+                                    <p>{t('allowedFormats')}</p>
                                 </div>
                                 {!access_token ? (
                                     <div className="flex justify-center items-center w-full mt-5">
                                         <div className="flex justify-center bg-amber-50 border border-amber-100 rounded-md text-amber-600 space-x-2 items-center p-3 transition-all shadow-xs w-full sm:w-auto">
                                             <Info size={15} className="text-amber-500" />
-                                            <div className="text-xs sm:text-sm font-medium">Please sign in to upload files</div>
+                                            <div className="text-xs sm:text-sm font-medium">{t('signInToUpload')}</div>
                                         </div>
                                     </div>
                                 ) : isLoading ? (
@@ -333,7 +335,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                                             onClick={() => document.getElementById("fileInput_" + assignmentTaskUUID)?.click()}
                                         >
                                             <UploadCloud size={15} className="mr-2" />
-                                            <span>Submit File</span>
+                                            <span>{t('submitFile')}</span>
                                         </button>
                                     </div>
                                 )}

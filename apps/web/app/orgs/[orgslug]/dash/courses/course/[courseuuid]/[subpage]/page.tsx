@@ -10,6 +10,7 @@ import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseSt
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral'
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess'
 import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors'
+import { useTranslations } from 'next-intl';
 export type CourseOverviewParams = {
   orgslug: string
   courseuuid: string
@@ -17,6 +18,7 @@ export type CourseOverviewParams = {
 }
 
 function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
+  const t = useTranslations('DashPage.Courses.CoursePage');
   const params = use(props.params);
   function getEntireCourseUUID(courseuuid: string) {
     // add course_ to uuid
@@ -43,11 +45,11 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               >
                 <div className="flex items-center space-x-2.5 mx-2">
                   <Info size={16} />
-                  <div>General</div>
+                  <div>{t('general')}</div>
                 </div>
               </div>
             </Link>
-            
+
             <Link
               href={
                 getUriWithOrg(params.orgslug, '') +
@@ -62,7 +64,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               >
                 <div className="flex items-center space-x-2.5 mx-2">
                   <GalleryVerticalEnd size={16} />
-                  <div>Content</div>
+                  <div>{t('content')}</div>
                 </div>
               </div>
             </Link>
@@ -80,7 +82,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               >
                 <div className="flex items-center space-x-2.5 mx-2">
                   <Globe size={16} />
-                  <div>Access</div>
+                  <div>{t('access')}</div>
                 </div>
               </div>
             </Link>
@@ -98,7 +100,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               >
                 <div className="flex items-center space-x-2.5 mx-2">
                   <UserPen size={16} />
-                  <div>Contributors</div>
+                  <div>{t('contributors')}</div>
                 </div>
               </div>
             </Link>

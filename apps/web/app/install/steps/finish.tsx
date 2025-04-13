@@ -4,12 +4,14 @@ import { swrFetcher } from '@services/utils/ts/requests'
 import { Check } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 import useSWR from 'swr'
 
 const Finish = () => {
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('Install.Finish')
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
   const {
     data: install,
     error: error,
@@ -29,14 +31,14 @@ const Finish = () => {
 
   return (
     <div className="flex py-10 justify-center items-center space-x-3">
-      <h1>Installation Complete</h1>
+      <h1>{t('title')}</h1>
       <br />
       <Check size={32} />
       <div
         onClick={finishInstall}
-        className="p-3  font-bold bg-gray-200 text-gray-900 rounded-lg hover:cursor-pointer"
+        className="p-3 font-bold bg-gray-200 text-gray-900 rounded-lg hover:cursor-pointer"
       >
-        Next Step
+        {t('nextStep')}
       </div>
     </div>
   )

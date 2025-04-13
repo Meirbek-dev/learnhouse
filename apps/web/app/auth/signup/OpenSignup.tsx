@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { signup } from '@services/auth/auth'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { signIn } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 
 const validate = (values: any) => {
   const errors: any = {}
@@ -46,6 +47,8 @@ const validate = (values: any) => {
 }
 
 function OpenSignUpComponent() {
+  const t = useTranslations('Auth.Signup');
+  const generalT = useTranslations('General');
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const org = useOrg() as any
   const router = useRouter()
@@ -69,10 +72,10 @@ function OpenSignUpComponent() {
       setMessage('')
       setIsSubmitting(true)
       let res = await signup(values)
-      let message = await res.json()
+      let responseMessage = await res.json()
       if (res.status == 200) {
         //router.push(`/login`);
-        setMessage('Your account was successfully created')
+        setMessage(t('accountCreated'))
         setIsSubmitting(false)
       } else if (
         res.status == 401 ||
@@ -80,10 +83,10 @@ function OpenSignUpComponent() {
         res.status == 404 ||
         res.status == 409
       ) {
-        setError(message.detail)
+        setError(responseMessage.detail)
         setIsSubmitting(false)
       } else {
-        setError('Something went wrong')
+        setError(generalT('errorSomethingWentWrong'))
         setIsSubmitting(false)
       }
     },
@@ -106,18 +109,19 @@ function OpenSignUpComponent() {
             <div className="font-bold text-sm">{message}</div>
           </div>
           <hr className="border-green-900/20 800 w-40 border" />
-          <Link className="flex space-x-2 items-center" href={'/login'}>
-            <User size={14} /> <div>Login </div>
+          <Link className="flex space-x-2 items-center" href={`/login?orgslug=${org?.slug}`}>
+            <User size={14} /> <div>{t('loginToAccount')}</div>
           </Link>
         </div>
       )}
       <FormLayout onSubmit={formik.handleSubmit}>
         <FormField name="email">
-          <FormLabelAndMessage label="Email" message={formik.errors.email} />
+          <FormLabelAndMessage label={t('email')} message={formik.errors.email} />
           <Form.Control asChild>
             <Input
               onChange={formik.handleChange}
               value={formik.values.email}
+              placeholder={t('emailPlaceholder')}
               type="email"
               required
             />
@@ -126,7 +130,7 @@ function OpenSignUpComponent() {
         {/* for password  */}
         <FormField name="password">
           <FormLabelAndMessage
-            label="Password"
+            label={t('password')}
             message={formik.errors.password}
           />
 
@@ -134,6 +138,7 @@ function OpenSignUpComponent() {
             <Input
               onChange={formik.handleChange}
               value={formik.values.password}
+              placeholder={t('passwordPlaceholder')}
               type="password"
               required
             />
@@ -142,7 +147,7 @@ function OpenSignUpComponent() {
         {/* for username  */}
         <FormField name="username">
           <FormLabelAndMessage
-            label="Username"
+            label={t('username')}
             message={formik.errors.username}
           />
 
@@ -150,6 +155,7 @@ function OpenSignUpComponent() {
             <Input
               onChange={formik.handleChange}
               value={formik.values.username}
+              placeholder={t('usernamePlaceholder')}
               type="text"
               required
             />
@@ -158,12 +164,13 @@ function OpenSignUpComponent() {
 
         {/* for bio  */}
         <FormField name="bio">
-          <FormLabelAndMessage label="Bio" message={formik.errors.bio} />
+          <FormLabelAndMessage label={t('bio')} message={formik.errors.bio} />
 
           <Form.Control asChild>
             <Textarea
               onChange={formik.handleChange}
               value={formik.values.bio}
+              placeholder={t('bioPlaceholder')}
               required
             />
           </Form.Control>
@@ -172,7 +179,7 @@ function OpenSignUpComponent() {
         <div className="flex  py-4">
           <Form.Submit asChild>
             <button className="w-full bg-black text-white font-bold text-center p-2 rounded-md shadow-md hover:cursor-pointer">
-              {isSubmitting ? 'Loading...' : 'Create an account'}
+              {isSubmitting ? generalT('loading') : t('createAccount')}
             </button>
           </Form.Submit>
         </div>
@@ -181,7 +188,7 @@ function OpenSignUpComponent() {
         <div className='flex h-0.5 rounded-2xl bg-slate-100 mt-5 mb-5 mx-10'></div>
         <button onClick={() => signIn('google')} className="flex justify-center py-3 text-md w-full bg-white text-slate-600 space-x-3 font-semibold text-center p-2 rounded-md shadow-sm hover:cursor-pointer">
           <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="" />
-          <span>Sign in with Google</span>
+          <span>{t('signInWithGoogle')}</span>
         </button>
       </div>
     </div>

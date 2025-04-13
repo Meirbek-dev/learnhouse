@@ -10,9 +10,12 @@ import toast from 'react-hot-toast';
 import { mutate } from 'swr';
 import dynamic from 'next/dynamic';
 import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';
+import { useTranslations } from 'next-intl';
 const AssignmentTaskContentEdit = dynamic(() => import('./Subs/AssignmentTaskContentEdit'))
 
 function AssignmentTaskEditor({ page }: any) {
+    const t = useTranslations('DashPage.Assignments.TaskEditor');
+    const generalT = useTranslations('General');
     const [selectedSubPage, setSelectedSubPage] = React.useState(page)
     const assignment = useAssignments() as any
     const assignmentTaskState = useAssignmentsTask() as any
@@ -32,14 +35,14 @@ function AssignmentTaskEditor({ page }: any) {
             });
             mutate(`${getAPIUrl()}assignments/${assignment.assignment_object.assignment_uuid}/tasks`)
             mutate(`${getAPIUrl()}assignments/${assignment.assignment_object.assignment_uuid}`)
-            toast.success('Task deleted successfully')
+            toast.success(t('deleteSuccess'))
         } else {
-            toast.error('Error deleting task, please retry later.')
+            toast.error(t('deleteError'))
         }
     }
 
     useEffect(() => {
-        // Switch back to general page if the selectedAssignmentTaskUUID is changed 
+        // Switch back to general page if the selectedAssignmentTaskUUID is changed
         if (assignmentTaskState.selectedAssignmentTaskUUID !== assignmentTaskState.assignmentTask.assignment_task_uuid) {
             setSelectedSubPage('general')
         }
@@ -60,7 +63,7 @@ function AssignmentTaskEditor({ page }: any) {
                                     onClick={() => deleteTaskUI()}
                                     className='flex px-2 py-1.5 cursor-pointer rounded-md space-x-2 items-center bg-linear-to-bl text-red-800  bg-rose-100  border border-rose-600/10 shadow-rose-900/10 shadow-lg'>
                                     <Trash size={18} />
-                                    <p className='text-xs font-semibold'>Delete Task</p>
+                                    <p className='text-xs font-semibold'>{t('deleteTask')}</p>
                                 </div>
                             </div>
                         </div>
@@ -74,7 +77,7 @@ function AssignmentTaskEditor({ page }: any) {
                             >
                                 <div className="flex items-center space-x-2.5 mx-2">
                                     <Info size={16} />
-                                    <div>General</div>
+                                    <div>{generalT('general')}</div>
                                 </div>
                             </div>
                             <div
@@ -86,7 +89,7 @@ function AssignmentTaskEditor({ page }: any) {
                             >
                                 <div className="flex items-center space-x-2.5 mx-2">
                                     <GalleryVerticalEnd size={16} />
-                                    <div>Content</div>
+                                    <div>{generalT('content')}</div>
                                 </div>
                             </div>
                         </div>
@@ -103,7 +106,7 @@ function AssignmentTaskEditor({ page }: any) {
                         <div className='flex flex-col space-y-2 items-center'>
                             <TentTree size={60} />
                             <div className='font-semibold text-2xl py-1'>
-                                No Task Selected
+                                {t('noTaskSelected')}
                             </div>
                         </div>
                     </div>

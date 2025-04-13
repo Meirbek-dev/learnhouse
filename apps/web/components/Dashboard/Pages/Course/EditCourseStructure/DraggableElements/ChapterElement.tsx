@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation'
 import { getAPIUrl } from '@services/config/config'
 import { mutate } from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 type ChapterElementProps = {
   chapter: any
@@ -41,6 +42,7 @@ function ChapterElement(props: ChapterElementProps) {
   const [selectedChapter, setSelectedChapter] = React.useState<
     string | undefined
   >(undefined)
+  const t = useTranslations('CourseEdit')
 
   const router = useRouter()
 
@@ -95,7 +97,7 @@ function ChapterElement(props: ChapterElementProps) {
                     <input
                       type="text"
                       className="bg-transparent outline-hidden text-sm text-neutral-700 w-full max-w-[150px] sm:max-w-none"
-                      placeholder="Chapter name"
+                      placeholder={t('chapterNamePlaceholder')}
                       value={
                         modifiedChapter
                           ? modifiedChapter?.chapterName
@@ -130,9 +132,9 @@ function ChapterElement(props: ChapterElementProps) {
             <div className="flex items-center space-x-2">
               <MoreVertical size={15} className="text-gray-300" />
               <ConfirmationModal
-                confirmationButtonText="Delete Chapter"
-                confirmationMessage="Are you sure you want to delete this chapter?"
-                dialogTitle={'Delete ' + props.chapter.name + ' ?'}
+                confirmationButtonText={t('deleteChapterButton')}
+                confirmationMessage={t('deleteChapterConfirmation')}
+                dialogTitle={t('deleteChapterTitle', { name: props.chapter.name })}
                 dialogTrigger={
                   <button
                     className="hover:cursor-pointer p-1 px-2 sm:px-3 bg-red-600 rounded-md shadow-sm flex items-center text-rose-100 text-sm"
@@ -152,8 +154,8 @@ function ChapterElement(props: ChapterElementProps) {
             type="activity"
           >
             {(provided, snapshot) => (
-              <div 
-                {...provided.droppableProps} 
+              <div
+                {...provided.droppableProps}
                 ref={provided.innerRef}
                 className={`min-h-[60px] rounded-lg transition-colors duration-75 ${
                   snapshot.isDraggingOver ? 'bg-blue-50/50' : ''
