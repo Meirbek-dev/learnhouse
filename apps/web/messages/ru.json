@@ -35,7 +35,12 @@
         "hint": "Подсказка",
         "back": "Назад",
         "next": "Далее",
-        "finish": "Завершить"
+        "finish": "Завершить",
+        "saving": "Сохранение...",
+        "creating": "Создание...",
+        "updating": "Обновление...",
+        "deleting": "Удаление...",
+        "details": "Детали"
     },
     "Components": {
         "Button": {
@@ -47,7 +52,23 @@
             "settings": "Настройки",
             "delete": "Удалить курс",
             "toastDeleteSuccess": "Курс успешно удален",
-            "toastDeleteError": "Не удалось удалить курс"
+            "toastDeleteError": "Не удалось удалить курс",
+            "deleteConfirmationTitle": "Удалить {courseName}?",
+            "deleteConfirmationMessage": "Вы уверены, что хотите удалить этот курс?",
+            "deleteButtonText": "Удалить курс"
+        },
+        "CourseThumbnailLanding": {
+            "updatedDate": "Обновлено {date, date, short}",
+            "startLearningButton": "Начать обучение",
+            "deleteConfirmationTitle": "Удалить {courseName}?",
+            "deleteConfirmationMessage": "Вы уверены, что хотите удалить этот курс?",
+            "deleteButtonText": "Удалить курс"
+        },
+        "CollectionThumbnail": {
+            "courseCount": "{count, plural, =0 {0 курсов} one {# курс} few {# курса} many {# курсов} other {# курса}}",
+            "deleteConfirmationTitle": "Удалить {collectionName}?",
+            "deleteConfirmationMessage": "Вы уверены, что хотите удалить эту коллекцию?",
+            "deleteButtonText": "Удалить коллекцию"
         },
         "CreateCourseModal": {
             "createCourse": "Создать курс",
@@ -92,6 +113,229 @@
             "kz": "Казахский",
             "sp": "Испанский",
             "fr": "Французский"
+        },
+        "PageLoading": {
+            "loading": "Загрузка..."
+        },
+        "OrgMenuLinks": {
+            "courses": "Курсы",
+            "collections": "Коллекции",
+            "trail": "Путь"
+        },
+        "EditAssignmentModal": {
+            "editAssignment": "Редактировать задание",
+            "updateDetails": "Обновить детали задания",
+            "assignmentTitle": "Название задания",
+            "assignmentDescription": "Описание задания",
+            "dueDate": "Срок сдачи",
+            "gradingType": "Тип оценивания",
+            "alphabet": "Буквенный",
+            "numeric": "Числовой",
+            "percentage": "Процентный",
+            "cancel": "Отмена",
+            "saveChanges": "Сохранить изменения",
+            "saving": "Сохранение...",
+            "updateLoading": "Обновление задания...",
+            "updateSuccess": "Задание успешно обновлено",
+            "updateError": "Не удалось обновить задание",
+            "updateErrorGeneric": "Произошла ошибка при обновлении задания",
+            "valueMissingTitle": "Пожалуйста, укажите название для вашего задания",
+            "valueMissingDescription": "Пожалуйста, укажите описание для вашего задания",
+            "valueMissingDueDate": "Пожалуйста, укажите срок сдачи для вашего задания",
+            "valueMissingGradingType": "Пожалуйста, укажите тип оценивания для вашего задания"
+        },
+        "NewAssignmentModal": {
+            "assignmentTitle": "Название задания",
+            "assignmentDescription": "Описание задания",
+            "dueDate": "Срок сдачи",
+            "gradingType": "Тип оценивания",
+            "alphabet": "Буквенный",
+            "numeric": "Числовой",
+            "percentage": "Процентный",
+            "createActivity": "Создать активность",
+            "creatingAssignment": "Создание задания...",
+            "createSuccess": "Задание успешно создано",
+            "createError": "Не удалось создать задание: {error}",
+            "valueMissingTitle": "Пожалуйста, укажите название для вашего задания",
+            "valueMissingDescription": "Пожалуйста, укажите описание для вашего задания",
+            "valueMissingDueDate": "Пожалуйста, укажите срок сдачи для вашего задания",
+            "valueMissingGradingType": "Пожалуйста, укажите тип оценивания для вашего задания"
+        },
+        "DocumentPdfModal": {
+            "pdfDocumentName": "Название PDF документа",
+            "pdfDocumentFile": "Файл PDF документа",
+            "createActivity": "Создать активность",
+            "valueMissingName": "Пожалуйста, укажите название для вашей PDF активности",
+            "valueMissingFile": "Пожалуйста, предоставьте PDF документ для вашей активности"
+        },
+        "DynamicCanvaModal": {
+            "activityName": "Название активности",
+            "activityDescription": "Описание активности",
+            "createActivity": "Создать активность",
+            "valueMissingName": "Пожалуйста, укажите название для вашей активности",
+            "valueMissingDescription": "Пожалуйста, укажите описание для вашей активности"
+        },
+        "VideoModal": {
+            "videoName": "Название видео",
+            "videoFile": "Файл видео",
+            "youtubeUrl": "URL YouTube",
+            "videoUpload": "Загрузка видео",
+            "youtubeVideo": "Видео YouTube",
+            "createActivity": "Создать активность",
+            "valueMissingName": "Пожалуйста, укажите название для вашей видео активности",
+            "valueMissingFile": "Пожалуйста, предоставьте видео для вашей активности",
+            "valueMissingUrl": "Пожалуйста, укажите URL YouTube для вашей активности"
+        },
+        "NewActivity": {
+            "dynamicPage": "Динамическая страница",
+            "video": "Видео",
+            "document": "Документ",
+            "assignments": "Задания"
+        },
+        "NewChapterModal": {
+            "chapterName": "Название главы",
+            "chapterDescription": "Описание главы",
+            "createChapter": "Создать главу",
+            "valueMissingName": "Пожалуйста, укажите название главы",
+            "valueMissingDescription": "Пожалуйста, укажите описание главы"
+        },
+        "LinkToUserGroup": {
+            "infoMessage": "Пользователи, не входящие в группу, больше не будут иметь доступ к этому курсу",
+            "userGroupNameLabel": "Название группы",
+            "noUserGroupsAvailable": "Нет доступных групп",
+            "createUserGroupLink": "Создать группу",
+            "linkButton": "Связать",
+            "linkSuccess": "Успешно связано с группой",
+            "linkError": "Ошибка связи с группой: {error}"
+        },
+        "OrgInviteCodeGenerate": {
+            "linkedTitle": "Код приглашения, связанный с группой",
+            "linkedDescription": "При регистрации пользователи будут автоматически добавлены в выбранную вами группу",
+            "generateButton": "Сгенерировать",
+            "noUserGroupsAvailable": "Нет доступных групп",
+            "createUserGroupLink": "Создать группу",
+            "normalTitle": "Обычный код приглашения",
+            "normalDescription": "При регистрации пользователь не будет связан ни с какой группой",
+            "createInviteError": "Ошибка создания кода приглашения: {error}"
+        },
+        "AddUserGroup": {
+            "nameLabel": "Название",
+            "descriptionLabel": "Описание",
+            "nameRequiredError": "Требуется название",
+            "createButton": "Создать группу",
+            "loadingButton": "Загрузка...",
+            "toastLoading": "Создание...",
+            "toastSuccess": "Новая группа создана",
+            "toastError": "Не удалось создать новую группу"
+        },
+        "EditUserGroup": {
+            "nameLabel": "Название",
+            "descriptionLabel": "Описание",
+            "nameRequiredError": "Требуется название",
+            "saveButton": "Сохранить группу",
+            "loadingButton": "Загрузка...",
+            "toastSuccess": "Группа успешно сохранена",
+            "toastError": "Ошибка сохранения группы, попробуйте позже."
+        },
+        "ManageUsers": {
+            "userHeader": "Пользователь",
+            "linkedHeader": "Связан",
+            "actionsHeader": "Действия",
+            "linkedStatus": "Связан",
+            "notLinkedStatus": "Не связан",
+            "linkButton": "Связать",
+            "unlinkButton": "Отвязать",
+            "linkSuccess": "Пользователь успешно связан",
+            "linkError": "Ошибка связи пользователя: {error}",
+            "unlinkSuccess": "Пользователь успешно отвязан",
+            "unlinkError": "Ошибка отвязки пользователя: {error}"
+        },
+        "RolesUpdate": {
+            "rolesLabel": "Роли",
+            "selectRolePlaceholder": "Пожалуйста, выберите роль для пользователя",
+            "adminRole": "Администратор",
+            "maintainerRole": "Сопровождающий",
+            "userRole": "Пользователь",
+            "updateButton": "Обновить роль",
+            "loadingButton": "Загрузка...",
+            "toastLoading": "Обновление роли...",
+            "toastSuccess": "Роль обновлена",
+            "toastError": "Ошибка при обновлении роли",
+            "updateErrorDetail": "Ошибка обновления роли: {error}"
+        },
+        "Onboarding": {
+            "triggerText": "Онбординг",
+            "finishTooltip": "Завершить онбординг",
+            "step1Title": "Обучайте мир!",
+            "step1Desc": "Добро пожаловать в LearnHouse, LMS, разработанную для простоты, удобства использования и производительности. Встречайте новый способ создания, обмена и взаимодействия с образовательным контентом.",
+            "step2Title": "Создавайте курсы",
+            "step2Desc": "Курсы - это основные строительные блоки LearnHouse, они всегда содержат Главы, а Главы содержат Активности.",
+            "step2Button": "Создать новый курс",
+            "step3Title": "Активности",
+            "step3Desc": "Активности - это элементы, которые вы можете добавлять к своим Курсам через Главы: Динамические страницы, Видео, Документы, Тесты и скоро будет больше.",
+            "step3Button": "Узнать больше об активностях",
+            "step4Title": "Динамические страницы и Редактор",
+            "step4Desc": "Динамические страницы - это страницы с динамическим контентом, как страницы Notion, они могут содержать различные компоненты, такие как Тесты, Изображения, Видео, Документы и т.д.",
+            "step4Button": "Узнать больше о Динамических страницах и Редакторе",
+            "step5Title": "Искусственный интеллект",
+            "step5Desc": "Инструменты для мышления, созданные как для учителей, так и для учеников, осведомленные о контексте, могут отвечать на основе ваших курсов и уникального контента, который вы создаете в LearnHouse",
+            "step5Button": "Узнать больше об ИИ LearnHouse",
+            "step6Title": "Группируйте студентов и упрощайте доступ",
+            "step6Desc": "С помощью Групп пользователей вы можете разделять студентов по Группам и предоставлять доступ к Курсам в зависимости от их потребностей",
+            "step6Button": "Создать группы пользователей",
+            "step7Title": "Выбирайте, делать ли Курсы доступными в Интернете или нет",
+            "step7Desc": "Вы можете сделать свои Курсы доступными для поисковых систем и неаутентифицированных пользователей или предоставлять доступ только аутентифицированным пользователям",
+            "step8Title": "Создавайте и оценивайте Задания",
+            "step8Desc": "Вовлекайте студентов с помощью заданий, отслеживайте их прогресс и предоставляйте обратную связь через нашу интуитивно понятную систему оценивания.",
+            "step8Button": "Создать Задание",
+            "step9Title": "Монетизируйте свой контент",
+            "step9Desc": "Настраивайте планы оплаты, продавайте курсы и управляйте подписками с помощью нашей интегрированной платежной системы.",
+            "step9Button": "Настройки платежей",
+            "step10Title": "К бесконечности и далее",
+            "step10Desc": "Чтобы узнать больше о LearnHouse, вы можете пройти наши оригинальные курсы в Университете LearnHouse",
+            "step10Button": "Университет LearnHouse",
+            "nextButton": "Далее",
+            "finishButton": "Завершить онбординг",
+            "endButton": "Завершить",
+            "minimizeButtonTooltip": "Закрыть временно"
+        },
+        "SearchBar": {
+            "placeholder": "Искать курсы, пользователей, коллекции...",
+            "discoverTitle": "Откройте для себя следующее учебное путешествие",
+            "discoverSubtitle": "Начните вводить текст для поиска по доступному контенту",
+            "suggestionsTitle": "Поисковые предложения",
+            "quickResultsTitle": "Быстрые результаты",
+            "coursesSection": "Курсы",
+            "collectionsSection": "Коллекции",
+            "usersSection": "Пользователи",
+            "courseType": "Курс",
+            "collectionType": "Коллекция",
+            "userType": "Пользователь",
+            "viewAllResults": "Посмотреть все результаты"
+        },
+        "ErrorUI": {
+            "defaultMessage": "Что-то пошло не так",
+            "retryButton": "Повторить",
+            "homeButton": "Главная"
+        },
+        "InfoUI": {
+            "defaultMessage": "Информация",
+            "homeButton": "Главная"
+        },
+        "Modal": {
+            "closeButtonDefault": "Закрыть"
+        },
+        "TypeOfContentTitle": {
+            "logoAlt": "Логотип {type}"
+        },
+        "UserAvatar": {
+            "altText": "Аватар пользователя"
+        },
+        "UserProfilePopup": {
+            "loadingError": "Не удалось загрузить данные пользователя"
+        },
+        "Form": {
+             "errorMessageDefault": "Неверный ввод"
         }
     },
     "HomePage": {

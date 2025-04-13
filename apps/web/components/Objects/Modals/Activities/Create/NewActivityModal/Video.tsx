@@ -1,3 +1,4 @@
+'use client'
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -11,6 +12,7 @@ import * as Form from '@radix-ui/react-form'
 import BarLoader from 'react-spinners/BarLoader'
 import { Youtube } from 'lucide-react'
 import { constructAcceptValue } from '@/lib/constants';
+import { useTranslations } from 'next-intl';
 
 const SUPPORTED_FILES = constructAcceptValue(['mp4', 'webm'])
 
@@ -27,6 +29,7 @@ function VideoModal({
   chapterId,
   course,
 }: any) {
+  const t = useTranslations('Components.VideoModal');
   const [video, setVideo] = React.useState(null) as any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [name, setName] = React.useState('')
@@ -93,9 +96,9 @@ function VideoModal({
     <FormLayout onSubmit={handleSubmit}>
       <FormField name="video-activity-name">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <FormLabel>Video name</FormLabel>
+          <FormLabel>{t('videoName')}</FormLabel>
           <FormMessage match="valueMissing">
-            Please provide a name for your video activity
+            {t('valueMissingName')}
           </FormMessage>
         </Flex>
         <Form.Control asChild>
@@ -111,7 +114,7 @@ function VideoModal({
               }}
               className="rounded-full bg-slate-900 text-zinc-50 py-2 px-4 text-sm drop-shadow-md hover:cursor-pointer hover:bg-slate-700 "
             >
-              Video upload
+              {t('videoUpload')}
             </div>
             <div
               onClick={() => {
@@ -119,7 +122,7 @@ function VideoModal({
               }}
               className="rounded-full bg-slate-900 text-zinc-50 py-2 px-4 text-sm drop-shadow-md hover:cursor-pointer hover:bg-slate-700"
             >
-              YouTube Video
+              {t('youtubeVideo')}
             </div>
           </div>
           {selectedView === 'file' && (
@@ -131,9 +134,9 @@ function VideoModal({
                     justifyContent: 'space-between',
                   }}
                 >
-                  <FormLabel>Video file</FormLabel>
+                  <FormLabel>{t('videoFile')}</FormLabel>
                   <FormMessage match="valueMissing">
-                    Please provide a video for your activity
+                    {t('valueMissingFile')}
                   </FormMessage>
                 </Flex>
                 <Form.Control asChild>
@@ -153,10 +156,10 @@ function VideoModal({
                 >
                   <FormLabel className="flex justify-center align-middle">
                     <Youtube className="m-auto pr-1" />
-                    <span className="flex">YouTube URL</span>
+                    <span className="flex">{t('youtubeUrl')}</span>
                   </FormLabel>
                   <FormMessage match="valueMissing">
-                    Please provide a video for your activity
+                    {t('valueMissingUrl')}
                   </FormMessage>
                 </Flex>
                 <Form.Control asChild>
@@ -187,7 +190,7 @@ function VideoModal({
                 color="#ffffff"
               />
             ) : (
-              'Create activity'
+              t('createActivity')
             )}
           </ButtonBlack>
         </Form.Submit>

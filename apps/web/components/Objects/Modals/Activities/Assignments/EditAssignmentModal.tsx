@@ -1,3 +1,4 @@
+'use client'
 import React from 'react';
 import { updateAssignment } from '@services/courses/assignments';
 import { mutate } from 'swr';
@@ -15,6 +16,7 @@ import FormLayout, {
 import * as Form from '@radix-ui/react-form';
 import { useFormik } from 'formik';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useTranslations } from 'next-intl';
 
 interface Assignment {
     assignment_uuid: string;
@@ -42,6 +44,8 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
     assignment,
     accessToken
 }) => {
+    const t = useTranslations('Components.EditAssignmentModal');
+
     const formik = useFormik({
         initialValues: {
             title: assignment.title || '',
@@ -51,18 +55,18 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
         },
         enableReinitialize: true,
         onSubmit: async (values, { setSubmitting }) => {
-            const toast_loading = toast.loading('Updating assignment...');
+            const toast_loading = toast.loading(t('updateLoading'));
             try {
                 const res = await updateAssignment(values, assignment.assignment_uuid, accessToken);
                 if (res.success) {
                     mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
-                    toast.success('Assignment updated successfully');
+                    toast.success(t('updateSuccess'));
                     onClose();
                 } else {
-                    toast.error('Failed to update assignment');
+                    toast.error(t('updateError'));
                 }
             } catch (error) {
-                toast.error('An error occurred while updating the assignment');
+                toast.error(t('updateErrorGeneric'));
             } finally {
                 toast.dismiss(toast_loading);
                 setSubmitting(false);
@@ -74,9 +78,9 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
         <FormLayout onSubmit={formik.handleSubmit}>
             <FormField name="title">
                 <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <FormLabel>Assignment Title</FormLabel>
+                    <FormLabel>{t('assignmentTitle')}</FormLabel>
                     <FormMessage match="valueMissing">
-                        Please provide a name for your assignment
+                        {t('valueMissingTitle')}
                     </FormMessage>
                 </Flex>
                 <Form.Control asChild>
@@ -91,9 +95,9 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
 
             <FormField name="description">
                 <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <FormLabel>Assignment Description</FormLabel>
+                    <FormLabel>{t('assignmentDescription')}</FormLabel>
                     <FormMessage match="valueMissing">
-                        Please provide a description for your assignment
+                        {t('valueMissingDescription')}
                     </FormMessage>
                 </Flex>
                 <Form.Control asChild>
@@ -107,9 +111,9 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
 
             <FormField name="due_date">
                 <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <FormLabel>Due Date</FormLabel>
+                    <FormLabel>{t('dueDate')}</FormLabel>
                     <FormMessage match="valueMissing">
-                        Please provide a due date for your assignment
+                        {t('valueMissingDueDate')}
                     </FormMessage>
                 </Flex>
                 <Form.Control asChild>
@@ -124,12 +128,12 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
 
             <FormField name="grading_type">
                 <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <FormLabel>Grading Type</FormLabel>
+                    <FormLabel>{t('gradingType')}</FormLabel>
                     <FormMessage match="valueMissing">
-                        Please provide a grading type for your assignment
+                        {t('valueMissingGradingType')}
                     </FormMessage>
                 </Flex>
-                <select 
+                <select
                     id="grading_type"
                     name="grading_type"
                     className='w-full bg-gray-100/40 rounded-lg px-3 py-2 outline outline-1 outline-gray-100'
@@ -137,9 +141,9 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                     value={formik.values.grading_type}
                     required
                 >
-                    <option value="ALPHABET">Alphabet</option>
-                    <option value="NUMERIC">Numeric</option>
-                    <option value="PERCENTAGE">Percentage</option>
+                    <option value="ALPHABET">{t('alphabet')}</option>
+                    <option value="NUMERIC">{t('numeric')}</option>
+                    <option value="PERCENTAGE">{t('percentage')}</option>
                 </select>
             </FormField>
 
@@ -149,7 +153,7 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                     onClick={onClose}
                     className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
                 >
-                    Cancel
+                    {t('cancel')}
                 </button>
                 <Form.Submit asChild>
                     <button
@@ -157,7 +161,7 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                         disabled={formik.isSubmitting}
                         className="px-4 py-2 bg-black text-white font-bold rounded-md hover:bg-black/90"
                     >
-                        {formik.isSubmitting ? 'Saving...' : 'Save Changes'}
+                        {formik.isSubmitting ? t('saving') : t('saveChanges')}
                     </button>
                 </Form.Submit>
             </div>
@@ -171,6 +175,7 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
     assignment,
     accessToken
 }) => {
+    const t = useTranslations('Components.EditAssignmentModal');
     return (
         <Modal
             isDialogOpen={isOpen}
@@ -184,11 +189,11 @@ const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
                     accessToken={accessToken}
                 />
             }
-            dialogTitle="Edit Assignment"
-            dialogDescription="Update assignment details"
+            dialogTitle={t('editAssignment')}
+            dialogDescription={t('updateDetails')}
             dialogTrigger={null}
         />
     );
 };
 
-export default EditAssignmentModal; 
+export default EditAssignmentModal;

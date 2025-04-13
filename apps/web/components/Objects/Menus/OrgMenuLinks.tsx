@@ -3,6 +3,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { BookCopy, Signpost, SquareLibrary } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 function MenuLinks(props: { orgslug: string }) {
   return (
@@ -30,6 +31,7 @@ function MenuLinks(props: { orgslug: string }) {
   )
 }
 const LinkItem = (props: any) => {
+  const t = useTranslations('Components.OrgMenuLinks')
   const link = props.link
   const orgslug = props.orgslug
   return (
@@ -38,21 +40,21 @@ const LinkItem = (props: any) => {
         {props.type == 'courses' && (
           <>
             <BookCopy size={20}  />{' '}
-            <span>Courses</span>
+            <span>{t('courses')}</span>
           </>
         )}
 
         {props.type == 'collections' && (
           <>
             <SquareLibrary size={20} />{' '}
-            <span>Collections</span>
+            <span>{t('collections')}</span>
           </>
         )}
 
         {props.type == 'trail' && (
           <>
             <Signpost size={20} />{' '}
-            <span>Trail</span>
+            <span>{t('trail')}</span>
           </>
         )}
       </li>

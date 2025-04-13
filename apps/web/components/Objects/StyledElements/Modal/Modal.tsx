@@ -4,6 +4,7 @@ import React from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@components/ui/dialog"
 import { ButtonBlack } from '../Form/Form'
 import { cn } from "@/lib/utils"
+import { useTranslations } from 'next-intl'
 
 type ModalParams = {
   dialogTitle?: string
@@ -21,6 +22,8 @@ type ModalParams = {
 }
 
 const Modal = (params: ModalParams) => {
+  const t = useTranslations('Components.Modal')
+
   const getMinHeight = () => {
     switch (params.minHeight) {
       case 'sm': return 'md:min-h-[300px]'
@@ -72,7 +75,7 @@ const Modal = (params: ModalParams) => {
             {params.dialogClose}
             {params.addDefCloseButton && (
               <ButtonBlack type="submit">
-                Close
+                {t('closeButtonDefault')}
               </ButtonBlack>
             )}
           </DialogFooter>

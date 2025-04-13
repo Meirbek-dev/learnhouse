@@ -15,6 +15,7 @@ import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { BarLoader } from 'react-spinners'
 import { mutate } from 'swr'
+import { useTranslations } from 'next-intl';
 
 interface Props {
   user: any
@@ -23,6 +24,7 @@ interface Props {
 }
 
 function RolesUpdate(props: Props) {
+  const t = useTranslations('Components.RolesUpdate');
   const org = useOrg() as any
   const session = useLHSession() as any
     const access_token = session?.data?.tokens?.access_token;
@@ -30,26 +32,35 @@ function RolesUpdate(props: Props) {
   const [assignedRole, setAssignedRole] = React.useState(
     props.alreadyAssignedRole
   )
-  const [error, setError] = React.useState(null) as any
+  const [error, setError] = React.useState<string | null>(null) as any
 
-  const handleAssignedRole = (event: React.ChangeEvent<any>) => {
+  const handleAssignedRole = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setError(null)
     setAssignedRole(event.target.value)
   }
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
-    const res = await updateUserRole(org.id, props.user.user.id, assignedRole,access_token)
-    const toastId = toast.loading("Updating role...")
-    if (res.status === 200) {
-      await mutate(`${getAPIUrl()}orgs/${org.id}/users`)
-      props.setRolesModal(false)
-      toast.success("Updated role", {id:toastId})
-    } else {
-      setIsSubmitting(false)
-      setError('Error ' + res.status + ': ' + res.data.detail)
-      toast.error("Error while updating role", {id:toastId})
+    setError(null)
+    const toastId = toast.loading(t("toastLoading"))
+    try {
+        const res = await updateUserRole(org.id, props.user.user.id, assignedRole, access_token)
+        if (res.status === 200) {
+          await mutate(`${getAPIUrl()}orgs/${org.id}/users`)
+          props.setRolesModal(false)
+          toast.success(t("toastSuccess"), {id:toastId})
+        } else {
+          const errorDetail = res.data?.detail || 'Unknown error'
+          setError(t('updateErrorDetail', { error: errorDetail }));
+          toast.error(t("toastError"), {id:toastId})
+        }
+    } catch (error: any) {
+        const errorMessage = error?.message || 'An unexpected error occurred'
+        setError(t('updateErrorDetail', { error: errorMessage }));
+        toast.error(t("toastError"), {id:toastId})
+    } finally {
+        setIsSubmitting(false)
     }
   }
 
@@ -58,39 +69,36 @@ function RolesUpdate(props: Props) {
   return (
     <div>
       <FormLayout onSubmit={handleSubmit}>
-        <FormField name="course-visibility">
-          {error ? (
-            <div className="text-red-500 font-bold text-xs px-3 py-2 bg-red-100 rounded-md">
+        <FormField name="role-select">
+          {error && (
+            <div className="text-red-500 font-bold text-xs px-3 py-2 bg-red-100 rounded-md mb-2">
               {error}
             </div>
-          ) : (
-            ''
           )}
           <Flex
             css={{ alignItems: 'baseline', justifyContent: 'space-between' }}
           >
-            <FormLabel>Roles</FormLabel>
+            <FormLabel>{t('rolesLabel')}</FormLabel>
             <FormMessage match="valueMissing">
-              Please choose a role for the user
+              {t('selectRolePlaceholder')}
             </FormMessage>
           </Flex>
           <Form.Control asChild>
             <select
               onChange={handleAssignedRole}
-              defaultValue={assignedRole}
-              className="border border-gray-300 rounded-md p-2"
+              value={assignedRole}
+              className="border border-gray-300 rounded-md p-2 w-full bg-white"
               required
             >
-              <option value="role_global_admin">Admin </option>
-              <option value="role_global_maintainer">Maintainer</option>
-              <option value="role_global_user">User</option>
+              <option value="role_global_admin">{t('adminRole')}</option>
+              <option value="role_global_maintainer">{t('maintainerRole')}</option>
+              <option value="role_global_user">{t('userRole')}</option>
             </select>
           </Form.Control>
         </FormField>
-        <div className="h-full"></div>
         <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
           <Form.Submit asChild>
-            <ButtonBlack type="submit" css={{ marginTop: 10 }}>
+            <ButtonBlack type="submit" css={{ marginTop: 10 }} disabled={isSubmitting}>
               {isSubmitting ? (
                 <BarLoader
                   cssOverride={{ borderRadius: 60 }}
@@ -98,7 +106,7 @@ function RolesUpdate(props: Props) {
                   color="#ffffff"
                 />
               ) : (
-                'Update user role'
+                t('updateButton')
               )}
             </ButtonBlack>
           </Form.Submit>

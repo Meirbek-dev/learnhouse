@@ -1,5 +1,7 @@
+'use client'
 import React, { useState, Dispatch, SetStateAction, useEffect } from 'react'
-import { Tag, TagInput } from 'emblor'
+import { Tag, TagInput as EmblorTagInput } from 'emblor'
+import { useTranslations } from 'next-intl'
 
 interface FormTagInputProps {
   value: string
@@ -16,6 +18,7 @@ const FormTagInput = ({
   error,
 	placeholder,
 }: FormTagInputProps) => {
+  const t = useTranslations('General')
   const [tags, setTags] = useState<Tag[]>(() =>
     value && typeof value === 'string'
       ? value.split(separator).filter(text => text.trim()).map((text, i) => ({
@@ -56,10 +59,10 @@ const FormTagInput = ({
   return (
 		<div>
 			<div className="space-y-2">
-				<TagInput
+				<EmblorTagInput
 					tags={tags}
 					setTags={handleTagsChange}
-					placeholder={placeholder}
+					placeholder={placeholder || t('placeholderTags')}
 					styleClasses={{
 						inlineTagsContainer:
 							'border-input rounded-lg bg-background shadow-2xs transition-shadow focus-within:border-ring/40 focus-within:outline-hidden focus-within:ring-[3px] ring-ring/8 dark:ring-ring/12 p-1 gap-1',

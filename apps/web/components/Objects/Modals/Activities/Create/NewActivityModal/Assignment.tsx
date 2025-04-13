@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import FormLayout, {
     ButtonBlack,
@@ -17,8 +18,10 @@ import { createAssignment } from '@services/courses/assignments'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { createActivity, deleteActivity } from '@services/courses/activities'
 import toast from 'react-hot-toast'
+import { useTranslations } from 'next-intl'
 
 function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
+    const t = useTranslations('Components.NewAssignmentModal')
     const org = useOrg() as any;
     const session = useLHSession() as any
     const [activityName, setActivityName] = React.useState('')
@@ -46,40 +49,53 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
     const handleSubmit = async (e: any) => {
         e.preventDefault()
         setIsSubmitting(true)
-        const activity = {
+        const toast_loading = toast.loading(t('creatingAssignment'))
+
+        let activity_res: any;
+        try {
+          activity_res = await createActivity({
             name: activityName,
             chapter_id: chapterId,
             activity_type: 'TYPE_ASSIGNMENT',
             activity_sub_type: 'SUBTYPE_ASSIGNMENT_ANY',
             published: false,
             course_id: course?.courseStructure.id,
+          }, chapterId, org?.id, session.data?.tokens?.access_token);
+
+          const res = await createAssignment({
+              title: activityName,
+              description: activityDescription,
+              due_date: dueDate,
+              grading_type: gradingType,
+              course_id: course?.courseStructure.id,
+              org_id: org?.id,
+              chapter_id: chapterId,
+              activity_id: activity_res?.id,
+          }, session.data?.tokens?.access_token)
+
+          if (res.success) {
+              toast.success(t('createSuccess'))
+              mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
+              closeModal()
+          } else {
+              toast.error(t('createError', { error: res.data?.detail || 'Unknown error' }))
+              if (activity_res?.activity_uuid) {
+                  await deleteActivity(activity_res.activity_uuid, session.data?.tokens?.access_token)
+              }
+          }
+        } catch (error: any) {
+             toast.error(t('createError', { error: error?.message || 'An unexpected error occurred' }))
+             if (activity_res?.activity_uuid) {
+                  try {
+                      await deleteActivity(activity_res.activity_uuid, session.data?.tokens?.access_token);
+                  } catch (rollbackError) {
+                      console.error("Failed to rollback activity creation:", rollbackError);
+                  }
+             }
+        } finally {
+          toast.dismiss(toast_loading)
+          setIsSubmitting(false)
         }
-
-        const activity_res = await createActivity(activity, chapterId, org?.id, session.data?.tokens?.access_token)
-        const res = await createAssignment({
-            title: activityName,
-            description: activityDescription,
-            due_date: dueDate,
-            grading_type: gradingType,
-            course_id: course?.courseStructure.id,
-            org_id: org?.id,
-            chapter_id: chapterId,
-            activity_id: activity_res?.id,
-        }, session.data?.tokens?.access_token)
-        const toast_loading = toast.loading('Creating assignment...')
-
-        if (res.success) {
-            toast.dismiss(toast_loading)
-            toast.success('Assignment created successfully')
-        } else {
-            toast.error(res.data.detail)
-            await deleteActivity(activity_res.activity_uuid, session.data?.tokens?.access_token)
-
-        }
-
-        mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
-        setIsSubmitting(false)
-        closeModal()
     }
 
 
@@ -87,9 +103,9 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
         <FormLayout onSubmit={handleSubmit}>
             <FormField name="assignment-activity-title">
                 <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <FormLabel>Assignment Title</FormLabel>
+                    <FormLabel>{t('assignmentTitle')}</FormLabel>
                     <FormMessage match="valueMissing">
-                        Please provide a name for your assignment
+                        {t('valueMissingTitle')}
                     </FormMessage>
                 </Flex>
                 <Form.Control asChild>
@@ -100,9 +116,9 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
             {/* Description  */}
             <FormField name="assignment-activity-description">
                 <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <FormLabel>Assignment Description</FormLabel>
+                    <FormLabel>{t('assignmentDescription')}</FormLabel>
                     <FormMessage match="valueMissing">
-                        Please provide a description for your assignment
+                        {t('valueMissingDescription')}
                     </FormMessage>
                 </Flex>
                 <Form.Control asChild>
@@ -113,9 +129,9 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
             {/* Due date  */}
             <FormField name="assignment-activity-due-date">
                 <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <FormLabel>Due Date</FormLabel>
+                    <FormLabel>{t('dueDate')}</FormLabel>
                     <FormMessage match="valueMissing">
-                        Please provide a due date for your assignment
+                        {t('valueMissingDueDate')}
                     </FormMessage>
                 </Flex>
                 <Form.Control asChild>
@@ -126,16 +142,16 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
             {/* Grading type  */}
             <FormField name="assignment-activity-grading-type">
                 <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                    <FormLabel>Grading Type</FormLabel>
+                    <FormLabel>{t('gradingType')}</FormLabel>
                     <FormMessage match="valueMissing">
-                        Please provide a grading type for your assignment
+                        {t('valueMissingGradingType')}
                     </FormMessage>
                 </Flex>
                 <Form.Control asChild>
                     <select className='bg-gray-100/40 rounded-lg px-1 py-2 outline outline-1 outline-gray-100' onChange={handleGradingTypeChange} required>
-                        <option value="ALPHABET">Alphabet</option>
-                        <option value="NUMERIC">Numeric</option>
-                        <option value="PERCENTAGE">Percentage</option>
+                        <option value="ALPHABET">{t('alphabet')}</option>
+                        <option value="NUMERIC">{t('numeric')}</option>
+                        <option value="PERCENTAGE">{t('percentage')}</option>
                     </select>
                 </Form.Control>
             </FormField>
@@ -150,7 +166,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
                                 color="#ffffff"
                             />
                         ) : (
-                            'Create activity'
+                            t('createActivity')
                         )}
                     </ButtonBlack>
                 </Form.Submit>

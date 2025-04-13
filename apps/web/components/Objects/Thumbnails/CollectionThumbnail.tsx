@@ -11,6 +11,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 type PropsType = {
   collection: any
@@ -23,6 +24,7 @@ const removeCollectionPrefix = (collectionid: string) => {
 }
 
 function CollectionThumbnail(props: PropsType) {
+  const t = useTranslations('Components.CollectionThumbnail')
   const org = useOrg() as any
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
@@ -57,7 +59,7 @@ function CollectionThumbnail(props: PropsType) {
               {props.collection.name}
             </Link>
             <span className="mt-1 text-sm font-medium text-indigo-200">
-              {props.collection.courses.length} course{props.collection.courses.length !== 1 ? 's' : ''}
+              {t('courseCount', { count: props.collection.courses.length })}
             </span>
           </div>
         </div>
@@ -73,6 +75,7 @@ function CollectionThumbnail(props: PropsType) {
 }
 
 const CollectionAdminEditsArea = (props: any) => {
+  const t = useTranslations('Components.CollectionThumbnail')
   const router = useRouter()
   const session = useLHSession() as any;
 
@@ -92,9 +95,9 @@ const CollectionAdminEditsArea = (props: any) => {
     >
       <div className="z-20">
         <ConfirmationModal
-          confirmationMessage="Are you sure you want to delete this collection?"
-          confirmationButtonText="Delete Collection"
-          dialogTitle={'Delete ' + props.collection.name + '?'}
+          confirmationMessage={t('deleteConfirmationMessage')}
+          confirmationButtonText={t('deleteButtonText')}
+          dialogTitle={t('deleteConfirmationTitle', { collectionName: props.collection.name })}
           dialogTrigger={
             <button
               className="absolute right-2 top-2 rounded-full bg-red-500 p-2 text-white transition-colors duration-300 hover:bg-red-600"

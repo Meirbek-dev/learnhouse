@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { MapPin, Building2, Globe, Briefcase, GraduationCap, Link, Users, Calendar, Lightbulb, Loader2, ExternalLink } from 'lucide-react'
@@ -6,6 +7,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 type UserProfilePopupProps = {
   children: React.ReactNode
@@ -41,6 +43,7 @@ const ICON_MAP = {
 } as const
 
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
+  const t = useTranslations('Components.UserProfilePopup')
   const session = useLHSession() as any
   const router = useRouter()
   const [userData, setUserData] = useState<UserData | null>(null)
@@ -50,15 +53,15 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userId) return
-      
+
       setIsLoading(true)
       setError(null)
-      
+
       try {
         const data = await getUser(userId, session?.data?.tokens?.access_token)
         setUserData(data)
       } catch (err) {
-        setError('Failed to load user data')
+        setError(t('loadingError'))
         console.error('Error fetching user data:', err)
       } finally {
         setIsLoading(false)
@@ -66,7 +69,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
     }
 
     fetchUserData()
-  }, [userId, session?.data?.tokens?.access_token])
+  }, [userId, session?.data?.tokens?.access_token, t])
 
   const IconComponent = ({ iconName }: { iconName: string }) => {
     const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
@@ -92,7 +95,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
             <div className="relative">
               {/* Background gradient */}
               <div className="absolute inset-0 bg-gradient-to-b from-gray-100/30 to-transparent h-28 rounded-t-lg" />
-              
+
               {/* Content */}
               <div className="relative px-5 pt-5 pb-4">
                 <div className="flex items-start gap-4">
@@ -156,4 +159,4 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   )
 }
 
-export default UserProfilePopup 
+export default UserProfilePopup

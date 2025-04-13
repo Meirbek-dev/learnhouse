@@ -13,6 +13,7 @@ import { getAPIUrl } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
+import { useTranslations } from 'next-intl'
 
 type EditUserGroupProps = {
     usergroup: {
@@ -22,21 +23,20 @@ type EditUserGroupProps = {
     }
 }
 
-const validate = (values: any) => {
-    const errors: any = {}
-
-    if (!values.name) {
-        errors.name = 'Name is Required'
-    }
-
-    return errors
-}
-
 function EditUserGroup(props: EditUserGroupProps) {
+    const t = useTranslations('Components.EditUserGroup')
     const org = useOrg() as any;
     const session = useLHSession() as any
     const access_token = session?.data?.tokens?.access_token;
     const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+    const validate = (values: any) => {
+        const errors: any = {}
+        if (!values.name) {
+            errors.name = t('nameRequiredError')
+        }
+        return errors
+    }
 
     const formik = useFormik({
         initialValues: {
@@ -50,10 +50,10 @@ function EditUserGroup(props: EditUserGroupProps) {
 
             if (res.status == 200) {
                 setIsSubmitting(false)
-                toast.success(`UserGroup saved successfully`)
+                toast.success(t('toastSuccess'))
                 mutate(`${getAPIUrl()}usergroups/org/${org.id}`)
             } else {
-                toast.error(`Error saving UserGroup, please retry later.`)
+                toast.error(t('toastError'))
                 setIsSubmitting(false)
             }
         },
@@ -65,8 +65,8 @@ function EditUserGroup(props: EditUserGroupProps) {
         <FormLayout onSubmit={formik.handleSubmit}>
             <FormField name="name">
                 <FormLabelAndMessage
-                    label="Name"
-                    message={formik.errors.name}
+                    label={t('nameLabel')}
+                    message={formik.touched.name && formik.errors.name || undefined}
                 />
                 <Form.Control asChild>
                     <Input
@@ -79,8 +79,8 @@ function EditUserGroup(props: EditUserGroupProps) {
             </FormField>
             <FormField name="description">
                 <FormLabelAndMessage
-                    label="Description"
-                    message={formik.errors.description}
+                    label={t('descriptionLabel')}
+                    message={formik.touched.description && formik.errors.description || undefined}
                 />
                 <Form.Control asChild>
                     <Input
@@ -93,7 +93,7 @@ function EditUserGroup(props: EditUserGroupProps) {
             <div className="flex py-4">
                 <Form.Submit asChild>
                     <button className="w-full bg-black text-white font-bold text-center p-2 rounded-md shadow-md hover:cursor-pointer">
-                        {isSubmitting ? 'Loading...' : 'Save UserGroup'}
+                        {isSubmitting ? t('loadingButton') : t('saveButton')}
                     </button>
                 </Form.Submit>
             </div>

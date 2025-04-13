@@ -1,7 +1,8 @@
 'use client'
 import React from 'react'
-import * as Tooltip from '@radix-ui/react-tooltip'
+import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 import { styled, keyframes } from '@stitches/react'
+import { useTranslations } from 'next-intl'
 
 type TooltipProps = {
   sideOffset?: number
@@ -12,11 +13,12 @@ type TooltipProps = {
 }
 
 const ToolTip = (props: TooltipProps) => {
+  const t = useTranslations('General')
   return (
-    <Tooltip.Provider delayDuration={200}>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>{props.children}</Tooltip.Trigger>
-        <Tooltip.Portal>
+    <TooltipPrimitive.Provider delayDuration={200}>
+      <TooltipPrimitive.Root>
+        <TooltipPrimitive.Trigger asChild>{props.children}</TooltipPrimitive.Trigger>
+        <TooltipPrimitive.Portal>
           <TooltipContent
             slateBlack={props.slateBlack}
             side={props.side ? props.side : 'bottom'}
@@ -24,9 +26,9 @@ const ToolTip = (props: TooltipProps) => {
           >
             {props.content}
           </TooltipContent>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
+        </TooltipPrimitive.Portal>
+      </TooltipPrimitive.Root>
+    </TooltipPrimitive.Provider>
   )
 }
 
@@ -55,7 +57,7 @@ const closeAndFade = keyframes({
   '100%': { opacity: 0 },
 })
 
-const TooltipContent = styled(Tooltip.Content, {
+const TooltipContent = styled(TooltipPrimitive.Content, {
   variants: {
     slateBlack: {
       true: {

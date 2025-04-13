@@ -1,5 +1,6 @@
 'use client'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 const variants = {
   hidden: { opacity: 0, x: 0, y: 0 },
@@ -23,6 +24,8 @@ const dotVariants = {
 }
 
 function PageLoading() {
+  const t = useTranslations('Components.PageLoading')
+
   return (
     <motion.main
       variants={variants}
@@ -47,14 +50,14 @@ function PageLoading() {
               />
             ))}
           </div>
-          
-          <motion.p 
+
+          <motion.p
             className="mt-6 text-sm text-gray-500 dark:text-gray-400"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            Loading...
+            {t('loading')}
           </motion.p>
         </div>
       </div>

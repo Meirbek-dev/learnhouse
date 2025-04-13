@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import { getUriWithOrg } from '@services/config/config'
 import { useParams } from 'next/navigation'
@@ -5,6 +6,7 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import UserProfilePopup from './UserProfilePopup'
 import { getUserByUsername } from '@services/users/users'
+import { useTranslations } from 'next-intl'
 
 type UserAvatarProps = {
   width?: number
@@ -14,13 +16,14 @@ type UserAvatarProps = {
   border?: 'border-2' | 'border-4' | 'border-8'
   borderColor?: string
   predefined_avatar?: 'ai' | 'empty'
-  backgroundColor?: 'bg-white' | 'bg-gray-100' 
+  backgroundColor?: 'bg-white' | 'bg-gray-100'
   showProfilePopup?: boolean
   userId?: string
   username?: string
 }
 
 function UserAvatar(props: UserAvatarProps) {
+  const t = useTranslations('Components.UserAvatar')
   const session = useLHSession() as any
   const params = useParams() as any
   const [userData, setUserData] = useState<any>(null)
@@ -103,7 +106,7 @@ function UserAvatar(props: UserAvatarProps) {
 
   const avatarImage = (
     <img
-      alt="User Avatar"
+      alt={t('altText')}
       width={props.width ?? 50}
       height={props.width ?? 50}
       src={getAvatarUrl()}

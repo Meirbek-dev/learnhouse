@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu"
+import { useTranslations } from 'next-intl'
 
 type Course = {
   course_uuid: string
@@ -36,19 +37,21 @@ type PropsType = {
 export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('course_', '')
 
 function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
-  const router = useRouter() 
+  const t = useTranslations('Components.CourseThumbnail')
+  const tg = useTranslations('General')
+  const router = useRouter()
   const org = useOrg() as any
   const session = useLHSession() as any
 
   const deleteCourse = async () => {
-    const toastId = toast.loading('Deleting course...')
+    const toastId = toast.loading(tg('deleting'))
     try {
       await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token)
       await revalidateTags(['courses'], orgslug)
-      toast.success('Course deleted successfully')
+      toast.success(t('toastDeleteSuccess'))
       router.refresh()
     } catch (error) {
-      toast.error('Failed to delete course')
+      toast.error(t('toastDeleteError'))
     } finally {
       toast.dismiss(toastId)
     }
@@ -84,6 +87,7 @@ const AdminEditOptions = ({ course, orgSlug, deleteCourse }: {
   orgSlug: string
   deleteCourse: () => Promise<void>
 }) => {
+  const t = useTranslations('Components.CourseThumbnail')
   return (
     <AuthenticatedClientElement
       action="update"
@@ -100,23 +104,37 @@ const AdminEditOptions = ({ course, orgSlug, deleteCourse }: {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem asChild>
-              <Link prefetch href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)}>
-                <FilePenLine className="mr-2 h-4 w-4" /> Edit Content
+              <Link
+                prefetch
+                href={getUriWithOrg(
+                  orgSlug,
+                  `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`
+                )}
+              >
+                <FilePenLine className="mr-2 h-4 w-4" /> {t('editContent')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link prefetch href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)}>
-                <Settings2 className="mr-2 h-4 w-4" /> Settings
+              <Link
+                prefetch
+                href={getUriWithOrg(
+                  orgSlug,
+                  `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`
+                )}
+              >
+                <Settings2 className="mr-2 h-4 w-4" /> {t('settings')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <ConfirmationModal
-                confirmationButtonText="Delete Course"
-                confirmationMessage="Are you sure you want to delete this course?"
-                dialogTitle={`Delete ${course.name}?`}
+                confirmationButtonText={t('deleteButtonText')}
+                confirmationMessage={t('deleteConfirmationMessage')}
+                dialogTitle={t('deleteConfirmationTitle', {
+                  courseName: course.name,
+                })}
                 dialogTrigger={
                   <button className="w-full text-left flex items-center px-2 py-1 rounded-md text-sm bg-rose-500/10 hover:bg-rose-500/20 transition-colors text-red-600">
-                    <BookMinus className="mr-4 h-4 w-4" /> Delete Course
+                    <BookMinus className="mr-4 h-4 w-4" /> {t('delete')}
                   </button>
                 }
                 functionToExecute={deleteCourse}

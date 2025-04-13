@@ -1,3 +1,4 @@
+'use client'
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import Image, { StaticImageData } from 'next/image';
 import React, { useEffect, useState } from 'react';
@@ -16,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useTranslations } from 'next-intl';
 
 interface OnboardingStep {
   imageSrc: StaticImageData;
@@ -29,6 +31,7 @@ interface OnboardingStep {
 }
 
 const Onboarding: React.FC = () => {
+  const t = useTranslations('Components.Onboarding');
   const [currentStep, setCurrentStep] = useState(() => {
     // Initialize with saved step or 0
     const savedStep = localStorage.getItem('onboardingLastStep');
@@ -46,7 +49,7 @@ const Onboarding: React.FC = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     // Initial check
     checkMobile();
 
@@ -60,16 +63,16 @@ const Onboarding: React.FC = () => {
   const onboardingData: OnboardingStep[] = [
     {
       imageSrc: OnBoardWelcome,
-      title: 'Teach the world!',
-      description: 'Welcome to LearnHouse, a LMS engineered for simplicity, ease of use and performance, meet the new way to create, share, and engage with educational content.',
+      title: t('step1Title'),
+      description: t('step1Desc'),
     },
     {
       imageSrc: OnBoardCourses,
-      title: 'Create Courses',
-      description: 'Courses are the main building blocks of LearnHouse, they always contain Chapters and Chapters contain Activities.',
+      title: t('step2Title'),
+      description: t('step2Desc'),
       buttons: [
         {
-          label: 'Create New Course',
+          label: t('step2Button'),
           action: () => router.push(getUriWithOrg(org?.slug, '/courses?new=true')),
           icon: <Book size={16} />,
         },
@@ -77,11 +80,11 @@ const Onboarding: React.FC = () => {
     },
     {
       imageSrc: OnBoardActivities,
-      title: 'Activities',
-      description: 'Activities are elements you can add to your Courses via Chapters, they can be : Dynamic Pages, Videos, Documents, Quizz and more soon.',
+      title: t('step3Title'),
+      description: t('step3Desc'),
       buttons: [
         {
-          label: 'Learn more about activities',
+          label: t('step3Button'),
           action: () => window.open('https://university.learnhouse.io/course/be89716c-9992-44bb-81df-ef3d76e355ba', '_blank'),
           icon: <Info size={16} />,
         },
@@ -89,11 +92,11 @@ const Onboarding: React.FC = () => {
     },
     {
       imageSrc: OnBoardEditor,
-      title: 'Dynamic pages and The Editor',
-      description: 'Dynamic pages are pages with dynamic content, like Notion pages they can contain various components like Quizzes, Images, Videos, Documents etc',
+      title: t('step4Title'),
+      description: t('step4Desc'),
       buttons: [
         {
-          label: 'Learn more about Dynamic Pages and The Editor',
+          label: t('step4Button'),
           action: () => window.open('https://university.learnhouse.io/course/be89716c-9992-44bb-81df-ef3d76e355ba', '_blank'),
           icon: <Info size={16} />,
         },
@@ -101,11 +104,11 @@ const Onboarding: React.FC = () => {
     },
     {
       imageSrc: OnBoardAI,
-      title: 'Artificial Intelligence',
-      description: 'Tools for tought made for teachers and students alike, context aware it can reply based on your courses and the unique content you create on LearnHouse',
+      title: t('step5Title'),
+      description: t('step5Desc'),
       buttons: [
         {
-          label: 'Learn more about LearnHouse AI',
+          label: t('step5Button'),
           action: () => window.open('https://docs.learnhouse.app/features/ai/students', '_blank'),
           icon: <Sparkle size={16} />,
         },
@@ -113,11 +116,11 @@ const Onboarding: React.FC = () => {
     },
     {
       imageSrc: OnBoardUGs,
-      title: 'Group students and streamline access ',
-      description: 'With UserGroups you can separate students by Groups and give access to Courses depending on their needs',
+      title: t('step6Title'),
+      description: t('step6Desc'),
       buttons: [
         {
-          label: 'Create UserGroups',
+          label: t('step6Button'),
           action: () => router.push(getUriWithOrg(org?.slug, '/dash/users/settings/usergroups')),
           icon: <SquareUser size={16} />,
         },
@@ -125,11 +128,9 @@ const Onboarding: React.FC = () => {
     },
     {
       imageSrc: OnBoardAccess,
-      title: 'Choose whether to make Courses available on the Web or not ',
-      description: 'You can choose to make your Courses discoverable from search engines and accesible to non authenticated users or to only give it to authenticated Users',
-      buttons: [
-
-      ],
+      title: t('step7Title'),
+      description: t('step7Desc'),
+      buttons: [],
     },
     {
       imageSrc: OnBoardAssignments,
@@ -258,7 +259,7 @@ const Onboarding: React.FC = () => {
               <Sprout size={20} />
               <p>Onboarding</p>
               <div className='h-2 w-2 bg-green-500 animate-pulse rounded-full'></div>
-              <div 
+              <div
                 className="ml-2 pl-2 border-l border-gray-700 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -300,13 +301,13 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     <div className='flex flex-col'>
       <div className='onboarding_screens flex-col px-4 py-4'>
         <div className='grow rounded-xl'>
-          <Image 
-            unoptimized 
-            className='mx-auto shadow-md shadow-gray-200 rounded-lg w-[730px] h-[330px] object-cover' 
-            alt='' 
-            priority 
-            quality={100} 
-            src={step.imageSrc} 
+          <Image
+            unoptimized
+            className='mx-auto shadow-md shadow-gray-200 rounded-lg w-[730px] h-[330px] object-cover'
+            alt=''
+            priority
+            quality={100}
+            src={step.imageSrc}
           />
         </div>
         <div className='grid grid-flow-col justify-stretch space-x-3 mt-4'>

@@ -35,7 +35,12 @@
         "hint": "Hint",
         "back": "Back",
         "next": "Next",
-        "finish": "Finish"
+        "finish": "Finish",
+        "saving": "Saving...",
+        "creating": "Creating...",
+        "updating": "Updating...",
+        "deleting": "Deleting...",
+        "details": "Details"
     },
     "Components": {
         "Button": {
@@ -47,7 +52,23 @@
             "settings": "Settings",
             "delete": "Delete Course",
             "toastDeleteSuccess": "Course deleted successfully",
-            "toastDeleteError": "Failed to delete course"
+            "toastDeleteError": "Failed to delete course",
+            "deleteConfirmationTitle": "Delete {courseName}?",
+            "deleteConfirmationMessage": "Are you sure you want to delete this course?",
+            "deleteButtonText": "Delete Course"
+        },
+        "CourseThumbnailLanding": {
+            "updatedDate": "Updated {date, date, short}",
+            "startLearningButton": "Start Learning",
+            "deleteConfirmationTitle": "Delete {courseName}?",
+            "deleteConfirmationMessage": "Are you sure you want to delete this course?",
+            "deleteButtonText": "Delete Course"
+        },
+        "CollectionThumbnail": {
+            "courseCount": "{count, plural, =0 {0 courses} one {# course} other {# courses}}",
+            "deleteConfirmationTitle": "Delete {collectionName}?",
+            "deleteConfirmationMessage": "Are you sure you want to delete this collection?",
+            "deleteButtonText": "Delete Collection"
         },
         "CreateCourseModal": {
             "createCourse": "Create Course",
@@ -92,6 +113,229 @@
             "kz": "Kazakh",
             "sp": "Spanish",
             "fr": "French"
+        },
+        "PageLoading": {
+            "loading": "Loading..."
+        },
+        "OrgMenuLinks": {
+            "courses": "Courses",
+            "collections": "Collections",
+            "trail": "Trail"
+        },
+        "EditAssignmentModal": {
+            "editAssignment": "Edit Assignment",
+            "updateDetails": "Update assignment details",
+            "assignmentTitle": "Assignment Title",
+            "assignmentDescription": "Assignment Description",
+            "dueDate": "Due Date",
+            "gradingType": "Grading Type",
+            "alphabet": "Alphabet",
+            "numeric": "Numeric",
+            "percentage": "Percentage",
+            "cancel": "Cancel",
+            "saveChanges": "Save Changes",
+            "saving": "Saving...",
+            "updateLoading": "Updating assignment...",
+            "updateSuccess": "Assignment updated successfully",
+            "updateError": "Failed to update assignment",
+            "updateErrorGeneric": "An error occurred while updating the assignment",
+            "valueMissingTitle": "Please provide a name for your assignment",
+            "valueMissingDescription": "Please provide a description for your assignment",
+            "valueMissingDueDate": "Please provide a due date for your assignment",
+            "valueMissingGradingType": "Please provide a grading type for your assignment"
+        },
+        "NewAssignmentModal": {
+            "assignmentTitle": "Assignment Title",
+            "assignmentDescription": "Assignment Description",
+            "dueDate": "Due Date",
+            "gradingType": "Grading Type",
+            "alphabet": "Alphabet",
+            "numeric": "Numeric",
+            "percentage": "Percentage",
+            "createActivity": "Create activity",
+            "creatingAssignment": "Creating assignment...",
+            "createSuccess": "Assignment created successfully",
+            "createError": "Failed to create assignment: {error}",
+            "valueMissingTitle": "Please provide a name for your assignment",
+            "valueMissingDescription": "Please provide a description for your assignment",
+            "valueMissingDueDate": "Please provide a due date for your assignment",
+            "valueMissingGradingType": "Please provide a grading type for your assignment"
+        },
+        "DocumentPdfModal": {
+            "pdfDocumentName": "PDF Document name",
+            "pdfDocumentFile": "PDF Document file",
+            "createActivity": "Create activity",
+            "valueMissingName": "Please provide a name for your PDF Document activity",
+            "valueMissingFile": "Please provide a PDF Document for your activity"
+        },
+        "DynamicCanvaModal": {
+            "activityName": "Activity name",
+            "activityDescription": "Activity description",
+            "createActivity": "Create activity",
+            "valueMissingName": "Please provide a name for your activity",
+            "valueMissingDescription": "Please provide a description for your activity"
+        },
+        "VideoModal": {
+            "videoName": "Video name",
+            "videoFile": "Video file",
+            "youtubeUrl": "YouTube URL",
+            "videoUpload": "Video upload",
+            "youtubeVideo": "YouTube Video",
+            "createActivity": "Create activity",
+            "valueMissingName": "Please provide a name for your video activity",
+            "valueMissingFile": "Please provide a video for your activity",
+            "valueMissingUrl": "Please provide a YouTube URL for your activity"
+        },
+        "NewActivity": {
+            "dynamicPage": "Dynamic Page",
+            "video": "Video",
+            "document": "Document",
+            "assignments": "Assignments"
+        },
+        "NewChapterModal": {
+            "chapterName": "Chapter name",
+            "chapterDescription": "Chapter description",
+            "createChapter": "Create Chapter",
+            "valueMissingName": "Please provide a chapter name",
+            "valueMissingDescription": "Please provide a chapter description"
+        },
+        "LinkToUserGroup": {
+            "infoMessage": "Users that are not part of the UserGroup will no longer have access to this course",
+            "userGroupNameLabel": "UserGroup Name",
+            "noUserGroupsAvailable": "No UserGroups available",
+            "createUserGroupLink": "Create a UserGroup",
+            "linkButton": "Link",
+            "linkSuccess": "Successfully linked to usergroup",
+            "linkError": "Error linking to usergroup: {error}"
+        },
+        "OrgInviteCodeGenerate": {
+            "linkedTitle": "Invite Code linked to a UserGroup",
+            "linkedDescription": "On Signup, Users will be automatically linked to a UserGroup of your choice",
+            "generateButton": "Generate",
+            "noUserGroupsAvailable": "No UserGroups available",
+            "createUserGroupLink": "Create a UserGroup",
+            "normalTitle": "Normal Invite Code",
+            "normalDescription": "On Signup, User will not be linked to any UserGroup",
+            "createInviteError": "Error creating invite code: {error}"
+        },
+        "AddUserGroup": {
+            "nameLabel": "Name",
+            "descriptionLabel": "Description",
+            "nameRequiredError": "Name is Required",
+            "createButton": "Create a UserGroup",
+            "loadingButton": "Loading...",
+            "toastLoading": "Creating...",
+            "toastSuccess": "Created new usergroup",
+            "toastError": "Couldn't create new usergroup"
+        },
+        "EditUserGroup": {
+            "nameLabel": "Name",
+            "descriptionLabel": "Description",
+            "nameRequiredError": "Name is Required",
+            "saveButton": "Save UserGroup",
+            "loadingButton": "Loading...",
+            "toastSuccess": "UserGroup saved successfully",
+            "toastError": "Error saving UserGroup, please retry later."
+        },
+        "ManageUsers": {
+            "userHeader": "User",
+            "linkedHeader": "Linked",
+            "actionsHeader": "Actions",
+            "linkedStatus": "Linked",
+            "notLinkedStatus": "Not linked",
+            "linkButton": "Link",
+            "unlinkButton": "Unlink",
+            "linkSuccess": "User linked successfully",
+            "linkError": "Error linking user: {error}",
+            "unlinkSuccess": "User unlinked successfully",
+            "unlinkError": "Error unlinking user: {error}"
+        },
+        "RolesUpdate": {
+            "rolesLabel": "Roles",
+            "selectRolePlaceholder": "Please choose a role for the user",
+            "adminRole": "Admin",
+            "maintainerRole": "Maintainer",
+            "userRole": "User",
+            "updateButton": "Update user role",
+            "loadingButton": "Loading...",
+            "toastLoading": "Updating role...",
+            "toastSuccess": "Updated role",
+            "toastError": "Error while updating role",
+            "updateErrorDetail": "Error updating role: {error}"
+        },
+        "Onboarding": {
+            "triggerText": "Onboarding",
+            "finishTooltip": "Finish Onboarding",
+            "step1Title": "Teach the world!",
+            "step1Desc": "Welcome to LearnHouse, a LMS engineered for simplicity, ease of use and performance, meet the new way to create, share, and engage with educational content.",
+            "step2Title": "Create Courses",
+            "step2Desc": "Courses are the main building blocks of LearnHouse, they always contain Chapters and Chapters contain Activities.",
+            "step2Button": "Create New Course",
+            "step3Title": "Activities",
+            "step3Desc": "Activities are elements you can add to your Courses via Chapters, they can be : Dynamic Pages, Videos, Documents, Quizz and more soon.",
+            "step3Button": "Learn more about activities",
+            "step4Title": "Dynamic pages and The Editor",
+            "step4Desc": "Dynamic pages are pages with dynamic content, like Notion pages they can contain various components like Quizzes, Images, Videos, Documents etc",
+            "step4Button": "Learn more about Dynamic Pages and The Editor",
+            "step5Title": "Artificial Intelligence",
+            "step5Desc": "Tools for tought made for teachers and students alike, context aware it can reply based on your courses and the unique content you create on LearnHouse",
+            "step5Button": "Learn more about LearnHouse AI",
+            "step6Title": "Group students and streamline access",
+            "step6Desc": "With UserGroups you can separate students by Groups and give access to Courses depending on their needs",
+            "step6Button": "Create UserGroups",
+            "step7Title": "Choose whether to make Courses available on the Web or not",
+            "step7Desc": "You can choose to make your Courses discoverable from search engines and accesible to non authenticated users or to only give it to authenticated Users",
+            "step8Title": "Create and Grade Assignments",
+            "step8Desc": "Engage students with assignments, track their progress, and provide feedback through our intuitive grading system.",
+            "step8Button": "Create Assignment",
+            "step9Title": "Monetize Your Content",
+            "step9Desc": "Set up payment plans, sell courses, and manage subscriptions with our integrated payment system.",
+            "step9Button": "Payment Settings",
+            "step10Title": "To infinity and beyond",
+            "step10Desc": "To Learn more about LearnHouse, you're welcome to follow our Original courses on the LearnHouse University",
+            "step10Button": "LearnHouse University",
+            "nextButton": "Next",
+            "finishButton": "Finish Onboarding",
+            "endButton": "End",
+            "minimizeButtonTooltip": "Close temporarily"
+        },
+        "SearchBar": {
+            "placeholder": "Search courses, users, collections...",
+            "discoverTitle": "Discover Your Next Learning Journey",
+            "discoverSubtitle": "Start typing to search through available content",
+            "suggestionsTitle": "Search suggestions",
+            "quickResultsTitle": "Quick Results",
+            "coursesSection": "Courses",
+            "collectionsSection": "Collections",
+            "usersSection": "Users",
+            "courseType": "Course",
+            "collectionType": "Collection",
+            "userType": "User",
+            "viewAllResults": "View all results"
+        },
+        "ErrorUI": {
+            "defaultMessage": "Something went wrong",
+            "retryButton": "Retry",
+            "homeButton": "Home"
+        },
+        "InfoUI": {
+            "defaultMessage": "Information",
+            "homeButton": "Home"
+        },
+        "Modal": {
+            "closeButtonDefault": "Close"
+        },
+        "TypeOfContentTitle": {
+            "logoAlt": "{type} logo"
+        },
+        "UserAvatar": {
+            "altText": "User Avatar"
+        },
+        "UserProfilePopup": {
+            "loadingError": "Failed to load user data"
+        },
+        "Form": {
+            "errorMessageDefault": "Invalid input"
         }
     },
     "HomePage": {
@@ -340,7 +584,6 @@
         "UserSettings": {
             "users": "Users",
             "signups": "Signups & Invite Codes",
-            "add": "Invite Members",
             "usergroups": "UserGroups",
             "usersTitle": "Users",
             "usersDescription": "Manage your organization users, assign roles and permissions",
@@ -352,7 +595,8 @@
             "usergroupsDescription": "Create and manage user groups",
             "desktopOnlyTitle": "Desktop Only",
             "desktopOnlyMessage1": "This page is only accessible from a desktop device.",
-            "desktopOnlyMessage2": "Please switch to a desktop to view and manage user settings."
+            "desktopOnlyMessage2": "Please switch to a desktop to view and manage user settings.",
+            "add": "Invite Members"
         }
     },
     "NewCollectionPage": {

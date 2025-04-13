@@ -1,3 +1,4 @@
+'use client'
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -10,8 +11,10 @@ import FormLayout, {
 import React, { useState } from 'react'
 import * as Form from '@radix-ui/react-form'
 import BarLoader from 'react-spinners/BarLoader'
+import { useTranslations } from 'next-intl'
 
 function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
+  const t = useTranslations('Components.DynamicCanvaModal')
   const [activityName, setActivityName] = useState('')
   const [activityDescription, setActivityDescription] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -42,9 +45,9 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
     <FormLayout onSubmit={handleSubmit}>
       <FormField name="dynamic-activity-name">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <FormLabel>Activity name</FormLabel>
+          <FormLabel>{t('activityName')}</FormLabel>
           <FormMessage match="valueMissing">
-            Please provide a name for your activity
+            {t('valueMissingName')}
           </FormMessage>
         </Flex>
         <Form.Control asChild>
@@ -53,9 +56,9 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
       </FormField>
       <FormField name="dynamic-activity-desc">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <FormLabel>Activity description</FormLabel>
+          <FormLabel>{t('activityDescription')}</FormLabel>
           <FormMessage match="valueMissing">
-            Please provide a description for your activity
+            {t('valueMissingDescription')}
           </FormMessage>
         </Flex>
         <Form.Control asChild>
@@ -73,7 +76,7 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
                 color="#ffffff"
               />
             ) : (
-              'Create activity'
+              t('createActivity')
             )}
           </ButtonBlack>
         </Form.Submit>
