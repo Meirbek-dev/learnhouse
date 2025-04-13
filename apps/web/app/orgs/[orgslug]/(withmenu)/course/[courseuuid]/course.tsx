@@ -19,8 +19,11 @@ import { CourseProvider } from '@components/Contexts/CourseContext'
 import { useMediaQuery } from 'usehooks-ts'
 import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions'
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
+import { useTranslations } from 'next-intl'
 
 const CourseClient = (props: any) => {
+  const t = useTranslations('CoursePage')
+  const tGeneral = useTranslations('General')
   const [learnings, setLearnings] = useState<any>([])
   const [expandedChapters, setExpandedChapters] = useState<{[key: string]: boolean}>({})
   const courseuuid = props.courseuuid
@@ -56,7 +59,7 @@ const CourseClient = (props: any) => {
       text: text.trim(), // Trim whitespace that might be present after commas
       emoji: '📝' // Default emoji for legacy items
     }))
-    
+
     setLearnings(learningItems)
   }
 
@@ -73,7 +76,7 @@ const CourseClient = (props: any) => {
           <GeneralWrapperStyled>
             <div className="pb-3 flex flex-col md:flex-row justify-between items-start md:items-center">
               <div>
-                <p className="text-md font-bold text-gray-400 pb-2">Course</p>
+                <p className="text-md font-bold text-gray-400 pb-2">{tGeneral('course')}</p>
                 <h1 className="text-3xl md:text-3xl -mt-3 font-bold">{course.name}</h1>
               </div>
               <div className="mt-4 md:mt-0">
@@ -112,7 +115,7 @@ const CourseClient = (props: any) => {
 
             <div className="flex flex-col md:flex-row md:space-x-10 space-y-6 md:space-y-0 pt-10">
               <div className="course_metadata_left w-full md:basis-3/4 space-y-2">
-                <h2 className="py-3 text-2xl font-bold">About</h2>
+                <h2 className="py-3 text-2xl font-bold">{t('about')}</h2>
                 <div className="">
                   <p className="py-5  whitespace-pre-wrap">{course.about}</p>
                 </div>
@@ -120,7 +123,7 @@ const CourseClient = (props: any) => {
                 {learnings.length > 0 && learnings[0]?.text !== 'null' && (
                   <div>
                     <h2 className="py-3 text-2xl font-bold">
-                      What you will learn
+                      {t('whatYouWillLearn')}
                     </h2>
                     <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden px-5 py-5 space-y-2">
                       {learnings.map((learning: any) => {
@@ -128,9 +131,9 @@ const CourseClient = (props: any) => {
                         const learningText = typeof learning === 'string' ? learning : learning.text
                         const learningEmoji = typeof learning === 'string' ? null : learning.emoji
                         const learningId = typeof learning === 'string' ? learning : learning.id || learning.text
-                        
+
                         if (!learningText) return null
-                        
+
                         return (
                           <div
                             key={learningId}
@@ -145,9 +148,9 @@ const CourseClient = (props: any) => {
                             </div>
                             <p>{learningText}</p>
                             {learning.link && (
-                              <a 
-                                href={learning.link} 
-                                target="_blank" 
+                              <a
+                                href={learning.link}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-500 hover:underline text-sm"
                               >
@@ -162,13 +165,13 @@ const CourseClient = (props: any) => {
                   </div>
                 )}
 
-                <h2 className="py-3 text-xl md:text-2xl font-bold">Course Lessons</h2>
+                <h2 className="py-3 text-xl md:text-2xl font-bold">{t('courseLessons')}</h2>
                 <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
                   {course.chapters.map((chapter: any) => {
                     const isExpanded = expandedChapters[chapter.chapter_uuid] ?? true; // Default to expanded
                     return (
                       <div key={chapter.chapter_uuid || `chapter-${chapter.name}`} className="">
-                        <div 
+                        <div
                           className="flex text-lg py-4 px-4 outline outline-1 outline-neutral-200/40 font-bold bg-neutral-50 text-neutral-600 items-center cursor-pointer hover:bg-neutral-100 transition-colors"
                           onClick={() => setExpandedChapters(prev => ({
                             ...prev,
@@ -180,10 +183,10 @@ const CourseClient = (props: any) => {
                             <p className="text-sm font-normal text-neutral-400 px-3 py-[2px] outline-1 outline outline-neutral-200 rounded-full whitespace-nowrap shrink-0">
                               {chapter.activities.length} Activities
                             </p>
-                            <svg 
-                              className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-                              fill="none" 
-                              stroke="currentColor" 
+                            <svg
+                              className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                              fill="none"
+                              stroke="currentColor"
                               viewBox="0 0 24 24"
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -353,7 +356,7 @@ const CourseClient = (props: any) => {
               </div>
             </div>
           </GeneralWrapperStyled>
-          
+
           {isMobile && (
             <div className="fixed bottom-0 left-0 right-0  p-4 z-50">
               <CourseActionsMobile courseuuid={courseuuid} orgslug={orgslug} course={course} />

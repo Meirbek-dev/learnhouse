@@ -7,6 +7,7 @@ import { nextAuthOptions } from 'app/auth/options'
 import { Metadata } from 'next'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; courseid: string; collectionid: string }>
@@ -17,6 +18,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params;
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
+  const t = await getTranslations('General')
 
   // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
@@ -31,8 +33,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // SEO
   return {
-    title: `Collection : ${col.name}  — ${org.name}`,
-    description: `${col.description} `,
+    title: `${t('collection')}: ${col.name} — ${org.name}`,
+    description: `${col.description}`,
     robots: {
       index: true,
       follow: true,
@@ -44,14 +46,15 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       },
     },
     openGraph: {
-      title: `Collection : ${col.name}  — ${org.name}`,
-      description: `${col.description} `,
+      title: `${t('collection')}: ${col.name} — ${org.name}`,
+      description: `${col.description}`,
       type: 'website',
     },
   }
 }
 
 const CollectionPage = async (params: any) => {
+  const t = await getTranslations('General')
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
   const org = await getOrganizationContextInfo((await params.params).orgslug, {
@@ -71,7 +74,7 @@ const CollectionPage = async (params: any) => {
 
   return (
     <GeneralWrapperStyled>
-      <h2 className="text-sm font-bold text-gray-400">Collection</h2>
+      <h2 className="text-sm font-bold text-gray-400">{t('collection')}</h2>
       <h1 className="text-3xl font-bold">{col.name}</h1>
       <br />
       <div className="home_courses flex flex-wrap">

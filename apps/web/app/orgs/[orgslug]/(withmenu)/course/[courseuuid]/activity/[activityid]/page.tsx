@@ -5,6 +5,7 @@ import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
 import { getServerSession } from 'next-auth'
 import { nextAuthOptions } from 'app/auth/options'
+import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>
@@ -30,6 +31,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params;
   const session = await getServerSession(nextAuthOptions as any) as Session
   const access_token = session?.tokens?.access_token || null
+  const t = await getTranslations('General')
 
   // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
@@ -45,7 +47,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // SEO
   return {
-    title: activity.name + ` — ${course_meta.name} Course`,
+    title: `${activity.name} — ${t('course')}: ${course_meta.name}`,
     description: course_meta.description,
     keywords: course_meta.learnings,
     robots: {
@@ -59,7 +61,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       },
     },
     openGraph: {
-      title: activity.name + ` — ${course_meta.name} Course`,
+      title: `${activity.name} — ${t('course')}: ${course_meta.name}`,
       description: course_meta.description,
       publishedTime: course_meta.creation_date,
       tags: course_meta.learnings,
@@ -73,6 +75,8 @@ const ActivityPage = async (params: any) => {
   const activityid = (await params.params).activityid
   const courseuuid = (await params.params).courseuuid
   const orgslug = (await params.params).orgslug
+
+  const t = await getTranslations('General')
 
   const [course_meta, activity] = await Promise.all([
     fetchCourseMetadata(courseuuid, access_token),
@@ -90,6 +94,7 @@ const ActivityPage = async (params: any) => {
       orgslug={orgslug}
       activity={activity}
       course={course_meta}
+      translations={t}
     />
   )
 }

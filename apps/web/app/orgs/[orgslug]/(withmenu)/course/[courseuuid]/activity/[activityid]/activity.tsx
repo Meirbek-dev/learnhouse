@@ -28,6 +28,7 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import { useMediaQuery } from 'usehooks-ts'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
+import { useTranslations } from 'next-intl'
 
 interface ActivityClientProps {
   activityid: string
@@ -35,9 +36,12 @@ interface ActivityClientProps {
   orgslug: string
   activity: any
   course: any
+  translations?: any
 }
 
 function ActivityClient(props: ActivityClientProps) {
+  const t = useTranslations('CoursePage')
+  const tGeneral = props.translations || useTranslations('General')
   const activityid = props.activityid
   const courseuuid = props.courseuuid
   const orgslug = props.orgslug
@@ -51,7 +55,7 @@ function ActivityClient(props: ActivityClientProps) {
   const [assignment, setAssignment] = React.useState(null) as any;
   const [markStatusButtonActive, setMarkStatusButtonActive] = React.useState(false);
   const { contributorStatus } = useContributorStatus(courseuuid);
- 
+
 
   function getChapterNameByActivityId(course: any, activity_id: any) {
     for (let i = 0; i < course.chapters.length; i++) {
@@ -110,7 +114,7 @@ function ActivityClient(props: ActivityClientProps) {
                     </Link>
                   </div>
                   <div className="flex flex-col -space-y-1">
-                    <p className="font-bold text-gray-700 text-md">Course </p>
+                    <p className="font-bold text-gray-700 text-md">{tGeneral('course')} </p>
                     <h1 className="font-bold text-gray-950 text-2xl first-letter:uppercase">
                       {course.name}
                     </h1>
@@ -126,14 +130,15 @@ function ActivityClient(props: ActivityClientProps) {
 
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
-                  <ActivityChapterDropdown 
+                  <ActivityChapterDropdown
                     course={course}
                     currentActivityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
                     orgslug={orgslug}
+                    t={t}
                   />
                   <div className="flex flex-col -space-y-1">
                     <p className="font-bold text-gray-700 text-md">
-                      Chapter : {getChapterNameByActivityId(course, activity.id)}
+                      {t('courseLessons')} : {getChapterNameByActivityId(course, activity.id)}
                     </p>
                     <h1 className="font-bold text-gray-950 text-2xl first-letter:uppercase">
                       {activity.name}
@@ -232,7 +237,7 @@ function ActivityClient(props: ActivityClientProps) {
                   )}
                 </>
               )}
-              
+
               {/* Activity Navigation */}
               {activity && activity.published == true && activity.content.paid_access != false && (
                 <ActivityNavigation
@@ -241,7 +246,7 @@ function ActivityClient(props: ActivityClientProps) {
                   orgslug={orgslug}
                 />
               )}
-              
+
               {<div style={{ height: '100px' }}></div>}
             </div>
           </GeneralWrapperStyled>
@@ -426,6 +431,7 @@ function ActivityChapterDropdown(props: {
   course: any
   currentActivityId: string
   orgslug: string
+  t: any
 }): React.ReactNode {
   const [isOpen, setIsOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
@@ -479,19 +485,19 @@ function ActivityChapterDropdown(props: {
       >
         <ListTree size={18} className="text-gray-700" />
       </button>
-      
+
       {isOpen && (
         <div className={`absolute z-50 mt-2 ${isMobile ? 'left-0 w-[90vw] sm:w-80' : 'left-0 w-80'} max-h-[70vh] cursor-pointer overflow-y-auto bg-white rounded-lg shadow-xl border border-gray-200 py-2 animate-in fade-in duration-200`}>
           <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-bold text-gray-800">Course Content</h3>
-            <button 
+            <h3 className="font-bold text-gray-800">{props.t('courseContent')}</h3>
+            <button
               onClick={() => setIsOpen(false)}
               className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 cursor-pointer"
             >
               <X size={18} />
             </button>
           </div>
-          
+
           <div className="py-1">
             {props.course.chapters.map((chapter: any) => (
               <div key={chapter.id} className="mb-2">
@@ -506,7 +512,7 @@ function ActivityChapterDropdown(props: {
                     // Remove any prefixes from UUIDs
                     const cleanActivityUuid = activity.activity_uuid?.replace('activity_', '');
                     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
-                    
+
                     return (
                       <Link
                         key={activity.id}
@@ -514,7 +520,7 @@ function ActivityChapterDropdown(props: {
                         prefetch={false}
                         onClick={() => setIsOpen(false)}
                       >
-                        <div 
+                        <div
                           className={`px-4 py-2.5 hover:bg-gray-100 transition-colors flex items-center ${
                             cleanActivityUuid === props.currentActivityId.replace('activity_', '') ? 'bg-gray-50 border-l-2 border-gray-300 pl-3 font-medium' : ''
                           }`}
@@ -560,12 +566,12 @@ function ActivityNavigation(props: {
   const [isBottomNavVisible, setIsBottomNavVisible] = React.useState(true);
   const bottomNavRef = React.useRef<HTMLDivElement>(null);
   const [navWidth, setNavWidth] = React.useState<number | null>(null);
-  
+
   // Function to find the current activity's position in the course
   const findActivityPosition = () => {
     let allActivities: any[] = [];
     let currentIndex = -1;
-    
+
     // Flatten all activities from all chapters
     props.course.chapters.forEach((chapter: any) => {
       chapter.activities.forEach((activity: any) => {
@@ -575,27 +581,27 @@ function ActivityNavigation(props: {
           cleanUuid: cleanActivityUuid,
           chapterName: chapter.name
         });
-        
+
         // Check if this is the current activity
         if (cleanActivityUuid === props.currentActivityId.replace('activity_', '')) {
           currentIndex = allActivities.length - 1;
         }
       });
     });
-    
+
     return { allActivities, currentIndex };
   };
-  
+
   const { allActivities, currentIndex } = findActivityPosition();
-  
+
   // Get previous and next activities
   const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null;
   const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
-  
+
   // Navigate to an activity
   const navigateToActivity = (activity: any) => {
     if (!activity) return;
-    
+
     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
     router.push(getUriWithOrg(props.orgslug, '') + `/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
   };
@@ -604,29 +610,29 @@ function ActivityNavigation(props: {
   // and measure the width of the bottom navigation
   React.useEffect(() => {
     if (!bottomNavRef.current) return;
-    
+
     // Update width when component mounts and on window resize
     const updateWidth = () => {
       if (bottomNavRef.current) {
         setNavWidth(bottomNavRef.current.offsetWidth);
       }
     };
-    
+
     // Initial width measurement
     updateWidth();
-    
+
     // Set up resize listener
     window.addEventListener('resize', updateWidth);
-    
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsBottomNavVisible(entry.isIntersecting);
       },
       { threshold: 0.1 }
     );
-    
+
     observer.observe(bottomNavRef.current);
-    
+
     return () => {
       window.removeEventListener('resize', updateWidth);
       if (bottomNavRef.current) {
@@ -644,8 +650,8 @@ function ActivityNavigation(props: {
           <button
             onClick={() => navigateToActivity(prevActivity)}
             className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${
-              prevActivity 
-                ? 'text-gray-700' 
+              prevActivity
+                ? 'text-gray-700'
                 : 'opacity-50 text-gray-400 cursor-not-allowed'
             }`}
             disabled={!prevActivity}
@@ -659,12 +665,12 @@ function ActivityNavigation(props: {
               </span>
             </div>
           </button>
-          
+
           <button
             onClick={() => navigateToActivity(nextActivity)}
             className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${
-              nextActivity 
-                ? 'text-gray-700' 
+              nextActivity
+                ? 'text-gray-700'
                 : 'opacity-50 text-gray-400 cursor-not-allowed'
             }`}
             disabled={!nextActivity}
@@ -686,8 +692,8 @@ function ActivityNavigation(props: {
             <button
               onClick={() => navigateToActivity(prevActivity)}
               className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-md transition-all duration-200 cursor-pointer ${
-                prevActivity 
-                  ? 'bg-white nice-shadow text-gray-700' 
+                prevActivity
+                  ? 'bg-white nice-shadow text-gray-700'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
               disabled={!prevActivity}
@@ -702,17 +708,17 @@ function ActivityNavigation(props: {
               </div>
             </button>
           </div>
-          
+
           <div className="text-sm text-gray-500 justify-self-center">
             {currentIndex + 1} of {allActivities.length}
           </div>
-          
+
           <div className="justify-self-end">
             <button
               onClick={() => navigateToActivity(nextActivity)}
               className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-md transition-all duration-200 cursor-pointer ${
-                nextActivity 
-                  ? 'bg-white nice-shadow text-gray-700' 
+                nextActivity
+                  ? 'bg-white nice-shadow text-gray-700'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
               disabled={!nextActivity}
@@ -731,18 +737,18 @@ function ActivityNavigation(props: {
       )}
     </div>
   );
-  
+
   return (
     <>
       {/* Bottom navigation (in-place) */}
       <div ref={bottomNavRef} className="mt-6 mb-2 w-full">
         <NavigationButtons isFloating={false} />
       </div>
-      
+
       {/* Floating bottom navigation - shown when bottom nav is not visible */}
       {!isBottomNavVisible && (
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 w-[85%] sm:w-auto sm:min-w-[350px] max-w-lg transition-all duration-300 ease-in-out">
-          <div 
+          <div
             className="bg-white/90 backdrop-blur-xl rounded-full py-1.5 px-2.5 shadow-xs animate-in fade-in slide-in-from-bottom duration-300"
           >
             <NavigationButtons isFloating={true} />
