@@ -8,6 +8,7 @@ import { getOrgCourses } from '@services/courses/courses'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding'
 import UserAvatar from '@components/Objects/UserAvatar'
+import { useTranslations } from 'next-intl'
 
 interface LandingCustomProps {
   landing: {
@@ -20,6 +21,7 @@ interface LandingCustomProps {
 function LandingCustom({ landing, orgslug }: LandingCustomProps) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const t = useTranslations('LandingCustom')
 
   // Fetch all courses for the organization
   const { data: allCourses } = useSWR(
@@ -31,12 +33,12 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
     switch (section.type) {
       case 'hero':
         return (
-          <div 
+          <div
             key={`hero-${section.title}`}
             className="min-h-[400px] sm:min-h-[500px] mt-[20px] sm:mt-[40px] mx-2 sm:mx-4 lg:mx-16 w-full flex items-center justify-center rounded-xl border border-gray-100"
             style={{
-              background: section.background.type === 'solid' 
-                ? section.background.color 
+              background: section.background.type === 'solid'
+                ? section.background.color
                 : section.background.type === 'gradient'
                 ? `linear-gradient(${section.background.direction || '45deg'}, ${section.background.colors?.join(', ')})`
                 : `url(${section.background.image}) center/cover`
@@ -67,7 +69,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                 'justify-center text-center'
               } p-6`}>
                 <div className="max-w-2xl">
-                  <h1 
+                  <h1
                     className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-4"
                     style={{ color: section.heading.color }}
                   >
@@ -105,7 +107,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
         )
       case 'text-and-image':
         return (
-          <div 
+          <div
             key={`text-image-${section.title}`}
             className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
           >
@@ -151,7 +153,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
         )
       case 'logos':
         return (
-          <div 
+          <div
             key={`logos-${section.type}`}
             className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
           >
@@ -175,7 +177,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
         )
       case 'people':
         return (
-          <div 
+          <div
             key={`people-${section.title}`}
             className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
           >
@@ -210,22 +212,22 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
       case 'featured-courses':
         if (!allCourses) {
           return (
-            <div 
+            <div
               key={`featured-courses-${section.title}`}
               className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
             >
               <h2 className="text-2xl md:text-3xl font-bold text-left mb-6 text-gray-900">{section.title}</h2>
-              <div className="text-center py-6 text-gray-500">Loading courses...</div>
+              <div className="text-center py-6 text-gray-500">{t('loadingCourses')}</div>
             </div>
           )
         }
 
-        const featuredCourses = allCourses.filter((course: any) => 
+        const featuredCourses = allCourses.filter((course: any) =>
           section.courses.includes(course.course_uuid)
         )
 
         return (
-          <div 
+          <div
             key={`featured-courses-${section.title}`}
             className="py-16 mx-2 sm:mx-4 lg:mx-16 w-full"
           >
@@ -241,7 +243,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               ))}
               {featuredCourses.length === 0 && (
                 <div className="col-span-full text-center py-6 text-gray-500">
-                  No featured courses selected
+                  {t('noFeaturedCourses')}
                 </div>
               )}
             </div>

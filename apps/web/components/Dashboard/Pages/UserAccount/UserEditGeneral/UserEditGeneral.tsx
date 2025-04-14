@@ -113,14 +113,14 @@ const DETAIL_TEMPLATES = {
   ],
 } as const
 
-const validationSchema = Yup.object().shape({
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  username: Yup.string().required('Username is required'),
-  first_name: Yup.string().required('First name is required'),
-  last_name: Yup.string().required('Last name is required'),
-  bio: Yup.string().max(400, 'Bio must be 400 characters or less'),
+const createValidationSchema = (t: (key: string, values?: any) => string) => Yup.object().shape({
+  email: Yup.string().email(t('Components.Form.invalidEmail')).required(t('Components.Form.requiredField', {fieldName: 'Email'})),
+  username: Yup.string().required(t('Components.Form.requiredField', {fieldName: 'Username'})),
+  first_name: Yup.string().required(t('Components.Form.requiredField', {fieldName: 'First name'})),
+  last_name: Yup.string().required(t('Components.Form.requiredField', {fieldName: 'Last name'})),
+  bio: Yup.string().max(400, t('Components.Form.maxChars', {count: 400})),
   details: Yup.object().shape({}),
-})
+});
 
 // Memoized detail card component for better performance
 const DetailCard = React.memo(
@@ -139,6 +139,7 @@ const DetailCard = React.memo(
   }) => {
     // Add local state for label input
     const [localLabel, setLocalLabel] = useState(detail.label)
+    const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
     // Debounce the label change handler
     const debouncedLabelChange = useDebounce((newLabel: string) => {
@@ -186,7 +187,7 @@ const DetailCard = React.memo(
           <Input
             value={localLabel}
             onChange={handleLabelChange}
-            placeholder="Enter label (e.g., Title, Location)"
+            placeholder={t('detailLabelPlaceholder')}
             className="max-w-[200px]"
           />
           <Button
@@ -196,16 +197,16 @@ const DetailCard = React.memo(
             className="text-red-500 hover:text-red-700"
             onClick={handleRemove}
           >
-            Remove
+            {t('detailRemove')}
           </Button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label>Icon</Label>
+            <Label>{t('detailIconLabel')}</Label>
             <Select value={detail.icon} onValueChange={handleIconChange}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select icon">
+                <SelectValue placeholder={t('detailSelectIconPlaceholder')}>
                   {detail.icon && (
                     <div className="flex items-center gap-2">
                       <IconComponent iconName={detail.icon} />
@@ -232,11 +233,11 @@ const DetailCard = React.memo(
             </Select>
           </div>
           <div>
-            <Label>Text</Label>
+            <Label>{t('detailTextLabel')}</Label>
             <Input
               value={detail.text}
               onChange={handleTextChange}
-              placeholder="Enter detail text"
+              placeholder={t('detailTextPlaceholder')}
             />
           </div>
         </div>
@@ -246,6 +247,7 @@ const DetailCard = React.memo(
 )
 
 DetailCard.displayName = 'DetailCard'
+
 interface UserEditFormProps {
   values: FormValues
   setFieldValue: (field: string, value: any) => void
@@ -260,7 +262,7 @@ interface UserEditFormProps {
     localAvatar: File | null
     handleFileChange: (event: any) => Promise<void>
   }
-  currentLocale: Locale // <-- Add currentLocale prop
+  currentLocale: Locale
 }
 
 // Form component to handle the details section
@@ -527,7 +529,7 @@ const UserEditForm = ({
                   <div className="flex items-center bg-red-200 rounded-md text-red-950 px-4 py-2 text-sm">
                     <FileWarning size={16} className="mr-2" />
                     <span className="font-semibold first-letter:uppercase">
-                      {profilePicture.error}
+                      {t('avatarError', { error: profilePicture.error })}
                     </span>
                   </div>
                 )}
@@ -535,7 +537,7 @@ const UserEditForm = ({
                   <div className="flex items-center bg-green-200 rounded-md text-green-950 px-4 py-2 text-sm">
                     <Check size={16} className="mr-2" />
                     <span className="font-semibold first-letter:uppercase">
-                      {profilePicture.success}
+                      {t('avatarSuccess')}
                     </span>
                   </div>
                 )}
@@ -551,7 +553,7 @@ const UserEditForm = ({
                 {profilePicture.isLoading ? (
                   <div className="font-bold animate-pulse antialiased bg-green-200 text-gray text-sm rounded-md px-4 py-2 flex items-center">
                     <ArrowBigUpDash size={16} className="mr-2" />
-                    <span>Uploading</span>
+                    <span>{t('uploadingAvatar')}</span>
                   </div>
                 ) : (
                   <>
@@ -607,24 +609,26 @@ function UserEditGeneral() {
   const [userData, setUserData] = useState<any>(null)
   const [currentLocale, setCurrentLocale] = useState<Locale | null>(null)
   const [initialLoading, setInitialLoading] = useState<boolean>(true)
+  const t = useTranslations()
+  const tNotify = useTranslations('Notifications')
+  const tGeneralSection = useTranslations('DashPage.UserAccountSettings.generalSection')
+  const validationSchema = React.useMemo(() => createValidationSchema(t), [t])
 
   useEffect(() => {
     const fetchData = async () => {
       if (session?.data?.user?.id && access_token) {
         try {
-          // Fetch user data and locale concurrently
           const [userDataResponse, localeResponse] = await Promise.all([
             getUser(session.data.user.id, access_token),
             getUserLocale(),
           ])
           setUserData(userDataResponse)
-
           setCurrentLocale(localeResponse as Locale)
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : 'Unknown error'
           console.error('Error fetching initial data:', errorMessage, err)
-          setError('Failed to load required data')
+          setError(tGeneralSection('loadingError'))
         } finally {
           setInitialLoading(false)
         }
@@ -634,12 +638,11 @@ function UserEditGeneral() {
     }
 
     fetchData()
-  }, [session?.data?.user?.id, access_token])
+  }, [session?.data?.user?.id, access_token, tGeneralSection])
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    // Type event
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -655,25 +658,25 @@ function UserEditGeneral() {
       )
       // await new Promise((r) => setTimeout(r, 1000));
       if (res.success === false) {
-        setError(res.HTTPmessage || 'Failed to upload avatar')
+        setError(res.HTTPmessage || tNotify('avatarError'))
       } else {
-        setSuccess('Avatar Updated')
+        setSuccess(tNotify('avatarSuccess'))
       }
     } catch (uploadError) {
       console.error('Avatar upload error:', uploadError)
-      setError('An error occurred during upload.')
+      setError(tNotify('avatarError'))
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleEmailChange = async (newEmail: string) => {
-    toast.success('Profile Updated Successfully', { duration: 4000 })
+    toast.success(tNotify('profileUpdateSuccess'), { duration: 4000 })
 
     toast(
       (t: any) => (
         <div className="flex items-center gap-2">
-          <span>Please login again with your new email: {newEmail}</span>
+          <span>{tNotify('promptLogoutOnEmailChange', { newEmail })}</span>
         </div>
       ),
       {
@@ -687,7 +690,7 @@ function UserEditGeneral() {
     signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })
   }
 
-  if (!userData || !currentLocale) {
+  if (initialLoading || !userData || !currentLocale) {
     return (
       <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow p-8">
         <div className="flex items-center justify-center">
@@ -712,7 +715,7 @@ function UserEditGeneral() {
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting }) => {
           const isEmailChanged = values.email !== userData.email
-          const loadingToast = toast.loading('Updating profile...')
+          const loadingToast = toast.loading(tNotify('updating'))
           setSubmitting(true)
 
           try {
@@ -724,11 +727,11 @@ function UserEditGeneral() {
             if (isEmailChanged) {
               await handleEmailChange(values.email)
             } else {
-              toast.success('Profile Updated Successfully')
+              toast.success(tNotify('profileUpdateSuccess'))
             }
           } catch (updateError) {
             console.error('Profile update error:', updateError)
-            toast.error('Failed to update profile', { id: loadingToast })
+            toast.error(tNotify('profileUpdateError'), { id: loadingToast })
           } finally {
             setSubmitting(false)
           }

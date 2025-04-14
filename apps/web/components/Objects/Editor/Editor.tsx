@@ -32,7 +32,7 @@ import TableRow from '@tiptap/extension-table-row'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import Link from 'next/link'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-
+import { useTranslations } from 'next-intl'
 
 // Lowlight
 import { common, createLowlight } from 'lowlight'
@@ -55,27 +55,26 @@ import { useMediaQuery } from 'usehooks-ts'
 import UserAvatar from '../UserAvatar'
 import UserBlock from './Extensions/Users/UserBlock'
 
-interface Editor {
+interface EditorProps {
   content: string
   activity: any
   course: any
   org: any
   session: any
-  setContent: (content: string) => void
+  setContent: (content: any) => void
 }
 
-function Editor(props: Editor) {
+function Editor(props: EditorProps) {
+  const t = useTranslations('Editor.Editor')
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' })
   const [isButtonAvailable, setIsButtonAvailable] = React.useState(false)
 
-
   React.useEffect(() => {
     if (is_ai_feature_enabled) {
       setIsButtonAvailable(true)
     }
-
   }, [is_ai_feature_enabled])
 
   // remove course_ from course_uuid
@@ -156,17 +155,16 @@ function Editor(props: Editor) {
     immediatelyRender: false,
   })
 
-
   const isMobile = useMediaQuery('(max-width: 767px)')
   if (isMobile) {
     // TODO: Work on a better editor mobile experience
     return (
       <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center p-4">
         <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <h2 className="text-xl font-bold mb-4">Desktop Only</h2>
+          <h2 className="text-xl font-bold mb-4">{t('mobileTitle')}</h2>
           <Monitor className='mx-auto my-5' size={60} />
-          <p>The editor is only accessible from a desktop device.</p>
-          <p>Please switch to a desktop to view.</p>
+          <p>{t('mobileMessage1')}</p>
+          <p>{t('mobileMessage2')}</p>
         </div>
       </div>
     )
@@ -195,7 +193,7 @@ function Editor(props: Editor) {
                     width={25}
                     height={25}
                     src={learnhouseIcon}
-                    alt=""
+                    alt="LearnHouse Logo"
                   />
                 </Link>
                 <Link target="_blank" href={`/course/${course_uuid}`}>
@@ -205,7 +203,7 @@ function Editor(props: Editor) {
                       props.course.course_uuid,
                       props.course.thumbnail_image
                     ) : getUriWithOrg(props.org?.slug,'/empty_thumbnail.png')}`}
-                    alt=""
+                    alt={`${props.course.name} Thumbnail`}
                   ></EditorInfoThumbnail>
                 </Link>
                 <EditorInfoDocName>
@@ -234,6 +232,7 @@ function Editor(props: Editor) {
                           'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)',
                       }}
                       className="rounded-md px-3 py-2 drop-shadow-md flex  items-center space-x-1.5 text-sm text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out hover:scale-105"
+                      title={t('aiEditor')}
                     >
                       {' '}
                       <i>
@@ -241,10 +240,10 @@ function Editor(props: Editor) {
                           className=""
                           width={20}
                           src={learnhouseAI_icon}
-                          alt=""
+                          alt="AI Editor Icon"
                         />
                       </i>{' '}
-                      <i className="not-italic text-xs font-bold">AI Editor</i>
+                      <i className="not-italic text-xs font-bold">{t('aiEditor')}</i>
                     </div>
                   )}
                 </div>
@@ -263,9 +262,9 @@ function Editor(props: Editor) {
                   onClick={() => props.setContent(editor.getJSON())}
                 >
                   {' '}
-                  Save{' '}
+                  {t('save')}{' '}
                 </div>
-                <ToolTip content="Preview">
+                <ToolTip content={t('preview')}>
                   <Link
                     target="_blank"
                     href={`/course/${course_uuid}/activity/${activity_uuid}`}

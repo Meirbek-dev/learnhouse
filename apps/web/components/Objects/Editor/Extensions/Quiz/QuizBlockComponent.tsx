@@ -1,3 +1,5 @@
+'use client'
+
 import { NodeViewWrapper } from '@tiptap/react'
 import { v4 as uuidv4 } from 'uuid'
 import { twMerge } from 'tailwind-merge'
@@ -5,6 +7,7 @@ import React from 'react'
 import { BadgeHelp, Check, Minus, Plus, RefreshCcw } from 'lucide-react'
 import ReactConfetti from 'react-confetti'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
+import { useTranslations } from 'next-intl'
 
 interface Answer {
   answer_id: string
@@ -19,6 +22,7 @@ interface Question {
 }
 
 function QuizBlockComponent(props: any) {
+  const t = useTranslations('Editor.QuizBlock')
   const [questions, setQuestions] = React.useState(
     props.node.attrs.questions
   ) as [Question[], any]
@@ -78,7 +82,7 @@ function QuizBlockComponent(props: any) {
       );
     });
 
-    setSubmissionMessage(correctAnswers ? 'All answers are correct!' : 'Some answers are incorrect!');
+    setSubmissionMessage(correctAnswers ? t('allCorrect') : t('someIncorrect'));
   }
 
   const getAnswerID = (answerIndex: number, questionId: string) => {
@@ -211,7 +215,7 @@ function QuizBlockComponent(props: any) {
       >
         {/* Header section */}
         <div className="flex flex-wrap gap-2 pt-1 items-center text-sm">
-          {submitted && submissionMessage === 'All answers are correct!' && (
+          {submitted && submissionMessage === t('allCorrect') && (
             <ReactConfetti
               numberOfPieces={submitted ? 1400 : 0}
               recycle={false}
@@ -221,23 +225,22 @@ function QuizBlockComponent(props: any) {
           <div className="flex space-x-2 items-center text-sm">
             <BadgeHelp className="text-slate-400" size={15} />
             <p className="uppercase tracking-widest text-xs font-bold py-1 text-slate-400">
-              Quiz
+              {t('title')}
             </p>
           </div>
-          
+
           {/* Submission message */}
           {submitted && (
-            <div className={`text-xs font-medium px-2 py-1 rounded-md ${
-              submissionMessage === 'All answers are correct!' 
-                ? 'bg-lime-100 text-lime-700' 
+            <div className={`text-xs font-medium px-2 py-1 rounded-md ${submissionMessage === t('allCorrect')
+                ? 'bg-lime-100 text-lime-700'
                 : 'bg-red-100 text-red-700'
             }`}>
               {submissionMessage}
             </div>
           )}
-          
+
           <div className="grow"></div>
-          
+
           {/* Action buttons */}
           {isEditable ? (
             <div>
@@ -245,7 +248,7 @@ function QuizBlockComponent(props: any) {
                 onClick={addSampleQuestion}
                 className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-1 px-2 rounded-lg text-xs"
               >
-                Add Question
+                {t('addQuestion')}
               </button>
             </div>
           ) : (
@@ -253,7 +256,7 @@ function QuizBlockComponent(props: any) {
               <div
                 onClick={() => refreshUserSubmission()}
                 className="cursor-pointer p-1.5 rounded-md hover:bg-slate-200"
-                title="Reset answers"
+                title={t('resetAnswers')}
               >
                 <RefreshCcw
                   className="text-slate-500"
@@ -264,7 +267,7 @@ function QuizBlockComponent(props: any) {
                 onClick={() => handleUserSubmission()}
                 className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-1 px-2 rounded-lg text-xs"
               >
-                Submit
+                {t('submit')}
               </button>
             </div>
           )}
@@ -279,7 +282,7 @@ function QuizBlockComponent(props: any) {
                   {isEditable ? (
                     <input
                       value={question.question}
-                      placeholder="Your Question"
+                      placeholder={t('questionPlaceholder')}
                       onChange={(e) =>
                         changeQuestionValue(
                           question.question_id,
@@ -298,12 +301,13 @@ function QuizBlockComponent(props: any) {
                   <div
                     onClick={() => deleteQuestion(question.question_id)}
                     className="w-[24px] flex-none flex items-center h-[24px] rounded-lg bg-slate-200 hover:bg-slate-300 text-sm transition-all ease-linear cursor-pointer"
+                    title={t('deleteQuestion')}
                   >
                     <Minus className="mx-auto text-slate-500" size={14} />
                   </div>
                 )}
               </div>
-              
+
               {/* Answers section - changed to vertical layout for better responsiveness */}
               <div className="answers flex flex-col py-2 space-y-2">
                 {question.answers.map((answer: Answer) => (
@@ -374,7 +378,7 @@ function QuizBlockComponent(props: any) {
                             e.target.value
                           )
                         }
-                        placeholder="Answer"
+                        placeholder={t('answerPlaceholder')}
                         className="w-full mx-2 px-3 pr-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold py-1.5"
                       ></input>
                     ) : (
@@ -393,7 +397,7 @@ function QuizBlockComponent(props: any) {
                             );
                           }}
                           className="w-[24px] flex-none flex items-center h-[24px] rounded-lg bg-lime-300 hover:bg-lime-400 transition-all ease-linear text-sm cursor-pointer"
-                          title={answer.correct ? "Mark as incorrect" : "Mark as correct"}
+                          title={answer.correct ? t('markIncorrect') : t('markCorrect')}
                         >
                           <Check className="mx-auto text-lime-800" size={14} />
                         </div>
@@ -403,7 +407,7 @@ function QuizBlockComponent(props: any) {
                             deleteAnswer(question.question_id, answer.answer_id);
                           }}
                           className="w-[24px] flex-none flex items-center h-[24px] rounded-lg bg-slate-200 hover:bg-slate-300 text-sm transition-all ease-linear cursor-pointer"
-                          title="Delete answer"
+                          title={t('deleteAnswer')}
                         >
                           <Minus className="mx-auto text-slate-500" size={14} />
                         </div>
@@ -417,7 +421,7 @@ function QuizBlockComponent(props: any) {
                     className="outline outline-2 w-full flex-none flex items-center h-[36px] outline-white hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white text-sm hover:scale-[1.01] active:scale-[1.02] duration-150 cursor-pointer ease-linear justify-center"
                   >
                     <Plus className="text-slate-800 mr-1" size={15} />
-                    <span className="text-slate-800 text-sm">Add Answer</span>
+                    <span className="text-slate-800 text-sm">{t('addAnswer')}</span>
                   </div>
                 )}
               </div>

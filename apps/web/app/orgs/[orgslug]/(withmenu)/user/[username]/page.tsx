@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { nextAuthOptions } from 'app/auth/options'
 import { Metadata } from 'next'
 import UserProfileClient from './UserProfileClient'
+import { getTranslations } from 'next-intl/server'
 
 interface UserPageParams {
   username: string;
@@ -17,26 +18,32 @@ interface UserPageProps {
 
 export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
   try {
-    const resolvedParams = await params
+    const resolvedParams = await params;
+    const t = await getTranslations('UserProfilePage');
 
-    
-
-    const userData = await getUserByUsername(resolvedParams.username)
+    const userData = await getUserByUsername(resolvedParams.username);
     return {
-      title: `${userData.first_name} ${userData.last_name} | Profile`,
-      description: userData.bio || `Profile page of ${userData.first_name} ${userData.last_name}`,
-    }
+      title: t('metaTitle', {
+        firstName: userData.first_name,
+        lastName: userData.last_name
+      }),
+      description: userData.bio || t('metaDescriptionFallback', {
+        firstName: userData.first_name,
+        lastName: userData.last_name
+      }),
+    };
   } catch (error) {
+    const t = await getTranslations('UserProfilePage');
     return {
-      title: 'User Profile',
-    }
+      title: t('metaTitleError'),
+    };
   }
 }
 
 async function UserPage({ params }: UserPageProps) {
   const resolvedParams = await params;
   const { username } = resolvedParams;
-  
+
   try {
     // Fetch user data by username
     const userData = await getUserByUsername(username);
@@ -51,17 +58,18 @@ async function UserPage({ params }: UserPageProps) {
           profile={profile}
         />
       </div>
-    )
+    );
   } catch (error) {
-    console.error('Error fetching user data:', error)
+    console.error('Error fetching user data:', error);
+    const t = await getTranslations('UserProfilePage');
     return (
       <div className="container mx-auto py-8">
         <div className="bg-white rounded-xl nice-shadow p-6">
-          <p className="text-red-600">Error loading user profile</p>
+          <p className="text-red-600">{t('profileLoadError')}</p>
         </div>
       </div>
-    )
+    );
   }
 }
 
-export default UserPage
+export default UserPage;

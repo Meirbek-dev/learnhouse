@@ -213,7 +213,7 @@ const OrgEditGeneral: React.FC = () => {
                       )}
                     </div>
 
-                    
+
 
                     <div className="flex items-center justify-between space-x-2 mt-6 bg-gray-50/50 p-4 rounded-lg nice-shadow">
                       <div className="flex items-center space-x-4">
@@ -232,7 +232,7 @@ const OrgEditGeneral: React.FC = () => {
                         <div className="space-y-0.5">
                           <Label className="text-base">Showcase in LearnHouse Explore</Label>
                           <p className="text-sm text-gray-500">
-                            Share your organization's courses and content with the LearnHouse community. 
+                            Share your organization's courses and content with the LearnHouse community.
                             Enable this to help learners discover your valuable educational resources.
                           </p>
                         </div>
@@ -247,8 +247,8 @@ const OrgEditGeneral: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-row-reverse mt-0 mx-5 mb-5">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isSubmitting}
                   className="bg-black text-white hover:bg-black/90"
                 >

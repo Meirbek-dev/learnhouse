@@ -1,3 +1,4 @@
+'use client';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import UserAvatar from '@components/Objects/UserAvatar'
+import { useTranslations } from 'next-intl'
 
 type EditCourseContributorsProps = {
     orgslug: string
@@ -53,6 +55,10 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
     const course = useCourse() as any;
     const { isLoading, courseStructure } = course as any;
     const dispatchCourse = useCourseDispatch() as any;
+    const t = useTranslations('DashPage.Courses.Contributors');
+    const tNotify = useTranslations('Notifications');
+    const tGeneral = useTranslations('General');
+    const tAccess = useTranslations('DashPage.Courses.Access');
 
     const { data: contributors } = useSWR<Contributor[]>(
         courseStructure ? `${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors` : null,
@@ -88,7 +94,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
 
             // Don't allow editing if the user is a CREATOR
             if (currentContributor.authorship === 'CREATOR') {
-                toast.error('Cannot modify a creator\'s role or status');
+                toast.error(tNotify('cannotModifyCreator'));
                 return;
             }
 
@@ -100,15 +106,37 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
 
             const res = await editContributor(courseStructure.course_uuid, contributorId, updatedData.authorship, updatedData.authorship_status, access_token);
             if (res.status === 200 && res.data?.status === 'success') {
-                toast.success(res.data.detail || 'Successfully updated contributor');
+                toast.success(
+                  res.data.detail || tNotify('contributorUpdateSuccess')
+                )
                 mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors`);
             } else {
-                toast.error(`Error: ${res.data?.detail || 'Failed to update contributor'}`);
+                toast.error(tNotify('contributorUpdateErrorDetailed', { error: res.data?.detail }));
             }
         } catch (error) {
-            toast.error('An error occurred while updating the contributor.');
+            toast.error(tNotify('contributorUpdateErrorGeneric'));
         }
     };
+
+    // Helper to translate roles
+    const translateRole = (role: ContributorRole) => {
+        switch(role) {
+            case 'CONTRIBUTOR': return t('roleContributor');
+            case 'MAINTAINER': return t('roleMaintainer');
+            case 'REPORTER': return t('roleReporter');
+            case 'CREATOR': return tGeneral('role');
+            default: return role;
+        }
+    }
+    // Helper to translate statuses
+    const translateStatus = (status: ContributorStatus) => {
+         switch(status) {
+            case 'ACTIVE': return t('statusActive');
+            case 'INACTIVE': return t('statusInactive');
+            case 'PENDING': return t('statusPending');
+            default: return status;
+        }
+    }
 
     const RoleDropdown = ({ contributor }: { contributor: Contributor }) => (
         <DropdownMenu>
@@ -118,7 +146,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     className="w-[200px] justify-between"
                     disabled={contributor.authorship === 'CREATOR'}
                 >
-                    {contributor.authorship}
+                    {translateRole(contributor.authorship)}
                     <ChevronDown className="ml-2 h-4 w-4 text-muted-foreground" />
                 </Button>
             </DropdownMenuTrigger>
@@ -129,7 +157,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                         onClick={() => updateContributor(contributor.user_id, { authorship: role as ContributorRole })}
                         className="justify-between"
                     >
-                        {role}
+                        {translateRole(role as ContributorRole)}
                         {contributor.authorship === role && <Check className="ml-2 h-4 w-4" />}
                     </DropdownMenuItem>
                 ))}
@@ -145,7 +173,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     className={`w-[200px] justify-between ${getStatusStyle(contributor.authorship_status)}`}
                     disabled={contributor.authorship === 'CREATOR'}
                 >
-                    {contributor.authorship_status}
+                    {translateStatus(contributor.authorship_status)}
                     <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
@@ -156,7 +184,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                         onClick={() => updateContributor(contributor.user_id, { authorship_status: status as ContributorStatus })}
                         className="justify-between"
                     >
-                        {status}
+                        {translateStatus(status as ContributorStatus)}
                         {contributor.authorship_status === status && <Check className="ml-2 h-4 w-4" />}
                     </DropdownMenuItem>
                 ))}
@@ -179,11 +207,11 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
 
     const sortContributors = (contributors: Contributor[] | undefined) => {
         if (!contributors) return [];
-        
+
         // Find the creator and other contributors
         const creator = contributors.find(c => c.authorship === 'CREATOR');
         const otherContributors = contributors.filter(c => c.authorship !== 'CREATOR');
-        
+
         // Return array with creator at the top, followed by other contributors in their original order
         return creator ? [creator, ...otherContributors] : otherContributors;
     };
@@ -195,30 +223,30 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     <div className="h-6"></div>
                     <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
                         <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-                            <h1 className="font-bold text-lg sm:text-xl text-gray-800">Course Contributors</h1>
+                            <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('title')}</h1>
                             <h2 className="text-gray-500 text-xs sm:text-sm">
-                                Choose if you want your course to be open for contributors and manage existing contributors
+                                {t('description')}
                             </h2>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mx-auto mb-3">
                             <ConfirmationModal
-                                confirmationButtonText="Open to Contributors"
-                                confirmationMessage="Are you sure you want to open this course to contributors?"
-                                dialogTitle="Open to Contributors?"
+                                confirmationButtonText={t('openToContributorsButton')}
+                                confirmationMessage={t('openConfirmMsg')}
+                                dialogTitle={t('openConfirmTitle')}
                                 dialogTrigger={
                                     <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
                                         {isOpenToContributors && (
                                             <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
-                                                Active
+                                                {tAccess('activeBadge')}
                                             </div>
                                         )}
                                         <div className="flex flex-col space-y-1 justify-center items-center h-full p-2 sm:p-4">
                                             <UserPen className="text-slate-400" size={32} />
                                             <div className="text-xl sm:text-2xl text-slate-700 font-bold">
-                                                Open to Contributors
+                                                {t('openToContributorsButton')}
                                             </div>
                                             <div className="text-gray-400 text-sm sm:text-md tracking-tight w-full sm:w-[500px] leading-5 text-center">
-                                                The course is open for contributors. Users can apply to become contributors and help improve the course content.
+                                                {t('openDescription')}
                                             </div>
                                         </div>
                                     </div>
@@ -227,23 +255,23 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 status="info"
                             />
                             <ConfirmationModal
-                                confirmationButtonText="Close to Contributors"
-                                confirmationMessage="Are you sure you want to close this course to contributors?"
-                                dialogTitle="Close to Contributors?"
+                                confirmationButtonText={t('closeToContributorsButton')}
+                                confirmationMessage={t('closeConfirmMsg')}
+                                dialogTitle={t('closeConfirmTitle')}
                                 dialogTrigger={
                                     <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
                                         {!isOpenToContributors && (
                                             <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
-                                                Active
+                                                {tAccess('activeBadge')}
                                             </div>
                                         )}
                                         <div className="flex flex-col space-y-1 justify-center items-center h-full p-2 sm:p-4">
                                             <Users className="text-slate-400" size={32} />
                                             <div className="text-xl sm:text-2xl text-slate-700 font-bold">
-                                                Closed to Contributors
+                                                {t('closedLabel')}
                                             </div>
                                             <div className="text-gray-400 text-sm sm:text-md tracking-tight w-full sm:w-[500px] leading-5 text-center">
-                                                The course is closed for contributors. Only existing contributors can modify the course content.
+                                                {t('closedDescription')}
                                             </div>
                                         </div>
                                     </div>
@@ -253,9 +281,9 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                             />
                         </div>
                         <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-                            <h1 className="font-bold text-lg sm:text-xl text-gray-800">Current Contributors</h1>
+                            <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('currentContributorsTitle')}</h1>
                             <h2 className="text-gray-500 text-xs sm:text-sm">
-                                Manage the current contributors of this course
+                                {t('currentContributorsDescription')}
                             </h2>
                         </div>
                         <div className="max-h-[600px] overflow-y-auto">
@@ -263,10 +291,10 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead className="w-[50px]"></TableHead>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Email</TableHead>
-                                        <TableHead>Role</TableHead>
-                                        <TableHead>Status</TableHead>
+                                        <TableHead>{t('tableHeaderName')}</TableHead>
+                                        <TableHead>{t('tableHeaderEmail')}</TableHead>
+                                        <TableHead>{t('tableHeaderRole')}</TableHead>
+                                        <TableHead>{t('tableHeaderStatus')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -282,7 +310,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                                 />
                                             </TableCell>
                                             <TableCell className="font-medium">
-                                                {contributor.user.first_name} {contributor.user.last_name} 
+                                                {contributor.user.first_name} {contributor.user.last_name}
                                             </TableCell>
                                             <TableCell className="text-gray-500">
                                                 {contributor.user.email}

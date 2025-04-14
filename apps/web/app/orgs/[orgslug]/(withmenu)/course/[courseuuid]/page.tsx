@@ -6,6 +6,7 @@ import { Metadata } from 'next'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { nextAuthOptions } from 'app/auth/options'
 import { getServerSession } from 'next-auth'
+import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; courseuuid: string }>
@@ -16,6 +17,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params;
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
+  const tGeneral = await getTranslations('General')
 
   // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
@@ -30,7 +32,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // SEO
   return {
-    title: course_meta.name + ` — ${org.name}`,
+    title: `${course_meta.name} — ${tGeneral('course')} — ${org.name}`,
     description: course_meta.description,
     keywords: course_meta.learnings,
     robots: {
@@ -68,6 +70,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 const CoursePage = async (params: any) => {
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
+  const tGeneral = await getTranslations('General')
 
   // Fetch course metadata once
   const course_meta = await getCourseMetadata(

@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { mutate } from 'swr'
+import { useTranslations } from 'next-intl'
 
 interface TrailCourseElementProps {
   course: any
@@ -23,6 +24,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
   const courseid = props.course.course_uuid.replace('course_', '')
   const course = props.course
   const router = useRouter()
+  const t = useTranslations('Trail')
   const course_total_steps = props.run.course_total_steps
   const course_completed_steps = props.run.steps.length
   const orgID = org?.id
@@ -65,7 +67,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
         <div className="course_top">
           <div className="course_info flex">
             <div className="course_basic flex flex-col flex-end -space-y-2">
-              <p className="p-0 font-bold text-sm text-gray-700">Course</p>
+              <p className="p-0 font-bold text-sm text-gray-700">{t('courseLabel')}</p>
               <div className="course_progress flex items-center space-x-2">
                 <h2 className="font-bold text-xl">{course.name}</h2>
                 <div className="bg-slate-300 rounded-full w-[10px] h-[5px]"></div>
@@ -77,7 +79,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
                 onClick={() => quitCourse(course.course_uuid)}
                 className="bg-red-200 text-red-700 hover:bg-red-300  rounded-full text-xs h-5 px-2 font-bold"
               >
-                Quit Course
+                {t('quitCourseButton')}
               </button>
             </div>
           </div>

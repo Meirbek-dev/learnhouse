@@ -1,8 +1,10 @@
+'use client'
+
 import { NodeViewProps, NodeViewWrapper } from '@tiptap/react'
 import { Node } from '@tiptap/core'
-import { 
-  Loader2, Video, Upload, X, HelpCircle, 
-  Maximize2, Minimize2, ArrowLeftRight, 
+import {
+  Loader2, Video, Upload, X, HelpCircle,
+  Maximize2, Minimize2, ArrowLeftRight,
   CheckCircle2, AlertCircle
 } from 'lucide-react'
 import React from 'react'
@@ -16,14 +18,15 @@ import { constructAcceptValue } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import styled from 'styled-components'
+import { useTranslations } from 'next-intl'
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mp4'])
 
 const VIDEO_SIZES = {
-  small: { width: 480, label: 'Small' },
-  medium: { width: 720, label: 'Medium' },
-  large: { width: 960, label: 'Large' },
-  full: { width: '100%', label: 'Full Width' }
+  small: { width: 480, label: 'sizeSmall' },
+  medium: { width: 720, label: 'sizeMedium' },
+  large: { width: 960, label: 'sizeLarge' },
+  full: { width: '100%', label: 'sizeFull' }
 } as const
 
 type VideoSize = keyof typeof VIDEO_SIZES
@@ -32,9 +35,9 @@ type VideoSize = keyof typeof VIDEO_SIZES
 const getVideoSizeFromWidth = (width: number | string | undefined): VideoSize => {
   if (!width) return 'medium'
   if (width === '100%') return 'full'
-  
+
   const numWidth = typeof width === 'string' ? parseInt(width) : width
-  
+
   if (numWidth <= VIDEO_SIZES.small.width) return 'small'
   if (numWidth <= VIDEO_SIZES.medium.width) return 'medium'
   if (numWidth <= VIDEO_SIZES.large.width) return 'large'
@@ -157,6 +160,7 @@ interface ExtendedNodeViewProps extends Omit<NodeViewProps, 'extension'> {
 }
 
 function VideoBlockComponent(props: ExtendedNodeViewProps) {
+  const t = useTranslations('Editor.VideoBlock')
   const { node, extension, updateAttributes } = props
   const org = useOrg() as Organization | null
   const course = useCourse() as Course | null
@@ -164,7 +168,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const session = useLHSession() as Session
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const uploadZoneRef = React.useRef<HTMLDivElement>(null)
-  
+
   // Convert legacy block object to new format
   const convertLegacyBlock = React.useCallback((block: LegacyVideoBlockObject): VideoBlockObject => {
     const videoSize = getVideoSizeFromWidth(block.size?.width)
@@ -200,7 +204,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
       setBlockObject(newBlockObject)
       updateAttributes({ blockObject: newBlockObject })
     }
-  }, [selectedSize])
+  }, [selectedSize, blockObject, updateAttributes])
 
   const isEditable = editorState?.isEditable
   const access_token = session?.data?.tokens?.access_token
@@ -240,7 +244,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
       setError(null)
       handleUpload(file)
     } else {
-      setError('Please upload a supported video format (MP4 or WebM)')
+      setError(t('errorFormat'))
     }
   }
 
@@ -279,7 +283,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
         setUploadProgress(0)
       }, 1000)
     } catch (err) {
-      setError('Failed to upload video. Please try again.')
+      setError(t('errorUpload'))
     } finally {
       setIsLoading(false)
     }
@@ -318,7 +322,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
           className="w-full flex justify-center"
         >
           <div
-            style={{ 
+            style={{
               maxWidth: typeof width === 'number' ? width : '100%',
               width: '100%'
             }}
@@ -351,7 +355,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-sm text-zinc-500">
               <Video size={16} />
-              <span className="font-medium">Video Block</span>
+              <span className="font-medium">{t('title')}</span>
             </div>
             {blockObject && (
               <motion.button
@@ -359,6 +363,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                 whileTap={{ scale: 0.95 }}
                 onClick={handleRemove}
                 className="text-zinc-400 hover:text-red-500 transition-colors"
+                title={t('remove')}
               >
                 <X size={16} />
               </motion.button>
@@ -399,7 +404,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                       className="space-y-3"
                     >
                       <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />
-                      <div className="text-sm text-zinc-600">Uploading video... {uploadProgress}%</div>
+                      <div className="text-sm text-zinc-600">{t('uploading', { progress: uploadProgress })}</div>
                       <div className="w-48 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">
                         <motion.div
                           className="h-full bg-blue-500 rounded-full"
@@ -419,10 +424,10 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                       <Upload className="w-8 h-8 mx-auto text-blue-500" />
                       <div>
                         <div className="text-sm font-medium text-zinc-700">
-                          Drop your video here or click to browse
+                          {t('uploadPlaceholder')}
                         </div>
                         <div className="text-xs text-zinc-500 mt-1">
-                          Supports MP4 and WebM formats
+                          {t('uploadHint')}
                         </div>
                       </div>
                     </motion.div>
@@ -449,7 +454,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="text-sm text-zinc-500 font-medium flex items-center gap-1">
                   <ArrowLeftRight size={14} />
-                  Video Size:
+                  {t('sizeLabel')}
                 </div>
                 {(Object.keys(VIDEO_SIZES) as VideoSize[]).map((size) => (
                   <SizeButton
@@ -459,17 +464,17 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {size === selectedSize && <CheckCircle2 size={14} />}
-                    {VIDEO_SIZES[size].label}
+                    {selectedSize === size && <CheckCircle2 size={14} />}
+                    {t(VIDEO_SIZES[size].label)}
                   </SizeButton>
                 ))}
               </div>
 
               <VideoContainer>
                 <div
-                  style={{ 
-                    maxWidth: typeof VIDEO_SIZES[selectedSize].width === 'number' 
-                      ? VIDEO_SIZES[selectedSize].width 
+                  style={{
+                    maxWidth: typeof VIDEO_SIZES[selectedSize].width === 'number'
+                      ? VIDEO_SIZES[selectedSize].width
                       : '100%',
                     width: '100%'
                   }}

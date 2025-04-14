@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -9,6 +11,7 @@ import { Button } from '@components/ui/button'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { getUriWithOrg } from '@services/config/config'
+import { useTranslations } from 'next-intl'
 
 interface CoursePaidOptionsProps {
   course: {
@@ -18,6 +21,7 @@ interface CoursePaidOptionsProps {
 }
 
 function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
+  const t = useTranslations('Courses.CoursePaidOptions')
   const org = useOrg() as any
   const session = useLHSession() as any
   const [expandedProducts, setExpandedProducts] = useState<{ [key: string]: boolean }>({})
@@ -49,10 +53,10 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
       if (response.success) {
         router.push(response.data.checkout_url)
       } else {
-        toast.error('Failed to initiate checkout process')
+        toast.error(t('checkoutError'))
       }
     } catch (error) {
-      toast.error('An error occurred while processing your request')
+      toast.error(t('requestError'))
     } finally {
       setIsProcessing(prev => ({ ...prev, [productId]: false }))
     }
@@ -65,8 +69,8 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
     }))
   }
 
-  if (error) return <div>Failed to load product options</div>
-  if (!linkedProducts) return <div>Loading...</div>
+  if (error) return <div>{t('failedToLoad')}</div>
+  if (!linkedProducts) return <div>{t('loading')}</div>
 
   return (
     <div className="space-y-4 p-1">
@@ -77,8 +81,8 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
               <Badge className='w-fit flex items-center space-x-2 bg-gray-100/50' variant="outline">
                 {product.product_type === 'subscription' ? <RefreshCcw size={12} /> : <SquareCheck size={12} />}
                 <span className='text-sm'>
-                  {product.product_type === 'subscription' ? 'Subscription' : 'One-time payment'}
-                  {product.product_type === 'subscription' && ' (per month)'}
+                  {product.product_type === 'subscription' ? t('subscription') : t('oneTimePayment')}
+                  {product.product_type === 'subscription' && ` ${t('perMonth')}`}
                 </span>
               </Badge>
               <h3 className="font-bold text-lg">{product.name}</h3>
@@ -93,7 +97,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
               </p>
               {product.benefits && (
                 <div className="mt-2">
-                  <h4 className="font-semibold text-sm">Benefits:</h4>
+                  <h4 className="font-semibold text-sm">{t('benefits')}</h4>
                   <p className="text-sm text-gray-600">
                     {product.benefits}
                   </p>
@@ -110,12 +114,12 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
               {expandedProducts[product.id] ? (
                 <>
                   <ChevronUp size={16} />
-                  <span>Show less</span>
+                  <span>{t('showLess')}</span>
                 </>
               ) : (
                 <>
                   <ChevronDown size={16} />
-                  <span>Show more</span>
+                  <span>{t('showMore')}</span>
                 </>
               )}
             </button>
@@ -123,7 +127,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
 
           <div className="mt-2 flex items-center justify-between bg-gray-100 rounded-md p-2">
             <span className="text-sm text-gray-600">
-              {product.price_type === 'customer_choice' ? 'Minimum Price:' : 'Price:'}
+              {product.price_type === 'customer_choice' ? t('minimumPrice') : t('price')}
             </span>
             <div className="flex flex-col items-end">
               <span className="font-semibold text-lg">
@@ -131,10 +135,10 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
                   style: 'currency',
                   currency: product.currency
                 }).format(product.amount)}
-                {product.product_type === 'subscription' && <span className="text-sm text-gray-500 ml-1">/month</span>}
+                {product.product_type === 'subscription' && <span className="text-sm text-gray-500 ml-1">{t('perMonthSuffix')}</span>}
               </span>
               {product.price_type === 'customer_choice' && (
-                <span className="text-sm text-gray-500">Choose your price</span>
+                <span className="text-sm text-gray-500">{t('choosePrice')}</span>
               )}
             </div>
           </div>
@@ -146,10 +150,10 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
             disabled={isProcessing[product.id]}
           >
             {isProcessing[product.id]
-              ? 'Processing...'
+              ? t('processing')
               : product.product_type === 'subscription'
-                ? 'Subscribe Now'
-                : 'Purchase Now'
+                ? t('subscribeNow')
+                : t('purchaseNow')
             }
           </Button>
         </div>

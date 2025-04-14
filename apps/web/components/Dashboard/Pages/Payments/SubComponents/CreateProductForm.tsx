@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -14,16 +15,16 @@ import { Label } from "@components/ui/label";
 import currencyCodes from 'currency-codes';
 import { useTranslations } from 'next-intl';
 
-const createValidationSchema = (t: any) => Yup.object().shape({
-  name: Yup.string().required(t('errors.nameRequired')),
-  description: Yup.string().required(t('errors.descriptionRequired')),
+const createValidationSchema = (t: (key: string, values?: any) => string) => Yup.object().shape({
+  name: Yup.string().required(t('Payments.ProductForm.errors.nameRequired')),
+  description: Yup.string().required(t('Payments.ProductForm.errors.descriptionRequired')),
   amount: Yup.number()
-    .min(1, t('errors.amountMin'))
-    .required(t('errors.amountRequired')),
+    .min(1, t('Payments.ProductForm.errors.amountMin'))
+    .required(t('Payments.ProductForm.errors.amountRequired')),
   benefits: Yup.string(),
-  currency: Yup.string().required(t('errors.currencyRequired')),
-  product_type: Yup.string().oneOf(['one_time', 'subscription']).required(t('errors.productTypeRequired')),
-  price_type: Yup.string().oneOf(['fixed_price', 'customer_choice']).required(t('errors.priceTypeRequired')),
+  currency: Yup.string().required(t('Payments.ProductForm.errors.currencyRequired')),
+  product_type: Yup.string().oneOf(['one_time', 'subscription']).required(t('Payments.ProductForm.errors.productTypeRequired')),
+  price_type: Yup.string().oneOf(['fixed_price', 'customer_choice']).required(t('Payments.ProductForm.errors.priceTypeRequired')),
 });
 
 interface ProductFormValues {
@@ -42,6 +43,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =
   const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
   const t = useTranslations('Payments.ProductForm');
   const tNotify = useTranslations('Notifications');
+  const validationSchema = React.useMemo(() => createValidationSchema(t), [t]);
 
   useEffect(() => {
     const allCurrencies = currencyCodes.data.map(currency => ({
@@ -84,7 +86,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =
   return (
     <Formik
       initialValues={initialValues}
-      validationSchema={createValidationSchema(t)}
+      validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
       {({ isSubmitting, values, setFieldValue }) => (

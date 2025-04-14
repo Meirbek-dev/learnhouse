@@ -9,6 +9,7 @@ import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import React, { useEffect } from 'react'
 import useSWR from 'swr'
+import { useTranslations } from 'next-intl'
 
 function Trail(params: any) {
   let orgslug = params.orgslug
@@ -16,6 +17,7 @@ function Trail(params: any) {
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any
   const orgID = org?.id
+  const t = useTranslations('TrailPage')
   const { data: trail, error: error } = useSWR(
     `${getAPIUrl()}trail/org/${orgID}/trail`,
     (url) => swrFetcher(url, access_token)
@@ -25,7 +27,7 @@ function Trail(params: any) {
 
   return (
     <GeneralWrapperStyled>
-      <TypeOfContentTitle title="Trail" type="tra" />
+      <TypeOfContentTitle title={t('title')} type="tra" />
       {!trail ? (
         <PageLoading></PageLoading>
       ) : (

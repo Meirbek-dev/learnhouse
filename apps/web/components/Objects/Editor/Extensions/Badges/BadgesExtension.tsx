@@ -4,8 +4,10 @@ import Picker from '@emoji-mart/react'
 import { ArrowRight, ChevronDown, ChevronRight, EllipsisVertical, Palette, Plus } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
+import { useTranslations } from 'next-intl'
 
 const BadgesExtension: React.FC = (props: any) => {
+  const t = useTranslations('Editor.BadgesExtension')
   const [color, setColor] = useState(props.node.attrs.color)
   const [emoji, setEmoji] = useState(props.node.attrs.emoji)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
@@ -73,47 +75,47 @@ const BadgesExtension: React.FC = (props: any) => {
     {
       emoji: '📝',
       color: 'sky',
-      content: 'Key Concept'
+      content: t('keyConcept')
     },
     {
       emoji: '💡',
       color: 'yellow',
-      content: 'Example'
+      content: t('example')
     },
     {
       emoji: '🔍',
       color: 'teal',
-      content: 'Deep Dive'
+      content: t('deepDive')
     },
     {
       emoji: '⚠️',
       color: 'red',
-      content: 'Important Note'
+      content: t('importantNote')
     },
     {
       emoji: '🧠',
       color: 'purple',
-      content: 'Remember This'
+      content: t('rememberThis')
     },
     {
       emoji: '🏋️',
       color: 'green',
-      content: 'Exercise'
+      content: t('exercise')
     },
     {
       emoji: '🎯',
       color: 'amber',
-      content: 'Learning Objective'
+      content: t('learningObjective')
     },
     {
       emoji: '📚',
       color: 'indigo',
-      content: 'Further Reading'
+      content: t('furtherReading')
     },
     {
       emoji: '💬',
       color: 'neutral',
-      content: 'Discussion Topic'
+      content: t('discussionTopic')
     }
   ]
 
@@ -174,7 +176,7 @@ const BadgesExtension: React.FC = (props: any) => {
             </div>
           )}
         </div>
-        
+
         {isEditable && (
           <button
             onClick={() => setShowPredefinedCallouts(!showPredefinedCallouts)}

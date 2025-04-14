@@ -16,6 +16,8 @@ import { Hexagon } from 'lucide-react'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
 
 type EditCourseStructureProps = {
   orgslug: string
@@ -43,6 +45,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const access_token = session?.data?.tokens?.access_token;
   // Check window availability
   const [winReady, setwinReady] = useState(false)
+  const t = useTranslations('CourseEdit.Structure');
+  const tNotify = useTranslations('Notifications');
 
   const dispatchCourse = useCourseDispatch() as any
 
@@ -60,11 +64,18 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
   // Submit new chapter
   const submitChapter = async (chapter: any) => {
-    await createChapter(chapter,access_token)
-    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
-    await revalidateTags(['courses'], props.orgslug)
-    router.refresh()
-    setNewChapterModal(false)
+    const loadingToast = toast.loading(tNotify('creatingChapter'));
+    try {
+      await createChapter(chapter, access_token)
+      mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
+      await revalidateTags(['courses'], props.orgslug)
+      router.refresh()
+      setNewChapterModal(false)
+      toast.success(tNotify('chapterCreatedSuccess'), { id: loadingToast });
+    } catch (error) {
+      console.error("Error creating chapter:", error);
+      toast.error(tNotify('chapterCreateFailed'), { id: loadingToast });
+    }
   }
 
   const updateStructure = (result: any) => {
@@ -77,7 +88,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       return
 
     const newCourseStructure = { ...course_structure }
-    
+
     if (type === 'chapter') {
       const newChapterOrder = Array.from(newCourseStructure.chapters)
       const [movedChapter] = newChapterOrder.splice(source.index, 1)
@@ -153,8 +164,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                 submitChapter={submitChapter}
               ></NewChapterModal>
             }
-            dialogTitle="Create chapter"
-            dialogDescription="Add a new chapter to the course"
+            dialogTitle={t('NewChapterModal.title')}
+            dialogDescription={t('NewChapterModal.description')}
             dialogTrigger={
               <div className="w-44 my-16 py-5 max-w-(--breakpoint-2xl) mx-auto bg-cyan-800 text-white rounded-xl shadow-xs px-6 items-center flex flex-row h-10">
                 <div className="mx-auto flex space-x-2 items-center hover:cursor-pointer">
@@ -163,7 +174,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                     size={16}
                     className="text-white text-sm "
                   />
-                  <div className="font-bold text-sm">Add Chapter</div>
+                  <div className="font-bold text-sm">{t('addChapterButton')}</div>
                 </div>
               </div>
             }

@@ -4,12 +4,16 @@ import { swrFetcher } from '@services/utils/ts/requests'
 import React, { createContext, useContext, useEffect } from 'react'
 import useSWR from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import PageLoading from '@components/Objects/Loaders/PageLoading'
+import ErrorUI from '@components/Objects/StyledElements/Error/Error'
+import { useTranslations } from 'next-intl'
 
 export const AssignmentContext = createContext({})
 
 export function AssignmentProvider({ children, assignment_uuid }: { children: React.ReactNode, assignment_uuid: string }) {
     const session = useLHSession() as any
     const accessToken = session?.data?.tokens?.access_token
+    const t = useTranslations('Contexts.Assignment')
     const [assignmentsFull, setAssignmentsFull] = React.useState({ assignment_object: null, assignment_tasks: null, course_object: null , activity_object: null})
 
     const { data: assignment, error: assignmentError } = useSWR(
@@ -42,9 +46,12 @@ export function AssignmentProvider({ children, assignment_uuid }: { children: Re
         }
     }, [assignment, assignment_tasks, course_object, activity_object, course_id, activity_id])
 
-    if (assignmentError || assignmentTasksError || courseObjectError || activityObjectError) return <div></div>
+    const isLoading = !assignment || !assignment_tasks || (course_id && !course_object) || (activity_id && !activity_object);
+    const hasError = assignmentError || assignmentTasksError || courseObjectError || activityObjectError;
 
-    if (!assignment || !assignment_tasks || (course_id && !course_object) || (activity_id && !activity_object)) return <div></div>
+    if (hasError) return <ErrorUI message={t('loadError')} />;
+
+    if (isLoading) return <PageLoading />;
 
     return <AssignmentContext.Provider value={assignmentsFull}>{children}</AssignmentContext.Provider>
 }

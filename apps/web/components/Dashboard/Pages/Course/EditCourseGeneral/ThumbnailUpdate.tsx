@@ -1,9 +1,10 @@
+'use client';
 import { useCourse } from '@components/Contexts/CourseContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getAPIUrl } from '@services/config/config'
 import { updateCourseThumbnail } from '@services/courses/courses'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { ArrowBigUpDash, UploadCloud, Image as ImageIcon } from 'lucide-react'
+import { ArrowBigUpDash, UploadCloud, Image as ImageIcon, FileWarning } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import React, { useState } from 'react'
 import { mutate } from 'swr'
@@ -60,7 +61,8 @@ function ThumbnailUpdate() {
           <div className="flex flex-col justify-center items-center">
             {error && (
               <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-2 transition-all shadow-xs">
-                <div className="text-sm font-semibold">{error}</div>
+                <FileWarning size={16} className="mr-2" />
+                <div className="text-sm font-semibold first-letter:uppercase">{error}</div>
               </div>
             )}
             {localThumbnail ? (
@@ -116,6 +118,7 @@ function ThumbnailUpdate() {
         <UnsplashImagePicker
           onSelect={handleUnsplashSelect}
           onClose={() => setShowUnsplashPicker(false)}
+          isOpen={showUnsplashPicker}
         />
       )}
     </div>

@@ -27,7 +27,7 @@ import { mutate } from 'swr'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { useMediaQuery } from 'usehooks-ts'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
-import { useContributorStatus } from '../../../../../../../../components/useContributorStatus'
+import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
 import { useTranslations } from 'next-intl'
 
 interface ActivityClientProps {
@@ -157,7 +157,7 @@ function ActivityClient(props: ActivityClientProps) {
                               className="bg-emerald-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
                             >
                               <Edit2 size={17} />
-                              <span className="text-xs font-bold">Contribute to Activity</span>
+                              <span className="text-xs font-bold">{t('contributeToActivity')}</span>
                             </Link>
                           )}
                           <MoreVertical size={17} className="text-gray-300" />
@@ -166,6 +166,7 @@ function ActivityClient(props: ActivityClientProps) {
                             activityid={activityid}
                             course={course}
                             orgslug={orgslug}
+                            t={t}
                           />
                         </>
                       }
@@ -179,6 +180,7 @@ function ActivityClient(props: ActivityClientProps) {
                               activityid={activityid}
                               course={course}
                               orgslug={orgslug}
+                              t={t}
                             />
                           </AssignmentSubmissionProvider>
                         </>
@@ -191,7 +193,7 @@ function ActivityClient(props: ActivityClientProps) {
                 <div className="p-7 drop-shadow-xs rounded-lg bg-gray-800">
                   <div className="text-white">
                     <h1 className="font-bold text-2xl">
-                      This activity is not published yet
+                      {t('activityNotPublished')}
                     </h1>
                   </div>
                 </div>
@@ -244,6 +246,7 @@ function ActivityClient(props: ActivityClientProps) {
                   course={course}
                   currentActivityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
                   orgslug={orgslug}
+                  t={t}
                 />
               )}
 
@@ -256,15 +259,20 @@ function ActivityClient(props: ActivityClientProps) {
   )
 }
 
-export function MarkStatus(props: {
-  activity: any
-  activityid: string
-  course: any
-  orgslug: string
-}) {
+interface MarkStatusProps {
+  activity: any;
+  activityid: string;
+  course: any;
+  orgslug: string;
+  t: ReturnType<typeof useTranslations<'CoursePage'>>;
+}
+
+export function MarkStatus(props: MarkStatusProps) {
   const router = useRouter()
   const session = useLHSession() as any;
   const isMobile = useMediaQuery('(max-width: 768px)')
+  const t = props.t;
+
   async function markActivityAsCompleteFront() {
     const trail = await markActivityAsComplete(
       props.orgslug,
@@ -293,7 +301,7 @@ export function MarkStatus(props: {
           <i>
             <Check size={17}></Check>
           </i>{' '}
-          <i className="not-italic text-xs font-bold">Complete</i>
+          <i className="not-italic text-xs font-bold">{t('statusComplete')}</i>
         </div>
       ) : (
         <div
@@ -304,23 +312,27 @@ export function MarkStatus(props: {
           <i>
             <Check size={17}></Check>
           </i>{' '}
-          {!isMobile && <i className="not-italic text-xs font-bold">Mark as complete</i>}
+          {!isMobile && <i className="not-italic text-xs font-bold">{t('markAsComplete')}</i>}
         </div>
       )}
     </>
   )
 }
 
-function AssignmentTools(props: {
-  activity: any
-  activityid: string
-  course: any
-  orgslug: string
-  assignment: any
-}) {
+interface AssignmentToolsProps {
+  activity: any;
+  activityid: string;
+  course: any;
+  orgslug: string;
+  assignment: any;
+  t: ReturnType<typeof useTranslations<'CoursePage'>>;
+}
+
+function AssignmentTools(props: AssignmentToolsProps) {
   const submission = useAssignmentSubmission() as any
   const session = useLHSession() as any;
   const [finalGrade, setFinalGrade] = React.useState(null) as any;
+  const t = props.t;
 
   const submitForGradingUI = async () => {
     if (props.assignment) {
@@ -329,11 +341,11 @@ function AssignmentTools(props: {
         session.data?.tokens?.access_token
       )
       if (res.success) {
-        toast.success('Assignment submitted for grading')
+        toast.success(t('submitSuccessToast'))
         mutate(`${getAPIUrl()}assignments/${props.assignment?.assignment_uuid}/submissions/me`,)
       }
       else {
-        toast.error('Failed to submit assignment for grading')
+        toast.error(t('submitErrorToast'))
       }
     }
   }
@@ -361,7 +373,7 @@ function AssignmentTools(props: {
           displayGrade = `${percentage.toFixed(2)}%`;
           break;
         default:
-          displayGrade = 'Unknown grading type';
+          displayGrade = t('unknownGradingType');
       }
 
       // Use displayGrade here, e.g., update state or display it
@@ -390,13 +402,13 @@ function AssignmentTools(props: {
   if (!submission || submission.length === 0) {
     return (
       <ConfirmationModal
-        confirmationButtonText="Submit Assignment"
-        confirmationMessage="Are you sure you want to submit your assignment for grading? Once submitted, you will not be able to make any changes."
-        dialogTitle="Submit your assignment for grading"
+        confirmationButtonText={t('submitButton')}
+        confirmationMessage={t('submitConfirmationMessage')}
+        dialogTitle={t('submitConfirmationTitle')}
         dialogTrigger={
           <div className="bg-cyan-800 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
             <BookOpenCheck size={17} />
-            <span className="text-xs font-bold">Submit for grading</span>
+            <span className="text-xs font-bold">{t('submitTrigger')}</span>
           </div>
         }
         functionToExecute={submitForGradingUI}
@@ -409,7 +421,7 @@ function AssignmentTools(props: {
     return (
       <div className="bg-amber-800 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white transition delay-150 duration-300 ease-in-out">
         <UserRoundPen size={17} />
-        <span className="text-xs font-bold">Grading in progress</span>
+        <span className="text-xs font-bold">{t('statusGradingInProgress')}</span>
       </div>
     )
   }
@@ -418,7 +430,7 @@ function AssignmentTools(props: {
     return (
       <div className="bg-teal-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white transition delay-150 duration-300 ease-in-out">
         <CheckCircle size={17} />
-        <span className="text-xs flex space-x-2 font-bold items-center"><span>Graded </span> <span className='bg-white text-teal-800 px-1 py-0.5 rounded-md'>{finalGrade}</span></span>
+        <span className="text-xs flex space-x-2 font-bold items-center"><span>{t('statusGraded')}</span> <span className='bg-white text-teal-800 px-1 py-0.5 rounded-md'>{finalGrade}</span></span>
       </div>
     )
   }
@@ -427,15 +439,18 @@ function AssignmentTools(props: {
   return null
 }
 
-function ActivityChapterDropdown(props: {
-  course: any
-  currentActivityId: string
-  orgslug: string
-  t: any
-}): React.ReactNode {
+interface ActivityChapterDropdownProps {
+  course: any;
+  currentActivityId: string;
+  orgslug: string;
+  t: ReturnType<typeof useTranslations<'CoursePage'>>;
+}
+
+function ActivityChapterDropdown(props: ActivityChapterDropdownProps): React.ReactNode {
   const [isOpen, setIsOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const t = props.t;
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -480,8 +495,8 @@ function ActivityChapterDropdown(props: {
       <button
         onClick={toggleDropdown}
         className="flex items-center justify-center bg-white nice-shadow p-2.5 rounded-full cursor-pointer"
-        aria-label="View all activities"
-        title="View all activities"
+        aria-label={t('viewAllActivities')}
+        title={t('viewAllActivities')}
       >
         <ListTree size={18} className="text-gray-700" />
       </button>
@@ -489,7 +504,7 @@ function ActivityChapterDropdown(props: {
       {isOpen && (
         <div className={`absolute z-50 mt-2 ${isMobile ? 'left-0 w-[90vw] sm:w-80' : 'left-0 w-80'} max-h-[70vh] cursor-pointer overflow-y-auto bg-white rounded-lg shadow-xl border border-gray-200 py-2 animate-in fade-in duration-200`}>
           <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-bold text-gray-800">{props.t('courseContent')}</h3>
+            <h3 className="font-bold text-gray-800">{t('courseContent')}</h3>
             <button
               onClick={() => setIsOpen(false)}
               className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 cursor-pointer"
@@ -556,16 +571,20 @@ function ActivityChapterDropdown(props: {
   );
 }
 
-function ActivityNavigation(props: {
-  course: any
-  currentActivityId: string
-  orgslug: string
-}): React.ReactNode {
+interface ActivityNavigationProps {
+  course: any;
+  currentActivityId: string;
+  orgslug: string;
+  t: ReturnType<typeof useTranslations<'CoursePage'>>;
+}
+
+function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
   const router = useRouter();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [isBottomNavVisible, setIsBottomNavVisible] = React.useState(true);
   const bottomNavRef = React.useRef<HTMLDivElement>(null);
   const [navWidth, setNavWidth] = React.useState<number | null>(null);
+  const t = props.t;
 
   // Function to find the current activity's position in the course
   const findActivityPosition = () => {
@@ -655,13 +674,13 @@ function ActivityNavigation(props: {
                 : 'opacity-50 text-gray-400 cursor-not-allowed'
             }`}
             disabled={!prevActivity}
-            title={prevActivity ? `Previous: ${prevActivity.name}` : 'No previous activity'}
+            title={prevActivity ? t('prevActivityTitle', { name: prevActivity.name }) : t('noPrevActivity')}
           >
             <ChevronLeft size={20} className="text-gray-800 shrink-0" />
             <div className="flex flex-col items-start">
-              <span className="text-xs text-gray-500">Previous</span>
+              <span className="text-xs text-gray-500">{t('previous')}</span>
               <span className="text-sm capitalize font-semibold text-left">
-                {prevActivity ? prevActivity.name : 'No previous activity'}
+                {prevActivity ? prevActivity.name : t('noPrevActivity')}
               </span>
             </div>
           </button>
@@ -674,12 +693,12 @@ function ActivityNavigation(props: {
                 : 'opacity-50 text-gray-400 cursor-not-allowed'
             }`}
             disabled={!nextActivity}
-            title={nextActivity ? `Next: ${nextActivity.name}` : 'No next activity'}
+            title={nextActivity ? t('nextActivityTitle', { name: nextActivity.name }) : t('noNextActivity')}
           >
             <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-500">Next</span>
+              <span className="text-xs text-gray-500">{t('next')}</span>
               <span className="text-sm capitalize font-semibold text-right">
-                {nextActivity ? nextActivity.name : 'No next activity'}
+                {nextActivity ? nextActivity.name : t('noNextActivity')}
               </span>
             </div>
             <ChevronRight size={20} className="text-gray-800 shrink-0" />
@@ -697,20 +716,20 @@ function ActivityNavigation(props: {
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
               disabled={!prevActivity}
-              title={prevActivity ? `Previous: ${prevActivity.name}` : 'No previous activity'}
+              title={prevActivity ? t('prevActivityTitle', { name: prevActivity.name }) : t('noPrevActivity')}
             >
               <ChevronLeft size={16} className="shrink-0" />
               <div className="flex flex-col items-start">
-                <span className="text-xs text-gray-500">Previous</span>
+                <span className="text-xs text-gray-500">{t('previous')}</span>
                 <span className="text-sm capitalize font-semibold text-left">
-                  {prevActivity ? prevActivity.name : 'No previous activity'}
+                  {prevActivity ? prevActivity.name : t('noPrevActivity')}
                 </span>
               </div>
             </button>
           </div>
 
           <div className="text-sm text-gray-500 justify-self-center">
-            {currentIndex + 1} of {allActivities.length}
+            {t('activityCounter', { current: currentIndex + 1, total: allActivities.length })}
           </div>
 
           <div className="justify-self-end">
@@ -722,12 +741,12 @@ function ActivityNavigation(props: {
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
               disabled={!nextActivity}
-              title={nextActivity ? `Next: ${nextActivity.name}` : 'No next activity'}
+              title={nextActivity ? t('nextActivityTitle', { name: nextActivity.name }) : t('noNextActivity')}
             >
               <div className="flex flex-col items-end">
-                <span className="text-xs text-gray-500">Next</span>
+                <span className="text-xs text-gray-500">{t('next')}</span>
                 <span className="text-sm capitalize font-semibold text-right">
-                  {nextActivity ? nextActivity.name : 'No next activity'}
+                  {nextActivity ? nextActivity.name : t('noNextActivity')}
                 </span>
               </div>
               <ChevronRight size={16} className="shrink-0" />

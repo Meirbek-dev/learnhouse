@@ -1,4 +1,4 @@
-'use client'; 
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -11,6 +11,7 @@ import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@
 import { getUriWithOrg } from '@services/config/config';
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import UserAvatar from '@components/Objects/UserAvatar';
+import { useTranslations } from 'next-intl';
 
 // Types from SearchBar component
 interface User {
@@ -78,7 +79,9 @@ function SearchPage() {
   const searchParams = useSearchParams();
   const session = useLHSession() as any;
   const org = useOrg() as any;
-  
+  const t = useTranslations('SearchPage');
+  const tGeneral = useTranslations('General');
+
   // Search state
   const [searchResults, setSearchResults] = useState<SearchResults>({
     courses: [],
@@ -90,7 +93,7 @@ function SearchPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  
+
   // URL parameters
   const query = searchParams.get('q') || '';
   const page = parseInt(searchParams.get('page') || '1');
@@ -153,7 +156,7 @@ function SearchPage() {
 
         // The response data is directly what we need
         const results = response.data;
-        
+
         setSearchResults({
           courses: results.courses || [],
           collections: results.collections || [],
@@ -195,7 +198,7 @@ function SearchPage() {
       }`}
     >
       <Icon size={16} />
-      <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+      <span>{t(`filter${type.charAt(0).toUpperCase() + type.slice(1)}`)}</span>
       <span className="text-black/40">({count})</span>
     </button>
   );
@@ -241,9 +244,9 @@ function SearchPage() {
       <div className="mb-4 p-4 bg-black/5 rounded-full">
         <Search className="w-8 h-8 text-black/40" />
       </div>
-      <h3 className="text-lg font-medium text-black/80 mb-2">No results found</h3>
+      <h3 className="text-lg font-medium text-black/80 mb-2">{t('noResultsTitle')}</h3>
       <p className="text-sm text-black/50 max-w-md">
-        We couldn't find any matches for "{query}". Try adjusting your search terms or browse our featured content.
+        {t('noResultsMessage', { query: query })}
       </p>
     </div>
   );
@@ -254,17 +257,17 @@ function SearchPage() {
       <div className="bg-white border-b border-black/5">
         <div className="container mx-auto px-4 py-6">
           <div className="max-w-2xl mx-auto">
-            <h1 className="text-2xl font-semibold  text-black/80 mb-6">Search</h1>
-            
+            <h1 className="text-2xl font-semibold text-black/80 mb-6">{t('searchTitle')}</h1>
+
             {/* Search Input */}
             <form onSubmit={handleSearch} className="relative group mb-6">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search courses, users, collections..."
-                className="w-full h-12 pl-12 pr-4 rounded-xl nice-shadow bg-white 
-                         focus:outline-none focus:ring-1 focus:ring-black/5 focus:border-black/20 
+                placeholder={t('searchInputPlaceholder')}
+                className="w-full h-12 pl-12 pr-4 rounded-xl nice-shadow bg-white
+                         focus:outline-none focus:ring-1 focus:ring-black/5 focus:border-black/20
                          text-sm placeholder:text-black/40 transition-all"
               />
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -274,10 +277,10 @@ function SearchPage() {
                 type="submit"
                 className="absolute inset-y-0 right-0 px-4 flex items-center text-sm text-black/60 hover:text-black/80"
               >
-                Search
+                {t('searchButton')}
               </button>
             </form>
-            
+
             {/* Filters */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
               <FilterButton type="all" count={totalResults} icon={Search} />
@@ -294,7 +297,7 @@ function SearchPage() {
         <div className="max-w-7xl mx-auto">
           {query && (
             <div className="text-sm text-black/60 mb-6">
-              Found {totalResults} results for "{query}"
+              {t('resultsFound', { count: totalResults, query: query })}
             </div>
           )}
 
@@ -309,7 +312,7 @@ function SearchPage() {
                 <div>
                   <h2 className="text-lg font-medium text-black/80 mb-4 flex items-center gap-2">
                     <GraduationCap size={20} className="text-black/60" />
-                    Courses ({searchResults.courses.length})
+                    {tGeneral('courses')} ({searchResults.courses.length})
                   </h2>
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {searchResults.courses.map((course) => (
@@ -362,7 +365,7 @@ function SearchPage() {
                 <div>
                   <h2 className="text-lg font-medium text-black/80 mb-4 flex items-center gap-2">
                     <Book size={20} className="text-black/60" />
-                    Collections ({searchResults.collections.length})
+                    {tGeneral('collections')} ({searchResults.collections.length})
                   </h2>
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {searchResults.collections.map((collection) => (
@@ -389,7 +392,7 @@ function SearchPage() {
                 <div>
                   <h2 className="text-lg font-medium text-black/80 mb-4 flex items-center gap-2">
                     <Users size={20} className="text-black/60" />
-                    Users ({searchResults.users.length})
+                    {tGeneral('users')} ({searchResults.users.length})
                   </h2>
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {searchResults.users.map((user) => (

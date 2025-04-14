@@ -7,6 +7,8 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import ErrorUI from '@components/Objects/StyledElements/Error/Error'
 import InfoUI from '@components/Objects/StyledElements/Info/Info'
 import { usePathname } from 'next/navigation'
+import PageLoading from '@components/Objects/Loaders/PageLoading'
+import { useTranslations } from 'next-intl'
 
 export const OrgContext = createContext(null)
 
@@ -14,6 +16,7 @@ export function OrgProvider({ children, orgslug }: { children: React.ReactNode, 
   const session = useLHSession() as any
   const pathname = usePathname()
   const accessToken = session?.data?.tokens?.access_token
+  const t = useTranslations('Contexts.Org')
   const isAllowedPathname = ['/login', '/signup'].includes(pathname);
 
   const { data: org, error: orgError } = useSWR(
@@ -25,19 +28,21 @@ export function OrgProvider({ children, orgslug }: { children: React.ReactNode, 
     (url) => swrFetcher(url, accessToken)
   )
 
+  const isLoading = !org || !orgs || !session || session.status === 'loading';
+  const hasError = orgError || orgsError;
 
   const isOrgActive = useMemo(() => org?.config?.config?.general?.enabled !== false, [org])
   const isUserPartOfTheOrg = useMemo(() => orgs?.some((userOrg: any) => userOrg.id === org?.id), [orgs, org?.id])
 
-  if (orgError || orgsError) return <ErrorUI message='An error occurred while fetching data' />
-  if (!org || !orgs || !session) return <div></div>
-  if (!isOrgActive) return <ErrorUI message='This organization is no longer active' />
+  if (hasError) return <ErrorUI message={t('fetchError')} />
+  if (isLoading) return <PageLoading />;
+  if (!isOrgActive) return <ErrorUI message={t('orgInactiveError')} />
   if (!isUserPartOfTheOrg && session.status == 'authenticated' && !isAllowedPathname) {
     return (
       <InfoUI
         href={getUriWithoutOrg(`/signup?orgslug=${orgslug}`)}
-        message='You are not part of this Organization yet'
-        cta={`Join ${org?.name}`}
+        message={t('notMemberInfo')}
+        cta={t('joinOrgCTA', { orgName: org?.name })}
       />
     )
   }

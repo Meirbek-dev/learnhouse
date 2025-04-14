@@ -22,13 +22,16 @@ import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import CreateProductForm from './SubComponents/CreateProductForm';
+import { useTranslations } from 'next-intl';
 
-const validationSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    description: Yup.string().required('Description is required'),
-    amount: Yup.number().min(0, 'Amount must be positive').required('Amount is required'),
+const createValidationSchema = (t: (key: string, values?: any) => string) => Yup.object().shape({
+    name: Yup.string().required(t('Components.Form.requiredField', { fieldName: t('Payments.ProductPage.editForm.nameLabel') })),
+    description: Yup.string().required(t('Components.Form.requiredField', { fieldName: t('Payments.ProductPage.editForm.descriptionLabel') })),
+    amount: Yup.number()
+        .min(0, t('Components.Form.positiveNumber'))
+        .required(t('Components.Form.requiredField', { fieldName: t('Payments.ProductPage.editForm.priceLabel') })),
     benefits: Yup.string(),
-    currency: Yup.string().required('Currency is required'),
+    currency: Yup.string().required(t('Components.Form.requiredField', { fieldName: t('Payments.ProductPage.editForm.currencyLabel') })),
 });
 
 function PaymentsProductPage() {
@@ -39,6 +42,9 @@ function PaymentsProductPage() {
     const [expandedProducts, setExpandedProducts] = useState<{ [key: string]: boolean }>({});
     const [isStripeEnabled, setIsStripeEnabled] = useState(false);
     const { isEnabled, isLoading } = usePaymentsEnabled();
+    const t = useTranslations('Payments.ProductPage');
+    const tNotify = useTranslations('Notifications');
+    const tGeneral = useTranslations('General');
 
     const { data: products, error } = useSWR(
         () => org && session ? [`/payments/${org.id}/products`, session.data?.tokens?.access_token] : null,
@@ -58,12 +64,16 @@ function PaymentsProductPage() {
     }, [paymentConfigs]);
 
     const handleArchiveProduct = async (productId: string) => {
-        const res = await archiveProduct(org.id, productId, session.data?.tokens?.access_token);
-        mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
-        if (res.status === 200) {
-            toast.success('Product archived successfully');
-        } else {
-            toast.error(res.data.detail);
+        try {
+            const res = await archiveProduct(org.id, productId, session.data?.tokens?.access_token);
+            mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
+            if (res.status === 200) {
+                toast.success(tNotify('productArchivedSuccess'));
+            } else {
+                toast.error(tNotify('errors.archiveProductFailed', { error: res.data?.detail || '' }));
+            }
+        } catch (error) {
+            toast.error(tNotify('errors.archiveProductFailed', { error: '' }));
         }
     }
 
@@ -80,19 +90,17 @@ function PaymentsProductPage() {
         );
     }
 
-    if (error) return <div>Failed to load products</div>;
-    if (!products) return <div>Loading...</div>;
+    if (error) return <div>{t('loadError')}</div>;
+    if (!products) return <div>{t('loading')}</div>;
 
     return (
         <div className="h-full w-full bg-[#f8f8f8]">
             <div className="pl-10 pr-10 mx-auto">
-
-
                 <Modal
                     isDialogOpen={isCreateModalOpen}
                     onOpenChange={setIsCreateModalOpen}
-                    dialogTitle="Create New Product"
-                    dialogDescription="Add a new product to your organization"
+                    dialogTitle={t('createModalTitle')}
+                    dialogDescription={t('createModalDescription')}
                     dialogContent={
                         <CreateProductForm onSuccess={() => setIsCreateModalOpen(false)} />
                     }
@@ -113,7 +121,7 @@ function PaymentsProductPage() {
                                         <div className="flex flex-col space-y-1 items-start">
                                             <Badge className='w-fit flex items-center space-x-2' variant="outline">
                                                 {product.product_type === 'subscription' ? <RefreshCcw size={12} /> : <SquareCheck size={12} />}
-                                                <span className='text-sm'>{product.product_type === 'subscription' ? 'Subscription' : 'One-time payment'}</span>
+                                                <span className='text-sm'>{product.product_type === 'subscription' ? t('subscriptionType') : t('oneTimeType')}</span>
                                             </Badge>
                                             <h3 className="font-bold text-lg">{product.name}</h3>
                                         </div>
@@ -122,15 +130,16 @@ function PaymentsProductPage() {
                                                 onClick={() => setEditingProductId(product.id)}
                                                 className={`text-blue-500 hover:text-blue-700 ${isStripeEnabled ? '' : 'opacity-50 cursor-not-allowed'}`}
                                                 disabled={!isStripeEnabled}
+                                                title={t('editButton')}
                                             >
                                                 <Pencil size={16} />
                                             </button>
                                             <ConfirmationModal
-                                                confirmationButtonText="Archive Product"
-                                                confirmationMessage="Are you sure you want to archive this product?"
-                                                dialogTitle={`Archive ${product.name}?`}
+                                                confirmationButtonText={t('archiveConfirmButton')}
+                                                confirmationMessage={t('archiveConfirmationMessage')}
+                                                dialogTitle={t('archiveConfirmationTitle', { productName: product.name })}
                                                 dialogTrigger={
-                                                    <button className="text-red-500 hover:text-red-700">
+                                                    <button className="text-red-500 hover:text-red-700" title={t('archiveButton')}>
                                                         <Archive size={16} />
                                                     </button>
                                                 }
@@ -146,7 +155,7 @@ function PaymentsProductPage() {
                                             </p>
                                             {product.benefits && (
                                                 <div className="mt-2">
-                                                    <h4 className="font-semibold text-sm">Benefits:</h4>
+                                                    <h4 className="font-semibold text-sm">{t('benefitsLabel')}</h4>
                                                     <p className="text-sm text-gray-600">
                                                         {product.benefits}
                                                     </p>
@@ -162,19 +171,19 @@ function PaymentsProductPage() {
                                             {expandedProducts[product.id] ? (
                                                 <>
                                                     <ChevronUp size={16} />
-                                                    <span>Show less</span>
+                                                    <span>{tGeneral('showLess')}</span>
                                                 </>
                                             ) : (
                                                 <>
                                                     <ChevronDown size={16} />
-                                                    <span>Show more</span>
+                                                    <span>{tGeneral('showMore')}</span>
                                                 </>
                                             )}
                                         </button>
                                     </div>
                                     <ProductLinkedCourses productId={product.id} />
                                     <div className="mt-2 flex items-center justify-between bg-gray-100 rounded-md p-2">
-                                        <span className="text-sm text-gray-600">Price:</span>
+                                        <span className="text-sm text-gray-600">{t('priceLabel')}</span>
                                         <span className="font-semibold text-lg">
                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: product.currency }).format(product.amount)}
                                         </span>
@@ -187,7 +196,7 @@ function PaymentsProductPage() {
                 {products.data.length === 0 && (
                     <div className="flex mx-auto space-x-2 font-semibold mt-3 text-gray-600 items-center">
                         <Info size={20} />
-                        <p>No products available. Create a new product to get started.</p>
+                        <p>{t('noProducts')}</p>
                     </div>
                 )}
 
@@ -199,7 +208,7 @@ function PaymentsProductPage() {
                         disabled={!isStripeEnabled}
                     >
                         <Plus size={18} />
-                        <span className="text-sm font-bold">Create New Product</span>
+                        <span className="text-sm font-bold">{t('createProductButton')}</span>
                     </button>
                 </div>
             </div>
@@ -211,6 +220,9 @@ const EditProductForm = ({ product, onSuccess, onCancel }: { product: any, onSuc
     const org = useOrg() as any;
     const session = useLHSession() as any;
     const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
+    const t = useTranslations('Payments.ProductPage.editForm');
+    const tNotify = useTranslations('Notifications');
+    const validationSchema = React.useMemo(() => createValidationSchema(t), [t]);
 
     useEffect(() => {
         const allCurrencies = currencyCodes.data.map(currency => ({
@@ -234,9 +246,9 @@ const EditProductForm = ({ product, onSuccess, onCancel }: { product: any, onSuc
             await updateProduct(org.id, product.id, values, session.data?.tokens?.access_token);
             mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
             onSuccess();
-            toast.success('Product updated successfully');
+            toast.success(tNotify('productUpdatedSuccess'));
         } catch (error) {
-            toast.error('Failed to update product');
+            toast.error(tNotify('errors.updateProductFailed'));
         } finally {
             setSubmitting(false);
         }
@@ -252,31 +264,31 @@ const EditProductForm = ({ product, onSuccess, onCancel }: { product: any, onSuc
                 <Form className="space-y-4">
                     <div className='px-1.5 py-2 flex-col space-y-3'>
                         <div>
-                            <Label htmlFor="name">Product Name</Label>
-                            <Field name="name" as={Input} placeholder="Product Name" />
+                            <Label htmlFor="name">{t('nameLabel')}</Label>
+                            <Field name="name" as={Input} placeholder={t('namePlaceholder')} />
                             <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
                         </div>
 
                         <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Field name="description" as={Textarea} placeholder="Product Description" />
+                            <Label htmlFor="description">{t('descriptionLabel')}</Label>
+                            <Field name="description" as={Textarea} placeholder={t('descriptionPlaceholder')} />
                             <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
                         </div>
 
                         <div className="flex space-x-2">
                             <div className="grow">
-                                <Label htmlFor="amount">Price</Label>
-                                <Field name="amount" as={Input} type="number" placeholder="Price" />
+                                <Label htmlFor="amount">{t('priceLabel')}</Label>
+                                <Field name="amount" as={Input} type="number" placeholder={t('pricePlaceholder')} />
                                 <ErrorMessage name="amount" component="div" className="text-red-500 text-sm mt-1" />
                             </div>
                             <div className="w-1/3">
-                                <Label htmlFor="currency">Currency</Label>
+                                <Label htmlFor="currency">{t('currencyLabel')}</Label>
                                 <Select
                                     value={values.currency}
                                     onValueChange={(value) => setFieldValue('currency', value)}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Currency" />
+                                        <SelectValue placeholder={t('currencyPlaceholder')} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {currencies.map((currency) => (
@@ -291,16 +303,16 @@ const EditProductForm = ({ product, onSuccess, onCancel }: { product: any, onSuc
                         </div>
 
                         <div>
-                            <Label htmlFor="benefits">Benefits</Label>
-                            <Field name="benefits" as={Textarea} placeholder="Product Benefits" />
+                            <Label htmlFor="benefits">{t('benefitsLabel')}</Label>
+                            <Field name="benefits" as={Textarea} placeholder={t('benefitsPlaceholder')} />
                             <ErrorMessage name="benefits" component="div" className="text-red-500 text-sm mt-1" />
                         </div>
                     </div>
 
                     <div className="flex justify-end space-x-2">
-                        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+                        <Button type="button" variant="outline" onClick={onCancel}>{t('cancelButton')}</Button>
                         <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? 'Saving...' : 'Save'}
+                            {isSubmitting ? t('savingButton') : t('saveButton')}
                         </Button>
                     </div>
                 </Form>

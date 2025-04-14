@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -39,10 +40,10 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
         mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
         toast.success(tNotify('courseUnlinkedSuccess'));
       } else {
-        toast.error(response.data?.detail || tNotify('errors.unlinkCourseFailed'));
+        toast.error(tNotify('errors.unlinkCourseFailed', { error: response.data?.detail || '' }));
       }
     } catch (error) {
-      toast.error(tNotify('errors.unlinkCourseFailed'));
+      toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }));
     }
   };
 

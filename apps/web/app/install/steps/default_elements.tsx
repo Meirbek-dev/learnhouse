@@ -1,52 +1,72 @@
+'use client'
 import { getAPIUrl } from '@services/config/config'
 import { createDefaultElements, updateInstall } from '@services/install/install'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
-import React from 'react'
+import React, { useState } from 'react'
 import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
+import { BarLoader } from 'react-spinners'
 
 function DefaultElements() {
-  const t = useTranslations('Install.DefaultElements');
+  const t = useTranslations('Install.steps.DEFAULT_ELEMENTS');
+  const generalT = useTranslations('General');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const {
     data: install,
-    error: error,
+    error: fetchError,
     isLoading,
-  } = useSWR(`${getAPIUrl()}install/latest`, (url) => swrFetcher(url, access_token))
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [isSubmitted, setIsSubmitted] = React.useState(false)
+  } = useSWR(access_token ? `${getAPIUrl()}install/latest` : null, (url) => swrFetcher(url, access_token), {
+    revalidateOnFocus: false
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
-  function createDefElementsAndUpdateInstall() {
+  async function createDefElementsAndUpdateInstall() {
+    if (isSubmitting || !install?.data) return;
+
+    setIsSubmitting(true);
     try {
-      createDefaultElements()
-      // add an {} to the install.data object
+      await createDefaultElements();
 
-      let install_data = { ...install.data, 2: { status: 'OK' } }
+      const installData = typeof install.data === 'object' && install.data !== null ? install.data : {};
 
-      updateInstall(install_data, 3)
-      // await 2 seconds
-      setTimeout(() => {
-        setIsSubmitting(false)
-      }, 2000)
+      const install_data_update = { ...installData, 2: { status: 'OK' } };
 
-      router.push('/install?step=3')
-      setIsSubmitted(true)
-    } catch (e) {}
+      await updateInstall(install_data_update, 3);
+
+      router.push('/install?step=3');
+
+    } catch (e) {
+      console.error("Error creating default elements or updating install:", e);
+      setIsSubmitting(false);
+    }
   }
 
+  if (isLoading) return <div>{generalT('loading')}</div>;
+  if (fetchError) return <div>{generalT('error')}: {typeof fetchError === 'object' && fetchError !== null && 'message' in fetchError ? String(fetchError.message) : String(fetchError)}</div>;
+  if (!install) return <div>{generalT('loading')}</div>;
+
   return (
-    <div className="flex py-10 justify-center items-center space-x-3">
-      <h1>{t('title')}</h1>
-      <div
+    <div className="flex py-10 justify-center items-center flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-3">
+      <h1 className="text-lg font-medium">{t('title')}</h1>
+      <button
         onClick={createDefElementsAndUpdateInstall}
-        className="p-3  font-bold bg-gray-200 text-gray-900 rounded-lg hover:cursor-pointer"
+        disabled={isSubmitting}
+        className="p-3 font-bold bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
       >
-        {t('installButton')}
-      </div>
+        {isSubmitting ? (
+          <BarLoader
+            cssOverride={{ borderRadius: 60 }}
+            width={60}
+            color="#000000"
+          />
+        ) : (
+          t('installButton')
+        )}
+      </button>
     </div>
   )
 }

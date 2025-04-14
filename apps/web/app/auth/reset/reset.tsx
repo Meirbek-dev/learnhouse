@@ -18,36 +18,10 @@ import { useFormik } from 'formik'
 import { resetPassword } from '@services/auth/auth'
 import { useTranslations } from 'next-intl'
 
-const validate = (values: any) => {
-    const errors: any = {}
-
-    if (!values.email) {
-        errors.email = 'Required'
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-        errors.email = 'Invalid email address'
-    }
-
-    if (!values.new_password) {
-        errors.new_password = 'Required'
-    }
-
-    if (!values.confirm_password) {
-        errors.confirm_password = 'Required'
-    }
-
-    if (values.new_password !== values.confirm_password) {
-        errors.confirm_password = 'Passwords do not match'
-    }
-
-    if (!values.reset_code) {
-        errors.reset_code = 'Required'
-    }
-    return errors
-}
-
 function ResetPasswordClient() {
     const t = useTranslations('Auth.Reset')
     const generalT = useTranslations('General')
+    const validationT = useTranslations('Validation')
     const org = useOrg() as any;
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const searchParams = useSearchParams()
@@ -56,6 +30,35 @@ function ResetPasswordClient() {
     const router = useRouter()
     const [error, setError] = React.useState('')
     const [message, setMessage] = React.useState('')
+
+    const validate = (values: any) => {
+        const errors: any = {}
+
+        if (!values.email) {
+            errors.email = validationT('required');
+        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+            errors.email = validationT('invalidEmail');
+        }
+
+        if (!values.new_password) {
+            errors.new_password = validationT('required');
+        } else if (values.new_password.length < 8) {
+            errors.new_password = validationT('passwordMinLength', { length: 8 });
+        }
+
+        if (!values.confirm_password) {
+            errors.confirm_password = validationT('required');
+        }
+
+        if (values.new_password !== values.confirm_password) {
+            errors.confirm_password = validationT('passwordsDoNotMatch');
+        }
+
+        if (!values.reset_code) {
+            errors.reset_code = validationT('required');
+        }
+        return errors
+    }
 
     const formik = useFormik({
         initialValues: {
@@ -70,7 +73,7 @@ function ResetPasswordClient() {
             setIsSubmitting(true)
             let res = await resetPassword(values.email, values.new_password, org?.id, values.reset_code)
             if (res.status == 200) {
-                setMessage(res.data + t('success'))
+                setMessage(t('success'))
                 setIsSubmitting(false)
             } else {
                 setError(res.data.detail)

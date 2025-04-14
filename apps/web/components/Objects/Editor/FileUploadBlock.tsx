@@ -1,3 +1,5 @@
+'use client'
+
 import { Loader } from 'lucide-react'
 import { UploadIcon } from '@radix-ui/react-icons'
 import React, {
@@ -6,6 +8,7 @@ import React, {
   InputHTMLAttributes,
 } from 'react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 const FileUploadBlockInput: React.FC<InputHTMLAttributes<HTMLInputElement>> = ({
   onChange,
@@ -29,6 +32,7 @@ const FileUploadBlockInput: React.FC<InputHTMLAttributes<HTMLInputElement>> = ({
 const FileUploadBlockButton: React.FC<
   ButtonHTMLAttributes<HTMLButtonElement>
 > = ({ onClick, className, ...props }) => {
+  const t = useTranslations('Editor.FileUploadBlock')
   return (
     <button
       className={cn(
@@ -39,7 +43,7 @@ const FileUploadBlockButton: React.FC<
       {...props}
     >
       <UploadIcon />
-      <p>Submit</p>
+      <p>{t('submit')}</p>
     </button>
   )
 }
@@ -59,6 +63,8 @@ function FileUploadBlock({
   Icon,
   children,
 }: UploadBlockComponentProps) {
+  const t = useTranslations('Editor.FileUploadBlock')
+
   if (isLoading)
     return <Loader className="animate-spin text-gray-200" size={50} />
 
@@ -66,7 +72,7 @@ function FileUploadBlock({
     return (
       <div className="flex items-center gap-5">
         {<Icon className="text-gray-200" size={50} />}
-        <p>No file available for preview.</p>
+        <p>{t('noFilePreview')}</p>
       </div>
     )
 

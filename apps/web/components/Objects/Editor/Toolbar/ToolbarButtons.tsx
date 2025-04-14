@@ -1,3 +1,5 @@
+'use client'
+
 import styled from 'styled-components'
 import {
   FontBoldIcon,
@@ -34,8 +36,10 @@ import {
 import { SiYoutube } from '@icons-pack/react-simple-icons'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 export const ToolbarButtons = ({ editor, props }: any) => {
+  const t = useTranslations('Editor.Toolbar')
   const [showTableMenu, setShowTableMenu] = React.useState(false)
 
   if (!editor) {
@@ -57,27 +61,27 @@ export const ToolbarButtons = ({ editor, props }: any) => {
 
   const tableOptions = [
     {
-      label: 'Insert new table (3×3)',
+      label: t('insertTable'),
       icon: <TableIcon />,
       action: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
     },
     {
-      label: 'Add row below',
+      label: t('addRowBelow'),
       icon: <RowsIcon />,
       action: () => editor.chain().focus().addRowAfter().run()
     },
     {
-      label: 'Add column right',
+      label: t('addColumnRight'),
       icon: <ColumnsIcon />,
       action: () => editor.chain().focus().addColumnAfter().run()
     },
     {
-      label: 'Delete current row',
+      label: t('deleteRow'),
       icon: <SectionIcon />,
       action: () => editor.chain().focus().deleteRow().run()
     },
     {
-      label: 'Delete current column',
+      label: t('deleteColumn'),
       icon: <ContainerIcon />,
       action: () => editor.chain().focus().deleteColumn().run()
     }
@@ -85,36 +89,48 @@ export const ToolbarButtons = ({ editor, props }: any) => {
 
   return (
     <ToolButtonsWrapper>
-      <ToolBtn onClick={() => editor.chain().focus().undo().run()}>
-        <ArrowLeftIcon />
-      </ToolBtn>
-      <ToolBtn onClick={() => editor.chain().focus().redo().run()}>
-        <ArrowRightIcon />
-      </ToolBtn>
-      <ToolBtn
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'is-active' : ''}
-      >
-        <FontBoldIcon />
-      </ToolBtn>
-      <ToolBtn
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive('italic') ? 'is-active' : ''}
-      >
-        <FontItalicIcon />
-      </ToolBtn>
-      <ToolBtn
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={editor.isActive('strike') ? 'is-active' : ''}
-      >
-        <StrikethroughIcon />
-      </ToolBtn>
-      <ToolBtn
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive('orderedList') ? 'is-active' : ''}
-      >
-        <ListBulletIcon />
-      </ToolBtn>
+      <ToolTip content={t('undo')}>
+        <ToolBtn onClick={() => editor.chain().focus().undo().run()}>
+          <ArrowLeftIcon />
+        </ToolBtn>
+      </ToolTip>
+      <ToolTip content={t('redo')}>
+        <ToolBtn onClick={() => editor.chain().focus().redo().run()}>
+          <ArrowRightIcon />
+        </ToolBtn>
+      </ToolTip>
+      <ToolTip content={t('bold')}>
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive('bold') ? 'is-active' : ''}
+        >
+          <FontBoldIcon />
+        </ToolBtn>
+      </ToolTip>
+      <ToolTip content={t('italic')}>
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={editor.isActive('italic') ? 'is-active' : ''}
+        >
+          <FontItalicIcon />
+        </ToolBtn>
+      </ToolTip>
+      <ToolTip content={t('strike')}>
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          className={editor.isActive('strike') ? 'is-active' : ''}
+        >
+          <StrikethroughIcon />
+        </ToolBtn>
+      </ToolTip>
+      <ToolTip content={t('orderedList')}>
+        <ToolBtn
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={editor.isActive('orderedList') ? 'is-active' : ''}
+        >
+          <ListBulletIcon />
+        </ToolBtn>
+      </ToolTip>
       <ToolSelect
         value={
           editor.isActive('heading', { level: 1 }) ? "1" :
@@ -132,27 +148,30 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             editor.chain().focus().toggleHeading({ level: parseInt(value) }).run();
           }
         }}
+        aria-label={t('heading')}
       >
-        <option value="0">Paragraph</option>
-        <option value="1">Heading 1</option>
-        <option value="2">Heading 2</option>
-        <option value="3">Heading 3</option>
-        <option value="4">Heading 4</option>
-        <option value="5">Heading 5</option>
-        <option value="6">Heading 6</option>
+        <option value="0">{t('paragraph')}</option>
+        <option value="1">{t('headingLevel', { level: 1 })}</option>
+        <option value="2">{t('headingLevel', { level: 2 })}</option>
+        <option value="3">{t('headingLevel', { level: 3 })}</option>
+        <option value="4">{t('headingLevel', { level: 4 })}</option>
+        <option value="5">{t('headingLevel', { level: 5 })}</option>
+        <option value="6">{t('headingLevel', { level: 6 })}</option>
       </ToolSelect>
       <TableMenuWrapper>
-        <ToolBtn 
-          onClick={() => setShowTableMenu(!showTableMenu)}
-          className={showTableMenu ? 'is-active' : ''}
-        >
-          <TableIcon width={18} />
-          <ChevronDownIcon  />
-        </ToolBtn>
+        <ToolTip content={t('table')}>
+          <ToolBtn
+            onClick={() => setShowTableMenu(!showTableMenu)}
+            className={showTableMenu ? 'is-active' : ''}
+          >
+            <TableIcon width={18} />
+            <ChevronDownIcon  />
+          </ToolBtn>
+        </ToolTip>
         {showTableMenu && (
           <TableDropdown>
             {tableOptions.map((option, index) => (
-              <TableMenuItem 
+              <TableMenuItem
                 key={index}
                 onClick={() => {
                   option.action()
@@ -169,14 +188,14 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       <DividerVerticalIcon
         style={{ marginTop: 'auto', marginBottom: 'auto', color: 'grey' }}
       />
-      <ToolTip content={'Info Callout'}>
+      <ToolTip content={t('infoCallout')}>
         <ToolBtn
           onClick={() => editor.chain().focus().toggleNode('calloutInfo').run()}
         >
           <AlertCircle size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Warning Callout'}>
+      <ToolTip content={t('warningCallout')}>
         <ToolBtn
           onClick={() =>
             editor.chain().focus().toggleNode('calloutWarning').run()
@@ -185,7 +204,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <AlertTriangle size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Image'}>
+      <ToolTip content={t('image')}>
         <ToolBtn
           onClick={() =>
             editor
@@ -200,7 +219,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <ImagePlus size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Video'}>
+      <ToolTip content={t('video')}>
         <ToolBtn
           onClick={() =>
             editor
@@ -215,12 +234,12 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <Video size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'YouTube video'}>
+      <ToolTip content={t('youtubeVideo')}>
         <ToolBtn  onClick={() => editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()}>
           <SiYoutube size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Math Equation (LaTeX)'}>
+      <ToolTip content={t('mathEquation')}>
         <ToolBtn
           onClick={() =>
             editor
@@ -235,7 +254,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <Sigma size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'PDF Document'}>
+      <ToolTip content={t('pdfDocument')}>
         <ToolBtn
           onClick={() =>
             editor
@@ -250,7 +269,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <FileText size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Interactive Quiz'}>
+      <ToolTip content={t('interactiveQuiz')}>
         <ToolBtn
           onClick={() =>
             editor
@@ -265,7 +284,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <BadgeHelp size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Code Block'}>
+      <ToolTip content={t('codeBlock')}>
         <ToolBtn
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           className={editor.isActive('codeBlock') ? 'is-active' : ''}
@@ -273,14 +292,14 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <Code size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'External Object (Embed)'}>
+      <ToolTip content={t('externalObject')}>
         <ToolBtn
           onClick={() => editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()}
         >
           <Cuboid size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Badges'}>
+      <ToolTip content={t('badges')}>
         <ToolBtn
           onClick={() => editor.chain().focus().insertContent({
             type: 'badge',
@@ -295,7 +314,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <Tags size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Button'}>
+      <ToolTip content={t('button')}>
         <ToolBtn
           onClick={() => editor.chain().focus().insertContent({
             type: 'button',
@@ -310,7 +329,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <MousePointerClick size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'User'}>
+      <ToolTip content={t('user')}>
         <ToolBtn
           onClick={() => editor.chain().focus().insertContent({ type: 'blockUser' }).run()}
         >

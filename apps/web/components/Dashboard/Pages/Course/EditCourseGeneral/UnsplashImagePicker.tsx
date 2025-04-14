@@ -12,28 +12,28 @@ const unsplash = createApi({
 
 const IMAGES_PER_PAGE = 20;
 
-const predefinedLabels = [
-  { name: 'Nature', icon: Flower },
-  { name: 'Technology', icon: Cpu },
-  { name: 'Business', icon: Briefcase },
-  { name: 'Education', icon: GraduationCap },
-  { name: 'Health', icon: Heart },
-  { name: 'Art', icon: Palette },
-  { name: 'Science', icon: Microscope },
-  { name: 'Travel', icon: Plane },
-  { name: 'Food', icon: Utensils },
-  { name: 'Sports', icon: Dumbbell },
-  { name: 'Music', icon: Music },
-  { name: 'Fashion', icon: Shirt },
-  { name: 'History', icon: Book },
-  { name: 'Architecture', icon: Building },
-  { name: 'Fitness', icon: Bike },
-  { name: 'Photography', icon: Camera },
-  { name: 'Biology', icon: Microscope },
-  { name: 'Finance', icon: Coins },
-  { name: 'Lifestyle', icon: Coffee },
-  { name: 'Gaming', icon: Gamepad },
-];
+const LABEL_KEYS_WITH_ICONS = [
+  { key: 'nature', icon: Flower },
+  { key: 'technology', icon: Cpu },
+  { key: 'business', icon: Briefcase },
+  { key: 'education', icon: GraduationCap },
+  { key: 'health', icon: Heart },
+  { key: 'art', icon: Palette },
+  { key: 'science', icon: Microscope },
+  { key: 'travel', icon: Plane },
+  { key: 'food', icon: Utensils },
+  { key: 'sports', icon: Dumbbell },
+  { key: 'music', icon: Music },
+  { key: 'fashion', icon: Shirt },
+  { key: 'history', icon: Book },
+  { key: 'architecture', icon: Building },
+  { key: 'fitness', icon: Bike },
+  { key: 'photography', icon: Camera },
+  { key: 'biology', icon: Microscope },
+  { key: 'finance', icon: Coins },
+  { key: 'lifestyle', icon: Coffee },
+  { key: 'gaming', icon: Gamepad },
+] as const;
 
 interface UnsplashImagePickerProps {
   onSelect: (imageUrl: string) => void;
@@ -47,6 +47,12 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const t = useTranslations('CourseEdit.General.UnsplashPicker');
+
+  // Generate predefined labels with translations
+  const predefinedLabels = LABEL_KEYS_WITH_ICONS.map(({ key, icon }) => ({
+    name: t(`Labels.${key}`), // Translate label using key
+    icon: icon
+  }));
 
   const fetchImages = useCallback(async (searchQuery: string, pageNum: number) => {
     setLoading(true);

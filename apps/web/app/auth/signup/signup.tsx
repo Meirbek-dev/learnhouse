@@ -115,6 +115,7 @@ function SignUpClient(props: SignUpClientProps) {
 
 const LoggedInJoinScreen = (props: any) => {
   const t = useTranslations('Auth.Signup')
+  const toastT = useTranslations('ToastMessages')
   const session = useLHSession() as any
   const org = useOrg() as any
   const invite_code = props.inviteCode
@@ -127,15 +128,15 @@ const LoggedInJoinScreen = (props: any) => {
     const res = await joinOrg({ org_id: org.id, user_id: session?.data?.user?.id, invite_code: props.inviteCode }, null, session.data?.tokens?.access_token)
     //wait for 1s
     if (res.success) {
-      toast.success(
-        res.data
-      )
+      toast.success(res.data + toastT('orgJoinSuccess'))
       setTimeout(() => {
         router.push(getUriWithOrg(org.slug,'/'))
       }, 2000)
       setIsSubmitting(false)
     } else {
-      toast.error(res.data.detail)
+      toast.error(
+        res.data?.detail || toastT('errorSomethingWentWrong')
+      )
       setIsLoading(false)
       setIsSubmitting(false)
     }
@@ -175,6 +176,7 @@ const LoggedInJoinScreen = (props: any) => {
 
 const NoTokenScreen = (props: any) => {
   const t = useTranslations('Auth.Signup')
+  const toastT = useTranslations('ToastMessages')
   const session = useLHSession() as any
   const org = useOrg() as any
   const router = useRouter()
@@ -192,13 +194,15 @@ const NoTokenScreen = (props: any) => {
     //wait for 1s
     if (res.success) {
       toast.success(
-        "Invite code is valid, you'll be redirected to the signup page in a few seconds"
+        toastT('inviteCodeValid')
       )
       setTimeout(() => {
         router.push(getUriWithoutOrg(`/signup?inviteCode=${inviteCode}&orgslug=${org.slug}`))
       }, 2000)
     } else {
-      toast.error('Invite code is invalid')
+      toast.error(
+        res.data?.detail || toastT('inviteCodeInvalid')
+      )
       setIsLoading(false)
     }
   }

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getCourseContributors } from '@services/courses/courses';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
 
 export type ContributorStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'INACTIVE';
 
@@ -9,6 +10,7 @@ export function useContributorStatus(courseUuid: string) {
   const session = useLHSession() as any;
   const [contributorStatus, setContributorStatus] = useState<ContributorStatus>('NONE');
   const [isLoading, setIsLoading] = useState(true);
+  const t = useTranslations('Hooks.useContributorStatus');
 
   const checkContributorStatus = useCallback(async () => {
     if (!session.data?.user) {
@@ -35,11 +37,11 @@ export function useContributorStatus(courseUuid: string) {
       }
     } catch (error) {
       console.error('Failed to check contributor status:', error);
-      toast.error('Failed to check contributor status');
+      toast.error(t('checkStatusError'));
     } finally {
       setIsLoading(false);
     }
-  }, [courseUuid, session.data?.tokens?.access_token, session.data?.user]);
+  }, [courseUuid, session.data?.tokens?.access_token, session.data?.user, t]);
 
   useEffect(() => {
     if (session.data?.user) {

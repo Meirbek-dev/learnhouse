@@ -4,11 +4,11 @@ import learnhousetextlogo from '../../../../public/learnhouse_logo.png'
 import { BookCopy, School, Settings, University, Users } from 'lucide-react'
 import Link from 'next/link'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 
-function DashboardHome() {
-  const t = useTranslations('DashPage.Card')
-  const dashboardT = useTranslations('DashPage.HomePage')
+async function DashboardHome() {
+  const t = await getTranslations('DashPage.Card')
+  const dashboardT = await getTranslations('DashPage.HomePage')
 
   return (
     <div className="flex items-center justify-center mx-auto min-h-screen flex-col p-4 sm:mb-0 mb-16">

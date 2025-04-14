@@ -2,10 +2,10 @@ import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import learnhouseIcon from 'public/black_logo.png'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 
-export default function NotFound() {
-  const t = useTranslations('NotFoundPage')
+export default async function NotFound() {
+  const t = await getTranslations('NotFoundPage')
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center

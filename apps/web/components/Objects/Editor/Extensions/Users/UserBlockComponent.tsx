@@ -1,3 +1,5 @@
+'use client'
+
 import { NodeViewWrapper } from '@tiptap/react'
 import React, { useEffect, useState } from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -5,9 +7,9 @@ import { getUserByUsername, getUser } from '@services/users/users'
 import { Input } from "@components/ui/input"
 import { Button } from "@components/ui/button"
 import { Label } from "@components/ui/label"
-import { 
-  Loader2, 
-  User, 
+import {
+  Loader2,
+  User,
   ExternalLink,
   Briefcase,
   GraduationCap,
@@ -28,6 +30,7 @@ import { useRouter } from 'next/navigation'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
+import { useTranslations } from 'next-intl'
 
 type UserData = {
   id: string
@@ -69,6 +72,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 }
 
 function UserBlockComponent(props: any) {
+  const t = useTranslations('Editor.UserBlock')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const editorState = useEditorProvider() as any
@@ -98,7 +102,7 @@ function UserBlockComponent(props: any) {
       setUsername(data.username)
     } catch (err: any) {
       console.error('Error fetching user by ID:', err)
-      setError(err.detail || 'User not found')
+      setError(err.detail || t('errorNotFound'))
       // Clear the invalid user_id from the node attributes
       props.updateAttributes({
         user_id: null
@@ -122,7 +126,7 @@ function UserBlockComponent(props: any) {
       })
     } catch (err: any) {
       console.error('Error fetching user by username:', err)
-      setError(err.detail || 'User not found')
+      setError(err.detail || t('errorNotFound'))
     } finally {
       setIsLoading(false)
     }
@@ -140,20 +144,20 @@ function UserBlockComponent(props: any) {
         <div className="bg-gray-50 rounded-lg p-6 border border-dashed border-gray-200">
           <form onSubmit={handleUsernameSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('usernameLabel')}</Label>
               <div className="flex gap-2 mt-2">
                 <Input
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
+                  placeholder={t('usernamePlaceholder')}
                   className="flex-1"
                 />
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    'Load User'
+                    t('loadUser')
                   )}
                 </Button>
               </div>
@@ -193,7 +197,7 @@ function UserBlockComponent(props: any) {
         <div className="bg-gray-50 rounded-lg p-6 border border-dashed border-gray-200">
           <div className="flex items-center gap-2 text-gray-500">
             <User className="w-5 h-5" />
-            <span>No user selected</span>
+            <span>{t('noUserSelected')}</span>
           </div>
         </div>
       </NodeViewWrapper>
@@ -207,7 +211,7 @@ function UserBlockComponent(props: any) {
         <div className="relative">
           {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-gray-100/30 to-transparent h-28 rounded-t-lg" />
-          
+
           {/* Content */}
           <div className="relative px-5 pt-5 pb-4">
             <div className="flex items-start gap-4">

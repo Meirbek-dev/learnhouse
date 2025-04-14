@@ -17,34 +17,11 @@ import { Check } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslations } from 'next-intl'
 
-const validate = (values: any) => {
-  const errors: any = {}
-
-  if (!values.name) {
-    errors.name = 'Required'
-  }
-
-  if (!values.description) {
-    errors.description = 'Required'
-  }
-
-  if (!values.slug) {
-    errors.slug = 'Required'
-  }
-
-  if (!values.email) {
-    errors.email = 'Required'
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-    errors.email = 'Invalid email address'
-  }
-
-  return errors
-}
-
 function OrgCreation() {
   const t = useTranslations('Install.OrgCreation');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
+  const validationT = useTranslations('Validation');
   const {
     data: install,
     error: error,
@@ -54,22 +31,44 @@ function OrgCreation() {
   const [isSubmitted, setIsSubmitted] = React.useState(false)
   const router = useRouter()
 
+  const validate = (values: any) => {
+    const errors: any = {}
+
+    if (!values.name) {
+      errors.name = validationT('required');
+    }
+
+    if (!values.description) {
+      errors.description = validationT('required');
+    }
+
+    if (!values.slug) {
+      errors.slug = validationT('required');
+    }
+
+    if (!values.email) {
+      errors.email = validationT('required');
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+      errors.email = validationT('invalidEmail');
+    }
+
+    return errors
+  }
+
   function createOrgAndUpdateInstall(values: any) {
     try {
       createNewOrgInstall(values)
-      install.data = {
-        1: values,
-      }
-      let install_data = { ...install.data, 1: values }
+      const install_data = { ...install?.data, 1: values }
       updateInstall(install_data, 2)
-      // await 2 seconds
       setTimeout(() => {
         setIsSubmitting(false)
+        router.push('/install?step=2')
+        setIsSubmitted(true)
       }, 2000)
-
-      router.push('/install?step=2')
-      setIsSubmitted(true)
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error creating org or updating install:", e);
+      setIsSubmitting(false);
+    }
   }
 
   const formik = useFormik({
@@ -81,6 +80,7 @@ function OrgCreation() {
     },
     validate,
     onSubmit: (values) => {
+      setIsSubmitting(true);
       createOrgAndUpdateInstall(values)
     },
   })

@@ -9,6 +9,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail'
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
+import { useTranslations } from 'next-intl'
 
 interface CourseProps {
   orgslug: string
@@ -17,6 +18,8 @@ interface CourseProps {
 }
 
 function Courses(props: CourseProps) {
+  const t = useTranslations('CoursesPage')
+  const tModal = useTranslations('Components.CreateCourseModal')
   const orgslug = props.orgslug
   const courses = props.courses
   const searchParams = useSearchParams()
@@ -33,7 +36,7 @@ function Courses(props: CourseProps) {
       <GeneralWrapperStyled>
         <div className="flex flex-col space-y-2 mb-2">
           <div className="flex items-center justify-between">
-            <TypeOfContentTitle title="Courses" type="cou" />
+            <TypeOfContentTitle title={t('title')} type="cou" />
             <AuthenticatedClientElement
               checkMethod="roles"
               action="create"
@@ -50,8 +53,8 @@ function Courses(props: CourseProps) {
                     orgslug={orgslug}
                   />
                 }
-                dialogTitle="Create Course"
-                dialogDescription="Create a new course"
+                dialogTitle={tModal('createCourse')}
+                dialogDescription={tModal('createCourse')}
                 dialogTrigger={
                   <button>
                     <NewCourseButton />
@@ -83,13 +86,13 @@ function Courses(props: CourseProps) {
                     </svg>
                   </div>
                   <h1 className="text-xl font-bold text-gray-600 mb-2">
-                    No courses yet
+                    {t('noCourses')}
                   </h1>
                   <p className="text-md text-gray-400">
                     {isUserAdmin ? (
-                      "Create a course to add content"
+                      t('createACourse')
                     ) : (
-                      "No courses available yet"
+                      t('noCoursesAvailable')
                     )}
                   </p>
                   {isUserAdmin && (
@@ -110,8 +113,8 @@ function Courses(props: CourseProps) {
                               orgslug={orgslug}
                             />
                           }
-                          dialogTitle="Create Course"
-                          dialogDescription="Create a new course"
+                          dialogTitle={tModal('createCourse')}
+                          dialogDescription={tModal('createCourse')}
                           dialogTrigger={
                             <button>
                               <NewCourseButton />

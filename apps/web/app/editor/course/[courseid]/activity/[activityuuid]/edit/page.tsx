@@ -9,6 +9,7 @@ import AIEditorProvider from '@components/Contexts/AI/AIEditorContext'
 import { nextAuthOptions } from 'app/auth/options'
 import { getServerSession } from 'next-auth'
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper'
+import { getTranslations } from 'next-intl/server'
 
 
 type MetadataProps = {
@@ -20,6 +21,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params;
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
+  const t = await getTranslations('EditorPage')
+
   // Get Org context information
   const course_meta = await getCourseMetadata(
     params.courseid,
@@ -28,7 +31,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   )
 
   return {
-    title: `Edit - ${course_meta.name} Activity`,
+    title: t('metaTitleEdit', { activityName: 'Activity' }),
     description: course_meta.mini_description,
   }
 }

@@ -6,6 +6,7 @@ import { nextAuthOptions } from 'app/auth/options'
 import { getServerSession } from 'next-auth'
 import { getOrgCourses } from '@services/courses/courses'
 import { getOrgThumbnailMediaDirectory } from '@services/media/media'
+import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string }>
@@ -14,6 +15,9 @@ type MetadataProps = {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
+  const tGeneral = await getTranslations('General');
+  const tCoursesPage = await getTranslations('CoursesPage');
+
   // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 0,
@@ -22,9 +26,9 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // SEO
   return {
-    title: 'Courses — ' + org.name,
+    title: `${tCoursesPage('title')} — ${org.name}`,
     description: org.description,
-    keywords: `${org.name}, ${org.description}, courses, learning, education, online learning, edu, online courses, ${org.name} courses`,
+    keywords: `${org.name}, ${org.description}, ${tGeneral('courses')}, ${tGeneral('learning')}, ${tGeneral('education')}, ${tGeneral('onlineLearning')}, ${tGeneral('edu')}, ${tGeneral('onlineCourses')}, ${org.name} ${tGeneral('courses')}`,
     robots: {
       index: true,
       follow: true,
@@ -36,7 +40,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       },
     },
     openGraph: {
-      title: 'Courses — ' + org.name,
+      title: `${tCoursesPage('title')} — ${org.name}`,
       description: org.description,
       type: 'website',
       images: [
@@ -53,6 +57,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 const CoursesPage = async (params: any) => {
   const orgslug = (await params.params).orgslug
+  const tGeneral = await getTranslations('General')
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 1800,
     tags: ['organizations'],

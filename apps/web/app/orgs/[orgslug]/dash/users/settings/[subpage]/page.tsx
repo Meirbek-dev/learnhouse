@@ -12,6 +12,7 @@ import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers'
 import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess'
 import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd'
 import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups'
+import { useTranslations } from 'next-intl';
 
 export type SettingsParams = {
   subpage: string
@@ -22,26 +23,27 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
   const params = use(props.params);
   const session = useLHSession() as any
   const org = useOrg() as any
+  const t = useTranslations('DashPage.UserSettings');
   const [H1Label, setH1Label] = React.useState('')
   const [H2Label, setH2Label] = React.useState('')
   const isMobile = useMediaQuery('(max-width: 767px)')
 
   function handleLabels() {
     if (params.subpage == 'users') {
-      setH1Label('Users')
-      setH2Label('Manage your organization users, assign roles and permissions')
+      setH1Label(t('usersTitle'))
+      setH2Label(t('usersDescription'))
     }
     if (params.subpage == 'signups') {
-      setH1Label('Signups & Invite Codes')
-      setH2Label('Choose from where users can join your organization')
+      setH1Label(t('signupsTitle'))
+      setH2Label(t('signupsDescription'))
     }
     if (params.subpage == 'add') {
-      setH1Label('Invite Members')
-      setH2Label('Invite members to join your organization')
+      setH1Label(t('addTitle'))
+      setH2Label(t('addDescription'))
     }
     if (params.subpage == 'usergroups') {
-      setH1Label('UserGroups')
-      setH2Label('Create and manage user groups')
+      setH1Label(t('usergroupsTitle'))
+      setH2Label(t('usergroupsDescription'))
     }
   }
 
@@ -54,10 +56,10 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
     return (
       <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center p-4">
         <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <h2 className="text-xl font-bold mb-4">Desktop Only</h2>
+          <h2 className="text-xl font-bold mb-4">{t('desktopOnlyTitle')}</h2>
           <Monitor className='mx-auto my-5' size={60} />
-          <p>This page is only accessible from a desktop device.</p>
-          <p>Please switch to a desktop to view and manage user settings.</p>
+          <p>{t('desktopOnlyMessage1')}</p>
+          <p>{t('desktopOnlyMessage2')}</p>
         </div>
       </div>
     )
@@ -91,7 +93,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             >
               <div className="flex items-center space-x-2.5 mx-2">
                 <Users size={16} />
-                <div>Users</div>
+                <div>{t('users')}</div>
               </div>
             </div>
           </Link>
@@ -108,7 +110,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             >
               <div className="flex items-center space-x-2.5 mx-2">
                 <SquareUserRound size={16} />
-                <div>UserGroups</div>
+                <div>{t('usergroups')}</div>
               </div>
             </div>
           </Link>
@@ -125,7 +127,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             >
               <div className="flex items-center space-x-2.5 mx-2">
                 <ScanEye size={16} />
-                <div>Signups & Invite Codes</div>
+                <div>{t('signups')}</div>
               </div>
             </div>
           </Link>
@@ -142,7 +144,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             >
               <div className="flex items-center space-x-2.5 mx-2">
                 <UserPlus size={16} />
-                <div>Invite Members</div>
+                <div>{t('add')}</div>
               </div>
             </div>
           </Link>

@@ -1,3 +1,4 @@
+'use client';
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { updatePassword } from '@services/settings/password'
 import { Formik, Form } from 'formik'
@@ -10,34 +11,39 @@ import { toast } from 'react-hot-toast'
 import { signOut } from 'next-auth/react'
 import { getUriWithoutOrg } from '@services/config/config'
 import * as Yup from 'yup'
+import { useTranslations } from 'next-intl'
 
-const validationSchema = Yup.object().shape({
-  old_password: Yup.string().required('Current password is required'),
+const createValidationSchema = (t: (key: string, values?: any) => string) => Yup.object().shape({
+  old_password: Yup.string().required(t('Components.Form.requiredField', { fieldName: t('UserAccount.EditPassword.currentPasswordLabel') })),
   new_password: Yup.string()
-    .required('New password is required')
-    .min(8, 'Password must be at least 8 characters'),
-})
+    .required(t('Components.Form.requiredField', { fieldName: t('UserAccount.EditPassword.newPasswordLabel') }))
+    .min(8, t('Components.Form.minChars', { count: 8 })),
+});
 
 function UserEditPassword() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations();
+  const tPassword = useTranslations('UserAccount.EditPassword');
+  const tNotify = useTranslations('Notifications');
+  const validationSchema = React.useMemo(() => createValidationSchema(t), [t]);
 
   const updatePasswordUI = async (values: any) => {
-    const loadingToast = toast.loading('Updating password...')
+    const loadingToast = toast.loading(tNotify('updating'));
     try {
       let user_id = session.data.user.id
       const response = await updatePassword(user_id, values, access_token)
-      
+
       if (response.success) {
         toast.dismiss(loadingToast)
-        
+
         // Show success message and notify about logout
-        toast.success('Password updated successfully', { duration: 4000 })
+        toast.success(tNotify('passwordUpdateSuccess'), { duration: 4000 })
         toast((t: any) => (
           <div className="flex items-center gap-2">
-            <span>Please login again with your new password</span>
+            <span>{tNotify('promptLogoutOnPasswordChange')}</span>
           </div>
-        ), { 
+        ), {
           duration: 4000,
           icon: '🔑'
         })
@@ -46,11 +52,10 @@ function UserEditPassword() {
         await new Promise(resolve => setTimeout(resolve, 4000))
         signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })
       } else {
-        toast.error(response.data.detail || 'Failed to update password', { id: loadingToast })
+        toast.error(tNotify('passwordUpdateError'), { id: loadingToast })
       }
     } catch (error: any) {
-      const errorMessage = error.data?.detail || 'Failed to update password. Please try again.'
-      toast.error(errorMessage, { id: loadingToast })
+      toast.error(tNotify('passwordUpdateError'), { id: loadingToast })
       console.error('Password update error:', error)
     }
   }
@@ -62,10 +67,10 @@ function UserEditPassword() {
       <div className="flex flex-col">
         <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
           <h1 className="font-bold text-xl text-gray-800">
-            Change Password
+            {tPassword('title')}
           </h1>
           <h2 className="text-gray-500 text-md">
-            Update your password to keep your account secure
+            {tPassword('description')}
           </h2>
         </div>
 
@@ -83,7 +88,7 @@ function UserEditPassword() {
             {({ isSubmitting, handleChange, errors, touched }) => (
               <Form className="w-full max-w-2xl mx-auto space-y-6">
                 <div>
-                  <Label htmlFor="old_password">Current Password</Label>
+                  <Label htmlFor="old_password">{tPassword('currentPasswordLabel')}</Label>
                   <Input
                     type="password"
                     id="old_password"
@@ -97,7 +102,7 @@ function UserEditPassword() {
                 </div>
 
                 <div>
-                  <Label htmlFor="new_password">New Password</Label>
+                  <Label htmlFor="new_password">{tPassword('newPasswordLabel')}</Label>
                   <Input
                     type="password"
                     id="new_password"
@@ -112,16 +117,16 @@ function UserEditPassword() {
 
                 <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 p-3 rounded-md">
                   <AlertTriangle size={16} />
-                  <span className="text-sm">You will be logged out after changing your password</span>
+                  <span className="text-sm">{tPassword('logoutWarning')}</span>
                 </div>
 
                 <div className="flex justify-end pt-2">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isSubmitting}
                     className="bg-black text-white hover:bg-black/90"
                   >
-                    {isSubmitting ? 'Updating...' : 'Update Password'}
+                    {isSubmitting ? tPassword('updatingButton') : tPassword('updateButton')}
                   </Button>
                 </div>
               </Form>

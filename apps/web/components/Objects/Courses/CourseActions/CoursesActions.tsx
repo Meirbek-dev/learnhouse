@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect } from 'react'
 import UserAvatar from '../../UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
@@ -15,6 +17,7 @@ import { checkPaidAccess } from '@services/payments/payments'
 import { applyForContributor } from '@services/courses/courses'
 import toast from 'react-hot-toast'
 import { useContributorStatus } from '../../../useContributorStatus'
+import { useTranslations } from 'next-intl'
 
 interface Author {
   user: {
@@ -60,37 +63,41 @@ interface CourseActionsProps {
 }
 
 // Separate component for author display
-const AuthorInfo = ({ author, isMobile }: { author: Author, isMobile: boolean }) => (
-  <div className="flex flex-row md:flex-col mx-auto space-y-0 md:space-y-3 space-x-4 md:space-x-0 px-2 py-2 items-center">
-    <UserAvatar
-      border="border-8"
-      avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
-      predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-      width={isMobile ? 60 : 100}
-      showProfilePopup={true}
-      userId={author.user.user_uuid}
-    />
-    <div className="md:-space-y-2">
-      <div className="text-[12px] text-neutral-400 font-semibold">Author</div>
-      <div className="text-lg md:text-xl font-bold text-neutral-800">
-        {(author.user.first_name && author.user.last_name) ? (
-          <div className="flex space-x-2 items-center">
-            <p>{`${author.user.first_name} ${author.user.last_name}`}</p>
-            <span className="text-xs bg-neutral-100 p-1 px-3 rounded-full text-neutral-400 font-semibold">
-              @{author.user.username}
-            </span>
-          </div>
-        ) : (
-          <div className="flex space-x-2 items-center">
-            <p>@{author.user.username}</p>
-          </div>
-        )}
+const AuthorInfo = ({ author, isMobile }: { author: Author, isMobile: boolean }) => {
+  const t = useTranslations('Courses.CoursesActions');
+  return (
+    <div className="flex flex-row md:flex-col mx-auto space-y-0 md:space-y-3 space-x-4 md:space-x-0 px-2 py-2 items-center">
+      <UserAvatar
+        border="border-8"
+        avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
+        predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
+        width={isMobile ? 60 : 100}
+        showProfilePopup={true}
+        userId={author.user.user_uuid}
+      />
+      <div className="md:-space-y-2">
+        <div className="text-[12px] text-neutral-400 font-semibold">{t('author')}</div>
+        <div className="text-lg md:text-xl font-bold text-neutral-800">
+          {(author.user.first_name && author.user.last_name) ? (
+            <div className="flex space-x-2 items-center">
+              <p>{`${author.user.first_name} ${author.user.last_name}`}</p>
+              <span className="text-xs bg-neutral-100 p-1 px-3 rounded-full text-neutral-400 font-semibold">
+                @{author.user.username}
+              </span>
+            </div>
+          ) : (
+            <div className="flex space-x-2 items-center">
+              <p>@{author.user.username}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-)
+  )
+}
 
 const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: boolean }) => {
+  const t = useTranslations('Courses.CoursesActions');
   const displayedAvatars = authors.slice(0, 3)
   const displayedNames = authors.slice(0, 2)
   const remainingCount = Math.max(0, authors.length - 3)
@@ -101,7 +108,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: b
 
   return (
     <div className="flex flex-col items-center space-y-4 px-2 py-2">
-      <div className="text-[12px] text-neutral-400 font-semibold self-start">Authors</div>
+      <div className="text-[12px] text-neutral-400 font-semibold self-start">{t('authors')}</div>
 
       {/* Avatars row */}
       <div className="flex justify-center -space-x-6 relative">
@@ -164,7 +171,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: b
               ))}
               {authors.length > 2 && (
                 <span className="text-neutral-500 ml-1">
-                  & {authors.length - 2} more
+                  {t('moreAuthors', { count: authors.length - 2 })}
                 </span>
               )}
             </>
@@ -190,6 +197,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: b
 }
 
 const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
+  const t = useTranslations('Courses.CoursesActions');
   const router = useRouter()
   const session = useLHSession() as any
   const [linkedProducts, setLinkedProducts] = useState<any[]>([])
@@ -236,7 +244,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
 
       } catch (error) {
         console.error('Failed to check course access')
-        toast.error('Failed to check course access. Please try again later.')
+        toast.error(t('accessCheckError'))
         setHasAccess(false)
       }
     }
@@ -244,7 +252,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
     if (linkedProducts.length > 0) {
       checkAccess()
     }
-  }, [course.id, course.org_id, session.data?.tokens?.access_token, linkedProducts])
+  }, [course.id, course.org_id, session.data?.tokens?.access_token, linkedProducts, t])
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
@@ -254,19 +262,19 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
 
     setIsActionLoading(true)
     const loadingToast = toast.loading(
-      isStarted ? 'Leaving course...' : 'Starting course...'
+      isStarted ? t('leavingCourse') : t('startingCourse')
     )
 
     try {
       if (isStarted) {
         await removeCourse('course_' + courseuuid, orgslug, session.data?.tokens?.access_token)
         await revalidateTags(['courses'], orgslug)
-        toast.success('Successfully left the course', { id: loadingToast })
+        toast.success(t('leaveSuccess'), { id: loadingToast })
         router.refresh()
       } else {
         await startCourse('course_' + courseuuid, orgslug, session.data?.tokens?.access_token)
         await revalidateTags(['courses'], orgslug)
-        toast.success('Successfully started the course', { id: loadingToast })
+        toast.success(t('startSuccess'), { id: loadingToast })
 
         // Get the first activity from the first chapter
         const firstChapter = course.chapters?.[0]
@@ -285,9 +293,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
     } catch (error) {
       console.error('Failed to perform course action:', error)
       toast.error(
-        isStarted
-          ? 'Failed to leave the course. Please try again later.'
-          : 'Failed to start the course. Please try again later.',
+        isStarted ? t('leaveError') : t('startError'),
         { id: loadingToast }
       )
     } finally {
@@ -302,7 +308,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
     }
 
     setIsContributeLoading(true)
-    const loadingToast = toast.loading('Submitting contributor application...')
+    const loadingToast = toast.loading(t('contributeLoading'))
 
     try {
       const data = {
@@ -312,10 +318,10 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
       await applyForContributor('course_' + courseuuid, data, session.data?.tokens?.access_token)
       await revalidateTags(['courses'], orgslug)
       await refetch()
-      toast.success('Your application to contribute has been submitted successfully', { id: loadingToast })
+      toast.success(t('contributeSuccess'), { id: loadingToast })
     } catch (error) {
       console.error('Failed to apply as contributor:', error)
-      toast.error('Failed to submit your application. Please try again later.', { id: loadingToast })
+      toast.error(t('contributeError'), { id: loadingToast })
     } finally {
       setIsContributeLoading(false)
     }
@@ -338,7 +344,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
           className="w-full bg-white text-neutral-700 border border-neutral-200 py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 mt-3 cursor-pointer"
         >
           <UserPen className="w-5 h-5" />
-          Authenticate to contribute
+          {t('authenticateToContribute')}
         </button>
       );
     }
@@ -347,7 +353,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
       return (
         <div className="w-full bg-green-50 text-green-700 border border-green-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
           <UserPen className="w-5 h-5" />
-          You are a contributor
+          {t('youAreContributor')}
         </div>
       );
     }
@@ -356,7 +362,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
       return (
         <div className="w-full bg-amber-50 text-amber-700 border border-amber-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
           <ClockIcon className="w-5 h-5" />
-          Contributor application pending
+          {t('applicationPending')}
         </div>
       );
     }
@@ -372,7 +378,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
         ) : (
           <>
             <UserPen className="w-5 h-5" />
-            Apply to contribute
+            {t('applyToContribute')}
           </>
         )}
       </button>
@@ -387,19 +393,16 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg nice-shadow">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <h3 className="text-green-800 font-semibold">You Own This Course</h3>
+                <h3 className="text-green-800 font-semibold">{t('ownCourseTitle')}</h3>
               </div>
               <p className="text-green-700 text-sm mt-1">
-                You have purchased this course and have full access to all content.
+                {t('ownCourseDescription')}
               </p>
             </div>
             <button
               onClick={handleCourseAction}
               disabled={isActionLoading}
-              className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                isStarted
-                  ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                  : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+              className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${isStarted ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400' : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
               }`}
             >
               {isActionLoading ? (
@@ -407,12 +410,12 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
               ) : isStarted ? (
                 <>
                   <LogOut className="w-5 h-5" />
-                  Leave Course
+                  {t('leaveCourse')}
                 </>
               ) : (
                 <>
                   <LogIn className="w-5 h-5" />
-                  Start Course
+                  {t('startCourse')}
                 </>
               )}
             </button>
@@ -422,10 +425,10 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg nice-shadow">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-amber-800" />
-              <h3 className="text-amber-800 font-semibold">Paid Course</h3>
+              <h3 className="text-amber-800 font-semibold">{t('paidCourseTitle')}</h3>
             </div>
             <p className="text-amber-700 text-sm mt-1">
-              This course requires purchase to access its content.
+              {t('paidCourseDescription')}
             </p>
           </div>
         )}
@@ -436,8 +439,8 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
               isDialogOpen={isModalOpen}
               onOpenChange={setIsModalOpen}
               dialogContent={<CoursePaidOptions course={course} />}
-              dialogTitle="Purchase Course"
-              dialogDescription="Select a payment option to access this course"
+              dialogTitle={t('modalTitle')}
+              dialogDescription={t('modalDescription')}
               minWidth="sm"
             />
             <button
@@ -445,7 +448,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
               onClick={() => setIsModalOpen(true)}
             >
               <ShoppingCart className="w-5 h-5" />
-              Purchase Course
+              {t('purchaseCourse')}
             </button>
             {renderContributorButton()}
           </>
@@ -459,10 +462,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
       <button
         onClick={handleCourseAction}
         disabled={isActionLoading}
-        className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-          isStarted
-            ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-            : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+        className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${isStarted ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400' : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
         }`}
       >
         {isActionLoading ? (
@@ -470,17 +470,17 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
         ) : !session.data?.user ? (
           <>
             <LogIn className="w-5 h-5" />
-            Authenticate to start course
+            {t('authenticateToStart')}
           </>
         ) : isStarted ? (
           <>
             <LogOut className="w-5 h-5" />
-            Leave Course
+            {t('leaveCourse')}
           </>
         ) : (
           <>
             <LogIn className="w-5 h-5" />
-            Start Course
+            {t('startCourse')}
           </>
         )}
       </button>

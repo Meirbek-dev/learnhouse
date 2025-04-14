@@ -164,7 +164,7 @@ function Activity(props: any) {
                   className=" hover:cursor-pointer p-1 px-3 bg-sky-700 rounded-md items-center"
                   rel="noopener noreferrer"
                 >
-                  <div className="text-sky-100 font-bold text-xs">Edit </div>
+                  <div className="text-sky-100 font-bold text-xs">{t('editButton')} </div>
                 </Link>
               </>
             )}

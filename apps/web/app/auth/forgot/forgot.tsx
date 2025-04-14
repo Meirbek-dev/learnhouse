@@ -18,26 +18,27 @@ import { useFormik } from 'formik'
 import { sendResetLink } from '@services/auth/auth'
 import { useTranslations } from 'next-intl'
 
-const validate = (values: any) => {
-    const errors: any = {}
-
-    if (!values.email) {
-        errors.email = 'Required'
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-        errors.email = 'Invalid email address'
-    }
-
-    return errors
-}
-
 function ForgotPasswordClient() {
     const t = useTranslations('Auth.Forgot')
     const generalT = useTranslations('General')
+    const validationT = useTranslations('Validation')
     const org = useOrg() as any;
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const router = useRouter()
     const [error, setError] = React.useState('')
     const [message, setMessage] = React.useState('')
+
+    const validate = (values: any) => {
+        const errors: any = {}
+
+        if (!values.email) {
+            errors.email = validationT('required')
+        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+            errors.email = validationT('invalidEmail')
+        }
+
+        return errors
+    }
 
     const formik = useFormik({
         initialValues: {

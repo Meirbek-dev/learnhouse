@@ -1,9 +1,13 @@
 import { Metadata } from 'next'
 import React from 'react'
 import ClientAdminLayout from './ClientAdminLayout'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'LearnHouse Dashboard',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('DashPage')
+  return {
+    title: t('DashboardTitle'),
+  }
 }
 
 async function DashboardLayout(

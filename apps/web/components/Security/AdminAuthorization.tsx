@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { useTranslations } from 'next-intl';
 
 type AuthorizationProps = {
   children: React.ReactNode;
@@ -29,6 +30,7 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizat
   const router = useRouter();
   const { isAdmin, loading } = useAdminStatus() as any
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const t = useTranslations('Security');
 
   const isUserAuthenticated = useMemo(() => session.status === 'authenticated', [session.status]);
 
@@ -89,7 +91,7 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizat
   if (authorizationMode === 'page' && !isAuthorized) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <h1 className="text-2xl">You are not authorized to access this page</h1>
+        <h1 className="text-2xl">{t('unauthorizedAccessMessage')}</h1>
       </div>
     );
   }

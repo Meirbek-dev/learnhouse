@@ -1,3 +1,4 @@
+'use client';
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
@@ -19,7 +20,7 @@ type EditCourseStructureProps = {
   course_uuid?: string
 }
 
-const validate = (values: any, t: any) => {
+const validate = (values: any, t: (key: string, values?: any) => string) => {
   const errors = {} as any;
 
   if (!values.name) {
@@ -76,7 +77,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       // Check if it's already a valid JSON array
       const parsed = JSON.parse(learnings);
       if (Array.isArray(parsed)) {
-        return learnings;
+        // Ensure existing items have the required fields
+        const standardizedItems = parsed.map(item => ({
+          id: item.id || Date.now().toString(),
+          text: item.text || '',
+          emoji: item.emoji || '📝',
+          link: item.link || undefined
+        }));
+        return JSON.stringify(standardizedItems);
       }
 
       // If it's a string but not a JSON array, convert it to a learning item
@@ -110,17 +118,18 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       name: courseStructure?.name || '',
       description: courseStructure?.description || '',
       about: courseStructure?.about || '',
-      learnings: initializeLearnings(courseStructure?.learnings || ''),
+      learnings: initializeLearnings(courseStructure?.learnings),
       tags: courseStructure?.tags || '',
       public: courseStructure?.public || false,
     },
     validate: (values) => validate(values, t),
     onSubmit: async values => {
       try {
-        // Add your submission logic here
-        dispatchCourse({ type: 'setIsSaved' });
+        // The actual save happens in the parent component via context dispatch
+        dispatchCourse({ type: 'setIsSaved' }); // Mark as saved for UI feedback
+        // Parent component should handle the actual API call
       } catch (e) {
-        setError(t('errors.saveFailed'));
+        setError(t('errors.saveFailed')); // Use translated error
       }
     },
     enableReinitialize: true,
@@ -130,20 +139,22 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     if (!isLoading) {
       const formikValues = formik.values as any;
       const initialValues = formik.initialValues as any;
-      const valuesChanged = Object.keys(formikValues).some(
-        key => formikValues[key] !== initialValues[key]
+      // Deep comparison for learnings (JSON string)
+      const learningsChanged = formikValues.learnings !== initialValues.learnings;
+      const otherValuesChanged = Object.keys(formikValues).some(
+        key => key !== 'learnings' && formikValues[key] !== initialValues[key]
       );
 
-      if (valuesChanged) {
-        dispatchCourse({ type: 'setIsNotSaved' });
-        const updatedCourse = {
-          ...courseStructure,
-          ...formikValues,
-        };
-        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
+      if (learningsChanged || otherValuesChanged) {
+          dispatchCourse({ type: 'setIsNotSaved' });
+          const updatedCourse = {
+              ...courseStructure,
+              ...formikValues,
+          };
+          dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
       }
     }
-  }, [formik.values, isLoading]);
+  }, [formik.values, isLoading, courseStructure, dispatchCourse, formik.initialValues]); // Added dependencies
 
   return (
     <div>
@@ -165,6 +176,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     style={{ backgroundColor: 'white' }}
                     onChange={formik.handleChange}
                     value={formik.values.name}
+                    name="name" // Ensure name prop is set for Formik
                     type="text"
                     required
                   />
@@ -178,6 +190,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     style={{ backgroundColor: 'white' }}
                     onChange={formik.handleChange}
                     value={formik.values.description}
+                    name="description" // Ensure name prop is set for Formik
                     type="text"
                     required
                   />
@@ -191,38 +204,32 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     style={{ backgroundColor: 'white' }}
                     onChange={formik.handleChange}
                     value={formik.values.about}
-                    required
+                    name="about" // Ensure name prop is set for Formik
                   />
                 </Form.Control>
               </FormField>
 
               <FormField name="learnings">
                 <FormLabelAndMessage label={t('learnings.label')} message={formik.errors.learnings} />
-                <Form.Control asChild>
-                  <LearningItemsList
-                    value={formik.values.learnings}
-                    onChange={(value) => formik.setFieldValue('learnings', value)}
-                    error={formik.errors.learnings}
-                  />
-                </Form.Control>
+                <LearningItemsList
+                  value={formik.values.learnings}
+                  onChange={(value) => formik.setFieldValue('learnings', value)}
+                  error={formik.errors.learnings}
+                />
               </FormField>
 
               <FormField name="tags">
                 <FormLabelAndMessage label={t('tags.label')} message={formik.errors.tags} />
-                <Form.Control asChild>
-									<FormTagInput
-										placeholder={t('tags.placeholder')}
-										onChange={(value) => formik.setFieldValue('tags', value)}
-										value={formik.values.tags}
-									/>
-                </Form.Control>
+                <FormTagInput
+                    placeholder={t('tags.placeholder')}
+                    onChange={(value) => formik.setFieldValue('tags', value)}
+                    value={formik.values.tags}
+                />
               </FormField>
 
               <FormField name="thumbnail">
                 <FormLabelAndMessage label={t('thumbnail.label')} />
-                <Form.Control asChild>
-                  <ThumbnailUpdate />
-                </Form.Control>
+                <ThumbnailUpdate />
               </FormField>
             </FormLayout>
           </div>

@@ -181,7 +181,7 @@ const CourseClient = (props: any) => {
                           <h3 className="grow mr-3 break-words">{chapter.name}</h3>
                           <div className="flex items-center space-x-3">
                             <p className="text-sm font-normal text-neutral-400 px-3 py-[2px] outline-1 outline outline-neutral-200 rounded-full whitespace-nowrap shrink-0">
-                              {chapter.activities.length} Activities
+                              {t('activityCount', { count: chapter.activities.length })}
                             </p>
                             <svg
                               className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -268,7 +268,7 @@ const CourseClient = (props: any) => {
                                               prefetch={false}
                                             >
                                               <div className="text-xs bg-gray-100 text-gray-400 font-bold px-2 py-1 rounded-full flex space-x-1 items-center">
-                                                <p>Page</p>
+                                                <p>{t('page')}</p>
                                                 <ArrowRight size={13} />
                                               </div>
                                             </Link>
@@ -289,7 +289,7 @@ const CourseClient = (props: any) => {
                                             prefetch={false}
                                           >
                                             <div className="text-xs bg-gray-100 text-gray-400 font-bold px-2 py-1 rounded-full flex space-x-1 items-center">
-                                              <p>Video</p>
+                                              <p>{t('video')}</p>
                                               <ArrowRight size={13} />
                                             </div>
                                           </Link>
@@ -311,7 +311,7 @@ const CourseClient = (props: any) => {
                                               prefetch={false}
                                             >
                                               <div className="text-xs bg-gray-100 text-gray-400 font-bold px-2 py-1 rounded-full flex space-x-1 items-center">
-                                                <p>Document</p>
+                                                <p>{t('document')}</p>
                                                 <ArrowRight size={13} />
                                               </div>
                                             </Link>
@@ -333,7 +333,7 @@ const CourseClient = (props: any) => {
                                               prefetch={false}
                                             >
                                               <div className="text-xs bg-gray-100 text-gray-400 font-bold px-2 py-1 rounded-full flex space-x-1 items-center">
-                                                <p>Assignment</p>
+                                                <p>{t('assignment')}</p>
                                                 <ArrowRight size={13} />
                                               </div>
                                             </Link>

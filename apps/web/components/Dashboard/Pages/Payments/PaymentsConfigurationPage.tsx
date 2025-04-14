@@ -97,8 +97,10 @@ const PaymentsConfigurationPage: React.FC = () => {
                 </div>
 
                 <Alert className="mb-3 p-6 border-2 border-blue-100 bg-blue-50/50">
-
-                    <AlertTitle className="text-lg font-semibold mb-2 flex items-center space-x-2"> <Info className="h-5 w-5 " /> <span>{t('aboutStripe.title')}</span></AlertTitle>
+                    <AlertTitle className="text-lg font-semibold mb-2 flex items-center space-x-2">
+                        <Info className="h-5 w-5" />
+                        <span>{t('aboutStripe.title')}</span>
+                    </AlertTitle>
                     <AlertDescription className="space-y-5">
                         <div className="pl-2">
                             <ul className="list-disc list-inside space-y-1 text-gray-600 pl-2">
@@ -255,7 +257,7 @@ const EditStripeConfigModal: React.FC<EditStripeConfigModalProps> = ({ orgId, co
         if (isOpen) {
             fetchConfig();
         }
-    }, [isOpen, orgId, configId, accessToken]);
+    }, [isOpen, orgId, configId, accessToken, tNotify]);
 
     const handleSubmit = async () => {
         const loadingToast = toast.loading(tNotify('updatingConfig'));

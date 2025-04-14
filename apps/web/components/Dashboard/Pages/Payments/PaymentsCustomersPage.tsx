@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -18,6 +19,7 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled'
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer'
+import { useTranslations } from 'next-intl'
 
 interface PaymentUserData {
   payment_user_id: number;
@@ -41,10 +43,12 @@ interface PaymentUserData {
 }
 
 function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
+  const t = useTranslations('Payments.CustomersPage')
+
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No customers found
+        {t('noCustomers')}
       </div>
     );
   }
@@ -53,12 +57,12 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>User</TableHead>
-          <TableHead>Product</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Amount</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Purchase Date</TableHead>
+          <TableHead>{t('userHeader')}</TableHead>
+          <TableHead>{t('productHeader')}</TableHead>
+          <TableHead>{t('typeHeader')}</TableHead>
+          <TableHead>{t('amountHeader')}</TableHead>
+          <TableHead>{t('statusHeader')}</TableHead>
+          <TableHead>{t('purchaseDateHeader')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -85,12 +89,12 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
                 {item.product.product_type === 'subscription' ? (
                   <Badge variant="outline" className="flex items-center gap-1">
                     <RefreshCcw size={12} />
-                    <span>Subscription</span>
+                    <span>{t('subscriptionType')}</span>
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="flex items-center gap-1">
                     <SquareCheck size={12} />
-                    <span>One-time</span>
+                    <span>{t('oneTimeType')}</span>
                   </Badge>
                 )}
               </div>
@@ -124,6 +128,8 @@ function PaymentsCustomersPage() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const { isEnabled, isLoading } = usePaymentsEnabled()
+  const t = useTranslations('Payments.CustomersPage')
+  const tNotify = useTranslations('Notifications')
 
   const { data: customers, error, isLoading: customersLoading } = useSWR(
     org ? [`/payments/${org.id}/customers`, access_token] : null,
@@ -137,14 +143,14 @@ function PaymentsCustomersPage() {
   }
 
   if (isLoading || customersLoading) return <PageLoading />
-  if (error) return <div>Error loading customers</div>
+  if (error) return <div>{tNotify('errors.loadCustomersFailed')}</div>
   if (!customers) return <div>No customer data available</div>
 
   return (
     <div className="ml-10 mr-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-3">
-        <h1 className="font-bold text-xl text-gray-800">Customers</h1>
-        <h2 className="text-gray-500 text-md">View and manage your customer information</h2>
+        <h1 className="font-bold text-xl text-gray-800">{t('title')}</h1>
+        <h2 className="text-gray-500 text-md">{t('description')}</h2>
       </div>
 
       <PaymentsUsersTable data={customers} />

@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast'
 import Toast from '@components/Objects/StyledElements/Toast/Toast'
 import { OrgProvider } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 interface EditorWrapperProps {
   content: string
@@ -15,6 +16,7 @@ interface EditorWrapperProps {
 }
 
 function EditorWrapper(props: EditorWrapperProps): JSX.Element {
+  const t = useTranslations('Editor.EditorWrapper')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token;
 
@@ -30,11 +32,12 @@ function EditorWrapper(props: EditorWrapperProps): JSX.Element {
         return res;
       }),
       {
-        loading: 'Saving...',
-        success: () => <b>Activity saved!</b>,
+        loading: t('saving'),
+        success: () => <b>{t('saveSuccess')}</b>,
         error: (err) => {
-          const errorMessage = err?.data?.detail || err?.data?.message || `Error ${err?.status}: Could not save`;
-          return <b>{errorMessage}</b>;
+          const errorMessage = err?.data?.detail || err?.data?.message || t('saveError');
+          const status = err?.status;
+          return <b>{status ? t('detailedSaveError', { status, message: errorMessage }) : errorMessage}</b>;
         },
       }
     )

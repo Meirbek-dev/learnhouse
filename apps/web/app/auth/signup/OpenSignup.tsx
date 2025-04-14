@@ -16,44 +16,46 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
-const validate = (values: any) => {
-  const errors: any = {}
-
-  if (!values.email) {
-    errors.email = 'Required'
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-    errors.email = 'Invalid email address'
-  }
-
-  if (!values.password) {
-    errors.password = 'Required'
-  } else if (values.password.length < 8) {
-    errors.password = 'Password must be at least 8 characters'
-  }
-
-  if (!values.username) {
-    errors.username = 'Required'
-  }
-
-  if (!values.username || values.username.length < 4) {
-    errors.username = 'Username must be at least 4 characters'
-  }
-
-  if (!values.bio) {
-    errors.bio = 'Required'
-  }
-
-  return errors
-}
-
 function OpenSignUpComponent() {
   const t = useTranslations('Auth.Signup');
   const generalT = useTranslations('General');
+  const validationT = useTranslations('Validation');
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const org = useOrg() as any
   const router = useRouter()
   const [error, setError] = React.useState('')
   const [message, setMessage] = React.useState('')
+
+  const validate = (values: any) => {
+    const errors: any = {}
+
+    if (!values.email) {
+      errors.email = validationT('required');
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+      errors.email = validationT('invalidEmail');
+    }
+
+    if (!values.password) {
+      errors.password = validationT('required');
+    } else if (values.password.length < 8) {
+      errors.password = validationT('passwordMinLength', { length: 8 });
+    }
+
+    if (!values.username) {
+      errors.username = validationT('required');
+    }
+
+    if (!values.username || values.username.length < 4) {
+      errors.username = validationT('usernameMinLength', { length: 4 });
+    }
+
+    if (!values.bio) {
+      errors.bio = validationT('required');
+    }
+
+    return errors
+  }
+
   const formik = useFormik({
     initialValues: {
       org_slug: org?.slug,

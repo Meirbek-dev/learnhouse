@@ -2,7 +2,6 @@
 import React from 'react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 import { styled, keyframes } from '@stitches/react'
-import { useTranslations } from 'next-intl'
 
 type TooltipProps = {
   sideOffset?: number
@@ -13,7 +12,6 @@ type TooltipProps = {
 }
 
 const ToolTip = (props: TooltipProps) => {
-  const t = useTranslations('General')
   return (
     <TooltipPrimitive.Provider delayDuration={200}>
       <TooltipPrimitive.Root>

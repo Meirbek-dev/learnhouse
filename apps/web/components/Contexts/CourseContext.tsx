@@ -4,6 +4,9 @@ import { swrFetcher } from '@services/utils/ts/requests'
 import React, { createContext, useContext, useEffect, useReducer } from 'react'
 import useSWR from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import ErrorUI from '@components/Objects/StyledElements/Error/Error'
+import PageLoading from '@components/Objects/Loaders/PageLoading'
+import { useTranslations } from 'next-intl'
 
 export const CourseContext = createContext(null)
 export const CourseDispatchContext = createContext(null)
@@ -11,8 +14,9 @@ export const CourseDispatchContext = createContext(null)
 export function CourseProvider({ children, courseuuid }: any) {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('Contexts.Course');
 
-  const { data: courseStructureData, error } = useSWR(`${getAPIUrl()}courses/${courseuuid}/meta`,
+  const { data: courseStructureData, error, isLoading: isSWRLoading } = useSWR(`${getAPIUrl()}courses/${courseuuid}/meta`,
     url => swrFetcher(url, access_token)
   );
 
@@ -34,8 +38,10 @@ export function CourseProvider({ children, courseuuid }: any) {
     }
   }, [courseStructureData]);
 
-  if (error) return <div>Failed to load course structure</div>;
-  if (!courseStructureData) return '';
+  const isLoading = isSWRLoading || state.isLoading;
+
+  if (error) return <ErrorUI message={t('loadError')} />;
+  if (isLoading) return <PageLoading />;
 
   if (courseStructureData) {
     return (

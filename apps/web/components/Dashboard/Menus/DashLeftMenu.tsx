@@ -56,7 +56,7 @@ function DashLeftMenu() {
             href={'/'}
           >
             <ToolTip
-              content={'Back to Home'}
+              content={t('tooltips.backToHome')}
               slateBlack
               sideOffset={8}
               side="right"

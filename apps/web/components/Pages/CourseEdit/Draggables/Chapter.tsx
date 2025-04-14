@@ -10,6 +10,7 @@ import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 interface ModifiedChapterInterface {
   chapterId: string
@@ -19,6 +20,7 @@ interface ModifiedChapterInterface {
 function Chapter(props: any) {
   const router = useRouter()
   const session = useLHSession() as any;
+  const t = useTranslations('CourseEdit');
   const [modifiedChapter, setModifiedChapter] = React.useState<
     ModifiedChapterInterface | undefined
   >(undefined)
@@ -70,7 +72,7 @@ function Chapter(props: any) {
                     <input
                       type="text"
                       className="bg-transparent outline-hidden text-sm text-neutral-700"
-                      placeholder="Chapter name"
+                      placeholder={t('chapterNamePlaceholder')}
                       value={
                         modifiedChapter
                           ? modifiedChapter?.chapterName
@@ -111,9 +113,9 @@ function Chapter(props: any) {
             </div>
             <MoreVertical size={15} className="text-gray-300" />
             <ConfirmationModal
-              confirmationButtonText="Delete Chapter"
-              confirmationMessage="Are you sure you want to delete this chapter?"
-              dialogTitle={'Delete ' + props.info.list.chapter.name + ' ?'}
+              confirmationButtonText={t('deleteChapterButton')}
+              confirmationMessage={t('deleteChapterConfirmation')}
+              dialogTitle={t('deleteChapterTitle', { name: props.info.list.chapter.name })}
               dialogTrigger={
                 <div
                   className=" hover:cursor-pointer p-1 px-4 bg-red-600 rounded-md shadow-sm flex space-x-1 items-center text-rose-100 text-sm"
@@ -161,7 +163,7 @@ function Chapter(props: any) {
                   >
                     <Sparkles className="" size={17} />
                     <div className="text-sm mx-auto my-auto  items-center font-bold">
-                      Add Activity +{' '}
+                      {t('addActivityButton')} +{' '}
                     </div>
                   </div>
                 </div>

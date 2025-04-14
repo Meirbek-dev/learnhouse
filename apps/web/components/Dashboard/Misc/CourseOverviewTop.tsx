@@ -9,6 +9,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import Link from 'next/link'
 import Image from 'next/image'
 import EmptyThumbnailImage from '../../../public/empty_thumbnail.png'
+import { useTranslations } from 'next-intl'
 
 export function CourseOverviewTop({
   params,
@@ -17,6 +18,7 @@ export function CourseOverviewTop({
 }) {
   const course = useCourse() as any
   const org = useOrg() as any
+  const t = useTranslations('DashPage.CourseOverview')
 
   useEffect(() => {}, [course, org])
 
@@ -51,7 +53,7 @@ export function CourseOverviewTop({
             )}
           </Link>
           <div className="flex flex-col course_metadata justify-center pl-5">
-            <div className="text-gray-400 font-semibold text-sm">Course</div>
+            <div className="text-gray-400 font-semibold text-sm">{t('courseLabel')}</div>
             <div className="text-black font-bold text-xl -mt-1 first-letter:uppercase">
               {course.courseStructure.name}
             </div>

@@ -2,12 +2,12 @@
 
 import React from 'react'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { 
-  Briefcase, 
-  Building2, 
-  MapPin, 
-  Globe, 
-  Link as LinkIcon, 
+import {
+  Briefcase,
+  Building2,
+  MapPin,
+  Globe,
+  Link as LinkIcon,
   GraduationCap,
   Award,
   BookOpen,
@@ -23,6 +23,7 @@ import { getCoursesByUser } from '@services/users/users'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { Button } from "@components/ui/button"
 import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding'
+import { useTranslations } from 'next-intl'
 
 interface UserProfileClientProps {
   userData: any;
@@ -74,6 +75,7 @@ const ImageModal: React.FC<{
 function UserProfileClient({ userData, profile }: UserProfileClientProps) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const t = useTranslations('UserProfilePage')
   const [selectedImage, setSelectedImage] = React.useState<{ url: string; caption?: string } | null>(null);
   const [userCourses, setUserCourses] = React.useState<any[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = React.useState(false);
@@ -110,7 +112,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
       <div className="h-48 w-full bg-gray-100 rounded-t-xl mb-0 relative overflow-hidden">
         {/* Optional banner content */}
       </div>
-      
+
       {/* Profile Content */}
       <div className="bg-white rounded-b-xl nice-shadow p-8 relative">
         {/* Avatar Positioned on the banner */}
@@ -133,8 +135,8 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
             section.type === 'affiliation' && section.affiliations?.map((affiliation: any, index: number) => (
               affiliation.logoUrl && (
                 <div key={index} className="bg-white rounded-lg p-2 shadow-lg border-2 border-white">
-                  <img 
-                    src={affiliation.logoUrl} 
+                  <img
+                    src={affiliation.logoUrl}
                     alt={affiliation.name}
                     className="w-16 h-16 object-contain"
                     title={affiliation.name}
@@ -171,21 +173,21 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
             {/* Right column with about and related content */}
             <div className="w-full md:w-4/6">
               <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">About</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('aboutTitle')}</h2>
                 {userData.bio ? (
                   <p className="text-gray-700">{userData.bio}</p>
                 ) : (
                   <p className="text-gray-500 italic">No biography provided</p>
                 )}
               </div>
-              
+
               {/* Profile sections from profile builder */}
               {profile.sections && profile.sections.length > 0 && (
                 <div>
                   {profile.sections.map((section: any, index: number) => (
                     <div key={index} className="mb-8">
                       <h2 className="text-xl font-semibold mb-4">{section.title}</h2>
-                      
+
                       {/* Add Image Gallery section */}
                       {section.type === 'image-gallery' && (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -209,11 +211,11 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                           ))}
                         </div>
                       )}
-                      
+
                       {section.type === 'text' && (
                         <div className="prose max-w-none">{section.content}</div>
                       )}
-                      
+
                       {section.type === 'links' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {section.links.map((link: any, linkIndex: number) => (
@@ -230,7 +232,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                           ))}
                         </div>
                       )}
-                      
+
                       {section.type === 'skills' && (
                         <div className="flex flex-wrap gap-2">
                           {section.skills.map((skill: any, skillIndex: number) => (
@@ -244,7 +246,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                           ))}
                         </div>
                       )}
-                      
+
                       {section.type === 'experience' && (
                         <div className="space-y-4">
                           {section.experiences.map((exp: any, expIndex: number) => (
@@ -261,7 +263,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                           ))}
                         </div>
                       )}
-                      
+
                       {section.type === 'education' && (
                         <div className="space-y-4">
                           {section.education.map((edu: any, eduIndex: number) => (
@@ -285,8 +287,8 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                             <div key={affIndex} className="border-l-2 border-gray-200 pl-4">
                               <div className="flex items-start gap-4">
                                 {affiliation.logoUrl && (
-                                  <img 
-                                    src={affiliation.logoUrl} 
+                                  <img
+                                    src={affiliation.logoUrl}
                                     alt={affiliation.name}
                                     className="w-12 h-12 object-contain"
                                   />
@@ -347,4 +349,4 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
   )
 }
 
-export default UserProfileClient 
+export default UserProfileClient

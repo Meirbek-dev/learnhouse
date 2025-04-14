@@ -1,3 +1,5 @@
+'use client'
+
 import { NodeViewWrapper } from '@tiptap/react'
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { Upload, Link as LinkIcon, GripVertical, GripHorizontal, AlignCenter, Cuboid, Code } from 'lucide-react'
@@ -5,6 +7,7 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { SiGithub, SiReplit, SiSpotify, SiLoom, SiGooglemaps, SiCodepen, SiCanva, SiNotion, SiGoogledocs, SiGitlab, SiX, SiFigma, SiGiphy, SiYoutube } from '@icons-pack/react-simple-icons'
 import { useRouter } from 'next/navigation'
 import DOMPurify from 'dompurify'
+import { useTranslations } from 'next-intl'
 
 // Add new type for script-based embeds
 const SCRIPT_BASED_EMBEDS = {
@@ -19,22 +22,22 @@ const getYouTubeEmbedUrl = (url: string): string => {
   try {
     // First validate that this is a proper URL
     const parsedUrl = new URL(url);
-    
+
     // Ensure the hostname is actually YouTube
-    const isYoutubeHostname = 
-      parsedUrl.hostname === 'youtube.com' || 
-      parsedUrl.hostname === 'www.youtube.com' || 
-      parsedUrl.hostname === 'youtu.be' || 
+    const isYoutubeHostname =
+      parsedUrl.hostname === 'youtube.com' ||
+      parsedUrl.hostname === 'www.youtube.com' ||
+      parsedUrl.hostname === 'youtu.be' ||
       parsedUrl.hostname === 'www.youtu.be';
-    
+
     if (!isYoutubeHostname) {
       return url; // Not a YouTube URL, return as is
     }
-    
+
     // Handle different YouTube URL formats with a more precise regex
     const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
     const match = url.match(youtubeRegex);
-    
+
     if (match && match[1]) {
       // Validate the video ID format (should be exactly 11 characters)
       const videoId = match[1];
@@ -43,7 +46,7 @@ const getYouTubeEmbedUrl = (url: string): string => {
         return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
       }
     }
-    
+
     // If no valid match found, return the original URL
     return url;
   } catch (e) {
@@ -61,7 +64,7 @@ const MemoizedEmbed = React.memo(({ embedUrl, sanitizedEmbedCode, embedType }: {
   useEffect(() => {
     if (embedType === 'code' && sanitizedEmbedCode) {
       // Check for any matching script-based embeds
-      const matchingPlatform = Object.entries(SCRIPT_BASED_EMBEDS).find(([_, config]) => 
+      const matchingPlatform = Object.entries(SCRIPT_BASED_EMBEDS).find(([_, config]) =>
         sanitizedEmbedCode.includes(config.identifier)
       );
 
@@ -83,40 +86,41 @@ const MemoizedEmbed = React.memo(({ embedUrl, sanitizedEmbedCode, embedType }: {
   if (embedType === 'url' && embedUrl) {
     // Process the URL if it's a YouTube URL - using proper URL validation
     let isYoutubeUrl = false;
-    
+
     try {
       const url = new URL(embedUrl);
       // Check if the hostname is exactly youtube.com or youtu.be (or www variants)
-      isYoutubeUrl = url.hostname === 'youtube.com' || 
-                     url.hostname === 'www.youtube.com' || 
-                     url.hostname === 'youtu.be' || 
+      isYoutubeUrl = url.hostname === 'youtube.com' ||
+                     url.hostname === 'www.youtube.com' ||
+                     url.hostname === 'youtu.be' ||
                      url.hostname === 'www.youtu.be';
     } catch (e) {
       // Invalid URL format, not a YouTube URL
       isYoutubeUrl = false;
     }
-    
+
     const processedUrl = isYoutubeUrl ? getYouTubeEmbedUrl(embedUrl) : embedUrl;
-      
+
     return (
-      <iframe 
-        src={processedUrl} 
+      <iframe
+        src={processedUrl}
         className="w-full h-full"
         frameBorder="0"
         allowFullScreen
       />
     );
   }
-  
+
   if (embedType === 'code' && sanitizedEmbedCode) {
     return <div dangerouslySetInnerHTML={{ __html: sanitizedEmbedCode }} className="w-full h-full" />;
   }
-  
+
   return null;
 });
 MemoizedEmbed.displayName = 'MemoizedEmbed';
 
 function EmbedObjectsComponent(props: any) {
+  const t = useTranslations('Editor.EmbedObjects')
   const [embedType, setEmbedType] = useState<'url' | 'code'>(props.node.attrs.embedType || 'url')
   const [embedUrl, setEmbedUrl] = useState(props.node.attrs.embedUrl || '')
   const [embedCode, setEmbedCode] = useState(props.node.attrs.embedCode || '')
@@ -140,10 +144,10 @@ function EmbedObjectsComponent(props: any) {
         const parentElement = containerRef.current.parentElement;
         const newParentWidth = parentElement.offsetWidth;
         setParentWidth(newParentWidth);
-        
+
         // Check if we're in a mobile viewport
         setIsMobile(newParentWidth < 640); // 640px is a common breakpoint for small screens
-        
+
         // If embedWidth is set to a percentage, maintain that percentage
         // Otherwise, adjust to fit parent width
         if (typeof embedWidth === 'string' && embedWidth.endsWith('%')) {
@@ -213,20 +217,20 @@ function EmbedObjectsComponent(props: any) {
   const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = event.target.value;
     const trimmedUrl = newUrl.trim();
-    
+
     // Only update if URL is not just whitespace
     if (newUrl === '' || trimmedUrl) {
       // First sanitize with DOMPurify
       const sanitizedUrl = DOMPurify.sanitize(newUrl);
-      
+
       // Additional URL validation for security
       let validatedUrl = sanitizedUrl;
-      
+
       if (sanitizedUrl) {
         try {
           // Ensure it's a valid URL by parsing it
           const url = new URL(sanitizedUrl);
-          
+
           // Only allow http and https protocols
           if (url.protocol !== 'http:' && url.protocol !== 'https:') {
             // If invalid protocol, default to https
@@ -241,7 +245,7 @@ function EmbedObjectsComponent(props: any) {
           }
         }
       }
-      
+
       setEmbedUrl(validatedUrl);
       props.updateAttributes({
         embedUrl: validatedUrl,
@@ -284,13 +288,13 @@ function EmbedObjectsComponent(props: any) {
           const parentWidth = resizeRef.current.parentElement?.offsetWidth || 1
           const widthPercentage = Math.min(100, Math.max(10, (newWidth / parentWidth) * 100))
           const newWidthValue = `${widthPercentage}%`
-          
+
           // Update ref and DOM directly during resize
           dimensionsRef.current.width = newWidthValue
           resizeRef.current.style.width = newWidthValue
         } else {
           const newHeight = Math.max(100, startHeight + e.clientY - startY)
-          
+
           // Update ref and DOM directly during resize
           dimensionsRef.current.height = newHeight
           resizeRef.current.style.height = `${newHeight}px`
@@ -303,7 +307,7 @@ function EmbedObjectsComponent(props: any) {
       // Only update state and attributes after resize is complete
       setEmbedWidth(dimensionsRef.current.width)
       setEmbedHeight(dimensionsRef.current.height)
-      props.updateAttributes({ 
+      props.updateAttributes({
         embedWidth: dimensionsRef.current.width,
         embedHeight: dimensionsRef.current.height
       })
@@ -352,7 +356,7 @@ function EmbedObjectsComponent(props: any) {
   // Memoize the embed content
   const embedContent = useMemo(() => (
     !isResizing && (embedUrl || sanitizedEmbedCode) ? (
-      <MemoizedEmbed 
+      <MemoizedEmbed
         embedUrl={embedUrl}
         sanitizedEmbedCode={sanitizedEmbedCode}
         embedType={embedType}
@@ -373,10 +377,10 @@ function EmbedObjectsComponent(props: any) {
     // Set the input type to URL by default
     setEmbedType('url');
     setActiveInput('url');
-    
+
     // Store the selected product for the popup
     setSelectedProduct(product);
-    
+
     // Focus the URL input after a short delay to allow rendering
     setTimeout(() => {
       if (urlInputRef.current) {
@@ -405,7 +409,7 @@ function EmbedObjectsComponent(props: any) {
 
   return (
     <NodeViewWrapper className="embed-block w-full" ref={containerRef}>
-      <div 
+      <div
         ref={resizeRef}
         className={`relative bg-gray-100 rounded-lg overflow-hidden flex justify-center items-center ${alignment === 'center' ? 'mx-auto' : ''}`}
         style={getResponsiveStyles()}
@@ -414,14 +418,14 @@ function EmbedObjectsComponent(props: any) {
           // Show the embed content if we have a URL or code
           <>
             {embedContent}
-            
+
             {/* Minimal toolbar for existing embeds */}
             {isEditable && (
               <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-white bg-opacity-90 backdrop-blur-xs rounded-lg p-1 shadow-xs transition-opacity opacity-70 hover:opacity-100">
                 <button
                   onClick={() => setActiveInput(embedType)}
                   className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600"
-                  title="Edit embed"
+                  title={t('editEmbedTitle')}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"></path>
@@ -430,7 +434,7 @@ function EmbedObjectsComponent(props: any) {
                 <button
                   onClick={handleCenterBlock}
                   className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600"
-                  title={alignment === 'center' ? 'Align left' : 'Center align'}
+                  title={alignment === 'center' ? t('alignLeftTitle') : t('centerAlignTitle')}
                 >
                   <AlignCenter size={16} />
                 </button>
@@ -438,13 +442,13 @@ function EmbedObjectsComponent(props: any) {
                   onClick={() => {
                     setEmbedUrl('');
                     setEmbedCode('');
-                    props.updateAttributes({ 
+                    props.updateAttributes({
                       embedUrl: '',
                       embedCode: ''
                     });
                   }}
                   className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600"
-                  title="Remove embed"
+                  title={t('removeEmbedTitle')}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 6h18"></path>
@@ -458,14 +462,14 @@ function EmbedObjectsComponent(props: any) {
         ) : (
           // Show the embed selection UI if we don't have content yet
           <div className="w-full h-full flex flex-col items-center justify-center p-2 sm:p-6">
-            <p className="text-gray-500 mb-2 sm:mb-4 font-medium tracking-tighter text-base sm:text-lg text-center">Add an embed from :</p>
+            <p className="text-gray-500 mb-2 sm:mb-4 font-medium tracking-tighter text-base sm:text-lg text-center">{t('addEmbedFrom')}</p>
             <div className="flex flex-wrap gap-2 sm:gap-5 justify-center">
               {supportedProducts.map((product) => (
                 <button
                   key={product.name}
                   className="flex flex-col items-center group transition-transform hover:scale-110"
                   onClick={() => handleProductSelection(product)}
-                  title={`Add ${product.name} embed`}
+                  title={t('addProductEmbedTitle', { productName: product.name })}
                 >
                   <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow" style={{ backgroundColor: product.color }}>
                     <product.icon size={isMobile ? 16 : 24} color="#FFFFFF" />
@@ -474,11 +478,11 @@ function EmbedObjectsComponent(props: any) {
                 </button>
               ))}
             </div>
-            
+
             <p className="text-xs text-gray-500 mt-3 mb-2 text-center max-w-md">
-              Click a service to add an embed
+              {t('clickServiceToAdd')}
             </p>
-            
+
             {/* Direct input options */}
             {isEditable && (
               <div className="mt-4 flex gap-3 justify-center">
@@ -490,7 +494,7 @@ function EmbedObjectsComponent(props: any) {
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-xs hover:shadow-md transition-all text-sm text-gray-700"
                 >
                   <LinkIcon size={14} />
-                  <span>URL</span>
+                  <span>{t('urlButton')}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -500,17 +504,17 @@ function EmbedObjectsComponent(props: any) {
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-xs hover:shadow-md transition-all text-sm text-gray-700"
                 >
                   <Code size={14} />
-                  <span>Code</span>
+                  <span>{t('codeButton')}</span>
                 </button>
               </div>
             )}
           </div>
         )}
-        
+
         {/* Inline input UI - appears in place without covering content */}
         {isEditable && activeInput !== 'none' && (
           <div className="absolute inset-0 bg-gray-100 bg-opacity-95 backdrop-blur-xs flex items-center justify-center p-4 z-10">
-            <form 
+            <form
               onSubmit={handleInputSubmit}
               className="w-full max-w-lg bg-white rounded-xl shadow-lg p-4"
               onKeyDown={handleKeyDown}
@@ -518,17 +522,17 @@ function EmbedObjectsComponent(props: any) {
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
                   {selectedProduct && activeInput === 'url' && (
-                    <div 
-                      className="w-8 h-8 rounded-lg flex items-center justify-center" 
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: selectedProduct.color }}
                     >
                       <selectedProduct.icon size={18} color="#FFFFFF" />
                     </div>
                   )}
                   <h3 className="text-lg font-medium text-gray-800">
-                    {activeInput === 'url' 
-                      ? (selectedProduct ? `Add ${selectedProduct.name} Embed` : 'Add Embed URL') 
-                      : 'Add Embed Code'}
+                    {activeInput === 'url'
+                      ? (selectedProduct ? t('addProductEmbedTitle', { productName: selectedProduct.name }) : t('addEmbedUrlTitle'))
+                      : t('addEmbedCodeTitle')}
                   </h3>
                 </div>
                 <button
@@ -542,7 +546,7 @@ function EmbedObjectsComponent(props: any) {
                   </svg>
                 </button>
               </div>
-              
+
               {activeInput === 'url' ? (
                 <>
                   <div className="relative mb-2">
@@ -555,13 +559,13 @@ function EmbedObjectsComponent(props: any) {
                       value={embedUrl}
                       onChange={handleUrlChange}
                       className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden transition-all"
-                      placeholder={selectedProduct ? `Paste ${selectedProduct.name} embed URL` : "Paste embed URL (YouTube, Spotify, etc.)"}
+                      placeholder={selectedProduct ? t('productUrlPlaceholder', { productName: selectedProduct.name }) : t('urlPlaceholder')}
                       autoFocus
                     />
                   </div>
                   <div className="flex justify-between items-center mb-4">
                     <p className="text-xs text-gray-500">
-                      Tip: Paste any {selectedProduct?.name || "YouTube, Spotify, or other"} embed URL directly
+                      {selectedProduct ? t('urlTip', { productName: selectedProduct.name }) : t('defaultUrlTip')}
                     </p>
                     {selectedProduct && (
                       <button
@@ -574,7 +578,7 @@ function EmbedObjectsComponent(props: any) {
                           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                           <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
-                        How to embed {selectedProduct.name}
+                        {t('howToEmbed', { productName: selectedProduct.name })}
                       </button>
                     )}
                   </div>
@@ -587,13 +591,13 @@ function EmbedObjectsComponent(props: any) {
                       value={embedCode}
                       onChange={handleCodeChange}
                       className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl h-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden transition-all font-mono text-sm"
-                      placeholder="Paste embed code (iframe, embed script, etc.)"
+                      placeholder={t('codePlaceholder')}
                       autoFocus
                     />
                   </div>
                   <div className="flex justify-between items-center mb-4">
                     <p className="text-xs text-gray-500">
-                      Tip: Paste iframe or embed code from any platform
+                      {t('codeTip')}
                     </p>
                     {selectedProduct && (
                       <button
@@ -606,33 +610,33 @@ function EmbedObjectsComponent(props: any) {
                           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                           <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
-                        How to embed {selectedProduct.name}
+                        {t('howToEmbed', { productName: selectedProduct.name })}
                       </button>
                     )}
                   </div>
                 </>
               )}
-              
+
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveInput('none')}
                   className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 rounded-lg"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
                   disabled={(activeInput === 'url' && !embedUrl) || (activeInput === 'code' && !embedCode)}
                 >
-                  Apply
+                  {t('apply')}
                 </button>
               </div>
             </form>
           </div>
         )}
-        
+
         {/* Resize handles */}
         {isEditable && (
           <>

@@ -1,9 +1,8 @@
 'use client'
-import React, { useEffect } from 'react'
-import { INSTALL_STEPS } from './steps/steps'
+import React, { useEffect, Suspense } from 'react'
+import { INSTALL_STEPS, InstallStepConfig } from './steps/steps'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
 import { useTranslations } from 'next-intl'
 
 function InstallClient() {
@@ -11,10 +10,8 @@ function InstallClient() {
 
   return (
     <GeneralWrapperStyled>
-      <Suspense>
-        <>
-          <Stepscomp />
-        </>
+      <Suspense fallback={<div>Loading installation steps...</div>}>
+        <Stepscomp />
       </Suspense>
     </GeneralWrapperStyled>
   )
@@ -24,41 +21,63 @@ const Stepscomp = () => {
   const t = useTranslations('Install')
   const searchParams = useSearchParams()
   const router = useRouter()
-  const step: any = parseInt(searchParams.get('step') || '0')
-  const [stepNumber, setStepNumber] = React.useState(step)
-  const [stepsState, setStepsState] = React.useState(INSTALL_STEPS)
+  const stepParam = searchParams.get('step')
+  const currentStepIndex = stepParam !== null && !isNaN(parseInt(stepParam)) ? parseInt(stepParam) : 0;
 
-  function handleStepChange(stepNumber: number) {
-    setStepNumber(stepNumber)
-    router.push(`/install?step=${stepNumber}`)
+  const validatedStepIndex = Math.max(0, Math.min(currentStepIndex, INSTALL_STEPS.length - 1));
+
+  const [stepNumber, setStepNumber] = React.useState(validatedStepIndex)
+
+  function handleStepChange(stepIndex: number) {
+    if (stepIndex >= 0 && stepIndex < INSTALL_STEPS.length) {
+      setStepNumber(stepIndex)
+      router.push(`/install?step=${stepIndex}`)
+    }
   }
 
   useEffect(() => {
-    setStepNumber(step)
-  }, [step])
+    const stepParam = searchParams.get('step');
+    const currentStepIndex = stepParam !== null && !isNaN(parseInt(stepParam)) ? parseInt(stepParam) : 0;
+    const validatedStepIndex = Math.max(0, Math.min(currentStepIndex, INSTALL_STEPS.length - 1));
+    if (validatedStepIndex !== stepNumber) {
+        setStepNumber(validatedStepIndex);
+    }
+  }, [searchParams.toString()]);
+
+  const currentStepConfig: InstallStepConfig | undefined = INSTALL_STEPS[stepNumber];
+
+  if (!currentStepConfig) {
+      console.error(`Invalid step number derived: ${stepNumber}`);
+      const fallbackStepConfig = INSTALL_STEPS[0];
+      if (!fallbackStepConfig) {
+          return <div>Error: Critical installation configuration missing.</div>;
+      }
+       return <div>Error: Invalid installation step number.</div>;
+  }
 
   return (
     <div>
-      <div className="flex justify-center ">
-        <div className="grow">
+      <div className="flex justify-center items-center mb-8">
+        <div className="grow hidden md:block">
           <LearnHouseLogo />
         </div>
-        <div className="steps flex space-x-2 justify-center text-sm p-3 bg-slate-50 rounded-full w-fit m-auto px-10">
-          <div className="flex space-x-8">
-            {stepsState.map((stepConfig, index) => (
+        <div className="steps flex flex-wrap space-x-2 justify-center text-xs sm:text-sm p-3 bg-slate-50 rounded-full w-full md:w-fit m-auto px-4 sm:px-10 overflow-x-auto">
+          <div className="flex space-x-4 sm:space-x-8">
+            {INSTALL_STEPS.map((stepConfig: InstallStepConfig, index: number) => (
               <div
-                key={index}
-                className={`flex items-center cursor-pointer space-x-2`}
+                key={stepConfig.id}
+                className={`flex items-center cursor-pointer space-x-2 group`}
                 onClick={() => handleStepChange(index)}
+                title={t(stepConfig.translationKey)}
               >
                 <div
-                  className={`flex w-7 h-7 rounded-full text-slate-700 bg-slate-200 justify-center items-center m-auto align-middle hover:bg-slate-300 transition-all ${
-                    index === stepNumber ? 'bg-slate-300' : ''
+                  className={`flex w-6 h-6 sm:w-7 sm:h-7 rounded-full text-slate-700 bg-slate-200 justify-center items-center m-auto align-middle transition-all ${
+                    index === stepNumber ? 'bg-blue-200 text-blue-800 font-semibold ring-2 ring-blue-400' : 'group-hover:bg-slate-300'
                   }`}
                 >
-                  {index}
+                  {index + 1}
                 </div>
-                <div>{t(`steps.${stepConfig.id}`)}</div>
+                <div className="hidden lg:block">{t(stepConfig.translationKey)}</div>
               </div>
             ))}
           </div>
@@ -66,8 +85,8 @@ const Stepscomp = () => {
       </div>
 
       <div className="flex pt-8 flex-col">
-        <h1 className="font-bold text-3xl">{t(`steps.${stepsState[stepNumber].id}`)}</h1>
-        <div className="pt-8">{stepsState[stepNumber].component}</div>
+        <h1 className="font-bold text-2xl md:text-3xl mb-4">{t(currentStepConfig.translationKey)}</h1>
+        <div className="pt-4 sm:pt-8">{currentStepConfig.component}</div>
       </div>
     </div>
   )

@@ -1,3 +1,5 @@
+'use client'
+
 import { NodeViewWrapper } from '@tiptap/react'
 import React from 'react'
 import styled from 'styled-components'
@@ -7,58 +9,59 @@ import { Save, Sigma, ExternalLink, ChevronDown, BookOpen, Lightbulb } from 'luc
 import Link from 'next/link'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 // Predefined LaTeX templates
 const mathTemplates = [
-  { 
-    name: 'Fraction', 
+  {
+    name: 'templateFraction',
     latex: '\\frac{a}{b}',
-    description: 'Simple fraction'
+    description: 'templateFractionDesc'
   },
-  { 
-    name: 'Square Root', 
+  {
+    name: 'templateSqrt',
     latex: '\\sqrt{x}',
-    description: 'Square root'
+    description: 'templateSqrtDesc'
   },
-  { 
-    name: 'Summation', 
+  {
+    name: 'templateSum',
     latex: '\\sum_{i=1}^{n} x_i',
-    description: 'Sum with limits'
+    description: 'templateSumDesc'
   },
-  { 
-    name: 'Integral', 
+  {
+    name: 'templateIntegral',
     latex: '\\int_{a}^{b} f(x) \\, dx',
-    description: 'Definite integral'
+    description: 'templateIntegralDesc'
   },
-  { 
-    name: 'Limit', 
+  {
+    name: 'templateLimit',
     latex: '\\lim_{x \\to \\infty} f(x)',
-    description: 'Limit expression'
+    description: 'templateLimitDesc'
   },
-  { 
-    name: 'Matrix 2×2', 
+  {
+    name: 'templateMatrix',
     latex: '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}',
-    description: '2×2 matrix with parentheses'
+    description: 'templateMatrixDesc'
   },
-  { 
-    name: 'Binomial', 
+  {
+    name: 'templateBinomial',
     latex: '\\binom{n}{k}',
-    description: 'Binomial coefficient'
+    description: 'templateBinomialDesc'
   },
-  { 
-    name: 'Quadratic Formula', 
+  {
+    name: 'templateQuadratic',
     latex: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}',
-    description: 'Solution to quadratic equation'
+    description: 'templateQuadraticDesc'
   },
-  { 
-    name: 'Vector', 
+  {
+    name: 'templateVector',
     latex: '\\vec{v} = \\begin{pmatrix} x \\\\ y \\\\ z \\end{pmatrix}',
-    description: '3D vector'
+    description: 'templateVectorDesc'
   },
-  { 
-    name: 'System of Equations', 
+  {
+    name: 'templateSystemEq',
     latex: '\\begin{cases} a_1x + b_1y = c_1 \\\\ a_2x + b_2y = c_2 \\end{cases}',
-    description: 'System of linear equations'
+    description: 'templateSystemEqDesc'
   }
 ];
 
@@ -99,7 +102,7 @@ const EditBar = styled.div`
   height: 45px;
   border: solid 1px #e2e2e2;
   transition: all 0.2s ease;
-  
+
   &:focus-within {
     border-color: #d1d1d1;
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.03);
@@ -112,7 +115,7 @@ const EditBar = styled.div`
     color: #494949;
     width: 100%;
     font-family: 'DM Sans', sans-serif;
-    
+
     &:focus {
       outline: none;
     }
@@ -164,7 +167,7 @@ const TemplateItem = styled.div`
   padding: 8px 12px;
   cursor: pointer;
   transition: background 0.15s;
-  
+
   &:hover {
     background: rgba(217, 217, 217, 0.24);
   }
@@ -202,6 +205,7 @@ const HelpDropdown = styled.div`
 `
 
 function MathEquationBlockComponent(props: any) {
+  const t = useTranslations('Editor.MathEquationBlock')
   const [equation, setEquation] = React.useState(props.node.attrs.math_equation)
   const [isEditing, setIsEditing] = React.useState(true)
   const [showTemplates, setShowTemplates] = React.useState(false)
@@ -254,7 +258,7 @@ function MathEquationBlockComponent(props: any) {
       math_equation: template,
     })
     setShowTemplates(false)
-    
+
     // Focus the input and place cursor at the end
     if (inputRef.current) {
       inputRef.current.focus()
@@ -265,12 +269,12 @@ function MathEquationBlockComponent(props: any) {
   const insertSymbol = (symbol: string) => {
     const cursorPosition = inputRef.current?.selectionStart || equation.length
     const newEquation = equation.substring(0, cursorPosition) + symbol + equation.substring(cursorPosition)
-    
+
     setEquation(newEquation)
     props.updateAttributes({
       math_equation: newEquation,
     })
-    
+
     // Focus the input and place cursor after the inserted symbol
     setTimeout(() => {
       if (inputRef.current) {
@@ -290,13 +294,13 @@ function MathEquationBlockComponent(props: any) {
         <MathEqWrapper className="flex flex-col space-y-3 rounded-lg py-6 px-5">
           <div className="flex items-center space-x-2 text-sm text-zinc-500 mb-1">
             <Sigma size={16} />
-            <span className="font-medium">Math Equation</span>
+            <span className="font-medium">{t('title')}</span>
           </div>
-          
+
           <div className="bg-white p-4 rounded-md nice-shadow">
             <BlockMath>{equation}</BlockMath>
           </div>
-          
+
           {isEditing && isEditable && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -306,54 +310,54 @@ function MathEquationBlockComponent(props: any) {
             >
               <div className="flex space-x-2">
                 <div ref={templatesRef} className="relative">
-                  <TemplateButton 
+                  <TemplateButton
                     onClick={() => setShowTemplates(!showTemplates)}
                     className="flex items-center space-x-1"
                   >
                     <BookOpen size={14} />
-                    <span>Templates</span>
+                    <span>{t('templates')}</span>
                     <ChevronDown size={14} className={`transition-transform ${showTemplates ? 'rotate-180' : ''}`} />
                   </TemplateButton>
-                  
+
                   {showTemplates && (
                     <TemplateDropdown className="absolute left-0 mt-1 z-10 w-64 max-h-80 overflow-y-auto">
                       <div className="p-2 text-xs text-zinc-500 border-b">
-                        Select a template to insert
+                        {t('selectTemplate')}
                       </div>
                       {mathTemplates.map((template, index) => (
-                        <TemplateItem 
-                          key={index} 
+                        <TemplateItem
+                          key={index}
                           onClick={() => insertTemplate(template.latex)}
                         >
                           <div className="flex flex-col">
-                            <span className="font-medium">{template.name}</span>
-                            <span className="text-xs text-zinc-500">{template.description}</span>
+                            <span className="font-medium">{t(template.name)}</span>
+                            <span className="text-xs text-zinc-500">{t(template.description)}</span>
                           </div>
                         </TemplateItem>
                       ))}
                     </TemplateDropdown>
                   )}
                 </div>
-                
+
                 <div ref={symbolsRef} className="relative">
-                  <TemplateButton 
+                  <TemplateButton
                     onClick={() => setShowSymbols(!showSymbols)}
                     className="flex items-center space-x-1"
                   >
                     <Sigma size={14} />
-                    <span>Symbols</span>
+                    <span>{t('symbols')}</span>
                     <ChevronDown size={14} className={`transition-transform ${showSymbols ? 'rotate-180' : ''}`} />
                   </TemplateButton>
-                  
+
                   {showSymbols && (
                     <SymbolsDropdown className="absolute left-0 mt-1 z-10 w-64">
                       <div className="p-2 text-xs text-zinc-500 border-b">
-                        Click a symbol to insert
+                        {t('insertSymbol')}
                       </div>
                       <div className="flex flex-wrap p-2">
                         {mathSymbols.map((symbol, index) => (
-                          <SymbolButton 
-                            key={index} 
+                          <SymbolButton
+                            key={index}
                             onClick={() => insertSymbol(symbol.symbol)}
                             title={symbol.symbol}
                           >
@@ -364,40 +368,40 @@ function MathEquationBlockComponent(props: any) {
                     </SymbolsDropdown>
                   )}
                 </div>
-                
+
                 <div ref={helpRef} className="relative">
-                  <TemplateButton 
+                  <TemplateButton
                     onClick={() => setShowHelp(!showHelp)}
                     className="flex items-center space-x-1"
                   >
                     <Lightbulb size={14} />
-                    <span>Help</span>
+                    <span>{t('help')}</span>
                     <ChevronDown size={14} className={`transition-transform ${showHelp ? 'rotate-180' : ''}`} />
                   </TemplateButton>
-                  
+
                   {showHelp && (
                     <HelpDropdown className="absolute left-0 mt-1 z-10 w-72">
                       <div className="p-2 text-xs font-medium text-zinc-700 border-b">
-                        LaTeX Math Quick Reference
+                        {t('quickReference')}
                       </div>
                       <div className="p-3 text-xs space-y-2">
                         <div>
-                          <span className="font-medium">Fractions:</span> \frac{'{'}'numerator'{'}'}{'{'}denominator{'}'}
+                          <span className="font-medium">{t('fractions')}</span> \frac{'{'}'numerator'{'}'}{'{'}denominator{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">Exponents:</span> x^{'{'}'power'{'}'}
+                          <span className="font-medium">{t('exponents')}</span> x^{'{'}'power'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">Subscripts:</span> x_{'{'}'subscript'{'}'}
+                          <span className="font-medium">{t('subscripts')}</span> x_{'{'}'subscript'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">Square root:</span> \sqrt{'{'}'x'{'}'}
+                          <span className="font-medium">{t('squareRoot')}</span> \sqrt{'{'}'x'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">Summation:</span> \sum_{'{'}'lower'{'}'}^{'{'}'upper'{'}'}
+                          <span className="font-medium">{t('summation')}</span> \sum_{'{'}'lower'{'}'}^{'{'}'upper'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">Integral:</span> \int_{'{'}'lower'{'}'}^{'{'}'upper'{'}'}
+                          <span className="font-medium">{t('integral')}</span> \int_{'{'}'lower'{'}'}^{'{'}'upper'{'}'}
                         </div>
                         <div className="pt-1 border-t">
                           <Link
@@ -405,7 +409,7 @@ function MathEquationBlockComponent(props: any) {
                             href="https://katex.org/docs/supported.html"
                             target="_blank"
                           >
-                            View complete reference
+                            {t('completeReference')}
                             <ExternalLink size={10} className="ml-1" />
                           </Link>
                         </div>
@@ -414,36 +418,37 @@ function MathEquationBlockComponent(props: any) {
                   )}
                 </div>
               </div>
-              
+
               <EditBar>
                 <input
                   ref={inputRef}
                   value={equation}
                   onChange={handleEquationChange}
-                  placeholder="Insert a Math Equation (LaTeX)"
+                  placeholder={t('placeholder')}
                   type="text"
                   className="focus:ring-1 focus:ring-blue-300"
                 />
-                <SaveButton 
+                <SaveButton
                   onClick={() => saveEquation()}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  title={t('save')}
                 >
                   <Save size={15} />
                 </SaveButton>
               </EditBar>
-              
+
               <InfoLink className="flex items-center text-zinc-500 text-sm">
-                <span>Please refer to this</span>
+                <span>{t('referTo')}</span>
                 <Link
                   className="inline-flex items-center mx-1 text-blue-600 hover:text-blue-800 font-medium"
                   href="https://katex.org/docs/supported.html"
                   target="_blank"
                 >
-                  guide
+                  {t('guideLink')}
                   <ExternalLink size={12} className="ml-1" />
                 </Link>
-                <span>for supported TeX functions</span>
+                <span>{t('supportedFunctions')}</span>
               </InfoLink>
             </motion.div>
           )}

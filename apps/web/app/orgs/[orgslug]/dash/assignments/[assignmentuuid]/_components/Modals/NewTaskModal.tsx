@@ -29,7 +29,7 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
 
   async function createTask(type: string) {
     const task_object = {
-      title: "Untitled Task",
+      title: t('untitledTaskTitle'),
       description: "",
       hint: "",
       reference_file: "",

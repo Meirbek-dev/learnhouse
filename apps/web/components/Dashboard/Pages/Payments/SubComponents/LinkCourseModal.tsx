@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -13,6 +14,7 @@ import { getCoursesLinkedToProduct } from '@services/payments/products';
 import Link from 'next/link';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUriWithOrg } from '@services/config/config';
+import { useTranslations } from 'next-intl';
 
 interface LinkCourseModalProps {
   productId: string;
@@ -34,7 +36,8 @@ interface CoursePreviewProps {
 
 const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps) => {
   const org = useOrg() as any;
-  
+  const t = useTranslations('Payments.LinkCourseModal');
+
   const thumbnailImage = course.thumbnail_image
     ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
     : '../empty_thumbnail.png';
@@ -42,11 +45,11 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
   return (
     <div className="flex gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
       {/* Thumbnail */}
-      <div 
+      <div
         className="shrink-0 w-[120px] h-[68px] rounded-md bg-cover bg-center ring-1 ring-inset ring-black/10"
         style={{ backgroundImage: `url(${thumbnailImage})` }}
       />
-      
+
       {/* Content */}
       <div className="grow space-y-1">
         <h3 className="font-medium text-gray-900 line-clamp-1">
@@ -66,14 +69,14 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
             disabled
             className="text-gray-500"
           >
-            Already Linked
+            {t('alreadyLinked')}
           </Button>
         ) : (
           <Button
             onClick={() => onLink(course.id)}
             size="sm"
           >
-            Link Course
+            {t('linkCourseButton')}
           </Button>
         )}
       </div>
@@ -85,13 +88,15 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
   const [searchTerm, setSearchTerm] = useState('');
   const org = useOrg() as any;
   const session = useLHSession() as any;
+  const t = useTranslations('Payments.LinkCourseModal');
+  const tNotify = useTranslations('Notifications');
 
-  const { data: courses } = useSWR(
-    () => org && session ? [org.slug, searchTerm, session.data?.tokens?.access_token] : null,
-    ([orgSlug, search, token]) => getOrgCourses(orgSlug, null, token)
+  const { data: coursesData, error: coursesError } = useSWR(
+    () => org && session ? [org.slug, session.data?.tokens?.access_token] : null,
+    ([orgSlug, token]) => getOrgCourses(orgSlug, null, token)
   );
 
-  const { data: linkedCourses } = useSWR(
+  const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(
     () => org && session ? [`/payments/${org.id}/products/${productId}/courses`, session.data?.tokens?.access_token] : null,
     ([_, token]) => getCoursesLinkedToProduct(org.id, productId, token)
   );
@@ -101,28 +106,41 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
       const response = await linkCourseToProduct(org.id, productId, courseId, session.data?.tokens?.access_token);
       if (response.success) {
         mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
-        toast.success('Course linked successfully');
+        toast.success(tNotify('courseLinkedSuccess'));
         onSuccess();
       } else {
-        toast.error(response.data?.detail || 'Failed to link course');
+        toast.error(tNotify('errors.linkCourseFailed', { error: response.data?.detail || '' }));
       }
     } catch (error) {
-      toast.error('Failed to link course');
+      toast.error(tNotify('errors.linkCourseFailed', { error: '' }));
     }
   };
 
-  const isLinked = (courseId: string) => {
-    return linkedCourses?.data?.some((course: any) => course.id === courseId);
+  const isLinked = (courseId: string): boolean => {
+    return !!linkedCoursesData?.data?.some((course: any) => course.id === courseId);
   };
+
+  const filteredCourses = coursesData?.filter((course: any) =>
+    course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.description.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
 
   return (
     <div className="space-y-4">
-     
+      <div className="relative px-3">
+        <Input
+          type="text"
+          placeholder={t('searchPlaceholder')}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10"
+        />
+        <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+      </div>
 
-      {/* Course List */}
       <div className="max-h-[400px] overflow-y-auto space-y-2 px-3">
-        {courses?.map((course: any) => (
-          <CoursePreview 
+        {filteredCourses.map((course: any) => (
+          <CoursePreview
             key={course.course_uuid}
             course={course}
             orgslug={org.slug}
@@ -130,14 +148,13 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
             isLinked={isLinked(course.id)}
           />
         ))}
-        
-        {/* Empty State */}
-        {(!courses || courses.length === 0) && (
+
+        {filteredCourses.length === 0 && (
           <div className="text-center py-6 text-gray-500">
-            No courses found
+            {t('noCoursesFound')}
           </div>
         )}
       </div>
     </div>
   );
-} 
+}
