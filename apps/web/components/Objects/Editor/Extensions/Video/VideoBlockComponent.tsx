@@ -3,9 +3,17 @@
 import { NodeViewProps, NodeViewWrapper } from '@tiptap/react'
 import { Node } from '@tiptap/core'
 import {
-  Loader2, Video, Upload, X, HelpCircle,
-  Maximize2, Minimize2, ArrowLeftRight,
-  CheckCircle2, AlertCircle
+  Loader2,
+  Video,
+  Upload,
+  X,
+  HelpCircle,
+  Maximize2,
+  Minimize2,
+  ArrowLeftRight,
+  CheckCircle2,
+  AlertCircle,
+  Download,
 } from 'lucide-react'
 import React from 'react'
 import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video'
@@ -26,13 +34,15 @@ const VIDEO_SIZES = {
   small: { width: 480, label: 'sizeSmall' },
   medium: { width: 720, label: 'sizeMedium' },
   large: { width: 960, label: 'sizeLarge' },
-  full: { width: '100%', label: 'sizeFull' }
+  full: { width: '100%', label: 'sizeFull' },
 } as const
 
 type VideoSize = keyof typeof VIDEO_SIZES
 
 // Helper function to determine video size from width
-const getVideoSizeFromWidth = (width: number | string | undefined): VideoSize => {
+const getVideoSizeFromWidth = (
+  width: number | string | undefined
+): VideoSize => {
   if (!width) return 'medium'
   if (width === '100%') return 'full'
 
@@ -58,8 +68,9 @@ const VideoContainer = styled.div`
 `
 
 const UploadZone = styled(motion.div)<{ isDragging: boolean }>`
-  border: 2px dashed ${props => props.isDragging ? '#3b82f6' : '#e5e7eb'};
-  background: ${props => props.isDragging ? 'rgba(59, 130, 246, 0.05)' : '#ffffff'};
+  border: 2px dashed ${(props) => (props.isDragging ? '#3b82f6' : '#e5e7eb')};
+  background: ${(props) =>
+    props.isDragging ? 'rgba(59, 130, 246, 0.05)' : '#ffffff'};
   transition: all 0.2s ease;
   border-radius: 0.75rem;
   padding: 2rem;
@@ -79,13 +90,13 @@ const SizeButton = styled(motion.button)<{ isActive: boolean }>`
   padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  color: ${props => props.isActive ? '#ffffff' : '#4b5563'};
-  background: ${props => props.isActive ? '#3b82f6' : 'transparent'};
-  border: 1px solid ${props => props.isActive ? '#3b82f6' : '#e5e7eb'};
+  color: ${(props) => (props.isActive ? '#ffffff' : '#4b5563')};
+  background: ${(props) => (props.isActive ? '#3b82f6' : 'transparent')};
+  border: 1px solid ${(props) => (props.isActive ? '#3b82f6' : '#e5e7eb')};
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => props.isActive ? '#2563eb' : '#f9fafb'};
+    background: ${(props) => (props.isActive ? '#2563eb' : '#f9fafb')};
   }
 
   &:disabled {
@@ -170,17 +181,23 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const uploadZoneRef = React.useRef<HTMLDivElement>(null)
 
   // Convert legacy block object to new format
-  const convertLegacyBlock = React.useCallback((block: LegacyVideoBlockObject): VideoBlockObject => {
-    const videoSize = getVideoSizeFromWidth(block.size?.width)
-    return {
-      ...block,
-      size: videoSize
-    }
-  }, [])
+  const convertLegacyBlock = React.useCallback(
+    (block: LegacyVideoBlockObject): VideoBlockObject => {
+      const videoSize = getVideoSizeFromWidth(block.size?.width)
+      return {
+        ...block,
+        size: videoSize,
+      }
+    },
+    []
+  )
 
   const initialBlockObject = React.useMemo(() => {
     if (!node.attrs.blockObject) return null
-    if ('size' in node.attrs.blockObject && typeof node.attrs.blockObject.size === 'string') {
+    if (
+      'size' in node.attrs.blockObject &&
+      typeof node.attrs.blockObject.size === 'string'
+    ) {
       return node.attrs.blockObject as VideoBlockObject
     }
     return convertLegacyBlock(node.attrs.blockObject as LegacyVideoBlockObject)
@@ -191,15 +208,19 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const [error, setError] = React.useState<string | null>(null)
   const [isDragging, setIsDragging] = React.useState(false)
   const [uploadProgress, setUploadProgress] = React.useState(0)
-  const [blockObject, setBlockObject] = React.useState<VideoBlockObject | null>(initialBlockObject)
-  const [selectedSize, setSelectedSize] = React.useState<VideoSize>(initialBlockObject?.size || 'medium')
+  const [blockObject, setBlockObject] = React.useState<VideoBlockObject | null>(
+    initialBlockObject
+  )
+  const [selectedSize, setSelectedSize] = React.useState<VideoSize>(
+    initialBlockObject?.size || 'medium'
+  )
 
   // Update block object when size changes
   React.useEffect(() => {
     if (blockObject && blockObject.size !== selectedSize) {
       const newBlockObject = {
         ...blockObject,
-        size: selectedSize
+        size: selectedSize,
       }
       setBlockObject(newBlockObject)
       updateAttributes({ blockObject: newBlockObject })
@@ -208,7 +229,9 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
 
   const isEditable = editorState?.isEditable
   const access_token = session?.data?.tokens?.access_token
-  const fileId = blockObject ? `${blockObject.content.file_id}.${blockObject.content.file_format}` : null
+  const fileId = blockObject
+    ? `${blockObject.content.file_id}.${blockObject.content.file_format}`
+    : null
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -239,7 +262,9 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     setIsDragging(false)
 
     const file = e.dataTransfer.files[0]
-    if (file && SUPPORTED_FILES.split(',').some(format => file.name.toLowerCase().endsWith(format.trim()))) {
+    const fileExtension = file?.name.split('.').pop()?.toLowerCase()
+
+    if (file && fileExtension && ['mp4', 'webm'].includes(fileExtension)) {
       setVideo(file)
       setError(null)
       handleUpload(file)
@@ -258,7 +283,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
 
       // Simulate upload progress
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 90))
+        setUploadProgress((prev) => Math.min(prev + 10, 90))
       }, 200)
 
       const object = await uploadNewVideoFile(
@@ -272,7 +297,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
 
       const newBlockObject = {
         ...object,
-        size: selectedSize
+        size: selectedSize,
       }
       setBlockObject(newBlockObject)
       updateAttributes({ blockObject: newBlockObject })
@@ -301,14 +326,32 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     setSelectedSize(size)
   }
 
-  const videoUrl = blockObject && org?.org_uuid && course?.courseStructure.course_uuid ? getActivityBlockMediaDirectory(
-    org.org_uuid,
-    course.courseStructure.course_uuid,
-    extension.options.activity.activity_uuid,
-    blockObject.block_uuid,
-    fileId || '',
-    'videoBlock'
-  ) : null
+  const videoUrl =
+    blockObject && org?.org_uuid && course?.courseStructure.course_uuid
+      ? getActivityBlockMediaDirectory(
+          org.org_uuid,
+          course.courseStructure.course_uuid,
+          extension.options.activity.activity_uuid,
+          blockObject.block_uuid,
+          fileId || '',
+          'videoBlock'
+        )
+      : null
+
+  const handleDownload = () => {
+    if (!videoUrl) return
+
+    // Create a temporary link element
+    const link = document.createElement('a')
+    link.href = videoUrl
+    link.download = `video-${blockObject?.block_uuid || 'download'}.${blockObject?.content.file_format || 'mp4'}`
+    link.setAttribute('download', '')
+    link.setAttribute('target', '_blank')
+    link.setAttribute('rel', 'noopener noreferrer')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   // If we're in preview mode and have a video, show only the video player
   if (!isEditable && blockObject && videoUrl) {
@@ -319,19 +362,28 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-full flex justify-center"
+          className="w-full flex justify-center relative"
         >
           <div
             style={{
               maxWidth: typeof width === 'number' ? width : '100%',
-              width: '100%'
+              width: '100%',
             }}
           >
-            <video
-              controls
-              className="w-full aspect-video object-contain rounded-lg shadow-sm"
-              src={videoUrl}
-            />
+            <div className="relative">
+              <video
+                controls
+                className="w-full aspect-video object-contain rounded-lg shadow-sm"
+                src={videoUrl}
+              />
+              <button
+                onClick={handleDownload}
+                className="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+                title="Download video"
+              >
+                <Download className="w-4 h-4 text-white" />
+              </button>
+            </div>
           </div>
         </motion.div>
       </NodeViewWrapper>
@@ -404,7 +456,9 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                       className="space-y-3"
                     >
                       <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />
-                      <div className="text-sm text-zinc-600">{t('uploading', { progress: uploadProgress })}</div>
+                      <div className="text-sm text-zinc-600">
+                        {t('uploading', { progress: uploadProgress })}
+                      </div>
                       <div className="w-48 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">
                         <motion.div
                           className="h-full bg-blue-500 rounded-full"
@@ -468,15 +522,26 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                     {t(VIDEO_SIZES[size].label)}
                   </SizeButton>
                 ))}
+                <SizeButton
+                  isActive={false}
+                  onClick={handleDownload}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="ml-auto"
+                >
+                  <Download size={14} />
+                  Download
+                </SizeButton>
               </div>
 
               <VideoContainer>
                 <div
                   style={{
-                    maxWidth: typeof VIDEO_SIZES[selectedSize].width === 'number'
-                      ? VIDEO_SIZES[selectedSize].width
-                      : '100%',
-                    width: '100%'
+                    maxWidth:
+                      typeof VIDEO_SIZES[selectedSize].width === 'number'
+                        ? VIDEO_SIZES[selectedSize].width
+                        : '100%',
+                    width: '100%',
                   }}
                 >
                   <div className="relative rounded-lg overflow-hidden bg-black/5">
@@ -488,8 +553,8 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                     <video
                       controls
                       className={cn(
-                        "w-full aspect-video object-contain bg-black/95 shadow-sm transition-all duration-200",
-                        isLoading && "opacity-50 blur-sm"
+                        'w-full aspect-video object-contain bg-black/95 shadow-sm transition-all duration-200',
+                        isLoading && 'opacity-50 blur-sm'
                       )}
                       src={videoUrl}
                     />

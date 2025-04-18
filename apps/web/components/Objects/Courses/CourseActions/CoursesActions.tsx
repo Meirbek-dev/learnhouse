@@ -1,45 +1,41 @@
-'use client'
-
 import React, { useState, useEffect } from 'react'
-import UserAvatar from '../../UserAvatar'
-import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { removeCourse, startCourse } from '@services/courses/activity'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useMediaQuery } from 'usehooks-ts'
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config'
 import { getProductsByCourse } from '@services/payments/products'
-import { LogIn, LogOut, ShoppingCart, AlertCircle, UserPen, ClockIcon } from 'lucide-react'
+import {
+  LogIn,
+  LogOut,
+  ShoppingCart,
+  AlertCircle,
+  UserPen,
+  ClockIcon,
+  ArrowRight,
+  Sparkles,
+  BookOpen,
+} from 'lucide-react'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import CoursePaidOptions from './CoursePaidOptions'
 import { checkPaidAccess } from '@services/payments/payments'
 import { applyForContributor } from '@services/courses/courses'
 import toast from 'react-hot-toast'
 import { useContributorStatus } from '../../../../hooks/useContributorStatus'
-import { useTranslations } from 'next-intl'
-
-interface Author {
-  user: {
-    id: string
-    user_uuid: string
-    avatar_image: string
-    first_name: string
-    last_name: string
-    username: string
-  }
-  authorship: 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER'
-  authorship_status: 'ACTIVE' | 'INACTIVE' | 'PENDING'
-}
+import CourseProgress from '../CourseProgress/CourseProgress'
+import UserAvatar from '@components/Objects/UserAvatar'
 
 interface CourseRun {
   status: string
   course_id: string
+  steps: Array<{
+    activity_id: string
+    complete: boolean
+  }>
 }
 
 interface Course {
   id: string
-  authors: Author[]
   trail?: {
     runs: CourseRun[]
   }
@@ -62,142 +58,7 @@ interface CourseActionsProps {
   }
 }
 
-// Separate component for author display
-const AuthorInfo = ({ author, isMobile }: { author: Author, isMobile: boolean }) => {
-  const t = useTranslations('Courses.CoursesActions');
-  return (
-    <div className="flex flex-row md:flex-col mx-auto space-y-0 md:space-y-3 space-x-4 md:space-x-0 px-2 py-2 items-center">
-      <UserAvatar
-        border="border-8"
-        avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
-        predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-        width={isMobile ? 60 : 100}
-        showProfilePopup={true}
-        userId={author.user.user_uuid}
-      />
-      <div className="md:-space-y-2">
-        <div className="text-[12px] text-neutral-400 font-semibold">{t('author')}</div>
-        <div className="text-lg md:text-xl font-bold text-neutral-800">
-          {(author.user.first_name && author.user.last_name) ? (
-            <div className="flex space-x-2 items-center">
-              <p>{`${author.user.first_name} ${author.user.last_name}`}</p>
-              <span className="text-xs bg-neutral-100 p-1 px-3 rounded-full text-neutral-400 font-semibold">
-                @{author.user.username}
-              </span>
-            </div>
-          ) : (
-            <div className="flex space-x-2 items-center">
-              <p>@{author.user.username}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const MultipleAuthors = ({ authors, isMobile }: { authors: Author[], isMobile: boolean }) => {
-  const t = useTranslations('Courses.CoursesActions');
-  const displayedAvatars = authors.slice(0, 3)
-  const displayedNames = authors.slice(0, 2)
-  const remainingCount = Math.max(0, authors.length - 3)
-
-  // Consistent sizes for both avatars and badge
-  const avatarSize = isMobile ? 72 : 86
-  const borderSize = "border-4"
-
-  return (
-    <div className="flex flex-col items-center space-y-4 px-2 py-2">
-      <div className="text-[12px] text-neutral-400 font-semibold self-start">{t('authors')}</div>
-
-      {/* Avatars row */}
-      <div className="flex justify-center -space-x-6 relative">
-        {displayedAvatars.map((author, index) => (
-          <div
-            key={author.user.user_uuid}
-            className="relative"
-            style={{ zIndex: displayedAvatars.length - index }}
-          >
-            <div className="ring-white">
-              <UserAvatar
-                border={borderSize}
-                rounded='rounded-full'
-                avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
-                predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                width={avatarSize}
-                showProfilePopup={true}
-                userId={author.user.id}
-              />
-            </div>
-          </div>
-        ))}
-        {remainingCount > 0 && (
-          <div
-            className="relative"
-            style={{ zIndex: 0 }}
-          >
-            <div
-              className="flex items-center justify-center bg-neutral-100 text-neutral-600 font-medium rounded-full border-4 border-white shadow-sm"
-              style={{
-                width: `${avatarSize}px`,
-                height: `${avatarSize}px`,
-                fontSize: isMobile ? '14px' : '16px'
-              }}
-            >
-              +{remainingCount}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Names row - improved display logic */}
-      <div className="text-center mt-2">
-        <div className="text-sm font-medium text-neutral-800">
-          {authors.length === 1 ? (
-            <span>
-              {authors[0].user.first_name && authors[0].user.last_name
-                ? `${authors[0].user.first_name} ${authors[0].user.last_name}`
-                : `@${authors[0].user.username}`}
-            </span>
-          ) : (
-            <>
-              {displayedNames.map((author, index) => (
-                <span key={author.user.user_uuid}>
-                  {author.user.first_name && author.user.last_name
-                    ? `${author.user.first_name} ${author.user.last_name}`
-                    : `@${author.user.username}`}
-                  {index === 0 && authors.length > 1 && index < displayedNames.length - 1 && " & "}
-                </span>
-              ))}
-              {authors.length > 2 && (
-                <span className="text-neutral-500 ml-1">
-                  {t('moreAuthors', { count: authors.length - 2 })}
-                </span>
-              )}
-            </>
-          )}
-        </div>
-        <div className="text-xs text-neutral-500 mt-0.5">
-          {authors.length === 1 ? (
-            <span>@{authors[0].user.username}</span>
-          ) : (
-            <>
-              {displayedNames.map((author, index) => (
-                <span key={author.user.user_uuid}>
-                  @{author.user.username}
-                  {index === 0 && authors.length > 1 && index < displayedNames.length - 1 && " & "}
-                </span>
-              ))}
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
-  const t = useTranslations('Courses.CoursesActions');
+function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
   const router = useRouter()
   const session = useLHSession() as any
   const [linkedProducts, setLinkedProducts] = useState<any[]>([])
@@ -206,11 +67,14 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
   const [isContributeLoading, setIsContributeLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [hasAccess, setHasAccess] = useState<boolean | null>(null)
-  const { contributorStatus, refetch } = useContributorStatus(courseuuid);
+  const { contributorStatus, refetch } = useContributorStatus(courseuuid)
+  const [isProgressOpen, setIsProgressOpen] = useState(false)
 
-  const isStarted = course.trail?.runs?.some(
-    (run) => run.status === 'STATUS_IN_PROGRESS' && run.course_id === course.id
-  ) ?? false
+  const isStarted =
+    course.trail?.runs?.some(
+      (run) =>
+        run.status === 'STATUS_IN_PROGRESS' && run.course_id === course.id
+    ) ?? false
 
   useEffect(() => {
     const fetchLinkedProducts = async () => {
@@ -241,10 +105,9 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
           session.data?.tokens?.access_token
         )
         setHasAccess(response.has_access)
-
       } catch (error) {
         console.error('Failed to check course access')
-        toast.error(t('accessCheckError'))
+        toast.error('Failed to check course access. Please try again later.')
         setHasAccess(false)
       }
     }
@@ -252,7 +115,12 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
     if (linkedProducts.length > 0) {
       checkAccess()
     }
-  }, [course.id, course.org_id, session.data?.tokens?.access_token, linkedProducts, t])
+  }, [
+    course.id,
+    course.org_id,
+    session.data?.tokens?.access_token,
+    linkedProducts,
+  ])
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
@@ -262,19 +130,27 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
 
     setIsActionLoading(true)
     const loadingToast = toast.loading(
-      isStarted ? t('leavingCourse') : t('startingCourse')
+      isStarted ? 'Leaving course...' : 'Starting course...'
     )
 
     try {
       if (isStarted) {
-        await removeCourse('course_' + courseuuid, orgslug, session.data?.tokens?.access_token)
+        await removeCourse(
+          'course_' + courseuuid,
+          orgslug,
+          session.data?.tokens?.access_token
+        )
         await revalidateTags(['courses'], orgslug)
-        toast.success(t('leaveSuccess'), { id: loadingToast })
+        toast.success('Successfully left the course', { id: loadingToast })
         router.refresh()
       } else {
-        await startCourse('course_' + courseuuid, orgslug, session.data?.tokens?.access_token)
+        await startCourse(
+          'course_' + courseuuid,
+          orgslug,
+          session.data?.tokens?.access_token
+        )
         await revalidateTags(['courses'], orgslug)
-        toast.success(t('startSuccess'), { id: loadingToast })
+        toast.success('Successfully started the course', { id: loadingToast })
 
         // Get the first activity from the first chapter
         const firstChapter = course.chapters?.[0]
@@ -284,7 +160,7 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
           // Redirect to the first activity
           router.push(
             getUriWithOrg(orgslug, '') +
-            `/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
+              `/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
           )
         } else {
           router.refresh()
@@ -293,7 +169,9 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
     } catch (error) {
       console.error('Failed to perform course action:', error)
       toast.error(
-        isStarted ? t('leaveError') : t('startError'),
+        isStarted
+          ? 'Failed to leave the course. Please try again later.'
+          : 'Failed to start the course. Please try again later.',
         { id: loadingToast }
       )
     } finally {
@@ -308,63 +186,105 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
     }
 
     setIsContributeLoading(true)
-    const loadingToast = toast.loading(t('contributeLoading'))
+    const loadingToast = toast.loading('Submitting contributor application...')
 
     try {
       const data = {
-        message: "I would like to contribute to this course."
+        message: 'I would like to contribute to this course.',
       }
 
-      await applyForContributor('course_' + courseuuid, data, session.data?.tokens?.access_token)
+      await applyForContributor(
+        'course_' + courseuuid,
+        data,
+        session.data?.tokens?.access_token
+      )
       await revalidateTags(['courses'], orgslug)
       await refetch()
-      toast.success(t('contributeSuccess'), { id: loadingToast })
+      toast.success(
+        'Your application to contribute has been submitted successfully',
+        { id: loadingToast }
+      )
     } catch (error) {
       console.error('Failed to apply as contributor:', error)
-      toast.error(t('contributeError'), { id: loadingToast })
+      toast.error(
+        'Failed to submit your application. Please try again later.',
+        { id: loadingToast }
+      )
     } finally {
       setIsContributeLoading(false)
     }
   }
 
-  if (isLoading) {
-    return <div className="animate-pulse h-20 bg-gray-100 rounded-lg nice-shadow" />
+  const renderActionButton = (action: 'start' | 'leave') => {
+    if (!session.data?.user) {
+      return (
+        <>
+          <UserAvatar
+            width={24}
+            predefined_avatar="empty"
+            rounded="rounded-full"
+            border="border-2"
+            borderColor="border-white"
+          />
+          <span>{action === 'start' ? 'Start Course' : 'Leave Course'}</span>
+          <ArrowRight className="w-5 h-5" />
+        </>
+      )
+    }
+
+    return (
+      <>
+        <UserAvatar
+          width={24}
+          use_with_session={true}
+          rounded="rounded-full"
+          border="border-2"
+          borderColor="border-white"
+        />
+        <span>{action === 'start' ? 'Start Course' : 'Leave Course'}</span>
+        <ArrowRight className="w-5 h-5" />
+      </>
+    )
   }
 
   const renderContributorButton = () => {
-    // Don't render anything if the course is not open to contributors or if the user status is INACTIVE
-    if (contributorStatus === 'INACTIVE' || course.open_to_contributors !== true) {
-      return null;
+    if (
+      contributorStatus === 'INACTIVE' ||
+      course.open_to_contributors !== true
+    ) {
+      return null
     }
 
     if (!session.data?.user) {
       return (
         <button
-          onClick={() => router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))}
+          onClick={() =>
+            router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))
+          }
           className="w-full bg-white text-neutral-700 border border-neutral-200 py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 mt-3 cursor-pointer"
         >
           <UserPen className="w-5 h-5" />
-          {t('authenticateToContribute')}
+          Authenticate to contribute
         </button>
-      );
+      )
     }
 
     if (contributorStatus === 'ACTIVE') {
       return (
         <div className="w-full bg-green-50 text-green-700 border border-green-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
           <UserPen className="w-5 h-5" />
-          {t('youAreContributor')}
+          You are a contributor
         </div>
-      );
+      )
     }
 
     if (contributorStatus === 'PENDING') {
       return (
         <div className="w-full bg-amber-50 text-amber-700 border border-amber-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
           <ClockIcon className="w-5 h-5" />
-          {t('applicationPending')}
+          Contributor application pending
         </div>
-      );
+      )
     }
 
     return (
@@ -378,140 +298,251 @@ const Actions = ({ courseuuid, orgslug, course }: CourseActionsProps) => {
         ) : (
           <>
             <UserPen className="w-5 h-5" />
-            {t('applyToContribute')}
+            Apply to contribute
           </>
         )}
       </button>
-    );
-  };
+    )
+  }
+
+  const renderProgressSection = () => {
+    const totalActivities =
+      course.chapters?.reduce(
+        (acc: number, chapter: any) => acc + chapter.activities.length,
+        0
+      ) || 0
+    const completedActivities =
+      course.trail?.runs
+        ?.find((run: CourseRun) => run.course_id === course.id)
+        ?.steps?.filter((step) => step.complete)?.length || 0
+
+    const progressPercentage = Math.round(
+      (completedActivities / totalActivities) * 100
+    )
+
+    if (!isStarted) {
+      return (
+        <div className="relative bg-white nice-shadow rounded-lg overflow-hidden">
+          <div
+            className="absolute inset-0 opacity-[0.05]"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle at center, #101010 1px, transparent 1px)',
+              backgroundSize: '12px 12px',
+            }}
+          />
+          <div className="relative p-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-16 h-16">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="28"
+                        stroke="#e5e7eb"
+                        strokeWidth="6"
+                        fill="none"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <BookOpen className="w-6 h-6 text-neutral-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">
+                      Ready to Begin?
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Start your learning journey with {totalActivities}{' '}
+                      exciting{' '}
+                      {totalActivities === 1 ? 'activity' : 'activities'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="relative bg-white nice-shadow rounded-lg overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at center, #000 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+        <div className="relative p-4">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-4">
+                <div className="relative w-16 h-16">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      stroke="#e5e7eb"
+                      strokeWidth="6"
+                      fill="none"
+                    />
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      stroke="#10b981"
+                      strokeWidth="6"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeDasharray={2 * Math.PI * 28}
+                      strokeDashoffset={
+                        2 *
+                        Math.PI *
+                        28 *
+                        (1 - completedActivities / totalActivities)
+                      }
+                      className="transition-all duration-500 ease-out"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg font-bold text-gray-800">
+                      {progressPercentage}%
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsProgressOpen(true)}
+                  className="flex-1 text-left hover:bg-neutral-50/50 p-2 rounded-lg transition-colors"
+                >
+                  <div className="text-sm font-medium text-gray-900">
+                    Course Progress
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {completedActivities} of {totalActivities} completed
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="animate-pulse h-20 bg-gray-100 rounded-lg nice-shadow" />
+    )
+  }
 
   if (linkedProducts.length > 0) {
     return (
-      <div className="space-y-4">
-        {hasAccess ? (
-          <>
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg nice-shadow">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <h3 className="text-green-800 font-semibold">{t('ownCourseTitle')}</h3>
+      <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+        <div className="space-y-4">
+          {hasAccess ? (
+            <>
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg nice-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <h3 className="text-green-800 font-semibold">
+                    You Own This Course
+                  </h3>
+                </div>
+                <p className="text-green-700 text-sm mt-1">
+                  You have purchased this course and have full access to all
+                  content.
+                </p>
               </div>
-              <p className="text-green-700 text-sm mt-1">
-                {t('ownCourseDescription')}
-              </p>
-            </div>
-            <button
-              onClick={handleCourseAction}
-              disabled={isActionLoading}
-              className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${isStarted ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400' : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
-              }`}
-            >
-              {isActionLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : isStarted ? (
-                <>
-                  <LogOut className="w-5 h-5" />
-                  {t('leaveCourse')}
-                </>
-              ) : (
-                <>
-                  <LogIn className="w-5 h-5" />
-                  {t('startCourse')}
-                </>
-              )}
-            </button>
-            {renderContributorButton()}
-          </>
-        ) : (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg nice-shadow">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-800" />
-              <h3 className="text-amber-800 font-semibold">{t('paidCourseTitle')}</h3>
-            </div>
-            <p className="text-amber-700 text-sm mt-1">
-              {t('paidCourseDescription')}
-            </p>
-          </div>
-        )}
-
-        {!hasAccess && (
-          <>
-            <Modal
-              isDialogOpen={isModalOpen}
-              onOpenChange={setIsModalOpen}
-              dialogContent={<CoursePaidOptions course={course} />}
-              dialogTitle={t('modalTitle')}
-              dialogDescription={t('modalDescription')}
-              minWidth="sm"
-            />
-            <button
-              className="w-full bg-neutral-900 text-white py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <ShoppingCart className="w-5 h-5" />
-              {t('purchaseCourse')}
-            </button>
-            {renderContributorButton()}
-          </>
-        )}
+              <button
+                onClick={handleCourseAction}
+                disabled={isActionLoading}
+                className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                  isStarted
+                    ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
+                    : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+                }`}
+              >
+                {isActionLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  renderActionButton(isStarted ? 'leave' : 'start')
+                )}
+              </button>
+              {renderContributorButton()}
+            </>
+          ) : (
+            <>
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg nice-shadow">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-800" />
+                  <h3 className="text-amber-800 font-semibold">Paid Course</h3>
+                </div>
+                <p className="text-amber-700 text-sm mt-1">
+                  This course requires purchase to access its content.
+                </p>
+              </div>
+              <Modal
+                isDialogOpen={isModalOpen}
+                onOpenChange={setIsModalOpen}
+                dialogContent={<CoursePaidOptions course={course} />}
+                dialogTitle="Purchase Course"
+                dialogDescription="Select a payment option to access this course"
+                minWidth="sm"
+              />
+              <button
+                className="w-full bg-neutral-900 text-white py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                Purchase Course
+              </button>
+              {renderContributorButton()}
+            </>
+          )}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <button
-        onClick={handleCourseAction}
-        disabled={isActionLoading}
-        className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${isStarted ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400' : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
-        }`}
-      >
-        {isActionLoading ? (
-          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        ) : !session.data?.user ? (
-          <>
-            <LogIn className="w-5 h-5" />
-            {t('authenticateToStart')}
-          </>
-        ) : isStarted ? (
-          <>
-            <LogOut className="w-5 h-5" />
-            {t('leaveCourse')}
-          </>
-        ) : (
-          <>
-            <LogIn className="w-5 h-5" />
-            {t('startCourse')}
-          </>
-        )}
-      </button>
-      {renderContributorButton()}
-    </div>
-  )
-}
+    <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+      <div className="space-y-4">
+        {/* Progress Section */}
+        {renderProgressSection()}
 
-function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
-  const router = useRouter()
-  const session = useLHSession() as any
-  const isMobile = useMediaQuery('(max-width: 768px)')
+        {/* Start/Leave Course Button */}
+        <button
+          onClick={handleCourseAction}
+          disabled={isActionLoading}
+          className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+            isStarted
+              ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
+              : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+          }`}
+        >
+          {isActionLoading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            renderActionButton(isStarted ? 'leave' : 'start')
+          )}
+        </button>
 
-  // Filter active authors and sort by role priority
-  const sortedAuthors = [...course.authors]
-    .filter(author => author.authorship_status === 'ACTIVE')
-    .sort((a, b) => {
-      const rolePriority: Record<string, number> = {
-        'CREATOR': 0,
-        'MAINTAINER': 1,
-        'CONTRIBUTOR': 2,
-        'REPORTER': 3
-      };
-      return rolePriority[a.authorship] - rolePriority[b.authorship];
-    });
+        {/* Contributor Button */}
+        {renderContributorButton()}
 
-  return (
-    <div className="space-y-3 antialiased flex flex-col p-3 py-5 bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
-      <MultipleAuthors authors={sortedAuthors} isMobile={isMobile} />
-      <div className='px-3 py-2'>
-        <Actions courseuuid={courseuuid} orgslug={orgslug} course={course} />
+        {/* Course Progress Modal */}
+        <CourseProgress
+          course={course}
+          orgslug={orgslug}
+          isOpen={isProgressOpen}
+          onClose={() => setIsProgressOpen(false)}
+        />
       </div>
     </div>
   )
