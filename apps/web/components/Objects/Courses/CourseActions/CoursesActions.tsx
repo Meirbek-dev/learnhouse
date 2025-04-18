@@ -16,7 +16,7 @@ import CoursePaidOptions from './CoursePaidOptions'
 import { checkPaidAccess } from '@services/payments/payments'
 import { applyForContributor } from '@services/courses/courses'
 import toast from 'react-hot-toast'
-import { useContributorStatus } from '../../../useContributorStatus'
+import { useContributorStatus } from '../../../../hooks/useContributorStatus'
 import { useTranslations } from 'next-intl'
 
 interface Author {

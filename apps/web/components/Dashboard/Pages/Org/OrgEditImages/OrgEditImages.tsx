@@ -1,45 +1,81 @@
 'use client'
 import React, { useState } from 'react'
-import { UploadCloud, Info, Plus, X, Video, GripVertical, Image, Layout, Images, StarIcon, ImageIcon } from 'lucide-react'
+import {
+  UploadCloud,
+  Info,
+  Plus,
+  X,
+  Video,
+  GripVertical,
+  Image,
+  Layout,
+  Images,
+  StarIcon,
+  ImageIcon,
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getOrgLogoMediaDirectory, getOrgPreviewMediaDirectory, getOrgThumbnailMediaDirectory } from '@services/media/media'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs"
+import {
+  getOrgLogoMediaDirectory,
+  getOrgPreviewMediaDirectory,
+  getOrgThumbnailMediaDirectory,
+} from '@services/media/media'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
 import { toast } from 'react-hot-toast'
 import { constructAcceptValue } from '@/lib/constants'
-import { uploadOrganizationLogo, uploadOrganizationThumbnail, uploadOrganizationPreview, updateOrganization } from '@services/settings/org'
+import {
+  uploadOrganizationLogo,
+  uploadOrganizationThumbnail,
+  uploadOrganizationPreview,
+  updateOrganization,
+} from '@services/settings/org'
 import { cn } from '@/lib/utils'
-import { Input } from "@components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@components/ui/dialog"
-import { Button } from "@components/ui/button"
-import { Label } from "@components/ui/label"
+import { Input } from '@components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@components/ui/dialog'
+import { Button } from '@components/ui/button'
+import { Label } from '@components/ui/label'
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons'
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from '@hello-pangea/dnd'
 import { useTranslations } from 'next-intl'
 
 const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg'])
 
 type Preview = {
-  id: string;
-  url: string;
-  type: 'image' | 'youtube' | 'loom';
-  filename?: string;
-  thumbnailUrl?: string;
-  order: number;
-};
+  id: string
+  url: string
+  type: 'image' | 'youtube' | 'loom'
+  filename?: string
+  thumbnailUrl?: string
+  order: number
+}
 
 // Update the height constant
 const PREVIEW_HEIGHT = 'h-28' // Reduced height
 
 // Add this type for the video service selection
-type VideoService = 'youtube' | 'loom' | null;
+type VideoService = 'youtube' | 'loom' | null
 
 // Add this constant for consistent sizing
 const DIALOG_ICON_SIZE = 'w-16 h-16'
 
 // Function to get translated preview options
-const getAddPreviewOptions = (t: Function, isPreviewUploading: boolean, setSelectedService: Function) => [
+const getAddPreviewOptions = (
+  t: Function,
+  isPreviewUploading: boolean,
+  setSelectedService: Function
+) => [
   {
     id: 'image',
     title: t('Dialog.AddPreview.imageTitle'),
@@ -47,7 +83,7 @@ const getAddPreviewOptions = (t: Function, isPreviewUploading: boolean, setSelec
     icon: UploadCloud,
     color: 'blue',
     onClick: () => document.getElementById('previewInput')?.click(),
-    disabled: isPreviewUploading
+    disabled: isPreviewUploading,
   },
   {
     id: 'youtube',
@@ -56,7 +92,7 @@ const getAddPreviewOptions = (t: Function, isPreviewUploading: boolean, setSelec
     icon: SiYoutube,
     color: 'red',
     onClick: () => setSelectedService('youtube'),
-    disabled: false
+    disabled: false,
   },
   {
     id: 'loom',
@@ -65,17 +101,17 @@ const getAddPreviewOptions = (t: Function, isPreviewUploading: boolean, setSelec
     icon: SiLoom,
     color: 'blue',
     onClick: () => setSelectedService('loom'),
-    disabled: false
-  }
-];
+    disabled: false,
+  },
+]
 
 export default function OrgEditImages() {
   const router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
-  const t = useTranslations('Dashboard.OrgSettings.Images');
-  const tNotify = useTranslations('Notifications');
+  const t = useTranslations('Dashboard.OrgSettings.Images')
+  const tNotify = useTranslations('Notifications')
   const [localLogo, setLocalLogo] = useState<string | null>(null)
   const [localThumbnail, setLocalThumbnail] = useState<string | null>(null)
   const [isLogoUploading, setIsLogoUploading] = useState(false)
@@ -89,8 +125,8 @@ export default function OrgEditImages() {
         url: getOrgThumbnailMediaDirectory(org?.org_uuid, item.filename),
         filename: item.filename,
         type: 'image' as const,
-        order: item.order ?? index // Use existing order or fallback to index
-      }));
+        order: item.order ?? index, // Use existing order or fallback to index
+      }))
 
     // Initialize with video previews
     const videoPreviews = (org?.previews?.videos || [])
@@ -99,22 +135,25 @@ export default function OrgEditImages() {
         id: video.id,
         url: video.url,
         type: video.type as 'youtube' | 'loom',
-        thumbnailUrl: video.type === 'youtube'
-          ? `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`
-          : '',
+        thumbnailUrl:
+          video.type === 'youtube'
+            ? `https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`
+            : '',
         filename: '',
-        order: video.order ?? (imagePreviews.length + index) // Use existing order or fallback to index after images
-      }));
+        order: video.order ?? imagePreviews.length + index, // Use existing order or fallback to index after images
+      }))
 
-    const allPreviews = [...imagePreviews, ...videoPreviews];
-    return allPreviews.sort((a, b) => a.order - b.order);
-  });
+    const allPreviews = [...imagePreviews, ...videoPreviews]
+    return allPreviews.sort((a, b) => a.order - b.order)
+  })
   const [isPreviewUploading, setIsPreviewUploading] = useState(false)
   const [videoUrl, setVideoUrl] = useState('')
   const [videoDialogOpen, setVideoDialogOpen] = useState(false)
   const [selectedService, setSelectedService] = useState<VideoService>(null)
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0]
       setLocalLogo(URL.createObjectURL(file))
@@ -133,7 +172,9 @@ export default function OrgEditImages() {
     }
   }
 
-  const handleThumbnailChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0]
       setLocalThumbnail(URL.createObjectURL(file))
@@ -152,60 +193,76 @@ export default function OrgEditImages() {
     }
   }
 
-  const handleImageButtonClick = (inputId: string) => (event: React.MouseEvent) => {
-    event.preventDefault()
-    document.getElementById(inputId)?.click()
-  }
+  const handleImageButtonClick =
+    (inputId: string) => (event: React.MouseEvent) => {
+      event.preventDefault()
+      document.getElementById(inputId)?.click()
+    }
 
-  const handlePreviewUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePreviewUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files && event.target.files.length > 0) {
       const files = Array.from(event.target.files)
       const remainingSlots = 4 - previews.length
 
       if (files.length > remainingSlots) {
-        toast.error(tNotify('maxPreviewsError', { count: remainingSlots }))
+        toast.error(t('Errors.maxPreviewsError', { count: remainingSlots }))
         return
       }
 
       setIsPreviewUploading(true)
-      const loadingToast = toast.loading(tNotify('uploadingPreviews', { count: files.length }))
+      const loadingToast = toast.loading(
+        tNotify('uploadingPreviews', { count: files.length })
+      )
 
       try {
         const uploadPromises = files.map(async (file) => {
-          const response = await uploadOrganizationPreview(org.id, file, access_token)
+          const response = await uploadOrganizationPreview(
+            org.id,
+            file,
+            access_token
+          )
           return {
             id: response.name_in_disk,
             url: URL.createObjectURL(file),
             filename: response.name_in_disk,
             type: 'image' as const,
-            order: previews.length // Add new items at the end
+            order: previews.length, // Add new items at the end
           }
         })
 
         const newPreviews = await Promise.all(uploadPromises)
         const updatedPreviews = [...previews, ...newPreviews]
 
-        await updateOrganization(org.id, {
-          previews: {
-            images: updatedPreviews
-              .filter(p => p.type === 'image')
-              .map(p => ({
-                filename: p.filename,
-                order: p.order
-              })),
-            videos: updatedPreviews
-              .filter(p => p.type === 'youtube' || p.type === 'loom')
-              .map(p => ({
-                type: p.type,
-                url: p.url,
-                id: p.id,
-                order: p.order
-              }))
-          }
-        }, access_token)
+        await updateOrganization(
+          org.id,
+          {
+            previews: {
+              images: updatedPreviews
+                .filter((p) => p.type === 'image')
+                .map((p) => ({
+                  filename: p.filename,
+                  order: p.order,
+                })),
+              videos: updatedPreviews
+                .filter((p) => p.type === 'youtube' || p.type === 'loom')
+                .map((p) => ({
+                  type: p.type,
+                  url: p.url,
+                  id: p.id,
+                  order: p.order,
+                })),
+            },
+          },
+          access_token
+        )
 
         setPreviews(updatedPreviews)
-        toast.success(tNotify('previewsAddedSuccess', { count: files.length }), { id: loadingToast })
+        toast.success(
+          tNotify('previewsAddedSuccess', { count: files.length }),
+          { id: loadingToast }
+        )
         router.refresh()
       } catch (err) {
         toast.error(tNotify('previewsUploadFailed'), { id: loadingToast })
@@ -218,14 +275,18 @@ export default function OrgEditImages() {
   const removePreview = async (id: string) => {
     const loadingToast = toast.loading(tNotify('removingPreview'))
     try {
-      const updatedPreviews = previews.filter(p => p.id !== id)
-      const updatedPreviewFilenames = updatedPreviews.map(p => p.filename)
+      const updatedPreviews = previews.filter((p) => p.id !== id)
+      const updatedPreviewFilenames = updatedPreviews.map((p) => p.filename)
 
-      await updateOrganization(org.id, {
-        previews: {
-          images: updatedPreviewFilenames
-        }
-      }, access_token)
+      await updateOrganization(
+        org.id,
+        {
+          previews: {
+            images: updatedPreviewFilenames,
+          },
+        },
+        access_token
+      )
 
       setPreviews(updatedPreviews)
       toast.success(tNotify('previewRemovedSuccess'), { id: loadingToast })
@@ -235,9 +296,13 @@ export default function OrgEditImages() {
     }
   }
 
-  const extractVideoId = (url: string, type: 'youtube' | 'loom'): string | null => {
+  const extractVideoId = (
+    url: string,
+    type: 'youtube' | 'loom'
+  ): string | null => {
     if (type === 'youtube') {
-      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+      const regex =
+        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
       const match = url.match(regex)
       return match ? match[1] : null
     } else if (type === 'loom') {
@@ -249,24 +314,29 @@ export default function OrgEditImages() {
   }
 
   const handleVideoSubmit = async (type: 'youtube' | 'loom') => {
-    const videoId = extractVideoId(videoUrl, type);
+    const videoId = extractVideoId(videoUrl, type)
     if (!videoId) {
-      toast.error(tNotify('invalidVideoUrl', { type: t(`Dialog.AddPreview.${type}Title`) }));
-      return;
+      toast.error(
+        t('Errors.invalidVideoUrl', {
+          type: t(`Dialog.AddPreview.${type}Title`),
+        })
+      )
+      return
     }
 
     // Check if video already exists
-    if (previews.some(preview => preview.id === videoId)) {
-      toast.error(tNotify('videoAlreadyAddedError'));
-      return;
+    if (previews.some((preview) => preview.id === videoId)) {
+      toast.error(t('Errors.videoAlreadyAddedError'))
+      return
     }
 
-    const loadingToast = toast.loading(tNotify('addingVideoPreview'));
+    const loadingToast = toast.loading(tNotify('addingVideoPreview'))
 
     try {
-      const thumbnailUrl = type === 'youtube'
-        ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-        : '';
+      const thumbnailUrl =
+        type === 'youtube'
+          ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+          : ''
 
       const newPreview: Preview = {
         id: videoId,
@@ -274,84 +344,92 @@ export default function OrgEditImages() {
         type,
         thumbnailUrl,
         filename: '',
-        order: previews.length // Add new items at the end
-      };
+        order: previews.length, // Add new items at the end
+      }
 
-      const updatedPreviews = [...previews, newPreview];
+      const updatedPreviews = [...previews, newPreview]
 
-      await updateOrganization(org.id, {
-        previews: {
-          images: updatedPreviews
-            .filter(p => p.type === 'image')
-            .map(p => ({
-              filename: p.filename,
-              order: p.order
-            })),
-          videos: updatedPreviews
-            .filter(p => p.type === 'youtube' || p.type === 'loom')
-            .map(p => ({
-              type: p.type,
-              url: p.url,
-              id: p.id,
-              order: p.order
-            }))
-        }
-      }, access_token);
+      await updateOrganization(
+        org.id,
+        {
+          previews: {
+            images: updatedPreviews
+              .filter((p) => p.type === 'image')
+              .map((p) => ({
+                filename: p.filename,
+                order: p.order,
+              })),
+            videos: updatedPreviews
+              .filter((p) => p.type === 'youtube' || p.type === 'loom')
+              .map((p) => ({
+                type: p.type,
+                url: p.url,
+                id: p.id,
+                order: p.order,
+              })),
+          },
+        },
+        access_token
+      )
 
-      setPreviews(updatedPreviews);
-      setVideoUrl('');
-      setVideoDialogOpen(false);
-      toast.success(tNotify('videoPreviewAddedSuccess'), { id: loadingToast });
-      router.refresh();
+      setPreviews(updatedPreviews)
+      setVideoUrl('')
+      setVideoDialogOpen(false)
+      toast.success(tNotify('videoPreviewAddedSuccess'), { id: loadingToast })
+      router.refresh()
     } catch (err) {
-      toast.error(tNotify('videoPreviewAddFailed'), { id: loadingToast });
+      toast.error(tNotify('videoPreviewAddFailed'), { id: loadingToast })
     }
-  };
+  }
 
   const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
+    if (!result.destination) return
 
-    const items = Array.from(previews);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    const items = Array.from(previews)
+    const [reorderedItem] = items.splice(result.source.index, 1)
+    items.splice(result.destination.index, 0, reorderedItem)
 
     // Update order numbers
     const reorderedItems = items.map((item, index) => ({
       ...item,
-      order: index
-    }));
+      order: index,
+    }))
 
-    setPreviews(reorderedItems);
+    setPreviews(reorderedItems)
 
     // Update the order in the backend
-    const loadingToast = toast.loading(tNotify('updatingPreviewOrder'));
+    const loadingToast = toast.loading(tNotify('updatingPreviewOrder'))
     try {
-      await updateOrganization(org.id, {
-        previews: {
-          images: reorderedItems
-            .filter(p => p.type === 'image')
-            .map(p => ({
-              filename: p.filename,
-              order: p.order
-            })),
-          videos: reorderedItems
-            .filter(p => p.type === 'youtube' || p.type === 'loom')
-            .map(p => ({
-              type: p.type,
-              url: p.url,
-              id: p.id,
-              order: p.order
-            }))
-        }
-      }, access_token);
+      await updateOrganization(
+        org.id,
+        {
+          previews: {
+            images: reorderedItems
+              .filter((p) => p.type === 'image')
+              .map((p) => ({
+                filename: p.filename,
+                order: p.order,
+              })),
+            videos: reorderedItems
+              .filter((p) => p.type === 'youtube' || p.type === 'loom')
+              .map((p) => ({
+                type: p.type,
+                url: p.url,
+                id: p.id,
+                order: p.order,
+              })),
+          },
+        },
+        access_token
+      )
 
-      toast.success(tNotify('previewOrderUpdatedSuccess'), { id: loadingToast });
-      router.refresh();
+      toast.success(tNotify('previewOrderUpdatedSuccess'), { id: loadingToast })
+      router.refresh()
     } catch (err) {
-      toast.error(tNotify('previewOrderUpdateFailed'), { id: loadingToast });
-      setPreviews(previews);
+      toast.error(tNotify('previewOrderUpdateFailed'), { id: loadingToast })
+      setPreviews(previews)
     }
-  };
+  }
 
   // Add function to reset video dialog state
   const resetVideoDialog = () => {
@@ -362,12 +440,8 @@ export default function OrgEditImages() {
   return (
     <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow px-3 py-3 sm:mb-0 mb-16">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mb-2 rounded-md">
-        <h1 className="font-bold text-xl text-gray-800">
-          {t('title')}
-        </h1>
-        <h2 className="text-gray-500 text-md">
-          {t('description')}
-        </h2>
+        <h1 className="font-bold text-xl text-gray-800">{t('title')}</h1>
+        <h2 className="text-gray-500 text-md">{t('description')}</h2>
       </div>
       <Tabs defaultValue="logo" className="w-full">
         <TabsList className="grid w-full grid-cols-3 p-1 bg-gray-100 rounded-lg">
@@ -401,11 +475,13 @@ export default function OrgEditImages() {
                 <div className="relative group">
                   <div
                     className={cn(
-                      "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white",
-                      "border-2 border-gray-100 hover:border-blue-200 transition-all duration-300",
-                      isLogoUploading && "opacity-50"
+                      'w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white',
+                      'border-2 border-gray-100 hover:border-blue-200 transition-all duration-300',
+                      isLogoUploading && 'opacity-50'
                     )}
-                    style={{ backgroundImage: `url(${localLogo || getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)})` }}
+                    style={{
+                      backgroundImage: `url(${localLogo || getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)})`,
+                    }}
                   />
                 </div>
 
@@ -421,17 +497,24 @@ export default function OrgEditImages() {
                     type="button"
                     disabled={isLogoUploading}
                     className={cn(
-                      "font-medium text-sm px-6 py-2.5 rounded-full",
-                      "bg-linear-to-r from-blue-500 to-blue-600 text-white",
-                      "hover:from-blue-600 hover:to-blue-700",
-                      "shadow-xs hover:shadow-sm transition-all duration-300",
-                      "flex items-center space-x-2",
-                      isLogoUploading && "opacity-75 cursor-not-allowed"
+                      'font-medium text-sm px-6 py-2.5 rounded-full',
+                      'bg-linear-to-r from-blue-500 to-blue-600 text-white',
+                      'hover:from-blue-600 hover:to-blue-700',
+                      'shadow-xs hover:shadow-sm transition-all duration-300',
+                      'flex items-center space-x-2',
+                      isLogoUploading && 'opacity-75 cursor-not-allowed'
                     )}
                     onClick={handleImageButtonClick('fileInput')}
                   >
-                    <UploadCloud size={18} className={cn("", isLogoUploading && "animate-bounce")} />
-                    <span>{isLogoUploading ? t('Buttons.uploadingLogo') : t('Buttons.uploadNewLogo')}</span>
+                    <UploadCloud
+                      size={18}
+                      className={cn('', isLogoUploading && 'animate-bounce')}
+                    />
+                    <span>
+                      {isLogoUploading
+                        ? t('Buttons.uploadingLogo')
+                        : t('Buttons.uploadNewLogo')}
+                    </span>
                   </button>
 
                   <div className="flex flex-col text-xs space-y-2 items-center text-gray-500">
@@ -439,7 +522,9 @@ export default function OrgEditImages() {
                       <Info size={14} />
                       <p className="font-medium">{t('Info.acceptedFormats')}</p>
                     </div>
-                    <p className="text-gray-400">{t('Info.recommendedSizeLogo')}</p>
+                    <p className="text-gray-400">
+                      {t('Info.recommendedSizeLogo')}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -454,11 +539,13 @@ export default function OrgEditImages() {
                 <div className="relative group">
                   <div
                     className={cn(
-                      "w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white",
-                      "border-2 border-gray-100 hover:border-purple-200 transition-all duration-300",
-                      isThumbnailUploading && "opacity-50"
+                      'w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white',
+                      'border-2 border-gray-100 hover:border-purple-200 transition-all duration-300',
+                      isThumbnailUploading && 'opacity-50'
                     )}
-                    style={{ backgroundImage: `url(${localThumbnail || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)})` }}
+                    style={{
+                      backgroundImage: `url(${localThumbnail || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)})`,
+                    }}
                   />
                 </div>
 
@@ -474,17 +561,27 @@ export default function OrgEditImages() {
                     type="button"
                     disabled={isThumbnailUploading}
                     className={cn(
-                      "font-medium text-sm px-6 py-2.5 rounded-full",
-                      "bg-linear-to-r from-purple-500 to-purple-600 text-white",
-                      "hover:from-purple-600 hover:to-purple-700",
-                      "shadow-xs hover:shadow-sm transition-all duration-300",
-                      "flex items-center space-x-2",
-                      isThumbnailUploading && "opacity-75 cursor-not-allowed"
+                      'font-medium text-sm px-6 py-2.5 rounded-full',
+                      'bg-linear-to-r from-purple-500 to-purple-600 text-white',
+                      'hover:from-purple-600 hover:to-purple-700',
+                      'shadow-xs hover:shadow-sm transition-all duration-300',
+                      'flex items-center space-x-2',
+                      isThumbnailUploading && 'opacity-75 cursor-not-allowed'
                     )}
                     onClick={handleImageButtonClick('thumbnailInput')}
                   >
-                    <UploadCloud size={18} className={cn("", isThumbnailUploading && "animate-bounce")} />
-                    <span>{isThumbnailUploading ? t('Buttons.uploadingThumbnail') : t('Buttons.uploadNewThumbnail')}</span>
+                    <UploadCloud
+                      size={18}
+                      className={cn(
+                        '',
+                        isThumbnailUploading && 'animate-bounce'
+                      )}
+                    />
+                    <span>
+                      {isThumbnailUploading
+                        ? t('Buttons.uploadingThumbnail')
+                        : t('Buttons.uploadNewThumbnail')}
+                    </span>
                   </button>
 
                   <div className="flex flex-col text-xs space-y-2 items-center text-gray-500">
@@ -492,7 +589,9 @@ export default function OrgEditImages() {
                       <Info size={14} />
                       <p className="font-medium">{t('Info.acceptedFormats')}</p>
                     </div>
-                    <p className="text-gray-400">{t('Info.recommendedSizeThumbnail')}</p>
+                    <p className="text-gray-400">
+                      {t('Info.recommendedSizeThumbnail')}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -509,8 +608,8 @@ export default function OrgEditImages() {
                     {(provided) => (
                       <div
                         className={cn(
-                          "flex gap-4 w-full max-w-5xl p-4 overflow-x-auto pb-6",
-                          previews.length === 0 && "justify-center"
+                          'flex gap-4 w-full max-w-5xl p-4 overflow-x-auto pb-6',
+                          previews.length === 0 && 'justify-center'
                         )}
                         {...provided.droppableProps}
                         ref={provided.innerRef}
@@ -526,17 +625,19 @@ export default function OrgEditImages() {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 className={cn(
-                                  "relative group shrink-0",
-                                  "w-48",
-                                  snapshot.isDragging ? "scale-105 z-50" : "hover:scale-102",
+                                  'relative group shrink-0',
+                                  'w-48',
+                                  snapshot.isDragging
+                                    ? 'scale-105 z-50'
+                                    : 'hover:scale-102'
                                 )}
                               >
                                 <button
                                   onClick={() => removePreview(preview.id)}
                                   className={cn(
-                                    "absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5",
-                                    "opacity-0 group-hover:opacity-100 z-10 shadow-xs",
-                                    "transition-opacity duration-200"
+                                    'absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5',
+                                    'opacity-0 group-hover:opacity-100 z-10 shadow-xs',
+                                    'transition-opacity duration-200'
                                   )}
                                 >
                                   <X size={14} />
@@ -544,9 +645,9 @@ export default function OrgEditImages() {
                                 <div
                                   {...provided.dragHandleProps}
                                   className={cn(
-                                    "absolute -top-2 -left-2 bg-gray-600 hover:bg-gray-700 text-white rounded-full p-1.5",
-                                    "opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing z-10 shadow-xs",
-                                    "transition-opacity duration-200"
+                                    'absolute -top-2 -left-2 bg-gray-600 hover:bg-gray-700 text-white rounded-full p-1.5',
+                                    'opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing z-10 shadow-xs',
+                                    'transition-opacity duration-200'
                                   )}
                                 >
                                   <GripVertical size={14} />
@@ -555,23 +656,31 @@ export default function OrgEditImages() {
                                   <div
                                     className={cn(
                                       `w-full ${PREVIEW_HEIGHT} bg-contain bg-no-repeat bg-center rounded-xl bg-white`,
-                                      "border border-gray-200 hover:border-gray-300",
-                                      "transition-colors duration-200",
-                                      snapshot.isDragging ? "shadow-lg" : "shadow-xs hover:shadow-md"
+                                      'border border-gray-200 hover:border-gray-300',
+                                      'transition-colors duration-200',
+                                      snapshot.isDragging
+                                        ? 'shadow-lg'
+                                        : 'shadow-xs hover:shadow-md'
                                     )}
                                     style={{
                                       backgroundImage: `url(${getOrgPreviewMediaDirectory(org?.org_uuid, preview.id)})`,
                                     }}
                                   />
                                 ) : (
-                                  <div className={cn(
-                                    `w-full ${PREVIEW_HEIGHT} relative rounded-xl overflow-hidden`,
-                                    "border border-gray-200 hover:border-gray-300 transition-colors duration-200",
-                                    snapshot.isDragging ? "shadow-lg" : "shadow-xs hover:shadow-md"
-                                  )}>
+                                  <div
+                                    className={cn(
+                                      `w-full ${PREVIEW_HEIGHT} relative rounded-xl overflow-hidden`,
+                                      'border border-gray-200 hover:border-gray-300 transition-colors duration-200',
+                                      snapshot.isDragging
+                                        ? 'shadow-lg'
+                                        : 'shadow-xs hover:shadow-md'
+                                    )}
+                                  >
                                     <div
                                       className="absolute inset-0 bg-cover bg-center"
-                                      style={{ backgroundImage: `url(${preview.thumbnailUrl})` }}
+                                      style={{
+                                        backgroundImage: `url(${preview.thumbnailUrl})`,
+                                      }}
                                     />
                                     <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-[2px] flex items-center justify-center">
                                       {preview.type === 'youtube' ? (
@@ -588,62 +697,88 @@ export default function OrgEditImages() {
                         ))}
                         {provided.placeholder}
                         {previews.length < 4 && (
-                          <div className={cn(
-                            "shrink-0 w-48",
-                            previews.length === 0 && "m-0"
-                          )}>
-                            <Dialog open={videoDialogOpen} onOpenChange={(open) => {
-                              setVideoDialogOpen(open);
-                              if (!open) resetVideoDialog();
-                            }}>
+                          <div
+                            className={cn(
+                              'shrink-0 w-48',
+                              previews.length === 0 && 'm-0'
+                            )}
+                          >
+                            <Dialog
+                              open={videoDialogOpen}
+                              onOpenChange={(open) => {
+                                setVideoDialogOpen(open)
+                                if (!open) resetVideoDialog()
+                              }}
+                            >
                               <DialogTrigger asChild>
                                 <button
                                   className={cn(
                                     `w-full ${PREVIEW_HEIGHT}`,
-                                    "border-2 border-dashed border-gray-200 rounded-xl",
-                                    "hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200",
-                                    "flex flex-col items-center justify-center space-y-2 group"
+                                    'border-2 border-dashed border-gray-200 rounded-xl',
+                                    'hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200',
+                                    'flex flex-col items-center justify-center space-y-2 group'
                                   )}
                                 >
                                   <div className="bg-blue-50 rounded-full p-2 group-hover:bg-blue-100 transition-colors duration-200">
                                     <Plus size={20} className="text-blue-500" />
                                   </div>
-                                  <span className="text-sm font-medium text-gray-600">{t('Buttons.addPreview')}</span>
+                                  <span className="text-sm font-medium text-gray-600">
+                                    {t('Buttons.addPreview')}
+                                  </span>
                                 </button>
                               </DialogTrigger>
                               <DialogContent className="sm:max-w-[600px]">
                                 <DialogHeader>
-                                  <DialogTitle>{t('Dialog.AddPreview.title')}</DialogTitle>
+                                  <DialogTitle>
+                                    {t('Dialog.AddPreview.title')}
+                                  </DialogTitle>
                                 </DialogHeader>
-                                <div className={cn(
-                                  "p-6",
-                                  selectedService ? "space-y-4" : "grid grid-cols-3 gap-6"
-                                )}>
+                                <div
+                                  className={cn(
+                                    'p-6',
+                                    selectedService
+                                      ? 'space-y-4'
+                                      : 'grid grid-cols-3 gap-6'
+                                  )}
+                                >
                                   {!selectedService ? (
                                     <>
-                                      {getAddPreviewOptions(t, isPreviewUploading, setSelectedService).map((option) => (
+                                      {getAddPreviewOptions(
+                                        t,
+                                        isPreviewUploading,
+                                        setSelectedService
+                                      ).map((option) => (
                                         <button
                                           key={option.id}
                                           onClick={option.onClick}
                                           className={cn(
-                                            "w-full aspect-square rounded-2xl border-2 border-dashed",
+                                            'w-full aspect-square rounded-2xl border-2 border-dashed',
                                             `hover:border-${option.color}-300 hover:bg-${option.color}-50/50`,
-                                            "transition-all duration-200",
-                                            "flex flex-col items-center justify-center space-y-4",
-                                            option.disabled && "opacity-50 cursor-not-allowed"
+                                            'transition-all duration-200',
+                                            'flex flex-col items-center justify-center space-y-4',
+                                            option.disabled &&
+                                              'opacity-50 cursor-not-allowed'
                                           )}
                                           disabled={option.disabled}
                                         >
-                                          <div className={cn(
-                                            DIALOG_ICON_SIZE,
-                                            `rounded-full bg-${option.color}-50`,
-                                            "flex items-center justify-center"
-                                          )}>
-                                            <option.icon className={`w-8 h-8 text-${option.color}-500`} />
+                                          <div
+                                            className={cn(
+                                              DIALOG_ICON_SIZE,
+                                              `rounded-full bg-${option.color}-50`,
+                                              'flex items-center justify-center'
+                                            )}
+                                          >
+                                            <option.icon
+                                              className={`w-8 h-8 text-${option.color}-500`}
+                                            />
                                           </div>
                                           <div className="text-center">
-                                            <p className="font-medium text-gray-700">{option.title}</p>
-                                            <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                                            <p className="font-medium text-gray-700">
+                                              {option.title}
+                                            </p>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                              {option.description}
+                                            </p>
                                           </div>
                                         </button>
                                       ))}
@@ -660,10 +795,14 @@ export default function OrgEditImages() {
                                     <div className="space-y-4">
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-3">
-                                          <div className={cn(
-                                            "w-10 h-10 rounded-full flex items-center justify-center",
-                                            selectedService === 'youtube' ? "bg-red-50" : "bg-blue-50"
-                                          )}>
+                                          <div
+                                            className={cn(
+                                              'w-10 h-10 rounded-full flex items-center justify-center',
+                                              selectedService === 'youtube'
+                                                ? 'bg-red-50'
+                                                : 'bg-blue-50'
+                                            )}
+                                          >
                                             {selectedService === 'youtube' ? (
                                               <SiYoutube className="w-5 h-5 text-red-500" />
                                             ) : (
@@ -672,17 +811,29 @@ export default function OrgEditImages() {
                                           </div>
                                           <div>
                                             <h3 className="font-medium text-gray-900">
-                                              {selectedService === 'youtube' ? t('Dialog.AddVideo.youtubeTitle') : t('Dialog.AddVideo.loomTitle')}
+                                              {selectedService === 'youtube'
+                                                ? t(
+                                                    'Dialog.AddVideo.youtubeTitle'
+                                                  )
+                                                : t(
+                                                    'Dialog.AddVideo.loomTitle'
+                                                  )}
                                             </h3>
                                             <p className="text-sm text-gray-500">
                                               {selectedService === 'youtube'
-                                                ? t('Dialog.AddVideo.youtubeDescription')
-                                                : t('Dialog.AddVideo.loomDescription')}
+                                                ? t(
+                                                    'Dialog.AddVideo.youtubeDescription'
+                                                  )
+                                                : t(
+                                                    'Dialog.AddVideo.loomDescription'
+                                                  )}
                                             </p>
                                           </div>
                                         </div>
                                         <button
-                                          onClick={() => setSelectedService(null)}
+                                          onClick={() =>
+                                            setSelectedService(null)
+                                          }
                                           className="text-gray-400 hover:text-gray-500 transition-colors"
                                         >
                                           <X size={20} />
@@ -692,21 +843,31 @@ export default function OrgEditImages() {
                                       <div className="space-y-3">
                                         <Input
                                           id="videoUrlInput"
-                                          placeholder={selectedService === 'youtube'
-                                            ? t('Dialog.AddVideo.youtubePlaceholder')
-                                            : t('Dialog.AddVideo.loomPlaceholder')}
+                                          placeholder={
+                                            selectedService === 'youtube'
+                                              ? t(
+                                                  'Dialog.AddVideo.youtubePlaceholder'
+                                                )
+                                              : t(
+                                                  'Dialog.AddVideo.loomPlaceholder'
+                                                )
+                                          }
                                           value={videoUrl}
-                                          onChange={(e) => setVideoUrl(e.target.value)}
+                                          onChange={(e) =>
+                                            setVideoUrl(e.target.value)
+                                          }
                                           className="w-full"
                                           autoFocus
                                         />
                                         <Button
-                                          onClick={() => handleVideoSubmit(selectedService)}
+                                          onClick={() =>
+                                            handleVideoSubmit(selectedService)
+                                          }
                                           className={cn(
-                                            "w-full",
+                                            'w-full',
                                             selectedService === 'youtube'
-                                              ? "bg-red-500 hover:bg-red-600"
-                                              : "bg-blue-500 hover:bg-blue-600"
+                                              ? 'bg-red-500 hover:bg-red-600'
+                                              : 'bg-blue-500 hover:bg-blue-600'
                                           )}
                                           disabled={!videoUrl}
                                         >

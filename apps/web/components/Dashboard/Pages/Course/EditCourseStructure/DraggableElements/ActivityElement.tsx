@@ -24,12 +24,16 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { Draggable } from '@hello-pangea/dnd'
 import { mutate } from 'swr'
-import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments'
+import {
+  deleteAssignmentUsingActivityUUID,
+  getAssignmentFromActivityUUID,
+} from '@services/courses/assignments'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 import toast from 'react-hot-toast'
 import { useMediaQuery } from 'usehooks-ts'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
+import { useTranslations } from 'next-intl'
 
 type ActivitiyElementProps = {
   orgslug: string
@@ -45,8 +49,8 @@ interface ModifiedActivityInterface {
 
 function ActivityElement(props: ActivitiyElementProps) {
   const router = useRouter()
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
   const [modifiedActivity, setModifiedActivity] = React.useState<
     ModifiedActivityInterface | undefined
   >(undefined)
@@ -56,24 +60,27 @@ function ActivityElement(props: ActivitiyElementProps) {
   const [isUpdatingName, setIsUpdatingName] = React.useState<boolean>(false)
   const activityUUID = props.activity.activity_uuid
   const isMobile = useMediaQuery('(max-width: 767px)')
+  const t = useTranslations('CourseEdit.ActivityElement')
 
   async function deleteActivityUI() {
     const toast_loading = toast.loading('Deleting activity...')
-    // Assignments 
+    // Assignments
     if (props.activity.activity_type === 'TYPE_ASSIGNMENT') {
-      await deleteAssignmentUsingActivityUUID(props.activity.activity_uuid, access_token)
+      await deleteAssignmentUsingActivityUUID(
+        props.activity.activity_uuid,
+        access_token
+      )
     }
 
     await deleteActivity(props.activity.activity_uuid, access_token)
     mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta`)
-    await revalidateTags(['courses'], props.orgslug)
     toast.dismiss(toast_loading)
-    toast.success('Activity deleted successfully')
+    toast.success(t('activityDeletedSuccess'))
     router.refresh()
   }
 
   async function changePublicStatus() {
-    const toast_loading = toast.loading('Updating assignment...')
+    const toast_loading = toast.loading(t('updating'))
     await updateActivity(
       {
         ...props.activity,
@@ -84,7 +91,7 @@ function ActivityElement(props: ActivitiyElementProps) {
     )
     mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta`)
     toast.dismiss(toast_loading)
-    toast.success('The activity has been updated successfully')
+    toast.success(t('activityUpdateSuccess'))
     await revalidateTags(['courses'], props.orgslug)
     router.refresh()
   }
@@ -95,7 +102,7 @@ function ActivityElement(props: ActivitiyElementProps) {
       selectedActivity !== undefined
     ) {
       setIsUpdatingName(true)
-      
+
       let modifiedActivityCopy = {
         ...props.activity,
         name: modifiedActivity.activityName,
@@ -118,6 +125,7 @@ function ActivityElement(props: ActivitiyElementProps) {
       setSelectedActivity(undefined)
     }
   }
+  useEffect(() => {}, [props.activity])
 
   return (
     <Draggable
@@ -127,10 +135,11 @@ function ActivityElement(props: ActivitiyElementProps) {
     >
       {(provided, snapshot) => (
         <div
-          className={`grid grid-cols-[auto_1fr_auto] gap-2 py-2 px-3 my-2 w-full rounded-md text-gray-500 
-            ${snapshot.isDragging 
-              ? 'nice-shadow bg-white ring-2 ring-blue-500/20 z-50 rotate-1 scale-[1.04]' 
-              : 'nice-shadow bg-gray-50 hover:bg-gray-100 '
+          className={`grid grid-cols-[auto_1fr_auto] gap-2 py-2 px-3 my-2 w-full rounded-md text-gray-500
+            ${
+              snapshot.isDragging
+                ? 'nice-shadow bg-white ring-2 ring-blue-500/20 z-50 rotate-1 scale-[1.04]'
+                : 'nice-shadow bg-gray-50 hover:bg-gray-100 '
             }
             items-center border-1 border-gray-200`}
           key={props.activity.id}
@@ -138,11 +147,15 @@ function ActivityElement(props: ActivitiyElementProps) {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
           style={{
-            ...provided.draggableProps.style
+            ...provided.draggableProps.style,
           }}
         >
           {/*   Activity Type Icon  */}
-          <ActivityTypeIndicator activityType={props.activity.activity_type} isMobile={isMobile} />
+          <ActivityTypeIndicator
+            activityType={props.activity.activity_type}
+            isMobile={isMobile}
+            t={t}
+          />
 
           {/*   Centered Activity Name  */}
           <div className="flex items-center space-x-2 justify-center">
@@ -178,17 +191,26 @@ function ActivityElement(props: ActivitiyElementProps) {
                 </button>
               </div>
             ) : (
-              <p className="first-letter:uppercase text-center sm:text-left"> {props.activity.name} </p>
+              <p className="first-letter:uppercase text-center sm:text-left">
+                {' '}
+                {props.activity.name}{' '}
+              </p>
             )}
             <Pencil
-              onClick={() => !isUpdatingName && setSelectedActivity(props.activity.id)}
+              onClick={() =>
+                !isUpdatingName && setSelectedActivity(props.activity.id)
+              }
               className={`text-neutral-400 hover:cursor-pointer size-3 min-w-3 ${isUpdatingName ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
           </div>
 
           {/*   Edit, View, Publish, and Delete Buttons  */}
           <div className="flex items-center gap-2 justify-end">
-            <ActivityElementOptions activity={props.activity} isMobile={isMobile} />
+            <ActivityElementOptions
+              activity={props.activity}
+              isMobile={isMobile}
+              t={t}
+            />
             {/*   Publishing  */}
             <button
               className={`p-1 px-2 sm:px-3 border shadow-md rounded-md font-bold text-xs flex items-center space-x-1 transition-colors duration-200 ${
@@ -248,64 +270,88 @@ function ActivityElement(props: ActivitiyElementProps) {
 }
 
 const ACTIVITIES = {
-  'TYPE_VIDEO': {
-    displayName: 'Video',
-    Icon: Video
+  TYPE_VIDEO: {
+    Icon: Video,
   },
-  'TYPE_DOCUMENT': {
-    displayName: 'Document',
-    Icon: File
+  TYPE_DOCUMENT: {
+    Icon: File,
   },
-  'TYPE_ASSIGNMENT': {
-    displayName: 'Assignment',
-    Icon: Backpack
+  TYPE_ASSIGNMENT: {
+    Icon: Backpack,
   },
-  'TYPE_DYNAMIC': {
-    displayName: 'Dynamic',
-    Icon: Sparkles
-  }
-}
+  TYPE_DYNAMIC: {
+    Icon: Sparkles,
+  },
+} as const
 
-const ActivityTypeIndicator = ({activityType, isMobile} : { activityType: keyof typeof ACTIVITIES, isMobile: boolean}) => {
-  const {displayName, Icon} = ACTIVITIES[activityType]
+const ActivityTypeIndicator = ({
+  activityType,
+  isMobile,
+  t,
+}: {
+  activityType: keyof typeof ACTIVITIES
+  isMobile: boolean
+  t: ReturnType<typeof useTranslations>
+}) => {
+  const { Icon } = ACTIVITIES[activityType]
+
+  const translatedTypeName = t(activityType as any)
 
   return (
-    <div className={`text-gray-300 space-x-1 w-28 flex ${isMobile ? 'flex-col' : ''}`}>
+    <div
+      className={`text-gray-300 space-x-1 w-28 flex ${isMobile ? 'flex-col' : ''}`}
+    >
       <div className="flex space-x-2 items-center">
-            <Icon className="size-4" />{' '}
-            <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full mx-auto justify-center align-middle">
-              {displayName}
-            </div>{' '}
-          </div>
+        <Icon className="size-4" />
+        <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full mx-auto justify-center align-middle">
+          {translatedTypeName}
+        </div>
+      </div>
     </div>
   )
 }
 
-const ActivityElementOptions = ({ activity, isMobile }: { activity: any; isMobile: boolean }) => {
-  const [assignmentUUID, setAssignmentUUID] = useState('');
-  const org = useOrg() as any;
-  const course = useCourse() as any;
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
+const ActivityElementOptions = ({
+  activity,
+  isMobile,
+  t,
+}: {
+  activity: any
+  isMobile: boolean
+  t: ReturnType<typeof useTranslations>
+}) => {
+  const [assignmentUUID, setAssignmentUUID] = useState('')
+  const org = useOrg() as any
+  const course = useCourse() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
 
-  async function getAssignmentUUIDFromActivityUUID(activityUUID: string):  Promise<string | undefined> {
-    const activity = await getAssignmentFromActivityUUID(activityUUID, access_token);
-    if (activity) {
-      return activity.data.assignment_uuid;
+  async function getAssignmentUUIDFromActivityUUID(
+    activityUUID: string
+  ): Promise<string | undefined> {
+    const assignment = await getAssignmentFromActivityUUID(
+      activityUUID,
+      access_token
+    )
+    if (assignment && assignment.data) {
+      return assignment.data.assignment_uuid
     }
+    return undefined
   }
 
   const fetchAssignmentUUID = async () => {
     if (activity.activity_type === 'TYPE_ASSIGNMENT') {
-      const assignment_uuid = await getAssignmentUUIDFromActivityUUID(activity.activity_uuid);
-      if(assignment_uuid)
-        setAssignmentUUID(assignment_uuid.replace('assignment_', ''));
+      const assignment_uuid = await getAssignmentUUIDFromActivityUUID(
+        activity.activity_uuid
+      )
+      if (assignment_uuid)
+        setAssignmentUUID(assignment_uuid.replace('assignment_', ''))
     }
-  };
+  }
 
   useEffect(() => {
-    fetchAssignmentUUID();
-  }, [activity, course]);
+    fetchAssignmentUUID()
+  }, [activity, course])
 
   return (
     <>
@@ -323,15 +369,16 @@ const ActivityElementOptions = ({ activity, isMobile }: { activity: any; isMobil
               )}/edit`
             }
             className={`hover:cursor-pointer p-1 ${isMobile ? 'px-2' : 'px-3'} bg-sky-700 rounded-md items-center`}
-            target='_blank'
+            target="_blank"
           >
             <div className="text-sky-100 font-bold text-xs flex items-center space-x-1">
-              <FilePenLine size={12} />  <span>Edit Page</span>
+              <FilePenLine size={12} />
+              <span>{t('editPageButton')}</span>
             </div>
           </Link>
         </>
       )}
-      {activity.activity_type === 'TYPE_ASSIGNMENT' && (
+      {activity.activity_type === 'TYPE_ASSIGNMENT' && assignmentUUID && (
         <>
           <Link
             href={
@@ -341,13 +388,14 @@ const ActivityElementOptions = ({ activity, isMobile }: { activity: any; isMobil
             className={`hover:cursor-pointer p-1 ${isMobile ? 'px-2' : 'px-3'} bg-teal-700 rounded-md items-center`}
           >
             <div className="text-sky-100 font-bold text-xs flex items-center space-x-1">
-              <FilePenLine size={12} /> {!isMobile && <span>Edit Assignment</span>}
+              <FilePenLine size={12} />{' '}
+              {!isMobile && <span>{t('editAssignmentButton')}</span>}
             </div>
           </Link>
         </>
       )}
-    </> 
-  );
-};
+    </>
+  )
+}
 
 export default ActivityElement

@@ -80,7 +80,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
     activity: any,
     chapterId: string
   ) => {
-    const toast_loading = toast.loading(tNotify('creatingActivityAndUploadingFile'))
+    const toast_loading = toast.loading(tNotify('creatingActivity'))
     await createExternalVideoActivity(
       external_video_data,
       activity,

@@ -2,38 +2,43 @@
 import React, { useState } from 'react'
 import { Form, Formik } from 'formik'
 import * as Yup from 'yup'
-import {
-  updateOrganization,
-} from '@services/settings/org'
+import { updateOrganization } from '@services/settings/org'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { toast } from 'react-hot-toast'
-import { Input } from "@components/ui/input"
-import { Textarea } from "@components/ui/textarea"
-import { Button } from "@components/ui/button"
-import { Label } from "@components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
-import { Switch } from "@components/ui/switch"
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import { Button } from '@components/ui/button'
+import { Label } from '@components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select'
+import { Switch } from '@components/ui/switch'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import Image from 'next/image'
 import learnhouseIcon from '@public/learnhouse_logo.png'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 const ORG_LABELS = [
   { value: 'languages', label: '🌐 Languages' },
   { value: 'business', label: '💰 Business' },
-  { value: 'ecommerce', label: '🛍 E-commerce' },
+  { value: 'ecommerce', label: '🛍️ E-commerce' },
   { value: 'gaming', label: '🎮 Gaming' },
   { value: 'music', label: '🎸 Music' },
-  { value: 'sports', label: '⚽ Sports' },
+  { value: 'sports', label: '⚽️ Sports' },
   { value: 'cars', label: '🚗 Cars' },
   { value: 'sales_marketing', label: '🚀 Sales & Marketing' },
   { value: 'tech', label: '💻 Tech' },
   { value: 'photo_video', label: '📸 Photo & Video' },
-  { value: 'pets', label: '🐕 Pets' },
+  { value: 'pets', label: '🐾 Pets' },
   { value: 'personal_development', label: '📚 Personal Development' },
   { value: 'real_estate', label: '🏠 Real Estate' },
   { value: 'beauty_fashion', label: '👠 Beauty & Fashion' },
@@ -46,25 +51,33 @@ const ORG_LABELS = [
   { value: 'stem', label: '🔬 STEM' },
   { value: 'humanities', label: '📖 Humanities' },
   { value: 'professional_skills', label: '💼 Professional Skills' },
-  { value: 'digital_skills', label: '💻 Digital Skills' },
+  { value: 'digital_skills', label: '🖥️ Digital Skills' },
   { value: 'creative_arts', label: '🎨 Creative Arts' },
   { value: 'social_sciences', label: '🌍 Social Sciences' },
-  { value: 'test_prep', label: '✍️ Test Preparation' },
+  { value: 'test_prep', label: '✍️ Test Prep' },
   { value: 'vocational', label: '🔧 Vocational Training' },
   { value: 'early_education', label: '🎯 Early Education' },
 ] as const
 
+const getOrgLabels = (t: Function) =>
+  ORG_LABELS.map((item) => ({
+    value: item.value,
+    label: t(`OrgLabels.${item.value}` as any),
+  }))
+
 const validationSchema = Yup.object().shape({
   name: Yup.string()
-    .required('Name is required')
-    .max(60, 'Organization name must be 60 characters or less'),
+    .required('Dashboard.OrgSettings.General.Form.nameRequired')
+    .max(60, 'Dashboard.OrgSettings.General.Form.nameMax'),
   description: Yup.string()
-    .required('Short description is required')
-    .max(100, 'Short description must be 100 characters or less'),
+    .required('Dashboard.OrgSettings.General.Form.descriptionRequired')
+    .max(100, 'Dashboard.OrgSettings.General.Form.descriptionMax'),
   about: Yup.string()
     .optional()
-    .max(400, 'About text must be 400 characters or less'),
-  label: Yup.string().required('Organization label is required'),
+    .max(400, 'Dashboard.OrgSettings.General.Form.aboutMax'),
+  label: Yup.string().required(
+    'Dashboard.OrgSettings.General.Form.labelRequired'
+  ),
   explore: Yup.boolean(),
 })
 
@@ -81,6 +94,8 @@ const OrgEditGeneral: React.FC = () => {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
+  const t = useTranslations('Dashboard.OrgSettings.General')
+  const tNotify = useTranslations('Notifications')
 
   const initialValues: OrganizationValues = {
     name: org?.name,
@@ -91,14 +106,14 @@ const OrgEditGeneral: React.FC = () => {
   }
 
   const updateOrg = async (values: OrganizationValues) => {
-    const loadingToast = toast.loading('Updating organization...')
+    const loadingToast = toast.loading(tNotify('updatingOrg'))
     try {
       await updateOrganization(org.id, values, access_token)
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
-      toast.success('Organization Updated', { id: loadingToast })
+      toast.success(tNotify('orgUpdatedSuccess'), { id: loadingToast })
     } catch (err) {
-      toast.error('Failed to update organization', { id: loadingToast })
+      toast.error(tNotify('orgUpdateFailed'), { id: loadingToast })
     }
   }
 
@@ -115,16 +130,21 @@ const OrgEditGeneral: React.FC = () => {
           }, 400)
         }}
       >
-        {({ isSubmitting, values, handleChange, errors, touched, setFieldValue }) => (
+        {({
+          isSubmitting,
+          values,
+          handleChange,
+          errors,
+          touched,
+          setFieldValue,
+        }) => (
           <Form>
             <div className="flex flex-col gap-0">
               <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
                 <h1 className="font-bold text-xl text-gray-800">
-                  Organization Settings
+                  {t('title')}
                 </h1>
-                <h2 className="text-gray-500 text-md">
-                  Manage your organization's profile and settings
-                </h2>
+                <h2 className="text-gray-500 text-md">{t('description')}</h2>
               </div>
 
               <div className="flex flex-col lg:flex-row lg:space-x-8 mt-0 mx-5 my-5">
@@ -132,9 +152,10 @@ const OrgEditGeneral: React.FC = () => {
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="name">
-                        Organization Name
-                        <span className="text-gray-500 text-sm ml-2">
-                          ({60 - (values.name?.length || 0)} characters left)
+                        {t('Form.nameLabel')}
+                        <span className="ml-2 text-sm text-gray-500">
+                          ({60 - (values.name?.length || 0)}{' '}
+                          {t('Form.charsLeft')}
                         </span>
                       </Label>
                       <Input
@@ -142,19 +163,22 @@ const OrgEditGeneral: React.FC = () => {
                         name="name"
                         value={values.name}
                         onChange={handleChange}
-                        placeholder="Organization Name"
+                        placeholder={t('Form.namePlaceholder')}
                         maxLength={60}
                       />
                       {touched.name && errors.name && (
-                        <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.name}
+                        </p>
                       )}
                     </div>
 
                     <div>
                       <Label htmlFor="description">
-                        Short Description
-                        <span className="text-gray-500 text-sm ml-2">
-                          ({100 - (values.description?.length || 0)} characters left)
+                        {t('Form.descriptionLabel')}
+                        <span className="ml-2 text-sm text-gray-500">
+                          ({100 - (values.description?.length || 0)}{' '}
+                          {t('Form.charsLeft')}
                         </span>
                       </Label>
                       <Input
@@ -162,25 +186,29 @@ const OrgEditGeneral: React.FC = () => {
                         name="description"
                         value={values.description}
                         onChange={handleChange}
-                        placeholder="Brief description of your organization"
+                        placeholder={t('Form.descriptionPlaceholder')}
                         maxLength={100}
                       />
                       {touched.description && errors.description && (
-                        <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.description}
+                        </p>
                       )}
                     </div>
 
                     <div>
-                      <Label htmlFor="label">Organization Label</Label>
+                      <Label htmlFor="label">{t('Form.labelLabel')}</Label>
                       <Select
-                        value={values.label}
+                        value={values.label || ''}
                         onValueChange={(value) => setFieldValue('label', value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select organization label" />
+                          <SelectValue
+                            placeholder={t('Form.labelPlaceholder')}
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          {ORG_LABELS.map((type) => (
+                          {getOrgLabels(t).map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
                             </SelectItem>
@@ -188,15 +216,18 @@ const OrgEditGeneral: React.FC = () => {
                         </SelectContent>
                       </Select>
                       {touched.label && errors.label && (
-                        <p className="text-red-500 text-sm mt-1">{errors.label}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.label}
+                        </p>
                       )}
                     </div>
 
                     <div>
                       <Label htmlFor="about">
-                        About Organization
-                        <span className="text-gray-500 text-sm ml-2">
-                          ({400 - (values.about?.length || 0)} characters left)
+                        {t('Form.aboutLabel')}
+                        <span className="ml-2 text-sm text-gray-500">
+                          ({400 - (values.about?.length || 0)}{' '}
+                          {t('Form.charsLeft')}
                         </span>
                       </Label>
                       <Textarea
@@ -204,20 +235,24 @@ const OrgEditGeneral: React.FC = () => {
                         name="about"
                         value={values.about}
                         onChange={handleChange}
-                        placeholder="Detailed description of your organization"
+                        placeholder={t('Form.aboutPlaceholder')}
                         className="min-h-[150px]"
                         maxLength={400}
                       />
                       {touched.about && errors.about && (
-                        <p className="text-red-500 text-sm mt-1">{errors.about}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.about}
+                        </p>
                       )}
                     </div>
 
-
-
                     <div className="flex items-center justify-between space-x-2 mt-6 bg-gray-50/50 p-4 rounded-lg nice-shadow">
                       <div className="flex items-center space-x-4">
-                        <Link href="https://www.learnhouse.app/explore" target="_blank" className="flex items-center space-x-2">
+                        <Link
+                          href="https://www.learnhouse.app/explore"
+                          target="_blank"
+                          className="flex items-center space-x-2"
+                        >
                           <Image
                             quality={100}
                             width={120}
@@ -226,21 +261,21 @@ const OrgEditGeneral: React.FC = () => {
                             className="rounded-lg"
                           />
                           <span className="px-2 py-1 mt-1 bg-black rounded-md text-[10px] font-semibold text-white">
-                            EXPLORE
+                            {t('Form.exploreLabel')}
                           </span>
                         </Link>
                         <div className="space-y-0.5">
-                          <Label className="text-base">Showcase in LearnHouse Explore</Label>
                           <p className="text-sm text-gray-500">
-                            Share your organization's courses and content with the LearnHouse community.
-                            Enable this to help learners discover your valuable educational resources.
+                            {t('Form.exploreDescription')}
                           </p>
                         </div>
                       </div>
                       <Switch
                         name="explore"
                         checked={values.explore ?? false}
-                        onCheckedChange={(checked) => setFieldValue('explore', checked)}
+                        onCheckedChange={(checked) =>
+                          setFieldValue('explore', checked)
+                        }
                       />
                     </div>
                   </div>
@@ -252,7 +287,7 @@ const OrgEditGeneral: React.FC = () => {
                   disabled={isSubmitting}
                   className="bg-black text-white hover:bg-black/90"
                 >
-                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                  {isSubmitting ? t('Form.savingButton') : t('Form.saveButton')}
                 </Button>
               </div>
             </div>

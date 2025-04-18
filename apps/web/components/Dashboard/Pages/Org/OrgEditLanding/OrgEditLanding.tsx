@@ -1,112 +1,150 @@
 'use client'
 import React from 'react'
-import { LandingObject, LandingSection, LandingHeroSection, LandingTextAndImageSection, LandingLogos, LandingPeople, LandingBackground, LandingButton, LandingHeading, LandingImage, LandingFeaturedCourses } from './landing_types'
-import { Plus, Eye, ArrowUpDown, Trash2, GripVertical, LayoutTemplate, ImageIcon, Users, Award, ArrowRight, Edit, Link, Upload, Save, BookOpen, TextIcon } from 'lucide-react'
+import {
+  LandingObject,
+  LandingSection,
+  LandingHeroSection,
+  LandingTextAndImageSection,
+  LandingLogos,
+  LandingPeople,
+  LandingBackground,
+  LandingButton,
+  LandingHeading,
+  LandingImage,
+  LandingFeaturedCourses,
+} from './landing_types'
+import {
+  Plus,
+  Eye,
+  ArrowUpDown,
+  Trash2,
+  GripVertical,
+  LayoutTemplate,
+  ImageIcon,
+  Users,
+  Award,
+  ArrowRight,
+  Edit,
+  Link,
+  Upload,
+  Save,
+  BookOpen,
+  TextIcon,
+} from 'lucide-react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { Input } from "@components/ui/input"
-import { Textarea } from "@components/ui/textarea"
-import { Label } from "@components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
-import { Button } from "@components/ui/button"
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import { Label } from '@components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select'
+import { Button } from '@components/ui/button'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs'
+import {
+  updateOrgLanding,
+  uploadLandingContent,
+} from '@services/organizations/orgs'
 import { getOrgLandingMediaDirectory } from '@services/media/media'
 import { getOrgCourses } from '@services/courses/courses'
 import toast from 'react-hot-toast'
 import useSWR from 'swr'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui/tabs'
 import { useTranslations } from 'next-intl'
 
 const SECTION_TYPES = {
   hero: {
     icon: LayoutTemplate,
     label: 'Hero',
-    description: 'Add a hero section with heading and call-to-action'
+    description: 'Add a hero section with heading and call-to-action',
   },
   'text-and-image': {
     icon: ImageIcon,
     label: 'Text & Image',
-    description: 'Add a section with text and an image'
+    description: 'Add a section with text and an image',
   },
   logos: {
     icon: Award,
     label: 'Logos',
-    description: 'Add a section to showcase logos'
+    description: 'Add a section to showcase logos',
   },
   people: {
     icon: Users,
     label: 'People',
-    description: 'Add a section to highlight team members'
+    description: 'Add a section to highlight team members',
   },
   'featured-courses': {
     icon: BookOpen,
     label: 'Courses',
-    description: 'Add a section to showcase selected courses'
-  }
+    description: 'Add a section to showcase selected courses',
+  },
 } as const
 
 const PREDEFINED_GRADIENTS = {
-  'sunrise': {
+  sunrise: {
     colors: ['#fef9f3', '#ffecd2'] as Array<string>,
-    direction: '45deg'
+    direction: '45deg',
   },
   'mint-breeze': {
     colors: ['#f0fff4', '#dcfce7'] as Array<string>,
-    direction: '45deg'
+    direction: '45deg',
   },
   'deep-ocean': {
     colors: ['#0f172a', '#1e3a8a'] as Array<string>,
-    direction: '135deg'
+    direction: '135deg',
   },
   'sunset-blaze': {
     colors: ['#7f1d1d', '#ea580c'] as Array<string>,
-    direction: '45deg'
+    direction: '45deg',
   },
   'midnight-purple': {
     colors: ['#581c87', '#7e22ce'] as Array<string>,
-    direction: '90deg'
+    direction: '90deg',
   },
   'forest-depths': {
     colors: ['#064e3b', '#059669'] as Array<string>,
-    direction: '225deg'
+    direction: '225deg',
   },
   'berry-fusion': {
     colors: ['#831843', '#be185d'] as Array<string>,
-    direction: '135deg'
+    direction: '135deg',
   },
   'cosmic-night': {
     colors: ['#1e1b4b', '#4338ca'] as Array<string>,
-    direction: '45deg'
+    direction: '45deg',
   },
   'autumn-fire': {
     colors: ['#7c2d12', '#c2410c'] as Array<string>,
-    direction: '90deg'
+    direction: '90deg',
   },
   'emerald-depths': {
     colors: ['#064e3b', '#10b981'] as Array<string>,
-    direction: '135deg'
+    direction: '135deg',
   },
   'royal-navy': {
     colors: ['#1e3a8a', '#3b82f6'] as Array<string>,
-    direction: '225deg'
+    direction: '225deg',
   },
-  'volcanic': {
+  volcanic: {
     colors: ['#991b1b', '#f97316'] as Array<string>,
-    direction: '315deg'
+    direction: '315deg',
   },
   'arctic-night': {
     colors: ['#0f172a', '#475569'] as Array<string>,
-    direction: '90deg'
+    direction: '90deg',
   },
   'grape-punch': {
     colors: ['#6b21a8', '#d946ef'] as Array<string>,
-    direction: '135deg'
+    direction: '135deg',
   },
   'marine-blue': {
     colors: ['#0c4a6e', '#0ea5e9'] as Array<string>,
-    direction: '45deg'
-  }
+    direction: '45deg',
+  },
 } as const
 
 const GRADIENT_DIRECTIONS = {
@@ -117,7 +155,7 @@ const GRADIENT_DIRECTIONS = {
   '225deg': '↙️ Bottom Left',
   '270deg': '⬇️ Bottom',
   '315deg': '↘️ Bottom Right',
-  '0deg': '➡️ Right'
+  '0deg': '➡️ Right',
 } as const
 
 // Map section type keys to translation keys
@@ -127,36 +165,36 @@ const SECTION_TYPE_KEYS: { [key in LandingSection['type']]: string } = {
   logos: 'logos',
   people: 'people',
   'featured-courses': 'featuredCourses',
-};
+}
 
 // Function to get translated section types
 const getSectionTypes = (t: Function) => ({
   hero: {
     icon: LayoutTemplate,
     label: t('SectionTypes.hero.label'),
-    description: t('SectionTypes.hero.description')
+    description: t('SectionTypes.hero.description'),
   },
   'text-and-image': {
     icon: ImageIcon,
     label: t('SectionTypes.textAndImage.label'),
-    description: t('SectionTypes.textAndImage.description')
+    description: t('SectionTypes.textAndImage.description'),
   },
   logos: {
     icon: Award,
     label: t('SectionTypes.logos.label'),
-    description: t('SectionTypes.logos.description')
+    description: t('SectionTypes.logos.description'),
   },
   people: {
     icon: Users,
     label: t('SectionTypes.people.label'),
-    description: t('SectionTypes.people.description')
+    description: t('SectionTypes.people.description'),
   },
   'featured-courses': {
     icon: BookOpen,
     label: t('SectionTypes.featuredCourses.label'),
-    description: t('SectionTypes.featuredCourses.description')
-  }
-});
+    description: t('SectionTypes.featuredCourses.description'),
+  },
+})
 
 // Map gradient direction keys to translation keys
 const GRADIENT_DIRECTION_KEYS: { [key: string]: string } = {
@@ -167,27 +205,30 @@ const GRADIENT_DIRECTION_KEYS: { [key: string]: string } = {
   '225deg': 'bottomLeft',
   '270deg': 'bottom',
   '315deg': 'bottomRight',
-  '0deg': 'right'
-};
+  '0deg': 'right',
+}
 
 // Function to get translated gradient directions
 const getGradientDirections = (t: Function) => {
-  return Object.entries(GRADIENT_DIRECTION_KEYS).reduce((acc, [key, tKey]) => {
-    acc[key] = t(`GradientDirections.${tKey}`);
-    return acc;
-  }, {} as { [key: string]: string });
-};
+  return Object.entries(GRADIENT_DIRECTION_KEYS).reduce(
+    (acc, [key, tKey]) => {
+      acc[key] = t(`GradientDirections.${tKey}`)
+      return acc
+    },
+    {} as { [key: string]: string }
+  )
+}
 
 // Function to get translated gradient preset names
 const getGradientPresetName = (t: Function, name: string) => {
   // Assumes keys like GradientPresets.sunrise, GradientPresets.mintBreeze etc.
-  return t(`GradientPresets.${name.replace('-', '_')}`);
+  return t(`GradientPresets.${name.replace('-', '_')}`)
 }
 
 // Function to get translated section display name
 const getSectionDisplayName = (t: Function, section: LandingSection) => {
-  const sectionTypeKey = SECTION_TYPE_KEYS[section.type];
-  return t(`SectionTypes.${sectionTypeKey}.label`);
+  const sectionTypeKey = SECTION_TYPE_KEYS[section.type]
+  return t(`SectionTypes.${sectionTypeKey}.label`)
 }
 
 const OrgEditLanding = () => {
@@ -195,13 +236,15 @@ const OrgEditLanding = () => {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [isLandingEnabled, setIsLandingEnabled] = React.useState(false)
-  const t = useTranslations('Dashboard.OrgSettings.Landing');
-  const tNotify = useTranslations('Notifications');
+  const t = useTranslations('Dashboard.OrgSettings.Landing')
+  const tNotify = useTranslations('Notifications')
   const [landingData, setLandingData] = React.useState<LandingObject>({
     sections: [],
-    enabled: false
+    enabled: false,
   })
-  const [selectedSection, setSelectedSection] = React.useState<number | null>(null)
+  const [selectedSection, setSelectedSection] = React.useState<number | null>(
+    null
+  )
   const [isSaving, setIsSaving] = React.useState(false)
 
   // Initialize landing data from org config
@@ -210,22 +253,27 @@ const OrgEditLanding = () => {
       const landingConfig = org.config.config.landing
       setLandingData({
         sections: landingConfig.sections || [],
-        enabled: landingConfig.enabled || false
+        enabled: landingConfig.enabled || false,
       })
       setIsLandingEnabled(landingConfig.enabled || false)
     }
   }, [org])
 
   const addSection = (type: string) => {
-    const newSection: LandingSection = createEmptySection(t, type as keyof typeof SECTION_TYPE_KEYS)
-    setLandingData(prev => ({
+    const newSection: LandingSection = createEmptySection(
+      t,
+      type as keyof typeof SECTION_TYPE_KEYS
+    )
+    setLandingData((prev) => ({
       ...prev,
-      sections: [...prev.sections, newSection]
+      sections: [...prev.sections, newSection],
     }))
   }
 
-  const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): LandingSection => {
-    const sectionTypeKey = SECTION_TYPE_KEYS[type];
+  const createEmptySection = (
+    t: Function,
+    type: keyof typeof SECTION_TYPE_KEYS
+  ): LandingSection => {
     switch (type) {
       case 'hero':
         return {
@@ -233,21 +281,21 @@ const OrgEditLanding = () => {
           title: t('EmptySections.hero.title'),
           background: {
             type: 'solid',
-            color: '#ffffff'
+            color: '#ffffff',
           },
           heading: {
             text: t('EmptySections.hero.heading'),
             color: '#000000',
-            size: 'large'
+            size: 'large',
           },
           subheading: {
             text: t('EmptySections.hero.subheading'),
             color: '#666666',
-            size: 'medium'
+            size: 'medium',
           },
           buttons: [],
           illustration: undefined,
-          contentAlign: 'center'
+          contentAlign: 'center',
         }
       case 'text-and-image':
         return {
@@ -257,46 +305,46 @@ const OrgEditLanding = () => {
           flow: 'left',
           image: {
             url: '',
-            alt: ''
+            alt: '',
           },
-          buttons: []
+          buttons: [],
         }
       case 'logos':
         return {
           type: 'logos',
           title: t('EmptySections.logos.title'),
-          logos: []
+          logos: [],
         }
       case 'people':
         return {
           type: 'people',
           title: t('EmptySections.people.title'),
-          people: []
+          people: [],
         }
       case 'featured-courses':
         return {
           type: 'featured-courses',
           title: t('EmptySections.featuredCourses.title'),
-          courses: []
+          courses: [],
         }
       default:
-        throw new Error(t('Errors.invalidSectionType'));
+        throw new Error(t('Errors.invalidSectionType'))
     }
   }
 
   const updateSection = (index: number, updatedSection: LandingSection) => {
     const newSections = [...landingData.sections]
     newSections[index] = updatedSection
-    setLandingData(prev => ({
+    setLandingData((prev) => ({
       ...prev,
-      sections: newSections
+      sections: newSections,
     }))
   }
 
   const deleteSection = (index: number) => {
-    setLandingData(prev => ({
+    setLandingData((prev) => ({
       ...prev,
-      sections: prev.sections.filter((_, i) => i !== index)
+      sections: prev.sections.filter((_, i) => i !== index),
     }))
     setSelectedSection(null)
   }
@@ -308,26 +356,30 @@ const OrgEditLanding = () => {
     const [reorderedItem] = items.splice(result.source.index, 1)
     items.splice(result.destination.index, 0, reorderedItem)
 
-    setLandingData(prev => ({
+    setLandingData((prev) => ({
       ...prev,
-      sections: items
+      sections: items,
     }))
     setSelectedSection(result.destination.index)
   }
 
   const handleSave = async () => {
     if (!org?.id) {
-      toast.error(tNotify('orgIdNotFound'));
+      toast.error(tNotify('orgIdNotFound'))
       return
     }
 
     setIsSaving(true)
-    const loadingToast = toast.loading(tNotify('savingLandingPage'));
+    const loadingToast = toast.loading(tNotify('savingLandingPage'))
     try {
-      const res = await updateOrgLanding(org.id, {
-        sections: landingData.sections,
-        enabled: isLandingEnabled
-      }, access_token)
+      const res = await updateOrgLanding(
+        org.id,
+        {
+          sections: landingData.sections,
+          enabled: isLandingEnabled,
+        },
+        access_token
+      )
 
       if (res.status === 200) {
         toast.success(tNotify('landingPageSavedSuccess'), { id: loadingToast })
@@ -348,7 +400,12 @@ const OrgEditLanding = () => {
         {/* Enable/Disable Landing Page */}
         <div className="flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="text-xl font-semibold flex items-center">{t('title')} <div className="text-xs ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full">{t('betaBadge')}</div></h2>
+            <h2 className="text-xl font-semibold flex items-center">
+              {t('title')}{' '}
+              <div className="text-xs ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
+                {t('betaBadge')}
+              </div>
+            </h2>
             <p className="text-gray-600">{t('description')}</p>
           </div>
           <div className="flex items-center space-x-4">
@@ -407,28 +464,39 @@ const OrgEditLanding = () => {
                               >
                                 <div className="flex items-center justify-between group">
                                   <div className="flex items-center space-x-3">
-                                    <div {...provided.dragHandleProps}
+                                    <div
+                                      {...provided.dragHandleProps}
                                       className={`p-1.5 rounded-md transition-colors duration-200 ${
                                         selectedSection === index
                                           ? 'text-blue-500 bg-blue-100/50'
                                           : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                                      }`}>
+                                      }`}
+                                    >
                                       <GripVertical size={16} />
                                     </div>
-                                    <div className={`p-1.5 rounded-md ${
-                                      selectedSection === index
-                                        ? 'text-blue-600 bg-blue-100/50'
-                                        : 'text-gray-600 bg-gray-100/50'
-                                    }`}>
-                                      {React.createElement(SECTION_TYPES[section.type as keyof typeof SECTION_TYPES].icon, {
-                                        size: 16
-                                      })}
+                                    <div
+                                      className={`p-1.5 rounded-md ${
+                                        selectedSection === index
+                                          ? 'text-blue-600 bg-blue-100/50'
+                                          : 'text-gray-600 bg-gray-100/50'
+                                      }`}
+                                    >
+                                      {React.createElement(
+                                        SECTION_TYPES[
+                                          section.type as keyof typeof SECTION_TYPES
+                                        ].icon,
+                                        {
+                                          size: 16,
+                                        }
+                                      )}
                                     </div>
-                                    <span className={`text-sm font-medium truncate capitalize ${
-                                      selectedSection === index
-                                        ? 'text-blue-700'
-                                        : 'text-gray-700'
-                                    }`}>
+                                    <span
+                                      className={`text-sm font-medium truncate capitalize ${
+                                        selectedSection === index
+                                          ? 'text-blue-700'
+                                          : 'text-gray-700'
+                                      }`}
+                                    >
                                       {getSectionDisplayName(t, section)}
                                     </span>
                                   </div>
@@ -477,26 +545,35 @@ const OrgEditLanding = () => {
                   >
                     <SelectTrigger className="w-full p-0 border-0 bg-black ">
                       <div className="w-full">
-                        <Button variant="default" className="w-full bg-black hover:bg-black/90 text-white">
+                        <Button
+                          variant="default"
+                          className="w-full bg-black hover:bg-black/90 text-white"
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           {t('SectionsPanel.addSectionButton')}
                         </Button>
                       </div>
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(getSectionTypes(t)).map(([type, { icon: Icon, label, description }]) => (
-                        <SelectItem key={type} value={type}>
-                          <div className="flex items-center space-x-3 py-1">
-                            <div className="p-1.5 bg-gray-50 rounded-md">
-                              <Icon size={16} className="text-gray-600" />
+                      {Object.entries(getSectionTypes(t)).map(
+                        ([type, { icon: Icon, label, description }]) => (
+                          <SelectItem key={type} value={type}>
+                            <div className="flex items-center space-x-3 py-1">
+                              <div className="p-1.5 bg-gray-50 rounded-md">
+                                <Icon size={16} className="text-gray-600" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium text-sm text-gray-700">
+                                  {label}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {description}
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <div className="font-medium text-sm text-gray-700">{label}</div>
-                              <div className="text-xs text-gray-500">{description}</div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -508,7 +585,9 @@ const OrgEditLanding = () => {
                   <SectionEditor
                     t={t}
                     section={landingData.sections[selectedSection]}
-                    onChange={(updatedSection) => updateSection(selectedSection, updatedSection)}
+                    onChange={(updatedSection) =>
+                      updateSection(selectedSection, updatedSection)
+                    }
                   />
                 ) : (
                   <div className="h-full flex items-center justify-center text-gray-500">
@@ -525,30 +604,42 @@ const OrgEditLanding = () => {
 }
 
 interface SectionEditorProps {
-  t: Function;
+  t: Function
   section: LandingSection
   onChange: (section: LandingSection) => void
 }
 
-const SectionEditor: React.FC<SectionEditorProps> = ({ t, section, onChange }) => {
+const SectionEditor: React.FC<SectionEditorProps> = ({
+  t,
+  section,
+  onChange,
+}) => {
   switch (section.type) {
     case 'hero':
       return <HeroSectionEditor t={t} section={section} onChange={onChange} />
     case 'text-and-image':
-      return <TextAndImageSectionEditor t={t} section={section} onChange={onChange} />
+      return (
+        <TextAndImageSectionEditor
+          t={t}
+          section={section}
+          onChange={onChange}
+        />
+      )
     case 'logos':
       return <LogosSectionEditor t={t} section={section} onChange={onChange} />
     case 'people':
       return <PeopleSectionEditor t={t} section={section} onChange={onChange} />
     case 'featured-courses':
-      return <FeaturedCoursesEditor t={t} section={section} onChange={onChange} />
+      return (
+        <FeaturedCoursesEditor t={t} section={section} onChange={onChange} />
+      )
     default:
       return <div>{t('Errors.unknownSectionType')}</div>
   }
 }
 
 const HeroSectionEditor: React.FC<{
-  t: Function;
+  t: Function
   section: LandingHeroSection
   onChange: (section: LandingHeroSection) => void
 }> = ({ t, section, onChange }) => {
@@ -561,8 +652,8 @@ const HeroSectionEditor: React.FC<{
           ...section,
           background: {
             type: 'image',
-            image: reader.result as string
-          }
+            image: reader.result as string,
+          },
         })
       }
       reader.readAsDataURL(file)
@@ -573,7 +664,7 @@ const HeroSectionEditor: React.FC<{
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <LayoutTemplate className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">
+        <h3 className="text-lg font-medium">
           {t('SectionTypes.hero.label')} {t('Editor.titleSuffix')}
         </h3>
       </div>
@@ -1389,19 +1480,25 @@ const HeroSectionEditor: React.FC<{
 }
 
 interface ImageUploaderProps {
-  t: Function;
+  t: Function
   onImageUploaded: (imageUrl: string) => void
   className?: string
   buttonText?: string
   id: string
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ t, onImageUploaded, className, buttonText, id }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({
+  t,
+  onImageUploaded,
+  className,
+  buttonText,
+  id,
+}) => {
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [isUploading, setIsUploading] = React.useState(false)
-  const tNotify = useTranslations('Notifications');
+  const tNotify = useTranslations('Notifications')
   const inputId = `imageUpload-${id}`
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1409,11 +1506,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ t, onImageUploaded, class
     if (!file) return
 
     setIsUploading(true)
-    const loadingToast = toast.loading(tNotify('uploadingImage'));
+    const loadingToast = toast.loading(tNotify('uploadingImage'))
     try {
       const response = await uploadLandingContent(org.id, file, access_token)
       if (response.status === 200) {
-        const imageUrl = getOrgLandingMediaDirectory(org.org_uuid, response.data.filename)
+        const imageUrl = getOrgLandingMediaDirectory(
+          org.org_uuid,
+          response.data.filename
+        )
         onImageUploaded(imageUrl)
         toast.success(tNotify('imageUploadSuccess'), { id: loadingToast })
       } else {
@@ -1436,7 +1536,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ t, onImageUploaded, class
         className="w-full"
       >
         <Upload className="h-4 w-4 mr-2" />
-        {isUploading ? t('ImageUploader.uploading') : buttonText || t('ImageUploader.defaultButtonText')}
+        {isUploading
+          ? t('ImageUploader.uploading')
+          : buttonText || t('ImageUploader.defaultButtonText')}
       </Button>
       <input
         id={inputId}
@@ -1450,7 +1552,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ t, onImageUploaded, class
 }
 
 const TextAndImageSectionEditor: React.FC<{
-  t: Function;
+  t: Function
   section: LandingTextAndImageSection
   onChange: (section: LandingTextAndImageSection) => void
 }> = ({ t, section, onChange }) => {
@@ -1458,7 +1560,9 @@ const TextAndImageSectionEditor: React.FC<{
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <ImageIcon className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">{t('SectionTypes.textAndImage.label')} {t('Editor.titleSuffix')}</h3>
+        <h3 className="font-medium text-lg">
+          {t('SectionTypes.textAndImage.label')} {t('Editor.titleSuffix')}
+        </h3>
       </div>
 
       <div className="space-y-4">
@@ -1475,7 +1579,9 @@ const TextAndImageSectionEditor: React.FC<{
 
         {/* Text */}
         <div>
-          <Label htmlFor="content">{t('TextAndImageEditor.contentLabel')}</Label>
+          <Label htmlFor="content">
+            {t('TextAndImageEditor.contentLabel')}
+          </Label>
           <Textarea
             id="content"
             value={section.text}
@@ -1487,17 +1593,27 @@ const TextAndImageSectionEditor: React.FC<{
 
         {/* Flow */}
         <div>
-          <Label htmlFor="flow">{t('TextAndImageEditor.imagePositionLabel')}</Label>
+          <Label htmlFor="flow">
+            {t('TextAndImageEditor.imagePositionLabel')}
+          </Label>
           <Select
             value={section.flow}
-            onValueChange={(value) => onChange({ ...section, flow: value as 'left' | 'right' })}
+            onValueChange={(value) =>
+              onChange({ ...section, flow: value as 'left' | 'right' })
+            }
           >
             <SelectTrigger>
-              <SelectValue placeholder={t('TextAndImageEditor.imagePositionPlaceholder')} />
+              <SelectValue
+                placeholder={t('TextAndImageEditor.imagePositionPlaceholder')}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="left">{t('TextAndImageEditor.positionLeft')}</SelectItem>
-              <SelectItem value="right">{t('TextAndImageEditor.positionRight')}</SelectItem>
+              <SelectItem value="left">
+                {t('TextAndImageEditor.positionLeft')}
+              </SelectItem>
+              <SelectItem value="right">
+                {t('TextAndImageEditor.positionRight')}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -1509,18 +1625,22 @@ const TextAndImageSectionEditor: React.FC<{
             <div className="space-y-2">
               <Input
                 value={section.image.url}
-                onChange={(e) => onChange({
-                  ...section,
-                  image: { ...section.image, url: e.target.value }
-                })}
+                onChange={(e) =>
+                  onChange({
+                    ...section,
+                    image: { ...section.image, url: e.target.value },
+                  })
+                }
                 placeholder={t('TextAndImageEditor.imageUrlPlaceholder')}
               />
               <ImageUploader
                 id="text-image-section"
-                onImageUploaded={(url) => onChange({
-                  ...section,
-                  image: { ...section.image, url }
-                })}
+                onImageUploaded={(url) =>
+                  onChange({
+                    ...section,
+                    image: { ...section.image, url },
+                  })
+                }
                 buttonText={t('TextAndImageEditor.uploadImageButton')}
                 t={t}
               />
@@ -1528,10 +1648,12 @@ const TextAndImageSectionEditor: React.FC<{
             <div>
               <Input
                 value={section.image.alt}
-                onChange={(e) => onChange({
-                  ...section,
-                  image: { ...section.image, alt: e.target.value }
-                })}
+                onChange={(e) =>
+                  onChange({
+                    ...section,
+                    image: { ...section.image, alt: e.target.value },
+                  })
+                }
                 placeholder={t('TextAndImageEditor.imageAltPlaceholder')}
               />
             </div>
@@ -1552,7 +1674,7 @@ const TextAndImageSectionEditor: React.FC<{
 }
 
 const LogosSectionEditor: React.FC<{
-  t: Function;
+  t: Function
   section: LandingLogos
   onChange: (section: LandingLogos) => void
 }> = ({ t, section, onChange }) => {
@@ -1560,7 +1682,9 @@ const LogosSectionEditor: React.FC<{
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <Award className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">{t('SectionTypes.logos.label')} {t('Editor.titleSuffix')}</h3>
+        <h3 className="font-medium text-lg">
+          {t('SectionTypes.logos.label')} {t('Editor.titleSuffix')}
+        </h3>
       </div>
 
       <div>
@@ -1637,11 +1761,11 @@ const LogosSectionEditor: React.FC<{
             onClick={() => {
               const newLogo: LandingImage = {
                 url: '',
-                alt: ''
+                alt: '',
               }
               onChange({
                 ...section,
-                logos: [...section.logos, newLogo]
+                logos: [...section.logos, newLogo],
               })
             }}
             className="w-full"
@@ -1656,7 +1780,7 @@ const LogosSectionEditor: React.FC<{
 }
 
 const PeopleSectionEditor: React.FC<{
-  t: Function;
+  t: Function
   section: LandingPeople
   onChange: (section: LandingPeople) => void
 }> = ({ t, section, onChange }) => {
@@ -1664,7 +1788,9 @@ const PeopleSectionEditor: React.FC<{
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <Users className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">{t('SectionTypes.people.label')} {t('Editor.titleSuffix')}</h3>
+        <h3 className="font-medium text-lg">
+          {t('SectionTypes.people.label')} {t('Editor.titleSuffix')}
+        </h3>
       </div>
 
       <div className="space-y-4">
@@ -1684,7 +1810,10 @@ const PeopleSectionEditor: React.FC<{
           <Label>{t('PeopleEditor.peopleLabel')}</Label>
           <div className="space-y-4 mt-2">
             {section.people.map((person, index) => (
-              <div key={index} className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 p-4 border rounded-lg">
+              <div
+                key={index}
+                className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 p-4 border rounded-lg"
+              >
                 <div className="space-y-2">
                   <Label>{t('PeopleEditor.nameLabel')}</Label>
                   <Input
@@ -1718,7 +1847,10 @@ const PeopleSectionEditor: React.FC<{
                       value={person.image_url}
                       onChange={(e) => {
                         const newPeople = [...section.people]
-                        newPeople[index] = { ...person, image_url: e.target.value }
+                        newPeople[index] = {
+                          ...person,
+                          image_url: e.target.value,
+                        }
                         onChange({ ...section, people: newPeople })
                       }}
                       placeholder={t('PeopleEditor.imageUrlPlaceholder')}
@@ -1727,7 +1859,10 @@ const PeopleSectionEditor: React.FC<{
                       id={`person-${index}`}
                       onImageUploaded={(url) => {
                         const newPeople = [...section.people]
-                        newPeople[index] = { ...section.people[index], image_url: url }
+                        newPeople[index] = {
+                          ...section.people[index],
+                          image_url: url,
+                        }
                         onChange({ ...section, people: newPeople })
                       }}
                       buttonText={t('PeopleEditor.uploadAvatarButton')}
@@ -1749,7 +1884,10 @@ const PeopleSectionEditor: React.FC<{
                     value={person.description}
                     onChange={(e) => {
                       const newPeople = [...section.people]
-                      newPeople[index] = { ...person, description: e.target.value }
+                      newPeople[index] = {
+                        ...person,
+                        description: e.target.value,
+                      }
                       onChange({ ...section, people: newPeople })
                     }}
                     placeholder={t('PeopleEditor.descriptionPlaceholder')}
@@ -1761,7 +1899,9 @@ const PeopleSectionEditor: React.FC<{
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      const newPeople = section.people.filter((_, i) => i !== index)
+                      const newPeople = section.people.filter(
+                        (_, i) => i !== index
+                      )
                       onChange({ ...section, people: newPeople })
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -1780,11 +1920,11 @@ const PeopleSectionEditor: React.FC<{
                   name: '',
                   description: '',
                   image_url: '',
-                  username: ''
+                  username: '',
                 }
                 onChange({
                   ...section,
-                  people: [...section.people, newPerson]
+                  people: [...section.people, newPerson],
                 })
               }}
               className="w-full"
@@ -1800,7 +1940,7 @@ const PeopleSectionEditor: React.FC<{
 }
 
 const FeaturedCoursesEditor: React.FC<{
-  t: Function;
+  t: Function
   section: LandingFeaturedCourses
   onChange: (section: LandingFeaturedCourses) => void
 }> = ({ t, section, onChange }) => {
@@ -1817,7 +1957,9 @@ const FeaturedCoursesEditor: React.FC<{
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
         <BookOpen className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">{t('SectionTypes.featuredCourses.label')} {t('Editor.titleSuffix')}</h3>
+        <h3 className="font-medium text-lg">
+          {t('SectionTypes.featuredCourses.label')} {t('Editor.titleSuffix')}
+        </h3>
       </div>
 
       <div className="space-y-4">
@@ -1856,20 +1998,36 @@ const FeaturedCoursesEditor: React.FC<{
                       </div>
                       <div>
                         <h4 className="font-medium">{course.name}</h4>
-                        <p className="text-sm text-gray-500">{course.description}</p>
+                        <p className="text-sm text-gray-500">
+                          {course.description}
+                        </p>
                       </div>
                     </div>
                     <Button
-                      variant={section.courses.includes(course.course_uuid) ? "default" : "outline"}
+                      variant={
+                        section.courses.includes(course.course_uuid)
+                          ? 'default'
+                          : 'outline'
+                      }
                       onClick={() => {
-                        const newCourses = section.courses.includes(course.course_uuid)
-                          ? section.courses.filter(id => id !== course.course_uuid)
+                        const newCourses = section.courses.includes(
+                          course.course_uuid
+                        )
+                          ? section.courses.filter(
+                              (id) => id !== course.course_uuid
+                            )
                           : [...section.courses, course.course_uuid]
                         onChange({ ...section, courses: newCourses })
                       }}
-                      className={section.courses.includes(course.course_uuid) ? "bg-black hover:bg-black/90" : ""}
+                      className={
+                        section.courses.includes(course.course_uuid)
+                          ? 'bg-black hover:bg-black/90'
+                          : ''
+                      }
                     >
-                      {section.courses.includes(course.course_uuid) ? t('FeaturedCoursesEditor.selectedButton') : t('FeaturedCoursesEditor.selectButton')}
+                      {section.courses.includes(course.course_uuid)
+                        ? t('FeaturedCoursesEditor.selectedButton')
+                        : t('FeaturedCoursesEditor.selectButton')}
                     </Button>
                   </div>
                 ))}

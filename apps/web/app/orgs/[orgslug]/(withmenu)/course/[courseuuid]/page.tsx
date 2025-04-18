@@ -73,16 +73,17 @@ const CoursePage = async (params: any) => {
   const tGeneral = await getTranslations('General')
 
   // Fetch course metadata once
+  const awaitedParams = await params.params
   const course_meta = await getCourseMetadata(
-    params.params.courseuuid,
+    awaitedParams.courseuuid,
     { revalidate: 0, tags: ['courses'] },
     access_token ? access_token : null
   )
 
   return (
     <CourseClient
-      courseuuid={params.params.courseuuid}
-      orgslug={params.params.orgslug}
+      courseuuid={awaitedParams.courseuuid}
+      orgslug={awaitedParams.orgslug}
       course={course_meta}
       access_token={access_token}
     />

@@ -50,8 +50,9 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
 
   // Generate predefined labels with translations
   const predefinedLabels = LABEL_KEYS_WITH_ICONS.map(({ key, icon }) => ({
-    name: t(`Labels.${key}`), // Translate label using key
-    icon: icon
+    name: t(`Labels.${key}`),
+    icon: icon,
+    key: key
   }));
 
   const fetchImages = useCallback(async (searchQuery: string, pageNum: number) => {
@@ -83,15 +84,26 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
   useEffect(() => {
     if (query) {
       debouncedFetchImages(query);
+    } else {
+        if (images.length > 0 || page > 1) {
+            setImages([]);
+            setPage(1);
+        }
     }
   }, [query, debouncedFetchImages]);
+
+  useEffect(() => {
+      if (isOpen && images.length === 0 && !query && !loading) {
+          fetchImages('course', 1);
+      }
+  }, [isOpen, images.length, query, loading, fetchImages]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   };
 
-  const handleLabelClick = (label: string) => {
-    setQuery(label);
+  const handleLabelClick = (labelKey: string) => {
+    setQuery(labelKey);
   };
 
   const handleLoadMore = () => {
@@ -118,18 +130,20 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         </div>
-        <div className="flex flex-wrap gap-2">
-          {predefinedLabels.map(label => (
-            <button
-              key={label.name}
-              onClick={() => handleLabelClick(label.name)}
-              className="px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 nice-shadow transition-colors flex items-center gap-1 space-x-1"
-            >
-              <label.icon size={16} />
-              <span>{label.name}</span>
-            </button>
-          ))}
-        </div>
+        {!query && (
+            <div className="flex flex-wrap gap-2 max-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+              {predefinedLabels.map(label => (
+                <button
+                  key={label.key}
+                  onClick={() => handleLabelClick(label.key)}
+                  className="px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 nice-shadow transition-colors flex items-center gap-1 space-x-1"
+                >
+                  <label.icon size={16} />
+                  <span>{label.name}</span>
+                </button>
+              ))}
+            </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 pt-0">
@@ -138,7 +152,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
             <div key={image.id} className="relative w-full pb-[56.25%]">
               <img
                 src={image.urls.small}
-                alt={image.alt_description}
+                alt={image.alt_description || 'Unsplash image'}
                 className="absolute inset-0 w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={() => handleImageSelect(image.urls.regular)}
               />
@@ -154,6 +168,9 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
             {t('loadMoreButton')}
           </button>
         )}
+         {!loading && images.length === 0 && query && (
+            <p className="text-center mt-4">{t('noResults')}</p>
+         )}
       </div>
     </div>
   );
@@ -171,7 +188,6 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
   );
 };
 
-// Custom debounce function
 const debounce = (func: Function, delay: number) => {
   let timeoutId: NodeJS.Timeout;
   return (...args: any[]) => {

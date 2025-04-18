@@ -24,19 +24,19 @@ const validate = (values: any, t: (key: string, values?: any) => string) => {
   const errors = {} as any;
 
   if (!values.name) {
-    errors.name = t('errors.required');
+    errors.name = t('errors.required', { fieldName: t('name.label') });
   } else if (values.name.length > 100) {
     errors.name = t('errors.maxLength', { count: 100 });
   }
 
   if (!values.description) {
-    errors.description = t('errors.required');
+    errors.description = t('errors.required', { fieldName: t('description.label') });
   } else if (values.description.length > 1000) {
     errors.description = t('errors.maxLength', { count: 1000 });
   }
 
   if (!values.learnings) {
-    errors.learnings = t('errors.required');
+    errors.learnings = t('errors.required', { fieldName: t('learnings.label') });
   } else {
     try {
       const learningItems = JSON.parse(values.learnings);
@@ -65,7 +65,6 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   const dispatchCourse = useCourseDispatch() as any;
   const { isLoading, courseStructure } = course as any;
   const t = useTranslations('CourseEdit.General');
-  const tCommon = useTranslations('Common');
 
   // Initialize learnings as a JSON array if it's not already
   const initializeLearnings = (learnings: any) => {
@@ -142,7 +141,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       // Deep comparison for learnings (JSON string)
       const learningsChanged = formikValues.learnings !== initialValues.learnings;
       const otherValuesChanged = Object.keys(formikValues).some(
-        key => key !== 'learnings' && formikValues[key] !== initialValues[key]
+        key => key !== 'learnings' && key !== 'public' && formikValues[key] !== initialValues[key]
       );
 
       if (learningsChanged || otherValuesChanged) {
@@ -150,6 +149,8 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
           const updatedCourse = {
               ...courseStructure,
               ...formikValues,
+              // Keep existing public value if it's not managed by this form
+              public: courseStructure?.public
           };
           dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
       }

@@ -63,18 +63,55 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       if (value) {
         const parsedItems = JSON.parse(value);
         if (Array.isArray(parsedItems)) {
-          setItems(parsedItems);
+          // Ensure parsed items have all necessary fields, adding defaults if missing
+          const standardizedItems = parsedItems.map(item => ({
+            id: item.id || Date.now().toString(), // Ensure ID exists
+            text: item.text || '',
+            emoji: item.emoji || '📝',
+            link: item.link || undefined
+          }));
+          setItems(standardizedItems);
           initializedRef.current = true;
         } else if (!initializedRef.current) {
-          // Initialize with one empty item if no valid array and not already initialized
+          // If it's not a valid array format from the start, initialize with one empty item
           const newItem: LearningItem = {
             id: Date.now().toString(),
             text: '',
             emoji: '📝',
           };
           setItems([newItem]);
-          onChange(JSON.stringify([newItem]));
-          initializedRef.current = true;
+          // Don't call onChange immediately if the initial value is just an empty string or invalid,
+          // wait for the user to interact or save. This prevents unnecessary form dirty state.
+          // Only call onChange if the *input* value was something parsable but not an array,
+          // or if it was completely empty and we need to set the initial structure.
+          // Given the parent's useEffect logic, it handles setting the initial formik value.
+          // We just need to ensure our internal state `items` is correct.
+          // Let's refine this initialization slightly:
+           if (typeof value === 'string' && value.trim() !== '') {
+               // If there's a non-empty string value that couldn't be parsed as an array,
+               // assume it's legacy format and convert to one item.
+                setItems([{
+                  id: Date.now().toString(),
+                  text: value,
+                  emoji: '📝'
+                }]);
+                // We should also update the parent's formik state to the new JSON format
+                // This might cause a re-render loop if not careful.
+                // A better approach might be to handle this conversion during formik initialization in the parent.
+                // Reverting to simpler logic based on parent's current `initializeLearnings`.
+                console.warn("LearningItemsList: Initial value is not a valid JSON array. Initializing with a default item.");
+                 setItems([newItem]);
+                 onChange(JSON.stringify([newItem])); // Still need to update parent to the expected format
+           } else {
+                // If value is empty or not a string, initialize with one empty item
+                 setItems([newItem]);
+                 // Only update parent if the initial value was truly empty, to set the expected [] structure
+                 if (!value || value.trim() === '') {
+                    onChange(JSON.stringify([newItem]));
+                 }
+           }
+           initializedRef.current = true;
+
         }
       } else if (!initializedRef.current) {
         // Initialize with one empty item if no value and not already initialized
@@ -89,16 +126,18 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       }
     } catch (e) {
       console.error('Error parsing learning items:', e);
-      // Initialize with one empty item on error if not already initialized
-      if (!initializedRef.current) {
+      // Initialize with one empty item on error if not already initialized or if parsing failed for non-empty string
+      if (!initializedRef.current || (typeof value === 'string' && value.trim() !== '')) {
+        console.warn("LearningItemsList: Parsing failed for initial value. Initializing with a default item.");
         const newItem: LearningItem = {
           id: Date.now().toString(),
           text: '',
           emoji: '📝',
         };
         setItems([newItem]);
-        onChange(JSON.stringify([newItem]));
-        initializedRef.current = true;
+         // Update parent state to clear potentially bad JSON
+         onChange(JSON.stringify([newItem]));
+         initializedRef.current = true;
       }
     }
   }, [value, onChange]);

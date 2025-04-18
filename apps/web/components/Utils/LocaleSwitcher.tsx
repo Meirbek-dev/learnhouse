@@ -21,7 +21,6 @@ interface LanguageSwitcherProps {
   className?: string
 }
 
-// TODO: the thing's buggy
 export function LanguageSwitcher({
   currentLocale,
   className,

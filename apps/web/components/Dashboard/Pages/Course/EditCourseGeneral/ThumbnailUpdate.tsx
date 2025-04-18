@@ -10,6 +10,7 @@ import React, { useState } from 'react'
 import { mutate } from 'swr'
 import UnsplashImagePicker from './UnsplashImagePicker'
 import { useTranslations } from 'next-intl'
+import toast from 'react-hot-toast'
 
 function ThumbnailUpdate() {
   const course = useCourse() as any
@@ -20,6 +21,7 @@ function ThumbnailUpdate() {
   const [error, setError] = React.useState('') as any
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
   const t = useTranslations('CourseEdit.General.Thumbnail')
+  const tNotify = useTranslations('Notifications');
 
   const handleFileChange = async (event: any) => {
     const file = event.target.files[0]
@@ -38,19 +40,30 @@ function ThumbnailUpdate() {
 
   const updateThumbnail = async (file: File) => {
     setIsLoading(true)
-    const res = await updateCourseThumbnail(
-      course.courseStructure.course_uuid,
-      file,
-      session.data?.tokens?.access_token
-    )
-    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
-    // wait for 1 second to show loading animation
-    await new Promise((r) => setTimeout(r, 1500))
-    if (res.success === false) {
-      setError(res.HTTPmessage)
-    } else {
-      setIsLoading(false)
-      setError('')
+    const toast_loading = tNotify('uploading');
+    const toast_id = toast.loading(toast_loading);
+
+    try {
+      const res = await updateCourseThumbnail(
+        course.courseStructure.course_uuid,
+        file,
+        session.data?.tokens?.access_token
+      );
+      mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`);
+
+      if (res.success === false) {
+        setError(res.HTTPmessage || tNotify('avatarError'));
+        toast.error(res.HTTPmessage || tNotify('avatarError'), { id: toast_id });
+      } else {
+        setError('');
+        toast.success(tNotify('avatarSuccess'), { id: toast_id });
+      }
+    } catch (err) {
+        console.error('Error updating thumbnail:', err);
+        setError(tNotify('avatarError'));
+        toast.error(tNotify('avatarError'), { id: toast_id });
+    } finally {
+        setIsLoading(false);
     }
   }
 
@@ -69,6 +82,7 @@ function ThumbnailUpdate() {
               <img
                 src={URL.createObjectURL(localThumbnail)}
                 className={`${isLoading ? 'animate-pulse' : ''} shadow-sm w-[200px] h-[100px] rounded-md`}
+                alt="Course Thumbnail Preview"
               />
             ) : (
               <img
@@ -78,6 +92,7 @@ function ThumbnailUpdate() {
                   course.courseStructure.thumbnail_image
                 ) : '/empty_thumbnail.png'}`}
                 className="shadow-sm w-[200px] h-[100px] rounded-md bg-gray-200"
+                alt="Course Thumbnail"
               />
             )}
           </div>
@@ -95,8 +110,10 @@ function ThumbnailUpdate() {
                 id="fileInput"
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
+                accept="image/*"
               />
               <button
+                type="button"
                 className="font-bold antialiased items-center text-gray text-sm rounded-md px-4 mt-6 flex"
                 onClick={() => document.getElementById('fileInput')?.click()}
               >
@@ -104,6 +121,7 @@ function ThumbnailUpdate() {
                 <span>{t('uploadImageButton')}</span>
               </button>
               <button
+                type="button"
                 className="font-bold antialiased items-center text-gray text-sm rounded-md px-4 mt-6 flex"
                 onClick={() => setShowUnsplashPicker(true)}
               >
