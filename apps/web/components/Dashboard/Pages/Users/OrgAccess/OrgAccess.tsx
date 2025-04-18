@@ -3,7 +3,11 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config'
+import {
+  getAPIUrl,
+  getUriWithOrg,
+  getUriWithoutOrg,
+} from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { Globe, Ticket, UserSquare, Users, X } from 'lucide-react'
 import Link from 'next/link'
@@ -24,61 +28,69 @@ import { useTranslations } from 'next-intl'
 function OrgAccess() {
   const org = useOrg() as any
   const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token;
-  const t = useTranslations('DashPage.UserSettings.signupsSection');
-  const tNotify = useTranslations('Notifications');
-  const tGeneral = useTranslations('General');
+  const access_token = session?.data?.tokens?.access_token
+  const t = useTranslations('DashPage.UserSettings.signupsSection')
+  const tNotify = useTranslations('Notifications')
+  const tGeneral = useTranslations('General')
 
   const { data: invites } = useSWR(
     org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null,
     (url) => swrFetcher(url, access_token)
   )
   const [isLoading, setIsLoading] = React.useState(true)
-  const [joinMethod, setJoinMethod] = React.useState<null | 'open' | 'inviteOnly'>(null)
+  const [joinMethod, setJoinMethod] = React.useState<
+    null | 'open' | 'inviteOnly'
+  >(null)
   const [invitesModal, setInvitesModal] = React.useState(false)
   const router = useRouter()
 
   useEffect(() => {
     if (org) {
-      setJoinMethod(org.config.config.features.members.signup_mode);
+      setJoinMethod(org.config.config.features.members.signup_mode)
     }
   }, [org])
 
   useEffect(() => {
     if (invites !== undefined && joinMethod !== null) {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }, [invites, joinMethod])
 
   async function deleteInvite(invite: any) {
-    const toastId = toast.loading(tNotify('deletingInvite'));
+    const toastId = toast.loading(tNotify('deletingInvite'))
     try {
-      let res = await deleteInviteCode(org.id, invite.invite_code_uuid, access_token);
+      let res = await deleteInviteCode(
+        org.id,
+        invite.invite_code_uuid,
+        access_token
+      )
       if (res.status == 200) {
-        mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
-        toast.success(tNotify('inviteDeletedSuccess'), {id:toastId});
+        mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
+        toast.success(tNotify('inviteDeletedSuccess'), { id: toastId })
       } else {
-        toast.error(tNotify('errors.deleteInviteFailed'), {id:toastId});
+        toast.error(tNotify('errors.deleteInviteFailed'), { id: toastId })
       }
     } catch (error) {
-        toast.error(tNotify('errors.deleteInviteFailed'), {id:toastId});
+      toast.error(tNotify('errors.deleteInviteFailed'), { id: toastId })
     }
   }
 
   async function changeJoinMethod(method: 'open' | 'inviteOnly') {
-    const toastId = toast.loading(tNotify('changingJoinMethod'));
+    const toastId = toast.loading(tNotify('changingJoinMethod'))
     try {
-      let res = await changeSignupMechanism(org.id, method, access_token);
+      let res = await changeSignupMechanism(org.id, method, access_token)
       if (res.status == 200) {
-        router.refresh();
-        mutate(`${getAPIUrl()}orgs/slug/${org?.slug}`);
-        toast.success(tNotify('joinMethodChangedSuccess', { method }), {id:toastId});
-        setJoinMethod(method);
+        router.refresh()
+        mutate(`${getAPIUrl()}orgs/slug/${org?.slug}`)
+        toast.success(tNotify('joinMethodChangedSuccess', { method }), {
+          id: toastId,
+        })
+        setJoinMethod(method)
       } else {
-        toast.error(tNotify('errors.changeJoinMethodFailed'), {id:toastId});
+        toast.error(tNotify('errors.changeJoinMethodFailed'), { id: toastId })
       }
     } catch (error) {
-        toast.error(tNotify('errors.changeJoinMethodFailed'), {id:toastId});
+      toast.error(tNotify('errors.changeJoinMethodFailed'), { id: toastId })
     }
   }
 
@@ -91,10 +103,10 @@ function OrgAccess() {
           <div className="h-6"></div>
           <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs px-4 py-4">
             <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-3 ">
-              <h1 className="font-bold text-xl text-gray-800">{t('joinMethodTitle')}</h1>
-              <h2 className="text-gray-500 text-md">
-                {t('description')}
-              </h2>
+              <h1 className="font-bold text-xl text-gray-800">
+                {t('joinMethodTitle')}
+              </h1>
+              <h2 className="text-gray-500 text-md">{t('description')}</h2>
             </div>
             <div className="flex space-x-2 mx-auto">
               <ConfirmationModal
@@ -152,7 +164,13 @@ function OrgAccess() {
                 status="info"
               />
             </div>
-            <div className={joinMethod !== 'inviteOnly' ? 'opacity-50 pointer-events-none' : ''}>
+            <div
+              className={
+                joinMethod !== 'inviteOnly'
+                  ? 'opacity-50 pointer-events-none'
+                  : ''
+              }
+            >
               <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mt-3 mb-3 ">
                 <h1 className="font-bold text-xl text-gray-800">
                   {t('inviteCodesTitle')}
@@ -231,7 +249,10 @@ function OrgAccess() {
                     ))}
                     {(!invites || invites.length === 0) && (
                       <tr>
-                        <td colSpan={5} className="text-center py-4 text-gray-500">
+                        <td
+                          colSpan={5}
+                          className="text-center py-4 text-gray-500"
+                        >
                           No invite codes generated yet.
                         </td>
                       </tr>
@@ -239,23 +260,19 @@ function OrgAccess() {
                   </tbody>
                 </table>
               </div>
-              <div className='flex flex-row-reverse mt-3 mr-2'>
+              <div className="flex flex-row-reverse mt-3 mr-2">
                 <Modal
                   isDialogOpen={invitesModal}
                   onOpenChange={() => setInvitesModal(!invitesModal)}
                   minHeight="no-min"
-                  minWidth='lg'
+                  minWidth="lg"
                   dialogContent={
-                    <OrgInviteCodeGenerate
-                      setInvitesModal={setInvitesModal}
-                    />
+                    <OrgInviteCodeGenerate setInvitesModal={setInvitesModal} />
                   }
                   dialogTitle={t('generateCodeModalTitle')}
                   dialogDescription={t('generateCodeModalDescription')}
                   dialogTrigger={
-                    <button
-                      className=" flex space-x-2 hover:cursor-pointer p-1 px-3 bg-green-700 rounded-md font-bold items-center text-sm text-green-100"
-                    >
+                    <button className=" flex space-x-2 hover:cursor-pointer p-1 px-3 bg-green-700 rounded-md font-bold items-center text-sm text-green-100">
                       <Ticket className="w-4 h-4" />
                       <span>{t('generateCodeButton')}</span>
                     </button>

@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import { getAPIUrl } from '@services/config/config'
 import { updateInstall } from '@services/install/install'
 import { swrFetcher } from '@services/utils/ts/requests'
@@ -19,9 +19,13 @@ const Finish = () => {
     data: install,
     error: fetchError,
     isLoading,
-  } = useSWR(access_token ? `${getAPIUrl()}install/latest` : null, (url) => swrFetcher(url, access_token), {
-    revalidateOnFocus: false
-  })
+  } = useSWR(
+    access_token ? `${getAPIUrl()}install/latest` : null,
+    (url) => swrFetcher(url, access_token),
+    {
+      revalidateOnFocus: false,
+    }
+  )
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -30,7 +34,10 @@ const Finish = () => {
 
     setIsSubmitting(true)
     try {
-      const installData = typeof install.data === 'object' && install.data !== null ? install.data : {}
+      const installData =
+        typeof install.data === 'object' && install.data !== null
+          ? install.data
+          : {}
       const install_data_update = { ...installData, 5: { status: 'OK' } }
 
       const data = await updateInstall(install_data_update, 6)
@@ -38,17 +45,27 @@ const Finish = () => {
       if (data) {
         router.push('/install?step=6')
       } else {
-        console.error("Failed to update installation status.")
+        console.error('Failed to update installation status.')
         setIsSubmitting(false)
       }
-    } catch(error) {
-      console.error("Error finishing installation:", error)
+    } catch (error) {
+      console.error('Error finishing installation:', error)
       setIsSubmitting(false)
     }
   }
 
   if (isLoading) return <div>{generalT('loading')}</div>
-  if (fetchError) return <div>{generalT('error')}: {typeof fetchError === 'object' && fetchError !== null && 'message' in fetchError ? String(fetchError.message) : String(fetchError)}</div>
+  if (fetchError)
+    return (
+      <div>
+        {generalT('error')}:{' '}
+        {typeof fetchError === 'object' &&
+        fetchError !== null &&
+        'message' in fetchError
+          ? String(fetchError.message)
+          : String(fetchError)}
+      </div>
+    )
   if (!install) return <div>{generalT('loading')}</div>
 
   return (

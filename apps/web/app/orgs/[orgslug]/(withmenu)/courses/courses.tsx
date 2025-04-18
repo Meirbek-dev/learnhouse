@@ -89,11 +89,7 @@ function Courses(props: CourseProps) {
                     {t('noCourses')}
                   </h1>
                   <p className="text-md text-gray-400">
-                    {isUserAdmin ? (
-                      t('createACourse')
-                    ) : (
-                      t('noCoursesAvailable')
-                    )}
+                    {isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}
                   </p>
                   {isUserAdmin && (
                     <div className="mt-4">

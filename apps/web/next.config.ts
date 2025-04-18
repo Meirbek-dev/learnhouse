@@ -1,5 +1,7 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import { NextConfig } from 'next'
+import createNextIntlPlugin from 'next-intl/plugin'
+
+const nextConfig: NextConfig = {
   experimental: {
     turbo: {}, // to disable this warning: "⚠ Webpack is configured while Turbopack is not, which may cause problems."
   },
@@ -18,8 +20,6 @@ const nextConfig = {
   reactStrictMode: false,
   output: 'standalone',
 }
-
-import createNextIntlPlugin from 'next-intl/plugin'
 
 const withNextIntl = createNextIntlPlugin()
 

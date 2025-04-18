@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 
 function MenuLinks(props: { orgslug: string }) {
   return (
-    <div className='pl-1'>
+    <div className="pl-1">
       <ul className="flex space-x-5">
         <LinkItem
           link="/courses"
@@ -39,22 +39,19 @@ const LinkItem = (props: any) => {
       <li className="flex space-x-2 items-center text-[#909192] font-medium">
         {props.type == 'courses' && (
           <>
-            <BookCopy size={20}  />{' '}
-            <span>{t('courses')}</span>
+            <BookCopy size={20} /> <span>{t('courses')}</span>
           </>
         )}
 
         {props.type == 'collections' && (
           <>
-            <SquareLibrary size={20} />{' '}
-            <span>{t('collections')}</span>
+            <SquareLibrary size={20} /> <span>{t('collections')}</span>
           </>
         )}
 
         {props.type == 'trail' && (
           <>
-            <Signpost size={20} />{' '}
-            <span>{t('trail')}</span>
+            <Signpost size={20} /> <span>{t('trail')}</span>
           </>
         )}
       </li>

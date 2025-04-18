@@ -5,7 +5,14 @@ import React from 'react'
 import styled from 'styled-components'
 import 'katex/dist/katex.min.css'
 import { BlockMath } from 'react-katex'
-import { Save, Sigma, ExternalLink, ChevronDown, BookOpen, Lightbulb } from 'lucide-react'
+import {
+  Save,
+  Sigma,
+  ExternalLink,
+  ChevronDown,
+  BookOpen,
+  Lightbulb,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { motion } from 'framer-motion'
@@ -16,54 +23,55 @@ const mathTemplates = [
   {
     name: 'templateFraction',
     latex: '\\frac{a}{b}',
-    description: 'templateFractionDesc'
+    description: 'templateFractionDesc',
   },
   {
     name: 'templateSqrt',
     latex: '\\sqrt{x}',
-    description: 'templateSqrtDesc'
+    description: 'templateSqrtDesc',
   },
   {
     name: 'templateSum',
     latex: '\\sum_{i=1}^{n} x_i',
-    description: 'templateSumDesc'
+    description: 'templateSumDesc',
   },
   {
     name: 'templateIntegral',
     latex: '\\int_{a}^{b} f(x) \\, dx',
-    description: 'templateIntegralDesc'
+    description: 'templateIntegralDesc',
   },
   {
     name: 'templateLimit',
     latex: '\\lim_{x \\to \\infty} f(x)',
-    description: 'templateLimitDesc'
+    description: 'templateLimitDesc',
   },
   {
     name: 'templateMatrix',
     latex: '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}',
-    description: 'templateMatrixDesc'
+    description: 'templateMatrixDesc',
   },
   {
     name: 'templateBinomial',
     latex: '\\binom{n}{k}',
-    description: 'templateBinomialDesc'
+    description: 'templateBinomialDesc',
   },
   {
     name: 'templateQuadratic',
     latex: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}',
-    description: 'templateQuadraticDesc'
+    description: 'templateQuadraticDesc',
   },
   {
     name: 'templateVector',
     latex: '\\vec{v} = \\begin{pmatrix} x \\\\ y \\\\ z \\end{pmatrix}',
-    description: 'templateVectorDesc'
+    description: 'templateVectorDesc',
   },
   {
     name: 'templateSystemEq',
-    latex: '\\begin{cases} a_1x + b_1y = c_1 \\\\ a_2x + b_2y = c_2 \\end{cases}',
-    description: 'templateSystemEqDesc'
-  }
-];
+    latex:
+      '\\begin{cases} a_1x + b_1y = c_1 \\\\ a_2x + b_2y = c_2 \\end{cases}',
+    description: 'templateSystemEqDesc',
+  },
+]
 
 // Common LaTeX symbols
 const mathSymbols = [
@@ -82,7 +90,7 @@ const mathSymbols = [
   { symbol: '\\geq', display: '≥' },
   { symbol: '\\neq', display: '≠' },
   { symbol: '\\approx', display: '≈' },
-];
+]
 
 // Styled components
 const MathEqWrapper = styled.div`
@@ -221,10 +229,16 @@ function MathEquationBlockComponent(props: any) {
   // Close dropdowns when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (templatesRef.current && !templatesRef.current.contains(event.target as Node)) {
+      if (
+        templatesRef.current &&
+        !templatesRef.current.contains(event.target as Node)
+      ) {
         setShowTemplates(false)
       }
-      if (symbolsRef.current && !symbolsRef.current.contains(event.target as Node)) {
+      if (
+        symbolsRef.current &&
+        !symbolsRef.current.contains(event.target as Node)
+      ) {
         setShowSymbols(false)
       }
       if (helpRef.current && !helpRef.current.contains(event.target as Node)) {
@@ -268,7 +282,10 @@ function MathEquationBlockComponent(props: any) {
 
   const insertSymbol = (symbol: string) => {
     const cursorPosition = inputRef.current?.selectionStart || equation.length
-    const newEquation = equation.substring(0, cursorPosition) + symbol + equation.substring(cursorPosition)
+    const newEquation =
+      equation.substring(0, cursorPosition) +
+      symbol +
+      equation.substring(cursorPosition)
 
     setEquation(newEquation)
     props.updateAttributes({
@@ -279,7 +296,10 @@ function MathEquationBlockComponent(props: any) {
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus()
-        inputRef.current.setSelectionRange(cursorPosition + symbol.length, cursorPosition + symbol.length)
+        inputRef.current.setSelectionRange(
+          cursorPosition + symbol.length,
+          cursorPosition + symbol.length
+        )
       }
     }, 0)
   }
@@ -316,7 +336,10 @@ function MathEquationBlockComponent(props: any) {
                   >
                     <BookOpen size={14} />
                     <span>{t('templates')}</span>
-                    <ChevronDown size={14} className={`transition-transform ${showTemplates ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform ${showTemplates ? 'rotate-180' : ''}`}
+                    />
                   </TemplateButton>
 
                   {showTemplates && (
@@ -330,8 +353,12 @@ function MathEquationBlockComponent(props: any) {
                           onClick={() => insertTemplate(template.latex)}
                         >
                           <div className="flex flex-col">
-                            <span className="font-medium">{t(template.name)}</span>
-                            <span className="text-xs text-zinc-500">{t(template.description)}</span>
+                            <span className="font-medium">
+                              {t(template.name)}
+                            </span>
+                            <span className="text-xs text-zinc-500">
+                              {t(template.description)}
+                            </span>
                           </div>
                         </TemplateItem>
                       ))}
@@ -346,7 +373,10 @@ function MathEquationBlockComponent(props: any) {
                   >
                     <Sigma size={14} />
                     <span>{t('symbols')}</span>
-                    <ChevronDown size={14} className={`transition-transform ${showSymbols ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform ${showSymbols ? 'rotate-180' : ''}`}
+                    />
                   </TemplateButton>
 
                   {showSymbols && (
@@ -376,7 +406,10 @@ function MathEquationBlockComponent(props: any) {
                   >
                     <Lightbulb size={14} />
                     <span>{t('help')}</span>
-                    <ChevronDown size={14} className={`transition-transform ${showHelp ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform ${showHelp ? 'rotate-180' : ''}`}
+                    />
                   </TemplateButton>
 
                   {showHelp && (
@@ -386,22 +419,29 @@ function MathEquationBlockComponent(props: any) {
                       </div>
                       <div className="p-3 text-xs space-y-2">
                         <div>
-                          <span className="font-medium">{t('fractions')}</span> \frac{'{'}'numerator'{'}'}{'{'}denominator{'}'}
+                          <span className="font-medium">{t('fractions')}</span>{' '}
+                          \frac{'{'}'numerator'{'}'}
+                          {'{'}denominator{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('exponents')}</span> x^{'{'}'power'{'}'}
+                          <span className="font-medium">{t('exponents')}</span>{' '}
+                          x^{'{'}'power'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('subscripts')}</span> x_{'{'}'subscript'{'}'}
+                          <span className="font-medium">{t('subscripts')}</span>{' '}
+                          x_{'{'}'subscript'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('squareRoot')}</span> \sqrt{'{'}'x'{'}'}
+                          <span className="font-medium">{t('squareRoot')}</span>{' '}
+                          \sqrt{'{'}'x'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('summation')}</span> \sum_{'{'}'lower'{'}'}^{'{'}'upper'{'}'}
+                          <span className="font-medium">{t('summation')}</span>{' '}
+                          \sum_{'{'}'lower'{'}'}^{'{'}'upper'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('integral')}</span> \int_{'{'}'lower'{'}'}^{'{'}'upper'{'}'}
+                          <span className="font-medium">{t('integral')}</span>{' '}
+                          \int_{'{'}'lower'{'}'}^{'{'}'upper'{'}'}
                         </div>
                         <div className="pt-1 border-t">
                           <Link

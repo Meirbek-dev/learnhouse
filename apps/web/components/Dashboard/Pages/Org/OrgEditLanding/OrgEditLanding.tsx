@@ -236,7 +236,7 @@ const OrgEditLanding = () => {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [isLandingEnabled, setIsLandingEnabled] = React.useState(false)
-  const t = useTranslations('Dashboard.OrgSettings.Landing')
+  const t = useTranslations('DashPage.OrgSettings.Landing')
   const tNotify = useTranslations('Notifications')
   const [landingData, setLandingData] = React.useState<LandingObject>({
     sections: [],

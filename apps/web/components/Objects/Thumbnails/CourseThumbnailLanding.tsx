@@ -17,7 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@components/ui/dropdown-menu"
+} from '@components/ui/dropdown-menu'
 import { useTranslations } from 'next-intl'
 
 type Course = {
@@ -41,9 +41,14 @@ interface AdminEditOptionsProps {
   deleteCourse: () => Promise<void>
 }
 
-export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('course_', '')
+export const removeCoursePrefix = (course_uuid: string) =>
+  course_uuid.replace('course_', '')
 
-const AdminEditOptions: React.FC<AdminEditOptionsProps> = ({ course, orgslug, deleteCourse }) => {
+const AdminEditOptions: React.FC<AdminEditOptionsProps> = ({
+  course,
+  orgslug,
+  deleteCourse,
+}) => {
   const t = useTranslations('Components.CourseThumbnail')
   return (
     <AuthenticatedClientElement
@@ -105,7 +110,11 @@ const AdminEditOptions: React.FC<AdminEditOptionsProps> = ({ course, orgslug, de
   )
 }
 
-const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLink }) => {
+const CourseThumbnailLanding: React.FC<PropsType> = ({
+  course,
+  orgslug,
+  customLink,
+}) => {
   const t = useTranslations('Components.CourseThumbnailLanding')
   const tg = useTranslations('General')
   const tCourseThumb = useTranslations('Components.CourseThumbnail')
@@ -116,7 +125,10 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
   const deleteCourse = async () => {
     const toastId = toast.loading(tg('deleting'))
     try {
-      await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token)
+      await deleteCourseFromBackend(
+        course.course_uuid,
+        session.data?.tokens?.access_token
+      )
       await revalidateTags(['courses'], orgslug)
       toast.success(tCourseThumb('toastDeleteSuccess'))
       router.refresh()
@@ -128,7 +140,11 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
   }
 
   const thumbnailImage = course.thumbnail_image
-    ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
+    ? getCourseThumbnailMediaDirectory(
+        org?.org_uuid,
+        course.course_uuid,
+        course.thumbnail_image
+      )
     : '../empty_thumbnail.png'
 
   return (
@@ -138,16 +154,30 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
         orgslug={orgslug}
         deleteCourse={deleteCourse}
       />
-      <Link prefetch href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
+      <Link
+        prefetch
+        href={
+          customLink
+            ? customLink
+            : getUriWithOrg(
+                orgslug,
+                `/course/${removeCoursePrefix(course.course_uuid)}`
+              )
+        }
+      >
         <div
           className="inset-0 ring-1 ring-inset ring-black/10 rounded-t-xl w-full aspect-video bg-cover bg-center"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
       </Link>
-      <div className='flex flex-col w-full p-4 space-y-3'>
+      <div className="flex flex-col w-full p-4 space-y-3">
         <div className="space-y-2">
-          <h2 className="font-bold text-gray-800 leading-tight text-base min-h-[2.75rem] line-clamp-2">{course.name}</h2>
-          <p className='text-xs text-gray-700 leading-normal min-h-[3.75rem] line-clamp-3'>{course.description}</p>
+          <h2 className="font-bold text-gray-800 leading-tight text-base min-h-[2.75rem] line-clamp-2">
+            {course.name}
+          </h2>
+          <p className="text-xs text-gray-700 leading-normal min-h-[3.75rem] line-clamp-3">
+            {course.description}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -162,7 +192,14 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
 
         <Link
           prefetch
-          href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+          href={
+            customLink
+              ? customLink
+              : getUriWithOrg(
+                  orgslug,
+                  `/course/${removeCoursePrefix(course.course_uuid)}`
+                )
+          }
           className="inline-flex items-center justify-center w-full px-3 py-1.5 bg-black text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
         >
           {t('startLearningButton')}

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { Check, Square, ArrowRight, Folder, FileText, Video, Layers, BookOpenCheck } from 'lucide-react'
+import {
+  Check,
+  Square,
+  ArrowRight,
+  Folder,
+  FileText,
+  Video,
+  Layers,
+  BookOpenCheck,
+} from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
@@ -11,7 +20,12 @@ interface CourseProgressProps {
   onClose: () => void
 }
 
-const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen, onClose }) => {
+const CourseProgress: React.FC<CourseProgressProps> = ({
+  course,
+  orgslug,
+  isOpen,
+  onClose,
+}) => {
   const [completedActivities, setCompletedActivities] = useState(0)
   const [totalActivities, setTotalActivities] = useState(0)
 
@@ -57,15 +71,20 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
     }
   }
 
-  const progressPercentage = totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0
+  const progressPercentage =
+    totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0
   const radius = 40
   const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - (progressPercentage / 100) * circumference
+  const strokeDashoffset =
+    circumference - (progressPercentage / 100) * circumference
 
   const dialogContent = (
     <div className="space-y-4">
       {course.chapters.map((chapter: any) => (
-        <div key={chapter.chapter_uuid} className="bg-gray-50 rounded-lg overflow-hidden">
+        <div
+          key={chapter.chapter_uuid}
+          className="bg-gray-50 rounded-lg overflow-hidden"
+        >
           <div className="px-4 py-3 bg-gray-100 font-semibold text-gray-700 flex items-center space-x-2">
             <Folder size={16} className="text-gray-400" />
             <span>{chapter.name}</span>
@@ -77,17 +96,29 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
               return (
                 <Link
                   key={activity.activity_uuid}
-                  href={getUriWithOrg(orgslug, '') + `/course/${courseId}/activity/${activityId}`}
+                  href={
+                    getUriWithOrg(orgslug, '') +
+                    `/course/${courseId}/activity/${activityId}`
+                  }
                 >
                   <div className="px-4 py-3 hover:bg-gray-100 transition-colors flex items-center group">
                     <div className="flex items-center space-x-3 flex-1">
                       {isActivityDone(activity) ? (
                         <div className="relative">
-                          <Square size={18} className="stroke-[2] text-teal-600" />
-                          <Check size={18} className="stroke-[2.5] text-teal-600 absolute top-0 left-0" />
+                          <Square
+                            size={18}
+                            className="stroke-[2] text-teal-600"
+                          />
+                          <Check
+                            size={18}
+                            className="stroke-[2.5] text-teal-600 absolute top-0 left-0"
+                          />
                         </div>
                       ) : (
-                        <Square size={18} className="stroke-[2] text-gray-300" />
+                        <Square
+                          size={18}
+                          className="stroke-[2] text-gray-300"
+                        />
                       )}
                       <div className="flex items-center space-x-2">
                         {getActivityTypeIcon(activity.activity_type)}
@@ -96,7 +127,10 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
                         </span>
                       </div>
                     </div>
-                    <ArrowRight size={16} className="text-gray-400 group-hover:text-gray-600" />
+                    <ArrowRight
+                      size={16}
+                      className="text-gray-400 group-hover:text-gray-600"
+                    />
                   </div>
                 </Link>
               )
@@ -119,4 +153,4 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
   )
 }
 
-export default CourseProgress 
+export default CourseProgress

@@ -67,16 +67,16 @@ const getOrgLabels = (t: Function) =>
 
 const validationSchema = Yup.object().shape({
   name: Yup.string()
-    .required('Dashboard.OrgSettings.General.Form.nameRequired')
-    .max(60, 'Dashboard.OrgSettings.General.Form.nameMax'),
+    .required('DashPage.OrgSettings.General.Form.nameRequired')
+    .max(60, 'DashPage.OrgSettings.General.Form.nameMax'),
   description: Yup.string()
-    .required('Dashboard.OrgSettings.General.Form.descriptionRequired')
-    .max(100, 'Dashboard.OrgSettings.General.Form.descriptionMax'),
+    .required('DashPage.OrgSettings.General.Form.descriptionRequired')
+    .max(100, 'DashPage.OrgSettings.General.Form.descriptionMax'),
   about: Yup.string()
     .optional()
-    .max(400, 'Dashboard.OrgSettings.General.Form.aboutMax'),
+    .max(400, 'DashPage.OrgSettings.General.Form.aboutMax'),
   label: Yup.string().required(
-    'Dashboard.OrgSettings.General.Form.labelRequired'
+    'DashPage.OrgSettings.General.Form.labelRequired'
   ),
   explore: Yup.boolean(),
 })
@@ -94,7 +94,7 @@ const OrgEditGeneral: React.FC = () => {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
-  const t = useTranslations('Dashboard.OrgSettings.General')
+  const t = useTranslations('DashPage.OrgSettings.General')
   const tNotify = useTranslations('Notifications')
 
   const initialValues: OrganizationValues = {

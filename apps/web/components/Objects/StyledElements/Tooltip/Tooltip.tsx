@@ -16,7 +16,9 @@ const ToolTip = (props: TooltipProps) => {
   return (
     <TooltipPrimitive.Provider delayDuration={200}>
       <TooltipPrimitive.Root>
-        <TooltipPrimitive.Trigger asChild>{props.children}</TooltipPrimitive.Trigger>
+        <TooltipPrimitive.Trigger asChild>
+          {props.children}
+        </TooltipPrimitive.Trigger>
         <TooltipPrimitive.Portal>
           <TooltipContent
             slateBlack={props.slateBlack}

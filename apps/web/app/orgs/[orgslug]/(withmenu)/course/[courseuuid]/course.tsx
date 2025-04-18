@@ -174,7 +174,7 @@ const CourseClient = (props: any) => {
                     <h2 className="py-3 text-2xl font-bold">
                       What you will learn
                     </h2>
-                    <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden px-5 py-5 space-y-2">
+                    <div className="bg-white shadow-md shadow-gray-300/25 outline-neutral-200/40 rounded-lg overflow-hidden px-5 py-5 space-y-2">
                       {learnings.map((learning: any) => {
                         // Handle both new format (object with text and emoji) and legacy format (string)
                         const learningText =
@@ -226,7 +226,7 @@ const CourseClient = (props: any) => {
                 <h2 className="py-3 text-xl md:text-2xl font-bold">
                   Course Lessons
                 </h2>
-                <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
+                <div className="bg-white shadow-md shadow-gray-300/25 outline-neutral-200/40 rounded-lg overflow-hidden">
                   {course.chapters.map((chapter: any) => {
                     const isExpanded =
                       expandedChapters[chapter.chapter_uuid] ?? true // Default to expanded
@@ -236,7 +236,7 @@ const CourseClient = (props: any) => {
                         className=""
                       >
                         <div
-                          className="flex text-lg py-4 px-4 outline outline-1 outline-neutral-200/40 font-bold bg-neutral-50 text-neutral-600 items-center cursor-pointer hover:bg-neutral-100 transition-colors"
+                          className="flex text-lg py-4 px-4 outline-neutral-200/40 font-bold bg-neutral-50 text-neutral-600 items-center cursor-pointer hover:bg-neutral-100 transition-colors"
                           onClick={() =>
                             setExpandedChapters((prev) => ({
                               ...prev,
@@ -248,7 +248,7 @@ const CourseClient = (props: any) => {
                             {chapter.name}
                           </h3>
                           <div className="flex items-center space-x-3">
-                            <p className="text-sm font-normal text-neutral-400 px-3 py-[2px] outline-1 outline outline-neutral-200 rounded-full whitespace-nowrap shrink-0">
+                            <p className="text-sm font-normal text-neutral-400 px-3 py-[2px] outline-neutral-200 rounded-full whitespace-nowrap shrink-0">
                               {chapter.activities.length} Activities
                             </p>
                             <svg
@@ -367,7 +367,7 @@ const CourseClient = (props: any) => {
                 />
 
                 {/* Authors & Updates Box */}
-                <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+                <div className="bg-white shadow-md shadow-gray-300/25 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
                   <CourseProvider courseuuid={course.course_uuid}>
                     <CourseAuthors authors={course.authors} />
                   </CourseProvider>

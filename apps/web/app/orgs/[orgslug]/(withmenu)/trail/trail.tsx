@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 function Trail(params: any) {
   let orgslug = params.orgslug
   const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token;
+  const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const orgID = org?.id
   const t = useTranslations('TrailPage')
@@ -23,7 +23,7 @@ function Trail(params: any) {
     (url) => swrFetcher(url, access_token)
   )
 
-  useEffect(() => { }, [trail, org])
+  useEffect(() => {}, [trail, org])
 
   return (
     <GeneralWrapperStyled>

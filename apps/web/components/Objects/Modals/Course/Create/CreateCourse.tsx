@@ -1,7 +1,13 @@
 'use client'
-import { Input } from "@components/ui/input"
-import { Textarea } from "@components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
@@ -17,9 +23,9 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import {  UploadCloud, Image as ImageIcon } from 'lucide-react'
-import UnsplashImagePicker from "@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker"
-import FormTagInput from "@components/Objects/StyledElements/Form/TagInput"
+import { UploadCloud, Image as ImageIcon } from 'lucide-react'
+import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker'
+import FormTagInput from '@components/Objects/StyledElements/Form/TagInput'
 import { useTranslations } from 'next-intl'
 
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {
@@ -34,12 +40,11 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
     name: Yup.string()
       .required(t('schemaNameRequired'))
       .max(100, t('schemaNameMax')),
-    description: Yup.string()
-      .max(1000, t('schemaDescriptionMax')),
+    description: Yup.string().max(1000, t('schemaDescriptionMax')),
     learnings: Yup.string(),
     tags: Yup.string(),
     visibility: Yup.boolean(),
-    thumbnail: Yup.mixed().nullable()
+    thumbnail: Yup.mixed().nullable(),
   })
 
   const formik = useFormik({
@@ -49,7 +54,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       learnings: '',
       visibility: true,
       tags: '',
-      thumbnail: null
+      thumbnail: null,
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -63,7 +68,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             description: values.description,
             learnings: values.learnings,
             tags: values.tags,
-            visibility: values.visibility
+            visibility: values.visibility,
           },
           values.thumbnail,
           session.data?.tokens?.access_token
@@ -87,7 +92,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       } finally {
         setSubmitting(false)
       }
-    }
+    },
   })
 
   const getOrgMetadata = async () => {
@@ -104,7 +109,9 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
     }
   }, [orgslug])
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0]
     if (file) {
       formik.setFieldValue('thumbnail', file)
@@ -116,7 +123,9 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
     try {
       const response = await fetch(imageUrl)
       const blob = await response.blob()
-      const file = new File([blob], 'unsplash_image.jpg', { type: 'image/jpeg' })
+      const file = new File([blob], 'unsplash_image.jpg', {
+        type: 'image/jpeg',
+      })
       formik.setFieldValue('thumbnail', file)
     } catch (error) {
       toast.error(t('toastErrorUnsplash'))
@@ -126,7 +135,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   }
 
   return (
-    <FormLayout onSubmit={formik.handleSubmit} >
+    <FormLayout onSubmit={formik.handleSubmit}>
       <FormField name="name">
         <FormLabelAndMessage
           label={t('labelName')}
@@ -145,7 +154,10 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       <FormField name="description">
         <FormLabelAndMessage
           label={t('labelDescription')}
-          message={(formik.touched.description && formik.errors.description) || undefined}
+          message={
+            (formik.touched.description && formik.errors.description) ||
+            undefined
+          }
         />
         <Form.Control asChild>
           <Textarea
@@ -158,9 +170,14 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       <FormField name="thumbnail">
         <FormLabelAndMessage
           label={t('labelThumbnail')}
-          message={(formik.touched.thumbnail && typeof formik.errors.thumbnail === 'string' ? formik.errors.thumbnail : undefined)}
+          message={
+            formik.touched.thumbnail &&
+            typeof formik.errors.thumbnail === 'string'
+              ? formik.errors.thumbnail
+              : undefined
+          }
         />
-        <div className="w-auto bg-gray-50 rounded-xl outline outline-1 outline-gray-200 h-[200px] shadow-sm">
+        <div className="w-auto bg-gray-50 rounded-xl outline-gray-200 h-[200px] shadow-sm">
           <div className="flex flex-col justify-center items-center h-full">
             <div className="flex flex-col justify-center items-center">
               {formik.values.thumbnail ? (
@@ -207,37 +224,62 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       <FormField name="learnings">
         <FormLabelAndMessage
           label={t('labelLearnings')}
-          message={(formik.touched.learnings && typeof formik.errors.learnings === 'string' ? formik.errors.learnings : undefined)}
+          message={
+            formik.touched.learnings &&
+            typeof formik.errors.learnings === 'string'
+              ? formik.errors.learnings
+              : undefined
+          }
         />
         <FormTagInput
           placeholder={t('placeholderLearnings')}
           value={formik.values.learnings}
           onChange={(value) => formik.setFieldValue('learnings', value)}
-          error={(formik.touched.learnings && typeof formik.errors.learnings === 'string' ? formik.errors.learnings : undefined)}
+          error={
+            formik.touched.learnings &&
+            typeof formik.errors.learnings === 'string'
+              ? formik.errors.learnings
+              : undefined
+          }
         />
       </FormField>
 
       <FormField name="tags">
         <FormLabelAndMessage
           label={t('labelTags')}
-          message={(formik.touched.tags && typeof formik.errors.tags === 'string' ? formik.errors.tags : undefined)}
+          message={
+            formik.touched.tags && typeof formik.errors.tags === 'string'
+              ? formik.errors.tags
+              : undefined
+          }
         />
         <FormTagInput
           placeholder={t('placeholderTags')}
           value={formik.values.tags}
           onChange={(value) => formik.setFieldValue('tags', value)}
-          error={(formik.touched.tags && typeof formik.errors.tags === 'string' ? formik.errors.tags : undefined)}
+          error={
+            formik.touched.tags && typeof formik.errors.tags === 'string'
+              ? formik.errors.tags
+              : undefined
+          }
         />
       </FormField>
 
       <FormField name="visibility">
         <FormLabelAndMessage
           label={t('labelVisibility')}
-          message={(formik.touched.visibility && typeof formik.errors.visibility === 'string' ? formik.errors.visibility : undefined)}
+          message={
+            formik.touched.visibility &&
+            typeof formik.errors.visibility === 'string'
+              ? formik.errors.visibility
+              : undefined
+          }
         />
         <Select
           value={formik.values.visibility.toString()}
-          onValueChange={(value) => formik.setFieldValue('visibility', value === 'true')}
+          onValueChange={(value) =>
+            formik.setFieldValue('visibility', value === 'true')
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder={t('placeholderVisibility')} />

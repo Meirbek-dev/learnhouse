@@ -1,36 +1,40 @@
-'use client';
-import React, { useState, useEffect, useRef } from 'react';
-import { Plus, X, Link as LinkIcon, Smile } from 'lucide-react';
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
-import { Input } from '@components/ui/input';
-import { useTranslations } from 'next-intl';
+'use client'
+import React, { useState, useEffect, useRef } from 'react'
+import { Plus, X, Link as LinkIcon, Smile } from 'lucide-react'
+import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
+import { Input } from '@components/ui/input'
+import { useTranslations } from 'next-intl'
 
 interface LearningItem {
-  id: string;
-  text: string;
-  emoji: string;
-  link?: string;
+  id: string
+  text: string
+  emoji: string
+  link?: string
 }
 
 interface LearningItemsListProps {
-  value: string;
-  onChange: (value: string) => void;
-  error?: string;
+  value: string
+  onChange: (value: string) => void
+  error?: string
 }
 
-const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) => {
-  const [items, setItems] = useState<LearningItem[]>([]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
-  const [showLinkInput, setShowLinkInput] = useState<string | null>(null);
-  const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
-  const pickerRef = useRef<HTMLDivElement>(null);
-  const linkInputRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
-  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const linkInputFieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const t = useTranslations('CourseEdit.General.LearningItems');
+const LearningItemsList = ({
+  value,
+  onChange,
+  error,
+}: LearningItemsListProps) => {
+  const [items, setItems] = useState<LearningItem[]>([])
+  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null)
+  const [showLinkInput, setShowLinkInput] = useState<string | null>(null)
+  const [focusedItemId, setFocusedItemId] = useState<string | null>(null)
+  const pickerRef = useRef<HTMLDivElement>(null)
+  const linkInputRef = useRef<HTMLDivElement>(null)
+  const initializedRef = useRef(false)
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const linkInputFieldRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const t = useTranslations('CourseEdit.General.LearningItems')
 
   // Add a new empty item
   const addItem = () => {
@@ -38,48 +42,49 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       id: Date.now().toString(),
       text: '',
       emoji: '📝',
-    };
-    const newItems = [...items, newItem];
-    setItems(newItems);
-    onChange(JSON.stringify(newItems));
+    }
+    const newItems = [...items, newItem]
+    setItems(newItems)
+    onChange(JSON.stringify(newItems))
 
     // Focus the newly added item after render
     setTimeout(() => {
       if (inputRefs.current[newItem.id]) {
-        inputRefs.current[newItem.id]?.focus();
-        setFocusedItemId(newItem.id);
+        inputRefs.current[newItem.id]?.focus()
+        setFocusedItemId(newItem.id)
       }
 
       // Scroll to the bottom when a new item is added
       if (scrollContainerRef.current && newItems.length > 5) {
-        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        scrollContainerRef.current.scrollTop =
+          scrollContainerRef.current.scrollHeight
       }
-    }, 0);
-  };
+    }, 0)
+  }
 
   // Parse the JSON string to items array when the component mounts or value changes
   useEffect(() => {
     try {
       if (value) {
-        const parsedItems = JSON.parse(value);
+        const parsedItems = JSON.parse(value)
         if (Array.isArray(parsedItems)) {
           // Ensure parsed items have all necessary fields, adding defaults if missing
-          const standardizedItems = parsedItems.map(item => ({
+          const standardizedItems = parsedItems.map((item) => ({
             id: item.id || Date.now().toString(), // Ensure ID exists
             text: item.text || '',
             emoji: item.emoji || '📝',
-            link: item.link || undefined
-          }));
-          setItems(standardizedItems);
-          initializedRef.current = true;
+            link: item.link || undefined,
+          }))
+          setItems(standardizedItems)
+          initializedRef.current = true
         } else if (!initializedRef.current) {
           // If it's not a valid array format from the start, initialize with one empty item
           const newItem: LearningItem = {
             id: Date.now().toString(),
             text: '',
             emoji: '📝',
-          };
-          setItems([newItem]);
+          }
+          setItems([newItem])
           // Don't call onChange immediately if the initial value is just an empty string or invalid,
           // wait for the user to interact or save. This prevents unnecessary form dirty state.
           // Only call onChange if the *input* value was something parsable but not an array,
@@ -87,31 +92,34 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           // Given the parent's useEffect logic, it handles setting the initial formik value.
           // We just need to ensure our internal state `items` is correct.
           // Let's refine this initialization slightly:
-           if (typeof value === 'string' && value.trim() !== '') {
-               // If there's a non-empty string value that couldn't be parsed as an array,
-               // assume it's legacy format and convert to one item.
-                setItems([{
-                  id: Date.now().toString(),
-                  text: value,
-                  emoji: '📝'
-                }]);
-                // We should also update the parent's formik state to the new JSON format
-                // This might cause a re-render loop if not careful.
-                // A better approach might be to handle this conversion during formik initialization in the parent.
-                // Reverting to simpler logic based on parent's current `initializeLearnings`.
-                console.warn("LearningItemsList: Initial value is not a valid JSON array. Initializing with a default item.");
-                 setItems([newItem]);
-                 onChange(JSON.stringify([newItem])); // Still need to update parent to the expected format
-           } else {
-                // If value is empty or not a string, initialize with one empty item
-                 setItems([newItem]);
-                 // Only update parent if the initial value was truly empty, to set the expected [] structure
-                 if (!value || value.trim() === '') {
-                    onChange(JSON.stringify([newItem]));
-                 }
-           }
-           initializedRef.current = true;
-
+          if (typeof value === 'string' && value.trim() !== '') {
+            // If there's a non-empty string value that couldn't be parsed as an array,
+            // assume it's legacy format and convert to one item.
+            setItems([
+              {
+                id: Date.now().toString(),
+                text: value,
+                emoji: '📝',
+              },
+            ])
+            // We should also update the parent's formik state to the new JSON format
+            // This might cause a re-render loop if not careful.
+            // A better approach might be to handle this conversion during formik initialization in the parent.
+            // Reverting to simpler logic based on parent's current `initializeLearnings`.
+            console.warn(
+              'LearningItemsList: Initial value is not a valid JSON array. Initializing with a default item.'
+            )
+            setItems([newItem])
+            onChange(JSON.stringify([newItem])) // Still need to update parent to the expected format
+          } else {
+            // If value is empty or not a string, initialize with one empty item
+            setItems([newItem])
+            // Only update parent if the initial value was truly empty, to set the expected [] structure
+            if (!value || value.trim() === '') {
+              onChange(JSON.stringify([newItem]))
+            }
+          }
+          initializedRef.current = true
         }
       } else if (!initializedRef.current) {
         // Initialize with one empty item if no value and not already initialized
@@ -119,28 +127,33 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           id: Date.now().toString(),
           text: '',
           emoji: '📝',
-        };
-        setItems([newItem]);
-        onChange(JSON.stringify([newItem]));
-        initializedRef.current = true;
+        }
+        setItems([newItem])
+        onChange(JSON.stringify([newItem]))
+        initializedRef.current = true
       }
     } catch (e) {
-      console.error('Error parsing learning items:', e);
+      console.error('Error parsing learning items:', e)
       // Initialize with one empty item on error if not already initialized or if parsing failed for non-empty string
-      if (!initializedRef.current || (typeof value === 'string' && value.trim() !== '')) {
-        console.warn("LearningItemsList: Parsing failed for initial value. Initializing with a default item.");
+      if (
+        !initializedRef.current ||
+        (typeof value === 'string' && value.trim() !== '')
+      ) {
+        console.warn(
+          'LearningItemsList: Parsing failed for initial value. Initializing with a default item.'
+        )
         const newItem: LearningItem = {
           id: Date.now().toString(),
           text: '',
           emoji: '📝',
-        };
-        setItems([newItem]);
-         // Update parent state to clear potentially bad JSON
-         onChange(JSON.stringify([newItem]));
-         initializedRef.current = true;
+        }
+        setItems([newItem])
+        // Update parent state to clear potentially bad JSON
+        onChange(JSON.stringify([newItem]))
+        initializedRef.current = true
       }
     }
-  }, [value, onChange]);
+  }, [value, onChange])
 
   // Restore focus after re-render if an item was focused
   useEffect(() => {
@@ -148,101 +161,116 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       if (showLinkInput === focusedItemId) {
         // Focus the link input if it's open for the focused item
         if (linkInputFieldRefs.current[focusedItemId]) {
-          linkInputFieldRefs.current[focusedItemId]?.focus();
+          linkInputFieldRefs.current[focusedItemId]?.focus()
         }
       } else {
         // Focus the text input
         if (inputRefs.current[focusedItemId]) {
-          inputRefs.current[focusedItemId]?.focus();
+          inputRefs.current[focusedItemId]?.focus()
         }
       }
 
       // Scroll the focused item into view if needed
       if (items.length > 5 && scrollContainerRef.current) {
-        const focusedElement = document.getElementById(`learning-item-${focusedItemId}`);
+        const focusedElement = document.getElementById(
+          `learning-item-${focusedItemId}`
+        )
         if (focusedElement) {
-          const containerRect = scrollContainerRef.current.getBoundingClientRect();
-          const elementRect = focusedElement.getBoundingClientRect();
+          const containerRect =
+            scrollContainerRef.current.getBoundingClientRect()
+          const elementRect = focusedElement.getBoundingClientRect()
 
           // Check if the element is outside the visible area
-          if (elementRect.top < containerRect.top || elementRect.bottom > containerRect.bottom) {
-            focusedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          if (
+            elementRect.top < containerRect.top ||
+            elementRect.bottom > containerRect.bottom
+          ) {
+            focusedElement.scrollIntoView({
+              block: 'nearest',
+              behavior: 'smooth',
+            })
           }
         }
       }
     }
-  }, [items, focusedItemId, showLinkInput]);
+  }, [items, focusedItemId, showLinkInput])
 
   // Handle clicks outside of emoji picker and link input
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setShowEmojiPicker(null);
+      if (
+        pickerRef.current &&
+        !pickerRef.current.contains(event.target as Node)
+      ) {
+        setShowEmojiPicker(null)
       }
-      if (linkInputRef.current && !linkInputRef.current.contains(event.target as Node)) {
-        setShowLinkInput(null);
+      if (
+        linkInputRef.current &&
+        !linkInputRef.current.contains(event.target as Node)
+      ) {
+        setShowLinkInput(null)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   // Update the parent component with the new JSON string when items change
   const updateItems = (newItems: LearningItem[]) => {
-    setItems(newItems);
-    onChange(JSON.stringify(newItems));
-  };
+    setItems(newItems)
+    onChange(JSON.stringify(newItems))
+  }
 
   // Remove an item
   const removeItem = (id: string) => {
     if (focusedItemId === id) {
-      setFocusedItemId(null);
+      setFocusedItemId(null)
     }
-    updateItems(items.filter(item => item.id !== id));
-  };
+    updateItems(items.filter((item) => item.id !== id))
+  }
 
   // Update item text
   const updateItemText = (id: string, text: string) => {
     updateItems(
-      items.map(item => (item.id === id ? { ...item, text } : item))
-    );
-  };
+      items.map((item) => (item.id === id ? { ...item, text } : item))
+    )
+  }
 
   // Update item emoji
   const updateItemEmoji = (id: string, emoji: string) => {
     updateItems(
-      items.map(item => (item.id === id ? { ...item, emoji } : item))
-    );
-    setShowEmojiPicker(null);
+      items.map((item) => (item.id === id ? { ...item, emoji } : item))
+    )
+    setShowEmojiPicker(null)
 
     // Restore focus to the text input after emoji selection
     setTimeout(() => {
       if (inputRefs.current[id]) {
-        inputRefs.current[id]?.focus();
-        setFocusedItemId(id);
+        inputRefs.current[id]?.focus()
+        setFocusedItemId(id)
       }
-    }, 0);
-  };
+    }, 0)
+  }
 
   // Update item link
   const updateItemLink = (id: string, link: string) => {
     updateItems(
-      items.map(item => (item.id === id ? { ...item, link } : item))
-    );
-  };
+      items.map((item) => (item.id === id ? { ...item, link } : item))
+    )
+  }
 
   // Handle emoji selection
   const handleEmojiSelect = (id: string, emojiData: any) => {
-    updateItemEmoji(id, emojiData.native);
-  };
+    updateItemEmoji(id, emojiData.native)
+  }
 
   // Handle focus on input
   const handleInputFocus = (id: string) => {
-    setFocusedItemId(id);
-  };
+    setFocusedItemId(id)
+  }
 
   // Handle blur on input
   const handleInputBlur = () => {
@@ -250,25 +278,27 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     // We'll use a small delay to allow other focus events to occur first
     setTimeout(() => {
       // Only clear if we're not focusing another input in this component
-      if (!document.activeElement ||
-          !document.activeElement.classList.contains('learning-item-input')) {
-        setFocusedItemId(null);
+      if (
+        !document.activeElement ||
+        !document.activeElement.classList.contains('learning-item-input')
+      ) {
+        setFocusedItemId(null)
       }
-    }, 100);
-  };
+    }, 100)
+  }
 
   // Ref callback for text inputs
   const setInputRef = (id: string) => (el: HTMLInputElement | null) => {
-    inputRefs.current[id] = el;
-  };
+    inputRefs.current[id] = el
+  }
 
   // Ref callback for link inputs
   const setLinkInputRef = (id: string) => (el: HTMLInputElement | null) => {
-    linkInputFieldRefs.current[id] = el;
-  };
+    linkInputFieldRefs.current[id] = el
+  }
 
   // Determine if we need to make the list scrollable
-  const isScrollable = items.length > 5;
+  const isScrollable = items.length > 5
 
   return (
     <div className="space-y-2">
@@ -283,13 +313,19 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         className={`space-y-2 ${isScrollable ? 'max-h-[350px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent' : ''}`}
       >
         {items.map((item) => (
-          <div key={item.id} id={`learning-item-${item.id}`} className="group relative">
+          <div
+            key={item.id}
+            id={`learning-item-${item.id}`}
+            className="group relative"
+          >
             <div className="flex items-center gap-2 py-2 px-3 bg-gray-50/70 hover:bg-gray-50 border border-gray-100 rounded-lg transition-colors">
               <button
                 type="button"
                 onClick={() => {
-                  setShowEmojiPicker(showEmojiPicker === item.id ? null : item.id);
-                  setShowLinkInput(null);
+                  setShowEmojiPicker(
+                    showEmojiPicker === item.id ? null : item.id
+                  )
+                  setShowLinkInput(null)
                 }}
                 className="text-lg shrink-0"
               >
@@ -317,15 +353,15 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                 <button
                   type="button"
                   onClick={() => {
-                    setShowLinkInput(showLinkInput === item.id ? null : item.id);
-                    setShowEmojiPicker(null);
-                    setFocusedItemId(item.id);
+                    setShowLinkInput(showLinkInput === item.id ? null : item.id)
+                    setShowEmojiPicker(null)
+                    setFocusedItemId(item.id)
                     // Focus the link input after render
                     setTimeout(() => {
                       if (linkInputFieldRefs.current[item.id]) {
-                        linkInputFieldRefs.current[item.id]?.focus();
+                        linkInputFieldRefs.current[item.id]?.focus()
                       }
-                    }, 0);
+                    }, 0)
                   }}
                   className="text-gray-400 hover:text-blue-500 transition-colors"
                   title={item.link ? t('editLinkTooltip') : t('addLinkTooltip')}
@@ -349,7 +385,9 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
               <div ref={pickerRef} className="absolute z-10 mt-1 left-0">
                 <Picker
                   data={data}
-                  onEmojiSelect={(emoji: any) => handleEmojiSelect(item.id, emoji)}
+                  onEmojiSelect={(emoji: any) =>
+                    handleEmojiSelect(item.id, emoji)
+                  }
                   theme="light"
                   previewPosition="none"
                   searchPosition="top"
@@ -360,10 +398,13 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
             )}
 
             {showLinkInput === item.id && (
-              <div ref={linkInputRef} className="mt-1 p-2 bg-white border border-gray-200 rounded-lg shadow-xs">
+              <div
+                ref={linkInputRef}
+                className="mt-1 p-2 bg-white border border-gray-200 rounded-lg shadow-xs"
+              >
                 <Input
                   ref={setLinkInputRef(item.id)}
-                  value={items.find(i => i.id === item.id)?.link || ''}
+                  value={items.find((i) => i.id === item.id)?.link || ''}
                   onChange={(e) => updateItemLink(item.id, e.target.value)}
                   onFocus={() => handleInputFocus(item.id)}
                   onBlur={handleInputBlur}
@@ -386,7 +427,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         <span>{t('addItemButton')}</span>
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default LearningItemsList;
+export default LearningItemsList

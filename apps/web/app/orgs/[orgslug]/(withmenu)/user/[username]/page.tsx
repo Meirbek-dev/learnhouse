@@ -7,69 +7,72 @@ import UserProfileClient from './UserProfileClient'
 import { getTranslations } from 'next-intl/server'
 
 interface UserPageParams {
-  username: string;
-  orgslug: string;
+  username: string
+  orgslug: string
 }
 
 interface UserPageProps {
-  params: Promise<UserPageParams>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  params: Promise<UserPageParams>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: UserPageProps): Promise<Metadata> {
   try {
-    const resolvedParams = await params;
-    const t = await getTranslations('UserProfilePage');
+    const resolvedParams = await params
+    const t = await getTranslations('UserProfilePage')
 
-    const userData = await getUserByUsername(resolvedParams.username);
+    const userData = await getUserByUsername(resolvedParams.username)
     return {
       title: t('metaTitle', {
         firstName: userData.first_name,
-        lastName: userData.last_name
+        lastName: userData.last_name,
       }),
-      description: userData.bio || t('metaDescriptionFallback', {
-        firstName: userData.first_name,
-        lastName: userData.last_name
-      }),
-    };
+      description:
+        userData.bio ||
+        t('metaDescriptionFallback', {
+          firstName: userData.first_name,
+          lastName: userData.last_name,
+        }),
+    }
   } catch (error) {
-    const t = await getTranslations('UserProfilePage');
+    const t = await getTranslations('UserProfilePage')
     return {
       title: t('metaTitleError'),
-    };
+    }
   }
 }
 
 async function UserPage({ params }: UserPageProps) {
-  const resolvedParams = await params;
-  const { username } = resolvedParams;
+  const resolvedParams = await params
+  const { username } = resolvedParams
 
   try {
     // Fetch user data by username
-    const userData = await getUserByUsername(username);
-    const profile = userData.profile ? (
-      typeof userData.profile === 'string' ? JSON.parse(userData.profile) : userData.profile
-    ) : { sections: [] };
+    const userData = await getUserByUsername(username)
+    const profile = userData.profile
+      ? typeof userData.profile === 'string'
+        ? JSON.parse(userData.profile)
+        : userData.profile
+      : { sections: [] }
 
     return (
       <div>
-        <UserProfileClient
-          userData={userData}
-          profile={profile}
-        />
+        <UserProfileClient userData={userData} profile={profile} />
       </div>
-    );
+    )
   } catch (error) {
-    console.error('Error fetching user data:', error);
-    const t = await getTranslations('UserProfilePage');
+    console.error('Error fetching user data:', error)
+    const t = await getTranslations('UserProfilePage')
     return (
       <div className="container mx-auto py-8">
         <div className="bg-white rounded-xl nice-shadow p-6">
           <p className="text-red-600">{t('profileLoadError')}</p>
         </div>
       </div>
-    );
+    )
   }
 }
 
-export default UserPage;
+export default UserPage

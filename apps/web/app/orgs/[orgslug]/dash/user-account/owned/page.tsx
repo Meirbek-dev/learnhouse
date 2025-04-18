@@ -17,7 +17,11 @@ function OwnedCoursesPage() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
 
-  const { data: ownedCourses, error, isLoading } = useSWR(
+  const {
+    data: ownedCourses,
+    error,
+    isLoading,
+  } = useSWR(
     org ? [`/payments/${org.id}/courses/owned`, access_token] : null,
     ([url, token]) => getOwnedCourses(org.id, token)
   )
@@ -31,7 +35,9 @@ function OwnedCoursesPage() {
         <div className="flex items-center gap-4">
           <Package2 className="w-8 h-8 text-gray-800" />
           <div className="flex flex-col -space-y-1">
-            <h1 className="font-bold text-xl text-gray-800">{t('myCourses')}</h1>
+            <h1 className="font-bold text-xl text-gray-800">
+              {t('myCourses')}
+            </h1>
             <h2 className="text-gray-500 text-md">{t('purchasedCourses')}</h2>
           </div>
         </div>

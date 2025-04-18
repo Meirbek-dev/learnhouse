@@ -22,9 +22,13 @@ const Stepscomp = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const stepParam = searchParams.get('step')
-  const currentStepIndex = stepParam !== null && !isNaN(parseInt(stepParam)) ? parseInt(stepParam) : 0;
+  const currentStepIndex =
+    stepParam !== null && !isNaN(parseInt(stepParam)) ? parseInt(stepParam) : 0
 
-  const validatedStepIndex = Math.max(0, Math.min(currentStepIndex, INSTALL_STEPS.length - 1));
+  const validatedStepIndex = Math.max(
+    0,
+    Math.min(currentStepIndex, INSTALL_STEPS.length - 1)
+  )
 
   const [stepNumber, setStepNumber] = React.useState(validatedStepIndex)
 
@@ -36,23 +40,30 @@ const Stepscomp = () => {
   }
 
   useEffect(() => {
-    const stepParam = searchParams.get('step');
-    const currentStepIndex = stepParam !== null && !isNaN(parseInt(stepParam)) ? parseInt(stepParam) : 0;
-    const validatedStepIndex = Math.max(0, Math.min(currentStepIndex, INSTALL_STEPS.length - 1));
+    const stepParam = searchParams.get('step')
+    const currentStepIndex =
+      stepParam !== null && !isNaN(parseInt(stepParam))
+        ? parseInt(stepParam)
+        : 0
+    const validatedStepIndex = Math.max(
+      0,
+      Math.min(currentStepIndex, INSTALL_STEPS.length - 1)
+    )
     if (validatedStepIndex !== stepNumber) {
-        setStepNumber(validatedStepIndex);
+      setStepNumber(validatedStepIndex)
     }
-  }, [searchParams.toString()]);
+  }, [searchParams.toString()])
 
-  const currentStepConfig: InstallStepConfig | undefined = INSTALL_STEPS[stepNumber];
+  const currentStepConfig: InstallStepConfig | undefined =
+    INSTALL_STEPS[stepNumber]
 
   if (!currentStepConfig) {
-      console.error(`Invalid step number derived: ${stepNumber}`);
-      const fallbackStepConfig = INSTALL_STEPS[0];
-      if (!fallbackStepConfig) {
-          return <div>Error: Critical installation configuration missing.</div>;
-      }
-       return <div>Error: Invalid installation step number.</div>;
+    console.error(`Invalid step number derived: ${stepNumber}`)
+    const fallbackStepConfig = INSTALL_STEPS[0]
+    if (!fallbackStepConfig) {
+      return <div>Error: Critical installation configuration missing.</div>
+    }
+    return <div>Error: Invalid installation step number.</div>
   }
 
   return (
@@ -63,29 +74,37 @@ const Stepscomp = () => {
         </div>
         <div className="steps flex flex-wrap space-x-2 justify-center text-xs sm:text-sm p-3 bg-slate-50 rounded-full w-full md:w-fit m-auto px-4 sm:px-10 overflow-x-auto">
           <div className="flex space-x-4 sm:space-x-8">
-            {INSTALL_STEPS.map((stepConfig: InstallStepConfig, index: number) => (
-              <div
-                key={stepConfig.id}
-                className={`flex items-center cursor-pointer space-x-2 group`}
-                onClick={() => handleStepChange(index)}
-                title={t(stepConfig.translationKey)}
-              >
+            {INSTALL_STEPS.map(
+              (stepConfig: InstallStepConfig, index: number) => (
                 <div
-                  className={`flex w-6 h-6 sm:w-7 sm:h-7 rounded-full text-slate-700 bg-slate-200 justify-center items-center m-auto align-middle transition-all ${
-                    index === stepNumber ? 'bg-blue-200 text-blue-800 font-semibold ring-2 ring-blue-400' : 'group-hover:bg-slate-300'
-                  }`}
+                  key={stepConfig.id}
+                  className={`flex items-center cursor-pointer space-x-2 group`}
+                  onClick={() => handleStepChange(index)}
+                  title={t(stepConfig.translationKey)}
                 >
-                  {index + 1}
+                  <div
+                    className={`flex w-6 h-6 sm:w-7 sm:h-7 rounded-full text-slate-700 bg-slate-200 justify-center items-center m-auto align-middle transition-all ${
+                      index === stepNumber
+                        ? 'bg-blue-200 text-blue-800 font-semibold ring-2 ring-blue-400'
+                        : 'group-hover:bg-slate-300'
+                    }`}
+                  >
+                    {index + 1}
+                  </div>
+                  <div className="hidden lg:block">
+                    {t(stepConfig.translationKey)}
+                  </div>
                 </div>
-                <div className="hidden lg:block">{t(stepConfig.translationKey)}</div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </div>
       </div>
 
       <div className="flex pt-8 flex-col">
-        <h1 className="font-bold text-2xl md:text-3xl mb-4">{t(currentStepConfig.translationKey)}</h1>
+        <h1 className="font-bold text-2xl md:text-3xl mb-4">
+          {t(currentStepConfig.translationKey)}
+        </h1>
         <div className="pt-4 sm:pt-8">{currentStepConfig.component}</div>
       </div>
     </div>

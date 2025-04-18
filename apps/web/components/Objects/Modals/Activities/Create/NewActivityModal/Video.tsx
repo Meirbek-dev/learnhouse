@@ -11,8 +11,8 @@ import React, { useState } from 'react'
 import * as Form from '@radix-ui/react-form'
 import BarLoader from 'react-spinners/BarLoader'
 import { Youtube } from 'lucide-react'
-import { constructAcceptValue } from '@/lib/constants';
-import { useTranslations } from 'next-intl';
+import { constructAcceptValue } from '@/lib/constants'
+import { useTranslations } from 'next-intl'
 
 const SUPPORTED_FILES = constructAcceptValue(['mp4', 'webm'])
 
@@ -29,7 +29,7 @@ function VideoModal({
   chapterId,
   course,
 }: any) {
-  const t = useTranslations('Components.VideoModal');
+  const t = useTranslations('Components.VideoModal')
   const [video, setVideo] = React.useState(null) as any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [name, setName] = React.useState('')
@@ -140,7 +140,12 @@ function VideoModal({
                   </FormMessage>
                 </Flex>
                 <Form.Control asChild>
-                  <input accept={SUPPORTED_FILES} type="file" onChange={handleVideoChange} required />
+                  <input
+                    accept={SUPPORTED_FILES}
+                    type="file"
+                    onChange={handleVideoChange}
+                    required
+                  />
                 </Form.Control>
               </FormField>
             </div>

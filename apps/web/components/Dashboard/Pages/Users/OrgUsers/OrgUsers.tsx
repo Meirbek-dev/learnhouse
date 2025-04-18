@@ -19,14 +19,17 @@ import { useTranslations } from 'next-intl'
 function OrgUsers() {
   const org = useOrg() as any
   const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token;
-  const t = useTranslations('DashPage.UserSettings.usersSection');
-  const tNotify = useTranslations('Notifications');
-  const tGeneral = useTranslations('General');
+  const access_token = session?.data?.tokens?.access_token
+  const t = useTranslations('DashPage.UserSettings.usersSection')
+  const tNotify = useTranslations('Notifications')
+  const tGeneral = useTranslations('General')
 
-  const { data: orgUsers, error, isLoading } = useSWR(
-    org ? `${getAPIUrl()}orgs/${org?.id}/users` : null,
-    (url) => swrFetcher(url, access_token)
+  const {
+    data: orgUsers,
+    error,
+    isLoading,
+  } = useSWR(org ? `${getAPIUrl()}orgs/${org?.id}/users` : null, (url) =>
+    swrFetcher(url, access_token)
   )
   const [rolesModal, setRolesModal] = React.useState(false)
   const [selectedUser, setSelectedUser] = React.useState<any | null>(null)
@@ -42,17 +45,17 @@ function OrgUsers() {
   }
 
   const handleRemoveUser = async (user_id: any) => {
-    const toastId = toast.loading(tNotify("removingUser"));
+    const toastId = toast.loading(tNotify('removingUser'))
     try {
       const res = await removeUserFromOrg(org.id, user_id, access_token)
       if (res.status === 200) {
         await mutate(`${getAPIUrl()}orgs/${org.id}/users`)
-        toast.success(tNotify("userRemovedSuccess"), {id:toastId});
+        toast.success(tNotify('userRemovedSuccess'), { id: toastId })
       } else {
-        toast.error(tNotify('errors.removeUserFailed'), {id:toastId});
+        toast.error(tNotify('errors.removeUserFailed'), { id: toastId })
       }
     } catch (error) {
-       toast.error(tNotify('errors.removeUserFailed'), {id:toastId});
+      toast.error(tNotify('errors.removeUserFailed'), { id: toastId })
     }
   }
 
@@ -68,11 +71,10 @@ function OrgUsers() {
           <div className="h-6"></div>
           <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs px-4 py-4  ">
             <div className="flex flex-col bg-gray-50 -space-y-1  px-5 py-3 rounded-md mb-3 ">
-              <h1 className="font-bold text-xl text-gray-800">{t('activeUsersTitle')}</h1>
-              <h2 className="text-gray-500  text-md">
-                {' '}
-                {t('description')}
-              </h2>
+              <h1 className="font-bold text-xl text-gray-800">
+                {t('activeUsersTitle')}
+              </h1>
+              <h2 className="text-gray-500  text-md"> {t('description')}</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
@@ -101,23 +103,29 @@ function OrgUsers() {
                       <td className="py-3 px-4 flex space-x-2 items-end">
                         <Modal
                           isDialogOpen={
-                            rolesModal && selectedUser?.user?.user_uuid === user.user.user_uuid
+                            rolesModal &&
+                            selectedUser?.user?.user_uuid ===
+                              user.user.user_uuid
                           }
                           onOpenChange={(isOpen) => {
-                            if (!isOpen) handleCloseRolesModal();
+                            if (!isOpen) handleCloseRolesModal()
                           }}
                           minHeight="no-min"
                           dialogContent={
                             selectedUser && (
                               <RolesUpdate
-                                alreadyAssignedRole={selectedUser.role.role_uuid}
+                                alreadyAssignedRole={
+                                  selectedUser.role.role_uuid
+                                }
                                 setRolesModal={setRolesModal}
                                 user={selectedUser}
                               />
                             )
                           }
                           dialogTitle={t('updateRoleModalTitle')}
-                          dialogDescription={t('updateRoleModalDescription', { username: user.user.username })}
+                          dialogDescription={t('updateRoleModalDescription', {
+                            username: user.user.username,
+                          })}
                           dialogTrigger={
                             <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-yellow-700 rounded-md font-bold items-center text-sm text-yellow-100">
                               <KeyRound className="w-4 h-4" />
@@ -129,7 +137,9 @@ function OrgUsers() {
                         <ConfirmationModal
                           confirmationButtonText={t('removeUserButton')}
                           confirmationMessage={t('removeUserModalMessage')}
-                          dialogTitle={t('removeUserModalTitle', { username: user.user.username })}
+                          dialogTitle={t('removeUserModalTitle', {
+                            username: user.user.username,
+                          })}
                           dialogTrigger={
                             <button className="mr-2 flex space-x-2 hover:cursor-pointer p-1 px-3 bg-rose-700 rounded-md font-bold items-center text-sm text-rose-100">
                               <LogOut className="w-4 h-4" />
@@ -146,7 +156,10 @@ function OrgUsers() {
                   ))}
                   {(!orgUsers || orgUsers.length === 0) && (
                     <tr>
-                      <td colSpan={3} className="text-center py-4 text-gray-500">
+                      <td
+                        colSpan={3}
+                        className="text-center py-4 text-gray-500"
+                      >
                         No users found in this organization.
                       </td>
                     </tr>

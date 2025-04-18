@@ -49,7 +49,7 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
           >
             <div className="flex w-full space-x-2 font-bold text-white/80">
               <Image
-                className="outline outline-1 outline-neutral-200/10 rounded-lg"
+                className="outline-neutral-200/10 rounded-lg"
                 width={24}
                 src={learnhouseAI_icon}
                 alt=""
@@ -94,7 +94,7 @@ function AIActionButton(props: {
   activity: any
 }) {
   const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token;
+  const access_token = session?.data?.tokens?.access_token
   const dispatchAIChatBot = useAIChatBotDispatch() as any
   const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
 
@@ -135,7 +135,8 @@ function AIActionButton(props: {
       const response = await sendActivityAIChatMessage(
         message,
         aiChatBotState.aichat_uuid,
-        props.activity.activity_uuid, access_token
+        props.activity.activity_uuid,
+        access_token
       )
       if (response.success == false) {
         await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
@@ -206,7 +207,7 @@ function AIActionButton(props: {
       <ToolTip sideOffset={10} slateBlack content={tooltipLabel}>
         <button
           onClick={() => handleAction(props.label)}
-          className="flex space-x-1.5 items-center bg-white/10 px-2 py-0.5 rounded-md outline outline-1 outline-neutral-200/20 text-sm font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+          className="flex space-x-1.5 items-center bg-white/10 px-2 py-0.5 rounded-md outline-neutral-200/20 text-sm font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
         >
           {props.label === 'Explain' && <BookOpen size={16} />}
           {props.label === 'Summarize' && <FormInput size={16} />}

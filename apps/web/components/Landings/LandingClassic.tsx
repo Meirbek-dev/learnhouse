@@ -19,7 +19,13 @@ interface LandingClassicProps {
   translations?: any
 }
 
-function LandingClassic({ courses, collections, orgslug, org_id, translations }: LandingClassicProps) {
+function LandingClassic({
+  courses,
+  collections,
+  orgslug,
+  org_id,
+  translations,
+}: LandingClassicProps) {
   const t = useTranslations()
 
   return (
@@ -28,7 +34,14 @@ function LandingClassic({ courses, collections, orgslug, org_id, translations }:
         {/* Collections */}
         <div className="flex flex-col space-y-4 mb-8">
           <div className="flex items-center justify-between">
-            <TypeOfContentTitle title={translations ? translations('HomePage.Collections.title') : t('HomePage.Collections.title')} type="col" />
+            <TypeOfContentTitle
+              title={
+                translations
+                  ? translations('HomePage.Collections.title')
+                  : t('HomePage.Collections.title')
+              }
+              type="col"
+            />
             <AuthenticatedClientElement
               checkMethod="roles"
               ressourceType="collections"
@@ -81,11 +94,19 @@ function LandingClassic({ courses, collections, orgslug, org_id, translations }:
                     </svg>
                   </div>
                   <h1 className="text-xl font-bold text-gray-600 mb-2">
-                    {translations ? translations('HomePage.Collections.noContent') : t('HomePage.Collections.noContent')}
+                    {translations
+                      ? translations('HomePage.Collections.noContent')
+                      : t('HomePage.Collections.noContent')}
                   </h1>
                   <p className="text-md text-gray-400">
                     <ContentPlaceHolderIfUserIsNotAdmin
-                      text={translations ? translations('HomePage.Collections.noContentUserAdmin') : t('HomePage.Collections.noContentUserAdmin')}
+                      text={
+                        translations
+                          ? translations(
+                              'HomePage.Collections.noContentUserAdmin'
+                            )
+                          : t('HomePage.Collections.noContentUserAdmin')
+                      }
                     />
                   </p>
                 </div>
@@ -97,7 +118,14 @@ function LandingClassic({ courses, collections, orgslug, org_id, translations }:
         {/* Courses */}
         <div className="flex flex-col space-y-4">
           <div className="flex items-center justify-between">
-            <TypeOfContentTitle title={translations ? translations('HomePage.Courses.title') : t('HomePage.Courses.title')} type="cou" />
+            <TypeOfContentTitle
+              title={
+                translations
+                  ? translations('HomePage.Courses.title')
+                  : t('HomePage.Courses.title')
+              }
+              type="cou"
+            />
             <AuthenticatedClientElement
               ressourceType="courses"
               action="create"
@@ -146,10 +174,18 @@ function LandingClassic({ courses, collections, orgslug, org_id, translations }:
                     </svg>
                   </div>
                   <h1 className="text-xl font-bold text-gray-600 mb-2">
-                    {translations ? translations('HomePage.Courses.noContent') : t('HomePage.Courses.noContent')}
+                    {translations
+                      ? translations('HomePage.Courses.noContent')
+                      : t('HomePage.Courses.noContent')}
                   </h1>
                   <p className="text-md text-gray-400">
-                    <ContentPlaceHolderIfUserIsNotAdmin text={translations ? translations('HomePage.Courses.noContentUserAdmin') : t('HomePage.Courses.noContentUserAdmin')} />
+                    <ContentPlaceHolderIfUserIsNotAdmin
+                      text={
+                        translations
+                          ? translations('HomePage.Courses.noContentUserAdmin')
+                          : t('HomePage.Courses.noContentUserAdmin')
+                      }
+                    />
                   </p>
                 </div>
               </div>

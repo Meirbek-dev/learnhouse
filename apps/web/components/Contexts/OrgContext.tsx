@@ -12,12 +12,18 @@ import { useTranslations } from 'next-intl'
 
 export const OrgContext = createContext(null)
 
-export function OrgProvider({ children, orgslug }: { children: React.ReactNode, orgslug: string }) {
+export function OrgProvider({
+  children,
+  orgslug,
+}: {
+  children: React.ReactNode
+  orgslug: string
+}) {
   const session = useLHSession() as any
   const pathname = usePathname()
   const accessToken = session?.data?.tokens?.access_token
   const t = useTranslations('Contexts.Org')
-  const isAllowedPathname = ['/login', '/signup'].includes(pathname);
+  const isAllowedPathname = ['/login', '/signup'].includes(pathname)
 
   const { data: org, error: orgError } = useSWR(
     `${getAPIUrl()}orgs/slug/${orgslug}`,
@@ -28,16 +34,26 @@ export function OrgProvider({ children, orgslug }: { children: React.ReactNode, 
     (url) => swrFetcher(url, accessToken)
   )
 
-  const isLoading = !org || !orgs || !session || session.status === 'loading';
-  const hasError = orgError || orgsError;
+  const isLoading = !org || !orgs || !session || session.status === 'loading'
+  const hasError = orgError || orgsError
 
-  const isOrgActive = useMemo(() => org?.config?.config?.general?.enabled !== false, [org])
-  const isUserPartOfTheOrg = useMemo(() => orgs?.some((userOrg: any) => userOrg.id === org?.id), [orgs, org?.id])
+  const isOrgActive = useMemo(
+    () => org?.config?.config?.general?.enabled !== false,
+    [org]
+  )
+  const isUserPartOfTheOrg = useMemo(
+    () => orgs?.some((userOrg: any) => userOrg.id === org?.id),
+    [orgs, org?.id]
+  )
 
   if (hasError) return <ErrorUI message={t('fetchError')} />
-  if (isLoading) return <PageLoading />;
+  if (isLoading) return <PageLoading />
   if (!isOrgActive) return <ErrorUI message={t('orgInactiveError')} />
-  if (!isUserPartOfTheOrg && session.status == 'authenticated' && !isAllowedPathname) {
+  if (
+    !isUserPartOfTheOrg &&
+    session.status == 'authenticated' &&
+    !isAllowedPathname
+  ) {
     return (
       <InfoUI
         href={getUriWithoutOrg(`/signup?orgslug=${orgslug}`)}

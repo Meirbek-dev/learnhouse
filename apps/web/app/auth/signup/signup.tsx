@@ -34,9 +34,7 @@ function SignUpClient(props: SignUpClientProps) {
 
   useEffect(() => {
     if (props.org.config) {
-      setJoinMethod(
-        props.org?.config?.config?.features.members.signup_mode
-      )
+      setJoinMethod(props.org?.config?.config?.features.members.signup_mode)
     }
     if (inviteCodeParam) {
       setInviteCode(inviteCodeParam)
@@ -125,22 +123,27 @@ const LoggedInJoinScreen = (props: any) => {
 
   const join = async () => {
     setIsSubmitting(true)
-    const res = await joinOrg({ org_id: org.id, user_id: session?.data?.user?.id, invite_code: props.inviteCode }, null, session.data?.tokens?.access_token)
+    const res = await joinOrg(
+      {
+        org_id: org.id,
+        user_id: session?.data?.user?.id,
+        invite_code: props.inviteCode,
+      },
+      null,
+      session.data?.tokens?.access_token
+    )
     //wait for 1s
     if (res.success) {
       toast.success(res.data + toastT('orgJoinSuccess'))
       setTimeout(() => {
-        router.push(getUriWithOrg(org.slug,'/'))
+        router.push(getUriWithOrg(org.slug, '/'))
       }, 2000)
       setIsSubmitting(false)
     } else {
-      toast.error(
-        res.data?.detail || toastT('errorSomethingWentWrong')
-      )
+      toast.error(res.data?.detail || toastT('errorSomethingWentWrong'))
       setIsLoading(false)
       setIsSubmitting(false)
     }
-
   }
 
   useEffect(() => {
@@ -151,7 +154,7 @@ const LoggedInJoinScreen = (props: any) => {
 
   return (
     <div className="flex flex-row  items-center mx-auto">
-       <Toast />
+      <Toast />
       <div className="flex space-y-7 flex-col justify-center items-center">
         <p className="pt-3 text-2xl font-semibold text-black/70 flex justify-center space-x-2 items-center">
           <span className="items-center">{t('hi')}</span>
@@ -161,13 +164,22 @@ const LoggedInJoinScreen = (props: any) => {
           </span>
           <span>{t('joinQuestion', { orgName: org?.name })}</span>
         </p>
-        <button onClick={() => join()} className="flex w-fit h-[35px] space-x-2 bg-black px-6 py-2 text-md rounded-lg font-semibold h-fit text-white items-center shadow-md">
-          {isSumbitting ? <BarLoader
-            cssOverride={{ borderRadius: 60 }}
-            width={60}
-            color="#ffffff"
-          /> : <><UserPlus size={18} />
-            <p>{t('join')}</p></>}
+        <button
+          onClick={() => join()}
+          className="flex w-fit h-[35px] space-x-2 bg-black px-6 py-2 text-md rounded-lg font-semibold h-fit text-white items-center shadow-md"
+        >
+          {isSumbitting ? (
+            <BarLoader
+              cssOverride={{ borderRadius: 60 }}
+              width={60}
+              color="#ffffff"
+            />
+          ) : (
+            <>
+              <UserPlus size={18} />
+              <p>{t('join')}</p>
+            </>
+          )}
         </button>
       </div>
     </div>
@@ -190,19 +202,23 @@ const NoTokenScreen = (props: any) => {
 
   const validateCode = async () => {
     setIsLoading(true)
-    let res = await validateInviteCode(org?.id, inviteCode, session?.user?.tokens.access_token)
+    let res = await validateInviteCode(
+      org?.id,
+      inviteCode,
+      session?.user?.tokens.access_token
+    )
     //wait for 1s
     if (res.success) {
-      toast.success(
-        toastT('inviteCodeValid')
-      )
+      toast.success(toastT('inviteCodeValid'))
       setTimeout(() => {
-        router.push(getUriWithoutOrg(`/signup?inviteCode=${inviteCode}&orgslug=${org.slug}`))
+        router.push(
+          getUriWithoutOrg(
+            `/signup?inviteCode=${inviteCode}&orgslug=${org.slug}`
+          )
+        )
       }, 2000)
     } else {
-      toast.error(
-        res.data?.detail || toastT('inviteCodeInvalid')
-      )
+      toast.error(res.data?.detail || toastT('inviteCodeInvalid'))
       setIsLoading(false)
     }
   }

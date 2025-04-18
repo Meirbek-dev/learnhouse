@@ -71,7 +71,7 @@ const SettingsNavigation = ({
 }
 
 function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
-  const t = useTranslations('DashPage.UserAccountSettings');
+  const t = useTranslations('DashPage.UserAccountSettings')
   const { subpage, orgslug } = use(params)
   const session = useLHSession() as Session
 

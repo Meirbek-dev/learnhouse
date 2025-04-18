@@ -34,8 +34,8 @@ interface ModifiedChapterInterface {
 
 function ChapterElement(props: ChapterElementProps) {
   const activities = props.chapter.activities || []
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
   const [modifiedChapter, setModifiedChapter] = React.useState<
     ModifiedChapterInterface | undefined
   >(undefined)
@@ -75,7 +75,9 @@ function ChapterElement(props: ChapterElementProps) {
       {(provided, snapshot) => (
         <div
           className={`mx-2 sm:mx-4 md:mx-6 lg:mx-10 bg-white rounded-xl nice-shadow px-3 sm:px-4 md:px-6 pt-4 sm:pt-6 ${
-            snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500/20 rotate-1' : ''
+            snapshot.isDragging
+              ? 'shadow-xl ring-2 ring-blue-500/20 rotate-1'
+              : ''
           }`}
           key={props.chapter.chapter_uuid}
           {...provided.draggableProps}
@@ -134,7 +136,9 @@ function ChapterElement(props: ChapterElementProps) {
               <ConfirmationModal
                 confirmationButtonText={t('deleteChapterButton')}
                 confirmationMessage={t('deleteChapterConfirmation')}
-                dialogTitle={t('deleteChapterTitle', { name: props.chapter.name })}
+                dialogTitle={t('deleteChapterTitle', {
+                  name: props.chapter.name,
+                })}
                 dialogTrigger={
                   <button
                     className="hover:cursor-pointer p-1 px-2 sm:px-3 bg-red-600 rounded-md shadow-sm flex items-center text-rose-100 text-sm"

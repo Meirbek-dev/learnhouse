@@ -33,7 +33,12 @@ function NewActivityModal({
             }}
           >
             <div className="h-20 rounded-lg m-0.5 flex flex-col items-center justify-end text-center bg-white hover:cursor-pointer">
-              <Image unoptimized quality={100} alt={t('dynamicPage')} src={DynamicPageActivityImage}></Image>
+              <Image
+                unoptimized
+                quality={100}
+                alt={t('dynamicPage')}
+                src={DynamicPageActivityImage}
+              ></Image>
             </div>
             <div className="flex text-sm h-5 font-medium text-gray-500 items-center justify-center text-center">
               {t('dynamicPage')}
@@ -45,7 +50,12 @@ function NewActivityModal({
             }}
           >
             <div className="h-20 rounded-lg m-0.5 flex flex-col items-center justify-end text-center bg-white hover:cursor-pointer">
-              <Image unoptimized quality={100} alt={t('video')} src={VideoPageActivityImage}></Image>
+              <Image
+                unoptimized
+                quality={100}
+                alt={t('video')}
+                src={VideoPageActivityImage}
+              ></Image>
             </div>
             <div className="flex text-sm h-5 font-medium text-gray-500 items-center justify-center text-center">
               {t('video')}
@@ -57,7 +67,12 @@ function NewActivityModal({
             }}
           >
             <div className="h-20 rounded-lg m-0.5 flex flex-col items-center justify-end text-center bg-white hover:cursor-pointer">
-              <Image unoptimized quality={100} alt={t('document')} src={DocumentPdfPageActivityImage}></Image>
+              <Image
+                unoptimized
+                quality={100}
+                alt={t('document')}
+                src={DocumentPdfPageActivityImage}
+              ></Image>
             </div>
             <div className="flex text-sm h-5 font-medium text-gray-500 items-center justify-center text-center">
               {t('document')}
@@ -69,7 +84,12 @@ function NewActivityModal({
             }}
           >
             <div className="h-20 rounded-lg m-0.5 flex flex-col items-center justify-end text-center bg-white hover:cursor-pointer">
-              <Image unoptimized quality={100} alt={t('assignments')} src={AssignmentActivityImage}></Image>
+              <Image
+                unoptimized
+                quality={100}
+                alt={t('assignments')}
+                src={AssignmentActivityImage}
+              ></Image>
             </div>
             <div className="flex text-sm h-5 font-medium text-gray-500 items-center justify-center text-center">
               {t('assignments')}
@@ -109,8 +129,8 @@ function NewActivityModal({
           chapterId={chapterId}
           course={course}
           closeModal={closeModal}
-        />)
-      }
+        />
+      )}
     </>
   )
 }

@@ -12,7 +12,12 @@ type UserAvatarProps = {
   width?: number
   avatar_url?: string
   use_with_session?: boolean
-  rounded?: 'rounded-md' | 'rounded-xl' | 'rounded-lg' | 'rounded-full' | 'rounded'
+  rounded?:
+    | 'rounded-md'
+    | 'rounded-xl'
+    | 'rounded-lg'
+    | 'rounded-full'
+    | 'rounded'
   border?: 'border-2' | 'border-4' | 'border-8'
   borderColor?: string
   predefined_avatar?: 'ai' | 'empty'
@@ -59,7 +64,8 @@ function UserAvatar(props: UserAvatarProps) {
   const getAvatarUrl = (): string => {
     // If predefined avatar is specified
     if (props.predefined_avatar) {
-      const avatarType = props.predefined_avatar === 'ai' ? 'ai_avatar.png' : 'empty_avatar.png'
+      const avatarType =
+        props.predefined_avatar === 'ai' ? 'ai_avatar.png' : 'empty_avatar.png'
       return getUriWithOrg(params.orgslug, `/${avatarType}`)
     }
 
@@ -124,7 +130,7 @@ function UserAvatar(props: UserAvatarProps) {
     />
   )
 
-  if (props.showProfilePopup && (props.userId || (userData?.id))) {
+  if (props.showProfilePopup && (props.userId || userData?.id)) {
     return (
       <UserProfilePopup userId={props.userId || userData?.id}>
         {avatarImage}

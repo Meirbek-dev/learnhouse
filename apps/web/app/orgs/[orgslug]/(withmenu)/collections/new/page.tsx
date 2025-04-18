@@ -89,9 +89,7 @@ function NewCollection(params: any) {
   if (error) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
-        <div className="text-red-500">
-          {t('errorLoadingCourses')}
-        </div>
+        <div className="text-red-500">{t('errorLoadingCourses')}</div>
       </div>
     )
   }
@@ -100,12 +98,8 @@ function NewCollection(params: any) {
     <div className="max-w-2xl mx-auto py-12 px-4">
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {t('title')}
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            {t('description')}
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="mt-2 text-sm text-gray-600">{t('description')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -133,12 +127,8 @@ function NewCollection(params: any) {
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 defaultValue={isPublic}
               >
-                <option value="true">
-                  {t('visibilityPublic')}
-                </option>
-                <option value="false">
-                  {t('visibilityPrivate')}
-                </option>
+                <option value="true">{t('visibilityPublic')}</option>
+                <option value="false">{t('visibilityPrivate')}</option>
               </select>
             </label>
 
@@ -251,7 +241,9 @@ function NewCollection(params: any) {
               className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-xs hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              <span>{isSubmitting ? t('creatingButton') : t('createButton')}</span>
+              <span>
+                {isSubmitting ? t('creatingButton') : t('createButton')}
+              </span>
             </button>
           </div>
         </form>

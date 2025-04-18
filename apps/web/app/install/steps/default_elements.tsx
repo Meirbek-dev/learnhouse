@@ -10,44 +10,60 @@ import { useTranslations } from 'next-intl'
 import { BarLoader } from 'react-spinners'
 
 function DefaultElements() {
-  const t = useTranslations('Install.steps.DEFAULT_ELEMENTS');
-  const generalT = useTranslations('General');
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('Install.steps.DEFAULT_ELEMENTS')
+  const generalT = useTranslations('General')
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
   const {
     data: install,
     error: fetchError,
     isLoading,
-  } = useSWR(access_token ? `${getAPIUrl()}install/latest` : null, (url) => swrFetcher(url, access_token), {
-    revalidateOnFocus: false
-  })
+  } = useSWR(
+    access_token ? `${getAPIUrl()}install/latest` : null,
+    (url) => swrFetcher(url, access_token),
+    {
+      revalidateOnFocus: false,
+    }
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
   async function createDefElementsAndUpdateInstall() {
-    if (isSubmitting || !install?.data) return;
+    if (isSubmitting || !install?.data) return
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
-      await createDefaultElements();
+      await createDefaultElements()
 
-      const installData = typeof install.data === 'object' && install.data !== null ? install.data : {};
+      const installData =
+        typeof install.data === 'object' && install.data !== null
+          ? install.data
+          : {}
 
-      const install_data_update = { ...installData, 2: { status: 'OK' } };
+      const install_data_update = { ...installData, 2: { status: 'OK' } }
 
-      await updateInstall(install_data_update, 3);
+      await updateInstall(install_data_update, 3)
 
-      router.push('/install?step=3');
-
+      router.push('/install?step=3')
     } catch (e) {
-      console.error("Error creating default elements or updating install:", e);
-      setIsSubmitting(false);
+      console.error('Error creating default elements or updating install:', e)
+      setIsSubmitting(false)
     }
   }
 
-  if (isLoading) return <div>{generalT('loading')}</div>;
-  if (fetchError) return <div>{generalT('error')}: {typeof fetchError === 'object' && fetchError !== null && 'message' in fetchError ? String(fetchError.message) : String(fetchError)}</div>;
-  if (!install) return <div>{generalT('loading')}</div>;
+  if (isLoading) return <div>{generalT('loading')}</div>
+  if (fetchError)
+    return (
+      <div>
+        {generalT('error')}:{' '}
+        {typeof fetchError === 'object' &&
+        fetchError !== null &&
+        'message' in fetchError
+          ? String(fetchError.message)
+          : String(fetchError)}
+      </div>
+    )
+  if (!install) return <div>{generalT('loading')}</div>
 
   return (
     <div className="flex py-10 justify-center items-center flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-3">

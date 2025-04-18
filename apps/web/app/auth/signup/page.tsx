@@ -10,7 +10,9 @@ type MetadataProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export async function generateMetadata(params: MetadataProps): Promise<Metadata> {
+export async function generateMetadata(
+  params: MetadataProps
+): Promise<Metadata> {
   const orgslug = (await params.searchParams).orgslug
   const t = await getTranslations('Auth.Signup')
   const org = await getOrganizationContextInfo(orgslug, {

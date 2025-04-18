@@ -22,10 +22,10 @@ export type StepId = keyof typeof INSTALL_STEPS_IDS
 
 // Interface for step configuration
 export interface InstallStepConfig {
-  id: StepId;
-  translationKey: `steps.${StepId}`; // Enforce structure for translation keys
-  component: React.ReactNode;
-  completed: boolean;
+  id: StepId
+  translationKey: `steps.${StepId}` // Enforce structure for translation keys
+  component: React.ReactNode
+  completed: boolean
 }
 
 export const INSTALL_STEPS: InstallStepConfig[] = [

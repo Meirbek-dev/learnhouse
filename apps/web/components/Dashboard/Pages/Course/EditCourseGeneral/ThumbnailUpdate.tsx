@@ -1,10 +1,15 @@
-'use client';
+'use client'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getAPIUrl } from '@services/config/config'
 import { updateCourseThumbnail } from '@services/courses/courses'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { ArrowBigUpDash, UploadCloud, Image as ImageIcon, FileWarning } from 'lucide-react'
+import {
+  ArrowBigUpDash,
+  UploadCloud,
+  Image as ImageIcon,
+  FileWarning,
+} from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import React, { useState } from 'react'
 import { mutate } from 'swr'
@@ -14,14 +19,14 @@ import toast from 'react-hot-toast'
 
 function ThumbnailUpdate() {
   const course = useCourse() as any
-  const session = useLHSession() as any;
+  const session = useLHSession() as any
   const org = useOrg() as any
   const [localThumbnail, setLocalThumbnail] = React.useState(null) as any
   const [isLoading, setIsLoading] = React.useState(false) as any
   const [error, setError] = React.useState('') as any
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
   const t = useTranslations('CourseEdit.General.Thumbnail')
-  const tNotify = useTranslations('Notifications');
+  const tNotify = useTranslations('Notifications')
 
   const handleFileChange = async (event: any) => {
     const file = event.target.files[0]
@@ -40,42 +45,44 @@ function ThumbnailUpdate() {
 
   const updateThumbnail = async (file: File) => {
     setIsLoading(true)
-    const toast_loading = tNotify('uploading');
-    const toast_id = toast.loading(toast_loading);
+    const toast_loading = tNotify('uploading')
+    const toast_id = toast.loading(toast_loading)
 
     try {
       const res = await updateCourseThumbnail(
         course.courseStructure.course_uuid,
         file,
         session.data?.tokens?.access_token
-      );
-      mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`);
+      )
+      mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
 
       if (res.success === false) {
-        setError(res.HTTPmessage || tNotify('avatarError'));
-        toast.error(res.HTTPmessage || tNotify('avatarError'), { id: toast_id });
+        setError(res.HTTPmessage || tNotify('avatarError'))
+        toast.error(res.HTTPmessage || tNotify('avatarError'), { id: toast_id })
       } else {
-        setError('');
-        toast.success(tNotify('avatarSuccess'), { id: toast_id });
+        setError('')
+        toast.success(tNotify('avatarSuccess'), { id: toast_id })
       }
     } catch (err) {
-        console.error('Error updating thumbnail:', err);
-        setError(tNotify('avatarError'));
-        toast.error(tNotify('avatarError'), { id: toast_id });
+      console.error('Error updating thumbnail:', err)
+      setError(tNotify('avatarError'))
+      toast.error(tNotify('avatarError'), { id: toast_id })
     } finally {
-        setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="w-auto bg-gray-50 rounded-xl outline outline-1 outline-gray-200 h-[200px] shadow-sm">
+    <div className="w-auto bg-gray-50 rounded-xl outline-gray-200 h-[200px] shadow-sm">
       <div className="flex flex-col justify-center items-center h-full">
         <div className="flex flex-col justify-center items-center">
           <div className="flex flex-col justify-center items-center">
             {error && (
               <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-2 transition-all shadow-xs">
                 <FileWarning size={16} className="mr-2" />
-                <div className="text-sm font-semibold first-letter:uppercase">{error}</div>
+                <div className="text-sm font-semibold first-letter:uppercase">
+                  {error}
+                </div>
               </div>
             )}
             {localThumbnail ? (
@@ -86,11 +93,15 @@ function ThumbnailUpdate() {
               />
             ) : (
               <img
-                src={`${course.courseStructure.thumbnail_image ? getCourseThumbnailMediaDirectory(
-                  org?.org_uuid,
-                  course.courseStructure.course_uuid,
+                src={`${
                   course.courseStructure.thumbnail_image
-                ) : '/empty_thumbnail.png'}`}
+                    ? getCourseThumbnailMediaDirectory(
+                        org?.org_uuid,
+                        course.courseStructure.course_uuid,
+                        course.courseStructure.thumbnail_image
+                      )
+                    : '/empty_thumbnail.png'
+                }`}
                 className="shadow-sm w-[200px] h-[100px] rounded-md bg-gray-200"
                 alt="Course Thumbnail"
               />

@@ -1,5 +1,4 @@
 'use client'
-import '../styles/globals.css'
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry'
 import { motion } from 'framer-motion'
 import LHSessionProvider from '@components/Contexts/LHSessionContext'

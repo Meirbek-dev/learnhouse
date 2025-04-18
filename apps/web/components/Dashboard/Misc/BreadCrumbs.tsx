@@ -65,7 +65,9 @@ function BreadCrumbs(props: BreadCrumbsProps) {
             <div className="flex space-x-2 items-center">
               {' '}
               <Users className="text-gray" size={14}></Users>
-              <Link href="/dash/users/settings/users">{t('Card.Users.title')}</Link>
+              <Link href="/dash/users/settings/users">
+                {t('Card.Users.title')}
+              </Link>
             </div>
           ) : (
             ''

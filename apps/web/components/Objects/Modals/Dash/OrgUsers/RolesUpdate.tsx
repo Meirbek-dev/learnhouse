@@ -15,7 +15,7 @@ import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { BarLoader } from 'react-spinners'
 import { mutate } from 'swr'
-import { useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl'
 
 interface Props {
   user: any
@@ -24,10 +24,10 @@ interface Props {
 }
 
 function RolesUpdate(props: Props) {
-  const t = useTranslations('Components.RolesUpdate');
+  const t = useTranslations('Components.RolesUpdate')
   const org = useOrg() as any
   const session = useLHSession() as any
-    const access_token = session?.data?.tokens?.access_token;
+  const access_token = session?.data?.tokens?.access_token
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [assignedRole, setAssignedRole] = React.useState(
     props.alreadyAssignedRole
@@ -43,24 +43,29 @@ function RolesUpdate(props: Props) {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
-    const toastId = toast.loading(t("toastLoading"))
+    const toastId = toast.loading(t('toastLoading'))
     try {
-        const res = await updateUserRole(org.id, props.user.user.id, assignedRole, access_token)
-        if (res.status === 200) {
-          await mutate(`${getAPIUrl()}orgs/${org.id}/users`)
-          props.setRolesModal(false)
-          toast.success(t("toastSuccess"), {id:toastId})
-        } else {
-          const errorDetail = res.data?.detail || 'Unknown error'
-          setError(t('updateErrorDetail', { error: errorDetail }));
-          toast.error(t("toastError"), {id:toastId})
-        }
+      const res = await updateUserRole(
+        org.id,
+        props.user.user.id,
+        assignedRole,
+        access_token
+      )
+      if (res.status === 200) {
+        await mutate(`${getAPIUrl()}orgs/${org.id}/users`)
+        props.setRolesModal(false)
+        toast.success(t('toastSuccess'), { id: toastId })
+      } else {
+        const errorDetail = res.data?.detail || 'Unknown error'
+        setError(t('updateErrorDetail', { error: errorDetail }))
+        toast.error(t('toastError'), { id: toastId })
+      }
     } catch (error: any) {
-        const errorMessage = error?.message || 'An unexpected error occurred'
-        setError(t('updateErrorDetail', { error: errorMessage }));
-        toast.error(t("toastError"), {id:toastId})
+      const errorMessage = error?.message || 'An unexpected error occurred'
+      setError(t('updateErrorDetail', { error: errorMessage }))
+      toast.error(t('toastError'), { id: toastId })
     } finally {
-        setIsSubmitting(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -91,14 +96,20 @@ function RolesUpdate(props: Props) {
               required
             >
               <option value="role_global_admin">{t('adminRole')}</option>
-              <option value="role_global_maintainer">{t('maintainerRole')}</option>
+              <option value="role_global_maintainer">
+                {t('maintainerRole')}
+              </option>
               <option value="role_global_user">{t('userRole')}</option>
             </select>
           </Form.Control>
         </FormField>
         <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
           <Form.Submit asChild>
-            <ButtonBlack type="submit" css={{ marginTop: 10 }} disabled={isSubmitting}>
+            <ButtonBlack
+              type="submit"
+              css={{ marginTop: 10 }}
+              disabled={isSubmitting}
+            >
               {isSubmitting ? (
                 <BarLoader
                   cssOverride={{ borderRadius: 60 }}

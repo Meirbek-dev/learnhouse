@@ -18,15 +18,17 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslations } from 'next-intl'
 
 function OrgCreation() {
-  const t = useTranslations('Install.OrgCreation');
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
-  const validationT = useTranslations('Validation');
+  const t = useTranslations('Install.OrgCreation')
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+  const validationT = useTranslations('Validation')
   const {
     data: install,
     error: error,
     isLoading,
-  } = useSWR(`${getAPIUrl()}install/latest`, (url) => swrFetcher(url, access_token))
+  } = useSWR(`${getAPIUrl()}install/latest`, (url) =>
+    swrFetcher(url, access_token)
+  )
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [isSubmitted, setIsSubmitted] = React.useState(false)
   const router = useRouter()
@@ -35,21 +37,21 @@ function OrgCreation() {
     const errors: any = {}
 
     if (!values.name) {
-      errors.name = validationT('required');
+      errors.name = validationT('required')
     }
 
     if (!values.description) {
-      errors.description = validationT('required');
+      errors.description = validationT('required')
     }
 
     if (!values.slug) {
-      errors.slug = validationT('required');
+      errors.slug = validationT('required')
     }
 
     if (!values.email) {
-      errors.email = validationT('required');
+      errors.email = validationT('required')
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = validationT('invalidEmail');
+      errors.email = validationT('invalidEmail')
     }
 
     return errors
@@ -66,8 +68,8 @@ function OrgCreation() {
         setIsSubmitted(true)
       }, 2000)
     } catch (e) {
-      console.error("Error creating org or updating install:", e);
-      setIsSubmitting(false);
+      console.error('Error creating org or updating install:', e)
+      setIsSubmitting(false)
     }
   }
 
@@ -80,7 +82,7 @@ function OrgCreation() {
     },
     validate,
     onSubmit: (values) => {
-      setIsSubmitting(true);
+      setIsSubmitting(true)
       createOrgAndUpdateInstall(values)
     },
   })
@@ -88,7 +90,10 @@ function OrgCreation() {
     <div>
       <FormLayout onSubmit={formik.handleSubmit}>
         <FormField name="name">
-          <FormLabelAndMessage label={t('nameLabel')} message={formik.errors.name} />
+          <FormLabelAndMessage
+            label={t('nameLabel')}
+            message={formik.errors.name}
+          />
           <Form.Control asChild>
             <Input
               onChange={formik.handleChange}
@@ -118,7 +123,10 @@ function OrgCreation() {
         </FormField>
 
         <FormField name="slug">
-          <FormLabelAndMessage label={t('slugLabel')} message={formik.errors.slug} />
+          <FormLabelAndMessage
+            label={t('slugLabel')}
+            message={formik.errors.slug}
+          />
 
           <Form.Control asChild>
             <Input
@@ -132,7 +140,10 @@ function OrgCreation() {
         </FormField>
         {/* for username  */}
         <FormField name="email">
-          <FormLabelAndMessage label={t('emailLabel')} message={formik.errors.email} />
+          <FormLabelAndMessage
+            label={t('emailLabel')}
+            message={formik.errors.email}
+          />
 
           <Form.Control asChild>
             <Input

@@ -17,8 +17,7 @@ export const HeaderProfileBox = () => {
   const org = useOrg() as any
   const t = useTranslations('Header')
 
-  useEffect(() => { }
-    , [session])
+  useEffect(() => {}, [session])
 
   return (
     <ProfileArea>
@@ -27,10 +26,23 @@ export const HeaderProfileBox = () => {
           <ul className="flex space-x-3 items-center">
             <li>
               <Link
-                href={{ pathname: getUriWithoutOrg('/login'), query: org ? { orgslug: org.slug } : null }} >{t('login')}</Link>
+                href={{
+                  pathname: getUriWithoutOrg('/login'),
+                  query: org ? { orgslug: org.slug } : null,
+                }}
+              >
+                {t('login')}
+              </Link>
             </li>
             <li className="bg-black rounded-lg shadow-md p-2 px-3 text-white">
-              <Link href={{ pathname: getUriWithoutOrg('/signup'), query: org ? { orgslug: org.slug } : null }}>{t('signUp')}</Link>
+              <Link
+                href={{
+                  pathname: getUriWithoutOrg('/signup'),
+                  query: org ? { orgslug: org.slug } : null,
+                }}
+              >
+                {t('signUp')}
+              </Link>
             </li>
           </ul>
         </UnidentifiedArea>
@@ -38,9 +50,13 @@ export const HeaderProfileBox = () => {
       {session.status == 'authenticated' && (
         <AccountArea className="space-x-0">
           <div className="flex items-center space-x-2">
-            <div className='flex items-center space-x-2' >
-              <p className='text-sm capitalize'>{session.data.user.username}</p>
-              {isUserAdmin.isAdmin && <div className="text-[10px] bg-rose-300 px-2 font-bold rounded-md shadow-inner py-1">{t('adminBadge')}</div>}
+            <div className="flex items-center space-x-2">
+              <p className="text-sm capitalize">{session.data.user.username}</p>
+              {isUserAdmin.isAdmin && (
+                <div className="text-[10px] bg-rose-300 px-2 font-bold rounded-md shadow-inner py-1">
+                  {t('adminBadge')}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center space-x-2">
@@ -49,7 +65,10 @@ export const HeaderProfileBox = () => {
                 sideOffset={15}
                 side="bottom"
               >
-                <Link className="text-gray-600" href={'/dash/user-account/owned'}>
+                <Link
+                  className="text-gray-600"
+                  href={'/dash/user-account/owned'}
+                >
                   <Package2 size={14} />
                 </Link>
               </Tooltip>

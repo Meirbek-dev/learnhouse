@@ -1,7 +1,23 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { MapPin, Building2, Globe, Briefcase, GraduationCap, Link, Users, Calendar, Lightbulb, Loader2, ExternalLink } from 'lucide-react'
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card'
+import {
+  MapPin,
+  Building2,
+  Globe,
+  Briefcase,
+  GraduationCap,
+  Link,
+  Users,
+  Calendar,
+  Lightbulb,
+  Loader2,
+  ExternalLink,
+} from 'lucide-react'
 import { getUser } from '@services/users/users'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { Button } from '@/components/ui/button'
@@ -31,15 +47,15 @@ type UserData = {
 }
 
 const ICON_MAP = {
-  'briefcase': Briefcase,
+  briefcase: Briefcase,
   'graduation-cap': GraduationCap,
   'map-pin': MapPin,
   'building-2': Building2,
-  'speciality': Lightbulb,
-  'globe': Globe,
-  'link': Link,
-  'users': Users,
-  'calendar': Calendar,
+  speciality: Lightbulb,
+  globe: Globe,
+  link: Link,
+  users: Users,
+  calendar: Calendar,
 } as const
 
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
@@ -79,9 +95,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
 
   return (
     <HoverCard openDelay={100} closeDelay={150}>
-      <HoverCardTrigger asChild>
-        {children}
-      </HoverCardTrigger>
+      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent className="w-96 bg-white/95 backdrop-blur-md p-0 nice-shadow">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
@@ -101,9 +115,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
                   <div className="flex-shrink-0">
-                    <div className="rounded-full">
-                      {children}
-                    </div>
+                    <div className="rounded-full">{children}</div>
                   </div>
 
                   {/* Name, Bio, and Button */}
@@ -114,7 +126,10 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                           {userData.first_name} {userData.last_name}
                         </h4>
                         {userData.username && (
-                          <Badge variant="outline" className="text-xs font-normal text-gray-500 px-2 truncate">
+                          <Badge
+                            variant="outline"
+                            className="text-xs font-normal text-gray-500 px-2 truncate"
+                          >
                             @{userData.username}
                           </Badge>
                         )}
@@ -123,7 +138,10 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6 text-gray-600 hover:text-gray-900 flex-shrink-0"
-                        onClick={() => userData.username && router.push(`/user/${userData.username}`)}
+                        onClick={() =>
+                          userData.username &&
+                          router.push(`/user/${userData.username}`)
+                        }
                       >
                         <ExternalLink className="w-4 h-4" />
                       </Button>
@@ -145,8 +163,12 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                   <div key={detail.id} className="flex items-center gap-2.5">
                     <IconComponent iconName={detail.icon} />
                     <div className="flex flex-col">
-                      <span className="text-xs text-gray-500">{detail.label}</span>
-                      <span className="text-sm text-gray-700">{detail.text}</span>
+                      <span className="text-xs text-gray-500">
+                        {detail.label}
+                      </span>
+                      <span className="text-sm text-gray-700">
+                        {detail.text}
+                      </span>
                     </div>
                   </div>
                 ))}

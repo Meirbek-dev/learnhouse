@@ -10,52 +10,92 @@ import { useTranslations } from 'next-intl'
 
 export const AssignmentContext = createContext({})
 
-export function AssignmentProvider({ children, assignment_uuid }: { children: React.ReactNode, assignment_uuid: string }) {
-    const session = useLHSession() as any
-    const accessToken = session?.data?.tokens?.access_token
-    const t = useTranslations('Contexts.Assignment')
-    const [assignmentsFull, setAssignmentsFull] = React.useState({ assignment_object: null, assignment_tasks: null, course_object: null , activity_object: null})
+export function AssignmentProvider({
+  children,
+  assignment_uuid,
+}: {
+  children: React.ReactNode
+  assignment_uuid: string
+}) {
+  const session = useLHSession() as any
+  const accessToken = session?.data?.tokens?.access_token
+  const t = useTranslations('Contexts.Assignment')
+  const [assignmentsFull, setAssignmentsFull] = React.useState({
+    assignment_object: null,
+    assignment_tasks: null,
+    course_object: null,
+    activity_object: null,
+  })
 
-    const { data: assignment, error: assignmentError } = useSWR(
-        `${getAPIUrl()}assignments/${assignment_uuid}`,
-        (url) => swrFetcher(url, accessToken)
-    )
+  const { data: assignment, error: assignmentError } = useSWR(
+    `${getAPIUrl()}assignments/${assignment_uuid}`,
+    (url) => swrFetcher(url, accessToken)
+  )
 
-    const { data: assignment_tasks, error: assignmentTasksError } = useSWR(
-        `${getAPIUrl()}assignments/${assignment_uuid}/tasks`,
-        (url) => swrFetcher(url, accessToken)
-    )
+  const { data: assignment_tasks, error: assignmentTasksError } = useSWR(
+    `${getAPIUrl()}assignments/${assignment_uuid}/tasks`,
+    (url) => swrFetcher(url, accessToken)
+  )
 
-    const course_id = assignment?.course_id
+  const course_id = assignment?.course_id
 
-    const { data: course_object, error: courseObjectError } = useSWR(
-        course_id ? `${getAPIUrl()}courses/id/${course_id}` : null,
-        (url) => swrFetcher(url, accessToken)
-    )
+  const { data: course_object, error: courseObjectError } = useSWR(
+    course_id ? `${getAPIUrl()}courses/id/${course_id}` : null,
+    (url) => swrFetcher(url, accessToken)
+  )
 
-    const activity_id = assignment?.activity_id
+  const activity_id = assignment?.activity_id
 
-    const { data: activity_object, error: activityObjectError } = useSWR(
-        activity_id ? `${getAPIUrl()}activities/id/${activity_id}` : null,
-        (url) => swrFetcher(url, accessToken)
-    )
+  const { data: activity_object, error: activityObjectError } = useSWR(
+    activity_id ? `${getAPIUrl()}activities/id/${activity_id}` : null,
+    (url) => swrFetcher(url, accessToken)
+  )
 
-    useEffect(() => {
-        if (assignment && assignment_tasks && (!course_id || course_object) && (!activity_id || activity_object)) {
-            setAssignmentsFull({ assignment_object: assignment, assignment_tasks: assignment_tasks, course_object: course_object, activity_object: activity_object })
-        }
-    }, [assignment, assignment_tasks, course_object, activity_object, course_id, activity_id])
+  useEffect(() => {
+    if (
+      assignment &&
+      assignment_tasks &&
+      (!course_id || course_object) &&
+      (!activity_id || activity_object)
+    ) {
+      setAssignmentsFull({
+        assignment_object: assignment,
+        assignment_tasks: assignment_tasks,
+        course_object: course_object,
+        activity_object: activity_object,
+      })
+    }
+  }, [
+    assignment,
+    assignment_tasks,
+    course_object,
+    activity_object,
+    course_id,
+    activity_id,
+  ])
 
-    const isLoading = !assignment || !assignment_tasks || (course_id && !course_object) || (activity_id && !activity_object);
-    const hasError = assignmentError || assignmentTasksError || courseObjectError || activityObjectError;
+  const isLoading =
+    !assignment ||
+    !assignment_tasks ||
+    (course_id && !course_object) ||
+    (activity_id && !activity_object)
+  const hasError =
+    assignmentError ||
+    assignmentTasksError ||
+    courseObjectError ||
+    activityObjectError
 
-    if (hasError) return <ErrorUI message={t('loadError')} />;
+  if (hasError) return <ErrorUI message={t('loadError')} />
 
-    if (isLoading) return <PageLoading />;
+  if (isLoading) return <PageLoading />
 
-    return <AssignmentContext.Provider value={assignmentsFull}>{children}</AssignmentContext.Provider>
+  return (
+    <AssignmentContext.Provider value={assignmentsFull}>
+      {children}
+    </AssignmentContext.Provider>
+  )
 }
 
 export function useAssignments() {
-    return useContext(AssignmentContext)
+  return useContext(AssignmentContext)
 }

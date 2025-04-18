@@ -17,7 +17,9 @@ function StripeConnectCallback() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const session = useLHSession() as any
-  const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
+  const [status, setStatus] = useState<'processing' | 'success' | 'error'>(
+    'processing'
+  )
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -37,7 +39,7 @@ function StripeConnectCallback() {
           session?.data?.tokens?.access_token
         )
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000))
 
         setStatus('success')
         setMessage(t('connectionSuccess'))
@@ -45,7 +47,6 @@ function StripeConnectCallback() {
         setTimeout(() => {
           window.close()
         }, 2000)
-
       } catch (error) {
         console.error('Error verifying Stripe connection:', error)
         setStatus('error')
@@ -63,7 +64,13 @@ function StripeConnectCallback() {
     <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
       <div className="flex flex-col items-center">
         <div className="mb-10">
-          <Image quality={100} width={50} height={50} src={learnhouseIcon} alt="" />
+          <Image
+            quality={100}
+            width={50}
+            height={50}
+            src={learnhouseIcon}
+            alt=""
+          />
         </div>
 
         <motion.div
@@ -88,7 +95,9 @@ function StripeConnectCallback() {
                 <div className="bg-green-100 p-3 rounded-full">
                   <Check className="h-8 w-8 text-green-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">{message}</h2>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {message}
+                </h2>
                 <p className="text-gray-500">{t('returnToDashboard')}</p>
               </>
             )}
@@ -98,7 +107,9 @@ function StripeConnectCallback() {
                 <div className="bg-red-100 p-3 rounded-full">
                   <AlertTriangle className="h-8 w-8 text-red-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">{message}</h2>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {message}
+                </h2>
                 <p className="text-gray-500">{t('tryAgainOrContact')}</p>
               </>
             )}

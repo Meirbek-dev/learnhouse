@@ -12,9 +12,9 @@ interface FormLayoutProps {
 
 const FormLayout = ({ children, onSubmit, className }: FormLayoutProps) => {
   return (
-    <Form.Root onSubmit={onSubmit} className={className}>
+    <FormRoot onSubmit={onSubmit} className={className}>
       {children}
-    </Form.Root>
+    </FormRoot>
   )
 }
 
@@ -34,7 +34,7 @@ export const FormLabelAndMessage = (props: {
 )
 
 export const FormRoot = styled(Form.Root, {
-  margin: 7,
+  margin: 4,
 })
 
 export const FormField = styled(Form.Field, {

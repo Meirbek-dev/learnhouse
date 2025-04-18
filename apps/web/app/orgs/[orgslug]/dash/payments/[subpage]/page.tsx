@@ -1,5 +1,5 @@
 'use client'
-import React, { use } from 'react';
+import React, { use } from 'react'
 import { motion } from 'framer-motion'
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
 import Link from 'next/link'
@@ -19,7 +19,7 @@ export type PaymentsParams = {
 }
 
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
-  const params = use(props.params);
+  const params = use(props.params)
   const t = useTranslations('DashPage.Payments')
   const session = useLHSession() as any
   const org = useOrg() as any
@@ -27,7 +27,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
 
   const isPaymentsEnabled = useFeatureFlag({
     path: ['features', 'payments', 'enabled'],
-    defaultValue: false
+    defaultValue: false,
   })
 
   const getPageTitle = () => {
@@ -35,22 +35,22 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
       case 'customers':
         return {
           h1: t('customers'),
-          h2: t('customerInfo')
+          h2: t('customerInfo'),
         }
       case 'paid-products':
         return {
           h1: t('paidProducts'),
-          h2: t('paidProductsInfo')
+          h2: t('paidProductsInfo'),
         }
       case 'configuration':
         return {
           h1: t('configuration'),
-          h2: t('configurationInfo')
+          h2: t('configurationInfo'),
         }
       default:
         return {
           h1: t('title'),
-          h2: t('overview')
+          h2: t('overview'),
         }
     }
   }
@@ -78,9 +78,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
             <div className="pt-3 flex font-bold text-4xl tracking-tighter">
               {h1}
             </div>
-            <div className="flex font-medium text-gray-400 text-md">
-              {h2}
-            </div>
+            <div className="flex font-medium text-gray-400 text-md">{h2}</div>
           </div>
         </div>
         <div className="flex space-x-0.5 font-black text-sm">
@@ -120,7 +118,17 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
   )
 }
 
-const TabLink = ({ href, icon, label, isActive }: { href: string, icon: React.ReactNode, label: string, isActive: boolean }) => (
+const TabLink = ({
+  href,
+  icon,
+  label,
+  isActive,
+}: {
+  href: string
+  icon: React.ReactNode
+  label: string
+  isActive: boolean
+}) => (
   <Link href={href}>
     <div
       className={`py-2 w-fit text-center border-black transition-all ease-linear ${isActive ? 'border-b-4' : 'opacity-50'} cursor-pointer`}

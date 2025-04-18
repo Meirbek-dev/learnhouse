@@ -1,53 +1,56 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getCourseContributors } from '@services/courses/courses';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import toast from 'react-hot-toast';
-import { useTranslations } from 'next-intl';
+import { useState, useEffect, useCallback } from 'react'
+import { getCourseContributors } from '@services/courses/courses'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import toast from 'react-hot-toast'
+import { useTranslations } from 'next-intl'
 
-export type ContributorStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'INACTIVE';
+export type ContributorStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'INACTIVE'
 
 export function useContributorStatus(courseUuid: string) {
-  const session = useLHSession() as any;
-  const [contributorStatus, setContributorStatus] = useState<ContributorStatus>('NONE');
-  const [isLoading, setIsLoading] = useState(true);
-  const t = useTranslations('Hooks.useContributorStatus');
+  const session = useLHSession() as any
+  const [contributorStatus, setContributorStatus] =
+    useState<ContributorStatus>('NONE')
+  const [isLoading, setIsLoading] = useState(true)
+  const t = useTranslations('Hooks.useContributorStatus')
 
   const checkContributorStatus = useCallback(async () => {
     if (!session.data?.user) {
-      setIsLoading(false);
-      return;
+      setIsLoading(false)
+      return
     }
 
     try {
       const response = await getCourseContributors(
         'course_' + courseUuid,
         session.data?.tokens?.access_token
-      );
+      )
 
       if (response && response.data) {
         const currentUser = response.data.find(
           (contributor: any) => contributor.user_id === session.data.user.id
-        );
+        )
 
         if (currentUser) {
-          setContributorStatus(currentUser.authorship_status as ContributorStatus);
+          setContributorStatus(
+            currentUser.authorship_status as ContributorStatus
+          )
         } else {
-          setContributorStatus('NONE');
+          setContributorStatus('NONE')
         }
       }
     } catch (error) {
-      console.error('Failed to check contributor status:', error);
-      toast.error(t('checkStatusError'));
+      console.error('Failed to check contributor status:', error)
+      toast.error(t('checkStatusError'))
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [courseUuid, session.data?.tokens?.access_token, session.data?.user, t]);
+  }, [courseUuid, session.data?.tokens?.access_token, session.data?.user, t])
 
   useEffect(() => {
     if (session.data?.user) {
-      checkContributorStatus();
+      checkContributorStatus()
     }
-  }, [checkContributorStatus, session.data?.user]);
+  }, [checkContributorStatus, session.data?.user])
 
-  return { contributorStatus, isLoading, refetch: checkContributorStatus };
+  return { contributorStatus, isLoading, refetch: checkContributorStatus }
 }

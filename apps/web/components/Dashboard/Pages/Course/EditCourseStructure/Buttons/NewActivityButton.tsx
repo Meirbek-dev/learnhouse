@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import { useCourse } from '@components/Contexts/CourseContext'
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
@@ -27,8 +27,8 @@ function NewActivityButton(props: NewActivityButtonProps) {
   const [newActivityModal, setNewActivityModal] = React.useState(false)
   const router = useRouter()
   const course = useCourse() as any
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('CourseEdit.NewActivityModal')
   const tNotify = useTranslations('Notifications')
 
@@ -84,7 +84,8 @@ function NewActivityButton(props: NewActivityButtonProps) {
     await createExternalVideoActivity(
       external_video_data,
       activity,
-      props.chapterId, access_token
+      props.chapterId,
+      access_token
     )
     mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
     setNewActivityModal(false)
@@ -94,7 +95,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
     router.refresh()
   }
 
-  useEffect(() => { }, [course])
+  useEffect(() => {}, [course])
 
   return (
     <div className="flex justify-center">
@@ -102,7 +103,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
         isDialogOpen={newActivityModal}
         onOpenChange={setNewActivityModal}
         minHeight="no-min"
-        minWidth='md'
+        minWidth="md"
         addDefCloseButton={false}
         dialogContent={
           <NewActivityModal
@@ -124,9 +125,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
             className="flex w-44 h-10 items-center justify-center py-2 my-3 rounded-xl text-white bg-black hover:cursor-pointer"
           >
             <Layers size={17} />
-            <div className="text-sm font-bold ml-2">
-              {t('buttonText')}
-            </div>
+            <div className="text-sm font-bold ml-2">{t('buttonText')}</div>
           </div>
         }
       />

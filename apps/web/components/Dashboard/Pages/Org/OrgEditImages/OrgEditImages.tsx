@@ -110,7 +110,7 @@ export default function OrgEditImages() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
-  const t = useTranslations('Dashboard.OrgSettings.Images')
+  const t = useTranslations('DashPage.OrgSettings.Images')
   const tNotify = useTranslations('Notifications')
   const [localLogo, setLocalLogo] = useState<string | null>(null)
   const [localThumbnail, setLocalThumbnail] = useState<string | null>(null)

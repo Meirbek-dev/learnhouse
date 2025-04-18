@@ -113,14 +113,23 @@ const DETAIL_TEMPLATES = {
   ],
 } as const
 
-const createValidationSchema = (t: (key: string, values?: any) => string) => Yup.object().shape({
-  email: Yup.string().email(t('Components.Form.invalidEmail')).required(t('Components.Form.requiredField', {fieldName: 'Email'})),
-  username: Yup.string().required(t('Components.Form.requiredField', {fieldName: 'Username'})),
-  first_name: Yup.string().required(t('Components.Form.requiredField', {fieldName: 'First name'})),
-  last_name: Yup.string().required(t('Components.Form.requiredField', {fieldName: 'Last name'})),
-  bio: Yup.string().max(400, t('Components.Form.maxChars', {count: 400})),
-  details: Yup.object().shape({}),
-});
+const createValidationSchema = (t: (key: string, values?: any) => string) =>
+  Yup.object().shape({
+    email: Yup.string()
+      .email(t('Components.Form.invalidEmail'))
+      .required(t('Components.Form.requiredField', { fieldName: 'Email' })),
+    username: Yup.string().required(
+      t('Components.Form.requiredField', { fieldName: 'Username' })
+    ),
+    first_name: Yup.string().required(
+      t('Components.Form.requiredField', { fieldName: 'First name' })
+    ),
+    last_name: Yup.string().required(
+      t('Components.Form.requiredField', { fieldName: 'Last name' })
+    ),
+    bio: Yup.string().max(400, t('Components.Form.maxChars', { count: 400 })),
+    details: Yup.object().shape({}),
+  })
 
 // Memoized detail card component for better performance
 const DetailCard = React.memo(
@@ -139,7 +148,7 @@ const DetailCard = React.memo(
   }) => {
     // Add local state for label input
     const [localLabel, setLocalLabel] = useState(detail.label)
-    const t = useTranslations('DashPage.UserAccountSettings.generalSection');
+    const t = useTranslations('DashPage.UserAccountSettings.generalSection')
 
     // Debounce the label change handler
     const debouncedLabelChange = useDebounce((newLabel: string) => {
@@ -611,7 +620,9 @@ function UserEditGeneral() {
   const [initialLoading, setInitialLoading] = useState<boolean>(true)
   const t = useTranslations()
   const tNotify = useTranslations('Notifications')
-  const tGeneralSection = useTranslations('DashPage.UserAccountSettings.generalSection')
+  const tGeneralSection = useTranslations(
+    'DashPage.UserAccountSettings.generalSection'
+  )
   const validationSchema = React.useMemo(() => createValidationSchema(t), [t])
 
   useEffect(() => {

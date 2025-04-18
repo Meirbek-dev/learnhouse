@@ -1,6 +1,7 @@
 import ClientLayout from './client-layout'
 import { isDevEnv } from './auth/options'
 import Script from 'next/script'
+import '../styles/globals.css'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server'
 
@@ -14,7 +15,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale}>
+    <html className="" lang={locale}>
       <head />
       <body>
         {isDevEnv ? (

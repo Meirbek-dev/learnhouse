@@ -53,7 +53,9 @@ export function CourseOverviewTop({
             )}
           </Link>
           <div className="flex flex-col course_metadata justify-center pl-5">
-            <div className="text-gray-400 font-semibold text-sm">{t('courseLabel')}</div>
+            <div className="text-gray-400 font-semibold text-sm">
+              {t('courseLabel')}
+            </div>
             <div className="text-black font-bold text-xl -mt-1 first-letter:uppercase">
               {course.courseStructure.name}
             </div>

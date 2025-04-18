@@ -1,168 +1,189 @@
 import React from 'react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { Plus, Trash2, GripVertical, ImageIcon, Link as LinkIcon, Award, ArrowRight, Edit, TextIcon, Briefcase, GraduationCap, Upload, MapPin, BookOpen } from 'lucide-react'
-import { Input } from "@components/ui/input"
-import { Textarea } from "@components/ui/textarea"
-import { Label } from "@components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
-import { Button } from "@components/ui/button"
+import {
+  Plus,
+  Trash2,
+  GripVertical,
+  ImageIcon,
+  Link as LinkIcon,
+  Award,
+  ArrowRight,
+  Edit,
+  TextIcon,
+  Briefcase,
+  GraduationCap,
+  Upload,
+  MapPin,
+  BookOpen,
+} from 'lucide-react'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import { Label } from '@components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select'
+import { Button } from '@components/ui/button'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { updateProfile } from '@services/settings/profile'
 import { getUser } from '@services/users/users'
 import { toast } from 'react-hot-toast'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui/tabs'
 import { useTranslations } from 'next-intl'
 
 // Define section type keys (mapping to translation keys)
 const SECTION_TYPE_KEYS = {
   'image-gallery': 'imageGallery',
-  'text': 'text',
-  'links': 'links',
-  'skills': 'skills',
-  'experience': 'experience',
-  'education': 'education',
-  'affiliation': 'affiliation',
-  'courses': 'courses'
-} as const;
+  text: 'text',
+  links: 'links',
+  skills: 'skills',
+  experience: 'experience',
+  education: 'education',
+  affiliation: 'affiliation',
+  courses: 'courses',
+} as const
 
 // Function to get translated section types configuration
 const getSectionTypesConfig = (t: Function) => ({
   'image-gallery': {
     icon: ImageIcon,
     label: t('SectionTypes.imageGallery.label'),
-    description: t('SectionTypes.imageGallery.description')
+    description: t('SectionTypes.imageGallery.description'),
   },
-  'text': {
+  text: {
     icon: TextIcon,
     label: t('SectionTypes.text.label'),
-    description: t('SectionTypes.text.description')
+    description: t('SectionTypes.text.description'),
   },
-  'links': {
+  links: {
     icon: LinkIcon,
     label: t('SectionTypes.links.label'),
-    description: t('SectionTypes.links.description')
+    description: t('SectionTypes.links.description'),
   },
-  'skills': {
+  skills: {
     icon: Award,
     label: t('SectionTypes.skills.label'),
-    description: t('SectionTypes.skills.description')
+    description: t('SectionTypes.skills.description'),
   },
-  'experience': {
+  experience: {
     icon: Briefcase,
     label: t('SectionTypes.experience.label'),
-    description: t('SectionTypes.experience.description')
+    description: t('SectionTypes.experience.description'),
   },
-  'education': {
+  education: {
     icon: GraduationCap,
     label: t('SectionTypes.education.label'),
-    description: t('SectionTypes.education.description')
+    description: t('SectionTypes.education.description'),
   },
-  'affiliation': {
+  affiliation: {
     icon: MapPin,
     label: t('SectionTypes.affiliation.label'),
-    description: t('SectionTypes.affiliation.description')
+    description: t('SectionTypes.affiliation.description'),
   },
-  'courses': {
+  courses: {
     icon: BookOpen,
     label: t('SectionTypes.courses.label'),
-    description: t('SectionTypes.courses.description')
-  }
-});
+    description: t('SectionTypes.courses.description'),
+  },
+})
 
 // Type definitions
 interface ProfileImage {
-  url: string;
-  caption?: string;
+  url: string
+  caption?: string
 }
 
 interface ProfileLink {
-  title: string;
-  url: string;
-  icon?: string;
+  title: string
+  url: string
+  icon?: string
 }
 
 interface ProfileSkill {
-  name: string;
-  level?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  category?: string;
+  name: string
+  level?: 'beginner' | 'intermediate' | 'advanced' | 'expert'
+  category?: string
 }
 
 interface ProfileExperience {
-  title: string;
-  organization: string;
-  startDate: string;
-  endDate?: string;
-  current: boolean;
-  description: string;
+  title: string
+  organization: string
+  startDate: string
+  endDate?: string
+  current: boolean
+  description: string
 }
 
 interface ProfileEducation {
-  institution: string;
-  degree: string;
-  field: string;
-  startDate: string;
-  endDate?: string;
-  current: boolean;
-  description?: string;
+  institution: string
+  degree: string
+  field: string
+  startDate: string
+  endDate?: string
+  current: boolean
+  description?: string
 }
 
 interface ProfileAffiliation {
-  name: string;
-  description: string;
-  logoUrl: string;
+  name: string
+  description: string
+  logoUrl: string
 }
 
 interface Course {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail?: string;
-  status: string;
+  id: string
+  title: string
+  description: string
+  thumbnail?: string
+  status: string
 }
 
 interface BaseSection {
-  id: string;
-  type: keyof typeof SECTION_TYPE_KEYS;
-  title: string;
+  id: string
+  type: keyof typeof SECTION_TYPE_KEYS
+  title: string
 }
 
 interface ImageGallerySection extends BaseSection {
-  type: 'image-gallery';
-  images: ProfileImage[];
+  type: 'image-gallery'
+  images: ProfileImage[]
 }
 
 interface TextSection extends BaseSection {
-  type: 'text';
-  content: string;
+  type: 'text'
+  content: string
 }
 
 interface LinksSection extends BaseSection {
-  type: 'links';
-  links: ProfileLink[];
+  type: 'links'
+  links: ProfileLink[]
 }
 
 interface SkillsSection extends BaseSection {
-  type: 'skills';
-  skills: ProfileSkill[];
+  type: 'skills'
+  skills: ProfileSkill[]
 }
 
 interface ExperienceSection extends BaseSection {
-  type: 'experience';
-  experiences: ProfileExperience[];
+  type: 'experience'
+  experiences: ProfileExperience[]
 }
 
 interface EducationSection extends BaseSection {
-  type: 'education';
-  education: ProfileEducation[];
+  type: 'education'
+  education: ProfileEducation[]
 }
 
 interface AffiliationSection extends BaseSection {
-  type: 'affiliation';
-  affiliations: ProfileAffiliation[];
+  type: 'affiliation'
+  affiliations: ProfileAffiliation[]
 }
 
 interface CoursesSection extends BaseSection {
-  type: 'courses';
+  type: 'courses'
   // No need to store courses as they will be fetched from API
 }
 
@@ -174,21 +195,23 @@ type ProfileSection =
   | ExperienceSection
   | EducationSection
   | AffiliationSection
-  | CoursesSection;
+  | CoursesSection
 
 interface ProfileData {
-  sections: ProfileSection[];
+  sections: ProfileSection[]
 }
 
 const UserProfileBuilder = () => {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('Dashboard.UserProfileBuilder');
-  const tNotify = useTranslations('Notifications');
+  const t = useTranslations('Dashboard.UserProfileBuilder')
+  const tNotify = useTranslations('Notifications')
   const [profileData, setProfileData] = React.useState<ProfileData>({
-    sections: []
+    sections: [],
   })
-  const [selectedSection, setSelectedSection] = React.useState<number | null>(null)
+  const [selectedSection, setSelectedSection] = React.useState<number | null>(
+    null
+  )
   const [isSaving, setIsSaving] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(true)
 
@@ -202,38 +225,44 @@ const UserProfileBuilder = () => {
 
           if (userData.profile) {
             try {
-              const profileSections = typeof userData.profile === 'string'
-                ? JSON.parse(userData.profile).sections
-                : userData.profile.sections;
+              const profileSections =
+                typeof userData.profile === 'string'
+                  ? JSON.parse(userData.profile).sections
+                  : userData.profile.sections
 
               setProfileData({
-                sections: profileSections || []
-              });
+                sections: profileSections || [],
+              })
             } catch (error) {
-              console.error('Error parsing profile data:', error);
-              setProfileData({ sections: [] });
+              console.error('Error parsing profile data:', error)
+              setProfileData({ sections: [] })
             }
           }
         } catch (error) {
-          console.error('Error fetching user data:', error);
-          toast.error('Failed to load profile data');
-          toast.error(tNotify('profileLoadFailed'));
+          console.error('Error fetching user data:', error)
+          toast.error('Failed to load profile data')
+          toast.error(tNotify('profileLoadFailed'))
         } finally {
           setIsLoading(false)
         }
       }
-    };
+    }
 
-    fetchUserData();
+    fetchUserData()
   }, [session?.data?.user?.id, access_token])
 
-  const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): ProfileSection => {
-    const sectionTypesConfig = getSectionTypesConfig(t);
-    const sectionTypeKey = SECTION_TYPE_KEYS[type];
+  const createEmptySection = (
+    t: Function,
+    type: keyof typeof SECTION_TYPE_KEYS
+  ): ProfileSection => {
+    const sectionTypesConfig = getSectionTypesConfig(t)
+    const sectionTypeKey = SECTION_TYPE_KEYS[type]
     const baseSection = {
       id: `section-${Date.now()}`,
       type,
-      title: t('EmptySections.defaultTitle', { sectionName: sectionTypesConfig[type].label })
+      title: t('EmptySections.defaultTitle', {
+        sectionName: sectionTypesConfig[type].label,
+      }),
     }
 
     switch (type) {
@@ -241,57 +270,57 @@ const UserProfileBuilder = () => {
         return {
           ...baseSection,
           type: 'image-gallery',
-          images: []
+          images: [],
         }
       case 'text':
         return {
           ...baseSection,
           type: 'text',
-          content: ''
+          content: '',
         }
       case 'links':
         return {
           ...baseSection,
           type: 'links',
-          links: []
+          links: [],
         }
       case 'skills':
         return {
           ...baseSection,
           type: 'skills',
-          skills: []
+          skills: [],
         }
       case 'experience':
         return {
           ...baseSection,
           type: 'experience',
-          experiences: []
+          experiences: [],
         }
       case 'education':
         return {
           ...baseSection,
           type: 'education',
-          education: []
+          education: [],
         }
       case 'affiliation':
         return {
           ...baseSection,
           type: 'affiliation',
-          affiliations: []
+          affiliations: [],
         }
       case 'courses':
         return {
           ...baseSection,
-          type: 'courses'
+          type: 'courses',
         }
     }
   }
 
   const addSection = (type: keyof typeof SECTION_TYPE_KEYS) => {
     const newSection = createEmptySection(t, type)
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      sections: [...prev.sections, newSection]
+      sections: [...prev.sections, newSection],
     }))
     setSelectedSection(profileData.sections.length)
   }
@@ -299,16 +328,16 @@ const UserProfileBuilder = () => {
   const updateSection = (index: number, updatedSection: ProfileSection) => {
     const newSections = [...profileData.sections]
     newSections[index] = updatedSection
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      sections: newSections
+      sections: newSections,
     }))
   }
 
   const deleteSection = (index: number) => {
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      sections: prev.sections.filter((_, i) => i !== index)
+      sections: prev.sections.filter((_, i) => i !== index),
     }))
     setSelectedSection(null)
   }
@@ -320,9 +349,9 @@ const UserProfileBuilder = () => {
     const [reorderedItem] = items.splice(result.source.index, 1)
     items.splice(result.destination.index, 0, reorderedItem)
 
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      sections: items
+      sections: items,
     }))
     setSelectedSection(result.destination.index)
   }
@@ -369,7 +398,12 @@ const UserProfileBuilder = () => {
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="text-xl font-semibold flex items-center">{t('title')} <div className="text-xs ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full">{t('betaBadge')}</div></h2>
+            <h2 className="text-xl font-semibold flex items-center">
+              {t('title')}{' '}
+              <div className="text-xs ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
+                {t('betaBadge')}
+              </div>
+            </h2>
             <p className="text-gray-600">{t('description')}</p>
           </div>
           <Button
@@ -414,28 +448,37 @@ const UserProfileBuilder = () => {
                           >
                             <div className="flex items-center justify-between group">
                               <div className="flex items-center space-x-3">
-                                <div {...provided.dragHandleProps}
+                                <div
+                                  {...provided.dragHandleProps}
                                   className={`p-1.5 rounded-md transition-colors duration-200 ${
                                     selectedSection === index
                                       ? 'text-blue-500 bg-blue-100/50'
                                       : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                                  }`}>
+                                  }`}
+                                >
                                   <GripVertical size={16} />
                                 </div>
-                                <div className={`p-1.5 rounded-md ${
-                                  selectedSection === index
-                                    ? 'text-blue-600 bg-blue-100/50'
-                                    : 'text-gray-600 bg-gray-100/50'
-                                }`}>
-                                  {React.createElement(getSectionTypesConfig(t)[section.type].icon, {
-                                    size: 16
-                                  })}
+                                <div
+                                  className={`p-1.5 rounded-md ${
+                                    selectedSection === index
+                                      ? 'text-blue-600 bg-blue-100/50'
+                                      : 'text-gray-600 bg-gray-100/50'
+                                  }`}
+                                >
+                                  {React.createElement(
+                                    getSectionTypesConfig(t)[section.type].icon,
+                                    {
+                                      size: 16,
+                                    }
+                                  )}
                                 </div>
-                                <span className={`text-sm font-medium truncate ${
-                                  selectedSection === index
-                                    ? 'text-blue-700'
-                                    : 'text-gray-700'
-                                }`}>
+                                <span
+                                  className={`text-sm font-medium truncate ${
+                                    selectedSection === index
+                                      ? 'text-blue-700'
+                                      : 'text-gray-700'
+                                  }`}
+                                >
                                   {section.title}
                                 </span>
                               </div>
@@ -484,26 +527,35 @@ const UserProfileBuilder = () => {
               >
                 <SelectTrigger className="w-full p-0 border-0 bg-black">
                   <div className="w-full">
-                    <Button variant="default" className="w-full bg-black hover:bg-black/90 text-white">
+                    <Button
+                      variant="default"
+                      className="w-full bg-black hover:bg-black/90 text-white"
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       {t('SectionsPanel.addSectionButton')}
                     </Button>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(getSectionTypesConfig(t)).map(([type, { icon: Icon, label, description }]) => (
-                    <SelectItem key={type} value={type}>
-                      <div className="flex items-center space-x-3 py-1">
-                        <div className="p-1.5 bg-gray-50 rounded-md">
-                          <Icon size={16} className="text-gray-600" />
+                  {Object.entries(getSectionTypesConfig(t)).map(
+                    ([type, { icon: Icon, label, description }]) => (
+                      <SelectItem key={type} value={type}>
+                        <div className="flex items-center space-x-3 py-1">
+                          <div className="p-1.5 bg-gray-50 rounded-md">
+                            <Icon size={16} className="text-gray-600" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-sm text-gray-700">
+                              {label}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {description}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <div className="font-medium text-sm text-gray-700">{label}</div>
-                          <div className="text-xs text-gray-500">{description}</div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -515,7 +567,12 @@ const UserProfileBuilder = () => {
               <SectionEditor
                 t={t}
                 section={profileData.sections[selectedSection]}
-                onChange={(updatedSection) => updateSection(selectedSection, updatedSection as ProfileSection)}
+                onChange={(updatedSection) =>
+                  updateSection(
+                    selectedSection,
+                    updatedSection as ProfileSection
+                  )
+                }
               />
             ) : (
               <div className="h-full flex items-center justify-center text-gray-500">
@@ -530,12 +587,16 @@ const UserProfileBuilder = () => {
 }
 
 interface SectionEditorProps {
-  t: Function;
-  section: ProfileSection;
-  onChange: (section: ProfileSection) => void;
+  t: Function
+  section: ProfileSection
+  onChange: (section: ProfileSection) => void
 }
 
-const SectionEditor: React.FC<SectionEditorProps> = ({ t, section, onChange }) => {
+const SectionEditor: React.FC<SectionEditorProps> = ({
+  t,
+  section,
+  onChange,
+}) => {
   switch (section.type) {
     case 'image-gallery':
       return <ImageGalleryEditor t={t} section={section} onChange={onChange} />
@@ -559,9 +620,9 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ t, section, onChange }) =
 }
 
 const ImageGalleryEditor: React.FC<{
-  t: Function;
-  section: ImageGallerySection;
-  onChange: (section: ImageGallerySection) => void;
+  t: Function
+  section: ImageGallerySection
+  onChange: (section: ImageGallerySection) => void
 }> = ({ t, section, onChange }) => {
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
@@ -587,7 +648,10 @@ const ImageGalleryEditor: React.FC<{
           <Label>Images</Label>
           <div className="space-y-3 mt-2">
             {section.images.map((image, index) => (
-              <div key={index} className="grid grid-cols-[2fr_1fr_auto] gap-4 p-4 border rounded-lg">
+              <div
+                key={index}
+                className="grid grid-cols-[2fr_1fr_auto] gap-4 p-4 border rounded-lg"
+              >
                 <div>
                   <Label>Image URL</Label>
                   <Input
@@ -618,7 +682,9 @@ const ImageGalleryEditor: React.FC<{
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      const newImages = section.images.filter((_, i) => i !== index)
+                      const newImages = section.images.filter(
+                        (_, i) => i !== index
+                      )
                       onChange({ ...section, images: newImages })
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -642,11 +708,11 @@ const ImageGalleryEditor: React.FC<{
               onClick={() => {
                 const newImage: ProfileImage = {
                   url: '',
-                  caption: ''
+                  caption: '',
                 }
                 onChange({
                   ...section,
-                  images: [...section.images, newImage]
+                  images: [...section.images, newImage],
                 })
               }}
               className="w-full"
@@ -662,9 +728,9 @@ const ImageGalleryEditor: React.FC<{
 }
 
 const TextEditor: React.FC<{
-  t: Function;
-  section: TextSection;
-  onChange: (section: TextSection) => void;
+  t: Function
+  section: TextSection
+  onChange: (section: TextSection) => void
 }> = ({ t, section, onChange }) => {
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
@@ -702,9 +768,9 @@ const TextEditor: React.FC<{
 }
 
 const LinksEditor: React.FC<{
-  t: Function;
-  section: LinksSection;
-  onChange: (section: LinksSection) => void;
+  t: Function
+  section: LinksSection
+  onChange: (section: LinksSection) => void
 }> = ({ t, section, onChange }) => {
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
@@ -730,7 +796,10 @@ const LinksEditor: React.FC<{
           <Label>Links</Label>
           <div className="space-y-3 mt-2">
             {section.links.map((link, index) => (
-              <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-2 p-4 border rounded-lg">
+              <div
+                key={index}
+                className="grid grid-cols-[1fr_1fr_auto] gap-2 p-4 border rounded-lg"
+              >
                 <Input
                   value={link.title}
                   onChange={(e) => {
@@ -767,11 +836,11 @@ const LinksEditor: React.FC<{
               onClick={() => {
                 const newLink: ProfileLink = {
                   title: '',
-                  url: ''
+                  url: '',
                 }
                 onChange({
                   ...section,
-                  links: [...section.links, newLink]
+                  links: [...section.links, newLink],
                 })
               }}
               className="w-full"
@@ -787,9 +856,9 @@ const LinksEditor: React.FC<{
 }
 
 const SkillsEditor: React.FC<{
-  t: Function;
-  section: SkillsSection;
-  onChange: (section: SkillsSection) => void;
+  t: Function
+  section: SkillsSection
+  onChange: (section: SkillsSection) => void
 }> = ({ t, section, onChange }) => {
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
@@ -815,7 +884,10 @@ const SkillsEditor: React.FC<{
           <Label>Skills</Label>
           <div className="space-y-3 mt-2">
             {section.skills.map((skill, index) => (
-              <div key={index} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 p-4 border rounded-lg">
+              <div
+                key={index}
+                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 p-4 border rounded-lg"
+              >
                 <Input
                   value={skill.name}
                   onChange={(e) => {
@@ -829,7 +901,10 @@ const SkillsEditor: React.FC<{
                   value={skill.level || 'intermediate'}
                   onValueChange={(value) => {
                     const newSkills = [...section.skills]
-                    newSkills[index] = { ...skill, level: value as ProfileSkill['level'] }
+                    newSkills[index] = {
+                      ...skill,
+                      level: value as ProfileSkill['level'],
+                    }
                     onChange({ ...section, skills: newSkills })
                   }}
                 >
@@ -856,7 +931,9 @@ const SkillsEditor: React.FC<{
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    const newSkills = section.skills.filter((_, i) => i !== index)
+                    const newSkills = section.skills.filter(
+                      (_, i) => i !== index
+                    )
                     onChange({ ...section, skills: newSkills })
                   }}
                   className="text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -870,11 +947,11 @@ const SkillsEditor: React.FC<{
               onClick={() => {
                 const newSkill: ProfileSkill = {
                   name: '',
-                  level: 'intermediate'
+                  level: 'intermediate',
                 }
                 onChange({
                   ...section,
-                  skills: [...section.skills, newSkill]
+                  skills: [...section.skills, newSkill],
                 })
               }}
               className="w-full"
@@ -890,9 +967,9 @@ const SkillsEditor: React.FC<{
 }
 
 const ExperienceEditor: React.FC<{
-  t: Function;
-  section: ExperienceSection;
-  onChange: (section: ExperienceSection) => void;
+  t: Function
+  section: ExperienceSection
+  onChange: (section: ExperienceSection) => void
 }> = ({ t, section, onChange }) => {
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
@@ -926,7 +1003,10 @@ const ExperienceEditor: React.FC<{
                       value={experience.title}
                       onChange={(e) => {
                         const newExperiences = [...section.experiences]
-                        newExperiences[index] = { ...experience, title: e.target.value }
+                        newExperiences[index] = {
+                          ...experience,
+                          title: e.target.value,
+                        }
                         onChange({ ...section, experiences: newExperiences })
                       }}
                       placeholder="Position or role"
@@ -938,7 +1018,10 @@ const ExperienceEditor: React.FC<{
                       value={experience.organization}
                       onChange={(e) => {
                         const newExperiences = [...section.experiences]
-                        newExperiences[index] = { ...experience, organization: e.target.value }
+                        newExperiences[index] = {
+                          ...experience,
+                          organization: e.target.value,
+                        }
                         onChange({ ...section, experiences: newExperiences })
                       }}
                       placeholder="Company or organization"
@@ -954,7 +1037,10 @@ const ExperienceEditor: React.FC<{
                       value={experience.startDate}
                       onChange={(e) => {
                         const newExperiences = [...section.experiences]
-                        newExperiences[index] = { ...experience, startDate: e.target.value }
+                        newExperiences[index] = {
+                          ...experience,
+                          startDate: e.target.value,
+                        }
                         onChange({ ...section, experiences: newExperiences })
                       }}
                     />
@@ -966,7 +1052,10 @@ const ExperienceEditor: React.FC<{
                       value={experience.endDate || ''}
                       onChange={(e) => {
                         const newExperiences = [...section.experiences]
-                        newExperiences[index] = { ...experience, endDate: e.target.value }
+                        newExperiences[index] = {
+                          ...experience,
+                          endDate: e.target.value,
+                        }
                         onChange({ ...section, experiences: newExperiences })
                       }}
                       disabled={experience.current}
@@ -983,7 +1072,9 @@ const ExperienceEditor: React.FC<{
                           newExperiences[index] = {
                             ...experience,
                             current: e.target.checked,
-                            endDate: e.target.checked ? undefined : experience.endDate
+                            endDate: e.target.checked
+                              ? undefined
+                              : experience.endDate,
                           }
                           onChange({ ...section, experiences: newExperiences })
                         }}
@@ -1000,7 +1091,10 @@ const ExperienceEditor: React.FC<{
                     value={experience.description}
                     onChange={(e) => {
                       const newExperiences = [...section.experiences]
-                      newExperiences[index] = { ...experience, description: e.target.value }
+                      newExperiences[index] = {
+                        ...experience,
+                        description: e.target.value,
+                      }
                       onChange({ ...section, experiences: newExperiences })
                     }}
                     placeholder="Describe your role and achievements"
@@ -1013,7 +1107,9 @@ const ExperienceEditor: React.FC<{
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      const newExperiences = section.experiences.filter((_, i) => i !== index)
+                      const newExperiences = section.experiences.filter(
+                        (_, i) => i !== index
+                      )
                       onChange({ ...section, experiences: newExperiences })
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -1032,11 +1128,11 @@ const ExperienceEditor: React.FC<{
                   organization: '',
                   startDate: new Date().toISOString().split('T')[0],
                   current: false,
-                  description: ''
+                  description: '',
                 }
                 onChange({
                   ...section,
-                  experiences: [...section.experiences, newExperience]
+                  experiences: [...section.experiences, newExperience],
                 })
               }}
               className="w-full"
@@ -1052,9 +1148,9 @@ const ExperienceEditor: React.FC<{
 }
 
 const EducationEditor: React.FC<{
-  t: Function;
-  section: EducationSection;
-  onChange: (section: EducationSection) => void;
+  t: Function
+  section: EducationSection
+  onChange: (section: EducationSection) => void
 }> = ({ t, section, onChange }) => {
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
@@ -1088,7 +1184,10 @@ const EducationEditor: React.FC<{
                       value={edu.institution}
                       onChange={(e) => {
                         const newEducation = [...section.education]
-                        newEducation[index] = { ...edu, institution: e.target.value }
+                        newEducation[index] = {
+                          ...edu,
+                          institution: e.target.value,
+                        }
                         onChange({ ...section, education: newEducation })
                       }}
                       placeholder="School or university"
@@ -1129,7 +1228,10 @@ const EducationEditor: React.FC<{
                       value={edu.startDate}
                       onChange={(e) => {
                         const newEducation = [...section.education]
-                        newEducation[index] = { ...edu, startDate: e.target.value }
+                        newEducation[index] = {
+                          ...edu,
+                          startDate: e.target.value,
+                        }
                         onChange({ ...section, education: newEducation })
                       }}
                     />
@@ -1141,7 +1243,10 @@ const EducationEditor: React.FC<{
                       value={edu.endDate || ''}
                       onChange={(e) => {
                         const newEducation = [...section.education]
-                        newEducation[index] = { ...edu, endDate: e.target.value }
+                        newEducation[index] = {
+                          ...edu,
+                          endDate: e.target.value,
+                        }
                         onChange({ ...section, education: newEducation })
                       }}
                       disabled={edu.current}
@@ -1158,7 +1263,7 @@ const EducationEditor: React.FC<{
                           newEducation[index] = {
                             ...edu,
                             current: e.target.checked,
-                            endDate: e.target.checked ? undefined : edu.endDate
+                            endDate: e.target.checked ? undefined : edu.endDate,
                           }
                           onChange({ ...section, education: newEducation })
                         }}
@@ -1175,7 +1280,10 @@ const EducationEditor: React.FC<{
                     value={edu.description || ''}
                     onChange={(e) => {
                       const newEducation = [...section.education]
-                      newEducation[index] = { ...edu, description: e.target.value }
+                      newEducation[index] = {
+                        ...edu,
+                        description: e.target.value,
+                      }
                       onChange({ ...section, education: newEducation })
                     }}
                     placeholder="Additional details about your education"
@@ -1188,7 +1296,9 @@ const EducationEditor: React.FC<{
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      const newEducation = section.education.filter((_, i) => i !== index)
+                      const newEducation = section.education.filter(
+                        (_, i) => i !== index
+                      )
                       onChange({ ...section, education: newEducation })
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -1208,11 +1318,11 @@ const EducationEditor: React.FC<{
                   field: '',
                   startDate: new Date().toISOString().split('T')[0],
                   current: false,
-                  description: ''
+                  description: '',
                 }
                 onChange({
                   ...section,
-                  education: [...section.education, newEducation]
+                  education: [...section.education, newEducation],
                 })
               }}
               className="w-full"
@@ -1228,9 +1338,9 @@ const EducationEditor: React.FC<{
 }
 
 const AffiliationEditor: React.FC<{
-  t: Function;
-  section: AffiliationSection;
-  onChange: (section: AffiliationSection) => void;
+  t: Function
+  section: AffiliationSection
+  onChange: (section: AffiliationSection) => void
 }> = ({ t, section, onChange }) => {
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
@@ -1264,7 +1374,10 @@ const AffiliationEditor: React.FC<{
                       value={affiliation.name}
                       onChange={(e) => {
                         const newAffiliations = [...section.affiliations]
-                        newAffiliations[index] = { ...affiliation, name: e.target.value }
+                        newAffiliations[index] = {
+                          ...affiliation,
+                          name: e.target.value,
+                        }
                         onChange({ ...section, affiliations: newAffiliations })
                       }}
                       placeholder="Name of the organization"
@@ -1276,7 +1389,10 @@ const AffiliationEditor: React.FC<{
                       value={affiliation.logoUrl}
                       onChange={(e) => {
                         const newAffiliations = [...section.affiliations]
-                        newAffiliations[index] = { ...affiliation, logoUrl: e.target.value }
+                        newAffiliations[index] = {
+                          ...affiliation,
+                          logoUrl: e.target.value,
+                        }
                         onChange({ ...section, affiliations: newAffiliations })
                       }}
                       placeholder="URL to the organization's logo"
@@ -1290,7 +1406,10 @@ const AffiliationEditor: React.FC<{
                     value={affiliation.description}
                     onChange={(e) => {
                       const newAffiliations = [...section.affiliations]
-                      newAffiliations[index] = { ...affiliation, description: e.target.value }
+                      newAffiliations[index] = {
+                        ...affiliation,
+                        description: e.target.value,
+                      }
                       onChange({ ...section, affiliations: newAffiliations })
                     }}
                     placeholder="Description of the organization"
@@ -1302,7 +1421,9 @@ const AffiliationEditor: React.FC<{
                   <Button
                     variant="ghost"
                     onClick={() => {
-                      const newAffiliations = section.affiliations.filter((_, i) => i !== index)
+                      const newAffiliations = section.affiliations.filter(
+                        (_, i) => i !== index
+                      )
                       onChange({ ...section, affiliations: newAffiliations })
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -1319,11 +1440,11 @@ const AffiliationEditor: React.FC<{
                 const newAffiliation: ProfileAffiliation = {
                   name: '',
                   description: '',
-                  logoUrl: ''
+                  logoUrl: '',
                 }
                 onChange({
                   ...section,
-                  affiliations: [...section.affiliations, newAffiliation]
+                  affiliations: [...section.affiliations, newAffiliation],
                 })
               }}
               className="w-full"
@@ -1339,9 +1460,9 @@ const AffiliationEditor: React.FC<{
 }
 
 const CoursesEditor: React.FC<{
-  t: Function;
-  section: CoursesSection;
-  onChange: (section: CoursesSection) => void;
+  t: Function
+  section: CoursesSection
+  onChange: (section: CoursesSection) => void
 }> = ({ t, section, onChange }) => {
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">

@@ -17,7 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@components/ui/dropdown-menu"
+} from '@components/ui/dropdown-menu'
 import { useTranslations } from 'next-intl'
 
 type Course = {
@@ -34,7 +34,8 @@ type PropsType = {
   customLink?: string
 }
 
-export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('course_', '')
+export const removeCoursePrefix = (course_uuid: string) =>
+  course_uuid.replace('course_', '')
 
 function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
   const t = useTranslations('Components.CourseThumbnail')
@@ -46,7 +47,10 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
   const deleteCourse = async () => {
     const toastId = toast.loading(tg('deleting'))
     try {
-      await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token)
+      await deleteCourseFromBackend(
+        course.course_uuid,
+        session.data?.tokens?.access_token
+      )
       await revalidateTags(['courses'], orgslug)
       toast.success(t('toastDeleteSuccess'))
       router.refresh()
@@ -58,7 +62,11 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
   }
 
   const thumbnailImage = course.thumbnail_image
-    ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
+    ? getCourseThumbnailMediaDirectory(
+        org?.org_uuid,
+        course.course_uuid,
+        course.thumbnail_image
+      )
     : '../empty_thumbnail.png'
 
   return (
@@ -68,21 +76,39 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
         orgSlug={orgslug}
         deleteCourse={deleteCourse}
       />
-      <Link prefetch href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
+      <Link
+        prefetch
+        href={
+          customLink
+            ? customLink
+            : getUriWithOrg(
+                orgslug,
+                `/course/${removeCoursePrefix(course.course_uuid)}`
+              )
+        }
+      >
         <div
           className="inset-0 ring-1 ring-inset ring-black/10 rounded-xl shadow-xl w-full aspect-video bg-cover bg-center"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
       </Link>
-      <div className='flex flex-col w-full pt-3 space-y-2'>
-        <h2 className="font-bold text-gray-800 line-clamp-2 leading-tight text-lg capitalize">{course.name}</h2>
-        <p className='text-sm text-gray-700 leading-normal line-clamp-3'>{course.description}</p>
+      <div className="flex flex-col w-full pt-3 space-y-2">
+        <h2 className="font-bold text-gray-800 line-clamp-2 leading-tight text-lg capitalize">
+          {course.name}
+        </h2>
+        <p className="text-sm text-gray-700 leading-normal line-clamp-3">
+          {course.description}
+        </p>
       </div>
     </div>
   )
 }
 
-const AdminEditOptions = ({ course, orgSlug, deleteCourse }: {
+const AdminEditOptions = ({
+  course,
+  orgSlug,
+  deleteCourse,
+}: {
   course: Course
   orgSlug: string
   deleteCourse: () => Promise<void>

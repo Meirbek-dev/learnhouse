@@ -5,19 +5,18 @@ import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 
 export default function AuthLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode
 }) {
-    const t = useTranslations('Auth.Layout')
-    const searchParams = useSearchParams()
-    const orgslug = searchParams.get('orgslug')
-    if (orgslug) {
-        return <OrgProvider orgslug={orgslug}>{children}</OrgProvider>
-    } else {
-        return <ErrorUI
-            message={t('orgNotSpecified')}
-            submessage={t('accessFromOrg')}
-        />
-    }
+  const t = useTranslations('Auth.Layout')
+  const searchParams = useSearchParams()
+  const orgslug = searchParams.get('orgslug')
+  if (orgslug) {
+    return <OrgProvider orgslug={orgslug}>{children}</OrgProvider>
+  } else {
+    return (
+      <ErrorUI message={t('orgNotSpecified')} submessage={t('accessFromOrg')} />
+    )
+  }
 }

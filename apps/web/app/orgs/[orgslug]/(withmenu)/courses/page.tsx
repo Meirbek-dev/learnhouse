@@ -13,10 +13,12 @@ type MetadataProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
-  const params = await props.params;
-  const tGeneral = await getTranslations('General');
-  const tCoursesPage = await getTranslations('CoursesPage');
+export async function generateMetadata(
+  props: MetadataProps
+): Promise<Metadata> {
+  const params = await props.params
+  const tGeneral = await getTranslations('General')
+  const tCoursesPage = await getTranslations('CoursesPage')
 
   // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
@@ -45,7 +47,10 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       type: 'website',
       images: [
         {
-          url: getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
+          url: getOrgThumbnailMediaDirectory(
+            org?.org_uuid,
+            org?.thumbnail_image
+          ),
           width: 800,
           height: 600,
           alt: org.name,

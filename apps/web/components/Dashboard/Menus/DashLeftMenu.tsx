@@ -3,7 +3,18 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { signOut } from 'next-auth/react'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import LearnHouseDashboardLogo from '@public/dashLogo.png'
-import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, Package2, School, Settings, Users, Vault } from 'lucide-react'
+import {
+  Backpack,
+  BadgeDollarSign,
+  BookCopy,
+  Home,
+  LogOut,
+  Package2,
+  School,
+  Settings,
+  Users,
+  Vault,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useEffect } from 'react'
@@ -18,7 +29,10 @@ function DashLeftMenu() {
   const org = useOrg() as any
   const session = useLHSession() as any
   const [loading, setLoading] = React.useState(true)
-  const isPaymentsEnabled = useFeatureFlag({ path: ['features', 'payments', 'enabled'], defaultValue: false })
+  const isPaymentsEnabled = useFeatureFlag({
+    path: ['features', 'payments', 'enabled'],
+    defaultValue: false,
+  })
   const t = useTranslations('DashboardMenu')
 
   function waitForEverythingToLoad() {
@@ -29,7 +43,10 @@ function DashLeftMenu() {
   }
 
   async function logOutUI() {
-    const res = await signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/login?orgslug=' + org.slug) })
+    const res = await signOut({
+      redirect: true,
+      callbackUrl: getUriWithoutOrg('/login?orgslug=' + org.slug),
+    })
     if (res) {
       getUriWithOrg(org.slug, '/')
     }
@@ -84,7 +101,12 @@ function DashLeftMenu() {
                         <Link className='bg-white text-black hover:text-white rounded-lg p-2 hover:bg-white/10 transition-all ease-linear' href={`/`} ><ArrowLeft className='hover:text-white' size={18} /></Link>
                     </ToolTip> */}
           <AdminAuthorization authorizationMode="component">
-            <ToolTip content={t('tooltips.home')} slateBlack sideOffset={8} side="right">
+            <ToolTip
+              content={t('tooltips.home')}
+              slateBlack
+              sideOffset={8}
+              side="right"
+            >
               <Link
                 className="bg-white/5 rounded-lg p-2 hover:bg-white/10 transition-all ease-linear"
                 href={`/dash`}
@@ -92,7 +114,12 @@ function DashLeftMenu() {
                 <Home size={18} />
               </Link>
             </ToolTip>
-            <ToolTip content={t('tooltips.courses')} slateBlack sideOffset={8} side="right">
+            <ToolTip
+              content={t('tooltips.courses')}
+              slateBlack
+              sideOffset={8}
+              side="right"
+            >
               <Link
                 className="bg-white/5 rounded-lg p-2 hover:bg-white/10 transition-all ease-linear"
                 href={`/dash/courses`}
@@ -100,7 +127,12 @@ function DashLeftMenu() {
                 <BookCopy size={18} />
               </Link>
             </ToolTip>
-            <ToolTip content={t('tooltips.assignments')} slateBlack sideOffset={8} side="right">
+            <ToolTip
+              content={t('tooltips.assignments')}
+              slateBlack
+              sideOffset={8}
+              side="right"
+            >
               <Link
                 className="bg-white/5 rounded-lg p-2 hover:bg-white/10 transition-all ease-linear"
                 href={`/dash/assignments`}
@@ -108,7 +140,12 @@ function DashLeftMenu() {
                 <Backpack size={18} />
               </Link>
             </ToolTip>
-            <ToolTip content={t('tooltips.users')} slateBlack sideOffset={8} side="right">
+            <ToolTip
+              content={t('tooltips.users')}
+              slateBlack
+              sideOffset={8}
+              side="right"
+            >
               <Link
                 className="bg-white/5 rounded-lg p-2 hover:bg-white/10 transition-all ease-linear"
                 href={`/dash/users/settings/users`}
@@ -117,7 +154,12 @@ function DashLeftMenu() {
               </Link>
             </ToolTip>
             {isPaymentsEnabled && (
-              <ToolTip content={t('tooltips.payments')} slateBlack sideOffset={8} side="right">
+              <ToolTip
+                content={t('tooltips.payments')}
+                slateBlack
+                sideOffset={8}
+                side="right"
+              >
                 <Link
                   className="bg-white/5 rounded-lg p-2 hover:bg-white/10 transition-all ease-linear"
                   href={`/dash/payments/customers`}
@@ -156,35 +198,36 @@ function DashLeftMenu() {
             <div className="flex items-center flex-col space-y-3">
               <div className="flex flex-col space-y-1 py-1">
                 <ToolTip
-                  content={t('tooltips.userOwnedCourses', { username: session.data.user.username })}
-                slateBlack
-                sideOffset={8}
-                side="right"
-              >
-                <Link
-                    href={'/dash/user-account/owned'}
-                    className="py-1"
+                  content={t('tooltips.userOwnedCourses', {
+                    username: session.data.user.username,
+                  })}
+                  slateBlack
+                  sideOffset={8}
+                  side="right"
                 >
-                  <Package2
-                    className="mx-auto text-neutral-400 cursor-pointer"
-                    size={18}
-                  />
-                </Link>
-              </ToolTip>
+                  <Link href={'/dash/user-account/owned'} className="py-1">
+                    <Package2
+                      className="mx-auto text-neutral-400 cursor-pointer"
+                      size={18}
+                    />
+                  </Link>
+                </ToolTip>
                 <ToolTip
-                  content={t('tooltips.userSettings', { username: session.data.user.username })}
-                slateBlack
-                sideOffset={8}
-                side="right"
-              >
-                <Link
-                  href={'/dash/user-account/settings/general'}
-                  className="py-1"
+                  content={t('tooltips.userSettings', {
+                    username: session.data.user.username,
+                  })}
+                  slateBlack
+                  sideOffset={8}
+                  side="right"
                 >
-                  <Settings
-                    className="mx-auto text-neutral-400 cursor-pointer"
-                    size={18}
-                  />
+                  <Link
+                    href={'/dash/user-account/settings/general'}
+                    className="py-1"
+                  >
+                    <Settings
+                      className="mx-auto text-neutral-400 cursor-pointer"
+                      size={18}
+                    />
                   </Link>
                 </ToolTip>
               </div>

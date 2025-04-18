@@ -1,16 +1,36 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { createApi } from 'unsplash-js';
-import { Search, X, Cpu, Briefcase, GraduationCap, Heart, Palette, Plane, Utensils,
-  Dumbbell, Music, Shirt, Book, Building, Bike, Camera, Microscope, Coins, Coffee, Gamepad,
-  Flower} from 'lucide-react';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useTranslations } from 'next-intl';
+import React, { useState, useEffect, useCallback } from 'react'
+import { createApi } from 'unsplash-js'
+import {
+  Search,
+  X,
+  Cpu,
+  Briefcase,
+  GraduationCap,
+  Heart,
+  Palette,
+  Plane,
+  Utensils,
+  Dumbbell,
+  Music,
+  Shirt,
+  Book,
+  Building,
+  Bike,
+  Camera,
+  Microscope,
+  Coins,
+  Coffee,
+  Gamepad,
+  Flower,
+} from 'lucide-react'
+import Modal from '@components/Objects/StyledElements/Modal/Modal'
+import { useTranslations } from 'next-intl'
 
 const unsplash = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
-});
+})
 
-const IMAGES_PER_PAGE = 20;
+const IMAGES_PER_PAGE = 20
 
 const LABEL_KEYS_WITH_ICONS = [
   { key: 'nature', icon: Flower },
@@ -33,89 +53,100 @@ const LABEL_KEYS_WITH_ICONS = [
   { key: 'finance', icon: Coins },
   { key: 'lifestyle', icon: Coffee },
   { key: 'gaming', icon: Gamepad },
-] as const;
+] as const
 
 interface UnsplashImagePickerProps {
-  onSelect: (imageUrl: string) => void;
-  onClose: () => void;
-  isOpen?: boolean;
+  onSelect: (imageUrl: string) => void
+  onClose: () => void
+  isOpen?: boolean
 }
 
-const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onClose, isOpen = true }) => {
-  const [query, setQuery] = useState('');
-  const [images, setImages] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const t = useTranslations('CourseEdit.General.UnsplashPicker');
+const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({
+  onSelect,
+  onClose,
+  isOpen = true,
+}) => {
+  const [query, setQuery] = useState('')
+  const [images, setImages] = useState<any[]>([])
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const t = useTranslations('CourseEdit.General.UnsplashPicker')
 
   // Generate predefined labels with translations
   const predefinedLabels = LABEL_KEYS_WITH_ICONS.map(({ key, icon }) => ({
     name: t(`Labels.${key}`),
     icon: icon,
-    key: key
-  }));
+    key: key,
+  }))
 
-  const fetchImages = useCallback(async (searchQuery: string, pageNum: number) => {
-    setLoading(true);
-    try {
-      const result = await unsplash.search.getPhotos({
-        query: searchQuery,
-        page: pageNum,
-        perPage: IMAGES_PER_PAGE,
-      });
-      if (result && result.response) {
-        setImages(prevImages => pageNum === 1 ? result.response.results : [...prevImages, ...result.response.results]);
+  const fetchImages = useCallback(
+    async (searchQuery: string, pageNum: number) => {
+      setLoading(true)
+      try {
+        const result = await unsplash.search.getPhotos({
+          query: searchQuery,
+          page: pageNum,
+          perPage: IMAGES_PER_PAGE,
+        })
+        if (result && result.response) {
+          setImages((prevImages) =>
+            pageNum === 1
+              ? result.response.results
+              : [...prevImages, ...result.response.results]
+          )
+        }
+      } catch (error) {
+        console.error('Error fetching images:', error)
+      } finally {
+        setLoading(false)
       }
-    } catch (error) {
-      console.error('Error fetching images:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    []
+  )
 
   const debouncedFetchImages = useCallback(
     debounce((searchQuery: string) => {
-      setPage(1);
-      fetchImages(searchQuery, 1);
+      setPage(1)
+      fetchImages(searchQuery, 1)
     }, 300),
     [fetchImages]
-  );
+  )
 
   useEffect(() => {
     if (query) {
-      debouncedFetchImages(query);
+      debouncedFetchImages(query)
     } else {
-        if (images.length > 0 || page > 1) {
-            setImages([]);
-            setPage(1);
-        }
+      if (images.length > 0 || page > 1) {
+        setImages([])
+        setPage(1)
+      }
     }
-  }, [query, debouncedFetchImages]);
+  }, [query, debouncedFetchImages])
 
   useEffect(() => {
-      if (isOpen && images.length === 0 && !query && !loading) {
-          fetchImages('course', 1);
-      }
-  }, [isOpen, images.length, query, loading, fetchImages]);
+    if (isOpen && images.length === 0 && !query && !loading) {
+      fetchImages('course', 1)
+    }
+  }, [isOpen, images.length, query, loading, fetchImages])
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-  };
+    setQuery(e.target.value)
+  }
 
   const handleLabelClick = (labelKey: string) => {
-    setQuery(labelKey);
-  };
+    setQuery(labelKey)
+  }
 
   const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchImages(query, nextPage);
-  };
+    const nextPage = page + 1
+    setPage(nextPage)
+    fetchImages(query, nextPage)
+  }
 
   const handleImageSelect = (imageUrl: string) => {
-    onSelect(imageUrl);
-    onClose();
-  };
+    onSelect(imageUrl)
+    onClose()
+  }
 
   const modalContent = (
     <div className="flex flex-col h-full">
@@ -128,27 +159,30 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
             placeholder={t('searchPlaceholder')}
             className="w-full p-2 pl-10 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500"
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={20}
+          />
         </div>
         {!query && (
-            <div className="flex flex-wrap gap-2 max-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-              {predefinedLabels.map(label => (
-                <button
-                  key={label.key}
-                  onClick={() => handleLabelClick(label.key)}
-                  className="px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 nice-shadow transition-colors flex items-center gap-1 space-x-1"
-                >
-                  <label.icon size={16} />
-                  <span>{label.name}</span>
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2 max-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+            {predefinedLabels.map((label) => (
+              <button
+                key={label.key}
+                onClick={() => handleLabelClick(label.key)}
+                className="px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 nice-shadow transition-colors flex items-center gap-1 space-x-1"
+              >
+                <label.icon size={16} />
+                <span>{label.name}</span>
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 pt-0">
         <div className="grid grid-cols-3 gap-4">
-          {images.map(image => (
+          {images.map((image) => (
             <div key={image.id} className="relative w-full pb-[56.25%]">
               <img
                 src={image.urls.small}
@@ -168,12 +202,12 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
             {t('loadMoreButton')}
           </button>
         )}
-         {!loading && images.length === 0 && query && (
-            <p className="text-center mt-4">{t('noResults')}</p>
-         )}
+        {!loading && images.length === 0 && query && (
+          <p className="text-center mt-4">{t('noResults')}</p>
+        )}
       </div>
     </div>
-  );
+  )
 
   return (
     <Modal
@@ -185,15 +219,15 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
       minHeight="lg"
       customHeight="h-[80vh]"
     />
-  );
-};
+  )
+}
 
 const debounce = (func: Function, delay: number) => {
-  let timeoutId: NodeJS.Timeout;
+  let timeoutId: NodeJS.Timeout
   return (...args: any[]) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
-  };
-};
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func(...args), delay)
+  }
+}
 
-export default UnsplashImagePicker;
+export default UnsplashImagePicker

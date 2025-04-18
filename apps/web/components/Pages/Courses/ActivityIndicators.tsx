@@ -113,7 +113,9 @@ function ActivityIndicators(props: Props) {
                       <div className="bg-white rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
                         <div className="flex items-center gap-2">
                           {getActivityTypeIcon(activity.activity_type)}
-                          <span className="text-sm text-gray-700">{activity.name}</span>
+                          <span className="text-sm text-gray-700">
+                            {activity.name}
+                          </span>
                           {isDone && (
                             <span className="ml-auto text-gray-400">
                               <Check size={14} />
@@ -121,11 +123,17 @@ function ActivityIndicators(props: Props) {
                           )}
                         </div>
                         <div className="flex items-center gap-2 mt-2">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${getActivityTypeBadgeColor(activity.activity_type)}`}>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full ${getActivityTypeBadgeColor(activity.activity_type)}`}
+                          >
                             {getActivityTypeLabel(activity.activity_type)}
                           </span>
                           <span className="text-xs text-gray-400">
-                            {isCurrent ? 'Current Activity' : isDone ? 'Completed' : 'Not Started'}
+                            {isCurrent
+                              ? 'Current Activity'
+                              : isDone
+                                ? 'Completed'
+                                : 'Not Started'}
                           </span>
                         </div>
                       </div>

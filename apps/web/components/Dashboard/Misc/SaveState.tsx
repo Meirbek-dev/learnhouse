@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 
 function SaveState(props: { orgslug: string }) {
   const course = useCourse() as any
-  const session = useLHSession() as any;
+  const session = useLHSession() as any
   const router = useRouter()
   const saved = course ? course.isSaved : true
   const dispatchCourse = useCourseDispatch() as any
@@ -125,7 +125,11 @@ function SaveState(props: { orgslug: string }) {
         onClick={saveCourseState}
       >
         {saved ? <Check size={20} /> : <SaveAllIcon size={20} />}
-        {saved ? <div className="">{t('saved')}</div> : <div className="">{t('save')}</div>}
+        {saved ? (
+          <div className="">{t('saved')}</div>
+        ) : (
+          <div className="">{t('save')}</div>
+        )}
       </div>
     </div>
   )

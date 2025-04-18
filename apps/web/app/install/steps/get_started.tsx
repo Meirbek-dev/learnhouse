@@ -8,14 +8,16 @@ import useSWR, { mutate } from 'swr'
 import { useTranslations } from 'next-intl'
 
 function GetStarted() {
-  const t = useTranslations('Install.GetStarted');
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('Install.GetStarted')
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
   const {
     data: install,
     error: error,
     isLoading,
-  } = useSWR(`${getAPIUrl()}install/latest`, (url) => swrFetcher(url, access_token))
+  } = useSWR(`${getAPIUrl()}install/latest`, (url) =>
+    swrFetcher(url, access_token)
+  )
   const router = useRouter()
 
   async function startInstallation() {

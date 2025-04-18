@@ -63,28 +63,33 @@ export const ToolbarButtons = ({ editor, props }: any) => {
     {
       label: t('insertTable'),
       icon: <TableIcon />,
-      action: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+      action: () =>
+        editor
+          .chain()
+          .focus()
+          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+          .run(),
     },
     {
       label: t('addRowBelow'),
       icon: <RowsIcon />,
-      action: () => editor.chain().focus().addRowAfter().run()
+      action: () => editor.chain().focus().addRowAfter().run(),
     },
     {
       label: t('addColumnRight'),
       icon: <ColumnsIcon />,
-      action: () => editor.chain().focus().addColumnAfter().run()
+      action: () => editor.chain().focus().addColumnAfter().run(),
     },
     {
       label: t('deleteRow'),
       icon: <SectionIcon />,
-      action: () => editor.chain().focus().deleteRow().run()
+      action: () => editor.chain().focus().deleteRow().run(),
     },
     {
       label: t('deleteColumn'),
       icon: <ContainerIcon />,
-      action: () => editor.chain().focus().deleteColumn().run()
-    }
+      action: () => editor.chain().focus().deleteColumn().run(),
+    },
   ]
 
   return (
@@ -133,19 +138,30 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       </ToolTip>
       <ToolSelect
         value={
-          editor.isActive('heading', { level: 1 }) ? "1" :
-          editor.isActive('heading', { level: 2 }) ? "2" :
-          editor.isActive('heading', { level: 3 }) ? "3" :
-          editor.isActive('heading', { level: 4 }) ? "4" :
-          editor.isActive('heading', { level: 5 }) ? "5" :
-          editor.isActive('heading', { level: 6 }) ? "6" : "0"
+          editor.isActive('heading', { level: 1 })
+            ? '1'
+            : editor.isActive('heading', { level: 2 })
+              ? '2'
+              : editor.isActive('heading', { level: 3 })
+                ? '3'
+                : editor.isActive('heading', { level: 4 })
+                  ? '4'
+                  : editor.isActive('heading', { level: 5 })
+                    ? '5'
+                    : editor.isActive('heading', { level: 6 })
+                      ? '6'
+                      : '0'
         }
         onChange={(e) => {
-          const value = e.target.value;
-          if (value === "0") {
-            editor.chain().focus().setParagraph().run();
+          const value = e.target.value
+          if (value === '0') {
+            editor.chain().focus().setParagraph().run()
           } else {
-            editor.chain().focus().toggleHeading({ level: parseInt(value) }).run();
+            editor
+              .chain()
+              .focus()
+              .toggleHeading({ level: parseInt(value) })
+              .run()
           }
         }}
         aria-label={t('heading')}
@@ -165,7 +181,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             className={showTableMenu ? 'is-active' : ''}
           >
             <TableIcon width={18} />
-            <ChevronDownIcon  />
+            <ChevronDownIcon />
           </ToolBtn>
         </ToolTip>
         {showTableMenu && (
@@ -235,7 +251,11 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('youtubeVideo')}>
-        <ToolBtn  onClick={() => editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()}>
+        <ToolBtn
+          onClick={() =>
+            editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()
+          }
+        >
           <SiYoutube size={15} />
         </ToolBtn>
       </ToolTip>
@@ -294,44 +314,60 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       </ToolTip>
       <ToolTip content={t('externalObject')}>
         <ToolBtn
-          onClick={() => editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()}
+          onClick={() =>
+            editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()
+          }
         >
           <Cuboid size={15} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('badges')}>
         <ToolBtn
-          onClick={() => editor.chain().focus().insertContent({
-            type: 'badge',
-            content: [
-              {
-                type: 'text',
-                text: 'This is a Badge'
-              }
-            ]
-          }).run()}
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'badge',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'This is a Badge',
+                  },
+                ],
+              })
+              .run()
+          }
         >
           <Tags size={15} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('button')}>
         <ToolBtn
-          onClick={() => editor.chain().focus().insertContent({
-            type: 'button',
-            content: [
-              {
-                type: 'text',
-                text: 'Click me'
-              }
-            ]
-          }).run()}
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'button',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Click me',
+                  },
+                ],
+              })
+              .run()
+          }
         >
           <MousePointerClick size={15} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('user')}>
         <ToolBtn
-          onClick={() => editor.chain().focus().insertContent({ type: 'blockUser' }).run()}
+          onClick={() =>
+            editor.chain().focus().insertContent({ type: 'blockUser' }).run()
+          }
         >
           <User size={15} />
         </ToolBtn>

@@ -1,15 +1,24 @@
 'use client'
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
 import { getUriWithOrg } from '@services/config/config'
-import { ImageIcon, Info, LockIcon, SearchIcon, TextIcon, LucideIcon, Share2Icon, LayoutDashboardIcon } from 'lucide-react'
+import {
+  ImageIcon,
+  Info,
+  LockIcon,
+  SearchIcon,
+  TextIcon,
+  LucideIcon,
+  Share2Icon,
+  LayoutDashboardIcon,
+} from 'lucide-react'
 import Link from 'next/link'
-import React, { useEffect, use } from 'react';
+import React, { useEffect, use } from 'react'
 import { motion } from 'framer-motion'
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral'
 import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages'
 import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials'
 import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding'
-import { useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl'
 
 export type OrgParams = {
   subpage: string
@@ -29,12 +38,16 @@ const SETTING_TABS: TabItem[] = [
   { id: 'socials', label: 'socials', icon: Share2Icon },
 ]
 
-function TabLink({ tab, isActive, orgslug }: {
-  tab: TabItem,
-  isActive: boolean,
+function TabLink({
+  tab,
+  isActive,
+  orgslug,
+}: {
+  tab: TabItem
+  isActive: boolean
   orgslug: string
 }) {
-  const t = useTranslations('DashPage.OrgSettings');
+  const t = useTranslations('DashPage.OrgSettings')
   return (
     <Link href={getUriWithOrg(orgslug, '') + `/dash/org/settings/${tab.id}`}>
       <div
@@ -52,8 +65,8 @@ function TabLink({ tab, isActive, orgslug }: {
 }
 
 function OrgPage(props: { params: Promise<OrgParams> }) {
-  const t = useTranslations('DashPage.OrgSettings');
-  const params = use(props.params);
+  const t = useTranslations('DashPage.OrgSettings')
+  const params = use(props.params)
   const [H1Label, setH1Label] = React.useState('')
   const [H2Label, setH2Label] = React.useState('')
 

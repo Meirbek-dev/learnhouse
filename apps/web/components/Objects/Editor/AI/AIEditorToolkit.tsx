@@ -33,11 +33,11 @@ type AIEditorToolkitProps = {
 
 type AIPromptsLabels = {
   label:
-  | 'Writer'
-  | 'ContinueWriting'
-  | 'MakeLonger'
-  | 'GenerateQuiz'
-  | 'Translate'
+    | 'Writer'
+    | 'ContinueWriting'
+    | 'MakeLonger'
+    | 'GenerateQuiz'
+    | 'Translate'
   selection: string
 }
 
@@ -92,7 +92,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                       <div className="pr-1">
                         <div className="flex w-full space-x-2 font-bold text-white/80 items-center">
                           <Image
-                            className="outline outline-1 outline-neutral-200/20 rounded-lg"
+                            className="outline-neutral-200/20 rounded-lg"
                             width={24}
                             src={learnhouseAI_icon}
                             alt=""
@@ -143,7 +143,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token;
+  const access_token = session?.data?.tokens?.access_token
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     await dispatchAIEditor({
@@ -162,7 +162,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       const response = await sendActivityAIChatMessage(
         message,
         aiEditorState.aichat_uuid,
-        props.activity.activity_uuid, access_token
+        props.activity.activity_uuid,
+        access_token
       )
       if (response.success === false) {
         await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' })
@@ -194,7 +195,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       })
       await dispatchAIEditor({ type: 'setIsWaitingForResponse' })
       const response = await startActivityAIChatSession(
-        message, access_token,
+        message,
+        access_token,
         props.activity.activity_uuid
       )
       if (response.success === false) {
@@ -395,7 +397,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               interface Question {
                 question_id: string;
                 question: string;
-                type: "multiple_choice" 
+                type: "multiple_choice"
                 answers: Answer[];
               }
             " `
@@ -451,7 +453,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       >
         <div className="flex space-x-2 justify-center">
           <Image
-            className="outline outline-1 outline-neutral-200/20 rounded-lg"
+            className="outline-neutral-200/20 rounded-lg"
             width={24}
             src={learnhouseAI_icon}
             alt=""
@@ -478,7 +480,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                   aiEditorState.chatInputValue
                 )
               }
-              className="bg-white/10 px-3  rounded-md outline outline-1 outline-neutral-200/20 py-2 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+              className="bg-white/10 px-3  rounded-md outline-neutral-200/20 py-2 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
             >
               <BetweenHorizontalStart
                 size={20}
@@ -534,7 +536,7 @@ const AiEditorToolButton = (props: any) => {
   return (
     <button
       onClick={() => handleToolButtonClick(props.label)}
-      className="flex space-x-1.5 items-center bg-white/10 px-2 py-0.5 rounded-md outline outline-1 outline-neutral-200/20 text-sm font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+      className="flex space-x-1.5 items-center bg-white/10 px-2 py-0.5 rounded-md outline-neutral-200/20 text-sm font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
     >
       {props.label === 'Writer' && <Feather size={14} />}
       {props.label === 'ContinueWriting' && <FastForward size={14} />}
@@ -575,7 +577,8 @@ const AiEditorActionScreen = ({
         !aiEditorState.error.isError && (
           <div className="flex flex-col mx-auto justify-center align-middle items-center">
             <p className="mx-auto flex p-2 text-white/80 mt-4 font-bold justify-center text-sm align-middle">
-              Place your cursor at the end of a sentence to continue writing{' '}
+              Place your cursor at the end of a sentence to continue
+              writing{' '}
             </p>
             <div
               onClick={() => {
@@ -584,7 +587,7 @@ const AiEditorActionScreen = ({
                   aiEditorState.chatInputValue
                 )
               }}
-              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline outline-1 outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
             >
               <FastForward size={24} />
             </div>
@@ -604,7 +607,7 @@ const AiEditorActionScreen = ({
                   aiEditorState.chatInputValue
                 )
               }}
-              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline outline-1 outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
             >
               <FileStack size={24} />
             </div>
@@ -630,7 +633,7 @@ const AiEditorActionScreen = ({
                   aiEditorState.chatInputValue
                 )
               }}
-              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline outline-1 outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
+              className="flex cursor-pointer space-x-1.5 p-4 mt-4 items-center bg-white/10  rounded-md outline-neutral-200/20 text-2xl font-semibold text-white/70 hover:bg-white/20 hover:outline-neutral-200/40 delay-75 ease-linear transition-all"
             >
               <Languages size={24} />
             </div>
@@ -664,7 +667,7 @@ const AiEditorActionScreen = ({
 
       {aiEditorState.error.isError && (
         <div className="flex items-center h-auto pt-7">
-          <div className="flex flex-col mx-auto w-full space-y-2 p-5 rounded-lg bg-red-500/20 outline outline-1 outline-red-500">
+          <div className="flex flex-col mx-auto w-full space-y-2 p-5 rounded-lg bg-red-500/20 outline-red-500">
             <AlertTriangle size={20} className="text-red-500" />
             <div className="flex flex-col">
               <h3 className="font-semibold text-red-200">

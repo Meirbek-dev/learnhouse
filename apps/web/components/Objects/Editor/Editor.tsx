@@ -162,7 +162,7 @@ function Editor(props: EditorProps) {
       <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center p-4">
         <div className="bg-white p-6 rounded-lg shadow-md text-center">
           <h2 className="text-xl font-bold mb-4">{t('mobileTitle')}</h2>
-          <Monitor className='mx-auto my-5' size={60} />
+          <Monitor className="mx-auto my-5" size={60} />
           <p>{t('mobileMessage1')}</p>
           <p>{t('mobileMessage2')}</p>
         </div>
@@ -198,17 +198,22 @@ function Editor(props: EditorProps) {
                 </Link>
                 <Link target="_blank" href={`/course/${course_uuid}`}>
                   <EditorInfoThumbnail
-                    src={`${props.course.thumbnail_image ? getCourseThumbnailMediaDirectory(
-                      props.org?.org_uuid,
-                      props.course.course_uuid,
+                    src={`${
                       props.course.thumbnail_image
-                    ) : getUriWithOrg(props.org?.slug,'/empty_thumbnail.png')}`}
+                        ? getCourseThumbnailMediaDirectory(
+                            props.org?.org_uuid,
+                            props.course.course_uuid,
+                            props.course.thumbnail_image
+                          )
+                        : getUriWithOrg(props.org?.slug, '/empty_thumbnail.png')
+                    }`}
                     alt={`${props.course.name} Thumbnail`}
                   ></EditorInfoThumbnail>
                 </Link>
                 <EditorInfoDocName>
                   {' '}
-                  <b>{props.course.name}</b> <SlashIcon /> {props.activity.name}{' '}
+                  <b>{props.course.name}</b> <SlashIcon />{' '}
+                  {props.activity.name}{' '}
                 </EditorInfoDocName>
               </EditorInfoWrapper>
               <EditorButtonsWrapper>
@@ -243,7 +248,9 @@ function Editor(props: EditorProps) {
                           alt="AI Editor Icon"
                         />
                       </i>{' '}
-                      <i className="not-italic text-xs font-bold">{t('aiEditor')}</i>
+                      <i className="not-italic text-xs font-bold">
+                        {t('aiEditor')}
+                      </i>
                     </div>
                   )}
                 </div>
@@ -285,7 +292,11 @@ function Editor(props: EditorProps) {
               />
 
               <EditorUserProfileWrapper>
-                <UserAvatar border="border-4" use_with_session={true} width={45} />
+                <UserAvatar
+                  border="border-4"
+                  use_with_session={true}
+                  width={45}
+                />
               </EditorUserProfileWrapper>
             </EditorUsersSection>
           </EditorTop>
@@ -317,7 +328,8 @@ const Page = styled.div`
   padding-top: 30px;
 
   // dots background
-  background-image: radial-gradient(#4744446b 1px, transparent 1px),
+  background-image:
+    radial-gradient(#4744446b 1px, transparent 1px),
     radial-gradient(#4744446b 1px, transparent 1px);
   background-position:
     0 0,
@@ -595,8 +607,11 @@ export const EditorContentWrapper = styled.div`
 
     .selectedCell:after {
       background: rgba(139, 139, 139, 0.2);
-      content: "";
-      left: 0; right: 0; top: 0; bottom: 0;
+      content: '';
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
       pointer-events: none;
       position: absolute;
       z-index: 2;

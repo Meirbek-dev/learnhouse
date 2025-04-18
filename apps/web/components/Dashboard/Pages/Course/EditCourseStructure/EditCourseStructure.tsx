@@ -16,8 +16,8 @@ import { Hexagon } from 'lucide-react'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl'
+import toast from 'react-hot-toast'
 
 type EditCourseStructureProps = {
   orgslug: string
@@ -41,12 +41,12 @@ export type OrderPayload =
 
 const EditCourseStructure = (props: EditCourseStructureProps) => {
   const router = useRouter()
-  const session = useLHSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
   // Check window availability
   const [winReady, setwinReady] = useState(false)
-  const t = useTranslations('CourseEdit.Structure');
-  const tNotify = useTranslations('Notifications');
+  const t = useTranslations('CourseEdit.Structure')
+  const tNotify = useTranslations('Notifications')
 
   const dispatchCourse = useCourseDispatch() as any
 
@@ -64,17 +64,17 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
   // Submit new chapter
   const submitChapter = async (chapter: any) => {
-    const loadingToast = toast.loading(tNotify('creatingChapter'));
+    const loadingToast = toast.loading(tNotify('creatingChapter'))
     try {
       await createChapter(chapter, access_token)
       mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
       setNewChapterModal(false)
-      toast.success(tNotify('chapterCreatedSuccess'), { id: loadingToast });
+      toast.success(tNotify('chapterCreatedSuccess'), { id: loadingToast })
     } catch (error) {
-      console.error("Error creating chapter:", error);
-      toast.error(tNotify('chapterCreateFailed'), { id: loadingToast });
+      console.error('Error creating chapter:', error)
+      toast.error(tNotify('chapterCreateFailed'), { id: loadingToast })
     }
   }
 
@@ -101,9 +101,10 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       const sourceChapter = newChapterOrder.find(
         (chapter: any) => chapter.chapter_uuid === source.droppableId
       ) as any
-      const destinationChapter = newChapterOrder.find(
-        (chapter: any) => chapter.chapter_uuid === destination.droppableId
-      ) ?? sourceChapter
+      const destinationChapter =
+        newChapterOrder.find(
+          (chapter: any) => chapter.chapter_uuid === destination.droppableId
+        ) ?? sourceChapter
 
       const [movedActivity] = sourceChapter.activities.splice(source.index, 1)
       destinationChapter.activities.splice(destination.index, 0, movedActivity)
@@ -174,7 +175,9 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                     size={16}
                     className="text-white text-sm "
                   />
-                  <div className="font-bold text-sm">{t('addChapterButton')}</div>
+                  <div className="font-bold text-sm">
+                    {t('addChapterButton')}
+                  </div>
                 </div>
               </div>
             }

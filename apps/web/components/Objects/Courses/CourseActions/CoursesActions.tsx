@@ -443,7 +443,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
 
   if (linkedProducts.length > 0) {
     return (
-      <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+      <div className="bg-white shadow-md shadow-gray-300/25 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
         <div className="space-y-4">
           {hasAccess ? (
             <>
@@ -511,7 +511,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
   }
 
   return (
-    <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+    <div className="bg-white shadow-md shadow-gray-300/25 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
       <div className="space-y-4">
         {/* Progress Section */}
         {renderProgressSection()}

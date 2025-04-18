@@ -19,8 +19,8 @@ interface ModifiedChapterInterface {
 
 function Chapter(props: any) {
   const router = useRouter()
-  const session = useLHSession() as any;
-  const t = useTranslations('CourseEdit');
+  const session = useLHSession() as any
+  const t = useTranslations('CourseEdit')
   const [modifiedChapter, setModifiedChapter] = React.useState<
     ModifiedChapterInterface | undefined
   >(undefined)
@@ -33,7 +33,11 @@ function Chapter(props: any) {
       let modifiedChapterCopy = {
         name: modifiedChapter.chapterName,
       }
-      await updateChapter(chapterId, modifiedChapterCopy, session.data?.tokens?.access_token)
+      await updateChapter(
+        chapterId,
+        modifiedChapterCopy,
+        session.data?.tokens?.access_token
+      )
       await mutate(`${getAPIUrl()}chapters/course/${props.course_uuid}/meta`)
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
@@ -115,7 +119,9 @@ function Chapter(props: any) {
             <ConfirmationModal
               confirmationButtonText={t('deleteChapterButton')}
               confirmationMessage={t('deleteChapterConfirmation')}
-              dialogTitle={t('deleteChapterTitle', { name: props.info.list.chapter.name })}
+              dialogTitle={t('deleteChapterTitle', {
+                name: props.info.list.chapter.name,
+              })}
               dialogTrigger={
                 <div
                   className=" hover:cursor-pointer p-1 px-4 bg-red-600 rounded-md shadow-sm flex space-x-1 items-center text-rose-100 text-sm"

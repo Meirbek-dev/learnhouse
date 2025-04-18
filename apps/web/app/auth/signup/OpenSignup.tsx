@@ -17,9 +17,9 @@ import { signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
 function OpenSignUpComponent() {
-  const t = useTranslations('Auth.Signup');
-  const generalT = useTranslations('General');
-  const validationT = useTranslations('Validation');
+  const t = useTranslations('Auth.Signup')
+  const generalT = useTranslations('General')
+  const validationT = useTranslations('Validation')
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const org = useOrg() as any
   const router = useRouter()
@@ -30,27 +30,27 @@ function OpenSignUpComponent() {
     const errors: any = {}
 
     if (!values.email) {
-      errors.email = validationT('required');
+      errors.email = validationT('required')
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = validationT('invalidEmail');
+      errors.email = validationT('invalidEmail')
     }
 
     if (!values.password) {
-      errors.password = validationT('required');
+      errors.password = validationT('required')
     } else if (values.password.length < 8) {
-      errors.password = validationT('passwordMinLength', { length: 8 });
+      errors.password = validationT('passwordMinLength', { length: 8 })
     }
 
     if (!values.username) {
-      errors.username = validationT('required');
+      errors.username = validationT('required')
     }
 
     if (!values.username || values.username.length < 4) {
-      errors.username = validationT('usernameMinLength', { length: 4 });
+      errors.username = validationT('usernameMinLength', { length: 4 })
     }
 
     if (!values.bio) {
-      errors.bio = validationT('required');
+      errors.bio = validationT('required')
     }
 
     return errors
@@ -94,7 +94,7 @@ function OpenSignUpComponent() {
     },
   })
 
-  useEffect(() => { }, [org])
+  useEffect(() => {}, [org])
 
   return (
     <div className="login-form m-auto w-72">
@@ -111,14 +111,20 @@ function OpenSignUpComponent() {
             <div className="font-bold text-sm">{message}</div>
           </div>
           <hr className="border-green-900/20 800 w-40 border" />
-          <Link className="flex space-x-2 items-center" href={`/login?orgslug=${org?.slug}`}>
+          <Link
+            className="flex space-x-2 items-center"
+            href={`/login?orgslug=${org?.slug}`}
+          >
             <User size={14} /> <div>{t('loginToAccount')}</div>
           </Link>
         </div>
       )}
       <FormLayout onSubmit={formik.handleSubmit}>
         <FormField name="email">
-          <FormLabelAndMessage label={t('email')} message={formik.errors.email} />
+          <FormLabelAndMessage
+            label={t('email')}
+            message={formik.errors.email}
+          />
           <Form.Control asChild>
             <Input
               onChange={formik.handleChange}
@@ -187,9 +193,15 @@ function OpenSignUpComponent() {
         </div>
       </FormLayout>
       <div>
-        <div className='flex h-0.5 rounded-2xl bg-slate-100 mt-5 mb-5 mx-10'></div>
-        <button onClick={() => signIn('google')} className="flex justify-center py-3 text-md w-full bg-white text-slate-600 space-x-3 font-semibold text-center p-2 rounded-md shadow-sm hover:cursor-pointer">
-          <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="" />
+        <div className="flex h-0.5 rounded-2xl bg-slate-100 mt-5 mb-5 mx-10"></div>
+        <button
+          onClick={() => signIn('google')}
+          className="flex justify-center py-3 text-md w-full bg-white text-slate-600 space-x-3 font-semibold text-center p-2 rounded-md shadow-sm hover:cursor-pointer"
+        >
+          <img
+            src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"
+            alt=""
+          />
           <span>{t('signInWithGoogle')}</span>
         </button>
       </div>
