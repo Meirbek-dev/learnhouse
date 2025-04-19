@@ -1,7 +1,8 @@
 'use client'
 
 import { NodeViewWrapper } from '@tiptap/react'
-import React, { useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUserByUsername, getUser } from '@services/users/users'
 import { Input } from '@components/ui/input'
@@ -25,11 +26,7 @@ import {
   Lightbulb,
 } from 'lucide-react'
 import { Badge } from '@components/ui/badge'
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@components/ui/hover-card'
+
 import { useRouter } from 'next/navigation'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
@@ -71,8 +68,8 @@ const AVAILABLE_ICONS = {
 
 const IconComponent = ({ iconName }: { iconName: string }) => {
   const IconElement = AVAILABLE_ICONS[iconName as keyof typeof AVAILABLE_ICONS]
-  if (!IconElement) return <User className="w-4 h-4 text-gray-600" />
-  return <IconElement className="w-4 h-4 text-gray-600" />
+  if (!IconElement) return <User className="h-4 w-4 text-gray-600" />
+  return <IconElement className="h-4 w-4 text-gray-600" />
 }
 
 function UserBlockComponent(props: any) {
@@ -136,7 +133,7 @@ function UserBlockComponent(props: any) {
     }
   }
 
-  const handleUsernameSubmit = async (e: React.FormEvent) => {
+  const handleUsernameSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!username.trim()) return
     await fetchUserByUsername(username)
@@ -145,11 +142,11 @@ function UserBlockComponent(props: any) {
   if (isEditable && !userData) {
     return (
       <NodeViewWrapper className="block-user">
-        <div className="bg-gray-50 rounded-lg p-6 border border-dashed border-gray-200">
+        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-6">
           <form onSubmit={handleUsernameSubmit} className="space-y-4">
             <div>
               <Label htmlFor="username">{t('usernameLabel')}</Label>
-              <div className="flex gap-2 mt-2">
+              <div className="mt-2 flex gap-2">
                 <Input
                   id="username"
                   value={username}
@@ -159,13 +156,13 @@ function UserBlockComponent(props: any) {
                 />
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     t('loadUser')
                   )}
                 </Button>
               </div>
-              {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+              {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
             </div>
           </form>
         </div>
@@ -177,7 +174,7 @@ function UserBlockComponent(props: any) {
     return (
       <NodeViewWrapper className="block-user">
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
         </div>
       </NodeViewWrapper>
     )
@@ -186,7 +183,7 @@ function UserBlockComponent(props: any) {
   if (error) {
     return (
       <NodeViewWrapper className="block-user">
-        <div className="bg-red-50 text-red-500 p-4 rounded-lg">{error}</div>
+        <div className="rounded-lg bg-red-50 p-4 text-red-500">{error}</div>
       </NodeViewWrapper>
     )
   }
@@ -194,9 +191,9 @@ function UserBlockComponent(props: any) {
   if (!userData) {
     return (
       <NodeViewWrapper className="block-user">
-        <div className="bg-gray-50 rounded-lg p-6 border border-dashed border-gray-200">
+        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-6">
           <div className="flex items-center gap-2 text-gray-500">
-            <User className="w-5 h-5" />
+            <User className="h-5 w-5" />
             <span>{t('noUserSelected')}</span>
           </div>
         </div>
@@ -206,11 +203,11 @@ function UserBlockComponent(props: any) {
 
   return (
     <NodeViewWrapper className="block-user">
-      <div className="bg-white rounded-lg nice-shadow overflow-hidden">
+      <div className="nice-shadow overflow-hidden rounded-lg bg-white">
         {/* Header with Avatar and Name */}
         <div className="relative">
           {/* Background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-100/30 to-transparent h-28 rounded-t-lg" />
+          <div className="absolute inset-0 h-28 rounded-t-lg bg-gradient-to-b from-gray-100/30 to-transparent" />
 
           {/* Content */}
           <div className="relative px-5 pt-5 pb-4">
@@ -239,16 +236,16 @@ function UserBlockComponent(props: any) {
               </div>
 
               {/* Name, Bio, and Button */}
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <h4 className="font-semibold text-gray-900 truncate">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <h4 className="truncate font-semibold text-gray-900">
                       {userData.first_name} {userData.last_name}
                     </h4>
                     {userData.username && (
                       <Badge
                         variant="outline"
-                        className="text-xs font-normal text-gray-500 px-2 truncate"
+                        className="truncate px-2 text-xs font-normal text-gray-500"
                       >
                         @{userData.username}
                       </Badge>
@@ -257,17 +254,17 @@ function UserBlockComponent(props: any) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-gray-600 hover:text-gray-900 flex-shrink-0"
+                    className="h-6 w-6 flex-shrink-0 text-gray-600 hover:text-gray-900"
                     onClick={() =>
                       userData.username &&
                       router.push(`/user/${userData.username}`)
                     }
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="h-4 w-4" />
                   </Button>
                 </div>
                 {userData.bio && (
-                  <p className="text-sm text-gray-500 mt-1.5 line-clamp-4 leading-normal">
+                  <p className="mt-1.5 line-clamp-4 text-sm leading-normal text-gray-500">
                     {userData.bio}
                   </p>
                 )}
@@ -278,7 +275,7 @@ function UserBlockComponent(props: any) {
 
         {/* Details */}
         {userData.details && Object.values(userData.details).length > 0 && (
-          <div className="px-5 pb-4 space-y-2.5 border-t border-gray-100 pt-3.5">
+          <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
             {Object.values(userData.details).map((detail) => (
               <div key={detail.id} className="flex items-center gap-2.5">
                 <IconComponent iconName={detail.icon} />

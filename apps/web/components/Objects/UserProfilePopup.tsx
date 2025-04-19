@@ -1,5 +1,6 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import {
   HoverCard,
   HoverCardContent,
@@ -26,7 +27,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 type UserProfilePopupProps = {
-  children: React.ReactNode
+  children: ReactNode
   userId: string
 }
 
@@ -90,25 +91,25 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const IconComponent = ({ iconName }: { iconName: string }) => {
     const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
     if (!IconElement) return null
-    return <IconElement className="w-4 h-4 text-gray-500" />
+    return <IconElement className="h-4 w-4 text-gray-500" />
   }
 
   return (
     <HoverCard openDelay={100} closeDelay={150}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
-      <HoverCardContent className="w-96 bg-white/95 backdrop-blur-md p-0 nice-shadow">
+      <HoverCardContent className="nice-shadow w-96 bg-white/95 p-0 backdrop-blur-md">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
           </div>
         ) : error ? (
-          <div className="text-sm text-red-500 p-4">{error}</div>
+          <div className="p-4 text-sm text-red-500">{error}</div>
         ) : userData ? (
           <div>
             {/* Header with Avatar and Name */}
             <div className="relative">
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-b from-gray-100/30 to-transparent h-28 rounded-t-lg" />
+              <div className="absolute inset-0 h-28 rounded-t-lg bg-gradient-to-b from-gray-100/30 to-transparent" />
 
               {/* Content */}
               <div className="relative px-5 pt-5 pb-4">
@@ -119,16 +120,16 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                   </div>
 
                   {/* Name, Bio, and Button */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <h4 className="font-semibold text-gray-900 truncate">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <h4 className="truncate font-semibold text-gray-900">
                           {userData.first_name} {userData.last_name}
                         </h4>
                         {userData.username && (
                           <Badge
                             variant="outline"
-                            className="text-xs font-normal text-gray-500 px-2 truncate"
+                            className="truncate px-2 text-xs font-normal text-gray-500"
                           >
                             @{userData.username}
                           </Badge>
@@ -137,17 +138,17 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-gray-600 hover:text-gray-900 flex-shrink-0"
+                        className="h-6 w-6 flex-shrink-0 text-gray-600 hover:text-gray-900"
                         onClick={() =>
                           userData.username &&
                           router.push(`/user/${userData.username}`)
                         }
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="h-4 w-4" />
                       </Button>
                     </div>
                     {userData.bio && (
-                      <p className="text-sm text-gray-500 mt-1.5 line-clamp-4 leading-normal">
+                      <p className="mt-1.5 line-clamp-4 text-sm leading-normal text-gray-500">
                         {userData.bio}
                       </p>
                     )}
@@ -158,7 +159,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
 
             {/* Details */}
             {userData.details && Object.values(userData.details).length > 0 && (
-              <div className="px-5 pb-4 space-y-2.5 border-t border-gray-100 pt-3.5">
+              <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
                 {Object.values(userData.details).map((detail) => (
                   <div key={detail.id} className="flex items-center gap-2.5">
                     <IconComponent iconName={detail.icon} />

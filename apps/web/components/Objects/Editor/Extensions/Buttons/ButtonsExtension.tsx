@@ -1,5 +1,6 @@
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
-import React, { useState, useRef, useEffect } from 'react'
+import type { FC, ChangeEvent } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Picker from '@emoji-mart/react'
 import {
   ArrowRight,
@@ -14,7 +15,7 @@ import { twMerge } from 'tailwind-merge'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { useTranslations } from 'next-intl'
 
-const ButtonsExtension: React.FC = (props: any) => {
+const ButtonsExtension: FC = (props: any) => {
   const t = useTranslations('Editor.ButtonsExtension')
   const [emoji, setEmoji] = useState(props.node.attrs.emoji)
   const [link, setLink] = useState(props.node.attrs.link)
@@ -65,7 +66,7 @@ const ButtonsExtension: React.FC = (props: any) => {
     })
   }
 
-  const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLinkChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLink(e.target.value)
     props.updateAttributes({
       link: e.target.value,
@@ -144,7 +145,7 @@ const ButtonsExtension: React.FC = (props: any) => {
         <button
           onClick={isEditable ? undefined : () => window.open(link, '_blank')}
           className={twMerge(
-            'flex items-center space-x-2 py-2 px-4 rounded-xl text-white transition-colors',
+            'flex items-center space-x-2 rounded-xl px-4 py-2 text-white transition-colors',
             getButtonColor(color),
             isEditable && 'pointer-events-none',
             !link && 'opacity-60'
@@ -155,40 +156,40 @@ const ButtonsExtension: React.FC = (props: any) => {
           <ArrowRight size={14} />
         </button>
         {isEditable && (
-          <div className="flex mt-2 space-x-2">
+          <div className="mt-2 flex space-x-2">
             <button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="p-1 bg-gray-200 rounded-md"
+              className="rounded-md bg-gray-200 p-1"
             >
               <ChevronDown size={14} />
             </button>
             <button
               onClick={() => setShowLinkInput(!showLinkInput)}
-              className="p-1 bg-gray-200 rounded-md"
+              className="rounded-md bg-gray-200 p-1"
             >
               <Link size={14} />
             </button>
             <button
               onClick={() => handleAlignmentChange('left')}
-              className="p-1 bg-gray-200 rounded-md"
+              className="rounded-md bg-gray-200 p-1"
             >
               <AlignLeft size={14} />
             </button>
             <button
               onClick={() => handleAlignmentChange('center')}
-              className="p-1 bg-gray-200 rounded-md"
+              className="rounded-md bg-gray-200 p-1"
             >
               <AlignCenter size={14} />
             </button>
             <button
               onClick={() => handleAlignmentChange('right')}
-              className="p-1 bg-gray-200 rounded-md"
+              className="rounded-md bg-gray-200 p-1"
             >
               <AlignRight size={14} />
             </button>
             <button
               onClick={() => setShowColorPicker(!showColorPicker)}
-              className="p-1 bg-gray-200 rounded-md"
+              className="rounded-md bg-gray-200 p-1"
             >
               <Palette size={14} />
             </button>
@@ -207,19 +208,19 @@ const ButtonsExtension: React.FC = (props: any) => {
           value={link}
           onChange={handleLinkChange}
           placeholder={t('linkPlaceholder')}
-          className="mt-2 p-2 w-full border rounded-md"
+          className="mt-2 w-full rounded-md border p-2"
         />
       )}
       {isEditable && showColorPicker && (
         <div
           ref={colorPickerRef}
-          className="absolute mt-2 p-2 bg-white rounded-md nice-shadow"
+          className="nice-shadow absolute mt-2 rounded-md bg-white p-2"
         >
           <div className="flex flex-wrap gap-2">
             {colors.map((c) => (
               <button
                 key={c}
-                className={`w-6 h-6 rounded-full ${getButtonColor(c)} hover:ring-2 hover:ring-opacity-50 focus:outline-hidden focus:ring-2 focus:ring-opacity-50`}
+                className={`h-6 w-6 rounded-full ${getButtonColor(c)} hover:ring-opacity-50 focus:ring-opacity-50 hover:ring-2 focus:ring-2 focus:outline-hidden`}
                 onClick={() => handleColorSelect(c)}
               />
             ))}

@@ -5,7 +5,7 @@ import { getOrgLogoMediaDirectory } from '@services/media/media'
 import Link from 'next/link'
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import React, { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { MailWarning, Ticket, UserPlus } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import UserAvatar from '@components/Objects/UserAvatar'
@@ -27,8 +27,8 @@ interface SignUpClientProps {
 function SignUpClient(props: SignUpClientProps) {
   const t = useTranslations('Auth.Signup')
   const session = useLHSession() as any
-  const [joinMethod, setJoinMethod] = React.useState('open')
-  const [inviteCode, setInviteCode] = React.useState('')
+  const [joinMethod, setJoinMethod] = useState('open')
+  const [inviteCode, setInviteCode] = useState('')
   const searchParams = useSearchParams()
   const inviteCodeParam = searchParams.get('inviteCode')
 
@@ -42,7 +42,7 @@ function SignUpClient(props: SignUpClientProps) {
   }, [props.org, inviteCodeParam])
 
   return (
-    <div className="grid grid-flow-col justify-stretch h-screen">
+    <div className="grid h-screen grid-flow-col justify-stretch">
       <div
         className="right-login-part"
         style={{
@@ -61,8 +61,8 @@ function SignUpClient(props: SignUpClientProps) {
             />
           </Link>
         </div>
-        <div className="ml-10 h-3/4 flex flex-row text-white">
-          <div className="m-auto flex space-x-4 items-center flex-wrap">
+        <div className="ml-10 flex h-3/4 flex-row text-white">
+          <div className="m-auto flex flex-wrap items-center space-x-4">
             <div>{t('invitedToJoin')} </div>
             <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
               {props.org?.logo_image ? (
@@ -73,7 +73,7 @@ function SignUpClient(props: SignUpClientProps) {
                   )}`}
                   alt="LearnHouse"
                   style={{ width: 'auto', height: 70 }}
-                  className="rounded-xl shadow-xl inset-0 ring-1 ring-inset ring-black/10 bg-white"
+                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
                 />
               ) : (
                 <Image
@@ -85,11 +85,11 @@ function SignUpClient(props: SignUpClientProps) {
                 />
               )}
             </div>
-            <div className="font-bold text-xl">{props.org?.name}</div>
+            <div className="text-xl font-bold">{props.org?.name}</div>
           </div>
         </div>
       </div>
-      <div className="left-join-part bg-white flex flex-row">
+      <div className="left-join-part flex flex-row bg-white">
         {joinMethod == 'open' &&
           (session.status == 'authenticated' ? (
             <LoggedInJoinScreen inviteCode={inviteCode} />
@@ -116,9 +116,8 @@ const LoggedInJoinScreen = (props: any) => {
   const toastT = useTranslations('ToastMessages')
   const session = useLHSession() as any
   const org = useOrg() as any
-  const invite_code = props.inviteCode
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [isSumbitting, setIsSubmitting] = React.useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSumbitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
   const join = async () => {
@@ -132,12 +131,12 @@ const LoggedInJoinScreen = (props: any) => {
       null,
       session.data?.tokens?.access_token
     )
-    //wait for 1s
+    //wait for 1.5s
     if (res.success) {
       toast.success(res.data + toastT('orgJoinSuccess'))
       setTimeout(() => {
         router.push(getUriWithOrg(org.slug, '/'))
-      }, 2000)
+      }, 1500)
       setIsSubmitting(false)
     } else {
       toast.error(res.data?.detail || toastT('errorSomethingWentWrong'))
@@ -153,12 +152,12 @@ const LoggedInJoinScreen = (props: any) => {
   }, [org, session])
 
   return (
-    <div className="flex flex-row  items-center mx-auto">
+    <div className="mx-auto flex flex-row items-center">
       <Toast />
-      <div className="flex space-y-7 flex-col justify-center items-center">
-        <p className="pt-3 text-2xl font-semibold text-black/70 flex justify-center space-x-2 items-center">
+      <div className="flex flex-col items-center justify-center space-y-7">
+        <p className="flex items-center justify-center space-x-2 pt-3 text-2xl font-semibold text-black/70">
           <span className="items-center">{t('hi')}</span>
-          <span className="capitalize flex space-x-2 items-center">
+          <span className="flex items-center space-x-2 capitalize">
             <UserAvatar rounded="rounded-xl" border="border-4" width={35} />
             <span>{session.data.username},</span>
           </span>
@@ -166,7 +165,7 @@ const LoggedInJoinScreen = (props: any) => {
         </p>
         <button
           onClick={() => join()}
-          className="flex w-fit h-[35px] space-x-2 bg-black px-6 py-2 text-md rounded-lg font-semibold h-fit text-white items-center shadow-md"
+          className="text-md flex h-[35px] w-fit items-center space-x-2 rounded-lg bg-black px-6 py-2 font-semibold text-white shadow-md"
         >
           {isSumbitting ? (
             <BarLoader
@@ -187,14 +186,13 @@ const LoggedInJoinScreen = (props: any) => {
 }
 
 const NoTokenScreen = (props: any) => {
-  const t = useTranslations('Auth.Signup')
   const toastT = useTranslations('ToastMessages')
+  const t = useTranslations('Auth.Signup')
   const session = useLHSession() as any
   const org = useOrg() as any
   const router = useRouter()
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [inviteCode, setInviteCode] = React.useState('')
-  const [messsage, setMessage] = React.useState('bruh')
+  const [isLoading, setIsLoading] = useState(true)
+  const [inviteCode, setInviteCode] = useState('')
 
   const handleInviteCodeChange = (e: any) => {
     setInviteCode(e.target.value)
@@ -207,7 +205,7 @@ const NoTokenScreen = (props: any) => {
       inviteCode,
       session?.user?.tokens.access_token
     )
-    //wait for 1s
+    //wait for 1.5s
     if (res.success) {
       toast.success(toastT('inviteCodeValid'))
       setTimeout(() => {
@@ -216,7 +214,7 @@ const NoTokenScreen = (props: any) => {
             `/signup?inviteCode=${inviteCode}&orgslug=${org.slug}`
           )
         )
-      }, 2000)
+      }, 1500)
     } else {
       toast.error(res.data?.detail || toastT('inviteCodeInvalid'))
       setIsLoading(false)
@@ -230,27 +228,27 @@ const NoTokenScreen = (props: any) => {
   }, [org, session])
 
   return (
-    <div className="flex flex-row  items-center mx-auto">
+    <div className="mx-auto flex flex-row items-center">
       <Toast />
       {isLoading ? (
-        <div className="flex space-y-7 flex-col w-[300px] justify-center items-center">
+        <div className="flex w-[300px] flex-col items-center justify-center space-y-7">
           <PageLoading />
         </div>
       ) : (
-        <div className="flex space-y-7 flex-col justify-center items-center">
-          <p className="flex space-x-2 text-lg font-medium text-red-800 items-center">
+        <div className="flex flex-col items-center justify-center space-y-7">
+          <p className="flex items-center space-x-2 text-lg font-medium text-red-800">
             <MailWarning size={18} />
             <span>{t('inviteCodeRequired', { orgName: org?.name })}</span>
           </p>
           <input
             onChange={handleInviteCodeChange}
-            className="bg-white outline-2 outline outline-gray-200 rounded-lg px-5 w-[300px] h-[50px]"
+            className="h-[50px] w-[300px] rounded-lg bg-white px-5 outline-2 outline-gray-200"
             placeholder={t('enterInviteCode')}
             type="text"
           />
           <button
             onClick={validateCode}
-            className="flex w-fit space-x-2 bg-black px-6 py-2 text-md rounded-lg font-semibold h-fit text-white items-center shadow-md"
+            className="text-md flex h-fit w-fit items-center space-x-2 rounded-lg bg-black px-6 py-2 font-semibold text-white shadow-md"
           >
             <Ticket size={18} />
             <p>{t('submit')}</p>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import type { FC } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Check,
   Square,
@@ -20,7 +21,7 @@ interface CourseProgressProps {
   onClose: () => void
 }
 
-const CourseProgress: React.FC<CourseProgressProps> = ({
+const CourseProgress: FC<CourseProgressProps> = ({
   course,
   orgslug,
   isOpen,
@@ -83,9 +84,9 @@ const CourseProgress: React.FC<CourseProgressProps> = ({
       {course.chapters.map((chapter: any) => (
         <div
           key={chapter.chapter_uuid}
-          className="bg-gray-50 rounded-lg overflow-hidden"
+          className="overflow-hidden rounded-lg bg-gray-50"
         >
-          <div className="px-4 py-3 bg-gray-100 font-semibold text-gray-700 flex items-center space-x-2">
+          <div className="flex items-center space-x-2 bg-gray-100 px-4 py-3 font-semibold text-gray-700">
             <Folder size={16} className="text-gray-400" />
             <span>{chapter.name}</span>
           </div>
@@ -101,8 +102,8 @@ const CourseProgress: React.FC<CourseProgressProps> = ({
                     `/course/${courseId}/activity/${activityId}`
                   }
                 >
-                  <div className="px-4 py-3 hover:bg-gray-100 transition-colors flex items-center group">
-                    <div className="flex items-center space-x-3 flex-1">
+                  <div className="group flex items-center px-4 py-3 transition-colors hover:bg-gray-100">
+                    <div className="flex flex-1 items-center space-x-3">
                       {isActivityDone(activity) ? (
                         <div className="relative">
                           <Square
@@ -111,7 +112,7 @@ const CourseProgress: React.FC<CourseProgressProps> = ({
                           />
                           <Check
                             size={18}
-                            className="stroke-[2.5] text-teal-600 absolute top-0 left-0"
+                            className="absolute top-0 left-0 stroke-[2.5] text-teal-600"
                           />
                         </div>
                       ) : (

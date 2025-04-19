@@ -15,20 +15,11 @@ export async function startActivityAIChatSession(
     RequestBodyWithAuthHeader('POST', data, null, access_token)
   )
   const json = await result.json()
-  if (result.status === 200) {
-    return {
-      success: true,
-      data: json,
-      status: result.status,
-      HTTPmessage: result.statusText,
-    }
-  } else {
-    return {
-      success: false,
-      data: json,
-      status: result.status,
-      HTTPmessage: result.statusText,
-    }
+  return {
+    success: result.status === 200,
+    data: json,
+    status: result.status,
+    HTTPmessage: result.statusText,
   }
 }
 
@@ -47,21 +38,11 @@ export async function sendActivityAIChatMessage(
     `${getAPIUrl()}ai/send/activity_chat_message`,
     RequestBodyWithAuthHeader('POST', data, null, access_token)
   )
-
   const json = await result.json()
-  if (result.status === 200) {
-    return {
-      success: true,
-      data: json,
-      status: result.status,
-      HTTPmessage: result.statusText,
-    }
-  } else {
-    return {
-      success: false,
-      data: json,
-      status: result.status,
-      HTTPmessage: result.statusText,
-    }
+  return {
+    success: result.status === 200,
+    data: json,
+    status: result.status,
+    HTTPmessage: result.statusText,
   }
 }

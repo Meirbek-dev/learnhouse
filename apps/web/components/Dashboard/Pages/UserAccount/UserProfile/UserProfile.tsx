@@ -1,4 +1,3 @@
-import React from 'react'
 import UserProfileBuilder from './UserProfileBuilder'
 
 function UserProfile() {

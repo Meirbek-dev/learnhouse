@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import UserAvatar from '../../UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { useMediaQuery } from 'usehooks-ts'
@@ -64,12 +64,12 @@ const MultipleAuthors = ({
 
   return (
     <div className="flex flex-col items-center space-y-4 px-2 py-2">
-      <div className="text-[12px] text-neutral-400 font-semibold self-start">
+      <div className="self-start text-[12px] font-semibold text-neutral-400">
         Authors & Updates{' '}
       </div>
 
       {/* Avatars row */}
-      <div className="flex justify-center -space-x-6 relative">
+      <div className="relative flex justify-center -space-x-6">
         {displayedAvatars.map((author, index) => (
           <div
             key={author.user.user_uuid}
@@ -101,7 +101,7 @@ const MultipleAuthors = ({
         {remainingCount > 0 && (
           <div className="relative" style={{ zIndex: 0 }}>
             <div
-              className="flex items-center justify-center bg-neutral-100 text-neutral-600 font-medium rounded-full border-4 border-white shadow-sm"
+              className="flex items-center justify-center rounded-full border-4 border-white bg-neutral-100 font-medium text-neutral-600 shadow-sm"
               style={{
                 width: `${avatarSize}px`,
                 height: `${avatarSize}px`,
@@ -115,7 +115,7 @@ const MultipleAuthors = ({
       </div>
 
       {/* Names row - improved display logic */}
-      <div className="text-center mt-2">
+      <div className="mt-2 text-center">
         <div className="text-sm font-medium text-neutral-800">
           {authors.length === 1 ? (
             <span>
@@ -137,14 +137,14 @@ const MultipleAuthors = ({
                 </span>
               ))}
               {authors.length > 2 && (
-                <span className="text-neutral-500 ml-1">
+                <span className="ml-1 text-neutral-500">
                   & {authors.length - 2} more
                 </span>
               )}
             </>
           )}
         </div>
-        <div className="text-xs text-neutral-500 mt-0.5">
+        <div className="mt-0.5 text-xs text-neutral-500">
           {authors.length === 1 ? (
             <span>@{authors[0].user.username}</span>
           ) : (
@@ -167,7 +167,7 @@ const MultipleAuthors = ({
 }
 
 const UpdatesSection = () => {
-  const [selectedView, setSelectedView] = React.useState('list')
+  const [selectedView, setSelectedView] = useState('list')
   const adminStatus = useAdminStatus()
   const course = useCourse() as any
   const session = useLHSession() as any
@@ -179,7 +179,7 @@ const UpdatesSection = () => {
 
   return (
     <div className="mt-2 pt-2">
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <Rss size={14} className="text-neutral-400" />
@@ -188,7 +188,7 @@ const UpdatesSection = () => {
             </span>
           </div>
           {updates && updates.length > 0 && (
-            <span className="px-2 py-0.5 text-[11px] font-medium bg-neutral-100 text-neutral-500 rounded-full">
+            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
               {updates.length} {updates.length === 1 ? 'update' : 'updates'}
             </span>
           )}
@@ -198,15 +198,11 @@ const UpdatesSection = () => {
             onClick={() =>
               setSelectedView(selectedView === 'new' ? 'list' : 'new')
             }
-            className={`
-              inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium
-              transition-colors duration-150
-              ${
-                selectedView === 'new'
-                  ? 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
-                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-              }
-            `}
+            className={`inline-flex items-center space-x-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
+              selectedView === 'new'
+                ? 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
+                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+            } `}
           >
             <PencilLine size={12} />
             <span>{selectedView === 'new' ? 'Cancel' : 'New Update'}</span>
@@ -220,7 +216,7 @@ const UpdatesSection = () => {
         transition={{ duration: 0.2 }}
         className="relative"
       >
-        <div className="max-h-[300px] overflow-y-auto pr-1 -mr-1">
+        <div className="-mr-1 max-h-[300px] overflow-y-auto pr-1">
           {selectedView === 'list' ? (
             <UpdatesListView />
           ) : (
@@ -290,7 +286,7 @@ const NewUpdateForm = ({
               type="text"
               required
               placeholder="What's new in this update?"
-              className="bg-white border-neutral-200 focus:border-neutral-300 focus:ring-neutral-200"
+              className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
             />
           </Form.Control>
         </FormField>
@@ -305,14 +301,14 @@ const NewUpdateForm = ({
               value={formik.values.content}
               required
               placeholder="Share the details of your update..."
-              className="bg-white h-[120px] border-neutral-200 focus:border-neutral-300 focus:ring-neutral-200 resize-none"
+              className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
             />
           </Form.Control>
         </FormField>
         <div className="flex justify-end space-x-2 pt-2">
           <button
             type="submit"
-            className="px-4 py-1.5 bg-neutral-900 hover:bg-black text-white text-xs font-medium rounded-full transition-colors duration-150"
+            className="rounded-full bg-neutral-900 px-4 py-1.5 text-xs font-medium text-white transition-colors duration-150 hover:bg-black"
           >
             Publish Update
           </button>
@@ -334,10 +330,10 @@ const UpdatesListView = () => {
 
   if (!updates || updates.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 px-4 text-center bg-neutral-50/50 rounded-lg border border-dashed border-neutral-200">
-        <TentTree size={28} className="text-neutral-400 mb-2" />
-        <p className="text-sm text-neutral-600 font-medium">No updates yet</p>
-        <p className="text-xs text-neutral-400 mt-1">
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 px-4 py-8 text-center">
+        <TentTree size={28} className="mb-2 text-neutral-400" />
+        <p className="text-sm font-medium text-neutral-600">No updates yet</p>
+        <p className="mt-1 text-xs text-neutral-400">
           Updates about this course will appear here
         </p>
       </div>
@@ -352,27 +348,27 @@ const UpdatesListView = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
-          className="group p-3 rounded-lg bg-neutral-50/50 hover:bg-neutral-100/80 transition-colors duration-150"
+          className="group rounded-lg bg-neutral-50/50 p-3 transition-colors duration-150 hover:bg-neutral-100/80"
         >
           <div className="flex items-start justify-between">
-            <div className="space-y-1 min-w-0 flex-1">
+            <div className="min-w-0 flex-1 space-y-1">
               <div className="flex items-baseline space-x-2">
-                <h4 className="text-sm font-medium text-neutral-800 truncate">
+                <h4 className="truncate text-sm font-medium text-neutral-800">
                   {update.title}
                 </h4>
                 <span
                   title={dayjs(update.creation_date).format('MMMM D, YYYY')}
-                  className="text-[11px] font-medium text-neutral-400 whitespace-nowrap"
+                  className="text-[11px] font-medium whitespace-nowrap text-neutral-400"
                 >
                   {dayjs(update.creation_date).fromNow()}
                 </span>
               </div>
-              <p className="text-sm text-neutral-600 line-clamp-3">
+              <p className="line-clamp-3 text-sm text-neutral-600">
                 {update.content}
               </p>
             </div>
             {adminStatus.isAdmin && !adminStatus.loading && (
-              <div className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="ml-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <DeleteUpdateButton update={update} />
               </div>
             )}
@@ -415,10 +411,10 @@ const DeleteUpdateButton = ({ update }: any) => {
       dialogTrigger={
         <button
           id="delete-update-button"
-          className="p-1.5 text-neutral-400 hover:text-rose-500 rounded-full hover:bg-rose-50 transition-all duration-150"
+          className="rounded-full p-1.5 text-neutral-400 transition-all duration-150 hover:bg-rose-50 hover:text-rose-500"
         >
           <svg
-            className="w-3.5 h-3.5"
+            className="h-3.5 w-3.5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

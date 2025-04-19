@@ -1,5 +1,4 @@
 'use client'
-import React from 'react'
 import useAdminStatus from '../Hooks/useAdminStatus'
 import { useTranslations } from 'next-intl'
 

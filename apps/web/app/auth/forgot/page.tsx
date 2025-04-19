@@ -1,4 +1,3 @@
-import React from 'react'
 import ForgotPasswordClient from './forgot'
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'

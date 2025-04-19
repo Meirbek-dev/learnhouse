@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import React from 'react'
+import { useState } from 'react'
 import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
 import FormLayout, {
   FormField,
@@ -13,23 +13,21 @@ import { AlertTriangle, Info } from 'lucide-react'
 import Link from 'next/link'
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useFormik } from 'formik'
 import { resetPassword } from '@services/auth/auth'
 import { useTranslations } from 'next-intl'
 
 function ResetPasswordClient() {
   const t = useTranslations('Auth.Reset')
-  const generalT = useTranslations('General')
   const validationT = useTranslations('Validation')
   const org = useOrg() as any
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const searchParams = useSearchParams()
   const reset_code = searchParams.get('resetCode') || ''
   const email = searchParams.get('email') || ''
-  const router = useRouter()
-  const [error, setError] = React.useState('')
-  const [message, setMessage] = React.useState('')
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
 
   const validate = (values: any) => {
     const errors: any = {}
@@ -87,7 +85,7 @@ function ResetPasswordClient() {
     },
   })
   return (
-    <div className="grid grid-flow-col justify-stretch h-screen">
+    <div className="grid h-screen grid-flow-col justify-stretch">
       <div
         className="right-login-part"
         style={{
@@ -106,8 +104,8 @@ function ResetPasswordClient() {
             />
           </Link>
         </div>
-        <div className="ml-10 h-4/6 flex flex-row text-white">
-          <div className="m-auto flex space-x-4 items-center flex-wrap">
+        <div className="ml-10 flex h-4/6 flex-row text-white">
+          <div className="m-auto flex flex-wrap items-center space-x-4">
             <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
               {org?.logo_image ? (
                 <img
@@ -117,7 +115,7 @@ function ResetPasswordClient() {
                   )}`}
                   alt={org?.name}
                   style={{ width: 'auto', height: 70 }}
-                  className="rounded-xl shadow-xl inset-0 ring-1 ring-inset ring-black/10 bg-white"
+                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
                 />
               ) : (
                 <Image
@@ -129,26 +127,26 @@ function ResetPasswordClient() {
                 />
               )}
             </div>
-            <div className="font-bold text-xl">{org?.name}</div>
+            <div className="text-xl font-bold">{org?.name}</div>
           </div>
         </div>
       </div>
-      <div className="left-login-part bg-white flex flex-row">
+      <div className="left-login-part flex flex-row bg-white">
         <div className="login-form m-auto w-72">
-          <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
-          <p className="text-sm mb-4">{t('enterResetDetails')}</p>
+          <h1 className="mb-4 text-2xl font-bold">{t('title')}</h1>
+          <p className="mb-4 text-sm">{t('enterResetDetails')}</p>
 
           {error && (
-            <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-4 transition-all shadow-xs">
+            <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
               <AlertTriangle size={18} />
-              <div className="font-bold text-sm">{error}</div>
+              <div className="text-sm font-bold">{error}</div>
             </div>
           )}
           {message && (
             <div className="flex flex-col gap-2">
-              <div className="flex justify-center bg-green-200 rounded-md text-green-950 space-x-2 items-center p-4 transition-all shadow-xs">
+              <div className="flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
                 <Info size={18} />
-                <div className="font-bold text-sm">{t('success')}</div>
+                <div className="text-sm font-bold">{t('success')}</div>
               </div>
               <Link
                 href={getUriWithoutOrg('/login?orgslug=' + org.slug)}
@@ -219,10 +217,10 @@ function ResetPasswordClient() {
               </Form.Control>
             </FormField>
 
-            <div className="flex  py-4">
+            <div className="flex py-4">
               <Form.Submit asChild>
-                <button className="w-full bg-black text-white font-bold text-center p-2 rounded-md shadow-md hover:cursor-pointer">
-                  {isSubmitting ? generalT('loading') : t('changePassword')}
+                <button className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md hover:cursor-pointer">
+                  {isSubmitting ? t('loading') : t('changePassword')}
                 </button>
               </Form.Submit>
             </div>

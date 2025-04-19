@@ -9,7 +9,7 @@ import Image from 'next/image'
 import * as Form from '@radix-ui/react-form'
 import { useFormik } from 'formik'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
-import React from 'react'
+import { useState } from 'react'
 import { AlertTriangle, UserRoundPlus } from 'lucide-react'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
@@ -22,8 +22,8 @@ interface LoginClientProps {
 
 const LoginClient = (props: LoginClientProps) => {
   const t = useTranslations('Auth.Login')
-  // const validationT = useTranslations('Validation')
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const validationT = useTranslations('Validation')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validate = (values: any) => {
     const errors: any = {}
@@ -43,7 +43,7 @@ const LoginClient = (props: LoginClientProps) => {
     return errors
   }
 
-  const [error, setError] = React.useState('')
+  const [error, setError] = useState('')
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -81,7 +81,7 @@ const LoginClient = (props: LoginClientProps) => {
   })
 
   return (
-    <div className="grid grid-flow-col justify-stretch h-screen">
+    <div className="grid h-screen grid-flow-col justify-stretch">
       <div
         className="right-login-part"
         style={{
@@ -100,8 +100,8 @@ const LoginClient = (props: LoginClientProps) => {
             />
           </Link>
         </div>
-        <div className="ml-10 h-4/6 flex flex-row text-white">
-          <div className="m-auto flex space-x-4 items-center flex-wrap">
+        <div className="ml-10 flex h-4/6 flex-row text-white">
+          <div className="m-auto flex flex-wrap items-center space-x-4">
             <div>{t('loginTo')} </div>
             <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
               {props.org?.logo_image ? (
@@ -112,7 +112,7 @@ const LoginClient = (props: LoginClientProps) => {
                   )}`}
                   alt={props.org?.name}
                   style={{ width: 'auto', height: 70 }}
-                  className="rounded-xl shadow-xl inset-0 ring-1 ring-inset ring-black/10 bg-white"
+                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
                 />
               ) : (
                 <Image
@@ -124,16 +124,16 @@ const LoginClient = (props: LoginClientProps) => {
                 />
               )}
             </div>
-            <div className="font-bold text-xl">{props.org?.name}</div>
+            <div className="text-xl font-bold">{props.org?.name}</div>
           </div>
         </div>
       </div>
-      <div className="left-login-part bg-white flex flex-row">
+      <div className="left-login-part flex flex-row bg-white">
         <div className="login-form m-auto w-72">
           {error && (
-            <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-4 transition-all shadow-xs">
+            <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
               <AlertTriangle size={18} />
-              <div className="font-bold text-sm">{t('wrongCredentials')}</div>
+              <div className="text-sm font-bold">{t('wrongCredentials')}</div>
             </div>
           )}
           <FormLayout onSubmit={formik.handleSubmit}>
@@ -179,23 +179,23 @@ const LoginClient = (props: LoginClientProps) => {
                 {t('forgotPassword')}
               </Link>
             </div>
-            <div className="flex  py-4">
+            <div className="flex py-4">
               <Form.Submit asChild>
-                <button className="w-full bg-black text-white font-bold text-center p-2 rounded-md shadow-md hover:cursor-pointer">
+                <button className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md hover:cursor-pointer">
                   {isSubmitting ? t('loading') : t('login')}
                 </button>
               </Form.Submit>
             </div>
           </FormLayout>
-          <div className="flex h-0.5 rounded-2xl bg-slate-100 mt-5  mx-10"></div>
-          <div className="flex justify-center py-5 mx-auto">{t('or')}</div>
+          <div className="mx-10 mt-5 flex h-0.5 rounded-2xl bg-slate-100"></div>
+          <div className="mx-auto flex justify-center py-5">{t('or')}</div>
           <div className="flex flex-col space-y-4">
             <Link
               href={{
                 pathname: getUriWithoutOrg('/signup'),
                 query: props.org.slug ? { orgslug: props.org.slug } : null,
               }}
-              className="flex justify-center items-center py-3 text-md w-full bg-gray-800 text-gray-300 space-x-3 font-semibold text-center p-2 rounded-md shadow-sm hover:cursor-pointer"
+              className="text-md flex w-full items-center justify-center space-x-3 rounded-md bg-gray-800 p-2 py-3 text-center font-semibold text-gray-300 shadow-sm hover:cursor-pointer"
             >
               <UserRoundPlus size={17} />
               <span>{t('signup')}</span>
@@ -204,7 +204,7 @@ const LoginClient = (props: LoginClientProps) => {
               onClick={() =>
                 signIn('google', { callbackUrl: '/redirect_from_auth' })
               }
-              className="flex justify-center py-3 text-md w-full bg-white text-slate-600 space-x-3 font-semibold text-center p-2 rounded-md shadow-sm hover:cursor-pointer"
+              className="text-md flex w-full justify-center space-x-3 rounded-md bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm hover:cursor-pointer"
             >
               <img
                 src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"

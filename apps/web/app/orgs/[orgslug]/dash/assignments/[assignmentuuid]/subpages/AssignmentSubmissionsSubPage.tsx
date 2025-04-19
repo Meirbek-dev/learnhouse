@@ -6,7 +6,7 @@ import { getAPIUrl } from '@services/config/config'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { SendHorizonal, UserCheck, X } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import EvaluateAssignment from './Modals/EvaluateAssignment'
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext'
@@ -46,17 +46,17 @@ function AssignmentSubmissionsSubPage({
   }
 
   return (
-    <div className="pl-10 mr-10 flex flex-col pt-3 w-full">
-      <div className="flex flex-row w-full">
+    <div className="mr-10 flex w-full flex-col pt-3 pl-10">
+      <div className="flex w-full flex-row">
         <div className="flex-1">
-          <div className="flex w-fit mx-auto px-3.5 py-1 bg-rose-600/80 space-x-2 my-5 items-center text-sm font-bold text-white rounded-full">
+          <div className="mx-auto my-5 flex w-fit items-center space-x-2 rounded-full bg-rose-600/80 px-3.5 py-1 text-sm font-bold text-white">
             <X size={18} />
             <h3>{t('late')}</h3>
           </div>
           <div className="flex flex-col gap-4">{renderSubmissions('LATE')}</div>
         </div>
         <div className="flex-1">
-          <div className="flex w-fit mx-auto px-3.5 py-1 bg-amber-600/80 space-x-2 my-5 items-center text-sm font-bold text-white rounded-full">
+          <div className="mx-auto my-5 flex w-fit items-center space-x-2 rounded-full bg-amber-600/80 px-3.5 py-1 text-sm font-bold text-white">
             <SendHorizonal size={18} />
             <h3>{t('submitted')}</h3>
           </div>
@@ -65,7 +65,7 @@ function AssignmentSubmissionsSubPage({
           </div>
         </div>
         <div className="flex-1">
-          <div className="flex w-fit mx-auto px-3.5 py-1 bg-emerald-600/80 space-x-2 my-5 items-center text-sm font-bold text-white rounded-full">
+          <div className="mx-auto my-5 flex w-fit items-center space-x-2 rounded-full bg-emerald-600/80 px-3.5 py-1 text-sm font-bold text-white">
             <UserCheck size={18} />
             <h3>{t('graded')}</h3>
           </div>
@@ -83,7 +83,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
   const generalT = useTranslations('General')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const [gradeSudmissionModal, setGradeSubmissionModal] = React.useState({
+  const [gradeSudmissionModal, setGradeSubmissionModal] = useState({
     open: false,
     submission_id: '',
   })
@@ -94,13 +94,13 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
   )
 
   return (
-    <div className="flex flex-row bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)] nice-shadow rounded-lg p-4 w-[350px] mx-auto">
-      <div className="flex flex-col space-y-2 w-full">
-        <div className="flex justify-between w-full">
-          <h2 className="uppercase text-slate-400 text-xs tracking-tight font-semibold">
+    <div className="nice-shadow mx-auto flex w-[350px] flex-row rounded-lg bg-white p-4 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+      <div className="flex w-full flex-col space-y-2">
+        <div className="flex w-full justify-between">
+          <h2 className="text-xs font-semibold tracking-tight text-slate-400 uppercase">
             {t('submission')}
           </h2>
-          <p className="uppercase text-xs tracking-tight font-semibold">
+          <p className="text-xs font-semibold tracking-tight uppercase">
             {new Date(submission.creation_date).toLocaleDateString('en-UK', {
               year: 'numeric',
               month: 'long',
@@ -161,7 +161,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
               dialogTitle={t('evaluateUser', { username: user?.username })}
               dialogDescription={t('evaluateSubmission')}
               dialogTrigger={
-                <div className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded text-xs cursor-pointer">
+                <div className="cursor-pointer rounded bg-slate-800 px-4 py-2 text-xs font-bold text-white hover:bg-slate-700">
                   {generalT('evaluate')}
                 </div>
               }

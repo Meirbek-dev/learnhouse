@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   getCoursesLinkedToProduct,
   unlinkCourseFromProduct,
@@ -76,7 +76,7 @@ export default function ProductLinkedCourses({
 
   return (
     <div className="mt-4">
-      <div className="flex justify-between items-center mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-700">{t('title')}</h3>
         <Modal
           isDialogOpen={isLinkModalOpen}
@@ -107,7 +107,7 @@ export default function ProductLinkedCourses({
 
       <div className="space-y-2">
         {linkedCourses.length === 0 ? (
-          <div className="text-sm text-gray-500 flex items-center gap-2">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
             <BookOpen size={16} />
             <span>{t('noCoursesLinked')}</span>
           </div>
@@ -115,7 +115,7 @@ export default function ProductLinkedCourses({
           linkedCourses.map((course) => (
             <div
               key={course.id}
-              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+              className="flex items-center justify-between rounded-md bg-gray-50 p-2"
             >
               <span className="text-sm font-medium">{course.name}</span>
               <Button

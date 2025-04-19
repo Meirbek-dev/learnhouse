@@ -25,7 +25,7 @@ export function useContributorStatus(courseUuid: string) {
         session.data?.tokens?.access_token
       )
 
-      if (response && response.data) {
+      if (response.data) {
         const currentUser = response.data.find(
           (contributor: any) => contributor.user_id === session.data.user.id
         )
@@ -39,7 +39,7 @@ export function useContributorStatus(courseUuid: string) {
         }
       }
     } catch (error) {
-      console.error('Failed to check contributor status:', error)
+      console.error(t('checkStatusError') + ': ' + error)
       toast.error(t('checkStatusError'))
     } finally {
       setIsLoading(false)

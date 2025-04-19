@@ -6,7 +6,7 @@ import FormLayout, {
 } from '@components/Objects/StyledElements/Form/Form'
 import * as Form from '@radix-ui/react-form'
 import { useOrg } from '@components/Contexts/OrgContext'
-import React from 'react'
+import { useState } from 'react'
 import { updateUserGroup } from '@services/usergroups/usergroups'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
@@ -28,7 +28,7 @@ function EditUserGroup(props: EditUserGroupProps) {
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validate = (values: any) => {
     const errors: any = {}
@@ -99,7 +99,7 @@ function EditUserGroup(props: EditUserGroupProps) {
       </FormField>
       <div className="flex py-4">
         <Form.Submit asChild>
-          <button className="w-full bg-black text-white font-bold text-center p-2 rounded-md shadow-md hover:cursor-pointer">
+          <button className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md hover:cursor-pointer">
             {isSubmitting ? t('loadingButton') : t('saveButton')}
           </button>
         </Form.Submit>

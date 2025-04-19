@@ -8,7 +8,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useSearchParams } from 'next/navigation'
-import React from 'react'
+import { useState } from 'react'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { useTranslations } from 'next-intl'
 
@@ -21,7 +21,7 @@ type CourseProps = {
 function CoursesHome(params: CourseProps) {
   const searchParams = useSearchParams()
   const isCreatingCourse = searchParams.get('new') ? true : false
-  const [newCourseModal, setNewCourseModal] = React.useState(isCreatingCourse)
+  const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse)
   const orgslug = params.orgslug
   const courses = params.courses
   const isUserAdmin = useAdminStatus() as any
@@ -32,11 +32,11 @@ function CoursesHome(params: CourseProps) {
   }
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
+    <div className="h-full w-full bg-[#f8f8f8] pr-10 pl-10">
       <div className="mb-6">
         <BreadCrumbs type="courses" />
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4">
-          <h1 className="text-3xl font-bold mb-4 sm:mb-0">{t('courses')}</h1>
+        <div className="mt-4 flex flex-col items-start justify-between sm:flex-row sm:items-center">
+          <h1 className="mb-4 text-3xl font-bold sm:mb-0">{t('courses')}</h1>
           <AuthenticatedClientElement
             checkMethod="roles"
             action="create"
@@ -65,7 +65,7 @@ function CoursesHome(params: CourseProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {courses.map((course: any) => (
           <div key={course.course_uuid}>
             <CourseThumbnail
@@ -76,7 +76,7 @@ function CoursesHome(params: CourseProps) {
           </div>
         ))}
         {courses.length === 0 && (
-          <div className="col-span-full flex justify-center items-center py-8">
+          <div className="col-span-full flex items-center justify-center py-8">
             <div className="text-center">
               <div className="mb-4">
                 <svg
@@ -90,7 +90,7 @@ function CoursesHome(params: CourseProps) {
                   {/* ... SVG content ... */}
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-600 mb-2">
+              <h2 className="mb-2 text-2xl font-bold text-gray-600">
                 {t('noCourses')}
               </h2>
               <p className="text-lg text-gray-400">

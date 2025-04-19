@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { linkCourseToProduct } from '@services/payments/products'
@@ -11,9 +11,7 @@ import { mutate } from 'swr'
 import useSWR from 'swr'
 import { getOrgCourses } from '@services/courses/courses'
 import { getCoursesLinkedToProduct } from '@services/payments/products'
-import Link from 'next/link'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { getUriWithOrg } from '@services/config/config'
 import { useTranslations } from 'next-intl'
 
 interface LinkCourseModalProps {
@@ -52,25 +50,25 @@ const CoursePreview = ({
     : '../empty_thumbnail.png'
 
   return (
-    <div className="flex gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
+    <div className="flex gap-4 rounded-lg border border-gray-100 bg-white p-4 transition-colors hover:border-gray-200">
       {/* Thumbnail */}
       <div
-        className="shrink-0 w-[120px] h-[68px] rounded-md bg-cover bg-center ring-1 ring-inset ring-black/10"
+        className="h-[68px] w-[120px] shrink-0 rounded-md bg-cover bg-center ring-1 ring-black/10 ring-inset"
         style={{ backgroundImage: `url(${thumbnailImage})` }}
       />
 
       {/* Content */}
       <div className="grow space-y-1">
-        <h3 className="font-medium text-gray-900 line-clamp-1">
+        <h3 className="line-clamp-1 font-medium text-gray-900">
           {course.name}
         </h3>
-        <p className="text-sm text-gray-500 line-clamp-2">
+        <p className="line-clamp-2 text-sm text-gray-500">
           {course.description}
         </p>
       </div>
 
       {/* Action Button */}
-      <div className="shrink-0 flex items-center">
+      <div className="flex shrink-0 items-center">
         {isLinked ? (
           <Button
             variant="outline"
@@ -168,12 +166,12 @@ export default function LinkCourseModal({
           className="w-full pl-10"
         />
         <Search
-          className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400"
+          className="absolute top-1/2 left-6 -translate-y-1/2 transform text-gray-400"
           size={20}
         />
       </div>
 
-      <div className="max-h-[400px] overflow-y-auto space-y-2 px-3">
+      <div className="max-h-[400px] space-y-2 overflow-y-auto px-3">
         {filteredCourses.map((course: any) => (
           <CoursePreview
             key={course.course_uuid}
@@ -185,7 +183,7 @@ export default function LinkCourseModal({
         ))}
 
         {filteredCourses.length === 0 && (
-          <div className="text-center py-6 text-gray-500">
+          <div className="py-6 text-center text-gray-500">
             {t('noCoursesFound')}
           </div>
         )}

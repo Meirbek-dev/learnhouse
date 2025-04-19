@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import React from 'react'
+import type { ReactNode } from 'react'
 import ClientAdminLayout from './ClientAdminLayout'
 import { getTranslations } from 'next-intl/server'
 
@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function DashboardLayout(props: {
-  children: React.ReactNode
+  children: ReactNode
   params: Promise<any>
 }) {
   const params = await props.params

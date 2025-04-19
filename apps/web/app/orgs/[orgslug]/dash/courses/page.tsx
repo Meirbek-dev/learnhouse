@@ -1,6 +1,5 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
-import React from 'react'
 import CoursesHome from './client'
 import { nextAuthOptions } from 'app/auth/options'
 import { getServerSession } from 'next-auth'

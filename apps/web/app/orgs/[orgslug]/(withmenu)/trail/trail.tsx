@@ -7,7 +7,7 @@ import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOf
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 

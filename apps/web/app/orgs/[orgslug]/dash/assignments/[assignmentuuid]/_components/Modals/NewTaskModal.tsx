@@ -3,7 +3,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { createAssignmentTask } from '@services/courses/assignments'
 import { AArrowUp, FileUp, ListTodo } from 'lucide-react'
-import React from 'react'
+import { useRef } from 'react'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
 import { useTranslations } from 'next-intl'
@@ -12,7 +12,7 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
   const t = useTranslations('DashPage.Assignments.NewTaskModal')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const reminderShownRef = React.useRef(false)
+  const reminderShownRef = useRef(false)
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any
 
   function showReminderToast() {
@@ -56,40 +56,40 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
   }
 
   return (
-    <div className="flex space-x-6 mx-auto justify-center items-center">
+    <div className="mx-auto flex items-center justify-center space-x-6">
       <div
         onClick={() => createTask('QUIZ')}
-        className="flex flex-col space-y-2 justify-center  text-center pt-10"
+        className="flex flex-col justify-center space-y-2 pt-10 text-center"
       >
-        <div className="px-5 py-5 rounded-full nice-shadow w-fit mx-auto bg-gray-100/50 text-gray-500 cursor-pointer hover:bg-gray-100 transition-all ease-linear">
+        <div className="nice-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <ListTodo size={30} />
         </div>
-        <p className="text-xl text-gray-700 font-semibold">{t('quizTitle')}</p>
-        <p className="text-sm text-gray-500 w-40">{t('quizDescription')}</p>
+        <p className="text-xl font-semibold text-gray-700">{t('quizTitle')}</p>
+        <p className="w-40 text-sm text-gray-500">{t('quizDescription')}</p>
       </div>
       <div
         onClick={() => createTask('FILE_SUBMISSION')}
-        className="flex flex-col space-y-2 justify-center  text-center pt-10"
+        className="flex flex-col justify-center space-y-2 pt-10 text-center"
       >
-        <div className="px-5 py-5 rounded-full nice-shadow w-fit mx-auto bg-gray-100/50 text-gray-500 cursor-pointer hover:bg-gray-100 transition-all ease-linear">
+        <div className="nice-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <FileUp size={30} />
         </div>
-        <p className="text-xl text-gray-700 font-semibold">
+        <p className="text-xl font-semibold text-gray-700">
           {t('fileSubmissionTitle')}
         </p>
-        <p className="text-sm text-gray-500 w-40">
+        <p className="w-40 text-sm text-gray-500">
           {t('fileSubmissionDescription')}
         </p>
       </div>
       <div
         onClick={() => toast.error(t('formNotSupported'))}
-        className="flex flex-col space-y-2 justify-center  text-center pt-10 opacity-25"
+        className="flex flex-col justify-center space-y-2 pt-10 text-center opacity-25"
       >
-        <div className="px-5 py-5 rounded-full nice-shadow w-fit mx-auto bg-gray-100/50 text-gray-500 cursor-pointer hover:bg-gray-100 transition-all ease-linear">
+        <div className="nice-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <AArrowUp size={30} />
         </div>
-        <p className="text-xl text-gray-700 font-semibold">{t('formTitle')}</p>
-        <p className="text-sm text-gray-500 w-40">{t('formDescription')}</p>
+        <p className="text-xl font-semibold text-gray-700">{t('formTitle')}</p>
+        <p className="w-40 text-sm text-gray-500">{t('formDescription')}</p>
       </div>
     </div>
   )

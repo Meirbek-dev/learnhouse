@@ -1,7 +1,7 @@
 'use client'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
-import React, { createContext, useContext, useEffect, useReducer } from 'react'
+import { createContext, useContext, useEffect, useReducer } from 'react'
 import useSWR from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import ErrorUI from '@components/Objects/StyledElements/Error/Error'
@@ -49,11 +49,11 @@ export function CourseProvider({ children, courseuuid }: any) {
 
   if (courseStructureData) {
     return (
-      <CourseContext.Provider value={state}>
-        <CourseDispatchContext.Provider value={dispatch}>
+      <CourseContext value={state}>
+        <CourseDispatchContext value={dispatch}>
           {children}
-        </CourseDispatchContext.Provider>
-      </CourseContext.Provider>
+        </CourseDispatchContext>
+      </CourseContext>
     )
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { removeCourse, startCourse } from '@services/courses/activity'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
@@ -6,14 +6,11 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config'
 import { getProductsByCourse } from '@services/payments/products'
 import {
-  LogIn,
-  LogOut,
   ShoppingCart,
   AlertCircle,
   UserPen,
   ClockIcon,
   ArrowRight,
-  Sparkles,
   BookOpen,
 } from 'lucide-react'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
@@ -227,7 +224,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
             borderColor="border-white"
           />
           <span>{action === 'start' ? 'Start Course' : 'Leave Course'}</span>
-          <ArrowRight className="w-5 h-5" />
+          <ArrowRight className="h-5 w-5" />
         </>
       )
     }
@@ -242,7 +239,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
           borderColor="border-white"
         />
         <span>{action === 'start' ? 'Start Course' : 'Leave Course'}</span>
-        <ArrowRight className="w-5 h-5" />
+        <ArrowRight className="h-5 w-5" />
       </>
     )
   }
@@ -261,9 +258,9 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
           onClick={() =>
             router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))
           }
-          className="w-full bg-white text-neutral-700 border border-neutral-200 py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 mt-3 cursor-pointer"
+          className="nice-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
         >
-          <UserPen className="w-5 h-5" />
+          <UserPen className="h-5 w-5" />
           Authenticate to contribute
         </button>
       )
@@ -271,8 +268,8 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
 
     if (contributorStatus === 'ACTIVE') {
       return (
-        <div className="w-full bg-green-50 text-green-700 border border-green-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
-          <UserPen className="w-5 h-5" />
+        <div className="nice-shadow mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 py-3 font-semibold text-green-700">
+          <UserPen className="h-5 w-5" />
           You are a contributor
         </div>
       )
@@ -280,8 +277,8 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
 
     if (contributorStatus === 'PENDING') {
       return (
-        <div className="w-full bg-amber-50 text-amber-700 border border-amber-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
-          <ClockIcon className="w-5 h-5" />
+        <div className="nice-shadow mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 py-3 font-semibold text-amber-700">
+          <ClockIcon className="h-5 w-5" />
           Contributor application pending
         </div>
       )
@@ -291,13 +288,13 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
       <button
         onClick={handleApplyToContribute}
         disabled={isContributeLoading}
-        className="w-full bg-white text-neutral-700 py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 mt-3 cursor-pointer disabled:cursor-not-allowed"
+        className="nice-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed"
       >
         {isContributeLoading ? (
-          <div className="w-5 h-5 border-2 border-neutral-700 border-t-transparent rounded-full animate-spin" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-700 border-t-transparent" />
         ) : (
           <>
-            <UserPen className="w-5 h-5" />
+            <UserPen className="h-5 w-5" />
             Apply to contribute
           </>
         )}
@@ -322,7 +319,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
 
     if (!isStarted) {
       return (
-        <div className="relative bg-white nice-shadow rounded-lg overflow-hidden">
+        <div className="nice-shadow relative overflow-hidden rounded-lg bg-white">
           <div
             className="absolute inset-0 opacity-[0.05]"
             style={{
@@ -335,8 +332,8 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-4">
-                  <div className="relative w-16 h-16">
-                    <svg className="w-full h-full transform -rotate-90">
+                  <div className="relative h-16 w-16">
+                    <svg className="h-full w-full -rotate-90 transform">
                       <circle
                         cx="32"
                         cy="32"
@@ -347,7 +344,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="w-6 h-6 text-neutral-400" />
+                      <BookOpen className="h-6 w-6 text-neutral-400" />
                     </div>
                   </div>
                   <div className="flex-1">
@@ -369,7 +366,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
     }
 
     return (
-      <div className="relative bg-white nice-shadow rounded-lg overflow-hidden">
+      <div className="nice-shadow relative overflow-hidden rounded-lg bg-white">
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
@@ -382,8 +379,8 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16">
-                  <svg className="w-full h-full transform -rotate-90">
+                <div className="relative h-16 w-16">
+                  <svg className="h-full w-full -rotate-90 transform">
                     <circle
                       cx="32"
                       cy="32"
@@ -418,7 +415,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
                 </div>
                 <button
                   onClick={() => setIsProgressOpen(true)}
-                  className="flex-1 text-left hover:bg-neutral-50/50 p-2 rounded-lg transition-colors"
+                  className="flex-1 rounded-lg p-2 text-left transition-colors hover:bg-neutral-50/50"
                 >
                   <div className="text-sm font-medium text-gray-900">
                     Course Progress
@@ -437,24 +434,24 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
 
   if (isLoading) {
     return (
-      <div className="animate-pulse h-20 bg-gray-100 rounded-lg nice-shadow" />
+      <div className="nice-shadow h-20 animate-pulse rounded-lg bg-gray-100" />
     )
   }
 
   if (linkedProducts.length > 0) {
     return (
-      <div className="bg-white shadow-md shadow-gray-300/25 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+      <div className="overflow-hidden rounded-lg bg-white p-4 shadow-md shadow-gray-300/25 outline-neutral-200/40">
         <div className="space-y-4">
           {hasAccess ? (
             <>
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg nice-shadow">
+              <div className="nice-shadow rounded-lg border border-green-200 bg-green-50 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <h3 className="text-green-800 font-semibold">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                  <h3 className="font-semibold text-green-800">
                     You Own This Course
                   </h3>
                 </div>
-                <p className="text-green-700 text-sm mt-1">
+                <p className="mt-1 text-sm text-green-700">
                   You have purchased this course and have full access to all
                   content.
                 </p>
@@ -462,14 +459,14 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
               <button
                 onClick={handleCourseAction}
                 disabled={isActionLoading}
-                className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
                   isStarted
                     ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
                     : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
                 }`}
               >
                 {isActionLoading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
                   renderActionButton(isStarted ? 'leave' : 'start')
                 )}
@@ -478,12 +475,12 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
             </>
           ) : (
             <>
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg nice-shadow">
+              <div className="nice-shadow rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-800" />
-                  <h3 className="text-amber-800 font-semibold">Paid Course</h3>
+                  <AlertCircle className="h-5 w-5 text-amber-800" />
+                  <h3 className="font-semibold text-amber-800">Paid Course</h3>
                 </div>
-                <p className="text-amber-700 text-sm mt-1">
+                <p className="mt-1 text-sm text-amber-700">
                   This course requires purchase to access its content.
                 </p>
               </div>
@@ -496,10 +493,10 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
                 minWidth="sm"
               />
               <button
-                className="w-full bg-neutral-900 text-white py-3 rounded-lg nice-shadow font-semibold hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+                className="nice-shadow flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-900 py-3 font-semibold text-white transition-colors hover:bg-neutral-800"
                 onClick={() => setIsModalOpen(true)}
               >
-                <ShoppingCart className="w-5 h-5" />
+                <ShoppingCart className="h-5 w-5" />
                 Purchase Course
               </button>
               {renderContributorButton()}
@@ -511,7 +508,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
   }
 
   return (
-    <div className="bg-white shadow-md shadow-gray-300/25 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+    <div className="overflow-hidden rounded-lg bg-white p-4 shadow-md shadow-gray-300/25 outline-neutral-200/40">
       <div className="space-y-4">
         {/* Progress Section */}
         {renderProgressSection()}
@@ -520,14 +517,14 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
         <button
           onClick={handleCourseAction}
           disabled={isActionLoading}
-          className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+          className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
             isStarted
               ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
               : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
           }`}
         >
           {isActionLoading ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
           ) : (
             renderActionButton(isStarted ? 'leave' : 'start')
           )}

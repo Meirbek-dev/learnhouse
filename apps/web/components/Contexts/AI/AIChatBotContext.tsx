@@ -1,6 +1,7 @@
 'use client'
 import { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk'
-import React, { createContext, useContext, useReducer } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext, useReducer } from 'react'
 export const AIChatBotContext = createContext(null) as any
 export const AIChatBotDispatchContext = createContext(null) as any
 
@@ -19,7 +20,7 @@ type AIError = {
   error_message: string
 }
 
-function AIChatBotProvider({ children }: { children: React.ReactNode }) {
+function AIChatBotProvider({ children }: { children: ReactNode }) {
   const [aiChatBotState, dispatchAIChatBot] = useReducer(aiChatBotReducer, {
     messages: [] as AIMessage[],
     isModalOpen: false,
@@ -29,11 +30,11 @@ function AIChatBotProvider({ children }: { children: React.ReactNode }) {
     error: { isError: false, status: 0, error_message: ' ' } as AIError,
   })
   return (
-    <AIChatBotContext.Provider value={aiChatBotState}>
-      <AIChatBotDispatchContext.Provider value={dispatchAIChatBot}>
+    <AIChatBotContext value={aiChatBotState}>
+      <AIChatBotDispatchContext value={dispatchAIChatBot}>
         {children}
-      </AIChatBotDispatchContext.Provider>
-    </AIChatBotContext.Provider>
+      </AIChatBotDispatchContext>
+    </AIChatBotContext>
   )
 }
 

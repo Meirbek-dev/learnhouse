@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import type { FC, ChangeEvent } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createApi } from 'unsplash-js'
 import {
   Search,
-  X,
   Cpu,
   Briefcase,
   GraduationCap,
@@ -61,7 +61,7 @@ interface UnsplashImagePickerProps {
   isOpen?: boolean
 }
 
-const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({
+const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({
   onSelect,
   onClose,
   isOpen = true,
@@ -129,7 +129,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({
     }
   }, [isOpen, images.length, query, loading, fetchImages])
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value)
   }
 
@@ -149,28 +149,28 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({
   }
 
   const modalContent = (
-    <div className="flex flex-col h-full">
-      <div className="p-4 space-y-4">
+    <div className="flex h-full flex-col">
+      <div className="space-y-4 p-4">
         <div className="relative">
           <input
             type="text"
             value={query}
             onChange={handleSearch}
             placeholder={t('searchPlaceholder')}
-            className="w-full p-2 pl-10 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border p-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
           />
           <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400"
             size={20}
           />
         </div>
         {!query && (
-          <div className="flex flex-wrap gap-2 max-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+          <div className="scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent flex max-h-[150px] flex-wrap gap-2 overflow-y-auto pr-2">
             {predefinedLabels.map((label) => (
               <button
                 key={label.key}
                 onClick={() => handleLabelClick(label.key)}
-                className="px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 nice-shadow transition-colors flex items-center gap-1 space-x-1"
+                className="nice-shadow flex items-center gap-1 space-x-1 rounded-lg bg-neutral-100 px-3 py-1 transition-colors hover:bg-neutral-200"
               >
                 <label.icon size={16} />
                 <span>{label.name}</span>
@@ -187,23 +187,23 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({
               <img
                 src={image.urls.small}
                 alt={image.alt_description || 'Unsplash image'}
-                className="absolute inset-0 w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                className="absolute inset-0 h-full w-full cursor-pointer rounded-lg object-cover transition-opacity hover:opacity-80"
                 onClick={() => handleImageSelect(image.urls.regular)}
               />
             </div>
           ))}
         </div>
-        {loading && <p className="text-center mt-4">{t('loading')}</p>}
+        {loading && <p className="mt-4 text-center">{t('loading')}</p>}
         {!loading && images.length > 0 && (
           <button
             onClick={handleLoadMore}
-            className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
           >
             {t('loadMoreButton')}
           </button>
         )}
         {!loading && images.length === 0 && query && (
-          <p className="text-center mt-4">{t('noResults')}</p>
+          <p className="mt-4 text-center">{t('noResults')}</p>
         )}
       </div>
     </div>

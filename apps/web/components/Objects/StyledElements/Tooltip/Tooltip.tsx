@@ -1,12 +1,12 @@
 'use client'
-import React from 'react'
+import type { ReactNode } from 'react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 import { styled, keyframes } from '@stitches/react'
 
 type TooltipProps = {
   sideOffset?: number
-  content: React.ReactNode
-  children: React.ReactNode
+  content: ReactNode
+  children: ReactNode
   side?: 'top' | 'right' | 'bottom' | 'left' // default is bottom
   slateBlack?: boolean
   unstyled?: boolean // new prop to remove default styling

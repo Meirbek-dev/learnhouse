@@ -1,5 +1,6 @@
 import { NodeViewWrapper } from '@tiptap/react'
-import React, { useEffect } from 'react'
+import type { ChangeEvent } from 'react'
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { AlertTriangle, FileText, Download } from 'lucide-react'
 import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf'
@@ -22,18 +23,16 @@ function PDFBlockComponent(props: any) {
   const course = useCourse() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const [pdf, setPDF] = React.useState(null)
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [blockObject, setblockObject] = React.useState(
-    props.node.attrs.blockObject
-  )
+  const [pdf, setPDF] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [blockObject, setblockObject] = useState(props.node.attrs.blockObject)
   const fileId = blockObject
     ? `${blockObject.content.file_id}.${blockObject.content.file_format}`
     : null
   const editorState = useEditorProvider() as any
   const isEditable = editorState.isEditable
 
-  const handlePDFChange = (event: React.ChangeEvent<any>) => {
+  const handlePDFChange = (event: ChangeEvent<any>) => {
     setPDF(event.target.files[0])
   }
 
@@ -96,7 +95,7 @@ function PDFBlockComponent(props: any) {
         <BlockPDF>
           <div className="relative">
             <iframe
-              className="shadow-sm rounded-lg h-96 w-full object-scale-down bg-black"
+              className="h-96 w-full rounded-lg bg-black object-scale-down shadow-sm"
               src={`${getActivityBlockMediaDirectory(
                 org?.org_uuid,
                 course?.courseStructure.course_uuid,
@@ -109,10 +108,10 @@ function PDFBlockComponent(props: any) {
             {!isEditable && (
               <button
                 onClick={handleDownload}
-                className="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+                className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                 title="Download PDF"
               >
-                <Download className="w-4 h-4 text-white" />
+                <Download className="h-4 w-4 text-white" />
               </button>
             )}
           </div>

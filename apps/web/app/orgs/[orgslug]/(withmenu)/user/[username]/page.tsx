@@ -1,7 +1,4 @@
-import React from 'react'
 import { getUserByUsername } from '@services/users/users'
-import { getServerSession } from 'next-auth'
-import { nextAuthOptions } from 'app/auth/options'
 import { Metadata } from 'next'
 import UserProfileClient from './UserProfileClient'
 import { getTranslations } from 'next-intl/server'
@@ -19,11 +16,12 @@ interface UserPageProps {
 export async function generateMetadata({
   params,
 }: UserPageProps): Promise<Metadata> {
+  const t = await getTranslations('UserProfilePage')
+
   try {
     const resolvedParams = await params
-    const t = await getTranslations('UserProfilePage')
-
     const userData = await getUserByUsername(resolvedParams.username)
+
     return {
       title: t('metaTitle', {
         firstName: userData.first_name,
@@ -37,7 +35,6 @@ export async function generateMetadata({
         }),
     }
   } catch (error) {
-    const t = await getTranslations('UserProfilePage')
     return {
       title: t('metaTitleError'),
     }
@@ -45,11 +42,11 @@ export async function generateMetadata({
 }
 
 async function UserPage({ params }: UserPageProps) {
+  const t = await getTranslations('UserProfilePage')
   const resolvedParams = await params
   const { username } = resolvedParams
 
   try {
-    // Fetch user data by username
     const userData = await getUserByUsername(username)
     const profile = userData.profile
       ? typeof userData.profile === 'string'
@@ -64,10 +61,9 @@ async function UserPage({ params }: UserPageProps) {
     )
   } catch (error) {
     console.error('Error fetching user data:', error)
-    const t = await getTranslations('UserProfilePage')
     return (
       <div className="container mx-auto py-8">
-        <div className="bg-white rounded-xl nice-shadow p-6">
+        <div className="nice-shadow rounded-xl bg-white p-6">
           <p className="text-red-600">{t('profileLoadError')}</p>
         </div>
       </div>

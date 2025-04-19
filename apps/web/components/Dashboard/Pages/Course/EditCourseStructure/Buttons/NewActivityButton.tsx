@@ -13,7 +13,7 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { Layers } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
-import React, { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
 import toast from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
@@ -24,7 +24,7 @@ type NewActivityButtonProps = {
 }
 
 function NewActivityButton(props: NewActivityButtonProps) {
-  const [newActivityModal, setNewActivityModal] = React.useState(false)
+  const [newActivityModal, setNewActivityModal] = useState(false)
   const router = useRouter()
   const course = useCourse() as any
   const session = useLHSession() as any
@@ -122,10 +122,10 @@ function NewActivityButton(props: NewActivityButtonProps) {
             onClick={() => {
               openNewActivityModal(props.chapterId)
             }}
-            className="flex w-44 h-10 items-center justify-center py-2 my-3 rounded-xl text-white bg-black hover:cursor-pointer"
+            className="my-3 flex h-10 w-44 items-center justify-center rounded-xl bg-black py-2 text-white hover:cursor-pointer"
           >
             <Layers size={17} />
-            <div className="text-sm font-bold ml-2">{t('buttonText')}</div>
+            <div className="ml-2 text-sm font-bold">{t('buttonText')}</div>
           </div>
         }
       />

@@ -52,7 +52,7 @@ export async function generateMetadata(
 
   // SEO
   return {
-    title: `${activity.name} — ${t('course')}: ${course_meta.name}`,
+    title: `${activity.name} — ${course_meta.name} ${t('course')}`,
     description: course_meta.description,
     keywords: course_meta.learnings,
     robots: {
@@ -66,7 +66,7 @@ export async function generateMetadata(
       },
     },
     openGraph: {
-      title: `${activity.name} — ${t('course')}: ${course_meta.name}`,
+      title: `${activity.name} — ${course_meta.name} ${t('course')}`,
       description: course_meta.description,
       publishedTime: course_meta.creation_date,
       tags: course_meta.learnings,
@@ -80,8 +80,6 @@ const ActivityPage = async (params: any) => {
   const activityid = (await params.params).activityid
   const courseuuid = (await params.params).courseuuid
   const orgslug = (await params.params).orgslug
-
-  const t = await getTranslations('General')
 
   const [course_meta, activity] = await Promise.all([
     fetchCourseMetadata(courseuuid, access_token),
@@ -99,7 +97,6 @@ const ActivityPage = async (params: any) => {
       orgslug={orgslug}
       activity={activity}
       course={course_meta}
-      translations={t}
     />
   )
 }

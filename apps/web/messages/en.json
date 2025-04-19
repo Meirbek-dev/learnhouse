@@ -1,4 +1,116 @@
 {
+  "Activities": {
+    "AIActivityAsk": {
+      "aiSender": "AI",
+      "askAI": "Ask AI",
+      "errorTitle": "Something wrong happened",
+      "experimental": "Experimental",
+      "hello": "Hello",
+      "howCanWeHelp": "how can we help today?",
+      "logoAlt": "LearnHouse AI Logo",
+      "placeholder": "Ask AI About this Lecture",
+      "questionAbout": "What is this Activity about?",
+      "questionExamples": "Explain this Activity in practical examples",
+      "questionFlashcards": "Generate flashcards about this Activity",
+      "usernameComma": "{username},"
+    },
+    "AICanvaToolkit": {
+      "aiIconAlt": "AI Icon",
+      "aiTitle": "AI",
+      "examplesAbbr": "Ex",
+      "examplesLabel": "Examples",
+      "examplesPrompt": "Give examples to understand \\\"{selection}\\\" better, if possible give context in the course.",
+      "examplesTooltip": "Give examples to understand better with AI",
+      "explainLabel": "Explain",
+      "explainPrompt": "Explain this part of the course \\\"{selection}\\\" keep this course context in mind.",
+      "explainTooltip": "Explain a word or a sentence with AI",
+      "summarizeLabel": "Summarize",
+      "summarizePrompt": "Summarize this \\\"{selection}\\\" with the course context in mind.",
+      "summarizeTooltip": "Summarize a long paragraph or text with AI",
+      "translateLabel": "Translate",
+      "translatePrompt": "Translate \\\"{selection}\\\" to another language.",
+      "translateTooltip": "Translate to different languages with AI"
+    },
+    "AIEditorToolkit": {
+      "applicationPending": "Contributor application pending",
+      "applyToContribute": "Apply to contribute",
+      "continuePlaceholder": "Place your cursor at the end of a sentence to continue writing",
+      "continueWritingLabel": "Continue Writing",
+      "errorTitle": "Something wrong happened",
+      "generateQuizLabel": "Generate Quiz",
+      "longerPlaceholder": "Select text to make longer",
+      "makeLongerLabel": "Make Longer",
+      "preAlpha": "PRE-ALPHA",
+      "thinking": "Thinking...",
+      "translateExample": "Japanese, Arabic, German, etc.",
+      "translateLabel": "Translate",
+      "translatePlaceholder": "Translate selected text to",
+      "userInputPlaceholder": "Ask AI",
+      "writerLabel": "Writer",
+      "writerPlaceholder": "Write about..."
+    },
+    "AssignmentBoxUI": {
+      "currentPoints": "Current points: {points}",
+      "enterGradePlaceholder": "Enter grade (max {max})",
+      "fileSubmissionTitle": "File Submission",
+      "grade": "Grade",
+      "points": "{count, plural, =0 {# points} one {# point} other {# points}}",
+      "quizTitle": "Quiz",
+      "save": "Save",
+      "saveProgress": "Save your progress",
+      "savingDisclaimer": "Don't forget to save your progress",
+      "teacherView": "Teacher view"
+    },
+    "AssignmentStudentActivity": {
+      "assignment": "Assignment",
+      "descriptionTitle": "Assignment Description",
+      "dueDate": "Due Date",
+      "hint": "Hint",
+      "referenceDocument": "Reference Document",
+      "task": "Task {index}"
+    }
+  },
+  "ActivityPage": {
+    "activityCounter": "{current} of {total}",
+    "activityTypes": {
+      "assignment": "Assignment",
+      "document": "Document",
+      "dynamic": "Page",
+      "video": "Video"
+    },
+    "assignmentActions": {
+      "submit": "Submit Assignment",
+      "submitYourAssingmentForGrading": "Submit your assignment for grading",
+      "submitForGrading": "Submit for grading",
+      "submitConfirm": "Are you sure you want to submit the assignment for grading? You will not be able to make changes after submission."
+    },
+    "assignmentStatus": {
+      "graded": "Graded",
+      "grading": "Grading in progress"
+    },
+    "course": "Course",
+    "courseLessons": "Chapter: ",
+    "courseContent": "Course Content",
+    "contributeToActivity": "Contribute to activity",
+    "current": "Current",
+    "marking": "Marking...",
+    "markAsComplete": "Mark as complete",
+    "next": "Next",
+    "nextActivityTitle": "Next: {name}",
+    "noContent": "No content available",
+    "noNextActivity": "No next activity",
+    "noPrevActivity": "No previous activity",
+    "paidContent": "Paid Content",
+    "paidContentMessage": "This content requires a course purchase to access.",
+    "prevActivityTitle": "Previous: {name}",
+    "previous": "Previous",
+    "statusComplete": "Complete",
+    "submitErrorToast": "Failed to submit assignment for grading",
+    "submitSuccessToast": "Assignment submitted for grading",
+    "unknownGradingType": "Unknown grading type",
+    "unpublishedActivity": "This activity is not published yet",
+    "viewAllActivities": "View all activities"
+  },
   "Auth": {
     "Forgot": {
       "checkEmail": "Check your email for the reset link",
@@ -31,22 +143,29 @@
     "Reset": {
       "changePassword": "Change Password",
       "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm new password",
       "email": "Email",
+      "emailPlaceholder": "Enter your email",
       "enterResetDetails": "Enter your email and reset code to reset your password",
       "loading": "Loading...",
       "loginAgain": "Please login again with your new password",
       "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
       "resetCode": "Reset Code",
+      "resetCodePlaceholder": "Enter reset code",
       "success": "Password reset successfully",
       "title": "Reset Password"
     },
     "Signup": {
       "accountCreated": "Your account was successfully created",
       "bio": "Bio",
+      "bioPlaceholder": "Tell something about yourself",
       "createAccount": "Create an account",
       "createAccountAndJoin": "Create account & Join",
       "email": "Email",
+      "emailPlaceholder": "Enter your email",
       "enterInviteCode": "Enter invite code",
+      "errorSomethingWentWrong": "Something went wrong",
       "hi": "Hi",
       "inviteCodeRequired": "An invite code is required to join {orgName}",
       "invitedToJoin": "You've been invited to join",
@@ -55,11 +174,17 @@
       "loading": "Loading...",
       "loginToAccount": "Login to your account",
       "password": "Password",
+      "passwordPlaceholder": "Enter your password",
       "signInWithGoogle": "Sign in with Google",
       "submit": "Submit",
       "title": "Sign up — {orgName}",
-      "username": "Username"
+      "username": "Username",
+      "usernamePlaceholder": "Enter your username"
     }
+  },
+  "Common": {
+    "save": "Save",
+    "saved": "Saved"
   },
   "Components": {
     "AddUserGroup": {
@@ -371,78 +496,304 @@
       "youtubeVideo": "YouTube Video"
     }
   },
-  "DashPage": {
-    "Activities": {
-      "AIActivityAsk": {
-        "aiSender": "AI",
-        "askAI": "Ask AI",
-        "errorTitle": "Something wrong happened",
-        "experimental": "Experimental",
-        "hello": "Hello",
-        "howCanWeHelp": "how can we help today?",
-        "logoAlt": "LearnHouse AI Logo",
-        "placeholder": "Ask AI About this Lecture",
-        "questionAbout": "What is this Activity about?",
-        "questionExamples": "Explain this Activity in practical examples",
-        "questionFlashcards": "Generate flashcards about this Activity",
-        "usernameComma": "{username},"
+  "Contexts": {
+    "Assignment": {
+      "loadError": "Failed to load assignment data"
+    },
+    "Course": {
+      "loadError": "Failed to load course structure"
+    },
+    "Org": {
+      "fetchError": "An error occurred while loading organization data",
+      "joinOrgCTA": "Join {orgName}",
+      "notMemberInfo": "You are not yet a member of this Organization",
+      "orgInactiveError": "This Organization is no longer active"
+    }
+  },
+  "CourseEdit": {
+    "ActivityElement": {
+      "deleteButton": "Delete Activity",
+      "deleteConfirmation": "Are you sure you want to delete this activity?",
+      "deleteTitle": "Delete {name}?",
+      "editAssignmentButton": "Edit Assignment",
+      "editPageButton": "Edit Page",
+      "previewTooltip": "Preview Activity",
+      "publishButton": "Publish",
+      "unpublishButton": "Unpublish"
+    },
+    "ChapterElement": {
+      "chapterNamePlaceholder": "Chapter name",
+      "deleteChapterButton": "Delete Chapter",
+      "deleteChapterConfirmation": "Are you sure you want to delete this chapter?",
+      "deleteChapterTitle": "Delete {name}?"
+    },
+    "General": {
+      "LearningItems": {
+        "addItemButton": "Add Learning Item",
+        "addLinkTooltip": "Add Link",
+        "editLinkTooltip": "Edit Link",
+        "linkInputPlaceholder": "Enter URL for link (optional)",
+        "noItems": "No learning items added yet.",
+        "placeholder": "Enter what you will learn...",
+        "removeItemAriaLabel": "Remove learning item",
+        "removeItemTooltip": "Remove item"
       },
-      "AICanvaToolkit": {
-        "aiIconAlt": "AI Icon",
-        "aiTitle": "AI",
-        "examplesAbbr": "Ex",
-        "examplesLabel": "Examples",
-        "examplesPrompt": "Give examples to understand \\\"{selection}\\\" better, if possible give context in the course.",
-        "examplesTooltip": "Give examples to understand better with AI",
-        "explainLabel": "Explain",
-        "explainPrompt": "Explain this part of the course \\\"{selection}\\\" keep this course context in mind.",
-        "explainTooltip": "Explain a word or a sentence with AI",
-        "summarizeLabel": "Summarize",
-        "summarizePrompt": "Summarize this \\\"{selection}\\\" with the course context in mind.",
-        "summarizeTooltip": "Summarize a long paragraph or text with AI",
-        "translateLabel": "Translate",
-        "translatePrompt": "Translate \\\"{selection}\\\" to another language.",
-        "translateTooltip": "Translate to different languages with AI"
+      "UnsplashPicker": {
+        "Labels": {
+          "architecture": "Architecture",
+          "art": "Art",
+          "biology": "Biology",
+          "business": "Business",
+          "education": "Education",
+          "fashion": "Fashion",
+          "finance": "Finance",
+          "fitness": "Fitness",
+          "food": "Food",
+          "gaming": "Gaming",
+          "health": "Health",
+          "history": "History",
+          "lifestyle": "Lifestyle",
+          "music": "Music",
+          "nature": "Nature",
+          "photography": "Photography",
+          "science": "Science",
+          "sports": "Sports",
+          "technology": "Technology",
+          "travel": "Travel"
+        },
+        "loadMoreButton": "Load More",
+        "loading": "Loading...",
+        "modalTitle": "Select Image from Unsplash",
+        "noResults": "No results",
+        "searchPlaceholder": "Search free high-resolution photos..."
       },
-      "AIEditorToolkit": {
-        "applicationPending": "Contributor application pending",
-        "applyToContribute": "Apply to contribute",
-        "continuePlaceholder": "Place your cursor at the end of a sentence to continue writing",
-        "continueWritingLabel": "Continue Writing",
-        "errorTitle": "Something wrong happened",
-        "generateQuizLabel": "Generate Quiz",
-        "longerPlaceholder": "Select text to make longer",
-        "makeLongerLabel": "Make Longer",
-        "preAlpha": "PRE-ALPHA",
-        "thinking": "Thinking...",
-        "translateExample": "Japanese, Arabic, German, etc.",
-        "translateLabel": "Translate",
-        "translatePlaceholder": "Translate selected text to",
-        "userInputPlaceholder": "Ask AI",
-        "writerLabel": "Writer",
-        "writerPlaceholder": "Write about..."
+      "about": {
+        "label": "About"
       },
-      "AssignmentBoxUI": {
-        "currentPoints": "Current points: {points}",
-        "enterGradePlaceholder": "Enter grade (max {max})",
-        "fileSubmissionTitle": "File Submission",
-        "grade": "Grade",
-        "points": "{count, plural, =0 {# points} one {# point} other {# points}}",
-        "quizTitle": "Quiz",
-        "save": "Save",
-        "saveProgress": "Save your progress",
-        "savingDisclaimer": "Don't forget to save your progress",
-        "teacherView": "Teacher view"
+      "description": {
+        "label": "Description"
       },
-      "AssignmentStudentActivity": {
-        "assignment": "Assignment",
-        "descriptionTitle": "Assignment Description",
-        "dueDate": "Due Date",
-        "hint": "Hint",
-        "referenceDocument": "Reference Document",
-        "task": "Task {index}"
+      "errors": {
+        "allLearningItemsMustHaveText": "All learning items must have text",
+        "atLeastOneLearningItem": "Must have at least one learning item with text",
+        "invalidFormat": "Invalid format",
+        "invalidJsonFormat": "Invalid JSON format",
+        "maxLength": "Must be {count} characters or less",
+        "required": "{fieldName} is required",
+        "saveFailed": "Failed to save course general info."
+      },
+      "learnings": {
+        "label": "What you will learn"
+      },
+      "name": {
+        "label": "Course Name"
+      },
+      "tags": {
+        "label": "Course Tags",
+        "placeholder": "Press Enter to add..."
+      },
+      "thumbnail": {
+        "chooseFromGalleryButton": "Choose from gallery",
+        "label": "Course Thumbnail",
+        "uploadImageButton": "Upload Image",
+        "uploading": "Uploading..."
       }
     },
+    "NewActivityModal": {
+      "buttonText": "Add Activity",
+      "description": "Create a new activity for this chapter.",
+      "title": "Add Activity"
+    },
+    "Structure": {
+      "NewChapterModal": {
+        "description": "Add a new chapter to your course structure.",
+        "title": "Create New Chapter"
+      },
+      "addChapterButton": "Add Chapter"
+    },
+    "activityNamePlaceholder": "Activity name",
+    "activityTypes": {
+      "assignment": "Assignment",
+      "document": "Document",
+      "dynamic": "Dynamic",
+      "video": "Video"
+    },
+    "addActivityButton": "Add Activity",
+    "chapterNamePlaceholder": "Chapter name",
+    "deleteActivityButton": "Delete Activity",
+    "deleteActivityConfirmation": "Are you sure you want to delete this activity?",
+    "deleteActivityTitle": "Delete {name}?",
+    "deleteChapterButton": "Delete Chapter",
+    "deleteChapterConfirmation": "Are you sure you want to delete this chapter?",
+    "deleteChapterTitle": "Delete {name}?",
+    "editButton": "Edit"
+  },
+  "CourseOverview": {
+    "courseLabel": "Course"
+  },
+  "CoursePage": {
+    "about": "About",
+    "access": "Access",
+    "activities": "{activitiesLength} Activities",
+    "activityCount": "{count, plural, =0 {0 Activities} one {# Activity} other {# Activities}}",
+    "activityCounter": "{current} of {total}",
+    "activityNotPublished": "This activity is not published yet",
+    "assignment": "Assignment",
+    "content": "Content",
+    "contributeToActivity": "Contribute to activity",
+    "contributors": "Contributors",
+    "courseContent": "Course Content",
+    "courseLessons": "Course Lessons",
+    "current": "Current",
+    "document": "Document",
+    "general": "General",
+    "linkTo": "Link to {learningText}",
+    "markAsComplete": "Mark as complete",
+    "next": "Next",
+    "nextActivityTitle": "Next: {name}",
+    "noNextActivity": "No next activity",
+    "noPrevActivity": "No previous activity",
+    "page": "Page",
+    "prevActivityTitle": "Previous: {name}",
+    "previous": "Previous",
+    "statusComplete": "Complete",
+    "statusGraded": "Graded",
+    "statusGradingInProgress": "Grading in progress",
+    "submitButton": "Submit assignment",
+    "submitConfirmationMessage": "Are you sure you want to submit the assignment for review? You will not be able to make changes after submission.",
+    "submitConfirmationTitle": "Submit your assignment for review",
+    "submitErrorToast": "Failed to submit assignment for review",
+    "submitSuccessToast": "Assignment submitted for review",
+    "submitTrigger": "Submit for review",
+    "title": "Course",
+    "unknownGradingType": "Unknown grading type",
+    "video": "Video",
+    "viewAllActivities": "View all activities",
+    "whatYouWillLearn": "What you will learn"
+  },
+  "Courses": {
+    "CourseActionsMobile": {
+      "author": "Author",
+      "authors": "Authors",
+      "leaveCourse": "Leave Course",
+      "loading": "Loading...",
+      "modalDescription": "Select a payment option to access this course",
+      "modalTitle": "Purchase Course",
+      "moreAuthors": "& {count} more",
+      "ownCourse": "You Own This Course",
+      "paidCourse": "Paid Course",
+      "purchaseCourse": "Purchase Course",
+      "signIn": "Sign In",
+      "startCourse": "Start Course"
+    },
+    "CoursePaidOptions": {
+      "benefits": "Benefits:",
+      "checkoutError": "Failed to initiate checkout process",
+      "choosePrice": "Choose your price",
+      "failedToLoad": "Failed to load product options",
+      "loading": "Loading...",
+      "minimumPrice": "Minimum Price:",
+      "oneTimePayment": "One-time payment",
+      "perMonth": "(per month)",
+      "perMonthSuffix": "/month",
+      "price": "Price:",
+      "processing": "Processing...",
+      "purchaseNow": "Purchase Now",
+      "requestError": "An error occurred while processing your request",
+      "showLess": "Show less",
+      "showMore": "Show more",
+      "subscribeNow": "Subscribe Now",
+      "subscription": "Subscription"
+    },
+    "CourseUpdates": {
+      "addNewUpdateTitle": "Add new Course Update",
+      "addUpdate": "Add Update",
+      "cancel": "Cancel",
+      "contentLabel": "Content",
+      "contentRequired": "Content is required",
+      "courseLabel": "Course",
+      "createdAtFull": "Created at {date, date, long} {date, time, short}",
+      "createdAtRelative": "{time} ago",
+      "deleteError": "Failed to delete update",
+      "deleteSuccess": "Update deleted successfully",
+      "deleteUpdate": "Delete",
+      "deleteUpdateButton": "Delete Update",
+      "deleteUpdateMessage": "Are you sure you want to delete this update?",
+      "deleteUpdateTitle": "Delete Update ?",
+      "deletingUpdate": "Deleting update...",
+      "newUpdate": "New Update",
+      "noUpdates": "No updates yet",
+      "titleLabel": "Title",
+      "titleRequired": "Title is required",
+      "updateAddedError": "Failed to add update",
+      "updateAddedSuccess": "Update added successfully",
+      "updates": "Updates"
+    },
+    "CoursesActions": {
+      "accessCheckError": "Failed to check course access. Please try again later.",
+      "applicationPending": "Contributor application pending",
+      "applyToContribute": "Apply to contribute",
+      "authenticateToContribute": "Authenticate to contribute",
+      "authenticateToStart": "Authenticate to start course",
+      "author": "Author",
+      "authors": "Authors",
+      "contributeError": "Failed to submit your application. Please try again later.",
+      "contributeLoading": "Submitting contributor application...",
+      "contributeSuccess": "Your application to contribute has been submitted successfully",
+      "leaveCourse": "Leave Course",
+      "leaveError": "Failed to leave the course. Please try again later.",
+      "leaveSuccess": "Successfully left the course",
+      "leavingCourse": "Leaving course...",
+      "modalDescription": "Select a payment option to access this course",
+      "modalTitle": "Purchase Course",
+      "moreAuthors": "& {count} more",
+      "ownCourseDescription": "You have purchased this course and have full access to all content.",
+      "ownCourseTitle": "You Own This Course",
+      "paidCourseDescription": "This course requires purchase to access its content.",
+      "paidCourseTitle": "Paid Course",
+      "purchaseCourse": "Purchase Course",
+      "startCourse": "Start Course",
+      "startError": "Failed to start the course. Please try again later.",
+      "startSuccess": "Successfully started the course",
+      "startingCourse": "Starting course...",
+      "youAreContributor": "You are a contributor"
+    },
+    "HomePageClient": {
+      "courses": "Courses",
+      "createACourse": "Create a course to add content",
+      "createCourse": "Create Course",
+      "createCourseDescription": "Create a new course",
+      "noCourses": "No courses yet",
+      "noCoursesAvailable": "No courses available yet"
+    },
+    "PaidCourseActivityDisclaimer": {
+      "message": "This content requires a course purchase to access.",
+      "paidContent": "Paid Content"
+    },
+    "access": "Access",
+    "content": "Content",
+    "contributors": "Contributors",
+    "createACourse": "Create a course to add content",
+    "error": "Error loading courses",
+    "general": "General",
+    "myCourses": "My Courses",
+    "noCourses": "No courses yet",
+    "noCoursesavailable": "No courses available yet",
+    "noPurchasedCourses": "No Purchased Courses",
+    "noPurchasedCoursesDesc": "You haven't purchased any courses yet",
+    "purchasedCourses": "Your purchased courses",
+    "title": "Courses"
+  },
+  "CoursesPage": {
+    "createACourse": "Create a course to add content",
+    "createCourse": "Create Course",
+    "createCourseDescription": "Create a new course",
+    "createCourseTitle": "Create Course",
+    "noCourses": "No courses yet",
+    "noCoursesAvailable": "No courses available yet",
+    "title": "Courses"
+  },
+  "DashPage": {
     "Assignments": {
       "AssignmentPage": {
         "assignmentTools": "Assignment Tools",
@@ -574,305 +925,6 @@
         "description": "Manage your organization's users and roles",
         "title": "Users"
       }
-    },
-    "Common": {
-      "save": "Save",
-      "saved": "Saved"
-    },
-    "Contexts": {
-      "Assignment": {
-        "loadError": "Failed to load assignment data"
-      },
-      "Course": {
-        "loadError": "Failed to load course structure"
-      },
-      "Org": {
-        "fetchError": "An error occurred while loading organization data",
-        "joinOrgCTA": "Join {orgName}",
-        "notMemberInfo": "You are not yet a member of this Organization",
-        "orgInactiveError": "This Organization is no longer active"
-      }
-    },
-    "CourseEdit": {
-      "ActivityElement": {
-        "deleteButton": "Delete Activity",
-        "deleteConfirmation": "Are you sure you want to delete this activity?",
-        "deleteTitle": "Delete {name}?",
-        "editAssignmentButton": "Edit Assignment",
-        "editPageButton": "Edit Page",
-        "previewTooltip": "Preview Activity",
-        "publishButton": "Publish",
-        "unpublishButton": "Unpublish"
-      },
-      "ChapterElement": {
-        "chapterNamePlaceholder": "Chapter name",
-        "deleteChapterButton": "Delete Chapter",
-        "deleteChapterConfirmation": "Are you sure you want to delete this chapter?",
-        "deleteChapterTitle": "Delete {name}?"
-      },
-      "General": {
-        "LearningItems": {
-          "addItemButton": "Add Learning Item",
-          "addLinkTooltip": "Add Link",
-          "editLinkTooltip": "Edit Link",
-          "linkInputPlaceholder": "Enter URL for link (optional)",
-          "noItems": "No learning items added yet.",
-          "placeholder": "Enter what you will learn...",
-          "removeItemAriaLabel": "Remove learning item",
-          "removeItemTooltip": "Remove item"
-        },
-        "UnsplashPicker": {
-          "Labels": {
-            "architecture": "Architecture",
-            "art": "Art",
-            "biology": "Biology",
-            "business": "Business",
-            "education": "Education",
-            "fashion": "Fashion",
-            "finance": "Finance",
-            "fitness": "Fitness",
-            "food": "Food",
-            "gaming": "Gaming",
-            "health": "Health",
-            "history": "History",
-            "lifestyle": "Lifestyle",
-            "music": "Music",
-            "nature": "Nature",
-            "photography": "Photography",
-            "science": "Science",
-            "sports": "Sports",
-            "technology": "Technology",
-            "travel": "Travel"
-          },
-          "loadMoreButton": "Load More",
-          "loading": "Loading...",
-          "modalTitle": "Select Image from Unsplash",
-          "noResults": "No results",
-          "searchPlaceholder": "Search free high-resolution photos..."
-        },
-        "about": {
-          "label": "About"
-        },
-        "description": {
-          "label": "Description"
-        },
-        "errors": {
-          "allLearningItemsMustHaveText": "All learning items must have text",
-          "atLeastOneLearningItem": "Must have at least one learning item with text",
-          "invalidFormat": "Invalid format",
-          "invalidJsonFormat": "Invalid JSON format",
-          "maxLength": "Must be {count} characters or less",
-          "required": "{fieldName} is required",
-          "saveFailed": "Failed to save course general info."
-        },
-        "learnings": {
-          "label": "What you will learn"
-        },
-        "name": {
-          "label": "Course Name"
-        },
-        "tags": {
-          "label": "Course Tags",
-          "placeholder": "Press Enter to add..."
-        },
-        "thumbnail": {
-          "chooseFromGalleryButton": "Choose from gallery",
-          "label": "Course Thumbnail",
-          "uploadImageButton": "Upload Image",
-          "uploading": "Uploading..."
-        }
-      },
-      "NewActivityModal": {
-        "buttonText": "Add Activity",
-        "description": "Create a new activity for this chapter.",
-        "title": "Add Activity"
-      },
-      "Structure": {
-        "NewChapterModal": {
-          "description": "Add a new chapter to your course structure.",
-          "title": "Create New Chapter"
-        },
-        "addChapterButton": "Add Chapter"
-      },
-      "activityNamePlaceholder": "Activity name",
-      "activityTypes": {
-        "assignment": "Assignment",
-        "document": "Document",
-        "dynamic": "Dynamic",
-        "video": "Video"
-      },
-      "addActivityButton": "Add Activity",
-      "chapterNamePlaceholder": "Chapter name",
-      "deleteActivityButton": "Delete Activity",
-      "deleteActivityConfirmation": "Are you sure you want to delete this activity?",
-      "deleteActivityTitle": "Delete {name}?",
-      "deleteChapterButton": "Delete Chapter",
-      "deleteChapterConfirmation": "Are you sure you want to delete this chapter?",
-      "deleteChapterTitle": "Delete {name}?",
-      "editButton": "Edit"
-    },
-    "CourseOverview": {
-      "courseLabel": "Course"
-    },
-    "CoursePage": {
-      "about": "About",
-      "activities": "Activities",
-      "activityCount": "{count, plural, =0 {0 Activities} one {# Activity} other {# Activities}}",
-      "activityCounter": "{current} of {total}",
-      "activityNotPublished": "This activity is not published yet",
-      "assignment": "Assignment",
-      "contributeToActivity": "Contribute to activity",
-      "courseContent": "Course Content",
-      "courseLessons": "Course Lessons",
-      "document": "Document",
-      "markAsComplete": "Mark as complete",
-      "next": "Next",
-      "nextActivityTitle": "Next: {name}",
-      "noNextActivity": "No next activity",
-      "noPrevActivity": "No previous activity",
-      "page": "Page",
-      "prevActivityTitle": "Previous: {name}",
-      "previous": "Previous",
-      "statusComplete": "Complete",
-      "statusGraded": "Graded",
-      "statusGradingInProgress": "Grading in progress",
-      "submitButton": "Submit assignment",
-      "submitConfirmationMessage": "Are you sure you want to submit the assignment for review? You will not be able to make changes after submission.",
-      "submitConfirmationTitle": "Submit your assignment for review",
-      "submitErrorToast": "Failed to submit assignment for review",
-      "submitSuccessToast": "Assignment submitted for review",
-      "submitTrigger": "Submit for review",
-      "unknownGradingType": "Unknown grading type",
-      "video": "Video",
-      "viewAllActivities": "View all activities",
-      "whatYouWillLearn": "What you will learn"
-    },
-    "Courses": {
-      "CourseActionsMobile": {
-        "author": "Author",
-        "authors": "Authors",
-        "leaveCourse": "Leave Course",
-        "loading": "Loading...",
-        "modalDescription": "Select a payment option to access this course",
-        "modalTitle": "Purchase Course",
-        "moreAuthors": "& {count} more",
-        "ownCourse": "You Own This Course",
-        "paidCourse": "Paid Course",
-        "purchaseCourse": "Purchase Course",
-        "signIn": "Sign In",
-        "startCourse": "Start Course"
-      },
-      "CoursePage": {
-        "access": "Access",
-        "content": "Content",
-        "contributors": "Contributors",
-        "general": "General"
-      },
-      "CoursePaidOptions": {
-        "benefits": "Benefits:",
-        "checkoutError": "Failed to initiate checkout process",
-        "choosePrice": "Choose your price",
-        "failedToLoad": "Failed to load product options",
-        "loading": "Loading...",
-        "minimumPrice": "Minimum Price:",
-        "oneTimePayment": "One-time payment",
-        "perMonth": "(per month)",
-        "perMonthSuffix": "/month",
-        "price": "Price:",
-        "processing": "Processing...",
-        "purchaseNow": "Purchase Now",
-        "requestError": "An error occurred while processing your request",
-        "showLess": "Show less",
-        "showMore": "Show more",
-        "subscribeNow": "Subscribe Now",
-        "subscription": "Subscription"
-      },
-      "CourseUpdates": {
-        "addNewUpdateTitle": "Add new Course Update",
-        "addUpdate": "Add Update",
-        "cancel": "Cancel",
-        "contentLabel": "Content",
-        "contentRequired": "Content is required",
-        "courseLabel": "Course",
-        "createdAtFull": "Created at {date, date, long} {date, time, short}",
-        "createdAtRelative": "{time} ago",
-        "deleteError": "Failed to delete update",
-        "deleteSuccess": "Update deleted successfully",
-        "deleteUpdate": "Delete",
-        "deleteUpdateButton": "Delete Update",
-        "deleteUpdateMessage": "Are you sure you want to delete this update?",
-        "deleteUpdateTitle": "Delete Update ?",
-        "deletingUpdate": "Deleting update...",
-        "newUpdate": "New Update",
-        "noUpdates": "No updates yet",
-        "titleLabel": "Title",
-        "titleRequired": "Title is required",
-        "updateAddedError": "Failed to add update",
-        "updateAddedSuccess": "Update added successfully",
-        "updates": "Updates"
-      },
-      "CoursesActions": {
-        "accessCheckError": "Failed to check course access. Please try again later.",
-        "applicationPending": "Contributor application pending",
-        "applyToContribute": "Apply to contribute",
-        "authenticateToContribute": "Authenticate to contribute",
-        "authenticateToStart": "Authenticate to start course",
-        "author": "Author",
-        "authors": "Authors",
-        "contributeError": "Failed to submit your application. Please try again later.",
-        "contributeLoading": "Submitting contributor application...",
-        "contributeSuccess": "Your application to contribute has been submitted successfully",
-        "leaveCourse": "Leave Course",
-        "leaveError": "Failed to leave the course. Please try again later.",
-        "leaveSuccess": "Successfully left the course",
-        "leavingCourse": "Leaving course...",
-        "modalDescription": "Select a payment option to access this course",
-        "modalTitle": "Purchase Course",
-        "moreAuthors": "& {count} more",
-        "ownCourseDescription": "You have purchased this course and have full access to all content.",
-        "ownCourseTitle": "You Own This Course",
-        "paidCourseDescription": "This course requires purchase to access its content.",
-        "paidCourseTitle": "Paid Course",
-        "purchaseCourse": "Purchase Course",
-        "startCourse": "Start Course",
-        "startError": "Failed to start the course. Please try again later.",
-        "startSuccess": "Successfully started the course",
-        "startingCourse": "Starting course...",
-        "youAreContributor": "You are a contributor"
-      },
-      "HomePageClient": {
-        "courses": "Courses",
-        "createACourse": "Create a course to add content",
-        "createCourse": "Create Course",
-        "createCourseDescription": "Create a new course",
-        "noCourses": "No courses yet",
-        "noCoursesAvailable": "No courses available yet"
-      },
-      "PaidCourseActivityDisclaimer": {
-        "message": "This content requires a course purchase to access.",
-        "paidContent": "Paid Content"
-      },
-      "access": "Access",
-      "content": "Content",
-      "contributors": "Contributors",
-      "createACourse": "Create a course to add content",
-      "error": "Error loading courses",
-      "general": "General",
-      "myCourses": "My Courses",
-      "noCourses": "No courses yet",
-      "noCoursesavailable": "No courses available yet",
-      "noPurchasedCourses": "No Purchased Courses",
-      "noPurchasedCoursesDesc": "You haven't purchased any courses yet",
-      "purchasedCourses": "Your purchased courses",
-      "title": "Courses"
-    },
-    "CoursesPage": {
-      "createACourse": "Create a course to add content",
-      "createCourseDescription": "Create a new course",
-      "createCourseTitle": "Create Course",
-      "noCourses": "No courses yet",
-      "noCoursesAvailable": "No courses available yet",
-      "title": "Courses"
     },
     "Editor": {
       "BadgesExtension": {
@@ -1024,7 +1076,7 @@
         "loading": "Loading...",
         "noUserSelected": "No user selected",
         "usernameLabel": "Username",
-        "usernamePlaceholder": "Enter username"
+        "usernamePlaceholder": "Enter your username"
       },
       "VideoBlock": {
         "errorFormat": "Please upload a supported video format (MP4 or WebM)",
@@ -1040,48 +1092,6 @@
         "uploadPlaceholder": "Drop your video here or click to browse",
         "uploading": "Uploading video... {progress}%"
       }
-    },
-    "Header": {
-      "adminBadge": "Admin",
-      "login": "Login",
-      "signUp": "Sign Up",
-      "tooltips": {
-        "ownedCourses": "My purchased courses",
-        "yourSettings": "Your Settings"
-      }
-    },
-    "Hooks": {
-      "useContributorStatus": {
-        "checkStatusError": "Failed to check contributor status"
-      }
-    },
-    "LandingCustom": {
-      "loadingCourses": "Loading courses...",
-      "noFeaturedCourses": "No featured courses selected"
-    },
-    "LearnhouseUniversity": "LearnHouse University",
-    "NewCollectionPage": {
-      "cancel": "Cancel",
-      "create": "Create Collection",
-      "creating": "Creating...",
-      "description": "Group your courses together in a collection to make them easier to find and manage.",
-      "errorLoadingCourses": "Failed to load courses. Please try again later.",
-      "labelDescription": "Description",
-      "labelName": "Collection Name",
-      "labelSelectCourses": "Select Courses",
-      "labelVisibility": "Visibility",
-      "noCourses": "No courses available. Create some courses first.",
-      "placeholderDescription": "Enter collection description",
-      "placeholderName": "Enter collection name",
-      "selectedCourses": "Selected courses",
-      "title": "Create New Collection",
-      "toastCoursesError": "Please select at least one course",
-      "toastDescriptionError": "Please enter a description",
-      "toastError": "Failed to create collection. Please try again.",
-      "toastNameError": "Please enter a collection name",
-      "toastSuccess": "Collection created successfully!",
-      "visibilityPrivate": "Private Collection - Only visible to organization members",
-      "visibilityPublic": "Public Collection - Visible to everyone"
     },
     "Notifications": {
       "activityDeleteFailed": "Failed to delete activity",
@@ -1400,9 +1410,6 @@
       "title": "Payments",
       "unconfiguredAlertTitle": "Payment Configuration Required"
     },
-    "Security": {
-      "unauthorizedAccessMessage": "You do not have permissions to access this page"
-    },
     "Stripe": {
       "completing": "Completing Connection...",
       "connectError": "Error connecting Stripe account",
@@ -1416,11 +1423,6 @@
     "Trail": {
       "courseLabel": "Course",
       "quitCourseButton": "Quit Course"
-    },
-    "TrailPage": {
-      "noCourses": "You haven't started any courses yet.",
-      "startExploring": "Start exploring courses!",
-      "title": "Learning Trail"
     },
     "UserAccountSettings": {
       "UserAccount": {
@@ -1701,7 +1703,8 @@
         "userHeader": "User"
       },
       "usersTitle": "Users"
-    }
+    },
+    "DashboardTitle": "LearnHouse Dashboard"
   },
   "DashboardMenu": {
     "mobile": {
@@ -1727,7 +1730,6 @@
       "yourOrganization": "Your Organization"
     }
   },
-  "DashboardTitle": "LearnHouse Dashboard",
   "General": {
     "actions": "Actions",
     "active": "Active",
@@ -1799,6 +1801,21 @@
     "warning": "Warning",
     "yes": "Yes"
   },
+  "Header": {
+    "adminBadge": "ADMIN",
+    "login": "Login",
+    "signUp": "Sign Up",
+    "tooltips": {
+      "ownedCourses": "My purchased courses",
+      "yourSettings": "Your Settings"
+    }
+  },
+  "HomeClient": {
+    "hello": "Hello",
+    "noOrganizations": "You are not a member of any organizations yet, join one to be able to see it here.",
+    "signOut": "Sign Out",
+    "yourOrganizations": "Your Organizations"
+  },
   "HomePage": {
     "Collections": {
       "noContent": "No collections yet",
@@ -1811,8 +1828,14 @@
       "title": "Courses"
     }
   },
+  "Hooks": {
+    "useContributorStatus": {
+      "checkStatusError": "Failed to check contributor status"
+    }
+  },
   "Install": {
     "description": "Configure your LearnHouse instance",
+    "loading": "Loading installation steps...",
     "steps": {
       "ACCOUNT_CREATION": "Account Creation",
       "DEFAULT_ELEMENTS": "Default Elements",
@@ -1825,9 +1848,57 @@
     "title": "LearnHouse Installation",
     "tryAgainOrContact": "Please try again or contact support if the issue persists."
   },
+  "LandingCustom": {
+    "loadingCourses": "Loading courses...",
+    "noFeaturedCourses": "No featured courses selected"
+  },
+  "LearnhouseUniversity": "LearnHouse University",
+  "NewCollectionPage": {
+    "cancelButton": "Cancel",
+    "createButton": "Create Collection",
+    "creatingButton": "Creating...",
+    "description": "Group your courses together in a collection to make them easier to find and manage.",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Enter collection description",
+    "errorLoadingCourses": "Failed to load courses. Please try again later.",
+    "nameLabel": "Collection Name",
+    "namePlaceholder": "Enter collection name",
+    "noCoursesAvailable": "No courses available. Create some courses first.",
+    "selectCoursesLabel": "Select Courses",
+    "selectedCount": "{count, plural, =0 {No courses selected} one {# course selected} other {# courses selected}}",
+    "title": "Create New Collection",
+    "toast": {
+      "failure": "Failed to create collection. Please try again.",
+      "missingDescription": "Please enter a description",
+      "missingName": "Please enter a collection name",
+      "noCoursesSelected": "Please select at least one course",
+      "success": "Collection created successfully!"
+    },
+    "visibilityLabel": "Visibility",
+    "visibilityPrivate": "Private Collection - Only visible to organization members",
+    "visibilityPublic": "Public Collection - Visible to everyone"
+  },
   "NotFoundPage": {
     "button": "Return to Homepage",
     "message": "We apologize for the inconvenience. It seems you are trying to access a page that has been deleted or never existed."
+  },
+  "SearchPage": {
+    "collections": "Collections",
+    "courses": "Courses",
+    "filterAll": "All",
+    "filterCollections": "Collections",
+    "filterCourses": "Courses",
+    "filterUsers": "Users",
+    "noResultsMessage": "We couldn't find any results for \"{query}\". Try adjusting your search terms or browse our featured content.",
+    "noResultsTitle": "No results found",
+    "resultsFound": "{count} results found for \"{query}\"",
+    "searchButton": "Search",
+    "searchInputPlaceholder": "Search for courses, collections, users...",
+    "searchTitle": "Search",
+    "users": "Users"
+  },
+  "Security": {
+    "unauthorizedAccessMessage": "You do not have permissions to access this page"
   },
   "SignupPage": {
     "enterInviteCode": "Enter invite code",
@@ -1838,11 +1909,42 @@
     "signUp": "Sign Up",
     "submit": "Submit"
   },
+  "ToastMessages": {
+    "errorSomethingWentWrong": "Something went wrong. Please try again later.",
+    "inviteCodeInvalid": "The invite code is invalid",
+    "inviteCodeValid": "Invite code is valid, you'll be redirected to the signup page in a second!",
+    "orgJoinSuccess": " successfully joined the organization."
+  },
+  "TrailPage": {
+    "metaDescription": "Check your progress using trail and easily navigate through your courses.",
+    "noCourses": "You haven't started any courses yet.",
+    "startExploring": "Start exploring courses!",
+    "title": "Trail"
+  },
+  "UserProfilePage": {
+    "aboutTitle": "About",
+    "academicInfo": "Academic Information",
+    "courseSection": {
+      "errorLoadingCourses": "Error loading courses",
+      "loadingCourses": "Loading courses...",
+      "noCoursesFound": "No courses found"
+    },
+    "fetchError": "Failed to fetch user data: ",
+    "generalInfo": "General Information",
+    "metaDescriptionFallback": "View {firstName} {lastName}'s profile and courses",
+    "metaTitle": "{firstName} {lastName}'s Profile",
+    "metaTitleError": "User Profile",
+    "noBiography": "No biography provided",
+    "professionalInfo": "Professional Information",
+    "profileLoadError": "Failed to load user profile",
+    "viewCourses": "View Courses"
+  },
   "Validation": {
     "invalidEmail": "Invalid email address",
     "loading": "Loading...",
     "passwordMinLength": "Password must be at least {length} characters",
     "required": "Required",
+    "usernameMinLength": "Username must be at least {length} characters",
     "wrongCredentials": "Wrong Email or Password"
   }
 }

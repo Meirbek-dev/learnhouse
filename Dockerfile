@@ -1,16 +1,16 @@
 # Base image
-FROM python:3.12.10-slim-bookworm AS base
+FROM python:3.13.3-slim-bookworm AS base
 
 # Install Nginx, curl, and build-essential
-RUN apt update && apt install -y nginx curl build-essential \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm /etc/nginx/sites-enabled/default
+RUN apt update && apt install -y nginx curl build-essential libomp-dev \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm /etc/nginx/sites-enabled/default
 
 # Install Node tools
 RUN curl -fsSL https://deb.nodesource.com/setup_23.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g corepack pm2
+  && apt-get install -y nodejs \
+  && npm install -g corepack pm2
 
 # Frontend Build
 FROM base AS deps
@@ -24,15 +24,15 @@ COPY ./apps/web/package.json ./apps/web/pnpm-lock.yaml* ./
 COPY ./apps/web /app/web
 RUN rm -f .env*
 RUN if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile && pnpm run build; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
+  else echo "Lockfile not found." && exit 1; \
+  fi
 
 # Final image
 FROM base AS runner
 RUN addgroup --system --gid 1001 system \
-    && adduser --system --uid 1001 app \
-    && mkdir .next \
-    && chown app:system .next
+  && adduser --system --uid 1001 app \
+  && mkdir .next \
+  && chown app:system .next
 COPY --from=deps /app/web/public ./app/web/public
 COPY --from=deps --chown=app:system /app/web/.next/standalone ./app/web/
 COPY --from=deps --chown=app:system /app/web/.next/static ./app/web/.next/static
@@ -42,8 +42,8 @@ WORKDIR /app/api
 COPY ./apps/api/uv.lock ./
 COPY ./apps/api/pyproject.toml ./
 RUN pip install --upgrade pip \
-    && pip install uv \
-    && uv sync
+  && pip install uv \
+  && uv sync
 COPY ./apps/api ./
 
 # Run the backend

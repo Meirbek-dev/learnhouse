@@ -1,12 +1,12 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import type { FC } from 'react'
+import { useState, useEffect } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { SiStripe } from '@icons-pack/react-simple-icons'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import {
   getPaymentConfigs,
   initializePaymentConfig,
-  updatePaymentConfig,
   deletePaymentConfig,
   updateStripeAccountID,
   getStripeOnboardingLink,
@@ -14,18 +14,14 @@ import {
 import FormLayout, {
   ButtonBlack,
   Input,
-  Textarea,
   FormField,
   FormLabelAndMessage,
   Flex,
 } from '@components/Objects/StyledElements/Form/Form'
 import {
-  AlertTriangle,
   BarChart2,
-  Check,
   Coins,
   CreditCard,
-  Edit,
   ExternalLink,
   Info,
   Loader2,
@@ -43,7 +39,7 @@ import { useRouter } from 'next/navigation'
 import { getUriWithoutOrg } from '@services/config/config'
 import { useTranslations } from 'next-intl'
 
-const PaymentsConfigurationPage: React.FC = () => {
+const PaymentsConfigurationPage: FC = () => {
   const org = useOrg() as any
   const session = useLHSession() as any
   const router = useRouter()
@@ -137,20 +133,20 @@ const PaymentsConfigurationPage: React.FC = () => {
 
   return (
     <div>
-      <div className="ml-10 mr-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-3">
-          <h1 className="font-bold text-xl text-gray-800">{t('pageTitle')}</h1>
-          <h2 className="text-gray-500 text-md">{t('pageDescription')}</h2>
+      <div className="nice-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">
+        <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+          <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
+          <h2 className="text-md text-gray-500">{t('pageDescription')}</h2>
         </div>
 
-        <Alert className="mb-3 p-6 border-2 border-blue-100 bg-blue-50/50">
-          <AlertTitle className="text-lg font-semibold mb-2 flex items-center space-x-2">
+        <Alert className="mb-3 border-2 border-blue-100 bg-blue-50/50 p-6">
+          <AlertTitle className="mb-2 flex items-center space-x-2 text-lg font-semibold">
             <Info className="h-5 w-5" />
             <span>{t('aboutStripe.title')}</span>
           </AlertTitle>
           <AlertDescription className="space-y-5">
             <div className="pl-2">
-              <ul className="list-disc list-inside space-y-1 text-gray-600 pl-2">
+              <ul className="list-inside list-disc space-y-1 pl-2 text-gray-600">
                 <li className="flex items-center space-x-2">
                   <CreditCard className="h-4 w-4" />
                   <span>{t('aboutStripe.acceptPayments')}</span>
@@ -173,7 +169,7 @@ const PaymentsConfigurationPage: React.FC = () => {
               href="https://stripe.com/docs"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 inline-flex items-center font-medium transition-colors duration-200 pl-2"
+              className="inline-flex items-center pl-2 font-medium text-blue-600 transition-colors duration-200 hover:text-blue-800"
             >
               {t('aboutStripe.learnMore')}
               <ExternalLink className="ml-1.5 h-4 w-4" />
@@ -181,9 +177,9 @@ const PaymentsConfigurationPage: React.FC = () => {
           </AlertDescription>
         </Alert>
 
-        <div className="flex flex-col rounded-lg light-shadow">
+        <div className="light-shadow flex flex-col rounded-lg">
           {stripeConfig ? (
-            <div className="flex items-center justify-between bg-linear-to-r from-indigo-500 to-purple-600 p-6 rounded-lg shadow-md">
+            <div className="flex items-center justify-between rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 p-6 shadow-md">
               <div className="flex items-center space-x-3">
                 <SiStripe className="text-white" size={32} />
                 <div className="flex flex-col">
@@ -193,22 +189,22 @@ const PaymentsConfigurationPage: React.FC = () => {
                     </span>
                     {stripeConfig.provider_specific_id &&
                     stripeConfig.active ? (
-                      <div className="flex items-center space-x-1 bg-green-500/20 px-2 py-0.5 rounded-full">
-                        <div className="h-2 w-2 bg-green-500 rounded-full" />
+                      <div className="flex items-center space-x-1 rounded-full bg-green-500/20 px-2 py-0.5">
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
                         <span className="text-xs text-green-100">
                           {t('connectedStatus')}
                         </span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-1 bg-red-500/20 px-2 py-0.5 rounded-full">
-                        <div className="h-2 w-2 bg-red-500 rounded-full" />
+                      <div className="flex items-center space-x-1 rounded-full bg-red-500/20 px-2 py-0.5">
+                        <div className="h-2 w-2 rounded-full bg-red-500" />
                         <span className="text-xs text-red-100">
                           {t('notConnectedStatus')}
                         </span>
                       </div>
                     )}
                   </div>
-                  <span className="text-white/80 text-sm">
+                  <span className="text-sm text-white/80">
                     {stripeConfig.provider_specific_id
                       ? `${t('linkedAccountLabel')}: ${stripeConfig.provider_specific_id}`
                       : t('accountNotConfigured')}
@@ -220,11 +216,11 @@ const PaymentsConfigurationPage: React.FC = () => {
                   !stripeConfig.active) && (
                   <Button
                     onClick={handleStripeOnboarding}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white text-sm rounded-full hover:bg-green-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-green-400 shadow-md"
+                    className="flex items-center space-x-2 rounded-full border-2 border-green-400 bg-green-500 px-4 py-2 text-sm text-white shadow-md transition duration-300 hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isOnboardingLoading}
                   >
                     {isOnboardingLoading ? (
-                      <Loader2 className="animate-spin h-4 w-4" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <UnplugIcon className="h-3 w-3" />
                     )}
@@ -236,7 +232,7 @@ const PaymentsConfigurationPage: React.FC = () => {
                   confirmationMessage={t('removeConnectionConfirmation')}
                   dialogTitle={t('removeConnectionTitle')}
                   dialogTrigger={
-                    <Button className="flex items-center space-x-2 bg-red-500 text-white text-sm rounded-full hover:bg-red-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <Button className="flex items-center space-x-2 rounded-full bg-red-500 text-sm text-white transition duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
                       <Trash2 size={16} />
                       <span>{t('removeConnectionButton')}</span>
                     </Button>
@@ -249,7 +245,7 @@ const PaymentsConfigurationPage: React.FC = () => {
           ) : (
             <Button
               onClick={enableStripe}
-              className="flex items-center justify-center space-x-2 bg-linear-to-r p-3 from-indigo-500 to-purple-600 text-white px-6 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center space-x-2 rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 p-3 px-6 text-white shadow-md transition duration-300 hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isOnboarding}
             >
               {isOnboarding ? (
@@ -292,7 +288,7 @@ interface EditStripeConfigModalProps {
   onClose: () => void
 }
 
-const EditStripeConfigModal: React.FC<EditStripeConfigModalProps> = ({
+const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({
   orgId,
   configId,
   accessToken,
@@ -358,7 +354,7 @@ const EditStripeConfigModal: React.FC<EditStripeConfigModalProps> = ({
           <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
             <ButtonBlack
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+              className="rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-300 hover:bg-blue-600"
             >
               {t('saveButton')}
             </ButtonBlack>

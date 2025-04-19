@@ -1,4 +1,5 @@
-import React from 'react'
+import type { FC } from 'react'
+import { useState, useEffect, createElement } from 'react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import {
   Plus,
@@ -7,12 +8,10 @@ import {
   ImageIcon,
   Link as LinkIcon,
   Award,
-  ArrowRight,
   Edit,
   TextIcon,
   Briefcase,
   GraduationCap,
-  Upload,
   MapPin,
   BookOpen,
 } from 'lucide-react'
@@ -31,7 +30,6 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { updateProfile } from '@services/settings/profile'
 import { getUser } from '@services/users/users'
 import { toast } from 'react-hot-toast'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui/tabs'
 import { useTranslations } from 'next-intl'
 
 // Define section type keys (mapping to translation keys)
@@ -206,17 +204,15 @@ const UserProfileBuilder = () => {
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('Dashboard.UserProfileBuilder')
   const tNotify = useTranslations('Notifications')
-  const [profileData, setProfileData] = React.useState<ProfileData>({
+  const [profileData, setProfileData] = useState<ProfileData>({
     sections: [],
   })
-  const [selectedSection, setSelectedSection] = React.useState<number | null>(
-    null
-  )
-  const [isSaving, setIsSaving] = React.useState(false)
-  const [isLoading, setIsLoading] = React.useState(true)
+  const [selectedSection, setSelectedSection] = useState<number | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Initialize profile data from user data
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchUserData = async () => {
       if (session?.data?.user?.id && access_token) {
         try {
@@ -384,23 +380,23 @@ const UserProfileBuilder = () => {
 
   if (isLoading) {
     return (
-      <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow p-6">
+      <div className="nice-shadow mx-0 rounded-xl bg-white p-6 sm:mx-10">
         <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
-      <div className="p-6 space-y-6">
+    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+      <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="text-xl font-semibold flex items-center">
+            <h2 className="flex items-center text-xl font-semibold">
               {t('title')}{' '}
-              <div className="text-xs ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
+              <div className="ml-2 rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
                 {t('betaBadge')}
               </div>
             </h2>
@@ -420,7 +416,7 @@ const UserProfileBuilder = () => {
         <div className="grid grid-cols-4 gap-6">
           {/* Sections Panel */}
           <div className="col-span-1 border-r pr-4">
-            <h3 className="font-medium mb-4">{t('SectionsPanel.title')}</h3>
+            <h3 className="mb-4 font-medium">{t('SectionsPanel.title')}</h3>
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="sections">
                 {(provided) => (
@@ -440,32 +436,32 @@ const UserProfileBuilder = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             onClick={() => setSelectedSection(index)}
-                            className={`p-4 bg-white/80 backdrop-blur-xs rounded-lg cursor-pointer border ${
+                            className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
                               selectedSection === index
-                                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/20 shadow-xs'
+                                ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
                                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
-                            } ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500/20 rotate-2' : ''}`}
+                            } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                           >
-                            <div className="flex items-center justify-between group">
+                            <div className="group flex items-center justify-between">
                               <div className="flex items-center space-x-3">
                                 <div
                                   {...provided.dragHandleProps}
-                                  className={`p-1.5 rounded-md transition-colors duration-200 ${
+                                  className={`rounded-md p-1.5 transition-colors duration-200 ${
                                     selectedSection === index
-                                      ? 'text-blue-500 bg-blue-100/50'
-                                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                      ? 'bg-blue-100/50 text-blue-500'
+                                      : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
                                   }`}
                                 >
                                   <GripVertical size={16} />
                                 </div>
                                 <div
-                                  className={`p-1.5 rounded-md ${
+                                  className={`rounded-md p-1.5 ${
                                     selectedSection === index
-                                      ? 'text-blue-600 bg-blue-100/50'
-                                      : 'text-gray-600 bg-gray-100/50'
+                                      ? 'bg-blue-100/50 text-blue-600'
+                                      : 'bg-gray-100/50 text-gray-600'
                                   }`}
                                 >
-                                  {React.createElement(
+                                  {createElement(
                                     getSectionTypesConfig(t)[section.type].icon,
                                     {
                                       size: 16,
@@ -473,7 +469,7 @@ const UserProfileBuilder = () => {
                                   )}
                                 </div>
                                 <span
-                                  className={`text-sm font-medium truncate ${
+                                  className={`truncate text-sm font-medium ${
                                     selectedSection === index
                                       ? 'text-blue-700'
                                       : 'text-gray-700'
@@ -482,16 +478,16 @@ const UserProfileBuilder = () => {
                                   {section.title}
                                 </span>
                               </div>
-                              <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <div className="flex space-x-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     setSelectedSection(index)
                                   }}
-                                  className={`p-1.5 rounded-md transition-colors duration-200 ${
+                                  className={`rounded-md p-1.5 transition-colors duration-200 ${
                                     selectedSection === index
                                       ? 'text-blue-500 hover:bg-blue-100'
-                                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                      : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
                                   }`}
                                 >
                                   <Edit size={14} />
@@ -501,7 +497,7 @@ const UserProfileBuilder = () => {
                                     e.stopPropagation()
                                     deleteSection(index)
                                   }}
-                                  className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors duration-200"
+                                  className="rounded-md p-1.5 text-red-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
                                 >
                                   <Trash2 size={14} />
                                 </button>
@@ -525,13 +521,13 @@ const UserProfileBuilder = () => {
                   }
                 }}
               >
-                <SelectTrigger className="w-full p-0 border-0 bg-black">
+                <SelectTrigger className="w-full border-0 bg-black p-0">
                   <div className="w-full">
                     <Button
                       variant="default"
-                      className="w-full bg-black hover:bg-black/90 text-white"
+                      className="w-full bg-black text-white hover:bg-black/90"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                       {t('SectionsPanel.addSectionButton')}
                     </Button>
                   </div>
@@ -541,11 +537,11 @@ const UserProfileBuilder = () => {
                     ([type, { icon: Icon, label, description }]) => (
                       <SelectItem key={type} value={type}>
                         <div className="flex items-center space-x-3 py-1">
-                          <div className="p-1.5 bg-gray-50 rounded-md">
+                          <div className="rounded-md bg-gray-50 p-1.5">
                             <Icon size={16} className="text-gray-600" />
                           </div>
                           <div className="flex-1">
-                            <div className="font-medium text-sm text-gray-700">
+                            <div className="text-sm font-medium text-gray-700">
                               {label}
                             </div>
                             <div className="text-xs text-gray-500">
@@ -575,7 +571,7 @@ const UserProfileBuilder = () => {
                 }
               />
             ) : (
-              <div className="h-full flex items-center justify-center text-gray-500">
+              <div className="flex h-full items-center justify-center text-gray-500">
                 Select a section to edit or add a new one
               </div>
             )}
@@ -592,11 +588,7 @@ interface SectionEditorProps {
   onChange: (section: ProfileSection) => void
 }
 
-const SectionEditor: React.FC<SectionEditorProps> = ({
-  t,
-  section,
-  onChange,
-}) => {
+const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
   switch (section.type) {
     case 'image-gallery':
       return <ImageGalleryEditor t={t} section={section} onChange={onChange} />
@@ -619,16 +611,16 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   }
 }
 
-const ImageGalleryEditor: React.FC<{
+const ImageGalleryEditor: FC<{
   t: Function
   section: ImageGallerySection
   onChange: (section: ImageGallerySection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <ImageIcon className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">Image Gallery</h3>
+        <ImageIcon className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">Image Gallery</h3>
       </div>
 
       <div className="space-y-4">
@@ -646,11 +638,11 @@ const ImageGalleryEditor: React.FC<{
         {/* Images */}
         <div>
           <Label>Images</Label>
-          <div className="space-y-3 mt-2">
+          <div className="mt-2 space-y-3">
             {section.images.map((image, index) => (
               <div
                 key={index}
-                className="grid grid-cols-[2fr_1fr_auto] gap-4 p-4 border rounded-lg"
+                className="grid grid-cols-[2fr_1fr_auto] gap-4 rounded-lg border p-4"
               >
                 <div>
                   <Label>Image URL</Label>
@@ -687,7 +679,7 @@ const ImageGalleryEditor: React.FC<{
                       )
                       onChange({ ...section, images: newImages })
                     }}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -717,7 +709,7 @@ const ImageGalleryEditor: React.FC<{
               }}
               className="w-full"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Image
             </Button>
           </div>
@@ -727,16 +719,16 @@ const ImageGalleryEditor: React.FC<{
   )
 }
 
-const TextEditor: React.FC<{
+const TextEditor: FC<{
   t: Function
   section: TextSection
   onChange: (section: TextSection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <TextIcon className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">Text Content</h3>
+        <TextIcon className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">Text Content</h3>
       </div>
 
       <div className="space-y-4">
@@ -767,16 +759,16 @@ const TextEditor: React.FC<{
   )
 }
 
-const LinksEditor: React.FC<{
+const LinksEditor: FC<{
   t: Function
   section: LinksSection
   onChange: (section: LinksSection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <LinkIcon className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">Links</h3>
+        <LinkIcon className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">Links</h3>
       </div>
 
       <div className="space-y-4">
@@ -794,11 +786,11 @@ const LinksEditor: React.FC<{
         {/* Links */}
         <div>
           <Label>Links</Label>
-          <div className="space-y-3 mt-2">
+          <div className="mt-2 space-y-3">
             {section.links.map((link, index) => (
               <div
                 key={index}
-                className="grid grid-cols-[1fr_1fr_auto] gap-2 p-4 border rounded-lg"
+                className="grid grid-cols-[1fr_1fr_auto] gap-2 rounded-lg border p-4"
               >
                 <Input
                   value={link.title}
@@ -825,7 +817,7 @@ const LinksEditor: React.FC<{
                     const newLinks = section.links.filter((_, i) => i !== index)
                     onChange({ ...section, links: newLinks })
                   }}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  className="text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -845,7 +837,7 @@ const LinksEditor: React.FC<{
               }}
               className="w-full"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Link
             </Button>
           </div>
@@ -855,16 +847,16 @@ const LinksEditor: React.FC<{
   )
 }
 
-const SkillsEditor: React.FC<{
+const SkillsEditor: FC<{
   t: Function
   section: SkillsSection
   onChange: (section: SkillsSection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <Award className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">Skills</h3>
+        <Award className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">Skills</h3>
       </div>
 
       <div className="space-y-4">
@@ -882,11 +874,11 @@ const SkillsEditor: React.FC<{
         {/* Skills */}
         <div>
           <Label>Skills</Label>
-          <div className="space-y-3 mt-2">
+          <div className="mt-2 space-y-3">
             {section.skills.map((skill, index) => (
               <div
                 key={index}
-                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 p-4 border rounded-lg"
+                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 rounded-lg border p-4"
               >
                 <Input
                   value={skill.name}
@@ -936,7 +928,7 @@ const SkillsEditor: React.FC<{
                     )
                     onChange({ ...section, skills: newSkills })
                   }}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  className="text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -956,7 +948,7 @@ const SkillsEditor: React.FC<{
               }}
               className="w-full"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Skill
             </Button>
           </div>
@@ -966,16 +958,16 @@ const SkillsEditor: React.FC<{
   )
 }
 
-const ExperienceEditor: React.FC<{
+const ExperienceEditor: FC<{
   t: Function
   section: ExperienceSection
   onChange: (section: ExperienceSection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <Briefcase className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">Experience</h3>
+        <Briefcase className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">Experience</h3>
       </div>
 
       <div className="space-y-4">
@@ -993,9 +985,9 @@ const ExperienceEditor: React.FC<{
         {/* Experiences */}
         <div>
           <Label>Experience Items</Label>
-          <div className="space-y-4 mt-2">
+          <div className="mt-2 space-y-4">
             {section.experiences.map((experience, index) => (
-              <div key={index} className="space-y-4 p-4 border rounded-lg">
+              <div key={index} className="space-y-4 rounded-lg border p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Title</Label>
@@ -1112,9 +1104,9 @@ const ExperienceEditor: React.FC<{
                       )
                       onChange({ ...section, experiences: newExperiences })
                     }}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Remove
                   </Button>
                 </div>
@@ -1137,7 +1129,7 @@ const ExperienceEditor: React.FC<{
               }}
               className="w-full"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Experience
             </Button>
           </div>
@@ -1147,16 +1139,16 @@ const ExperienceEditor: React.FC<{
   )
 }
 
-const EducationEditor: React.FC<{
+const EducationEditor: FC<{
   t: Function
   section: EducationSection
   onChange: (section: EducationSection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <GraduationCap className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">Education</h3>
+        <GraduationCap className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">Education</h3>
       </div>
 
       <div className="space-y-4">
@@ -1174,9 +1166,9 @@ const EducationEditor: React.FC<{
         {/* Education Items */}
         <div>
           <Label>Education Items</Label>
-          <div className="space-y-4 mt-2">
+          <div className="mt-2 space-y-4">
             {section.education.map((edu, index) => (
-              <div key={index} className="space-y-4 p-4 border rounded-lg">
+              <div key={index} className="space-y-4 rounded-lg border p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Institution</Label>
@@ -1301,9 +1293,9 @@ const EducationEditor: React.FC<{
                       )
                       onChange({ ...section, education: newEducation })
                     }}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Remove
                   </Button>
                 </div>
@@ -1327,7 +1319,7 @@ const EducationEditor: React.FC<{
               }}
               className="w-full"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Education
             </Button>
           </div>
@@ -1337,16 +1329,16 @@ const EducationEditor: React.FC<{
   )
 }
 
-const AffiliationEditor: React.FC<{
+const AffiliationEditor: FC<{
   t: Function
   section: AffiliationSection
   onChange: (section: AffiliationSection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <MapPin className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">Affiliation</h3>
+        <MapPin className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">Affiliation</h3>
       </div>
 
       <div className="space-y-4">
@@ -1364,9 +1356,9 @@ const AffiliationEditor: React.FC<{
         {/* Affiliations */}
         <div>
           <Label>Affiliations</Label>
-          <div className="space-y-3 mt-2">
+          <div className="mt-2 space-y-3">
             {section.affiliations.map((affiliation, index) => (
-              <div key={index} className="space-y-4 p-4 border rounded-lg">
+              <div key={index} className="space-y-4 rounded-lg border p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Name</Label>
@@ -1426,9 +1418,9 @@ const AffiliationEditor: React.FC<{
                       )
                       onChange({ ...section, affiliations: newAffiliations })
                     }}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Remove
                   </Button>
                 </div>
@@ -1449,7 +1441,7 @@ const AffiliationEditor: React.FC<{
               }}
               className="w-full"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Affiliation
             </Button>
           </div>
@@ -1459,16 +1451,16 @@ const AffiliationEditor: React.FC<{
   )
 }
 
-const CoursesEditor: React.FC<{
+const CoursesEditor: FC<{
   t: Function
   section: CoursesSection
   onChange: (section: CoursesSection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <BookOpen className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">Courses</h3>
+        <BookOpen className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">Courses</h3>
       </div>
 
       <div className="space-y-4">

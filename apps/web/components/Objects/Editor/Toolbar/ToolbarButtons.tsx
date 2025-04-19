@@ -24,23 +24,20 @@ import {
   Cuboid,
   FileText,
   ImagePlus,
-  Lightbulb,
   MousePointerClick,
   Sigma,
-  Table,
-  Tag,
   Tags,
   User,
   Video,
 } from 'lucide-react'
 import { SiYoutube } from '@icons-pack/react-simple-icons'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import React from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 export const ToolbarButtons = ({ editor, props }: any) => {
   const t = useTranslations('Editor.Toolbar')
-  const [showTableMenu, setShowTableMenu] = React.useState(false)
+  const [showTableMenu, setShowTableMenu] = useState(false)
 
   if (!editor) {
     return null

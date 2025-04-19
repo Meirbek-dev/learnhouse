@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import useSWR from 'swr'
 
 function HomeClient() {
@@ -28,7 +28,7 @@ function HomeClient() {
   useEffect(() => {}, [session, orgs])
   return (
     <div className="flex flex-col">
-      <div className="flex space-x-4 mx-auto font-semibold text-3xl pt-16 items-center bg-black rounded-b-2xl">
+      <div className="mx-auto flex items-center space-x-4 rounded-b-2xl bg-black pt-16 text-3xl font-semibold">
         <Image
           quality={100}
           width={60}
@@ -38,34 +38,34 @@ function HomeClient() {
         />
       </div>
 
-      <div className="flex space-x-4 mx-auto font-semibold text-2xl pt-16 items-center">
+      <div className="mx-auto flex items-center space-x-4 pt-16 text-2xl font-semibold">
         <span>{t('hello')},</span> <UserAvatar />{' '}
         <span className="capitalize">
           {session?.data?.user.first_name} {session?.data?.user.last_name}
         </span>
       </div>
-      <div className="flex space-x-4 mx-auto font-semibold text-sm mt-12 items-center uppercase bg-slate-200 text-gray-600 px-3 py-2 rounded-md">
+      <div className="mx-auto mt-12 flex items-center space-x-4 rounded-md bg-slate-200 px-3 py-2 text-sm font-semibold text-gray-600 uppercase">
         {t('yourOrganizations')}
       </div>
       {orgs && orgs.length == 0 && (
-        <div className="flex mx-auto my-5 space-x-3 bg-rose-200 rounded-lg px-3 py-2">
+        <div className="mx-auto my-5 flex space-x-3 rounded-lg bg-rose-200 px-3 py-2">
           <Info />
           <span>{t('noOrganizations')}</span>
         </div>
       )}
-      <div className="flex mx-auto pt-10 rounded-lg">
+      <div className="mx-auto flex rounded-lg pt-10">
         {orgs?.map((org: any) => (
           <Link
             href={getUriWithOrg(org.slug, '/')}
             key={org.id}
-            className="flex space-x-2 mx-auto w-fit justify-between items-center outline-slate-200 px-3 py-2 rounded-lg"
+            className="mx-auto flex w-fit items-center justify-between space-x-2 rounded-lg px-3 py-2 outline-slate-200"
           >
             <div>{org.name}</div>
             <ArrowRightCircle />
           </Link>
         ))}
       </div>
-      <div className="flex cursor-pointer space-x-4 mx-auto font-semibold text-2xl pt-16 items-center">
+      <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">
         <span
           onClick={() =>
             signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })

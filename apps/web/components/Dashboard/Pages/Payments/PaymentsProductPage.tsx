@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import currencyCodes from 'currency-codes'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -150,7 +150,7 @@ function PaymentsProductPage() {
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
-      <div className="pl-10 pr-10 mx-auto">
+      <div className="mx-auto pr-10 pl-10">
         <Modal
           isDialogOpen={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
@@ -161,11 +161,11 @@ function PaymentsProductPage() {
           }
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {products.data.map((product: any) => (
             <div
               key={product.id}
-              className="bg-white p-4 rounded-lg nice-shadow flex flex-col h-full"
+              className="nice-shadow flex h-full flex-col rounded-lg bg-white p-4"
             >
               {editingProductId === product.id ? (
                 <EditProductForm
@@ -174,11 +174,11 @@ function PaymentsProductPage() {
                   onCancel={() => setEditingProductId(null)}
                 />
               ) : (
-                <div className="flex flex-col h-full">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex flex-col space-y-1 items-start">
+                <div className="flex h-full flex-col">
+                  <div className="mb-2 flex items-start justify-between">
+                    <div className="flex flex-col items-start space-y-1">
                       <Badge
-                        className="w-fit flex items-center space-x-2"
+                        className="flex w-fit items-center space-x-2"
                         variant="outline"
                       >
                         {product.product_type === 'subscription' ? (
@@ -192,12 +192,12 @@ function PaymentsProductPage() {
                             : t('oneTimeType')}
                         </span>
                       </Badge>
-                      <h3 className="font-bold text-lg">{product.name}</h3>
+                      <h3 className="text-lg font-bold">{product.name}</h3>
                     </div>
                     <div className="flex space-x-2">
                       <button
                         onClick={() => setEditingProductId(product.id)}
-                        className={`text-blue-500 hover:text-blue-700 ${isStripeEnabled ? '' : 'opacity-50 cursor-not-allowed'}`}
+                        className={`text-blue-500 hover:text-blue-700 ${isStripeEnabled ? '' : 'cursor-not-allowed opacity-50'}`}
                         disabled={!isStripeEnabled}
                         title={t('editButton')}
                       >
@@ -231,7 +231,7 @@ function PaymentsProductPage() {
                       <p className="text-gray-600">{product.description}</p>
                       {product.benefits && (
                         <div className="mt-2">
-                          <h4 className="font-semibold text-sm">
+                          <h4 className="text-sm font-semibold">
                             {t('benefitsLabel')}
                           </h4>
                           <p className="text-sm text-gray-600">
@@ -244,7 +244,7 @@ function PaymentsProductPage() {
                   <div className="mt-2">
                     <button
                       onClick={() => toggleProductExpansion(product.id)}
-                      className="text-slate-500 hover:text-slate-700 text-sm flex items-center"
+                      className="flex items-center text-sm text-slate-500 hover:text-slate-700"
                     >
                       {expandedProducts[product.id] ? (
                         <>
@@ -260,11 +260,11 @@ function PaymentsProductPage() {
                     </button>
                   </div>
                   <ProductLinkedCourses productId={product.id} />
-                  <div className="mt-2 flex items-center justify-between bg-gray-100 rounded-md p-2">
+                  <div className="mt-2 flex items-center justify-between rounded-md bg-gray-100 p-2">
                     <span className="text-sm text-gray-600">
                       {t('priceLabel')}
                     </span>
-                    <span className="font-semibold text-lg">
+                    <span className="text-lg font-semibold">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: product.currency,
@@ -277,19 +277,19 @@ function PaymentsProductPage() {
           ))}
         </div>
         {products.data.length === 0 && (
-          <div className="flex mx-auto space-x-2 font-semibold mt-3 text-gray-600 items-center">
+          <div className="mx-auto mt-3 flex items-center space-x-2 font-semibold text-gray-600">
             <Info size={20} />
             <p>{t('noProducts')}</p>
           </div>
         )}
 
-        <div className="flex justify-center items-center py-10">
+        <div className="flex items-center justify-center py-10">
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className={`mb-4 flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-linear-to-bl text-white font-medium from-gray-700 to-gray-900 border border-gray-600 shadow-gray-900/20 nice-shadow transition duration-300 ${
+            className={`nice-shadow mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 bg-linear-to-bl from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
               isStripeEnabled
                 ? 'hover:from-gray-600 hover:to-gray-800'
-                : 'opacity-50 cursor-not-allowed'
+                : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}
           >
@@ -320,7 +320,7 @@ const EditProductForm = ({
   >([])
   const t = useTranslations('Payments.ProductPage.editForm')
   const tNotify = useTranslations('Notifications')
-  const validationSchema = React.useMemo(() => createValidationSchema(t), [t])
+  const validationSchema = useMemo(() => createValidationSchema(t), [t])
 
   useEffect(() => {
     const allCurrencies = currencyCodes.data.map((currency) => ({
@@ -371,7 +371,7 @@ const EditProductForm = ({
     >
       {({ isSubmitting, values, setFieldValue }) => (
         <Form className="space-y-4">
-          <div className="px-1.5 py-2 flex-col space-y-3">
+          <div className="flex-col space-y-3 px-1.5 py-2">
             <div>
               <Label htmlFor="name">{t('nameLabel')}</Label>
               <Field
@@ -382,7 +382,7 @@ const EditProductForm = ({
               <ErrorMessage
                 name="name"
                 component="div"
-                className="text-red-500 text-sm mt-1"
+                className="mt-1 text-sm text-red-500"
               />
             </div>
 
@@ -396,7 +396,7 @@ const EditProductForm = ({
               <ErrorMessage
                 name="description"
                 component="div"
-                className="text-red-500 text-sm mt-1"
+                className="mt-1 text-sm text-red-500"
               />
             </div>
 
@@ -412,7 +412,7 @@ const EditProductForm = ({
                 <ErrorMessage
                   name="amount"
                   component="div"
-                  className="text-red-500 text-sm mt-1"
+                  className="mt-1 text-sm text-red-500"
                 />
               </div>
               <div className="w-1/3">
@@ -435,7 +435,7 @@ const EditProductForm = ({
                 <ErrorMessage
                   name="currency"
                   component="div"
-                  className="text-red-500 text-sm mt-1"
+                  className="mt-1 text-sm text-red-500"
                 />
               </div>
             </div>
@@ -450,7 +450,7 @@ const EditProductForm = ({
               <ErrorMessage
                 name="benefits"
                 component="div"
-                className="text-red-500 text-sm mt-1"
+                className="mt-1 text-sm text-red-500"
               />
             </div>
           </div>

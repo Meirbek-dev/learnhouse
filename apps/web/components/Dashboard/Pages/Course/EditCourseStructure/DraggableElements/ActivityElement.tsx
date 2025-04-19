@@ -7,11 +7,9 @@ import {
   Eye,
   File,
   FilePenLine,
-  FileSymlink,
   Globe,
   Loader2,
   Lock,
-  MoreVertical,
   Pencil,
   Save,
   Sparkles,
@@ -21,7 +19,8 @@ import {
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import * as React from 'react'
 import { Draggable } from '@hello-pangea/dnd'
 import { mutate } from 'swr'
 import {
@@ -135,13 +134,11 @@ function ActivityElement(props: ActivitiyElementProps) {
     >
       {(provided, snapshot) => (
         <div
-          className={`grid grid-cols-[auto_1fr_auto] gap-2 py-2 px-3 my-2 w-full rounded-md text-gray-500
-            ${
-              snapshot.isDragging
-                ? 'nice-shadow bg-white ring-2 ring-blue-500/20 z-50 rotate-1 scale-[1.04]'
-                : 'nice-shadow bg-gray-50 hover:bg-gray-100 '
-            }
-            items-center border-1 border-gray-200`}
+          className={`my-2 grid w-full grid-cols-[auto_1fr_auto] gap-2 rounded-md px-3 py-2 text-gray-500 ${
+            snapshot.isDragging
+              ? 'nice-shadow z-50 scale-[1.04] rotate-1 bg-white ring-2 ring-blue-500/20'
+              : 'nice-shadow bg-gray-50 hover:bg-gray-100'
+          } items-center border-1 border-gray-200`}
           key={props.activity.id}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -158,12 +155,12 @@ function ActivityElement(props: ActivitiyElementProps) {
           />
 
           {/*   Centered Activity Name  */}
-          <div className="flex items-center space-x-2 justify-center">
+          <div className="flex items-center justify-center space-x-2">
             {selectedActivity === props.activity.id ? (
-              <div className="chapter-modification-zone text-[7px] text-gray-600 shadow-inner bg-gray-200/60 py-1 px-4 rounded-lg space-x-3">
+              <div className="chapter-modification-zone space-x-3 rounded-lg bg-gray-200/60 px-4 py-1 text-[7px] text-gray-600 shadow-inner">
                 <input
                   type="text"
-                  className="bg-transparent outline-hidden text-xs text-gray-500"
+                  className="bg-transparent text-xs text-gray-500 outline-hidden"
                   placeholder="Activity name"
                   value={
                     modifiedActivity
@@ -180,7 +177,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                 />
                 <button
                   onClick={() => updateActivityName(props.activity.id)}
-                  className="bg-transparent text-neutral-700 hover:cursor-pointer hover:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-transparent text-neutral-700 hover:cursor-pointer hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={isUpdatingName}
                 >
                   {isUpdatingName ? (
@@ -191,7 +188,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                 </button>
               </div>
             ) : (
-              <p className="first-letter:uppercase text-center sm:text-left">
+              <p className="text-center first-letter:uppercase sm:text-left">
                 {' '}
                 {props.activity.name}{' '}
               </p>
@@ -200,12 +197,12 @@ function ActivityElement(props: ActivitiyElementProps) {
               onClick={() =>
                 !isUpdatingName && setSelectedActivity(props.activity.id)
               }
-              className={`text-neutral-400 hover:cursor-pointer size-3 min-w-3 ${isUpdatingName ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`size-3 min-w-3 text-neutral-400 hover:cursor-pointer ${isUpdatingName ? 'cursor-not-allowed opacity-50' : ''}`}
             />
           </div>
 
           {/*   Edit, View, Publish, and Delete Buttons  */}
-          <div className="flex items-center gap-2 justify-end">
+          <div className="flex items-center justify-end gap-2">
             <ActivityElementOptions
               activity={props.activity}
               isMobile={isMobile}
@@ -213,10 +210,10 @@ function ActivityElement(props: ActivitiyElementProps) {
             />
             {/*   Publishing  */}
             <button
-              className={`p-1 px-2 sm:px-3 border shadow-md rounded-md font-bold text-xs flex items-center space-x-1 transition-colors duration-200 ${
+              className={`flex items-center space-x-1 rounded-md border p-1 px-2 text-xs font-bold shadow-md transition-colors duration-200 sm:px-3 ${
                 !props.activity.published
-                  ? 'bg-linear-to-bl text-green-800 from-green-400/50 to-lime-200/80 border-green-600/10 hover:from-green-500/50 hover:to-lime-300/80'
-                  : 'bg-linear-to-bl text-gray-800 from-gray-400/50 to-gray-200/80 border-gray-600/10 hover:from-gray-500/50 hover:to-gray-300/80'
+                  ? 'border-green-600/10 bg-linear-to-bl from-green-400/50 to-lime-200/80 text-green-800 hover:from-green-500/50 hover:to-lime-300/80'
+                  : 'border-gray-600/10 bg-linear-to-bl from-gray-400/50 to-gray-200/80 text-gray-800 hover:from-gray-500/50 hover:to-gray-300/80'
               }`}
               onClick={() => changePublicStatus()}
             >
@@ -227,7 +224,7 @@ function ActivityElement(props: ActivitiyElementProps) {
               )}
               <span>{!props.activity.published ? 'Publish' : 'Unpublish'}</span>
             </button>
-            <div className="w-px h-3 bg-gray-300 mx-1 self-center rounded-full hidden sm:block" />
+            <div className="mx-1 hidden h-3 w-px self-center rounded-full bg-gray-300 sm:block" />
             <ToolTip content="Preview Activity" sideOffset={8}>
               <Link
                 href={
@@ -240,7 +237,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                     ''
                   )}`
                 }
-                className="p-1 px-2 sm:px-3 bg-linear-to-bl text-cyan-800 from-sky-400/50 to-cyan-200/80 border border-cyan-600/10 shadow-md rounded-md font-bold text-xs flex items-center space-x-1 transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80"
+                className="flex items-center space-x-1 rounded-md border border-cyan-600/10 bg-linear-to-bl from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-bold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
                 rel="noopener noreferrer"
               >
                 <Eye strokeWidth={2} size={14} className="text-sky-600" />
@@ -253,10 +250,10 @@ function ActivityElement(props: ActivitiyElementProps) {
               dialogTitle={'Delete ' + props.activity.name + ' ?'}
               dialogTrigger={
                 <button
-                  className="p-1 px-2 sm:px-3 bg-red-600 rounded-md flex items-center space-x-1 shadow-md transition-colors duration-200 hover:bg-red-700"
+                  className="flex items-center space-x-1 rounded-md bg-red-600 p-1 px-2 shadow-md transition-colors duration-200 hover:bg-red-700 sm:px-3"
                   rel="noopener noreferrer"
                 >
-                  <X size={15} className="text-rose-200 font-bold" />
+                  <X size={15} className="font-bold text-rose-200" />
                 </button>
               }
               functionToExecute={() => deleteActivityUI()}
@@ -299,11 +296,11 @@ const ActivityTypeIndicator = ({
 
   return (
     <div
-      className={`text-gray-300 space-x-1 w-28 flex ${isMobile ? 'flex-col' : ''}`}
+      className={`flex w-28 space-x-1 text-gray-300 ${isMobile ? 'flex-col' : ''}`}
     >
-      <div className="flex space-x-2 items-center">
+      <div className="flex items-center space-x-2">
         <Icon className="size-4" />
-        <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full mx-auto justify-center align-middle">
+        <div className="mx-auto justify-center rounded-full bg-gray-200 px-2 py-1 align-middle text-xs font-bold text-gray-400">
           {translatedTypeName}
         </div>
       </div>
@@ -368,10 +365,10 @@ const ActivityElementOptions = ({
                 ''
               )}/edit`
             }
-            className={`hover:cursor-pointer p-1 ${isMobile ? 'px-2' : 'px-3'} bg-sky-700 rounded-md items-center`}
+            className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-sky-700`}
             target="_blank"
           >
-            <div className="text-sky-100 font-bold text-xs flex items-center space-x-1">
+            <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
               <FilePenLine size={12} />
               <span>{t('editPageButton')}</span>
             </div>
@@ -385,9 +382,9 @@ const ActivityElementOptions = ({
               getUriWithOrg(org.slug, '') +
               `/dash/assignments/${assignmentUUID}`
             }
-            className={`hover:cursor-pointer p-1 ${isMobile ? 'px-2' : 'px-3'} bg-teal-700 rounded-md items-center`}
+            className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-teal-700`}
           >
-            <div className="text-sky-100 font-bold text-xs flex items-center space-x-1">
+            <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
               <FilePenLine size={12} />{' '}
               {!isMobile && <span>{t('editAssignmentButton')}</span>}
             </div>

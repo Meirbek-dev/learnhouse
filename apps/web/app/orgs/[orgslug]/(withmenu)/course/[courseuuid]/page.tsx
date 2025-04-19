@@ -1,4 +1,3 @@
-import React from 'react'
 import CourseClient from './course'
 import { getCourseMetadata } from '@services/courses/courses'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
@@ -21,7 +20,6 @@ export async function generateMetadata(
   const access_token = session?.tokens?.access_token
   const tGeneral = await getTranslations('General')
 
-  // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
@@ -72,7 +70,6 @@ export async function generateMetadata(
 const CoursePage = async (params: any) => {
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
-  const tGeneral = await getTranslations('General')
 
   // Fetch course metadata once
   const awaitedParams = await params.params

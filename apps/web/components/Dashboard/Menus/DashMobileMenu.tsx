@@ -1,21 +1,17 @@
 'use client'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { signOut } from 'next-auth/react'
 import {
   Backpack,
   BadgeDollarSign,
   BookCopy,
   Home,
-  LogOut,
   School,
   Settings,
   Users,
 } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { useTranslations } from 'next-intl'
 
@@ -25,8 +21,8 @@ function DashMobileMenu() {
   const t = useTranslations('DashboardMenu')
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg text-white shadow-xl">
-      <div className="flex justify-around items-center h-16 px-2">
+    <div className="fixed right-0 bottom-0 left-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
+      <div className="flex h-16 items-center justify-around px-2">
         <AdminAuthorization authorizationMode="component">
           <ToolTip
             content={t('tooltips.home')}
@@ -36,7 +32,7 @@ function DashMobileMenu() {
           >
             <Link href={`/`} className="flex flex-col items-center p-2">
               <Home size={20} />
-              <span className="text-xs mt-1">{t('mobile.home')}</span>
+              <span className="mt-1 text-xs">{t('mobile.home')}</span>
             </Link>
           </ToolTip>
           <ToolTip
@@ -50,7 +46,7 @@ function DashMobileMenu() {
               className="flex flex-col items-center p-2"
             >
               <BookCopy size={20} />
-              <span className="text-xs mt-1">{t('mobile.courses')}</span>
+              <span className="mt-1 text-xs">{t('mobile.courses')}</span>
             </Link>
           </ToolTip>
           <ToolTip
@@ -64,7 +60,7 @@ function DashMobileMenu() {
               className="flex flex-col items-center p-2"
             >
               <Backpack size={20} />
-              <span className="text-xs mt-1">{t('mobile.assignments')}</span>
+              <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
             </Link>
           </ToolTip>
           <ToolTip
@@ -78,7 +74,7 @@ function DashMobileMenu() {
               className="flex flex-col items-center p-2"
             >
               <BadgeDollarSign size={20} />
-              <span className="text-xs mt-1">{t('mobile.payments')}</span>
+              <span className="mt-1 text-xs">{t('mobile.payments')}</span>
             </Link>
           </ToolTip>
           <ToolTip
@@ -92,7 +88,7 @@ function DashMobileMenu() {
               className="flex flex-col items-center p-2"
             >
               <Users size={20} />
-              <span className="text-xs mt-1">{t('mobile.users')}</span>
+              <span className="mt-1 text-xs">{t('mobile.users')}</span>
             </Link>
           </ToolTip>
           <ToolTip
@@ -106,7 +102,7 @@ function DashMobileMenu() {
               className="flex flex-col items-center p-2"
             >
               <School size={20} />
-              <span className="text-xs mt-1">{t('mobile.org')}</span>
+              <span className="mt-1 text-xs">{t('mobile.org')}</span>
             </Link>
           </ToolTip>
         </AdminAuthorization>
@@ -123,7 +119,7 @@ function DashMobileMenu() {
             className="flex flex-col items-center p-2"
           >
             <Settings size={20} />
-            <span className="text-xs mt-1">{t('mobile.settings')}</span>
+            <span className="mt-1 text-xs">{t('mobile.settings')}</span>
           </Link>
         </ToolTip>
       </div>

@@ -1,7 +1,7 @@
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'
-import React from 'react'
+import { Fragment } from 'react'
 import { Video, FileText, Layers, BookOpenCheck, Check } from 'lucide-react'
 
 interface Props {
@@ -100,7 +100,7 @@ function ActivityIndicators(props: Props) {
     <div className="grid grid-flow-col justify-stretch space-x-6">
       {course.chapters.map((chapter: any) => {
         return (
-          <React.Fragment key={chapter.id || `chapter-${chapter.name}`}>
+          <Fragment key={chapter.id || `chapter-${chapter.name}`}>
             <div className="grid grid-flow-col justify-stretch space-x-2">
               {chapter.activities.map((activity: any) => {
                 const isDone = isActivityDone(activity)
@@ -110,7 +110,7 @@ function ActivityIndicators(props: Props) {
                     sideOffset={8}
                     unstyled
                     content={
-                      <div className="bg-white rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
+                      <div className="nice-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
                         <div className="flex items-center gap-2">
                           {getActivityTypeIcon(activity.activity_type)}
                           <span className="text-sm text-gray-700">
@@ -122,9 +122,9 @@ function ActivityIndicators(props: Props) {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="mt-2 flex items-center gap-2">
                           <span
-                            className={`text-xs px-2 py-0.5 rounded-full ${getActivityTypeBadgeColor(activity.activity_type)}`}
+                            className={`rounded-full px-2 py-0.5 text-xs ${getActivityTypeBadgeColor(activity.activity_type)}`}
                           >
                             {getActivityTypeLabel(activity.activity_type)}
                           </span>
@@ -160,7 +160,7 @@ function ActivityIndicators(props: Props) {
                 )
               })}
             </div>
-          </React.Fragment>
+          </Fragment>
         )
       })}
     </div>

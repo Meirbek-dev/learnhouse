@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import { useState, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import learnhouseIcon from 'public/learnhouse_icon.png'
@@ -69,9 +69,9 @@ function Editor(props: EditorProps) {
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' })
-  const [isButtonAvailable, setIsButtonAvailable] = React.useState(false)
+  const [isButtonAvailable, setIsButtonAvailable] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (is_ai_feature_enabled) {
       setIsButtonAvailable(true)
     }
@@ -159,9 +159,9 @@ function Editor(props: EditorProps) {
   if (isMobile) {
     // TODO: Work on a better editor mobile experience
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center p-4">
-        <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <h2 className="text-xl font-bold mb-4">{t('mobileTitle')}</h2>
+      <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8] p-4">
+        <div className="rounded-lg bg-white p-6 text-center shadow-md">
+          <h2 className="mb-4 text-xl font-bold">{t('mobileTitle')}</h2>
           <Monitor className="mx-auto my-5" size={60} />
           <p>{t('mobileMessage1')}</p>
           <p>{t('mobileMessage2')}</p>
@@ -185,7 +185,7 @@ function Editor(props: EditorProps) {
           }}
           exit={{ opacity: 0 }}
         >
-          <EditorTop className="fixed bg-white bg-opacity-95 backdrop-blur-sm backdrop-brightness-125">
+          <EditorTop className="bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125">
             <EditorDocSection>
               <EditorInfoWrapper>
                 <Link href="/">
@@ -222,7 +222,7 @@ function Editor(props: EditorProps) {
             </EditorDocSection>
             <EditorUsersSection className="space-x-2">
               <div>
-                <div className="transition-all ease-linear text-teal-100 rounded-md hover:cursor-pointer">
+                <div className="rounded-md text-teal-100 transition-all ease-linear hover:cursor-pointer">
                   {isButtonAvailable && (
                     <div
                       onClick={() =>
@@ -236,7 +236,7 @@ function Editor(props: EditorProps) {
                         background:
                           'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)',
                       }}
-                      className="rounded-md px-3 py-2 drop-shadow-md flex  items-center space-x-1.5 text-sm text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out hover:scale-105"
+                      className="flex items-center space-x-1.5 rounded-md px-3 py-2 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
                       title={t('aiEditor')}
                     >
                       {' '}
@@ -248,7 +248,7 @@ function Editor(props: EditorProps) {
                           alt="AI Editor Icon"
                         />
                       </i>{' '}
-                      <i className="not-italic text-xs font-bold">
+                      <i className="text-xs font-bold not-italic">
                         {t('aiEditor')}
                       </i>
                     </div>
@@ -263,9 +263,9 @@ function Editor(props: EditorProps) {
                   opacity: '0.5',
                 }}
               />
-              <EditorLeftOptionsSection className="space-x-2 ">
+              <EditorLeftOptionsSection className="space-x-2">
                 <div
-                  className="bg-sky-600 hover:bg-sky-700 transition-all ease-linear px-3 py-2 font-black text-sm shadow-sm text-teal-100 rounded-lg hover:cursor-pointer"
+                  className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-black text-teal-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-sky-700"
                   onClick={() => props.setContent(editor.getJSON())}
                 >
                   {' '}
@@ -276,7 +276,7 @@ function Editor(props: EditorProps) {
                     target="_blank"
                     href={`/course/${course_uuid}/activity/${activity_uuid}`}
                   >
-                    <div className="flex bg-neutral-600 hover:bg-neutral-700 transition-all ease-linear h-9 px-3 py-2 font-black justify-center items-center text-sm shadow-sm text-neutral-100 rounded-lg hover:cursor-pointer">
+                    <div className="flex h-9 items-center justify-center rounded-lg bg-neutral-600 px-3 py-2 text-sm font-black text-neutral-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-neutral-700">
                       <Eye className="mx-auto items-center" size={15} />
                     </div>
                   </Link>

@@ -1,6 +1,6 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getActivityMediaDirectory } from '@services/media/media'
-import React from 'react'
+import { useEffect } from 'react'
 
 function DocumentPdfActivity({
   activity,
@@ -11,12 +11,12 @@ function DocumentPdfActivity({
 }) {
   const org = useOrg() as any
 
-  React.useEffect(() => {}, [activity, org])
+  useEffect(() => {}, [activity, org])
 
   return (
-    <div className="m-8 bg-zinc-900 rounded-md mt-14">
+    <div className="m-8 mt-14 rounded-md bg-zinc-900">
       <iframe
-        className="rounded-lg w-full h-[900px]"
+        className="h-[900px] w-full rounded-lg"
         src={getActivityMediaDirectory(
           org?.org_uuid,
           course?.course_uuid,

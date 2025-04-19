@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, Dispatch, SetStateAction, useEffect } from 'react'
+import { useState, Dispatch, SetStateAction, useEffect } from 'react'
 import { Tag, TagInput as EmblorTagInput } from 'emblor'
 import { useTranslations } from 'next-intl'
 
@@ -82,7 +82,7 @@ const FormTagInput = ({
           setActiveTagIndex={setActiveTagIndex}
         />
         {error && (
-          <p className="text-sm font-medium text-destructive">{error}</p>
+          <p className="text-destructive text-sm font-medium">{error}</p>
         )}
       </div>
     </div>

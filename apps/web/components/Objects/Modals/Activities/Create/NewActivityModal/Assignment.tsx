@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import { useState } from 'react'
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -23,11 +23,11 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
   const t = useTranslations('Components.NewAssignmentModal')
   const org = useOrg() as any
   const session = useLHSession() as any
-  const [activityName, setActivityName] = React.useState('')
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [activityDescription, setActivityDescription] = React.useState('')
-  const [dueDate, setDueDate] = React.useState('')
-  const [gradingType, setGradingType] = React.useState('ALPHABET')
+  const [activityName, setActivityName] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activityDescription, setActivityDescription] = useState('')
+  const [dueDate, setDueDate] = useState('')
+  const [gradingType, setGradingType] = useState('ALPHABET')
 
   const handleNameChange = (e: any) => {
     setActivityName(e.target.value)
@@ -169,7 +169,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
         </Flex>
         <Form.Control asChild>
           <select
-            className="bg-gray-100/40 rounded-lg px-1 py-2 outline-gray-100"
+            className="rounded-lg bg-gray-100/40 px-1 py-2 outline-gray-100"
             onChange={handleGradingTypeChange}
             required
           >

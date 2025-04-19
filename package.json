@@ -9,9 +9,9 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,md}\""
   },
   "devDependencies": {
-    "eslint": "^9.25.0",
+    "eslint": "^9.25.1",
     "prettier": "^3.5.3",
-    "turbo": "^2.5.0"
+    "turbo": "^2.5.1"
   },
-  "packageManager": "pnpm@10.7.0"
+  "packageManager": "pnpm@10.9.0"
 }

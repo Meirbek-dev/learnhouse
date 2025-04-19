@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import type { FormEvent } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { searchOrgContent } from '@services/search/search'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { Book, GraduationCap, Users, Search, Filter, X } from 'lucide-react'
+import { Book, GraduationCap, Users, Search } from 'lucide-react'
 import Link from 'next/link'
 import {
   getCourseThumbnailMediaDirectory,
@@ -83,7 +84,6 @@ function SearchPage() {
   const session = useLHSession() as any
   const org = useOrg() as any
   const t = useTranslations('SearchPage')
-  const tGeneral = useTranslations('General')
 
   // Search state
   const [searchResults, setSearchResults] = useState<SearchResults>({
@@ -118,7 +118,7 @@ function SearchPage() {
     router.push(`?${current.toString()}`)
   }
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       updateSearchParams({ q: searchQuery, page: '1' })
@@ -211,10 +211,10 @@ function SearchPage() {
         setSelectedType(type)
         updateSearchParams({ type: type === 'all' ? '' : type, page: '1' })
       }}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
+      className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${
         selectedType === type
-          ? 'bg-black/10 text-black/80 font-medium'
-          : 'hover:bg-black/5 text-black/60'
+          ? 'bg-black/10 font-medium text-black/80'
+          : 'text-black/60 hover:bg-black/5'
       }`}
     >
       <Icon size={16} />
@@ -227,15 +227,15 @@ function SearchPage() {
     if (totalPages <= 1) return null
 
     return (
-      <div className="flex justify-center gap-2 mt-8">
+      <div className="mt-8 flex justify-center gap-2">
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
           <button
             key={pageNum}
             onClick={() => updateSearchParams({ page: pageNum.toString() })}
-            className={`w-8 h-8 rounded-lg text-sm transition-colors ${
+            className={`h-8 w-8 rounded-lg text-sm transition-colors ${
               page === pageNum
-                ? 'bg-black/10 text-black/80 font-medium'
-                : 'hover:bg-black/5 text-black/60'
+                ? 'bg-black/10 font-medium text-black/80'
+                : 'text-black/60 hover:bg-black/5'
             }`}
           >
             {pageNum}
@@ -250,12 +250,12 @@ function SearchPage() {
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <div
           key={i}
-          className="bg-white rounded-xl nice-shadow p-4 animate-pulse"
+          className="nice-shadow animate-pulse rounded-xl bg-white p-4"
         >
-          <div className="w-full h-32 bg-black/5 rounded-lg mb-4" />
+          <div className="mb-4 h-32 w-full rounded-lg bg-black/5" />
           <div className="space-y-2">
-            <div className="w-3/4 h-4 bg-black/5 rounded" />
-            <div className="w-1/2 h-3 bg-black/5 rounded" />
+            <div className="h-4 w-3/4 rounded bg-black/5" />
+            <div className="h-3 w-1/2 rounded bg-black/5" />
           </div>
         </div>
       ))}
@@ -264,13 +264,13 @@ function SearchPage() {
 
   const EmptyState = () => (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-4 p-4 bg-black/5 rounded-full">
-        <Search className="w-8 h-8 text-black/40" />
+      <div className="mb-4 rounded-full bg-black/5 p-4">
+        <Search className="h-8 w-8 text-black/40" />
       </div>
-      <h3 className="text-lg font-medium text-black/80 mb-2">
+      <h3 className="mb-2 text-lg font-medium text-black/80">
         {t('noResultsTitle')}
       </h3>
-      <p className="text-sm text-black/50 max-w-md">
+      <p className="max-w-md text-sm text-black/50">
         {t('noResultsMessage', { query: query })}
       </p>
     </div>
@@ -279,33 +279,31 @@ function SearchPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Search Header */}
-      <div className="bg-white border-b border-black/5">
+      <div className="border-b border-black/5 bg-white">
         <div className="container mx-auto px-4 py-6">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-2xl font-semibold text-black/80 mb-6">
+          <div className="mx-auto max-w-2xl">
+            <h1 className="mb-6 text-2xl font-semibold text-black/80">
               {t('searchTitle')}
             </h1>
 
             {/* Search Input */}
-            <form onSubmit={handleSearch} className="relative group mb-6">
+            <form onSubmit={handleSearch} className="group relative mb-6">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('searchInputPlaceholder')}
-                className="w-full h-12 pl-12 pr-4 rounded-xl nice-shadow bg-white
-                         focus:outline-none focus:ring-1 focus:ring-black/5 focus:border-black/20
-                         text-sm placeholder:text-black/40 transition-all"
+                className="nice-shadow h-12 w-full rounded-xl bg-white pr-4 pl-12 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:ring-1 focus:ring-black/5 focus:outline-none"
               />
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <Search
-                  className="text-black/40 group-focus-within:text-black/60 transition-colors"
+                  className="text-black/40 transition-colors group-focus-within:text-black/60"
                   size={20}
                 />
               </div>
               <button
                 type="submit"
-                className="absolute inset-y-0 right-0 px-4 flex items-center text-sm text-black/60 hover:text-black/80"
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-sm text-black/60 hover:text-black/80"
               >
                 {t('searchButton')}
               </button>
@@ -336,9 +334,9 @@ function SearchPage() {
 
       {/* Search Results */}
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="mx-auto max-w-7xl">
           {query && (
-            <div className="text-sm text-black/60 mb-6">
+            <div className="mb-6 text-sm text-black/60">
               {t('resultsFound', { count: totalResults, query: query })}
             </div>
           )}
@@ -353,9 +351,9 @@ function SearchPage() {
               {(selectedType === 'all' || selectedType === 'courses') &&
                 searchResults.courses.length > 0 && (
                   <div>
-                    <h2 className="text-lg font-medium text-black/80 mb-4 flex items-center gap-2">
+                    <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
                       <GraduationCap size={20} className="text-black/60" />
-                      {tGeneral('courses')} ({searchResults.courses.length})
+                      {t('courses')} ({searchResults.courses.length})
                     </h2>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {searchResults.courses.map((course) => (
@@ -365,7 +363,7 @@ function SearchPage() {
                             org?.slug,
                             `/course/${removeCoursePrefix(course.course_uuid)}`
                           )}
-                          className="bg-white rounded-xl nice-shadow hover:shadow-md transition-all overflow-hidden group"
+                          className="nice-shadow group overflow-hidden rounded-xl bg-white transition-all hover:shadow-md"
                         >
                           <div className="relative h-48">
                             {course.thumbnail_image ? (
@@ -376,10 +374,10 @@ function SearchPage() {
                                   course.thumbnail_image
                                 )}
                                 alt={course.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             ) : (
-                              <div className="w-full h-full bg-black/5 flex items-center justify-center">
+                              <div className="flex h-full w-full items-center justify-center bg-black/5">
                                 <GraduationCap
                                   size={32}
                                   className="text-black/40"
@@ -388,14 +386,14 @@ function SearchPage() {
                             )}
                           </div>
                           <div className="p-4">
-                            <h3 className="text-sm font-medium text-black/80 mb-1">
+                            <h3 className="mb-1 text-sm font-medium text-black/80">
                               {course.name}
                             </h3>
-                            <p className="text-xs text-black/50 line-clamp-2">
+                            <p className="line-clamp-2 text-xs text-black/50">
                               {course.description}
                             </p>
                             {course.authors && course.authors.length > 0 && (
-                              <div className="flex items-center gap-2 mt-3">
+                              <div className="mt-3 flex items-center gap-2">
                                 <UserAvatar
                                   width={20}
                                   avatar_url={
@@ -433,10 +431,9 @@ function SearchPage() {
               {(selectedType === 'all' || selectedType === 'collections') &&
                 searchResults.collections.length > 0 && (
                   <div>
-                    <h2 className="text-lg font-medium text-black/80 mb-4 flex items-center gap-2">
+                    <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
                       <Book size={20} className="text-black/60" />
-                      {tGeneral('collections')} (
-                      {searchResults.collections.length})
+                      {t('collections')} ({searchResults.collections.length})
                     </h2>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {searchResults.collections.map((collection) => (
@@ -446,16 +443,16 @@ function SearchPage() {
                             org?.slug,
                             `/collection/${collection.collection_uuid.replace('collection_', '')}`
                           )}
-                          className="flex items-start gap-4 p-4 bg-white rounded-xl nice-shadow hover:shadow-md transition-all"
+                          className="nice-shadow flex items-start gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                         >
-                          <div className="w-12 h-12 bg-black/5 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-black/5">
                             <Book size={24} className="text-black/40" />
                           </div>
                           <div>
-                            <h3 className="text-sm font-medium text-black/80 mb-1">
+                            <h3 className="mb-1 text-sm font-medium text-black/80">
                               {collection.name}
                             </h3>
-                            <p className="text-xs text-black/50 line-clamp-2">
+                            <p className="line-clamp-2 text-xs text-black/50">
                               {collection.description}
                             </p>
                           </div>
@@ -469,9 +466,9 @@ function SearchPage() {
               {(selectedType === 'all' || selectedType === 'users') &&
                 searchResults.users.length > 0 && (
                   <div>
-                    <h2 className="text-lg font-medium text-black/80 mb-4 flex items-center gap-2">
+                    <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
                       <Users size={20} className="text-black/60" />
-                      {tGeneral('users')} ({searchResults.users.length})
+                      {t('users')} ({searchResults.users.length})
                     </h2>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {searchResults.users.map((user) => (
@@ -481,7 +478,7 @@ function SearchPage() {
                             org?.slug,
                             `/user/${user.username}`
                           )}
-                          className="flex items-center gap-4 p-4 bg-white rounded-xl nice-shadow hover:shadow-md transition-all"
+                          className="nice-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                         >
                           <UserAvatar
                             width={48}
@@ -509,7 +506,7 @@ function SearchPage() {
                               @{user.username}
                             </p>
                             {user.details?.title?.text && (
-                              <p className="text-xs text-black/40 mt-1">
+                              <p className="mt-1 text-xs text-black/40">
                                 {user.details.title.text}
                               </p>
                             )}

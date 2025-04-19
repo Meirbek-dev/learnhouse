@@ -8,7 +8,7 @@ import { getAPIUrl } from '@services/config/config'
 import { inviteBatchUsers } from '@services/organizations/invites'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { Info, UserPlus } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
 import { useTranslations } from 'next-intl'
@@ -20,8 +20,8 @@ function OrgUsersAdd() {
   const t = useTranslations('DashPage.UserSettings.addSection')
   const tNotify = useTranslations('Notifications')
   const tGeneral = useTranslations('General')
-  const [invitedUsers, setInvitedUsers] = React.useState('')
-  const [selectedInviteCode, setSelectedInviteCode] = React.useState<
+  const [invitedUsers, setInvitedUsers] = useState('')
+  const [selectedInviteCode, setSelectedInviteCode] = useState<
     string | undefined
   >(undefined)
 
@@ -80,23 +80,23 @@ function OrgUsersAdd() {
       ) : (
         <>
           <div className="h-6"></div>
-          <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs px-4 py-4">
-            <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-3 ">
-              <h1 className="font-bold text-xl text-gray-800">{t('title')}</h1>
-              <h2 className="text-gray-500 text-md">{t('description')}</h2>
+          <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
+            <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+              <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
+              <h2 className="text-md text-gray-500">{t('description')}</h2>
             </div>
-            <div className="flex space-x-2 mx-auto">
+            <div className="mx-auto flex space-x-2">
               <textarea
                 value={invitedUsers}
                 onChange={(e) => setInvitedUsers(e.target.value)}
-                className="w-full h-[200px] rounded-md border px-3 py-2 bg-gray-100/40 placeholder:italic placeholder:text-slate-300"
+                className="h-[200px] w-full rounded-md border bg-gray-100/40 px-3 py-2 placeholder:text-slate-300 placeholder:italic"
                 placeholder={t('textAreaPlaceholder')}
                 name="invitedUsers"
                 id="invitedUsersTextArea"
               />
             </div>
-            <div className="flex mx-auto my-5 ml-2 items-center space-x-4 justify-between">
-              <div className="flex space-x-2 items-center">
+            <div className="mx-auto my-5 ml-2 flex items-center justify-between space-x-4">
+              <div className="flex items-center space-x-2">
                 <label htmlFor="inviteCodeSelect" className="flex items-center">
                   {t('inviteCodeLabel')}
                 </label>
@@ -104,7 +104,7 @@ function OrgUsersAdd() {
                   id="inviteCodeSelect"
                   onChange={(e) => setSelectedInviteCode(e.target.value)}
                   value={selectedInviteCode || ''}
-                  className="text-gray-400 border rounded-md px-3 py-1"
+                  className="rounded-md border px-3 py-1 text-gray-400"
                   disabled={!invites || invites.length === 0}
                 >
                   {invites?.length === 0 && (
@@ -127,60 +127,60 @@ function OrgUsersAdd() {
                   <Info className="text-gray-400" size={14} />
                 </ToolTip>
               </div>
-              <div className="flex flex-row-reverse ">
+              <div className="flex flex-row-reverse">
                 <button
                   onClick={sendInvites}
-                  className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-green-700 rounded-md font-bold items-center text-sm text-green-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={!selectedInviteCode || !invitedUsers.trim()}
                 >
-                  <UserPlus className="w-4 h-4" />
+                  <UserPlus className="h-4 w-4" />
                   <span>{t('sendInvitesButton')}</span>
                 </button>
               </div>
             </div>
 
-            <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mt-3 mb-3 ">
-              <h1 className="font-bold text-xl text-gray-800">
+            <div className="mt-3 mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+              <h1 className="text-xl font-bold text-gray-800">
                 {t('invitedUsersTitle')}
               </h1>
-              <h2 className="text-gray-500 text-md">
+              <h2 className="text-md text-gray-500">
                 {t('invitedUsersDescription')}
               </h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-                <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
+              <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+                <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
                   <tr className="font-bolder text-sm">
-                    <th className="py-3 px-4">{t('emailHeader')}</th>
-                    <th className="py-3 px-4">{t('signupStatusHeader')}</th>
-                    <th className="py-3 px-4">{t('emailSentHeader')}</th>
+                    <th className="px-4 py-3">{t('emailHeader')}</th>
+                    <th className="px-4 py-3">{t('signupStatusHeader')}</th>
+                    <th className="px-4 py-3">{t('emailSentHeader')}</th>
                   </tr>
                 </thead>
-                <tbody className="mt-5 bg-white rounded-md">
+                <tbody className="mt-5 rounded-md bg-white">
                   {invited_users?.map((invited_user: any) => (
                     <tr
                       key={invited_user.email}
                       className="border-b border-gray-100 text-sm"
                     >
-                      <td className="py-3 px-4">{invited_user.email}</td>
-                      <td className="py-3 px-4">
+                      <td className="px-4 py-3">{invited_user.email}</td>
+                      <td className="px-4 py-3">
                         {invited_user.pending ? (
-                          <div className="bg-orange-400 text-orange-100 w-fit px-2 py1 rounded-md">
+                          <div className="py1 w-fit rounded-md bg-orange-400 px-2 text-orange-100">
                             {t('statusPending')}
                           </div>
                         ) : (
-                          <div className="bg-green-400 text-green-100 w-fit px-2 py1 rounded-md">
+                          <div className="py1 w-fit rounded-md bg-green-400 px-2 text-green-100">
                             {t('statusSigned')}
                           </div>
                         )}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="px-4 py-3">
                         {invited_user.email_sent ? (
-                          <div className="bg-green-600 text-green-100 w-fit px-2 py1 rounded-md">
+                          <div className="py1 w-fit rounded-md bg-green-600 px-2 text-green-100">
                             {t('emailSentYes')}
                           </div>
                         ) : (
-                          <div className="bg-red-400 text-red-100 w-fit px-2 py1 rounded-md">
+                          <div className="py1 w-fit rounded-md bg-red-400 px-2 text-red-100">
                             {t('emailSentNo')}
                           </div>
                         )}
@@ -191,7 +191,7 @@ function OrgUsersAdd() {
                     <tr>
                       <td
                         colSpan={3}
-                        className="text-center py-4 text-gray-500"
+                        className="py-4 text-center text-gray-500"
                       >
                         No users have been invited yet.
                       </td>

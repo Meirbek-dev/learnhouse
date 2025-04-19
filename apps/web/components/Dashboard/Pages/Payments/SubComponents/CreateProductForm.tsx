@@ -1,5 +1,6 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import type { FC } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { createProduct } from '@services/payments/products'
@@ -52,9 +53,7 @@ interface ProductFormValues {
   currency: string
 }
 
-const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
-  onSuccess,
-}) => {
+const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const org = useOrg() as any
   const session = useLHSession() as any
   const [currencies, setCurrencies] = useState<
@@ -62,7 +61,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
   >([])
   const t = useTranslations('Payments.ProductForm')
   const tNotify = useTranslations('Notifications')
-  const validationSchema = React.useMemo(() => createValidationSchema(t), [t])
+  const validationSchema = useMemo(() => createValidationSchema(t), [t])
 
   useEffect(() => {
     const allCurrencies = currencyCodes.data.map((currency) => ({
@@ -120,7 +119,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
     >
       {({ isSubmitting, values, setFieldValue }) => (
         <Form className="space-y-4">
-          <div className="px-1.5 py-2 flex-col space-y-3">
+          <div className="flex-col space-y-3 px-1.5 py-2">
             <div>
               <Label htmlFor="name">{t('nameLabel')}</Label>
               <Field
@@ -131,7 +130,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
               <ErrorMessage
                 name="name"
                 component="div"
-                className="text-red-500 text-sm mt-1"
+                className="mt-1 text-sm text-red-500"
               />
             </div>
 
@@ -145,7 +144,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
               <ErrorMessage
                 name="description"
                 component="div"
-                className="text-red-500 text-sm mt-1"
+                className="mt-1 text-sm text-red-500"
               />
             </div>
 
@@ -170,7 +169,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
               <ErrorMessage
                 name="product_type"
                 component="div"
-                className="text-red-500 text-sm mt-1"
+                className="mt-1 text-sm text-red-500"
               />
             </div>
 
@@ -197,7 +196,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
               <ErrorMessage
                 name="price_type"
                 component="div"
-                className="text-red-500 text-sm mt-1"
+                className="mt-1 text-sm text-red-500"
               />
             </div>
 
@@ -221,7 +220,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
                 <ErrorMessage
                   name="amount"
                   component="div"
-                  className="text-red-500 text-sm mt-1"
+                  className="mt-1 text-sm text-red-500"
                 />
               </div>
               <div className="w-1/3">
@@ -244,7 +243,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
                 <ErrorMessage
                   name="currency"
                   component="div"
-                  className="text-red-500 text-sm mt-1"
+                  className="mt-1 text-sm text-red-500"
                 />
               </div>
             </div>
@@ -259,7 +258,7 @@ const CreateProductForm: React.FC<{ onSuccess: () => void }> = ({
               <ErrorMessage
                 name="benefits"
                 component="div"
-                className="text-red-500 text-sm mt-1"
+                className="mt-1 text-sm text-red-500"
               />
             </div>
           </div>

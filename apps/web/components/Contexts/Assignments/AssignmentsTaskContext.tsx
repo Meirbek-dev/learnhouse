@@ -1,5 +1,6 @@
 'use client'
-import React, { createContext, useContext, useEffect, useReducer } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext, useEffect, useReducer } from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getAssignmentTask } from '@services/courses/assignments'
 import { useAssignments } from './AssignmentContext'
@@ -30,11 +31,7 @@ export const AssignmentsTaskDispatchContext = createContext<
   React.Dispatch<Action> | undefined
 >(undefined)
 
-export function AssignmentsTaskProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export function AssignmentsTaskProvider({ children }: { children: ReactNode }) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const assignment = useAssignments() as any
@@ -59,11 +56,11 @@ export function AssignmentsTaskProvider({
   }, [state.selectedAssignmentTaskUUID, state.reloadTrigger, assignment])
 
   return (
-    <AssignmentsTaskContext.Provider value={state}>
-      <AssignmentsTaskDispatchContext.Provider value={dispatch}>
+    <AssignmentsTaskContext value={state}>
+      <AssignmentsTaskDispatchContext value={dispatch}>
         {children}
-      </AssignmentsTaskDispatchContext.Provider>
-    </AssignmentsTaskContext.Provider>
+      </AssignmentsTaskDispatchContext>
+    </AssignmentsTaskContext>
   )
 }
 

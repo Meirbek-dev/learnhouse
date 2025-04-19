@@ -3,15 +3,11 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import {
-  getAPIUrl,
-  getUriWithOrg,
-  getUriWithoutOrg,
-} from '@services/config/config'
+import { getAPIUrl, getUriWithoutOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { Globe, Ticket, UserSquare, Users, X } from 'lucide-react'
 import Link from 'next/link'
-import React, { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import dayjs from 'dayjs'
 import {
@@ -37,11 +33,11 @@ function OrgAccess() {
     org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null,
     (url) => swrFetcher(url, access_token)
   )
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [joinMethod, setJoinMethod] = React.useState<
-    null | 'open' | 'inviteOnly'
-  >(null)
-  const [invitesModal, setInvitesModal] = React.useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [joinMethod, setJoinMethod] = useState<null | 'open' | 'inviteOnly'>(
+    null
+  )
+  const [invitesModal, setInvitesModal] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -101,31 +97,31 @@ function OrgAccess() {
       ) : (
         <>
           <div className="h-6"></div>
-          <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs px-4 py-4">
-            <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-3 ">
-              <h1 className="font-bold text-xl text-gray-800">
+          <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
+            <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+              <h1 className="text-xl font-bold text-gray-800">
                 {t('joinMethodTitle')}
               </h1>
-              <h2 className="text-gray-500 text-md">{t('description')}</h2>
+              <h2 className="text-md text-gray-500">{t('description')}</h2>
             </div>
-            <div className="flex space-x-2 mx-auto">
+            <div className="mx-auto flex space-x-2">
               <ConfirmationModal
                 confirmationButtonText={t('changeToOpenButton')}
                 confirmationMessage={t('changeToOpenConfirmation')}
                 dialogTitle={t('changeToOpenModalTitle')}
                 dialogTrigger={
-                  <div className="w-full h-[160px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 ease-linear transition-all relative">
+                  <div className="relative h-[160px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all ease-linear hover:bg-slate-200">
                     {joinMethod === 'open' && (
-                      <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute top-0 left-0 text-sm px-3 py-1 rounded-lg">
+                      <div className="absolute top-0 left-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                         {t('activeLabel')}
                       </div>
                     )}
-                    <div className="flex flex-col space-y-1 justify-center items-center h-full">
+                    <div className="flex h-full flex-col items-center justify-center space-y-1">
                       <Globe className="text-slate-400" size={40}></Globe>
-                      <div className="text-2xl text-slate-700 font-bold">
+                      <div className="text-2xl font-bold text-slate-700">
                         {t('openTitle')}
                       </div>
-                      <div className="text-gray-400 text-center px-2">
+                      <div className="px-2 text-center text-gray-400">
                         {t('openDescription')}
                       </div>
                     </div>
@@ -141,18 +137,18 @@ function OrgAccess() {
                 confirmationMessage={t('changeToClosedConfirmation')}
                 dialogTitle={t('changeToClosedModalTitle')}
                 dialogTrigger={
-                  <div className="w-full h-[160px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 ease-linear transition-all relative">
+                  <div className="relative h-[160px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all ease-linear hover:bg-slate-200">
                     {joinMethod === 'inviteOnly' && (
-                      <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute top-0 left-0 text-sm px-3 py-1 rounded-lg">
+                      <div className="absolute top-0 left-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                         {t('activeLabel')}
                       </div>
                     )}
-                    <div className="flex flex-col space-y-1 justify-center items-center h-full">
+                    <div className="flex h-full flex-col items-center justify-center space-y-1">
                       <Ticket className="text-slate-400" size={40}></Ticket>
-                      <div className="text-2xl text-slate-700 font-bold">
+                      <div className="text-2xl font-bold text-slate-700">
                         {t('closedTitle')}
                       </div>
-                      <div className="text-gray-400 text-center px-2">
+                      <div className="px-2 text-center text-gray-400">
                         {t('closedDescription')}
                       </div>
                     </div>
@@ -167,39 +163,39 @@ function OrgAccess() {
             <div
               className={
                 joinMethod !== 'inviteOnly'
-                  ? 'opacity-50 pointer-events-none'
+                  ? 'pointer-events-none opacity-50'
                   : ''
               }
             >
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mt-3 mb-3 ">
-                <h1 className="font-bold text-xl text-gray-800">
+              <div className="mt-3 mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+                <h1 className="text-xl font-bold text-gray-800">
                   {t('inviteCodesTitle')}
                 </h1>
-                <h2 className="text-gray-500 text-md">
+                <h2 className="text-md text-gray-500">
                   {t('inviteCodesDescription')}
                 </h2>
               </div>
               <div className="overflow-x-auto">
-                <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-                  <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
+                <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+                  <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
                     <tr className="font-bolder text-sm">
-                      <th className="py-3 px-4">{t('codeHeader')}</th>
-                      <th className="py-3 px-4">{t('signupLinkHeader')}</th>
-                      <th className="py-3 px-4">{t('typeHeader')}</th>
-                      <th className="py-3 px-4">{t('expirationHeader')}</th>
-                      <th className="py-3 px-4">{t('actionsHeader')}</th>
+                      <th className="px-4 py-3">{t('codeHeader')}</th>
+                      <th className="px-4 py-3">{t('signupLinkHeader')}</th>
+                      <th className="px-4 py-3">{t('typeHeader')}</th>
+                      <th className="px-4 py-3">{t('expirationHeader')}</th>
+                      <th className="px-4 py-3">{t('actionsHeader')}</th>
                     </tr>
                   </thead>
-                  <tbody className="mt-5 bg-white rounded-md">
+                  <tbody className="mt-5 rounded-md bg-white">
                     {invites?.map((invite: any) => (
                       <tr
                         key={invite.invite_code_uuid}
                         className="border-b border-gray-100 text-sm"
                       >
-                        <td className="py-3 px-4">{invite.invite_code}</td>
-                        <td className="py-3 px-4 ">
+                        <td className="px-4 py-3">{invite.invite_code}</td>
+                        <td className="px-4 py-3">
                           <Link
-                            className="bg-gray-50 text-gray-600 px-2 py-1 rounded-md outline-gray-300 outline-dashed outline-1 hover:bg-gray-100 transition-colors"
+                            className="rounded-md bg-gray-50 px-2 py-1 text-gray-600 outline-1 outline-gray-300 transition-colors outline-dashed hover:bg-gray-100"
                             target="_blank"
                             href={getUriWithoutOrg(
                               `/signup?inviteCode=${invite.invite_code}&orgslug=${org.slug}`
@@ -210,32 +206,32 @@ function OrgAccess() {
                             )}
                           </Link>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="px-4 py-3">
                           {invite.usergroup_id ? (
-                            <div className="flex space-x-2 items-center">
-                              <UserSquare className="w-4 h-4" />
+                            <div className="flex items-center space-x-2">
+                              <UserSquare className="h-4 w-4" />
                               <span>{t('linkedUserGroupType')}</span>
                             </div>
                           ) : (
-                            <div className="flex space-x-2 items-center">
-                              <Users className="w-4 h-4" />
+                            <div className="flex items-center space-x-2">
+                              <Users className="h-4 w-4" />
                               <span>{t('normalType')}</span>
                             </div>
                           )}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="px-4 py-3">
                           {dayjs(invite.expiration_date)
                             .add(1, 'year')
                             .format('DD/MM/YYYY')}{' '}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="px-4 py-3">
                           <ConfirmationModal
                             confirmationButtonText={t('deleteCodeButton')}
                             confirmationMessage={t('deleteCodeModalMessage')}
                             dialogTitle={t('deleteCodeModalTitle')}
                             dialogTrigger={
-                              <button className="mr-2 flex space-x-2 hover:cursor-pointer p-1 px-3 bg-rose-700 rounded-md font-bold items-center text-sm text-rose-100">
-                                <X className="w-4 h-4" />
+                              <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+                                <X className="h-4 w-4" />
                                 <span>{t('deleteCodeButton')}</span>
                               </button>
                             }
@@ -251,7 +247,7 @@ function OrgAccess() {
                       <tr>
                         <td
                           colSpan={5}
-                          className="text-center py-4 text-gray-500"
+                          className="py-4 text-center text-gray-500"
                         >
                           No invite codes generated yet.
                         </td>
@@ -260,7 +256,7 @@ function OrgAccess() {
                   </tbody>
                 </table>
               </div>
-              <div className="flex flex-row-reverse mt-3 mr-2">
+              <div className="mt-3 mr-2 flex flex-row-reverse">
                 <Modal
                   isDialogOpen={invitesModal}
                   onOpenChange={() => setInvitesModal(!invitesModal)}
@@ -272,8 +268,8 @@ function OrgAccess() {
                   dialogTitle={t('generateCodeModalTitle')}
                   dialogDescription={t('generateCodeModalDescription')}
                   dialogTrigger={
-                    <button className=" flex space-x-2 hover:cursor-pointer p-1 px-3 bg-green-700 rounded-md font-bold items-center text-sm text-green-100">
-                      <Ticket className="w-4 h-4" />
+                    <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer">
+                      <Ticket className="h-4 w-4" />
                       <span>{t('generateCodeButton')}</span>
                     </button>
                   }

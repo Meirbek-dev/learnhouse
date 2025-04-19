@@ -10,7 +10,7 @@ import { getAPIUrl } from '@services/config/config'
 import { deleteUserGroup } from '@services/usergroups/usergroups'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { Pencil, SquareUserRound, Users, X } from 'lucide-react'
-import React from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
 import { useTranslations } from 'next-intl'
@@ -23,16 +23,15 @@ function OrgUserGroups() {
   const tNotify = useTranslations('Notifications')
   const tGeneral = useTranslations('General')
   const [userGroupManagementModal, setUserGroupManagementModal] =
-    React.useState(false)
-  const [createUserGroupModal, setCreateUserGroupModal] = React.useState(false)
-  const [editUserGroupModal, setEditUserGroupModal] = React.useState(false)
-  const [selectedUserGroup, setSelectedUserGroup] = React.useState<any | null>(
-    null
-  )
-  const [selectedUserGroupIdForEdit, setSelectedUserGroupIdForEdit] =
-    React.useState<string | null>(null)
+    useState(false)
+  const [createUserGroupModal, setCreateUserGroupModal] = useState(false)
+  const [editUserGroupModal, setEditUserGroupModal] = useState(false)
+  const [selectedUserGroup, setSelectedUserGroup] = useState<any | null>(null)
+  const [selectedUserGroupIdForEdit, setSelectedUserGroupIdForEdit] = useState<
+    string | null
+  >(null)
   const [selectedUserGroupIdForManage, setSelectedUserGroupIdForManage] =
-    React.useState<string | null>(null)
+    useState<string | null>(null)
 
   const {
     data: usergroups,
@@ -87,30 +86,30 @@ function OrgUserGroups() {
   return (
     <>
       <div className="h-6"></div>
-      <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs px-4 py-4">
-        <div className="flex flex-col bg-gray-50 -space-y-1  px-5 py-3 rounded-md mb-3 ">
-          <h1 className="font-bold text-xl text-gray-800">{t('title')}</h1>
-          <h2 className="text-gray-500 text-sm">{t('description')}</h2>
+      <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
+        <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+          <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
+          <h2 className="text-sm text-gray-500">{t('description')}</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-            <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
+          <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+            <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
               <tr className="font-bolder text-sm">
-                <th className="py-3 px-4">{t('userGroupHeader')}</th>
-                <th className="py-3 px-4">{t('descriptionHeader')}</th>
-                <th className="py-3 px-4">{t('manageUsersHeader')}</th>
-                <th className="py-3 px-4">{t('actionsHeader')}</th>
+                <th className="px-4 py-3">{t('userGroupHeader')}</th>
+                <th className="px-4 py-3">{t('descriptionHeader')}</th>
+                <th className="px-4 py-3">{t('manageUsersHeader')}</th>
+                <th className="px-4 py-3">{t('actionsHeader')}</th>
               </tr>
             </thead>
-            <tbody className="mt-5 bg-white rounded-md">
+            <tbody className="mt-5 rounded-md bg-white">
               {usergroups?.map((usergroup: any) => (
                 <tr
                   key={usergroup.id}
                   className="border-b border-gray-100 text-sm"
                 >
-                  <td className="py-3 px-4">{usergroup.name}</td>
-                  <td className="py-3 px-4 ">{usergroup.description}</td>
-                  <td className="py-3 px-4 ">
+                  <td className="px-4 py-3">{usergroup.name}</td>
+                  <td className="px-4 py-3">{usergroup.description}</td>
+                  <td className="px-4 py-3">
                     <Modal
                       isDialogOpen={
                         userGroupManagementModal &&
@@ -129,14 +128,14 @@ function OrgUserGroups() {
                       dialogTitle={t('manageUsersModalTitle')}
                       dialogDescription={t('manageUsersModalDescription')}
                       dialogTrigger={
-                        <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-yellow-700 rounded-md font-bold items-center text-sm text-yellow-100">
-                          <Users className="w-4 h-4" />
+                        <button className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer">
+                          <Users className="h-4 w-4" />
                           <span>{t('manageUsersButton')}</span>
                         </button>
                       }
                     />
                   </td>
-                  <td className="py-3 px-4 flex space-x-2">
+                  <td className="flex space-x-2 px-4 py-3">
                     <Modal
                       isDialogOpen={
                         editUserGroupModal &&
@@ -146,7 +145,7 @@ function OrgUserGroups() {
                         if (!isOpen) handleCloseModal('edit')
                       }}
                       dialogTrigger={
-                        <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-sky-700 rounded-md font-bold items-center text-sm text-sky-100">
+                        <button className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer">
                           <Pencil className="size-4" />
                           <span>{t('editButton')}</span>
                         </button>
@@ -164,8 +163,8 @@ function OrgUserGroups() {
                       confirmationMessage={t('deleteModalMessage')}
                       dialogTitle={t('deleteModalTitle')}
                       dialogTrigger={
-                        <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-rose-700 rounded-md font-bold items-center text-sm text-rose-100">
-                          <X className="w-4 h-4" />
+                        <button className="flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+                          <X className="h-4 w-4" />
                           <span>{t('deleteButton')}</span>
                         </button>
                       }
@@ -179,7 +178,7 @@ function OrgUserGroups() {
               ))}
               {(!usergroups || usergroups.length === 0) && (
                 <tr>
-                  <td colSpan={4} className="text-center py-4 text-gray-500">
+                  <td colSpan={4} className="py-4 text-center text-gray-500">
                     No user groups found.
                   </td>
                 </tr>
@@ -187,7 +186,7 @@ function OrgUserGroups() {
             </tbody>
           </table>
         </div>
-        <div className="flex justify-end mt-3 mr-2">
+        <div className="mt-3 mr-2 flex justify-end">
           <Modal
             isDialogOpen={createUserGroupModal}
             onOpenChange={(isOpen) => {
@@ -201,8 +200,8 @@ function OrgUserGroups() {
             dialogTitle={t('createUserGroupModalTitle')}
             dialogDescription={t('createUserGroupModalDescription')}
             dialogTrigger={
-              <button className=" flex space-x-2 hover:cursor-pointer p-1 px-3 bg-green-700 rounded-md font-bold items-center text-sm text-green-100">
-                <SquareUserRound className="w-4 h-4" />
+              <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer">
+                <SquareUserRound className="h-4 w-4" />
                 <span>{t('createUserGroupButton')}</span>
               </button>
             }

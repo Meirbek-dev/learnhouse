@@ -10,7 +10,6 @@ import { X } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React from 'react'
 import { useTranslations } from 'next-intl'
 
 type PropsType = {
@@ -105,7 +104,7 @@ const CollectionAdminEditsArea = (props: any) => {
           })}
           dialogTrigger={
             <button
-              className="absolute right-2 top-2 rounded-full bg-red-500 p-2 text-white transition-colors duration-300 hover:bg-red-600"
+              className="absolute top-2 right-2 rounded-full bg-red-500 p-2 text-white transition-colors duration-300 hover:bg-red-600"
               rel="noopener noreferrer"
             >
               <X size={18} />

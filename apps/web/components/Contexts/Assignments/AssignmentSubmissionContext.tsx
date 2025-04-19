@@ -1,17 +1,18 @@
 'use client'
-import React from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 import { useLHSession } from '../LHSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import useSWR from 'swr'
 
-export const AssignmentSubmissionContext = React.createContext({})
+export const AssignmentSubmissionContext = createContext({})
 
 function AssignmentSubmissionProvider({
   children,
   assignment_uuid,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   assignment_uuid: string
 }) {
   const session = useLHSession() as any
@@ -23,14 +24,14 @@ function AssignmentSubmissionProvider({
   )
 
   return (
-    <AssignmentSubmissionContext.Provider value={assignmentSubmission}>
+    <AssignmentSubmissionContext value={assignmentSubmission}>
       {children}
-    </AssignmentSubmissionContext.Provider>
+    </AssignmentSubmissionContext>
   )
 }
 
 export function useAssignmentSubmission() {
-  return React.useContext(AssignmentSubmissionContext)
+  return useContext(AssignmentSubmissionContext)
 }
 
 export default AssignmentSubmissionProvider

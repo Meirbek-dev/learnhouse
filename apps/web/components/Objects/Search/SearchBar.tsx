@@ -1,5 +1,6 @@
 'use client'
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import type { FC, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import {
   Search,
   ArrowRight,
@@ -88,24 +89,24 @@ interface SearchBarProps {
 }
 
 const CourseResultsSkeleton = () => (
-  <div className="p-2 ">
+  <div className="p-2">
     <div className="flex items-center gap-2 px-2 py-2">
-      <div className="w-4 h-4 bg-black/5 rounded animate-pulse" />
-      <div className="w-20 h-4 bg-black/5 rounded animate-pulse" />
+      <div className="h-4 w-4 animate-pulse rounded bg-black/5" />
+      <div className="h-4 w-20 animate-pulse rounded bg-black/5" />
     </div>
     {[1, 2].map((i) => (
       <div key={i} className="flex items-center gap-3 p-2">
-        <div className="w-10 h-10 bg-black/5 rounded-lg animate-pulse" />
+        <div className="h-10 w-10 animate-pulse rounded-lg bg-black/5" />
         <div className="flex-1">
-          <div className="w-48 h-4 bg-black/5 rounded animate-pulse mb-2" />
-          <div className="w-32 h-3 bg-black/5 rounded animate-pulse" />
+          <div className="mb-2 h-4 w-48 animate-pulse rounded bg-black/5" />
+          <div className="h-3 w-32 animate-pulse rounded bg-black/5" />
         </div>
       </div>
     ))}
   </div>
 )
 
-export const SearchBar: React.FC<SearchBarProps> = ({
+export const SearchBar: FC<SearchBarProps> = ({
   orgslug,
   className = '',
   isMobile = false,
@@ -195,15 +196,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const MemoizedEmptyState = useMemo(() => {
     if (!searchQuery.trim()) {
       return (
-        <div className="py-8 px-4">
+        <div className="px-4 py-8">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 p-3 bg-black/5 rounded-full">
-              <Sparkles className="w-6 h-6 text-black/70" />
+            <div className="mb-4 rounded-full bg-black/5 p-3">
+              <Sparkles className="h-6 w-6 text-black/70" />
             </div>
-            <h3 className="text-sm font-medium text-black/80 mb-1">
+            <h3 className="mb-1 text-sm font-medium text-black/80">
               {t('discoverTitle')}
             </h3>
-            <p className="text-xs text-black/50 max-w-[240px]">
+            <p className="max-w-[240px] text-xs text-black/50">
               {t('discoverSubtitle')}
             </p>
           </div>
@@ -250,15 +251,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   orgslug,
                   `/search?q=${encodeURIComponent(term)}`
                 )}
-                className="flex items-center px-3 py-2 hover:bg-black/[0.02] rounded-lg transition-colors group"
+                className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-black/[0.02]"
               >
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex flex-1 items-center gap-2">
                   {icon}
                   <span className="text-sm text-black/70">{term}</span>
                 </div>
                 <ArrowUpRight
                   size={14}
-                  className="text-black/30 group-hover:text-black/50 transition-colors"
+                  className="text-black/30 transition-colors group-hover:text-black/50"
                 />
               </Link>
             ))}
@@ -298,7 +299,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   orgslug,
                   `/course/${removeCoursePrefix(course.course_uuid)}`
                 )}
-                className="flex items-center gap-3 p-2 hover:bg-black/[0.02] rounded-lg transition-colors"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
               >
                 <div className="relative">
                   {course.thumbnail_image ? (
@@ -309,27 +310,27 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                         course.thumbnail_image
                       )}
                       alt={course.name}
-                      className="w-10 h-10 object-cover rounded-lg"
+                      className="h-10 w-10 rounded-lg object-cover"
                     />
                   ) : (
-                    <div className="w-10 h-10 bg-black/5 rounded-lg flex items-center justify-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/5">
                       <Book size={20} className="text-black/40" />
                     </div>
                   )}
-                  <div className="absolute -bottom-1 -right-1 bg-white shadow-sm p-1 rounded-full">
+                  <div className="absolute -right-1 -bottom-1 rounded-full bg-white p-1 shadow-sm">
                     <GraduationCap size={11} className="text-black/60" />
                   </div>
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-black/80 truncate">
+                    <h3 className="truncate text-sm font-medium text-black/80">
                       {course.name}
                     </h3>
-                    <span className="text-[10px] font-medium text-black/40 uppercase tracking-wide whitespace-nowrap">
+                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
                       {t('courseType')}
                     </span>
                   </div>
-                  <p className="text-xs text-black/50 truncate">
+                  <p className="truncate text-xs text-black/50">
                     {course.description}
                   </p>
                 </div>
@@ -352,21 +353,21 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   orgslug,
                   `/collection/${collection.collection_uuid}`
                 )}
-                className="flex items-center gap-3 p-2 hover:bg-black/[0.02] rounded-lg transition-colors"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
               >
-                <div className="w-10 h-10 bg-black/5 rounded-lg flex items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/5">
                   <Book size={20} className="text-black/40" />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-black/80 truncate">
+                    <h3 className="truncate text-sm font-medium text-black/80">
                       {collection.name}
                     </h3>
-                    <span className="text-[10px] font-medium text-black/40 uppercase tracking-wide whitespace-nowrap">
+                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
                       {t('collectionType')}
                     </span>
                   </div>
-                  <p className="text-xs text-black/50 truncate">
+                  <p className="truncate text-xs text-black/50">
                     {collection.description}
                   </p>
                 </div>
@@ -386,7 +387,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               <Link
                 key={user.user_uuid}
                 href={getUriWithOrg(orgslug, `/user/${user.username}`)}
-                className="flex items-center gap-3 p-2 hover:bg-black/[0.02] rounded-lg transition-colors"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
               >
                 <UserAvatar
                   width={40}
@@ -404,16 +405,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   rounded="rounded-full"
                   backgroundColor="bg-gray-100"
                 />
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-black/80 truncate">
+                    <h3 className="truncate text-sm font-medium text-black/80">
                       {user.first_name} {user.last_name}
                     </h3>
-                    <span className="text-[10px] font-medium text-black/40 uppercase tracking-wide whitespace-nowrap">
+                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
                       {t('userType')}
                     </span>
                   </div>
-                  <p className="text-xs text-black/50 truncate">
+                  <p className="truncate text-xs text-black/50">
                     @{user.username}
                   </p>
                 </div>
@@ -425,41 +426,32 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     )
   }, [searchResults, orgslug, org?.org_uuid, t])
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value)
-      setShowResults(true)
-    },
-    []
-  )
+  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+    setShowResults(true)
+  }, [])
 
   return (
     <div ref={searchRef} className={`relative ${className}`}>
-      <div className="relative group">
+      <div className="group relative">
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
           onFocus={() => setShowResults(true)}
           placeholder={t('placeholder')}
-          className="w-full h-9 pl-11 pr-4 rounded-xl nice-shadow bg-white
-                     focus:outline-none focus:ring-1 focus:ring-black/5 focus:border-black/20
-                     text-sm placeholder:text-black/40 transition-all"
+          className="nice-shadow h-9 w-full rounded-xl bg-white pr-4 pl-11 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:ring-1 focus:ring-black/5 focus:outline-none"
         />
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
           <Search
-            className="text-black/40 group-focus-within:text-black/60 transition-colors"
+            className="text-black/40 transition-colors group-focus-within:text-black/60"
             size={18}
           />
         </div>
       </div>
 
       <div
-        className={`absolute z-50 w-full mt-2 bg-white rounded-xl nice-shadow
-                   overflow-hidden divide-y divide-black/5
-                   transition-all duration-200 ease-in-out transform
-                   ${showResults ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
-                   ${isMobile ? 'max-w-full' : 'min-w-[400px]'}`}
+        className={`nice-shadow absolute z-50 mt-2 w-full transform divide-y divide-black/5 overflow-hidden rounded-xl bg-white transition-all duration-200 ease-in-out ${showResults ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[400px]'}`}
       >
         {!searchQuery.trim() || isInitialLoad ? (
           MemoizedEmptyState
@@ -480,7 +472,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                       orgslug,
                       `/search?q=${encodeURIComponent(searchQuery)}`
                     )}
-                    className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 hover:text-black/70 hover:bg-black/[0.02] transition-colors"
+                    className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 transition-colors hover:bg-black/[0.02] hover:text-black/70"
                   >
                     <span>{t('viewAllResults')}</span>
                     <ArrowRight size={14} />

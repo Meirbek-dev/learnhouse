@@ -4,7 +4,7 @@ import { createDefaultElements, updateInstall } from '@services/install/install'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 import { BarLoader } from 'react-spinners'
@@ -66,12 +66,12 @@ function DefaultElements() {
   if (!install) return <div>{generalT('loading')}</div>
 
   return (
-    <div className="flex py-10 justify-center items-center flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-3">
+    <div className="flex flex-col items-center justify-center space-y-4 py-10 md:flex-row md:space-y-0 md:space-x-3">
       <h1 className="text-lg font-medium">{t('title')}</h1>
       <button
         onClick={createDefElementsAndUpdateInstall}
         disabled={isSubmitting}
-        className="p-3 font-bold bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
+        className="flex min-w-[120px] items-center justify-center rounded-lg bg-gray-200 p-3 font-bold text-gray-900 hover:cursor-pointer hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? (
           <BarLoader

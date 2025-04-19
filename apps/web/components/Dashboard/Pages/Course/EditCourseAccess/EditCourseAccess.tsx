@@ -11,7 +11,7 @@ import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { Globe, SquareUserRound, Users, X } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
 import { useTranslations } from 'next-intl'
@@ -68,33 +68,33 @@ function EditCourseAccess(props: EditCourseAccessProps) {
       {courseStructure && (
         <div>
           <div className="h-6"></div>
-          <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
-            <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-              <h1 className="font-bold text-lg sm:text-xl text-gray-800">
+          <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
+            <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
+              <h1 className="text-lg font-bold text-gray-800 sm:text-xl">
                 {t('title')}
               </h1>
-              <h2 className="text-gray-500 text-xs sm:text-sm">
+              <h2 className="text-xs text-gray-500 sm:text-sm">
                 {t('description')}
               </h2>
             </div>
-            <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mx-auto mb-3">
+            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <ConfirmationModal
                 confirmationButtonText={t('changeToPublicButton')}
                 confirmationMessage={t('changeToPublicConfirmMsg')}
                 dialogTitle={t('changeToPublicConfirmTitle')}
                 dialogTrigger={
-                  <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
+                  <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
                     {isClientPublic && (
-                      <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
+                      <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                         {t('activeBadge')}
                       </div>
                     )}
-                    <div className="flex flex-col space-y-1 justify-center items-center h-full p-2 sm:p-4">
+                    <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
                       <Globe className="text-slate-400" size={32} />
-                      <div className="text-xl sm:text-2xl text-slate-700 font-bold">
+                      <div className="text-xl font-bold text-slate-700 sm:text-2xl">
                         {t('publicLabel')}
                       </div>
-                      <div className="text-gray-400 text-sm sm:text-md tracking-tight w-full sm:w-[500px] leading-5 text-center">
+                      <div className="sm:text-md w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px]">
                         {t('publicDescription')}
                       </div>
                     </div>
@@ -108,18 +108,18 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                 confirmationMessage={t('changeToUsersOnlyConfirmMsg')}
                 dialogTitle={t('changeToUsersOnlyConfirmTitle')}
                 dialogTrigger={
-                  <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
+                  <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
                     {!isClientPublic && (
-                      <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
+                      <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                         {t('activeBadge')}
                       </div>
                     )}
-                    <div className="flex flex-col space-y-1 justify-center items-center h-full p-2 sm:p-4">
+                    <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
                       <Users className="text-slate-400" size={32} />
-                      <div className="text-xl sm:text-2xl text-slate-700 font-bold">
+                      <div className="text-xl font-bold text-slate-700 sm:text-2xl">
                         {t('usersOnlyLabel')}
                       </div>
-                      <div className="text-gray-400 text-sm sm:text-md tracking-tight w-full sm:w-[500px] leading-5 text-center">
+                      <div className="sm:text-md w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px]">
                         {t('usersOnlyDescription')}
                       </div>
                     </div>
@@ -170,35 +170,35 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
 
   return (
     <>
-      <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-        <h1 className="font-bold text-lg sm:text-xl text-gray-800">
+      <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
+        <h1 className="text-lg font-bold text-gray-800 sm:text-xl">
           {t('title')}
         </h1>
-        <h2 className="text-gray-500 text-xs sm:text-sm">{t('description')}</h2>
+        <h2 className="text-xs text-gray-500 sm:text-sm">{t('description')}</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-          <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
+        <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+          <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
             <tr className="font-bolder text-sm">
-              <th className="py-3 px-4">{t('tableHeaderName')}</th>
-              <th className="py-3 px-4">{t('tableHeaderActions')}</th>
+              <th className="px-4 py-3">{t('tableHeaderName')}</th>
+              <th className="px-4 py-3">{t('tableHeaderActions')}</th>
             </tr>
           </thead>
-          <tbody className="mt-5 bg-white rounded-md">
+          <tbody className="mt-5 rounded-md bg-white">
             {usergroups?.map((usergroup: any) => (
               <tr
                 key={usergroup.id}
                 className="border-b border-gray-100 text-sm"
               >
-                <td className="py-3 px-4">{usergroup.name}</td>
-                <td className="py-3 px-4">
+                <td className="px-4 py-3">{usergroup.name}</td>
+                <td className="px-4 py-3">
                   <ConfirmationModal
                     confirmationButtonText={t('deleteLinkButton')}
                     confirmationMessage={t('unlinkConfirmMsg')}
                     dialogTitle={t('unlinkConfirmTitle')}
                     dialogTrigger={
-                      <button className="mr-2 flex space-x-2 hover:cursor-pointer p-1 px-3 bg-rose-700 rounded-md font-bold items-center text-sm text-rose-100">
-                        <X className="w-4 h-4" />
+                      <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+                        <X className="h-4 w-4" />
                         <span>{t('deleteLinkButton')}</span>
                       </button>
                     }
@@ -211,7 +211,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
           </tbody>
         </table>
       </div>
-      <div className="flex flex-row-reverse mt-3 mr-2">
+      <div className="mt-3 mr-2 flex flex-row-reverse">
         <Modal
           isDialogOpen={userGroupModal}
           onOpenChange={() => setUserGroupModal(!userGroupModal)}
@@ -223,8 +223,8 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
           dialogTitle={tParent('linkModalTitle')}
           dialogDescription={tParent('linkModalDescription')}
           dialogTrigger={
-            <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-green-700 rounded-md font-bold items-center text-xs sm:text-sm text-green-100">
-              <SquareUserRound className="w-3 h-3 sm:w-4 sm:h-4" />
+            <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-xs font-bold text-green-100 hover:cursor-pointer sm:text-sm">
+              <SquareUserRound className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{tParent('linkToUserGroupButton')}</span>
             </button>
           }

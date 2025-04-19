@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import type { ReactNode } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -17,9 +17,9 @@ import { useTranslations } from 'next-intl'
 type ModalParams = {
   dialogTitle?: string
   dialogDescription?: string
-  dialogContent: React.ReactNode
-  dialogClose?: React.ReactNode | null
-  dialogTrigger?: React.ReactNode
+  dialogContent: ReactNode
+  dialogClose?: ReactNode | null
+  dialogTrigger?: ReactNode
   addDefCloseButton?: boolean
   onOpenChange: (open: boolean) => void
   isDialogOpen?: boolean
@@ -82,7 +82,7 @@ const Modal = (params: ModalParams) => {
         )}
       >
         {params.dialogTitle && params.dialogDescription && (
-          <DialogHeader className="text-center flex flex-col space-y-0.5 w-full">
+          <DialogHeader className="flex w-full flex-col space-y-0.5 text-center">
             <DialogTitle>{params.dialogTitle}</DialogTitle>
             <DialogDescription>{params.dialogDescription}</DialogDescription>
           </DialogHeader>

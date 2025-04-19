@@ -1,7 +1,8 @@
 'use client'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
-import React, { createContext, useContext, useEffect } from 'react'
+import type { ReactNode } from 'react'
+import { useState, createContext, useContext, useEffect } from 'react'
 import useSWR from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
@@ -14,13 +15,13 @@ export function AssignmentProvider({
   children,
   assignment_uuid,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   assignment_uuid: string
 }) {
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const t = useTranslations('Contexts.Assignment')
-  const [assignmentsFull, setAssignmentsFull] = React.useState({
+  const [assignmentsFull, setAssignmentsFull] = useState({
     assignment_object: null,
     assignment_tasks: null,
     course_object: null,
@@ -90,9 +91,7 @@ export function AssignmentProvider({
   if (isLoading) return <PageLoading />
 
   return (
-    <AssignmentContext.Provider value={assignmentsFull}>
-      {children}
-    </AssignmentContext.Provider>
+    <AssignmentContext value={assignmentsFull}>{children}</AssignmentContext>
   )
 }
 

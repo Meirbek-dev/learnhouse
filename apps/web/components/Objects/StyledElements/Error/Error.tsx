@@ -3,7 +3,6 @@ import { getUriWithoutOrg } from '@services/config/config'
 import { AlertTriangle, HomeIcon, RefreshCcw } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React from 'react'
 import { useTranslations } from 'next-intl'
 
 function ErrorUI(params: { message?: string; submessage?: string }) {
@@ -16,8 +15,8 @@ function ErrorUI(params: { message?: string; submessage?: string }) {
   }
 
   return (
-    <div className="flex flex-col py-10 mx-auto antialiased items-center space-y-6 bg-linear-to-b from-rose-100 to-rose-100/5 ">
-      <div className="flex flex-row  items-center space-x-5  rounded-xl ">
+    <div className="mx-auto flex flex-col items-center space-y-6 bg-linear-to-b from-rose-100 to-rose-100/5 py-10 antialiased">
+      <div className="flex flex-row items-center space-x-5 rounded-xl">
         <AlertTriangle className="text-rose-700" size={45} />
         <div className="flex flex-col">
           <p className="text-3xl font-bold text-rose-700">
@@ -33,14 +32,14 @@ function ErrorUI(params: { message?: string; submessage?: string }) {
       <div className="flex space-x-4">
         <button
           onClick={() => reloadPage()}
-          className="flex space-x-2 items-center rounded-full px-4 py-1 text-rose-200 bg-rose-700 hover:bg-rose-800 transition-all ease-linear shadow-lg "
+          className="flex items-center space-x-2 rounded-full bg-rose-700 px-4 py-1 text-rose-200 shadow-lg transition-all ease-linear hover:bg-rose-800"
         >
           <RefreshCcw className="text-rose-200" size={17} />
           <span className="text-md font-bold">{t('retryButton')}</span>
         </button>
         <Link
           href={getUriWithoutOrg('/home')}
-          className="flex space-x-2 items-center rounded-full px-4 py-1 text-gray-200 bg-gray-700 hover:bg-gray-800 transition-all ease-linear shadow-lg "
+          className="flex items-center space-x-2 rounded-full bg-gray-700 px-4 py-1 text-gray-200 shadow-lg transition-all ease-linear hover:bg-gray-800"
         >
           <HomeIcon className="text-gray-200" size={17} />
           <span className="text-md font-bold">{t('homeButton')}</span>

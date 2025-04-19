@@ -7,7 +7,7 @@ import FormLayout, {
 import * as Form from '@radix-ui/react-form'
 import { useFormik } from 'formik'
 import { BarLoader } from 'react-spinners'
-import React from 'react'
+import { useState } from 'react'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { getAPIUrl } from '@services/config/config'
 import useSWR from 'swr'
@@ -29,8 +29,8 @@ function OrgCreation() {
   } = useSWR(`${getAPIUrl()}install/latest`, (url) =>
     swrFetcher(url, access_token)
   )
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [isSubmitted, setIsSubmitted] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
   const router = useRouter()
 
   const validate = (values: any) => {

@@ -1,5 +1,4 @@
 'use client'
-import { useTranslations } from 'next-intl'
 
 export default function GlobalError({
   error,
@@ -8,13 +7,11 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  const t = useTranslations('Components.ErrorUI')
-
   return (
     <html>
       <body>
-        <h2>{t('defaultMessage')}</h2>
-        <button onClick={() => reset()}>{t('retryButton')}</button>
+        <h2>Something went wrong!</h2>
+        <button onClick={() => reset()}>Try again</button>
       </body>
     </html>
   )

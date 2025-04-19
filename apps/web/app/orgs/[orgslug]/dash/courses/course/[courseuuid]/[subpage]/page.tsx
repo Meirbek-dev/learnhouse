@@ -1,18 +1,11 @@
 'use client'
 import { getUriWithOrg } from '@services/config/config'
-import React, { use } from 'react'
+import { use } from 'react'
 import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext'
 import Link from 'next/link'
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop'
 import { motion } from 'framer-motion'
-import {
-  GalleryVerticalEnd,
-  Globe,
-  Info,
-  UserPen,
-  UserRoundCog,
-  Users,
-} from 'lucide-react'
+import { GalleryVerticalEnd, Globe, Info, UserPen } from 'lucide-react'
 import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure'
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral'
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess'
@@ -33,11 +26,11 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   }
 
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr]">
+    <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
       <CourseProvider courseuuid={getEntireCourseUUID(params.courseuuid)}>
-        <div className="pl-10 pr-10 text-sm tracking-tight bg-[#fcfbfc] z-10 nice-shadow">
+        <div className="nice-shadow z-10 bg-[#fcfbfc] pr-10 pl-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
-          <div className="flex space-x-3 font-black text-sm">
+          <div className="flex space-x-3 text-sm font-black">
             <Link
               href={
                 getUriWithOrg(params.orgslug, '') +
@@ -45,13 +38,13 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               }
             >
               <div
-                className={`flex space-x-4 py-2 w-fit text-center border-black transition-all ease-linear ${
+                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
                   params.subpage.toString() === 'general'
                     ? 'border-b-4'
                     : 'opacity-50'
                 } cursor-pointer`}
               >
-                <div className="flex items-center space-x-2.5 mx-2">
+                <div className="mx-2 flex items-center space-x-2.5">
                   <Info size={16} />
                   <div>{t('general')}</div>
                 </div>
@@ -65,13 +58,13 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               }
             >
               <div
-                className={`flex space-x-4 py-2 w-fit text-center border-black transition-all ease-linear ${
+                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
                   params.subpage.toString() === 'content'
                     ? 'border-b-4'
                     : 'opacity-50'
                 } cursor-pointer`}
               >
-                <div className="flex items-center space-x-2.5 mx-2">
+                <div className="mx-2 flex items-center space-x-2.5">
                   <GalleryVerticalEnd size={16} />
                   <div>{t('content')}</div>
                 </div>
@@ -84,13 +77,13 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               }
             >
               <div
-                className={`flex space-x-4 py-2 w-fit text-center border-black transition-all ease-linear ${
+                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
                   params.subpage.toString() === 'access'
                     ? 'border-b-4'
                     : 'opacity-50'
                 } cursor-pointer`}
               >
-                <div className="flex items-center space-x-2.5 mx-2">
+                <div className="mx-2 flex items-center space-x-2.5">
                   <Globe size={16} />
                   <div>{t('access')}</div>
                 </div>
@@ -103,13 +96,13 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               }
             >
               <div
-                className={`flex space-x-4 py-2 w-fit text-center border-black transition-all ease-linear ${
+                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
                   params.subpage.toString() === 'contributors'
                     ? 'border-b-4'
                     : 'opacity-50'
                 } cursor-pointer`}
               >
-                <div className="flex items-center space-x-2.5 mx-2">
+                <div className="mx-2 flex items-center space-x-2.5">
                   <UserPen size={16} />
                   <div>{t('contributors')}</div>
                 </div>

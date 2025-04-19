@@ -2,11 +2,7 @@ import { getBackendUrl } from '@services/config/config'
 const LEARNHOUSE_MEDIA_URL = process.env.NEXT_PUBLIC_LEARNHOUSE_MEDIA_URL
 
 function getMediaUrl() {
-  if (LEARNHOUSE_MEDIA_URL) {
-    return LEARNHOUSE_MEDIA_URL
-  } else {
-    return getBackendUrl()
-  }
+  return LEARNHOUSE_MEDIA_URL || getBackendUrl()
 }
 
 export function getCourseThumbnailMediaDirectory(
@@ -36,17 +32,8 @@ export function getActivityBlockMediaDirectory(
   fileId: any,
   type: string
 ) {
-  if (type == 'pdfBlock') {
-    let uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/pdfBlock/${blockId}/${fileId}`
-    return uri
-  }
-  if (type == 'videoBlock') {
-    let uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/videoBlock/${blockId}/${fileId}`
-    return uri
-  }
-  if (type == 'imageBlock') {
-    let uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/imageBlock/${blockId}/${fileId}`
-    return uri
+  if (type == 'pdfBlock' || type == 'videoBlock' || type == 'imageBlock') {
+    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/{type}/${blockId}/${fileId}`
   }
 }
 
@@ -81,13 +68,8 @@ export function getActivityMediaDirectory(
   fileId: string,
   activityType: string
 ) {
-  if (activityType == 'video') {
-    let uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/${fileId}`
-    return uri
-  }
-  if (activityType == 'documentpdf') {
-    let uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/documentpdf/${fileId}`
-    return uri
+  if (activityType == 'video' || activityType == 'documentpdf') {
+    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/{type}/${fileId}`
   }
 }
 

@@ -1,11 +1,11 @@
-import React from 'react'
+import type { ReactNode } from 'react'
 import * as Form from '@radix-ui/react-form'
 import { styled } from '@stitches/react'
 import { blackA } from '@radix-ui/colors'
 import { Info } from 'lucide-react'
 
 interface FormLayoutProps {
-  children: React.ReactNode
+  children: ReactNode
   onSubmit: (e: any) => void
   className?: string
 }
@@ -25,7 +25,7 @@ export const FormLabelAndMessage = (props: {
   <div className="flex items-center space-x-3">
     <FormLabel className="grow text-sm">{props.label}</FormLabel>
     {(props.message && (
-      <div className="text-red-700 text-sm items-center  rounded-md flex  space-x-1">
+      <div className="flex items-center space-x-1 rounded-md text-sm text-red-700">
         <Info size={10} />
         <div>{props.message}</div>
       </div>

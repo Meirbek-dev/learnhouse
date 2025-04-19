@@ -15,7 +15,8 @@ import FormLayout, {
 import * as Form from '@radix-ui/react-form'
 import { createNewCourse } from '@services/courses/courses'
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs'
-import React, { useEffect } from 'react'
+import type { ChangeEvent } from 'react'
+import { useState, useEffect } from 'react'
 import { BarLoader } from 'react-spinners'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
@@ -32,9 +33,9 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   const t = useTranslations('Components.CreateCourseModal')
   const router = useRouter()
   const session = useLHSession() as any
-  const [orgId, setOrgId] = React.useState(null) as any
-  const [showUnsplashPicker, setShowUnsplashPicker] = React.useState(false)
-  const [isUploading, setIsUploading] = React.useState(false)
+  const [orgId, setOrgId] = useState(null) as any
+  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
@@ -109,9 +110,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
     }
   }, [orgslug])
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       formik.setFieldValue('thumbnail', file)
@@ -177,21 +176,21 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
               : undefined
           }
         />
-        <div className="w-auto bg-gray-50 rounded-xl outline-gray-200 h-[200px] shadow-sm">
-          <div className="flex flex-col justify-center items-center h-full">
-            <div className="flex flex-col justify-center items-center">
+        <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-gray-200">
+          <div className="flex h-full flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
               {formik.values.thumbnail ? (
                 <img
                   src={URL.createObjectURL(formik.values.thumbnail)}
-                  className={`${isUploading ? 'animate-pulse' : ''} shadow-sm w-[200px] h-[100px] rounded-md`}
+                  className={`${isUploading ? 'animate-pulse' : ''} h-[100px] w-[200px] rounded-md shadow-sm`}
                 />
               ) : (
                 <img
                   src="/empty_thumbnail.png"
-                  className="shadow-sm w-[200px] h-[100px] rounded-md bg-gray-200"
+                  className="h-[100px] w-[200px] rounded-md bg-gray-200 shadow-sm"
                 />
               )}
-              <div className="flex justify-center items-center space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <input
                   type="file"
                   id="fileInput"
@@ -201,7 +200,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
                 />
                 <button
                   type="button"
-                  className="font-bold antialiased items-center text-gray text-sm rounded-md px-4 mt-6 flex"
+                  className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
                   onClick={() => document.getElementById('fileInput')?.click()}
                 >
                   <UploadCloud size={16} className="mr-2" />
@@ -209,7 +208,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
                 </button>
                 <button
                   type="button"
-                  className="font-bold antialiased items-center text-gray text-sm rounded-md px-4 mt-6 flex"
+                  className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
                   onClick={() => setShowUnsplashPicker(true)}
                 >
                   <ImageIcon size={16} className="mr-2" />
@@ -291,11 +290,11 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         </Select>
       </FormField>
 
-      <div className="flex justify-end mt-6">
+      <div className="mt-6 flex justify-end">
         <button
           type="submit"
           disabled={formik.isSubmitting}
-          className="px-4 py-2 bg-black text-white text-sm font-bold rounded-md"
+          className="rounded-md bg-black px-4 py-2 text-sm font-bold text-white"
         >
           {formik.isSubmitting ? (
             <BarLoader

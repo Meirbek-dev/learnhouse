@@ -3,16 +3,13 @@ import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
 import { getUriWithOrg } from '@services/config/config'
 import {
   ImageIcon,
-  Info,
-  LockIcon,
-  SearchIcon,
   TextIcon,
   LucideIcon,
   Share2Icon,
   LayoutDashboardIcon,
 } from 'lucide-react'
 import Link from 'next/link'
-import React, { useEffect, use } from 'react'
+import { useState, useEffect, use } from 'react'
 import { motion } from 'framer-motion'
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral'
 import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages'
@@ -51,11 +48,11 @@ function TabLink({
   return (
     <Link href={getUriWithOrg(orgslug, '') + `/dash/org/settings/${tab.id}`}>
       <div
-        className={`py-2 w-fit text-center border-black transition-all ease-linear ${
+        className={`w-fit border-black py-2 text-center transition-all ease-linear ${
           isActive ? 'border-b-4' : 'opacity-50'
         } cursor-pointer`}
       >
-        <div className="flex items-center space-x-2.5 mx-2.5">
+        <div className="mx-2.5 flex items-center space-x-2.5">
           <tab.icon size={16} />
           <div>{t(tab.label)}</div>
         </div>
@@ -67,8 +64,8 @@ function TabLink({
 function OrgPage(props: { params: Promise<OrgParams> }) {
   const t = useTranslations('DashPage.OrgSettings')
   const params = use(props.params)
-  const [H1Label, setH1Label] = React.useState('')
-  const [H2Label, setH2Label] = React.useState('')
+  const [H1Label, setH1Label] = useState('')
+  const [H2Label, setH2Label] = useState('')
 
   function handleLabels() {
     if (params.subpage == 'general') {
@@ -91,20 +88,20 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
   }, [params.subpage, params])
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] flex flex-col">
-      <div className="pl-10 pr-10 tracking-tight bg-[#fcfbfc] nice-shadow flex-shrink-0">
+    <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
+      <div className="nice-shadow flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
         <BreadCrumbs type="org"></BreadCrumbs>
-        <div className="my-2  py-2">
-          <div className="w-100 flex flex-col space-y-1">
-            <div className="pt-3 flex font-bold text-4xl tracking-tighter">
+        <div className="my-2 py-2">
+          <div className="flex w-100 flex-col space-y-1">
+            <div className="flex pt-3 text-4xl font-bold tracking-tighter">
               {H1Label}
             </div>
-            <div className="flex font-medium text-gray-400 text-md">
+            <div className="text-md flex font-medium text-gray-400">
               {H2Label}{' '}
             </div>
           </div>
         </div>
-        <div className="flex space-x-0.5 font-black text-sm">
+        <div className="flex space-x-0.5 text-sm font-black">
           {SETTING_TABS.map((tab) => (
             <TabLink
               key={tab.id}

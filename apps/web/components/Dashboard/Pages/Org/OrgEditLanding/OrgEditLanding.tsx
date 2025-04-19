@@ -1,5 +1,6 @@
 'use client'
-import React from 'react'
+import type { FC, ChangeEvent } from 'react'
+import { useState, useEffect, createElement } from 'react'
 import {
   LandingObject,
   LandingSection,
@@ -9,21 +10,17 @@ import {
   LandingPeople,
   LandingBackground,
   LandingButton,
-  LandingHeading,
   LandingImage,
   LandingFeaturedCourses,
 } from './landing_types'
 import {
   Plus,
-  Eye,
-  ArrowUpDown,
   Trash2,
   GripVertical,
   LayoutTemplate,
   ImageIcon,
   Users,
   Award,
-  ArrowRight,
   Edit,
   Link,
   Upload,
@@ -235,20 +232,18 @@ const OrgEditLanding = () => {
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const [isLandingEnabled, setIsLandingEnabled] = React.useState(false)
+  const [isLandingEnabled, setIsLandingEnabled] = useState(false)
   const t = useTranslations('DashPage.OrgSettings.Landing')
   const tNotify = useTranslations('Notifications')
-  const [landingData, setLandingData] = React.useState<LandingObject>({
+  const [landingData, setLandingData] = useState<LandingObject>({
     sections: [],
     enabled: false,
   })
-  const [selectedSection, setSelectedSection] = React.useState<number | null>(
-    null
-  )
-  const [isSaving, setIsSaving] = React.useState(false)
+  const [selectedSection, setSelectedSection] = useState<number | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Initialize landing data from org config
-  React.useEffect(() => {
+  useEffect(() => {
     if (org?.config?.config?.landing) {
       const landingConfig = org.config.config.landing
       setLandingData({
@@ -395,28 +390,28 @@ const OrgEditLanding = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
-      <div className="p-6 space-y-6">
+    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+      <div className="space-y-6 p-6">
         {/* Enable/Disable Landing Page */}
         <div className="flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="text-xl font-semibold flex items-center">
+            <h2 className="flex items-center text-xl font-semibold">
               {t('title')}{' '}
-              <div className="text-xs ml-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
+              <div className="ml-2 rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
                 {t('betaBadge')}
               </div>
             </h2>
             <p className="text-gray-600">{t('description')}</p>
           </div>
           <div className="flex items-center space-x-4">
-            <label className="relative inline-flex items-center cursor-pointer">
+            <label className="relative inline-flex cursor-pointer items-center">
               <input
                 type="checkbox"
                 checked={isLandingEnabled}
                 onChange={() => setIsLandingEnabled(!isLandingEnabled)}
-                className="sr-only peer"
+                className="peer sr-only"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-hidden after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
             </label>
             <Button
               variant="default"
@@ -424,7 +419,7 @@ const OrgEditLanding = () => {
               disabled={isSaving}
               className="bg-black hover:bg-black/90"
             >
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="mr-2 h-4 w-4" />
               {isSaving ? t('savingButton') : t('saveButton')}
             </Button>
           </div>
@@ -436,7 +431,7 @@ const OrgEditLanding = () => {
             <div className="grid grid-cols-4 gap-6">
               {/* Sections Panel */}
               <div className="col-span-1 border-r pr-4">
-                <h3 className="font-medium mb-4">{t('SectionsPanel.title')}</h3>
+                <h3 className="mb-4 font-medium">{t('SectionsPanel.title')}</h3>
                 <DragDropContext onDragEnd={onDragEnd}>
                   <Droppable droppableId="sections">
                     {(provided) => (
@@ -456,32 +451,32 @@ const OrgEditLanding = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 onClick={() => setSelectedSection(index)}
-                                className={`p-4 bg-white/80 backdrop-blur-xs rounded-lg cursor-pointer border  ${
+                                className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
                                   selectedSection === index
-                                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/20 shadow-xs'
+                                    ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
                                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
-                                } ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500/20 rotate-2' : ''}`}
+                                } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                               >
-                                <div className="flex items-center justify-between group">
+                                <div className="group flex items-center justify-between">
                                   <div className="flex items-center space-x-3">
                                     <div
                                       {...provided.dragHandleProps}
-                                      className={`p-1.5 rounded-md transition-colors duration-200 ${
+                                      className={`rounded-md p-1.5 transition-colors duration-200 ${
                                         selectedSection === index
-                                          ? 'text-blue-500 bg-blue-100/50'
-                                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                          ? 'bg-blue-100/50 text-blue-500'
+                                          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
                                       }`}
                                     >
                                       <GripVertical size={16} />
                                     </div>
                                     <div
-                                      className={`p-1.5 rounded-md ${
+                                      className={`rounded-md p-1.5 ${
                                         selectedSection === index
-                                          ? 'text-blue-600 bg-blue-100/50'
-                                          : 'text-gray-600 bg-gray-100/50'
+                                          ? 'bg-blue-100/50 text-blue-600'
+                                          : 'bg-gray-100/50 text-gray-600'
                                       }`}
                                     >
-                                      {React.createElement(
+                                      {createElement(
                                         SECTION_TYPES[
                                           section.type as keyof typeof SECTION_TYPES
                                         ].icon,
@@ -491,7 +486,7 @@ const OrgEditLanding = () => {
                                       )}
                                     </div>
                                     <span
-                                      className={`text-sm font-medium truncate capitalize ${
+                                      className={`truncate text-sm font-medium capitalize ${
                                         selectedSection === index
                                           ? 'text-blue-700'
                                           : 'text-gray-700'
@@ -500,16 +495,16 @@ const OrgEditLanding = () => {
                                       {getSectionDisplayName(t, section)}
                                     </span>
                                   </div>
-                                  <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                  <div className="flex space-x-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation()
                                         setSelectedSection(index)
                                       }}
-                                      className={`p-1.5 rounded-md transition-colors duration-200 ${
+                                      className={`rounded-md p-1.5 transition-colors duration-200 ${
                                         selectedSection === index
                                           ? 'text-blue-500 hover:bg-blue-100'
-                                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
                                       }`}
                                     >
                                       <Edit size={14} />
@@ -519,7 +514,7 @@ const OrgEditLanding = () => {
                                         e.stopPropagation()
                                         deleteSection(index)
                                       }}
-                                      className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors duration-200"
+                                      className="rounded-md p-1.5 text-red-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
                                     >
                                       <Trash2 size={14} />
                                     </button>
@@ -543,13 +538,13 @@ const OrgEditLanding = () => {
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full p-0 border-0 bg-black ">
+                    <SelectTrigger className="w-full border-0 bg-black p-0">
                       <div className="w-full">
                         <Button
                           variant="default"
-                          className="w-full bg-black hover:bg-black/90 text-white"
+                          className="w-full bg-black text-white hover:bg-black/90"
                         >
-                          <Plus className="h-4 w-4 mr-2" />
+                          <Plus className="mr-2 h-4 w-4" />
                           {t('SectionsPanel.addSectionButton')}
                         </Button>
                       </div>
@@ -559,11 +554,11 @@ const OrgEditLanding = () => {
                         ([type, { icon: Icon, label, description }]) => (
                           <SelectItem key={type} value={type}>
                             <div className="flex items-center space-x-3 py-1">
-                              <div className="p-1.5 bg-gray-50 rounded-md">
+                              <div className="rounded-md bg-gray-50 p-1.5">
                                 <Icon size={16} className="text-gray-600" />
                               </div>
                               <div className="flex-1">
-                                <div className="font-medium text-sm text-gray-700">
+                                <div className="text-sm font-medium text-gray-700">
                                   {label}
                                 </div>
                                 <div className="text-xs text-gray-500">
@@ -590,7 +585,7 @@ const OrgEditLanding = () => {
                     }
                   />
                 ) : (
-                  <div className="h-full flex items-center justify-center text-gray-500">
+                  <div className="flex h-full items-center justify-center text-gray-500">
                     {t('EditorPanel.emptyState')}
                   </div>
                 )}
@@ -609,11 +604,7 @@ interface SectionEditorProps {
   onChange: (section: LandingSection) => void
 }
 
-const SectionEditor: React.FC<SectionEditorProps> = ({
-  t,
-  section,
-  onChange,
-}) => {
+const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
   switch (section.type) {
     case 'hero':
       return <HeroSectionEditor t={t} section={section} onChange={onChange} />
@@ -638,12 +629,12 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   }
 }
 
-const HeroSectionEditor: React.FC<{
+const HeroSectionEditor: FC<{
   t: Function
   section: LandingHeroSection
   onChange: (section: LandingHeroSection) => void
 }> = ({ t, section, onChange }) => {
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
@@ -661,9 +652,9 @@ const HeroSectionEditor: React.FC<{
   }
 
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <LayoutTemplate className="w-5 h-5 text-gray-500" />
+        <LayoutTemplate className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
           {t('SectionTypes.hero.label')} {t('Editor.titleSuffix')}
         </h3>
@@ -682,7 +673,7 @@ const HeroSectionEditor: React.FC<{
         </div>
 
         <Tabs defaultValue="content" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 p-1 bg-gray-100 rounded-lg">
+          <TabsList className="grid w-full grid-cols-4 rounded-lg bg-gray-100 p-1">
             <TabsTrigger
               value="content"
               className="flex items-center space-x-2"
@@ -713,7 +704,7 @@ const HeroSectionEditor: React.FC<{
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="content" className="space-y-4 mt-4">
+          <TabsContent value="content" className="mt-4 space-y-4">
             {/* Heading */}
             <div className="space-y-4">
               <div>
@@ -747,7 +738,7 @@ const HeroSectionEditor: React.FC<{
                         heading: { ...section.heading, color: e.target.value },
                       })
                     }
-                    className="w-20 h-10 p-1"
+                    className="h-10 w-20 p-1"
                   />
                   <Input
                     value={section.heading.color}
@@ -803,7 +794,7 @@ const HeroSectionEditor: React.FC<{
                         },
                       })
                     }
-                    className="w-20 h-10 p-1"
+                    className="h-10 w-20 p-1"
                   />
                   <Input
                     value={section.subheading.color}
@@ -824,7 +815,7 @@ const HeroSectionEditor: React.FC<{
             </div>
           </TabsContent>
 
-          <TabsContent value="background" className="space-y-4 mt-4">
+          <TabsContent value="background" className="mt-4 space-y-4">
             <div>
               <Label htmlFor="background">
                 {t('HeroEditor.Background.typeLabel')}
@@ -884,7 +875,7 @@ const HeroSectionEditor: React.FC<{
                         },
                       })
                     }
-                    className="w-20 h-10 p-1"
+                    className="h-10 w-20 p-1"
                   />
                   <Input
                     value={section.background.color || '#ffffff'}
@@ -985,7 +976,7 @@ const HeroSectionEditor: React.FC<{
                               },
                             })
                           }
-                          className="w-20 h-10 p-1"
+                          className="h-10 w-20 p-1"
                         />
                         <Input
                           value={section.background.colors?.[0] || '#ffffff'}
@@ -1025,7 +1016,7 @@ const HeroSectionEditor: React.FC<{
                               },
                             })
                           }
-                          className="w-20 h-10 p-1"
+                          className="h-10 w-20 p-1"
                         />
                         <Input
                           value={section.background.colors?.[1] || '#f0f0f0'}
@@ -1091,7 +1082,7 @@ const HeroSectionEditor: React.FC<{
                           <SelectItem key={name} value={name}>
                             <div className="flex items-center space-x-2">
                               <div
-                                className="w-8 h-8 rounded-md"
+                                className="h-8 w-8 rounded-md"
                                 style={{
                                   background: `linear-gradient(${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].direction}, ${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].colors.join(', ')})`,
                                 }}
@@ -1141,7 +1132,7 @@ const HeroSectionEditor: React.FC<{
 
                 <div className="mt-2">
                   <div
-                    className="w-full h-20 rounded-lg"
+                    className="h-20 w-full rounded-lg"
                     style={{
                       background: `linear-gradient(${section.background.direction}, ${section.background.colors?.join(', ')})`,
                     }}
@@ -1162,7 +1153,7 @@ const HeroSectionEditor: React.FC<{
                       }
                       className="w-full"
                     >
-                      <Upload className="h-4 w-4 mr-2" />
+                      <Upload className="mr-2 h-4 w-4" />
                       {t('HeroEditor.Background.uploadImageButton')}
                     </Button>
                     <input
@@ -1187,12 +1178,12 @@ const HeroSectionEditor: React.FC<{
             )}
           </TabsContent>
 
-          <TabsContent value="buttons" className="space-y-4 mt-4">
+          <TabsContent value="buttons" className="mt-4 space-y-4">
             <div className="space-y-3">
               {section.buttons.map((button, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-[1fr_1fr_auto] gap-2 p-4 border rounded-lg"
+                  className="grid grid-cols-[1fr_1fr_auto] gap-2 rounded-lg border p-4"
                 >
                   <div className="space-y-2">
                     <Label>{t('HeroEditor.Buttons.textAndColorsLabel')}</Label>
@@ -1221,7 +1212,7 @@ const HeroSectionEditor: React.FC<{
                             }
                             onChange({ ...section, buttons: newButtons })
                           }}
-                          className="w-full h-8 p-1"
+                          className="h-8 w-full p-1"
                         />
                       </div>
                       <div className="space-y-1">
@@ -1239,7 +1230,7 @@ const HeroSectionEditor: React.FC<{
                             }
                             onChange({ ...section, buttons: newButtons })
                           }}
-                          className="w-full h-8 p-1"
+                          className="h-8 w-full p-1"
                         />
                       </div>
                     </div>
@@ -1271,9 +1262,9 @@ const HeroSectionEditor: React.FC<{
                       )
                       onChange({ ...section, buttons: newButtons })
                     }}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50 self-start mt-8"
+                    className="mt-8 self-start text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
+                    <Trash2 className="mr-1 h-4 w-4" />
                     {t('HeroEditor.Buttons.removeButton')}
                   </Button>
                 </div>
@@ -1295,14 +1286,14 @@ const HeroSectionEditor: React.FC<{
                   }}
                   className="w-full"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="mr-2 h-4 w-4" />
                   {t('HeroEditor.Buttons.addButton')}
                 </Button>
               )}
             </div>
           </TabsContent>
 
-          <TabsContent value="illustration" className="space-y-4 mt-4">
+          <TabsContent value="illustration" className="mt-4 space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>{t('HeroEditor.Illustration.imageLabel')}</Label>
@@ -1465,9 +1456,9 @@ const HeroSectionEditor: React.FC<{
                       illustration: undefined,
                     })
                   }
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 w-full"
+                  className="w-full text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="mr-2 h-4 w-4" />
                   {t('HeroEditor.Illustration.removeButton')}
                 </Button>
               )}
@@ -1487,7 +1478,7 @@ interface ImageUploaderProps {
   id: string
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({
+const ImageUploader: FC<ImageUploaderProps> = ({
   t,
   onImageUploaded,
   className,
@@ -1497,11 +1488,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const [isUploading, setIsUploading] = React.useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const tNotify = useTranslations('Notifications')
   const inputId = `imageUpload-${id}`
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -1535,7 +1526,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         disabled={isUploading}
         className="w-full"
       >
-        <Upload className="h-4 w-4 mr-2" />
+        <Upload className="mr-2 h-4 w-4" />
         {isUploading
           ? t('ImageUploader.uploading')
           : buttonText || t('ImageUploader.defaultButtonText')}
@@ -1551,16 +1542,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   )
 }
 
-const TextAndImageSectionEditor: React.FC<{
+const TextAndImageSectionEditor: FC<{
   t: Function
   section: LandingTextAndImageSection
   onChange: (section: LandingTextAndImageSection) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <ImageIcon className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">
+        <ImageIcon className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
           {t('SectionTypes.textAndImage.label')} {t('Editor.titleSuffix')}
         </h3>
       </div>
@@ -1621,7 +1612,7 @@ const TextAndImageSectionEditor: React.FC<{
         {/* Image */}
         <div>
           <Label>{t('TextAndImageEditor.imageLabel')}</Label>
-          <div className="grid grid-cols-2 gap-4 mt-2">
+          <div className="mt-2 grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Input
                 value={section.image.url}
@@ -1673,23 +1664,23 @@ const TextAndImageSectionEditor: React.FC<{
   )
 }
 
-const LogosSectionEditor: React.FC<{
+const LogosSectionEditor: FC<{
   t: Function
   section: LandingLogos
   onChange: (section: LandingLogos) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <Award className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">
+        <Award className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
           {t('SectionTypes.logos.label')} {t('Editor.titleSuffix')}
         </h3>
       </div>
 
       <div>
         <Label>{t('LogosEditor.logosLabel')}</Label>
-        <div className="space-y-3 mt-2">
+        <div className="mt-2 space-y-3">
           {/* Title */}
           <div>
             <Label htmlFor="title">{t('Editor.sectionTitleLabel')}</Label>
@@ -1749,7 +1740,7 @@ const LogosSectionEditor: React.FC<{
                   const newLogos = section.logos.filter((_, i) => i !== index)
                   onChange({ ...section, logos: newLogos })
                 }}
-                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                className="text-red-500 hover:bg-red-50 hover:text-red-600"
               >
                 <Trash2 className="h-4 w-4" />
                 {t('LogosEditor.removeButton')}
@@ -1770,7 +1761,7 @@ const LogosSectionEditor: React.FC<{
             }}
             className="w-full"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             {t('LogosEditor.addButton')}
           </Button>
         </div>
@@ -1779,16 +1770,16 @@ const LogosSectionEditor: React.FC<{
   )
 }
 
-const PeopleSectionEditor: React.FC<{
+const PeopleSectionEditor: FC<{
   t: Function
   section: LandingPeople
   onChange: (section: LandingPeople) => void
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <Users className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">
+        <Users className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
           {t('SectionTypes.people.label')} {t('Editor.titleSuffix')}
         </h3>
       </div>
@@ -1808,11 +1799,11 @@ const PeopleSectionEditor: React.FC<{
         {/* People List */}
         <div>
           <Label>{t('PeopleEditor.peopleLabel')}</Label>
-          <div className="space-y-4 mt-2">
+          <div className="mt-2 space-y-4">
             {section.people.map((person, index) => (
               <div
                 key={index}
-                className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 p-4 border rounded-lg"
+                className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 rounded-lg border p-4"
               >
                 <div className="space-y-2">
                   <Label>{t('PeopleEditor.nameLabel')}</Label>
@@ -1872,7 +1863,7 @@ const PeopleSectionEditor: React.FC<{
                       <img
                         src={person.image_url}
                         alt={person.name}
-                        className="w-12 h-12 rounded-full object-cover"
+                        className="h-12 w-12 rounded-full object-cover"
                       />
                     )}
                   </div>
@@ -1904,9 +1895,9 @@ const PeopleSectionEditor: React.FC<{
                       )
                       onChange({ ...section, people: newPeople })
                     }}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
+                    <Trash2 className="mr-1 h-4 w-4" />
                     {t('PeopleEditor.removeButton')}
                   </Button>
                 </div>
@@ -1929,7 +1920,7 @@ const PeopleSectionEditor: React.FC<{
               }}
               className="w-full"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               {t('PeopleEditor.addButton')}
             </Button>
           </div>
@@ -1939,7 +1930,7 @@ const PeopleSectionEditor: React.FC<{
   )
 }
 
-const FeaturedCoursesEditor: React.FC<{
+const FeaturedCoursesEditor: FC<{
   t: Function
   section: LandingFeaturedCourses
   onChange: (section: LandingFeaturedCourses) => void
@@ -1954,10 +1945,10 @@ const FeaturedCoursesEditor: React.FC<{
   )
 
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
-        <BookOpen className="w-5 h-5 text-gray-500" />
-        <h3 className="font-medium text-lg">
+        <BookOpen className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
           {t('SectionTypes.featuredCourses.label')} {t('Editor.titleSuffix')}
         </h3>
       </div>
@@ -1977,22 +1968,21 @@ const FeaturedCoursesEditor: React.FC<{
         {/* Course Selection */}
         <div>
           <Label>{t('FeaturedCoursesEditor.selectCoursesLabel')}</Label>
-          <div className="space-y-4 mt-2">
+          <div className="mt-2 space-y-4">
             {courses ? (
               <div className="grid gap-4">
                 {courses.map((course: any) => (
                   <div
                     key={course.course_uuid}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    className="flex items-center justify-between rounded-lg border p-4"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden">
+                      <div className="h-12 w-12 overflow-hidden rounded-md bg-gray-100">
                         {course.course_thumbnail && (
-                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={course.course_thumbnail}
                             alt={course.name}
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                           />
                         )}
                       </div>
@@ -2033,7 +2023,7 @@ const FeaturedCoursesEditor: React.FC<{
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="py-8 text-center text-gray-500">
                 {t('FeaturedCoursesEditor.loadingCourses')}
               </div>
             )}

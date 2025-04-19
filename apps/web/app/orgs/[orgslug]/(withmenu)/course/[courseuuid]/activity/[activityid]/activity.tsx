@@ -7,18 +7,14 @@ import {
   BookOpenCheck,
   Check,
   CheckCircle,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   FileText,
   Folder,
-  List,
-  Menu,
   MoreVertical,
   UserRoundPen,
   Video,
   Layers,
-  ListFilter,
   ListTree,
   X,
   Edit2,
@@ -35,7 +31,8 @@ import { CourseProvider } from '@components/Contexts/CourseContext'
 import AIActivityAsk from '@components/Objects/Activities/AI/AIActivityAsk'
 import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
+import * as React from 'react'
 import {
   getAssignmentFromActivityUUID,
   getFinalGrade,
@@ -61,12 +58,10 @@ interface ActivityClientProps {
   orgslug: string
   activity: any
   course: any
-  translations?: any
 }
 
 function ActivityClient(props: ActivityClientProps) {
-  const t = useTranslations('CoursePage')
-  const tGeneral = props.translations || useTranslations('General')
+  const t = useTranslations('ActivityPage')
   const activityid = props.activityid
   const courseuuid = props.courseuuid
   const orgslug = props.orgslug
@@ -121,7 +116,7 @@ function ActivityClient(props: ActivityClientProps) {
         <AIChatBotProvider>
           <GeneralWrapperStyled>
             <div className="space-y-4 pt-4">
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <div className="flex space-x-6">
                   <div className="flex">
                     <Link
@@ -130,7 +125,7 @@ function ActivityClient(props: ActivityClientProps) {
                       }
                     >
                       <img
-                        className="w-[100px] h-[57px] rounded-md drop-shadow-md"
+                        className="h-[57px] w-[100px] rounded-md drop-shadow-md"
                         src={`${getCourseThumbnailMediaDirectory(
                           org?.org_uuid,
                           course.course_uuid,
@@ -141,10 +136,10 @@ function ActivityClient(props: ActivityClientProps) {
                     </Link>
                   </div>
                   <div className="flex flex-col -space-y-1">
-                    <p className="font-bold text-gray-700 text-md">
-                      {tGeneral('course')}{' '}
+                    <p className="text-md font-bold text-gray-700">
+                      {t('course')}{' '}
                     </p>
-                    <h1 className="font-bold text-gray-950 text-2xl first-letter:uppercase">
+                    <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">
                       {course.name}
                     </h1>
                   </div>
@@ -157,7 +152,7 @@ function ActivityClient(props: ActivityClientProps) {
                 course={course}
               />
 
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <ActivityChapterDropdown
                     course={course}
@@ -170,16 +165,16 @@ function ActivityClient(props: ActivityClientProps) {
                     t={t}
                   />
                   <div className="flex flex-col -space-y-1">
-                    <p className="font-bold text-gray-700 text-md">
+                    <p className="text-md font-bold text-gray-700">
                       {t('courseLessons')} :{' '}
                       {getChapterNameByActivityId(course, activity.id)}
                     </p>
-                    <h1 className="font-bold text-gray-950 text-2xl first-letter:uppercase">
+                    <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">
                       {activity.name}
                     </h1>
                   </div>
                 </div>
-                <div className="flex space-x-2 items-center">
+                <div className="flex items-center space-x-2">
                   {activity &&
                     activity.published == true &&
                     activity.content.paid_access != false && (
@@ -194,7 +189,7 @@ function ActivityClient(props: ActivityClientProps) {
                                     getUriWithOrg(orgslug, '') +
                                     `/course/${courseuuid}/activity/${activityid}/edit`
                                   }
-                                  className="bg-emerald-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
+                                  className="flex items-center space-x-2 rounded-full bg-emerald-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
                                 >
                                   <Edit2 size={17} />
                                   <span className="text-xs font-bold">
@@ -214,10 +209,7 @@ function ActivityClient(props: ActivityClientProps) {
                         )}
                         {activity.activity_type == 'TYPE_ASSIGNMENT' && (
                           <>
-                            <MoreVertical
-                              size={17}
-                              className="text-gray-300 "
-                            />
+                            <MoreVertical size={17} className="text-gray-300" />
                             <AssignmentSubmissionProvider
                               assignment_uuid={assignment?.assignment_uuid}
                             >
@@ -237,10 +229,10 @@ function ActivityClient(props: ActivityClientProps) {
                 </div>
               </div>
               {activity && activity.published == false && (
-                <div className="p-7 drop-shadow-xs rounded-lg bg-gray-800">
+                <div className="rounded-lg bg-gray-800 p-7 drop-shadow-xs">
                   <div className="text-white">
-                    <h1 className="font-bold text-2xl">
-                      {t('activityNotPublished')}
+                    <h1 className="text-2xl font-bold">
+                      {t('unpublishedActivity')}
                     </h1>
                   </div>
                 </div>
@@ -251,7 +243,7 @@ function ActivityClient(props: ActivityClientProps) {
                   {activity.content.paid_access == false ? (
                     <PaidCourseActivityDisclaimer course={course} />
                   ) : (
-                    <div className={`p-7 drop-shadow-xs rounded-lg ${bgColor}`}>
+                    <div className={`rounded-lg p-7 drop-shadow-xs ${bgColor}`}>
                       {/* Activity Types */}
                       <div>
                         {activity.activity_type == 'TYPE_DYNAMIC' && (
@@ -326,7 +318,7 @@ interface MarkStatusProps {
   activityid: string
   course: any
   orgslug: string
-  t: ReturnType<typeof useTranslations<'CoursePage'>>
+  t: ReturnType<typeof useTranslations<'ActivityPage'>>
 }
 
 export function MarkStatus(props: MarkStatusProps) {
@@ -370,20 +362,22 @@ export function MarkStatus(props: MarkStatusProps) {
   return (
     <>
       {isActivityCompleted() ? (
-        <div className="bg-teal-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
+        <div className="flex items-center space-x-2 rounded-full bg-teal-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
           <i>
             <Check size={17}></Check>
           </i>{' '}
-          <i className="not-italic text-xs font-bold">{t('statusComplete')}</i>
+          <i className="text-xs font-bold not-italic">
+            {props.t('statusComplete')}
+          </i>
         </div>
       ) : (
         <div
-          className={`${isLoading ? 'opacity-75 cursor-not-allowed' : ''} bg-gray-800 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out`}
+          className={`${isLoading ? 'cursor-not-allowed opacity-75' : ''} flex items-center space-x-2 rounded-full bg-gray-800 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer`}
           onClick={!isLoading ? markActivityAsCompleteFront : undefined}
         >
           {isLoading ? (
             <div className="animate-spin">
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <circle
                   className="opacity-25"
                   cx="12"
@@ -406,8 +400,8 @@ export function MarkStatus(props: MarkStatusProps) {
             </i>
           )}{' '}
           {!isMobile && (
-            <i className="not-italic text-xs font-bold">
-              {isLoading ? 'Marking...' : 'Mark as complete'}
+            <i className="text-xs font-bold not-italic">
+              {isLoading ? props.t('marking') : props.t('markAsComplete')}
             </i>
           )}
         </div>
@@ -422,7 +416,7 @@ interface AssignmentToolsProps {
   course: any
   orgslug: string
   assignment: any
-  t: ReturnType<typeof useTranslations<'CoursePage'>>
+  t: ReturnType<typeof useTranslations<'ActivityPage'>>
 }
 
 function AssignmentTools(props: AssignmentToolsProps) {
@@ -503,13 +497,15 @@ function AssignmentTools(props: AssignmentToolsProps) {
   if (!submission || submission.length === 0) {
     return (
       <ConfirmationModal
-        confirmationButtonText={t('submitButton')}
-        confirmationMessage={t('submitConfirmationMessage')}
-        dialogTitle={t('submitConfirmationTitle')}
+        confirmationButtonText={t('assignmentActions.submit')}
+        confirmationMessage={t('assignmentActions.submitConfirm')}
+        dialogTitle={t('assignmentActions.submitYourAssingmentForGrading')}
         dialogTrigger={
-          <div className="bg-cyan-800 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
+          <div className="flex items-center space-x-2 rounded-full bg-cyan-800 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
             <BookOpenCheck size={17} />
-            <span className="text-xs font-bold">{t('submitTrigger')}</span>
+            <span className="text-xs font-bold">
+              {t('assignmentActions.submitForGrading')}
+            </span>
           </div>
         }
         functionToExecute={submitForGradingUI}
@@ -520,10 +516,10 @@ function AssignmentTools(props: AssignmentToolsProps) {
 
   if (submission[0].submission_status === 'SUBMITTED') {
     return (
-      <div className="bg-amber-800 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+      <div className="flex items-center space-x-2 rounded-full bg-amber-800 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out">
         <UserRoundPen size={17} />
         <span className="text-xs font-bold">
-          {t('statusGradingInProgress')}
+          {t('assignmentStatus.grading')}
         </span>
       </div>
     )
@@ -531,11 +527,11 @@ function AssignmentTools(props: AssignmentToolsProps) {
 
   if (submission[0].submission_status === 'GRADED') {
     return (
-      <div className="bg-teal-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+      <div className="flex items-center space-x-2 rounded-full bg-teal-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out">
         <CheckCircle size={17} />
-        <span className="text-xs flex space-x-2 font-bold items-center">
-          <span>{t('statusGraded')}</span>{' '}
-          <span className="bg-white text-teal-800 px-1 py-0.5 rounded-md">
+        <span className="flex items-center space-x-2 text-xs font-bold">
+          <span>{t('assignmentStatus.graded')}</span>{' '}
+          <span className="rounded-md bg-white px-1 py-0.5 text-teal-800">
             {finalGrade}
           </span>
         </span>
@@ -543,7 +539,6 @@ function AssignmentTools(props: AssignmentToolsProps) {
     )
   }
 
-  // Default return in case none of the conditions are met
   return null
 }
 
@@ -551,7 +546,7 @@ interface ActivityChapterDropdownProps {
   course: any
   currentActivityId: string
   orgslug: string
-  t: ReturnType<typeof useTranslations<'CoursePage'>>
+  t: ReturnType<typeof useTranslations<'ActivityPage'>>
 }
 
 function ActivityChapterDropdown(
@@ -607,7 +602,7 @@ function ActivityChapterDropdown(
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className="flex items-center justify-center bg-white nice-shadow p-2.5 rounded-full cursor-pointer"
+        className="nice-shadow flex cursor-pointer items-center justify-center rounded-full bg-white p-2.5"
         aria-label={t('viewAllActivities')}
         title={t('viewAllActivities')}
       >
@@ -616,13 +611,13 @@ function ActivityChapterDropdown(
 
       {isOpen && (
         <div
-          className={`absolute z-50 mt-2 ${isMobile ? 'left-0 w-[90vw] sm:w-80' : 'left-0 w-80'} max-h-[70vh] cursor-pointer overflow-y-auto bg-white rounded-lg shadow-xl border border-gray-200 py-2 animate-in fade-in duration-200`}
+          className={`absolute z-50 mt-2 ${isMobile ? 'left-0 w-[90vw] sm:w-80' : 'left-0 w-80'} animate-in fade-in max-h-[70vh] cursor-pointer overflow-y-auto rounded-lg border border-gray-200 bg-white py-2 shadow-xl duration-200`}
         >
-          <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2">
             <h3 className="font-bold text-gray-800">{t('courseContent')}</h3>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 cursor-pointer"
+              className="cursor-pointer rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
             >
               <X size={18} />
             </button>
@@ -631,7 +626,7 @@ function ActivityChapterDropdown(
           <div className="py-1">
             {props.course.chapters.map((chapter: any) => (
               <div key={chapter.id} className="mb-2">
-                <div className="px-4 py-2 font-medium text-gray-600 bg-gray-50 border-y border-gray-100 flex items-center">
+                <div className="flex items-center border-y border-gray-100 bg-gray-50 px-4 py-2 font-medium text-gray-600">
                   <div className="flex items-center space-x-2">
                     <Folder size={16} className="text-gray-400" />
                     <span>{chapter.name}</span>
@@ -660,14 +655,14 @@ function ActivityChapterDropdown(
                         onClick={() => setIsOpen(false)}
                       >
                         <div
-                          className={`px-4 py-2.5 hover:bg-gray-100 transition-colors flex items-center ${
+                          className={`flex items-center px-4 py-2.5 transition-colors hover:bg-gray-100 ${
                             cleanActivityUuid ===
                             props.currentActivityId.replace('activity_', '')
-                              ? 'bg-gray-50 border-l-2 border-gray-300 pl-3 font-medium'
+                              ? 'border-l-2 border-gray-300 bg-gray-50 pl-3 font-medium'
                               : ''
                           }`}
                         >
-                          <div className="flex-1 flex items-center gap-2">
+                          <div className="flex flex-1 items-center gap-2">
                             <span className="text-gray-400">
                               {getActivityTypeIcon(activity.activity_type)}
                             </span>
@@ -684,7 +679,7 @@ function ActivityChapterDropdown(
                                     activity.activity_uuid) &&
                                 step.complete === true
                             ) && (
-                            <span className="ml-2 text-gray-400 shrink-0">
+                            <span className="ml-2 shrink-0 text-gray-400">
                               <Check size={14} />
                             </span>
                           )}
@@ -706,7 +701,7 @@ interface ActivityNavigationProps {
   course: any
   currentActivityId: string
   orgslug: string
-  t: ReturnType<typeof useTranslations<'CoursePage'>>
+  t: ReturnType<typeof useTranslations<'ActivityPage'>>
 }
 
 function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
@@ -805,17 +800,17 @@ function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
   // Navigation buttons component - reused for both top and bottom
   const NavigationButtons = ({ isFloating = false }) => (
     <div
-      className={`${isFloating ? 'flex justify-between' : 'grid grid-cols-3'} items-center w-full`}
+      className={`${isFloating ? 'flex justify-between' : 'grid grid-cols-3'} w-full items-center`}
     >
       {isFloating ? (
         // Floating navigation - original flex layout
         <>
           <button
             onClick={() => navigateToActivity(prevActivity)}
-            className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${
+            className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
               prevActivity
                 ? 'text-gray-700'
-                : 'opacity-50 text-gray-400 cursor-not-allowed'
+                : 'cursor-not-allowed text-gray-400 opacity-50'
             }`}
             disabled={!prevActivity}
             title={
@@ -824,21 +819,20 @@ function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
                 : t('noPrevActivity')
             }
           >
-            <ChevronLeft size={20} className="text-gray-800 shrink-0" />
+            <ChevronLeft size={20} className="shrink-0 text-gray-800" />
             <div className="flex flex-col items-start">
               <span className="text-xs text-gray-500">{t('previous')}</span>
-              <span className="text-sm capitalize font-semibold text-left">
+              <span className="text-left text-sm font-semibold capitalize">
                 {prevActivity ? prevActivity.name : t('noPrevActivity')}
               </span>
             </div>
           </button>
-
           <button
             onClick={() => navigateToActivity(nextActivity)}
-            className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${
+            className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
               nextActivity
                 ? 'text-gray-700'
-                : 'opacity-50 text-gray-400 cursor-not-allowed'
+                : 'cursor-not-allowed text-gray-400 opacity-50'
             }`}
             disabled={!nextActivity}
             title={
@@ -849,11 +843,11 @@ function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
           >
             <div className="flex flex-col items-end">
               <span className="text-xs text-gray-500">{t('next')}</span>
-              <span className="text-sm capitalize font-semibold text-right">
+              <span className="text-right text-sm font-semibold capitalize">
                 {nextActivity ? nextActivity.name : t('noNextActivity')}
               </span>
             </div>
-            <ChevronRight size={20} className="text-gray-800 shrink-0" />
+            <ChevronRight size={20} className="shrink-0 text-gray-800" />
           </button>
         </>
       ) : (
@@ -862,10 +856,10 @@ function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
           <div className="justify-self-start">
             <button
               onClick={() => navigateToActivity(prevActivity)}
-              className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-md transition-all duration-200 cursor-pointer ${
+              className={`flex cursor-pointer items-center space-x-1.5 rounded-md px-3.5 py-2 transition-all duration-200 ${
                 prevActivity
-                  ? 'bg-white nice-shadow text-gray-700'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  ? 'nice-shadow bg-white text-gray-700'
+                  : 'cursor-not-allowed bg-gray-100 text-gray-400'
               }`}
               disabled={!prevActivity}
               title={
@@ -877,27 +871,25 @@ function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
               <ChevronLeft size={16} className="shrink-0" />
               <div className="flex flex-col items-start">
                 <span className="text-xs text-gray-500">{t('previous')}</span>
-                <span className="text-sm capitalize font-semibold text-left">
+                <span className="text-left text-sm font-semibold capitalize">
                   {prevActivity ? prevActivity.name : t('noPrevActivity')}
                 </span>
               </div>
             </button>
           </div>
-
-          <div className="text-sm text-gray-500 justify-self-center">
+          <div className="justify-self-center text-sm text-gray-500">
             {t('activityCounter', {
               current: currentIndex + 1,
               total: allActivities.length,
             })}
           </div>
-
           <div className="justify-self-end">
             <button
               onClick={() => navigateToActivity(nextActivity)}
-              className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-md transition-all duration-200 cursor-pointer ${
+              className={`flex cursor-pointer items-center space-x-1.5 rounded-md px-3.5 py-2 transition-all duration-200 ${
                 nextActivity
-                  ? 'bg-white nice-shadow text-gray-700'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  ? 'nice-shadow bg-white text-gray-700'
+                  : 'cursor-not-allowed bg-gray-100 text-gray-400'
               }`}
               disabled={!nextActivity}
               title={
@@ -908,7 +900,7 @@ function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
             >
               <div className="flex flex-col items-end">
                 <span className="text-xs text-gray-500">{t('next')}</span>
-                <span className="text-sm capitalize font-semibold text-right">
+                <span className="text-right text-sm font-semibold capitalize">
                   {nextActivity ? nextActivity.name : t('noNextActivity')}
                 </span>
               </div>
@@ -929,8 +921,8 @@ function ActivityNavigation(props: ActivityNavigationProps): React.ReactNode {
 
       {/* Floating bottom navigation - shown when bottom nav is not visible */}
       {!isBottomNavVisible && (
-        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 w-[85%] sm:w-auto sm:min-w-[350px] max-w-lg transition-all duration-300 ease-in-out">
-          <div className="bg-white/90 backdrop-blur-xl rounded-full py-1.5 px-2.5 shadow-xs animate-in fade-in slide-in-from-bottom duration-300">
+        <div className="fixed bottom-8 left-1/2 z-50 w-[85%] max-w-lg -translate-x-1/2 transform transition-all duration-300 ease-in-out sm:w-auto sm:min-w-[350px]">
+          <div className="animate-in fade-in slide-in-from-bottom rounded-full bg-white/90 px-2.5 py-1.5 shadow-xs backdrop-blur-xl duration-300">
             <NavigationButtons isFloating={true} />
           </div>
         </div>

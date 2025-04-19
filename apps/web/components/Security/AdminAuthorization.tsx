@@ -1,5 +1,6 @@
 'use client'
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
+import type { ReactNode, FC } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { usePathname, useRouter } from 'next/navigation'
@@ -9,7 +10,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useTranslations } from 'next-intl'
 
 type AuthorizationProps = {
-  children: React.ReactNode
+  children: ReactNode
   authorizationMode: 'component' | 'page'
 }
 
@@ -23,7 +24,7 @@ const ADMIN_PATHS = [
   '/dash/org/settings/general',
 ]
 
-const AdminAuthorization: React.FC<AuthorizationProps> = ({
+const AdminAuthorization: FC<AuthorizationProps> = ({
   children,
   authorizationMode,
 }) => {
@@ -99,7 +100,7 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <PageLoading />
       </div>
     )
@@ -107,7 +108,7 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({
 
   if (authorizationMode === 'page' && !isAuthorized) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <h1 className="text-2xl">{t('unauthorizedAccessMessage')}</h1>
       </div>
     )

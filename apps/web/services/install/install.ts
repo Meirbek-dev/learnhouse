@@ -54,9 +54,5 @@ export async function isInstallModeEnabled() {
     `${getAPIUrl()}install/latest`,
     RequestBody('GET', null, null)
   )
-  if (result.status === 200 || result.status === 404) {
-    return true
-  } else {
-    return false
-  }
+  return result.status === 200 || result.status === 404
 }

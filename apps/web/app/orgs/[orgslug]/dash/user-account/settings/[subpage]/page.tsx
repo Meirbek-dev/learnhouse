@@ -1,5 +1,6 @@
 'use client'
-import React, { useEffect, use } from 'react'
+import type { ComponentType } from 'react'
+import { useEffect, use } from 'react'
 import { motion } from 'framer-motion'
 import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral'
 import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword'
@@ -30,7 +31,7 @@ type NavigationItem = {
   id: string
   label: string
   icon: LucideIcon
-  component: React.ComponentType
+  component: ComponentType
 }
 
 const SettingsNavigation = ({
@@ -45,7 +46,7 @@ const SettingsNavigation = ({
   const t = useTranslations('DashPage.UserAccountSettings')
 
   return (
-    <div className="flex space-x-5 font-black text-sm">
+    <div className="flex space-x-5 text-sm font-black">
       {items.map((item) => (
         <Link
           key={item.id}
@@ -55,11 +56,11 @@ const SettingsNavigation = ({
           )}
         >
           <div
-            className={`py-2 w-fit text-center border-black transition-all ease-linear ${
+            className={`w-fit border-black py-2 text-center transition-all ease-linear ${
               currentPage === item.id ? 'border-b-4' : 'opacity-50'
             } cursor-pointer`}
           >
-            <div className="flex items-center space-x-2.5 mx-2">
+            <div className="mx-2 flex items-center space-x-2.5">
               <item.icon size={16} />
               <div>{t(item.label)}</div>
             </div>
@@ -103,12 +104,12 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
   )?.component
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] flex flex-col">
-      <div className="pl-10 pr-10 tracking-tight bg-[#fcfbfc] z-10 nice-shadow flex-shrink-0">
+    <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
+      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
         <BreadCrumbs type="user" last_breadcrumb={session?.user?.username} />
         <div className="my-2 tracking-tighter">
-          <div className="w-100 flex justify-between">
-            <div className="pt-3 flex font-bold text-4xl">{t('title')}</div>
+          <div className="flex w-100 justify-between">
+            <div className="flex pt-3 text-4xl font-bold">{t('title')}</div>
           </div>
         </div>
         <SettingsNavigation

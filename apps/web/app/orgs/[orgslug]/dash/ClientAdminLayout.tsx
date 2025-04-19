@@ -3,14 +3,14 @@ import DashLeftMenu from '@components/Dashboard/Menus/DashLeftMenu'
 import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
 import { SessionProvider } from 'next-auth/react'
-import React from 'react'
+import type { ReactNode } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
 function ClientAdminLayout({
   children,
   params,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   params: any
 }) {
   const isMobile = useMediaQuery('(max-width: 768px)')

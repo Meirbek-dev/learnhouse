@@ -1,14 +1,12 @@
 'use client'
-import React, { useState } from 'react'
+import type { ChangeEvent, MouseEvent } from 'react'
+import { useState } from 'react'
 import {
   UploadCloud,
   Info,
   Plus,
   X,
-  Video,
   GripVertical,
-  Image,
-  Layout,
   Images,
   StarIcon,
   ImageIcon,
@@ -40,7 +38,6 @@ import {
   DialogTrigger,
 } from '@components/ui/dialog'
 import { Button } from '@components/ui/button'
-import { Label } from '@components/ui/label'
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons'
 import {
   DragDropContext,
@@ -151,9 +148,7 @@ export default function OrgEditImages() {
   const [videoDialogOpen, setVideoDialogOpen] = useState(false)
   const [selectedService, setSelectedService] = useState<VideoService>(null)
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0]
       setLocalLogo(URL.createObjectURL(file))
@@ -173,7 +168,7 @@ export default function OrgEditImages() {
   }
 
   const handleThumbnailChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0]
@@ -193,15 +188,12 @@ export default function OrgEditImages() {
     }
   }
 
-  const handleImageButtonClick =
-    (inputId: string) => (event: React.MouseEvent) => {
-      event.preventDefault()
-      document.getElementById(inputId)?.click()
-    }
+  const handleImageButtonClick = (inputId: string) => (event: MouseEvent) => {
+    event.preventDefault()
+    document.getElementById(inputId)?.click()
+  }
 
-  const handlePreviewUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handlePreviewUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const files = Array.from(event.target.files)
       const remainingSlots = 4 - previews.length
@@ -438,30 +430,30 @@ export default function OrgEditImages() {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow px-3 py-3 sm:mb-0 mb-16">
-      <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mb-2 rounded-md">
-        <h1 className="font-bold text-xl text-gray-800">{t('title')}</h1>
-        <h2 className="text-gray-500 text-md">{t('description')}</h2>
+    <div className="nice-shadow mx-0 mb-16 rounded-xl bg-white px-3 py-3 sm:mx-10 sm:mb-0">
+      <div className="mb-2 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+        <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
+        <h2 className="text-md text-gray-500">{t('description')}</h2>
       </div>
       <Tabs defaultValue="logo" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 p-1 bg-gray-100 rounded-lg">
+        <TabsList className="grid w-full grid-cols-3 rounded-lg bg-gray-100 p-1">
           <TabsTrigger
             value="logo"
-            className="data-[state=active]:bg-white data-[state=active]:shadow-xs transition-all flex items-center space-x-2"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <StarIcon size={16} />
             <span>{t('Tabs.logo')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="thumbnail"
-            className="data-[state=active]:bg-white data-[state=active]:shadow-xs transition-all flex items-center space-x-2"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <ImageIcon size={16} />
             <span>{t('Tabs.thumbnail')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="previews"
-            className="data-[state=active]:bg-white data-[state=active]:shadow-xs transition-all flex items-center space-x-2"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <Images size={16} />
             <span>{t('Tabs.previews')}</span>
@@ -469,14 +461,14 @@ export default function OrgEditImages() {
         </TabsList>
 
         <TabsContent value="logo" className="mt-2">
-          <div className="flex flex-col space-y-5 w-full">
-            <div className="w-full bg-linear-to-b from-gray-50 to-white rounded-xl  transition-all duration-300 py-8">
-              <div className="flex flex-col justify-center items-center space-y-8">
-                <div className="relative group">
+          <div className="flex w-full flex-col space-y-5">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center space-y-8">
+                <div className="group relative">
                   <div
                     className={cn(
-                      'w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white',
-                      'border-2 border-gray-100 hover:border-blue-200 transition-all duration-300',
+                      'h-[100px] w-[200px] rounded-lg bg-white bg-contain bg-center bg-no-repeat shadow-md sm:h-[125px] sm:w-[250px]',
+                      'border-2 border-gray-100 transition-all duration-300 hover:border-blue-200',
                       isLogoUploading && 'opacity-50'
                     )}
                     style={{
@@ -497,12 +489,12 @@ export default function OrgEditImages() {
                     type="button"
                     disabled={isLogoUploading}
                     className={cn(
-                      'font-medium text-sm px-6 py-2.5 rounded-full',
+                      'rounded-full px-6 py-2.5 text-sm font-medium',
                       'bg-linear-to-r from-blue-500 to-blue-600 text-white',
                       'hover:from-blue-600 hover:to-blue-700',
-                      'shadow-xs hover:shadow-sm transition-all duration-300',
+                      'shadow-xs transition-all duration-300 hover:shadow-sm',
                       'flex items-center space-x-2',
-                      isLogoUploading && 'opacity-75 cursor-not-allowed'
+                      isLogoUploading && 'cursor-not-allowed opacity-75'
                     )}
                     onClick={handleImageButtonClick('fileInput')}
                   >
@@ -517,8 +509,8 @@ export default function OrgEditImages() {
                     </span>
                   </button>
 
-                  <div className="flex flex-col text-xs space-y-2 items-center text-gray-500">
-                    <div className="flex items-center space-x-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
+                  <div className="flex flex-col items-center space-y-2 text-xs text-gray-500">
+                    <div className="flex items-center space-x-2 rounded-full bg-blue-50 px-3 py-1.5 text-blue-700">
                       <Info size={14} />
                       <p className="font-medium">{t('Info.acceptedFormats')}</p>
                     </div>
@@ -533,14 +525,14 @@ export default function OrgEditImages() {
         </TabsContent>
 
         <TabsContent value="thumbnail" className="mt-2">
-          <div className="flex flex-col space-y-5 w-full">
-            <div className="w-full bg-linear-to-b from-gray-50 to-white rounded-xl  transition-all duration-300 py-8">
-              <div className="flex flex-col justify-center items-center space-y-8">
-                <div className="relative group">
+          <div className="flex w-full flex-col space-y-5">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center space-y-8">
+                <div className="group relative">
                   <div
                     className={cn(
-                      'w-[200px] sm:w-[250px] h-[100px] sm:h-[125px] bg-contain bg-no-repeat bg-center rounded-lg shadow-md bg-white',
-                      'border-2 border-gray-100 hover:border-purple-200 transition-all duration-300',
+                      'h-[100px] w-[200px] rounded-lg bg-white bg-contain bg-center bg-no-repeat shadow-md sm:h-[125px] sm:w-[250px]',
+                      'border-2 border-gray-100 transition-all duration-300 hover:border-purple-200',
                       isThumbnailUploading && 'opacity-50'
                     )}
                     style={{
@@ -561,12 +553,12 @@ export default function OrgEditImages() {
                     type="button"
                     disabled={isThumbnailUploading}
                     className={cn(
-                      'font-medium text-sm px-6 py-2.5 rounded-full',
+                      'rounded-full px-6 py-2.5 text-sm font-medium',
                       'bg-linear-to-r from-purple-500 to-purple-600 text-white',
                       'hover:from-purple-600 hover:to-purple-700',
-                      'shadow-xs hover:shadow-sm transition-all duration-300',
+                      'shadow-xs transition-all duration-300 hover:shadow-sm',
                       'flex items-center space-x-2',
-                      isThumbnailUploading && 'opacity-75 cursor-not-allowed'
+                      isThumbnailUploading && 'cursor-not-allowed opacity-75'
                     )}
                     onClick={handleImageButtonClick('thumbnailInput')}
                   >
@@ -584,8 +576,8 @@ export default function OrgEditImages() {
                     </span>
                   </button>
 
-                  <div className="flex flex-col text-xs space-y-2 items-center text-gray-500">
-                    <div className="flex items-center space-x-2 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full">
+                  <div className="flex flex-col items-center space-y-2 text-xs text-gray-500">
+                    <div className="flex items-center space-x-2 rounded-full bg-purple-50 px-3 py-1.5 text-purple-700">
                       <Info size={14} />
                       <p className="font-medium">{t('Info.acceptedFormats')}</p>
                     </div>
@@ -600,15 +592,15 @@ export default function OrgEditImages() {
         </TabsContent>
 
         <TabsContent value="previews" className="mt-4">
-          <div className="flex flex-col space-y-5 w-full">
-            <div className="w-full bg-linear-to-b from-gray-50 to-white rounded-xl transition-all duration-300 py-6">
-              <div className="flex flex-col justify-center items-center space-y-6">
+          <div className="flex w-full flex-col space-y-5">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-6 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center space-y-6">
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable droppableId="previews" direction="horizontal">
                     {(provided) => (
                       <div
                         className={cn(
-                          'flex gap-4 w-full max-w-5xl p-4 overflow-x-auto pb-6',
+                          'flex w-full max-w-5xl gap-4 overflow-x-auto p-4 pb-6',
                           previews.length === 0 && 'justify-center'
                         )}
                         {...provided.droppableProps}
@@ -625,18 +617,18 @@ export default function OrgEditImages() {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 className={cn(
-                                  'relative group shrink-0',
+                                  'group relative shrink-0',
                                   'w-48',
                                   snapshot.isDragging
-                                    ? 'scale-105 z-50'
+                                    ? 'z-50 scale-105'
                                     : 'hover:scale-102'
                                 )}
                               >
                                 <button
                                   onClick={() => removePreview(preview.id)}
                                   className={cn(
-                                    'absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5',
-                                    'opacity-0 group-hover:opacity-100 z-10 shadow-xs',
+                                    'absolute -top-2 -right-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
+                                    'z-10 opacity-0 shadow-xs group-hover:opacity-100',
                                     'transition-opacity duration-200'
                                   )}
                                 >
@@ -645,8 +637,8 @@ export default function OrgEditImages() {
                                 <div
                                   {...provided.dragHandleProps}
                                   className={cn(
-                                    'absolute -top-2 -left-2 bg-gray-600 hover:bg-gray-700 text-white rounded-full p-1.5',
-                                    'opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing z-10 shadow-xs',
+                                    'absolute -top-2 -left-2 rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
+                                    'z-10 cursor-grab opacity-0 shadow-xs group-hover:opacity-100 active:cursor-grabbing',
                                     'transition-opacity duration-200'
                                   )}
                                 >
@@ -655,7 +647,7 @@ export default function OrgEditImages() {
                                 {preview.type === 'image' ? (
                                   <div
                                     className={cn(
-                                      `w-full ${PREVIEW_HEIGHT} bg-contain bg-no-repeat bg-center rounded-xl bg-white`,
+                                      `w-full ${PREVIEW_HEIGHT} rounded-xl bg-white bg-contain bg-center bg-no-repeat`,
                                       'border border-gray-200 hover:border-gray-300',
                                       'transition-colors duration-200',
                                       snapshot.isDragging
@@ -669,8 +661,8 @@ export default function OrgEditImages() {
                                 ) : (
                                   <div
                                     className={cn(
-                                      `w-full ${PREVIEW_HEIGHT} relative rounded-xl overflow-hidden`,
-                                      'border border-gray-200 hover:border-gray-300 transition-colors duration-200',
+                                      `w-full ${PREVIEW_HEIGHT} relative overflow-hidden rounded-xl`,
+                                      'border border-gray-200 transition-colors duration-200 hover:border-gray-300',
                                       snapshot.isDragging
                                         ? 'shadow-lg'
                                         : 'shadow-xs hover:shadow-md'
@@ -682,11 +674,11 @@ export default function OrgEditImages() {
                                         backgroundImage: `url(${preview.thumbnailUrl})`,
                                       }}
                                     />
-                                    <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-[2px] flex items-center justify-center">
+                                    <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black backdrop-blur-[2px]">
                                       {preview.type === 'youtube' ? (
-                                        <SiYoutube className="w-10 h-10 text-red-500" />
+                                        <SiYoutube className="h-10 w-10 text-red-500" />
                                       ) : (
-                                        <SiLoom className="w-10 h-10 text-blue-500" />
+                                        <SiLoom className="h-10 w-10 text-blue-500" />
                                       )}
                                     </div>
                                   </div>
@@ -699,7 +691,7 @@ export default function OrgEditImages() {
                         {previews.length < 4 && (
                           <div
                             className={cn(
-                              'shrink-0 w-48',
+                              'w-48 shrink-0',
                               previews.length === 0 && 'm-0'
                             )}
                           >
@@ -714,12 +706,12 @@ export default function OrgEditImages() {
                                 <button
                                   className={cn(
                                     `w-full ${PREVIEW_HEIGHT}`,
-                                    'border-2 border-dashed border-gray-200 rounded-xl',
-                                    'hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200',
-                                    'flex flex-col items-center justify-center space-y-2 group'
+                                    'rounded-xl border-2 border-dashed border-gray-200',
+                                    'transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/50',
+                                    'group flex flex-col items-center justify-center space-y-2'
                                   )}
                                 >
-                                  <div className="bg-blue-50 rounded-full p-2 group-hover:bg-blue-100 transition-colors duration-200">
+                                  <div className="rounded-full bg-blue-50 p-2 transition-colors duration-200 group-hover:bg-blue-100">
                                     <Plus size={20} className="text-blue-500" />
                                   </div>
                                   <span className="text-sm font-medium text-gray-600">
@@ -752,12 +744,12 @@ export default function OrgEditImages() {
                                           key={option.id}
                                           onClick={option.onClick}
                                           className={cn(
-                                            'w-full aspect-square rounded-2xl border-2 border-dashed',
+                                            'aspect-square w-full rounded-2xl border-2 border-dashed',
                                             `hover:border-${option.color}-300 hover:bg-${option.color}-50/50`,
                                             'transition-all duration-200',
                                             'flex flex-col items-center justify-center space-y-4',
                                             option.disabled &&
-                                              'opacity-50 cursor-not-allowed'
+                                              'cursor-not-allowed opacity-50'
                                           )}
                                           disabled={option.disabled}
                                         >
@@ -769,14 +761,14 @@ export default function OrgEditImages() {
                                             )}
                                           >
                                             <option.icon
-                                              className={`w-8 h-8 text-${option.color}-500`}
+                                              className={`h-8 w-8 text-${option.color}-500`}
                                             />
                                           </div>
                                           <div className="text-center">
                                             <p className="font-medium text-gray-700">
                                               {option.title}
                                             </p>
-                                            <p className="text-sm text-gray-500 mt-1">
+                                            <p className="mt-1 text-sm text-gray-500">
                                               {option.description}
                                             </p>
                                           </div>
@@ -797,16 +789,16 @@ export default function OrgEditImages() {
                                         <div className="flex items-center space-x-3">
                                           <div
                                             className={cn(
-                                              'w-10 h-10 rounded-full flex items-center justify-center',
+                                              'flex h-10 w-10 items-center justify-center rounded-full',
                                               selectedService === 'youtube'
                                                 ? 'bg-red-50'
                                                 : 'bg-blue-50'
                                             )}
                                           >
                                             {selectedService === 'youtube' ? (
-                                              <SiYoutube className="w-5 h-5 text-red-500" />
+                                              <SiYoutube className="h-5 w-5 text-red-500" />
                                             ) : (
-                                              <SiLoom className="w-5 h-5 text-blue-500" />
+                                              <SiLoom className="h-5 w-5 text-blue-500" />
                                             )}
                                           </div>
                                           <div>
@@ -834,7 +826,7 @@ export default function OrgEditImages() {
                                           onClick={() =>
                                             setSelectedService(null)
                                           }
-                                          className="text-gray-400 hover:text-gray-500 transition-colors"
+                                          className="text-gray-400 transition-colors hover:text-gray-500"
                                         >
                                           <X size={20} />
                                         </button>
@@ -886,7 +878,7 @@ export default function OrgEditImages() {
                   </Droppable>
                 </DragDropContext>
 
-                <div className="flex items-center space-x-2 bg-gray-50 text-gray-600 px-4 py-2 rounded-full">
+                <div className="flex items-center space-x-2 rounded-full bg-gray-50 px-4 py-2 text-gray-600">
                   <Info size={14} />
                   <p className="text-sm">{t('Info.previewInstructions')}</p>
                 </div>

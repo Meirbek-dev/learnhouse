@@ -3,7 +3,7 @@ import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import { useTranslations } from 'next-intl'
 
@@ -49,11 +49,11 @@ function GetStarted() {
 
   if (error)
     return (
-      <div className="flex py-10 justify-center items-center space-x-3">
+      <div className="flex items-center justify-center space-x-3 py-10">
         <h1>{t('newInstallationTitle')}</h1>
         <div
           onClick={startInstallation}
-          className="p-3  font-bold bg-green-200 text-green-900 rounded-lg hover:cursor-pointer"
+          className="rounded-lg bg-green-200 p-3 font-bold text-green-900 hover:cursor-pointer"
         >
           {t('startButton')}
         </div>
@@ -64,17 +64,17 @@ function GetStarted() {
   if (install) {
     return (
       <div>
-        <div className="flex py-10 justify-center items-center space-x-3">
+        <div className="flex items-center justify-center space-x-3 py-10">
           <h1>{t('existingInstallationTitle')}</h1>
           <div
             onClick={redirectToStep}
-            className="p-3  font-bold bg-orange-200 text-orange-900 rounded-lg hover:cursor-pointer"
+            className="rounded-lg bg-orange-200 p-3 font-bold text-orange-900 hover:cursor-pointer"
           >
             {t('continueButton')}
           </div>
           <div
             onClick={startInstallation}
-            className="p-3  font-bold bg-green-200 text-green-900 rounded-lg hover:cursor-pointer"
+            className="rounded-lg bg-green-200 p-3 font-bold text-green-900 hover:cursor-pointer"
           >
             {t('startButton')}
           </div>

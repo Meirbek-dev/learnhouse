@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import React from 'react'
 import ResetPasswordClient from './reset'
 import { getTranslations } from 'next-intl/server'
 

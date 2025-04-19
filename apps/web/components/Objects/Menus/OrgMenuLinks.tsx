@@ -2,7 +2,6 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import { getUriWithOrg } from '@services/config/config'
 import { BookCopy, Signpost, SquareLibrary } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
 import { useTranslations } from 'next-intl'
 
 function MenuLinks(props: { orgslug: string }) {
@@ -36,7 +35,7 @@ const LinkItem = (props: any) => {
   const orgslug = props.orgslug
   return (
     <Link href={getUriWithOrg(orgslug, link)}>
-      <li className="flex space-x-2 items-center text-[#909192] font-medium">
+      <li className="flex items-center space-x-2 font-medium text-[#909192]">
         {props.type == 'courses' && (
           <>
             <BookCopy size={20} /> <span>{t('courses')}</span>

@@ -1,4 +1,3 @@
-import React from 'react'
 import Courses from './courses'
 import { Metadata } from 'next'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
@@ -20,7 +19,6 @@ export async function generateMetadata(
   const tGeneral = await getTranslations('General')
   const tCoursesPage = await getTranslations('CoursesPage')
 
-  // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 0,
     tags: ['organizations'],
@@ -62,7 +60,6 @@ export async function generateMetadata(
 
 const CoursesPage = async (params: any) => {
   const orgslug = (await params.params).orgslug
-  const tGeneral = await getTranslations('General')
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 1800,
     tags: ['organizations'],

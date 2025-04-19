@@ -7,15 +7,13 @@ import {
   Video,
   Upload,
   X,
-  HelpCircle,
-  Maximize2,
-  Minimize2,
   ArrowLeftRight,
   CheckCircle2,
   AlertCircle,
   Download,
 } from 'lucide-react'
-import React from 'react'
+import type { ChangeEvent, DragEvent } from 'react'
+import { useRef, useCallback, useMemo, useState, useEffect } from 'react'
 import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video'
 import { getActivityBlockMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -177,11 +175,11 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const course = useCourse() as Course | null
   const editorState = useEditorProvider() as EditorState
   const session = useLHSession() as Session
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const uploadZoneRef = React.useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const uploadZoneRef = useRef<HTMLDivElement>(null)
 
   // Convert legacy block object to new format
-  const convertLegacyBlock = React.useCallback(
+  const convertLegacyBlock = useCallback(
     (block: LegacyVideoBlockObject): VideoBlockObject => {
       const videoSize = getVideoSizeFromWidth(block.size?.width)
       return {
@@ -192,7 +190,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     []
   )
 
-  const initialBlockObject = React.useMemo(() => {
+  const initialBlockObject = useMemo(() => {
     if (!node.attrs.blockObject) return null
     if (
       'size' in node.attrs.blockObject &&
@@ -203,20 +201,20 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     return convertLegacyBlock(node.attrs.blockObject as LegacyVideoBlockObject)
   }, [node.attrs.blockObject, convertLegacyBlock])
 
-  const [video, setVideo] = React.useState<File | null>(null)
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [error, setError] = React.useState<string | null>(null)
-  const [isDragging, setIsDragging] = React.useState(false)
-  const [uploadProgress, setUploadProgress] = React.useState(0)
-  const [blockObject, setBlockObject] = React.useState<VideoBlockObject | null>(
+  const [video, setVideo] = useState<File | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [blockObject, setBlockObject] = useState<VideoBlockObject | null>(
     initialBlockObject
   )
-  const [selectedSize, setSelectedSize] = React.useState<VideoSize>(
+  const [selectedSize, setSelectedSize] = useState<VideoSize>(
     initialBlockObject?.size || 'medium'
   )
 
   // Update block object when size changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (blockObject && blockObject.size !== selectedSize) {
       const newBlockObject = {
         ...blockObject,
@@ -233,7 +231,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     ? `${blockObject.content.file_id}.${blockObject.content.file_format}`
     : null
 
-  const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       setVideo(file)
@@ -242,13 +240,13 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     }
   }
 
-  const handleDragEnter = (e: React.DragEvent) => {
+  const handleDragEnter = (e: DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(true)
   }
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = (e: DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.currentTarget === uploadZoneRef.current) {
@@ -256,7 +254,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(false)
@@ -362,7 +360,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-full flex justify-center relative"
+          className="relative flex w-full justify-center"
         >
           <div
             style={{
@@ -373,15 +371,15 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
             <div className="relative">
               <video
                 controls
-                className="w-full aspect-video object-contain rounded-lg shadow-sm"
+                className="aspect-video w-full rounded-lg object-contain shadow-sm"
                 src={videoUrl}
               />
               <button
                 onClick={handleDownload}
-                className="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+                className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                 title="Download video"
               >
-                <Download className="w-4 h-4 text-white" />
+                <Download className="h-4 w-4 text-white" />
               </button>
             </div>
           </div>
@@ -403,7 +401,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <VideoWrapper className="flex flex-col space-y-4 rounded-lg py-6 px-5">
+        <VideoWrapper className="flex flex-col space-y-4 rounded-lg px-5 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-sm text-zinc-500">
               <Video size={16} />
@@ -414,7 +412,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleRemove}
-                className="text-zinc-400 hover:text-red-500 transition-colors"
+                className="text-zinc-400 transition-colors hover:text-red-500"
                 title={t('remove')}
               >
                 <X size={16} />
@@ -455,13 +453,13 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                       exit={{ opacity: 0 }}
                       className="space-y-3"
                     >
-                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" />
+                      <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500" />
                       <div className="text-sm text-zinc-600">
                         {t('uploading', { progress: uploadProgress })}
                       </div>
-                      <div className="w-48 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">
+                      <div className="mx-auto h-1 w-48 overflow-hidden rounded-full bg-gray-200">
                         <motion.div
-                          className="h-full bg-blue-500 rounded-full"
+                          className="h-full rounded-full bg-blue-500"
                           initial={{ width: 0 }}
                           animate={{ width: `${uploadProgress}%` }}
                           transition={{ duration: 0.2 }}
@@ -475,12 +473,12 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                       exit={{ opacity: 0 }}
                       className="space-y-3"
                     >
-                      <Upload className="w-8 h-8 mx-auto text-blue-500" />
+                      <Upload className="mx-auto h-8 w-8 text-blue-500" />
                       <div>
                         <div className="text-sm font-medium text-zinc-700">
                           {t('uploadPlaceholder')}
                         </div>
-                        <div className="text-xs text-zinc-500 mt-1">
+                        <div className="mt-1 text-xs text-zinc-500">
                           {t('uploadHint')}
                         </div>
                       </div>
@@ -490,7 +488,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               </UploadZone>
 
               {error && (
-                <div className="flex items-center gap-2 text-sm text-red-500 font-medium bg-red-50 rounded-lg p-3">
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-500">
                   <AlertCircle size={16} />
                   {error}
                 </div>
@@ -505,8 +503,8 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               transition={{ duration: 0.3 }}
               className="space-y-4"
             >
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="text-sm text-zinc-500 font-medium flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1 text-sm font-medium text-zinc-500">
                   <ArrowLeftRight size={14} />
                   {t('sizeLabel')}
                 </div>
@@ -544,16 +542,16 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                     width: '100%',
                   }}
                 >
-                  <div className="relative rounded-lg overflow-hidden bg-black/5">
+                  <div className="relative overflow-hidden rounded-lg bg-black/5">
                     {isLoading && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm">
-                        <Loader2 className="w-8 h-8 animate-spin text-white" />
+                        <Loader2 className="h-8 w-8 animate-spin text-white" />
                       </div>
                     )}
                     <video
                       controls
                       className={cn(
-                        'w-full aspect-video object-contain bg-black/95 shadow-sm transition-all duration-200',
+                        'aspect-video w-full bg-black/95 object-contain shadow-sm transition-all duration-200',
                         isLoading && 'opacity-50 blur-sm'
                       )}
                       src={videoUrl}

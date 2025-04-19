@@ -1,7 +1,8 @@
 'use client'
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
-import React, { createContext, useContext, useMemo } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import useSWR from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import ErrorUI from '@components/Objects/StyledElements/Error/Error'
@@ -16,7 +17,7 @@ export function OrgProvider({
   children,
   orgslug,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   orgslug: string
 }) {
   const session = useLHSession() as any
@@ -63,7 +64,7 @@ export function OrgProvider({
     )
   }
 
-  return <OrgContext.Provider value={org}>{children}</OrgContext.Provider>
+  return <OrgContext value={org}>{children}</OrgContext>
 }
 
 export function useOrg() {

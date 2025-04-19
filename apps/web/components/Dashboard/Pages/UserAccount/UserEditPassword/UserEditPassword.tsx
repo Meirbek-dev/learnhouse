@@ -2,7 +2,7 @@
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { updatePassword } from '@services/settings/password'
 import { Formik, Form } from 'formik'
-import React, { useEffect } from 'react'
+import { useMemo, useEffect } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
@@ -35,7 +35,7 @@ function UserEditPassword() {
   const t = useTranslations()
   const tPassword = useTranslations('UserAccount.EditPassword')
   const tNotify = useTranslations('Notifications')
-  const validationSchema = React.useMemo(() => createValidationSchema(t), [t])
+  const validationSchema = useMemo(() => createValidationSchema(t), [t])
 
   const updatePasswordUI = async (values: any) => {
     const loadingToast = toast.loading(tNotify('updating'))
@@ -75,13 +75,13 @@ function UserEditPassword() {
   useEffect(() => {}, [session])
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
+    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <div className="flex flex-col">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
-          <h1 className="font-bold text-xl text-gray-800">
+        <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+          <h1 className="text-xl font-bold text-gray-800">
             {tPassword('title')}
           </h1>
-          <h2 className="text-gray-500 text-md">{tPassword('description')}</h2>
+          <h2 className="text-md text-gray-500">{tPassword('description')}</h2>
         </div>
 
         <div className="px-8 py-6">
@@ -96,7 +96,7 @@ function UserEditPassword() {
             }}
           >
             {({ isSubmitting, handleChange, errors, touched }) => (
-              <Form className="w-full max-w-2xl mx-auto space-y-6">
+              <Form className="mx-auto w-full max-w-2xl space-y-6">
                 <div>
                   <Label htmlFor="old_password">
                     {tPassword('currentPasswordLabel')}
@@ -109,7 +109,7 @@ function UserEditPassword() {
                     className="mt-1"
                   />
                   {touched.old_password && errors.old_password && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="mt-1 text-sm text-red-500">
                       {errors.old_password}
                     </p>
                   )}
@@ -127,13 +127,13 @@ function UserEditPassword() {
                     className="mt-1"
                   />
                   {touched.new_password && errors.new_password && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="mt-1 text-sm text-red-500">
                       {errors.new_password}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 p-3 rounded-md">
+                <div className="flex items-center space-x-2 rounded-md bg-amber-50 p-3 text-amber-600">
                   <AlertTriangle size={16} />
                   <span className="text-sm">{tPassword('logoutWarning')}</span>
                 </div>

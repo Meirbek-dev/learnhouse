@@ -11,7 +11,7 @@ import { getAPIUrl } from '@services/config/config'
 import { removeUserFromOrg } from '@services/organizations/orgs'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { KeyRound, LogOut } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
 import { useTranslations } from 'next-intl'
@@ -31,8 +31,8 @@ function OrgUsers() {
   } = useSWR(org ? `${getAPIUrl()}orgs/${org?.id}/users` : null, (url) =>
     swrFetcher(url, access_token)
   )
-  const [rolesModal, setRolesModal] = React.useState(false)
-  const [selectedUser, setSelectedUser] = React.useState<any | null>(null)
+  const [rolesModal, setRolesModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any | null>(null)
 
   const handleRolesModal = (user: any) => {
     setSelectedUser(user)
@@ -69,38 +69,38 @@ function OrgUsers() {
         <>
           <Toast></Toast>
           <div className="h-6"></div>
-          <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs px-4 py-4  ">
-            <div className="flex flex-col bg-gray-50 -space-y-1  px-5 py-3 rounded-md mb-3 ">
-              <h1 className="font-bold text-xl text-gray-800">
+          <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
+            <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+              <h1 className="text-xl font-bold text-gray-800">
                 {t('activeUsersTitle')}
               </h1>
-              <h2 className="text-gray-500  text-md"> {t('description')}</h2>
+              <h2 className="text-md text-gray-500"> {t('description')}</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-                <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
+              <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+                <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
                   <tr className="font-bolder text-sm">
-                    <th className="py-3 px-4">{t('userHeader')}</th>
-                    <th className="py-3 px-4">{t('roleHeader')}</th>
-                    <th className="py-3 px-4">{t('actionsHeader')}</th>
+                    <th className="px-4 py-3">{t('userHeader')}</th>
+                    <th className="px-4 py-3">{t('roleHeader')}</th>
+                    <th className="px-4 py-3">{t('actionsHeader')}</th>
                   </tr>
                 </thead>
-                <tbody className="mt-5 bg-white rounded-md">
+                <tbody className="mt-5 rounded-md bg-white">
                   {orgUsers?.map((user: any) => (
                     <tr
                       key={user.user.id}
-                      className="border-b border-gray-200 border-dashed"
+                      className="border-b border-dashed border-gray-200"
                     >
-                      <td className="py-3 px-4 flex space-x-2 items-center">
+                      <td className="flex items-center space-x-2 px-4 py-3">
                         <span>
                           {user.user.first_name + ' ' + user.user.last_name}
                         </span>
-                        <span className="text-xs bg-neutral-100 p-1 px-2 rounded-full text-neutral-400 font-semibold">
+                        <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
                           @{user.user.username}
                         </span>
                       </td>
-                      <td className="py-3 px-4">{user.role.name}</td>
-                      <td className="py-3 px-4 flex space-x-2 items-end">
+                      <td className="px-4 py-3">{user.role.name}</td>
+                      <td className="flex items-end space-x-2 px-4 py-3">
                         <Modal
                           isDialogOpen={
                             rolesModal &&
@@ -127,8 +127,8 @@ function OrgUsers() {
                             username: user.user.username,
                           })}
                           dialogTrigger={
-                            <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-yellow-700 rounded-md font-bold items-center text-sm text-yellow-100">
-                              <KeyRound className="w-4 h-4" />
+                            <button className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer">
+                              <KeyRound className="h-4 w-4" />
                               <span>{t('editRoleButton')}</span>
                             </button>
                           }
@@ -141,8 +141,8 @@ function OrgUsers() {
                             username: user.user.username,
                           })}
                           dialogTrigger={
-                            <button className="mr-2 flex space-x-2 hover:cursor-pointer p-1 px-3 bg-rose-700 rounded-md font-bold items-center text-sm text-rose-100">
-                              <LogOut className="w-4 h-4" />
+                            <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+                              <LogOut className="h-4 w-4" />
                               <span>{t('removeFromOrgButton')}</span>
                             </button>
                           }
@@ -158,7 +158,7 @@ function OrgUsers() {
                     <tr>
                       <td
                         colSpan={3}
-                        className="text-center py-4 text-gray-500"
+                        className="py-4 text-center text-gray-500"
                       >
                         No users found in this organization.
                       </td>

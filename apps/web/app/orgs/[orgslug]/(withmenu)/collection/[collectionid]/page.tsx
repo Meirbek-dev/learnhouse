@@ -56,7 +56,7 @@ export async function generateMetadata(
 }
 
 const CollectionPage = async (params: any) => {
-  const t = await getTranslations('CollectionPage')
+  const t = await getTranslations('General')
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
   const org = await getOrganizationContextInfo((await params.params).orgslug, {
@@ -76,7 +76,7 @@ const CollectionPage = async (params: any) => {
 
   return (
     <GeneralWrapperStyled>
-      <h2 className="text-sm font-bold text-gray-400">{t('typeLabel')}</h2>
+      <h2 className="text-sm font-bold text-gray-400">{t('collection')}</h2>
       <h1 className="text-3xl font-bold">{col.name}</h1>
       <br />
       <div className="home_courses flex flex-wrap">
@@ -89,7 +89,7 @@ const CollectionPage = async (params: any) => {
               )}
             >
               <div
-                className="inset-0 ring-1 ring-inset ring-black/10 rounded-lg shadow-xl relative w-[249px] h-[131px] bg-cover"
+                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
                 style={{
                   backgroundImage: `url(${getCourseThumbnailMediaDirectory(
                     org.org_uuid,
@@ -99,7 +99,7 @@ const CollectionPage = async (params: any) => {
                 }}
               ></div>
             </Link>
-            <h2 className="font-bold text-lg w-[250px] py-2">{course.name}</h2>
+            <h2 className="w-[250px] py-2 text-lg font-bold">{course.name}</h2>
           </div>
         ))}
       </div>

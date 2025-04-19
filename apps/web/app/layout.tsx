@@ -4,6 +4,9 @@ import Script from 'next/script'
 import '../styles/globals.css'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server'
+import { DM_Sans } from 'next/font/google'
+
+const dmSans = DM_Sans({ subsets: ['latin'] })
 
 export default async function RootLayout({
   children,
@@ -15,9 +18,9 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html className="" lang={locale}>
+    <html className={`${dmSans.className}`} lang={locale}>
       <head />
-      <body>
+      <body className="antialiased">
         {isDevEnv ? (
           ''
         ) : (

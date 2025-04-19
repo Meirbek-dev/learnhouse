@@ -1,5 +1,6 @@
 import { NodeViewWrapper } from '@tiptap/react'
-import React, { useEffect } from 'react'
+import type { ChangeEvent } from 'react'
+import { useState, useEffect } from 'react'
 import { Resizable } from 're-resizable'
 import { AlertTriangle, Image, Download } from 'lucide-react'
 import { uploadNewImageFile } from '../../../../../services/blocks/Image/images'
@@ -25,19 +26,17 @@ function ImageBlockComponent(props: any) {
   const access_token = session?.data?.tokens?.access_token
 
   const isEditable = editorState.isEditable
-  const [image, setImage] = React.useState(null)
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [blockObject, setblockObject] = React.useState(
-    props.node.attrs.blockObject
-  )
-  const [imageSize, setImageSize] = React.useState({
+  const [image, setImage] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [blockObject, setblockObject] = useState(props.node.attrs.blockObject)
+  const [imageSize, setImageSize] = useState({
     width: props.node.attrs.size ? props.node.attrs.size.width : 300,
   })
 
   const fileId = blockObject
     ? `${blockObject.content.file_id}.${blockObject.content.file_format}`
     : null
-  const handleImageChange = (event: React.ChangeEvent<any>) => {
+  const handleImageChange = (event: ChangeEvent<any>) => {
     setImage(event.target.files[0])
   }
 
@@ -98,7 +97,7 @@ function ImageBlockComponent(props: any) {
       </FileUploadBlock>
 
       {blockObject && isEditable && (
-        <div className="w-full flex justify-center">
+        <div className="flex w-full justify-center">
           <Resizable
             defaultSize={{ width: imageSize.width, height: '100%' }}
             handleStyles={{
@@ -149,7 +148,7 @@ function ImageBlockComponent(props: any) {
                 'imageBlock'
               )}`}
               alt=""
-              className="rounded-lg shadow-sm max-w-full h-auto"
+              className="h-auto max-w-full rounded-lg shadow-sm"
               style={{ width: '100%' }}
             />
           </Resizable>
@@ -157,7 +156,7 @@ function ImageBlockComponent(props: any) {
       )}
 
       {blockObject && !isEditable && (
-        <div className="w-full flex justify-center">
+        <div className="flex w-full justify-center">
           <div className="relative">
             <img
               src={`${getActivityBlockMediaDirectory(
@@ -169,15 +168,15 @@ function ImageBlockComponent(props: any) {
                 'imageBlock'
               )}`}
               alt=""
-              className="rounded-lg shadow-sm max-w-full h-auto"
+              className="h-auto max-w-full rounded-lg shadow-sm"
               style={{ width: imageSize.width, maxWidth: '100%' }}
             />
             <button
               onClick={handleDownload}
-              className="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+              className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
               title="Download image"
             >
-              <Download className="w-4 h-4 text-white" />
+              <Download className="h-4 w-4 text-white" />
             </button>
           </div>
         </div>

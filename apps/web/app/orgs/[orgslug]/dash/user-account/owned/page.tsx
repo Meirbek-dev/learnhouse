@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import useSWR from 'swr'
@@ -30,20 +29,20 @@ function OwnedCoursesPage() {
   if (error) return <div>{generalT('error')}</div>
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10 pt-5 ">
-      <div className="flex flex-col bg-white nice-shadow px-5 py-3 rounded-md mb-6">
+    <div className="h-full w-full bg-[#f8f8f8] pt-5 pr-10 pl-10">
+      <div className="nice-shadow mb-6 flex flex-col rounded-md bg-white px-5 py-3">
         <div className="flex items-center gap-4">
-          <Package2 className="w-8 h-8 text-gray-800" />
+          <Package2 className="h-8 w-8 text-gray-800" />
           <div className="flex flex-col -space-y-1">
-            <h1 className="font-bold text-xl text-gray-800">
+            <h1 className="text-xl font-bold text-gray-800">
               {t('myCourses')}
             </h1>
-            <h2 className="text-gray-500 text-md">{t('purchasedCourses')}</h2>
+            <h2 className="text-md text-gray-500">{t('purchasedCourses')}</h2>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {ownedCourses?.map((course: any) => (
           <div key={course.course_uuid} className="p-3">
             <CourseThumbnail course={course} orgslug={org.slug} />
@@ -51,12 +50,12 @@ function OwnedCoursesPage() {
         ))}
 
         {(!ownedCourses || ownedCourses.length === 0) && (
-          <div className="col-span-full flex justify-center items-center py-8">
+          <div className="col-span-full flex items-center justify-center py-8">
             <div className="text-center">
               <div className="mb-4">
-                <BookOpen className="w-12 h-12 mx-auto text-gray-400" />
+                <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
               </div>
-              <h2 className="text-xl font-bold text-gray-600 mb-2">
+              <h2 className="mb-2 text-xl font-bold text-gray-600">
                 {t('noPurchasedCourses')}
               </h2>
               <p className="text-md text-gray-400">

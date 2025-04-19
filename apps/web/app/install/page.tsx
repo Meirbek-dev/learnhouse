@@ -1,4 +1,3 @@
-import React from 'react'
 import InstallClient from './install'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
@@ -14,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 function InstallPage() {
   return (
-    <div className="bg-white h-screen">
+    <div className="h-screen bg-white">
       <InstallClient />
     </div>
   )

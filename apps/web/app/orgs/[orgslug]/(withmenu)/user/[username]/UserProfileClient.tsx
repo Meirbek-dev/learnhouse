@@ -1,6 +1,7 @@
 'use client'
 
-import React from 'react'
+import type { FC } from 'react'
+import { useState, useEffect } from 'react'
 import UserAvatar from '@components/Objects/UserAvatar'
 import {
   Briefcase,
@@ -16,12 +17,10 @@ import {
   Calendar,
   Lightbulb,
   X,
-  ExternalLink,
 } from 'lucide-react'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { getCoursesByUser } from '@services/users/users'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { Button } from '@components/ui/button'
 import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding'
 import { useTranslations } from 'next-intl'
 
@@ -45,27 +44,26 @@ const ICON_MAP = {
   calendar: Calendar,
 } as const
 
-// Add Modal component
-const ImageModal: React.FC<{
+const ImageModal: FC<{
   image: { url: string; caption?: string }
   onClose: () => void
 }> = ({ image, onClose }) => {
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="relative max-w-4xl w-full">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+      <div className="relative w-full max-w-4xl">
         <button
           onClick={onClose}
-          className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+          className="absolute -top-10 right-0 text-white transition-colors hover:text-gray-300"
         >
-          <X className="w-6 h-6" />
+          <X className="h-6 w-6" />
         </button>
         <img
           src={image.url}
           alt={image.caption || ''}
-          className="w-full h-auto rounded-lg"
+          className="h-auto w-full rounded-lg"
         />
         {image.caption && (
-          <p className="mt-4 text-white text-center text-lg">{image.caption}</p>
+          <p className="mt-4 text-center text-lg text-white">{image.caption}</p>
         )}
       </div>
     </div>
@@ -76,14 +74,15 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('UserProfilePage')
-  const [selectedImage, setSelectedImage] = React.useState<{
+  const [selectedImage, setSelectedImage] = useState<{
     url: string
     caption?: string
   } | null>(null)
-  const [userCourses, setUserCourses] = React.useState<any[]>([])
-  const [isLoadingCourses, setIsLoadingCourses] = React.useState(false)
+  const [userCourses, setUserCourses] = useState<any[]>([])
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false)
+  const [error, setError] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchUserCourses = async () => {
       if (userData.id && access_token) {
         try {
@@ -93,7 +92,8 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
             setUserCourses(coursesData.data)
           }
         } catch (error) {
-          console.error('Error fetching user courses:', error)
+          console.error(t('fetchError'), error)
+          setError(true)
         } finally {
           setIsLoadingCourses(false)
         }
@@ -106,21 +106,21 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
   const IconComponent = ({ iconName }: { iconName: string }) => {
     const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
     if (!IconElement) return null
-    return <IconElement className="w-4 h-4 text-gray-600" />
+    return <IconElement className="h-4 w-4 text-gray-600" />
   }
 
   return (
     <div className="container mx-auto py-8">
       {/* Banner */}
-      <div className="h-48 w-full bg-gray-100 rounded-t-xl mb-0 relative overflow-hidden">
+      <div className="relative mb-0 h-48 w-full overflow-hidden rounded-t-xl bg-gray-100">
         {/* Optional banner content */}
       </div>
 
       {/* Profile Content */}
-      <div className="bg-white rounded-b-xl nice-shadow p-8 relative">
+      <div className="nice-shadow relative rounded-b-xl bg-white p-8">
         {/* Avatar Positioned on the banner */}
         <div className="absolute -top-24 left-8">
-          <div className="rounded-xl overflow-hidden shadow-lg border-4 border-white">
+          <div className="overflow-hidden rounded-xl border-4 border-white shadow-lg">
             <UserAvatar
               width={150}
               avatar_url={
@@ -149,12 +149,12 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                   affiliation.logoUrl && (
                     <div
                       key={index}
-                      className="bg-white rounded-lg p-2 shadow-lg border-2 border-white"
+                      className="rounded-lg border-2 border-white bg-white p-2 shadow-lg"
                     >
                       <img
                         src={affiliation.logoUrl}
                         alt={affiliation.name}
-                        className="w-16 h-16 object-contain"
+                        className="h-16 w-16 object-contain"
                         title={affiliation.name}
                       />
                     </div>
@@ -165,11 +165,11 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
 
         {/* Profile Content with right padding to avoid overlap */}
         <div className="mt-20 md:mt-14">
-          <div className="flex flex-col md:flex-row gap-12">
+          <div className="flex flex-col gap-12 md:flex-row">
             {/* Left column with details - aligned with avatar */}
-            <div className="w-full md:w-1/6 pl-2">
+            <div className="w-full pl-2 md:w-1/6">
               {/* Name */}
-              <h1 className="text-[32px] font-bold mb-8">
+              <h1 className="mb-8 text-[32px] font-bold">
                 {userData.first_name} {userData.last_name}
               </h1>
 
@@ -181,7 +181,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                       <div className="flex-shrink-0">
                         <IconComponent iconName={detail.icon} />
                       </div>
-                      <span className="text-gray-700 text-[15px] font-medium">
+                      <span className="text-[15px] font-medium text-gray-700">
                         {detail.text}
                       </span>
                     </div>
@@ -192,13 +192,13 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
             {/* Right column with about and related content */}
             <div className="w-full md:w-4/6">
               <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">
+                <h2 className="mb-4 text-xl font-semibold">
                   {t('aboutTitle')}
                 </h2>
                 {userData.bio ? (
                   <p className="text-gray-700">{userData.bio}</p>
                 ) : (
-                  <p className="text-gray-500 italic">No biography provided</p>
+                  <p className="text-gray-500 italic">{t('noBiography')}</p>
                 )}
               </div>
 
@@ -207,28 +207,28 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                 <div>
                   {profile.sections.map((section: any, index: number) => (
                     <div key={index} className="mb-8">
-                      <h2 className="text-xl font-semibold mb-4">
+                      <h2 className="mb-4 text-xl font-semibold">
                         {section.title}
                       </h2>
 
                       {/* Add Image Gallery section */}
                       {section.type === 'image-gallery' && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                           {section.images.map(
                             (image: any, imageIndex: number) => (
                               <div
                                 key={imageIndex}
-                                className="relative group cursor-pointer"
+                                className="group relative cursor-pointer"
                                 onClick={() => setSelectedImage(image)}
                               >
                                 <img
                                   src={image.url}
                                   alt={image.caption || ''}
-                                  className="w-full h-48 object-cover rounded-lg"
+                                  className="h-48 w-full rounded-lg object-cover"
                                 />
                                 {image.caption && (
-                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center p-4">
-                                    <p className="text-white text-center text-sm">
+                                  <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                    <p className="text-center text-sm text-white">
                                       {image.caption}
                                     </p>
                                   </div>
@@ -246,7 +246,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                       )}
 
                       {section.type === 'links' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           {section.links.map((link: any, linkIndex: number) => (
                             <a
                               key={linkIndex}
@@ -255,7 +255,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               rel="noopener noreferrer"
                               className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
                             >
-                              <LinkIcon className="w-4 h-4" />
+                              <LinkIcon className="h-4 w-4" />
                               <span>{link.title}</span>
                             </a>
                           ))}
@@ -268,7 +268,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                             (skill: any, skillIndex: number) => (
                               <span
                                 key={skillIndex}
-                                className="px-3 py-1 bg-gray-100 rounded-full text-sm"
+                                className="rounded-full bg-gray-100 px-3 py-1 text-sm"
                               >
                                 {skill.name}
                                 {skill.level && ` • ${skill.level}`}
@@ -347,7 +347,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                                     <img
                                       src={affiliation.logoUrl}
                                       alt={affiliation.name}
-                                      className="w-12 h-12 object-contain"
+                                      className="h-12 w-12 object-contain"
                                     />
                                   )}
                                   <div>
@@ -371,10 +371,10 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                         <div>
                           {isLoadingCourses ? (
                             <div className="flex items-center justify-center py-8">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
                             </div>
                           ) : userCourses.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+                            <div className="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                               {userCourses.map((course) => (
                                 <div key={course.id} className="flex">
                                   <CourseThumbnailLanding
@@ -387,14 +387,24 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               ))}
                             </div>
                           ) : (
-                            <div className="text-center py-8 text-gray-500">
-                              No courses found
+                            <div className="py-8 text-center text-gray-500">
+                              {t('courseSection.noCoursesFound')}
                             </div>
                           )}
                         </div>
                       )}
                     </div>
                   ))}
+                </div>
+              )}
+              {isLoadingCourses && (
+                <div className="py-8 text-center text-gray-500">
+                  {t('courseSection.loadingCourses')}
+                </div>
+              )}
+              {error && (
+                <div className="text-red-500">
+                  {t('courseSection.errorLoadingCourses')}
                 </div>
               )}
             </div>

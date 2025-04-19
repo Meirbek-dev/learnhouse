@@ -1,6 +1,5 @@
 'use client'
 import FormLayout, {
-  ButtonBlack,
   FormField,
   FormLabelAndMessage,
   Input,
@@ -12,7 +11,7 @@ import { swrFetcher } from '@services/utils/ts/requests'
 import { useFormik } from 'formik'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRouter } from 'next/navigation'
-import React from 'react'
+import { useState } from 'react'
 import { BarLoader } from 'react-spinners'
 import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
@@ -30,7 +29,7 @@ function AccountCreation() {
   const t = useTranslations('Install.steps.ACCOUNT_CREATION') // Use specific step namespace
   const generalT = useTranslations('General')
   const validationT = useTranslations('Validation')
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const {
@@ -161,7 +160,7 @@ function AccountCreation() {
   return (
     <div>
       {/* Add a title for the form */}
-      <h2 className="text-xl font-semibold mb-4">{t('formTitle')}</h2>
+      <h2 className="mb-4 text-xl font-semibold">{t('formTitle')}</h2>
       <FormLayout onSubmit={formik.handleSubmit}>
         <FormField name="email">
           {/* Use translation keys for labels */}
@@ -192,7 +191,7 @@ function AccountCreation() {
           </Form.Control>
           {/* Optionally add error display specific to the field */}
           {formik.touched.email && formik.errors.email && (
-            <span id="email-error" className="text-red-600 text-sm">
+            <span id="email-error" className="text-sm text-red-600">
               {formik.errors.email}
             </span>
           )}
@@ -225,7 +224,7 @@ function AccountCreation() {
             />
           </Form.Control>
           {formik.touched.password && formik.errors.password && (
-            <span id="password-error" className="text-red-600 text-sm">
+            <span id="password-error" className="text-sm text-red-600">
               {formik.errors.password}
             </span>
           )}
@@ -261,7 +260,7 @@ function AccountCreation() {
             />
           </Form.Control>
           {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-            <span id="confirmPassword-error" className="text-red-600 text-sm">
+            <span id="confirmPassword-error" className="text-sm text-red-600">
               {formik.errors.confirmPassword}
             </span>
           )}
@@ -294,7 +293,7 @@ function AccountCreation() {
             />
           </Form.Control>
           {formik.touched.username && formik.errors.username && (
-            <span id="username-error" className="text-red-600 text-sm">
+            <span id="username-error" className="text-sm text-red-600">
               {formik.errors.username}
             </span>
           )}
@@ -305,7 +304,7 @@ function AccountCreation() {
             {/* Use ButtonBlack component if defined, otherwise standard button */}
             <button
               type="submit"
-              className="bg-black text-white font-bold py-2 px-4 rounded hover:bg-gray-800 disabled:opacity-50"
+              className="rounded bg-black px-4 py-2 font-bold text-white hover:bg-gray-800 disabled:opacity-50"
               disabled={isSubmitting || !formik.isValid || !formik.dirty} // Disable when submitting or form invalid/pristine
               style={{ marginTop: 10 }} // Keep inline style if necessary
             >

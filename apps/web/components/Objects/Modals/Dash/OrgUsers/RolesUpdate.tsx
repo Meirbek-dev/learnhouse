@@ -11,7 +11,8 @@ import * as Form from '@radix-ui/react-form'
 import { FormMessage } from '@radix-ui/react-form'
 import { getAPIUrl } from '@services/config/config'
 import { updateUserRole } from '@services/organizations/orgs'
-import React, { useEffect } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { BarLoader } from 'react-spinners'
 import { mutate } from 'swr'
@@ -28,18 +29,16 @@ function RolesUpdate(props: Props) {
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [assignedRole, setAssignedRole] = React.useState(
-    props.alreadyAssignedRole
-  )
-  const [error, setError] = React.useState<string | null>(null) as any
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [assignedRole, setAssignedRole] = useState(props.alreadyAssignedRole)
+  const [error, setError] = useState<string | null>(null) as any
 
-  const handleAssignedRole = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleAssignedRole = (event: ChangeEvent<HTMLSelectElement>) => {
     setError(null)
     setAssignedRole(event.target.value)
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
@@ -76,7 +75,7 @@ function RolesUpdate(props: Props) {
       <FormLayout onSubmit={handleSubmit}>
         <FormField name="role-select">
           {error && (
-            <div className="text-red-500 font-bold text-xs px-3 py-2 bg-red-100 rounded-md mb-2">
+            <div className="mb-2 rounded-md bg-red-100 px-3 py-2 text-xs font-bold text-red-500">
               {error}
             </div>
           )}
@@ -92,7 +91,7 @@ function RolesUpdate(props: Props) {
             <select
               onChange={handleAssignedRole}
               value={assignedRole}
-              className="border border-gray-300 rounded-md p-2 w-full bg-white"
+              className="w-full rounded-md border border-gray-300 bg-white p-2"
               required
             >
               <option value="role_global_admin">{t('adminRole')}</option>

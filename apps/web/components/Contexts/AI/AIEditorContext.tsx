@@ -1,6 +1,7 @@
 'use client'
 import { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk'
-import React, { createContext, useContext, useReducer } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext, useReducer } from 'react'
 export const AIEditorContext = createContext(null) as any
 export const AIEditorDispatchContext = createContext(null) as any
 
@@ -27,7 +28,7 @@ type AIError = {
   error_message: string
 }
 
-function AIEditorProvider({ children }: { children: React.ReactNode }) {
+function AIEditorProvider({ children }: { children: ReactNode }) {
   const [aIEditorState, dispatchAIEditor] = useReducer(aIEditorReducer, {
     messages: [] as AIMessage[],
     isModalOpen: false,
@@ -40,11 +41,11 @@ function AIEditorProvider({ children }: { children: React.ReactNode }) {
     error: { isError: false, status: 0, error_message: ' ' } as AIError,
   })
   return (
-    <AIEditorContext.Provider value={aIEditorState}>
-      <AIEditorDispatchContext.Provider value={dispatchAIEditor}>
+    <AIEditorContext value={aIEditorState}>
+      <AIEditorDispatchContext value={dispatchAIEditor}>
         {children}
-      </AIEditorDispatchContext.Provider>
-    </AIEditorContext.Provider>
+      </AIEditorDispatchContext>
+    </AIEditorContext>
   )
 }
 
