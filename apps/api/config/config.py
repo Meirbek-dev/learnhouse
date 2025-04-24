@@ -19,8 +19,8 @@ class SecurityConfig(BaseModel):
 
 
 class ChromaDBConfig(BaseModel):
-    isSeparateDatabaseEnabled: bool | None 
-    db_host: str | None 
+    isSeparateDatabaseEnabled: bool | None
+    db_host: str | None
 
 
 class AIConfig(BaseModel):
@@ -129,7 +129,6 @@ def get_learnhouse_config() -> LearnHouseConfig:
     env_site_description = os.environ.get("LEARNHOUSE_SITE_DESCRIPTION")
     env_contact_email = os.environ.get("LEARNHOUSE_CONTACT_EMAIL")
     env_domain = os.environ.get("LEARNHOUSE_DOMAIN")
-    os.environ.get("LEARNHOUSE_PORT")
     env_ssl = os.environ.get("LEARNHOUSE_SSL")
     env_port = os.environ.get("LEARNHOUSE_PORT")
     env_use_default_org = os.environ.get("LEARNHOUSE_USE_DEFAULT_ORG")
@@ -143,7 +142,7 @@ def get_learnhouse_config() -> LearnHouseConfig:
     env_self_hosted = os.environ.get("LEARNHOUSE_SELF_HOSTED")
     env_sql_connection_string = os.environ.get("LEARNHOUSE_SQL_CONNECTION_STRING")
 
-    
+
 
     # Fill in values with YAML file if they are not provided
     site_name = env_site_name or yaml_config.get("site_name")
@@ -243,11 +242,11 @@ def get_learnhouse_config() -> LearnHouseConfig:
     env_stripe_webhook_standard_secret = os.environ.get("LEARNHOUSE_STRIPE_WEBHOOK_STANDARD_SECRET")
     env_stripe_webhook_connect_secret = os.environ.get("LEARNHOUSE_STRIPE_WEBHOOK_CONNECT_SECRET")
     env_stripe_client_id = os.environ.get("LEARNHOUSE_STRIPE_CLIENT_ID")
-    
+
     stripe_secret_key = env_stripe_secret_key or yaml_config.get("payments_config", {}).get(
         "stripe", {}
     ).get("stripe_secret_key")
-    
+
     stripe_publishable_key = env_stripe_publishable_key or yaml_config.get("payments_config", {}).get(
         "stripe", {}
     ).get("stripe_publishable_key")

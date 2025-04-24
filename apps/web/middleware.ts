@@ -1,4 +1,3 @@
-import { isInstallModeEnabled } from '@services/install/install'
 import {
   LEARNHOUSE_DOMAIN,
   LEARNHOUSE_TOP_DOMAIN,
@@ -33,9 +32,6 @@ export default async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl
   const fullhost = req.headers ? req.headers.get('host') : ''
   const cookie_orgslug = req.cookies.get('learnhouse_current_orgslug')?.value
-  const orgslug = fullhost
-    ? fullhost.replace(`.${LEARNHOUSE_DOMAIN}`, '')
-    : (default_org as string)
 
   // Out of orgslug paths & rewrite
   const standard_paths = ['/home']
@@ -63,17 +59,6 @@ export default async function middleware(req: NextRequest) {
       })
     }
     return response
-  }
-
-  // Install Page (depreceated)
-  if (pathname.startsWith('/install')) {
-    // Check if install mode is enabled
-    const install_mode = await isInstallModeEnabled()
-    if (install_mode) {
-      return NextResponse.rewrite(new URL(pathname, req.url))
-    } else {
-      return NextResponse.redirect(new URL('/', req.url))
-    }
   }
 
   // Dynamic Pages Editor
@@ -150,12 +135,10 @@ export default async function middleware(req: NextRequest) {
     return response
   }
 
-  // Multi Organization Mode
-  if (hosting_mode === 'multi') {
-    // Get the organization slug from the URL
-    const orgslug = fullhost
-      ? fullhost.replace(`.${LEARNHOUSE_DOMAIN}`, '')
-      : (default_org as string)
+  // Single Organization Mode
+  if (hosting_mode === 'single') {
+    // Get the default organization slug
+    const orgslug = default_org as string
     const response = NextResponse.rewrite(
       new URL(`/orgs/${orgslug}${pathname}`, req.url)
     )
@@ -171,10 +154,12 @@ export default async function middleware(req: NextRequest) {
     return response
   }
 
-  // Single Organization Mode
-  if (hosting_mode === 'single') {
-    // Get the default organization slug
-    const orgslug = default_org as string
+  // Multi Organization Mode
+  if (hosting_mode === 'multi') {
+    // Get the organization slug from the URL
+    const orgslug = fullhost
+      ? fullhost.replace(`.${LEARNHOUSE_DOMAIN}`, '')
+      : (default_org as string)
     const response = NextResponse.rewrite(
       new URL(`/orgs/${orgslug}${pathname}`, req.url)
     )

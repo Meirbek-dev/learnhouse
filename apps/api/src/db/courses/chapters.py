@@ -59,9 +59,3 @@ class ChapterOrder(BaseModel):
 class ChapterUpdateOrder(BaseModel):
     chapter_order_by_ids: List[ChapterOrder]
 
-
-class DepreceatedChaptersRead(BaseModel):
-    chapterOrder: Any
-    chapters: Any
-    activities: Any
-    pass

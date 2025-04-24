@@ -7,7 +7,6 @@
 - **FastAPI** - A high performance, async API framework for Python
 - **Pydantic** - Data validation and settings management using Python type annotations.
 - **Ruff** - An extremely fast Python linter, written in Rust.
-- **Motor** - the async Python driver for MongoDB and Tornado or asyncio
 - **Uvicorn** - an ASGI web server implementation for Python.
 
 ### Get started
@@ -24,7 +23,7 @@ Initiate a dev environment, please check the official guide [here](https://docs.
 
 ### Tech
 
-- **Next.js** (13 with the App Directory) - The React Framework
+- **Next.js** (15 with the App Directory) - The React Framework
 - **TailwindCSS** - Styling
 - **Radix UI** - Accessible UI Components
 - **Tiptap** - An editor framework and headless wrapper around ProseMirror
@@ -34,7 +33,7 @@ Initiate a dev environment, please check the official guide [here](https://docs.
 
 ### Get started
 
-Use the Docker Image available in `front/Dockerfile`, or install the frontend package on your computer for greater performance.
+Use the Docker Image available in `web/Dockerfile`, or install the frontend package on your computer for greater performance.
 
 #### Start the Backend server first
 
@@ -46,11 +45,11 @@ Please check if you initiated your `.env` files, here is a [guide](https://docs.
 
 #### Install the frontend package
 
-    npm i
+    pnpm i
 
 #### Run in Dev environment
 
-    npm run dev
+    pnpm dev
 
 ## Submitting Contributions
 

@@ -80,21 +80,21 @@
     },
     "assignmentActions": {
       "submit": "Submit Assignment",
-      "submitYourAssingmentForGrading": "Submit your assignment for grading",
+      "submitConfirm": "Are you sure you want to submit the assignment for grading? You will not be able to make changes after submission.",
       "submitForGrading": "Submit for grading",
-      "submitConfirm": "Are you sure you want to submit the assignment for grading? You will not be able to make changes after submission."
+      "submitYourAssingmentForGrading": "Submit your assignment for grading"
     },
     "assignmentStatus": {
       "graded": "Graded",
       "grading": "Grading in progress"
     },
-    "course": "Course",
-    "courseLessons": "Chapter: ",
-    "courseContent": "Course Content",
     "contributeToActivity": "Contribute to activity",
+    "course": "Course",
+    "courseContent": "Course Content",
+    "courseLessons": "Chapter: ",
     "current": "Current",
-    "marking": "Marking...",
     "markAsComplete": "Mark as complete",
+    "marking": "Marking...",
     "next": "Next",
     "nextActivityTitle": "Next: {name}",
     "noContent": "No content available",
@@ -239,7 +239,7 @@
     "CreateCourseModal": {
       "createCourse": "Create Course",
       "labelDescription": "Description",
-      "labelLearnings": "What will the course teach (What will you teach)?",
+      "labelLearnings": "Course Learnings (What will the course teach?)",
       "labelName": "Course Name",
       "labelTags": "Course Tags",
       "labelThumbnail": "Course Thumbnail",
@@ -758,14 +758,6 @@
       "startingCourse": "Starting course...",
       "youAreContributor": "You are a contributor"
     },
-    "HomePageClient": {
-      "courses": "Courses",
-      "createACourse": "Create a course to add content",
-      "createCourse": "Create Course",
-      "createCourseDescription": "Create a new course",
-      "noCourses": "No courses yet",
-      "noCoursesAvailable": "No courses available yet"
-    },
     "PaidCourseActivityDisclaimer": {
       "message": "This content requires a course purchase to access.",
       "paidContent": "Paid Content"
@@ -779,9 +771,6 @@
     "myCourses": "My Courses",
     "noCourses": "No courses yet",
     "noCoursesavailable": "No courses available yet",
-    "noPurchasedCourses": "No Purchased Courses",
-    "noPurchasedCoursesDesc": "You haven't purchased any courses yet",
-    "purchasedCourses": "Your purchased courses",
     "title": "Courses"
   },
   "CoursesPage": {
@@ -910,7 +899,7 @@
     },
     "Card": {
       "AccountSettings": {
-        "description": "Configure your personal details, passwords, emails",
+        "description": "Configure your personal details, passwords, email",
         "title": "Account Settings"
       },
       "Courses": {
@@ -924,8 +913,33 @@
       "Users": {
         "description": "Manage your organization's users and roles",
         "title": "Users"
-      }
+      },
+      "learnhouseLogo": "LearnHouse Logo",
+      "learnhouseUniversity": "LearnHouse University"
     },
+    "Courses": {
+      "CoursePage": {
+        "access": "Access",
+        "content": "Content",
+        "contributors": "Contributors",
+        "general": "General"
+      },
+      "HomePageClient": {
+        "courses": "Courses",
+        "createACourse": "Create a course to add content",
+        "createCourse": "Create Course",
+        "createCourseDescription": "Create a new course",
+        "noCourses": "No courses yet",
+        "noCoursesAvailable": "No courses available yet"
+      },
+      "error": "Error loading courses",
+      "myCourses": "My Courses",
+      "noPurchasedCourses": "No purchased courses",
+      "noPurchasedCoursesDesc": "You haven't purchased any courses yet",
+      "purchasedCourses": "Courses you have purchased or subscribed to",
+      "title": "Courses"
+    },
+    "DashboardTitle": "LearnHouse Dashboard",
     "Editor": {
       "BadgesExtension": {
         "deepDive": "Deep Dive",
@@ -1703,8 +1717,7 @@
         "userHeader": "User"
       },
       "usersTitle": "Users"
-    },
-    "DashboardTitle": "LearnHouse Dashboard"
+    }
   },
   "DashboardMenu": {
     "mobile": {
@@ -1833,21 +1846,6 @@
       "checkStatusError": "Failed to check contributor status"
     }
   },
-  "Install": {
-    "description": "Configure your LearnHouse instance",
-    "loading": "Loading installation steps...",
-    "steps": {
-      "ACCOUNT_CREATION": "Account Creation",
-      "DEFAULT_ELEMENTS": "Default Elements",
-      "DISABLING_INSTALLATION_MODE": "Completing Setup",
-      "FINISH": "Finish",
-      "INSTALL_STATUS": "Get Started",
-      "ORGANIZATION_CREATION": "Organization Setup",
-      "SAMPLE_DATA": "Sample Data"
-    },
-    "title": "LearnHouse Installation",
-    "tryAgainOrContact": "Please try again or contact support if the issue persists."
-  },
   "LandingCustom": {
     "loadingCourses": "Loading courses...",
     "noFeaturedCourses": "No featured courses selected"
@@ -1946,5 +1944,6 @@
     "required": "Required",
     "usernameMinLength": "Username must be at least {length} characters",
     "wrongCredentials": "Wrong Email or Password"
-  }
+  },
+  "learnhouse-logo": "learnhouse logo"
 }

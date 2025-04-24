@@ -21,7 +21,6 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   const t = useTranslations('DashPage.Courses.CoursePage')
   const params = use(props.params)
   function getEntireCourseUUID(courseuuid: string) {
-    // add course_ to uuid
     return `course_${courseuuid}`
   }
 

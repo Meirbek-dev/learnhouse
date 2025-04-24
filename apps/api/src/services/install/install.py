@@ -118,11 +118,19 @@ def install_default_elements(db_session: Session):
     statement = select(Role).where(Role.role_type == RoleTypeEnum.TYPE_GLOBAL)
     roles = db_session.exec(statement).all()
 
+    # First, delete UserOrganization entries that reference the roles
+    for role in roles:
+        statement = select(UserOrganization).where(UserOrganization.role_id == role.id)
+        user_orgs = db_session.exec(statement).all()
+        for user_org in user_orgs:
+            db_session.delete(user_org)
+        db_session.commit()
+
+    # Now, delete the roles
     for role in roles:
         db_session.delete(role)
 
     db_session.commit()
-
     # Check if default roles already exist
     statement = select(Role).where(Role.role_type == RoleTypeEnum.TYPE_GLOBAL)
     roles = db_session.exec(statement).all()

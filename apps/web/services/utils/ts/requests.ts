@@ -120,20 +120,11 @@ export const getResponseMetadata = async (
   fetch_result: any
 ): Promise<CustomResponseTyping> => {
   const json = await fetch_result.json()
-  if (fetch_result.status === 200) {
-    return {
-      success: true,
-      data: json,
-      status: fetch_result.status,
-      HTTPmessage: fetch_result.statusText,
-    }
-  } else {
-    return {
-      success: false,
-      data: json,
-      status: fetch_result.status,
-      HTTPmessage: fetch_result.statusText,
-    }
+  return {
+    success: fetch_result.status === 200,
+    data: json,
+    status: fetch_result.status,
+    HTTPmessage: fetch_result.statusText,
   }
 }
 

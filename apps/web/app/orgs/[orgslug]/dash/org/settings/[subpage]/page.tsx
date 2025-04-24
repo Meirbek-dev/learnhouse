@@ -97,7 +97,7 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
               {H1Label}
             </div>
             <div className="text-md flex font-medium text-gray-400">
-              {H2Label}{' '}
+              {H2Label}
             </div>
           </div>
         </div>

@@ -19,7 +19,7 @@ declare global {
   }
 }
 
-export const isDevEnv = LEARNHOUSE_TOP_DOMAIN == 'localhost' ? true : false
+export const isDevEnv = LEARNHOUSE_TOP_DOMAIN == 'localhost'
 
 export const nextAuthOptions = {
   debug: true,

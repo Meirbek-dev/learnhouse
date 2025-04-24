@@ -16,7 +16,6 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const t = await getTranslations('General')
   const params = await props.params
-  // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 1800,
     tags: ['organizations'],

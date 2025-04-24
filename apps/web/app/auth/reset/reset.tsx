@@ -77,11 +77,10 @@ function ResetPasswordClient() {
       )
       if (res.status == 200) {
         setMessage(t('success'))
-        setIsSubmitting(false)
       } else {
         setError(res.data.detail)
-        setIsSubmitting(false)
       }
+      setIsSubmitting(false)
     },
   })
   return (

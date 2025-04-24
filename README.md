@@ -72,7 +72,7 @@ TLDR: Run `docker-compose up -d` and inspect the logs, should be ready to go in 
 
 LearnHouse uses a number of open source projects to work properly:
 
-- **Next.js** (14 with the App Directory) - The React Framework
+- **Next.js** (15 with the App Directory) - The React Framework
 - **TailwindCSS** - Styling
 - **Radix UI** - Accessible UI Components
 - **Tiptap** - An editor framework and headless wrapper around ProseMirror

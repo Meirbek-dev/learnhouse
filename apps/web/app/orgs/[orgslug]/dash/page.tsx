@@ -8,13 +8,12 @@ import { getTranslations } from 'next-intl/server'
 
 async function DashboardHome() {
   const t = await getTranslations('DashPage.Card')
-  const dashboardT = await getTranslations('DashPage.HomePage')
 
   return (
     <div className="mx-auto mb-16 flex min-h-screen flex-col items-center justify-center p-4 sm:mb-0">
       <div className="mx-auto pb-6 sm:pb-10">
         <Image
-          alt="learnhouse logo"
+          alt={t('learnhouseLogo')}
           width={230}
           src={learnhousetextlogo}
           className="w-48 sm:w-auto"
@@ -54,7 +53,7 @@ async function DashboardHome() {
             >
               <University className="text-gray-100/100" size={20} />
               <div className="text-sm font-bold text-gray-100/100">
-                {dashboardT('LearnhouseUniversity')}
+                {t('learnhouseUniversity')}
               </div>
             </Link>
           </div>
@@ -82,7 +81,6 @@ async function DashboardHome() {
   )
 }
 
-// New component for dashboard cards
 function DashboardCard({
   href,
   icon,

@@ -11,7 +11,6 @@ import { useTranslations } from 'next-intl'
 
 function OwnedCoursesPage() {
   const t = useTranslations('DashPage.Courses')
-  const generalT = useTranslations('General')
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -26,7 +25,7 @@ function OwnedCoursesPage() {
   )
 
   if (isLoading) return <PageLoading />
-  if (error) return <div>{generalT('error')}</div>
+  if (error) return <div>{t('error')}</div>
 
   return (
     <div className="h-full w-full bg-[#f8f8f8] pt-5 pr-10 pl-10">
