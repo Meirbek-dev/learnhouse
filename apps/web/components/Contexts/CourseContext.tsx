@@ -11,18 +11,14 @@ import { useTranslations } from 'next-intl'
 export const CourseContext = createContext(null)
 export const CourseDispatchContext = createContext(null)
 
-export function CourseProvider({ children, courseuuid }: any) {
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+export function CourseProvider({ children, courseuuid, withUnpublishedActivities = false }: any) {
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Course')
 
-  const {
-    data: courseStructureData,
-    error,
-    isLoading: isSWRLoading,
-  } = useSWR(`${getAPIUrl()}courses/${courseuuid}/meta`, (url) =>
-    swrFetcher(url, access_token)
-  )
+  const { data: courseStructureData, error, isLoading: isSWRLoading,} = useSWR(`${getAPIUrl()}courses/${courseuuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+    url => swrFetcher(url, access_token)
+  );
 
   const initialState = {
     courseStructure: {
@@ -31,7 +27,8 @@ export function CourseProvider({ children, courseuuid }: any) {
     courseOrder: {},
     isSaved: true,
     isLoading: true,
-  }
+    withUnpublishedActivities: withUnpublishedActivities
+  };
 
   const [state, dispatch] = useReducer(courseReducer, initialState) as any
 

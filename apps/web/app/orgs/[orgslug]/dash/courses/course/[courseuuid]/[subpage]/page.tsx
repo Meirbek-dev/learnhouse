@@ -26,7 +26,10 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
 
   return (
     <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
-      <CourseProvider courseuuid={getEntireCourseUUID(params.courseuuid)}>
+      <CourseProvider
+        courseuuid={getEntireCourseUUID(params.courseuuid)}
+        withUnpublishedActivities={true}
+      >
         <div className="nice-shadow z-10 bg-[#fcfbfc] pr-10 pl-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
           <div className="flex space-x-3 text-sm font-black">

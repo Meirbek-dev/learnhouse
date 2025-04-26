@@ -19,6 +19,7 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import { deleteActivity, updateActivity } from '@services/courses/activities'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslations } from 'next-intl'
+import { useCourse } from '@components/Contexts/CourseContext'
 
 interface ModifiedActivityInterface {
   activityId: string
@@ -35,10 +36,12 @@ function Activity(props: any) {
     undefined
   )
   const t = useTranslations('CourseEdit')
+  const course = useCourse() as any;
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
 
   async function removeActivity() {
     await deleteActivity(props.activity.id, session.data?.tokens?.access_token)
-    mutate(`${getAPIUrl()}chapters/meta/course_${props.courseid}`)
+    mutate(`${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`)
     await revalidateTags(['courses'], props.orgslug)
     router.refresh()
   }
@@ -53,12 +56,8 @@ function Activity(props: any) {
         name: modifiedActivity.activityName,
       }
 
-      await updateActivity(
-        modifiedActivityCopy,
-        activityId,
-        session.data?.tokens?.access_token
-      )
-      await mutate(`${getAPIUrl()}chapters/meta/course_${props.courseid}`)
+      await updateActivity(modifiedActivityCopy, activityId, session.data?.tokens?.access_token)
+      await mutate(`${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`)
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
     }

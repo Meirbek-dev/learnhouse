@@ -214,6 +214,7 @@ async def get_course_chapters(
     course_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
+    with_unpublished_activities: bool,
     page: int = 1,
     limit: int = 10,
 ) -> List[ChapterRead]:
@@ -249,7 +250,7 @@ async def get_course_chapters(
         for chapter_activity in chapter_activities:
             statement = (
                 select(Activity)
-                .where(Activity.id == chapter_activity.activity_id)
+                .where(Activity.id == chapter_activity.activity_id, with_unpublished_activities or Activity.published == True)
                 .distinct(Activity.id)
             )
             activity = db_session.exec(statement).first()
@@ -394,7 +395,7 @@ async def reorder_chapters_and_activities(
                 order=index,
             )
             db_session.add(course_chapter)
-        
+
         db_session.commit()
 
     # Remove chapters that are no longer in the order
@@ -417,7 +418,7 @@ async def reorder_chapters_and_activities(
 
     # Create a map for faster lookup
     existing_activity_map = {
-        (ca.chapter_id, ca.activity_id): ca 
+        (ca.chapter_id, ca.activity_id): ca
         for ca in existing_chapter_activities
     }
 
@@ -447,7 +448,7 @@ async def reorder_chapters_and_activities(
                     order=index,
                 )
                 db_session.add(chapter_activity)
-            
+
             db_session.commit()
 
     # Remove activities that are no longer in any chapter

@@ -11,86 +11,129 @@ import {
   FileWarning,
 } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useState } from 'react'
-import * as React from 'react'
+import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
 import UnsplashImagePicker from './UnsplashImagePicker'
 import { useTranslations } from 'next-intl'
 import toast from 'react-hot-toast'
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
+
+type ValidMimeType = typeof VALID_MIME_TYPES[number];
+
 function ThumbnailUpdate() {
   const course = useCourse() as any
   const session = useLHSession() as any
   const org = useOrg() as any
-  const [localThumbnail, setLocalThumbnail] = React.useState(null) as any
-  const [isLoading, setIsLoading] = React.useState(false) as any
-  const [error, setError] = React.useState('') as any
+  const [localThumbnail, setLocalThumbnail] = useState<{ file: File; url: string } | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string>('')
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
   const t = useTranslations('CourseEdit.General.Thumbnail')
   const tNotify = useTranslations('Notifications')
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
 
-  const handleFileChange = async (event: any) => {
-    const file = event.target.files[0]
-    setLocalThumbnail(file)
-    await updateThumbnail(file)
+  // Cleanup blob URLs when component unmounts or when thumbnail changes
+  useEffect(() => {
+    return () => {
+      if (localThumbnail?.url) {
+        URL.revokeObjectURL(localThumbnail.url);
+      }
+    };
+  }, [localThumbnail]);
+
+  const validateFile = (file: File): boolean => {
+    if (!VALID_MIME_TYPES.includes(file.type as ValidMimeType)) {
+      setError('Please upload only PNG or JPG/JPEG images');
+      return false;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File size should be less than 5MB');
+      return false;
+    }
+
+    return true;
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!validateFile(file)) {
+      event.target.value = '';
+      return;
+    }
+
+    const blobUrl = URL.createObjectURL(file);
+    setLocalThumbnail({ file, url: blobUrl });
+    await updateThumbnail(file);
   }
 
   const handleUnsplashSelect = async (imageUrl: string) => {
-    setIsLoading(true)
-    const response = await fetch(imageUrl)
-    const blob = await response.blob()
-    const file = new File([blob], 'unsplash_image.jpg', { type: 'image/jpeg' })
-    setLocalThumbnail(file)
-    await updateThumbnail(file)
+    try {
+      setIsLoading(true);
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+
+      if (!VALID_MIME_TYPES.includes(blob.type as ValidMimeType)) {
+        throw new Error('Invalid image format from Unsplash');
+      }
+
+      const file = new File([blob], `unsplash_${Date.now()}.jpg`, { type: blob.type });
+
+      if (!validateFile(file)) {
+        return;
+      }
+
+      const blobUrl = URL.createObjectURL(file);
+      setLocalThumbnail({ file, url: blobUrl });
+      await updateThumbnail(file);
+    } catch (err) {
+      setError('Failed to process Unsplash image');
+      setIsLoading(false);
+    }
   }
 
   const updateThumbnail = async (file: File) => {
-    setIsLoading(true)
-    const toast_loading = tNotify('uploading')
-    const toast_id = toast.loading(toast_loading)
-
+    setIsLoading(true);
     try {
       const res = await updateCourseThumbnail(
         course.courseStructure.course_uuid,
         file,
         session.data?.tokens?.access_token
-      )
-      mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
+      );
+
+      await mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
+      await new Promise((r) => setTimeout(r, 1500));
 
       if (res.success === false) {
-        setError(res.HTTPmessage || tNotify('avatarError'))
-        toast.error(res.HTTPmessage || tNotify('avatarError'), { id: toast_id })
+        setError(res.HTTPmessage);
       } else {
-        setError('')
-        toast.success(tNotify('avatarSuccess'), { id: toast_id })
+        setError('');
       }
     } catch (err) {
-      console.error('Error updating thumbnail:', err)
-      setError(tNotify('avatarError'))
-      toast.error(tNotify('avatarError'), { id: toast_id })
+      setError('Failed to update thumbnail');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   return (
-    <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-gray-200">
+    <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-1 outline-gray-200">
       <div className="flex h-full flex-col items-center justify-center">
         <div className="flex flex-col items-center justify-center">
           <div className="flex flex-col items-center justify-center">
             {error && (
               <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 shadow-xs transition-all">
-                <FileWarning size={16} className="mr-2" />
-                <div className="text-sm font-semibold first-letter:uppercase">
-                  {error}
-                </div>
+                <div className="text-sm font-semibold">{error}</div>
               </div>
             )}
             {localThumbnail ? (
               <img
                 src={URL.createObjectURL(localThumbnail)}
                 className={`${isLoading ? 'animate-pulse' : ''} h-[100px] w-[200px] rounded-md shadow-sm`}
-                alt="Course Thumbnail Preview"
               />
             ) : (
               <img
@@ -104,7 +147,6 @@ function ThumbnailUpdate() {
                     : '/empty_thumbnail.png'
                 }`}
                 className="h-[100px] w-[200px] rounded-md bg-gray-200 shadow-sm"
-                alt="Course Thumbnail"
               />
             )}
           </div>
@@ -112,7 +154,7 @@ function ThumbnailUpdate() {
             <div className="flex items-center justify-center">
               <div className="text-gray mt-4 flex animate-pulse items-center rounded-md bg-green-200 px-4 py-2 text-sm font-bold antialiased">
                 <ArrowBigUpDash size={16} className="mr-2" />
-                <span>{t('uploading')}</span>
+                <span>Uploading</span>
               </div>
             </div>
           ) : (
@@ -120,30 +162,43 @@ function ThumbnailUpdate() {
               <input
                 type="file"
                 id="fileInput"
-                style={{ display: 'none' }}
+                className="hidden"
+                accept=".jpg,.jpeg,.png"
                 onChange={handleFileChange}
                 accept="image/*"
               />
               <button
-                type="button"
-                className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
+                className="flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-100"
                 onClick={() => document.getElementById('fileInput')?.click()}
               >
                 <UploadCloud size={16} className="mr-2" />
-                <span>{t('uploadImageButton')}</span>
+                {t('uploadImageButton')}
               </button>
               <button
-                type="button"
                 className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
                 onClick={() => setShowUnsplashPicker(true)}
               >
                 <ImageIcon size={16} className="mr-2" />
-                <span>{t('chooseFromGalleryButton')}</span>
+                Gallery
               </button>
             </div>
           )}
         </div>
+
+        {isLoading && (
+          <div className="flex items-center justify-center">
+            <div className="flex items-center rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-800">
+              <ArrowBigUpDash size={16} className="mr-2 animate-bounce" />
+              Uploading...
+            </div>
+          </div>
+        )}
+
+        <p className="text-xs text-gray-500">
+          Supported formats: PNG, JPG/JPEG
+        </p>
       </div>
+
       {showUnsplashPicker && (
         <UnsplashImagePicker
           onSelect={handleUnsplashSelect}

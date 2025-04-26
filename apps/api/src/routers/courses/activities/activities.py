@@ -62,7 +62,7 @@ async def api_get_activityby_id(
     return await get_activityby_id(
         request, activity_id, current_user=current_user, db_session=db_session
     )
-            
+
 @router.get("/chapter/{chapter_id}")
 async def api_get_chapter_activities(
     request: Request,
@@ -113,6 +113,7 @@ async def api_create_video_activity(
     request: Request,
     name: str = Form(),
     chapter_id: str = Form(),
+    details: str = Form(default="{}"),
     current_user: PublicUser = Depends(get_current_user),
     video_file: UploadFile | None = None,
     db_session=Depends(get_db_session),
@@ -127,6 +128,7 @@ async def api_create_video_activity(
         current_user,
         db_session,
         video_file,
+        details,
     )
 
 

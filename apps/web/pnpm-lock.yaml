@@ -81,9 +81,21 @@ importers:
       '@tiptap/core':
         specifier: ^2.11.7
         version: 2.11.7(@tiptap/pm@2.11.7)
+      '@tiptap/extension-bullet-list':
+        specifier: ^2.11.7
+        version: 2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))
       '@tiptap/extension-code-block-lowlight':
         specifier: ^2.11.7
         version: 2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))(@tiptap/extension-code-block@2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7)(highlight.js@11.11.1)(lowlight@3.3.0)
+      '@tiptap/extension-link':
+        specifier: ^2.11.7
+        version: 2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7)
+      '@tiptap/extension-list-item':
+        specifier: ^2.11.7
+        version: 2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))
+      '@tiptap/extension-ordered-list':
+        specifier: ^2.11.7
+        version: 2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))
       '@tiptap/extension-table':
         specifier: ^2.11.7
         version: 2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7)
@@ -1657,6 +1669,12 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.7.0
 
+  '@tiptap/extension-link@2.11.7':
+    resolution: {integrity: sha512-qKIowE73aAUrnQCIifYP34xXOHOsZw46cT/LBDlb0T60knVfQoKVE4ku08fJzAV+s6zqgsaaZ4HVOXkQYLoW7g==}
+    peerDependencies:
+      '@tiptap/core': ^2.7.0
+      '@tiptap/pm': ^2.7.0
+
   '@tiptap/extension-list-item@2.11.7':
     resolution: {integrity: sha512-6ikh7Y+qAbkSuIHXPIINqfzmWs5uIGrylihdZ9adaIyvrN1KSnWIqrZIk/NcZTg5YFIJlXrnGSRSjb/QM3WUhw==}
     peerDependencies:
@@ -2868,6 +2886,9 @@ packages:
 
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
+
+  linkifyjs@4.2.0:
+    resolution: {integrity: sha512-pCj3PrQyATaoTYKHrgWRF3SJwsm61udVh+vuls/Rl6SptiDhgE7ziUIudAedRY9QEfynmM7/RmLEfPUyw1HPCw==}
 
   load-script@1.0.0:
     resolution: {integrity: sha512-kPEjMFtZvwL9TaZo0uZ2ml+Ye9HUMmPwbYRJ324qF9tqMejwykJ5ggTyvzmrbBeapCAbk98BSbTeovHEEP1uCA==}
@@ -5194,6 +5215,12 @@ snapshots:
     dependencies:
       '@tiptap/core': 2.11.7(@tiptap/pm@2.11.7)
 
+  '@tiptap/extension-link@2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7)':
+    dependencies:
+      '@tiptap/core': 2.11.7(@tiptap/pm@2.11.7)
+      '@tiptap/pm': 2.11.7
+      linkifyjs: 4.2.0
+
   '@tiptap/extension-list-item@2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))':
     dependencies:
       '@tiptap/core': 2.11.7(@tiptap/pm@2.11.7)
@@ -6593,6 +6620,8 @@ snapshots:
   linkify-it@5.0.0:
     dependencies:
       uc.micro: 2.1.0
+
+  linkifyjs@4.2.0: {}
 
   load-script@1.0.0: {}
 

@@ -126,6 +126,7 @@ async def get_course_by_id(
 async def get_course_meta(
     request: Request,
     course_uuid: str,
+    with_unpublished_activities: bool,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> FullCourseReadWithTrail:
@@ -147,26 +148,26 @@ async def get_course_meta(
 
     # Start async tasks concurrently
     tasks = []
-    
+
     # Task 1: Get course authors with their roles
     async def get_authors():
         authors_statement = (
             select(ResourceAuthor, User)
-            .join(User, ResourceAuthor.user_id == User.id)  # type: ignore  
+            .join(User, ResourceAuthor.user_id == User.id)  # type: ignore
             .where(ResourceAuthor.resource_uuid == course.course_uuid)
             .order_by(
                 ResourceAuthor.id.asc()  # type: ignore
             )
         )
         return db_session.exec(authors_statement).all()
-    
+
     # Task 2: Get course chapters
     async def get_chapters():
         # Ensure course.id is not None
         if course.id is None:
             return []
-        return await get_course_chapters(request, course.id, db_session, current_user)
-    
+        return await get_course_chapters(request, course.id, db_session, current_user, with_unpublished_activities)
+
     # Task 3: Get user trail (only for authenticated users)
     async def get_trail():
         if isinstance(current_user, AnonymousUser):
@@ -174,15 +175,15 @@ async def get_course_meta(
         return await get_user_trail_with_orgid(
             request, current_user, course.org_id, db_session
         )
-    
+
     # Add tasks to the list
     tasks.append(get_authors())
     tasks.append(get_chapters())
     tasks.append(get_trail())
-    
+
     # Run all tasks concurrently
     author_results, chapters, trail = await asyncio.gather(*tasks)
-    
+
     # Convert to AuthorWithRole objects
     authors = [
         AuthorWithRole(
@@ -194,10 +195,10 @@ async def get_course_meta(
         )
         for resource_author, user in author_results
     ]
-    
+
     # Create course read model
     course_read = CourseRead(**course.model_dump(), authors=authors)
-    
+
     return FullCourseReadWithTrail(
         **course_read.model_dump(),
         chapters=chapters,
@@ -251,13 +252,13 @@ async def get_courses_orgslug(
     query = query.offset(offset).limit(limit).distinct()
 
     courses = db_session.exec(query).all()
-    
+
     if not courses:
         return []
-        
+
     # Get all course UUIDs
     course_uuids = [course.course_uuid for course in courses]
-    
+
     # Fetch all authors for all courses in a single query
     authors_query = (
         select(ResourceAuthor, User)
@@ -267,9 +268,9 @@ async def get_courses_orgslug(
             ResourceAuthor.id.asc()
         )
     )
-    
+
     author_results = db_session.exec(authors_query).all()
-    
+
     # Create a dictionary mapping course_uuid to list of authors
     course_authors = {}
     for resource_author, user in author_results:
@@ -284,7 +285,7 @@ async def get_courses_orgslug(
                 update_date=resource_author.update_date
             )
         )
-    
+
     # Create CourseRead objects with authors
     course_reads = []
     for course in courses:
@@ -391,7 +392,7 @@ async def search_courses(
             )
             for resource_author, user in author_results
         ]
-        
+
         course_read = CourseRead.model_validate({
             "id": course.id or 0,  # Ensure id is never None
             "org_id": course.org_id,
@@ -674,7 +675,7 @@ async def get_user_courses(
 ) -> List[CourseRead]:
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
-    
+
     # Get all resource authors for the user
     statement = select(ResourceAuthor).where(
         and_(
@@ -683,21 +684,21 @@ async def get_user_courses(
         )
     )
     resource_authors = db_session.exec(statement).all()
-    
+
     # Extract course UUIDs from resource authors
     course_uuids = [author.resource_uuid for author in resource_authors]
-    
+
     if not course_uuids:
         return []
-    
+
     # Get courses with the extracted UUIDs
     statement = select(Course).where(Course.course_uuid.in_(course_uuids))
-    
+
     # Apply pagination
     statement = statement.offset((page - 1) * limit).limit(limit)
-    
+
     courses = db_session.exec(statement).all()
-    
+
     # Convert to CourseRead objects
     result = []
     for course in courses:
@@ -706,14 +707,14 @@ async def get_user_courses(
             ResourceAuthor.resource_uuid == course.course_uuid
         )
         authors = db_session.exec(authors_statement).all()
-        
+
         # Convert authors to AuthorWithRole objects
         authors_with_role = []
         for author in authors:
             # Get user for the author
             user_statement = select(User).where(User.id == author.user_id)
             user = db_session.exec(user_statement).first()
-            
+
             if user:
                 authors_with_role.append(
                     AuthorWithRole(
@@ -724,7 +725,7 @@ async def get_user_courses(
                         update_date=author.update_date,
                     )
                 )
-        
+
         # Create CourseRead object
         course_read = CourseRead.model_validate({
             "id": course.id or 0,  # Ensure id is never None
@@ -742,9 +743,9 @@ async def get_user_courses(
             "update_date": course.update_date,
             "authors": authors_with_role
         })
-        
+
         result.append(course_read)
-    
+
     return result
 
 

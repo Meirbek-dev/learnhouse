@@ -12,6 +12,7 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslations } from 'next-intl'
 
+import { useCourse } from '@components/Contexts/CourseContext'
 interface ModifiedChapterInterface {
   chapterId: string
   chapterName: string
@@ -27,18 +28,16 @@ function Chapter(props: any) {
   const [selectedChapter, setSelectedChapter] = useState<string | undefined>(
     undefined
   )
+  const course = useCourse() as any;
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
 
   async function updateChapterName(chapterId: string) {
     if (modifiedChapter?.chapterId === chapterId) {
       let modifiedChapterCopy = {
         name: modifiedChapter.chapterName,
       }
-      await updateChapter(
-        chapterId,
-        modifiedChapterCopy,
-        session.data?.tokens?.access_token
-      )
-      await mutate(`${getAPIUrl()}chapters/course/${props.course_uuid}/meta`)
+      await updateChapter(chapterId, modifiedChapterCopy, session.data?.tokens?.access_token)
+      await mutate(`${getAPIUrl()}chapters/course/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
     }

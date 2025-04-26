@@ -33,6 +33,8 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import Link from 'next/link'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { useTranslations } from 'next-intl'
+import { getLinkExtension } from './EditorConf'
+import { Link as LinkExtension } from '@tiptap/extension-link'
 
 // Lowlight
 import { common, createLowlight } from 'lowlight'
@@ -94,7 +96,18 @@ function Editor(props: EditorProps) {
   const editor: any = useEditor({
     editable: true,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: {
+          HTMLAttributes: {
+            class: 'bullet-list',
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: 'ordered-list',
+          },
+        },
+      }),
       InfoCallout.configure({
         editable: true,
       }),
@@ -150,6 +163,7 @@ function Editor(props: EditorProps) {
       TableRow,
       TableHeader,
       TableCell,
+      getLinkExtension(),
     ],
     content: props.content,
     immediatelyRender: false,
@@ -470,6 +484,19 @@ export const EditorContentWrapper = styled.div`
       margin-bottom: 10px;
     }
 
+    // Link styling
+    a {
+      color: #2563eb;
+      text-decoration: underline;
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #1d4ed8;
+        text-decoration: none;
+      }
+    }
+
     padding-left: 20px;
     padding-right: 20px;
     padding-bottom: 20px;
@@ -575,6 +602,13 @@ export const EditorContentWrapper = styled.div`
   ol {
     padding: 0 1rem;
     padding-left: 20px;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
     list-style-type: decimal;
   }
 

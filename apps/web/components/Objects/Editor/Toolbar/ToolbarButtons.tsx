@@ -24,37 +24,33 @@ import {
   Cuboid,
   FileText,
   ImagePlus,
+  Lightbulb,
+  Link2,
   MousePointerClick,
   Sigma,
   Tags,
   User,
   Video,
+  List,
+  ListOrdered,
 } from 'lucide-react'
 import { SiYoutube } from '@icons-pack/react-simple-icons'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import LinkInputTooltip from './LinkInputTooltip'
 import { useTranslations } from 'next-intl'
 
 export const ToolbarButtons = ({ editor, props }: any) => {
   const t = useTranslations('Editor.Toolbar')
   const [showTableMenu, setShowTableMenu] = useState(false)
+  const [showListMenu, setShowListMenu] = useState(false)
+  const [showLinkInput, setShowLinkInput] = useState(false)
+  const linkButtonRef = useRef<HTMLDivElement>(null)
 
   if (!editor) {
     return null
   }
 
-  // YouTube extension
-  const addYoutubeVideo = () => {
-    const url = prompt('Enter YouTube URL')
-
-    if (url) {
-      editor.commands.setYoutubeVideo({
-        src: url,
-        width: 640,
-        height: 480,
-      })
-    }
-  }
 
   const tableOptions = [
     {
@@ -89,50 +85,140 @@ export const ToolbarButtons = ({ editor, props }: any) => {
     },
   ]
 
+  const listOptions = [
+    {
+      label: 'Bullet List',
+      icon: <List size={15} />,
+      action: () => {
+        if (editor.isActive('bulletList')) {
+          editor.chain().focus().toggleBulletList().run()
+        } else {
+          editor.chain().focus().toggleOrderedList().run()
+          editor.chain().focus().toggleBulletList().run()
+        }
+      }
+    },
+    {
+      label: 'Ordered List',
+      icon: <ListOrdered size={15} />,
+      action: () => {
+        if (editor.isActive('orderedList')) {
+          editor.chain().focus().toggleOrderedList().run()
+        } else {
+          editor.chain().focus().toggleBulletList().run()
+          editor.chain().focus().toggleOrderedList().run()
+        }
+      }
+    }
+  ]
+
+  const handleLinkClick = () => {
+    // Store the current selection
+    const { from, to } = editor.state.selection
+
+    if (editor.isActive('link')) {
+      const currentLink = editor.getAttributes('link')
+      setShowLinkInput(true)
+    } else {
+      setShowLinkInput(true)
+    }
+
+    // Restore the selection after a small delay to ensure the tooltip is rendered
+    setTimeout(() => {
+      editor.commands.setTextSelection({ from, to })
+    }, 0)
+  }
+
+  const getCurrentLinkUrl = () => {
+    if (editor.isActive('link')) {
+      return editor.getAttributes('link').href
+    }
+    return ''
+  }
+
+  const handleLinkSave = (url: string) => {
+    editor
+      .chain()
+      .focus()
+      .setLink({
+        href: url,
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      })
+      .run()
+    setShowLinkInput(false)
+  }
+
+  const handleLinkCancel = () => {
+    setShowLinkInput(false)
+  }
+
   return (
     <ToolButtonsWrapper>
-      <ToolTip content={t('undo')}>
-        <ToolBtn onClick={() => editor.chain().focus().undo().run()}>
-          <ArrowLeftIcon />
-        </ToolBtn>
-      </ToolTip>
-      <ToolTip content={t('redo')}>
-        <ToolBtn onClick={() => editor.chain().focus().redo().run()}>
-          <ArrowRightIcon />
-        </ToolBtn>
-      </ToolTip>
-      <ToolTip content={t('bold')}>
+      <ToolBtn onClick={() => editor.chain().focus().undo().run()}>
+        <ArrowLeftIcon />
+      </ToolBtn>
+      <ToolBtn onClick={() => editor.chain().focus().redo().run()}>
+        <ArrowRightIcon />
+      </ToolBtn>
+      <ToolBtn
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive('bold') ? 'is-active' : ''}
+      >
+        <FontBoldIcon />
+      </ToolBtn>
+      <ToolBtn
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive('italic') ? 'is-active' : ''}
+      >
+        <FontItalicIcon />
+      </ToolBtn>
+      <ToolBtn
+        onClick={() => editor.chain().focus().toggleStrike().run()}
+        className={editor.isActive('strike') ? 'is-active' : ''}
+      >
+        <StrikethroughIcon />
+      </ToolBtn>
+      <ListMenuWrapper>
         <ToolBtn
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'is-active' : ''}
-        >
-          <FontBoldIcon />
-        </ToolBtn>
-      </ToolTip>
-      <ToolTip content={t('italic')}>
-        <ToolBtn
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'is-active' : ''}
-        >
-          <FontItalicIcon />
-        </ToolBtn>
-      </ToolTip>
-      <ToolTip content={t('strike')}>
-        <ToolBtn
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={editor.isActive('strike') ? 'is-active' : ''}
-        >
-          <StrikethroughIcon />
-        </ToolBtn>
-      </ToolTip>
-      <ToolTip content={t('orderedList')}>
-        <ToolBtn
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'is-active' : ''}
+          onClick={() => setShowListMenu(!showListMenu)}
+          className={
+            showListMenu ||
+            editor.isActive('bulletList') ||
+            editor.isActive('orderedList')
+              ? 'is-active'
+              : ''
+          }
         >
           <ListBulletIcon />
+          <ChevronDownIcon />
         </ToolBtn>
-      </ToolTip>
+        {showListMenu && (
+          <ListDropdown>
+            {listOptions.map((option, index) => (
+              <ListMenuItem
+                key={index}
+                onClick={() => {
+                  option.action()
+                  setShowListMenu(false)
+                }}
+                className={
+                  editor.isActive(
+                    option.label === 'Bullet List'
+                      ? 'bulletList'
+                      : 'orderedList'
+                  )
+                    ? 'is-active'
+                    : ''
+                }
+              >
+                <span className="icon">{option.icon}</span>
+                <span className="label">{option.label}</span>
+              </ListMenuItem>
+            ))}
+          </ListDropdown>
+        )}
+      </ListMenuWrapper>
       <ToolSelect
         value={
           editor.isActive('heading', { level: 1 })
@@ -216,6 +302,24 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         >
           <AlertTriangle size={15} />
         </ToolBtn>
+      </ToolTip>
+      <ToolTip content={'Link'}>
+        <div style={{ position: 'relative' }}>
+          <ToolBtn
+            ref={linkButtonRef}
+            onClick={handleLinkClick}
+            className={editor.isActive('link') ? 'is-active' : ''}
+          >
+            <Link2 size={15} />
+          </ToolBtn>
+          {showLinkInput && (
+            <LinkInputTooltip
+              onSave={handleLinkSave}
+              onCancel={handleLinkCancel}
+              currentUrl={getCurrentLinkUrl()}
+            />
+          )}
+        </div>
       </ToolTip>
       <ToolTip content={t('image')}>
         <ToolBtn
@@ -467,6 +571,52 @@ const TableMenuItem = styled.div`
 
   &:hover {
     background: rgba(217, 217, 217, 0.24);
+  }
+
+  .icon {
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+  }
+
+  .label {
+    font-size: 12px;
+    font-family: 'DM Sans';
+  }
+`
+
+
+const ListMenuWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`
+
+const ListDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid rgba(217, 217, 217, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 180px;
+  margin-top: 4px;
+`
+
+const ListMenuItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(217, 217, 217, 0.24);
+  }
+
+  &.is-active {
+    background: rgba(176, 176, 176, 0.5);
   }
 
   .icon {

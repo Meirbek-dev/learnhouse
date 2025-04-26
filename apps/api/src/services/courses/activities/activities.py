@@ -114,7 +114,7 @@ async def get_activity(
             status_code=404,
             detail="Activity not found",
         )
-    
+
     activity, course = result
 
     # RBAC check
@@ -152,7 +152,7 @@ async def get_activityby_id(
             status_code=404,
             detail="Activity not found",
         )
-    
+
     activity, course = result
 
     # RBAC check
@@ -260,21 +260,27 @@ async def get_activities(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> list[ActivityRead]:
-    statement = select(ChapterActivity).where(
-        ChapterActivity.chapter_id == coursechapter_id
+    # Get activities that are published and belong to the chapter
+    statement = (
+        select(Activity)
+        .join(ChapterActivity)
+        .where(
+            ChapterActivity.chapter_id == coursechapter_id,
+            Activity.published == True
+        )
     )
     activities = db_session.exec(statement).all()
 
     if not activities:
         raise HTTPException(
             status_code=404,
-            detail="No activities found",
+            detail="No published activities found",
         )
 
     # RBAC check
     statement = select(Chapter).where(Chapter.id == coursechapter_id)
     chapter = db_session.exec(statement).first()
-    
+
     if not chapter:
         raise HTTPException(
             status_code=404,
@@ -307,7 +313,7 @@ async def rbac_check(
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,
 ):
-    
+
 
     if action == "read":
         if current_user.id == 0:  # Anonymous user

@@ -27,8 +27,9 @@ function NewActivityButton(props: NewActivityButtonProps) {
   const [newActivityModal, setNewActivityModal] = useState(false)
   const router = useRouter()
   const course = useCourse() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
   const t = useTranslations('CourseEdit.NewActivityModal')
   const tNotify = useTranslations('Notifications')
 
@@ -48,7 +49,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
     )
     const toast_loading = toast.loading(tNotify('creatingActivity'))
     await createActivity(activity, props.chapterId, org.org_id, access_token)
-    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
+    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
     toast.dismiss(toast_loading)
     toast.success(tNotify('activityCreatedSuccess'))
     setNewActivityModal(false)
@@ -65,7 +66,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
   ) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'))
     await createFileActivity(file, type, activity, chapterId, access_token)
-    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
+    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
     setNewActivityModal(false)
     toast.dismiss(toast_loading)
     toast.success(tNotify('fileUploadSuccess'))
@@ -87,7 +88,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
       props.chapterId,
       access_token
     )
-    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`)
+    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
     setNewActivityModal(false)
     toast.dismiss(toast_loading)
     toast.success(tNotify('activityCreatedSuccess'))

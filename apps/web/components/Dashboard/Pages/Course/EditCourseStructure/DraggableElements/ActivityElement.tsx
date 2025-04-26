@@ -60,6 +60,8 @@ function ActivityElement(props: ActivitiyElementProps) {
   const activityUUID = props.activity.activity_uuid
   const isMobile = useMediaQuery('(max-width: 767px)')
   const t = useTranslations('CourseEdit.ActivityElement')
+  const course = useCourse() as any;
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
 
   async function deleteActivityUI() {
     const toast_loading = toast.loading('Deleting activity...')
@@ -72,7 +74,8 @@ function ActivityElement(props: ActivitiyElementProps) {
     }
 
     await deleteActivity(props.activity.activity_uuid, access_token)
-    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta`)
+    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
+    await revalidateTags(['courses'], props.orgslug)
     toast.dismiss(toast_loading)
     toast.success(t('activityDeletedSuccess'))
     router.refresh()
@@ -88,7 +91,7 @@ function ActivityElement(props: ActivitiyElementProps) {
       props.activity.activity_uuid,
       access_token
     )
-    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta`)
+    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
     toast.dismiss(toast_loading)
     toast.success(t('activityUpdateSuccess'))
     await revalidateTags(['courses'], props.orgslug)
@@ -109,7 +112,7 @@ function ActivityElement(props: ActivitiyElementProps) {
 
       try {
         await updateActivity(modifiedActivityCopy, activityUUID, access_token)
-        mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta`)
+        mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
         await revalidateTags(['courses'], props.orgslug)
         toast.success('Activity name updated successfully')
         router.refresh()
