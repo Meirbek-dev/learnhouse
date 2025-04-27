@@ -36,7 +36,7 @@ export function AssignmentsTaskProvider({ children }: { children: ReactNode }) {
   const access_token = session?.data?.tokens?.access_token
   const assignment = useAssignments() as any
 
-  const [state, dispatch] = useReducer(assignmentstaskReducer, initialState)
+  const [state, dispatch] = useReducer(assignmentsTaskReducer, initialState)
 
   async function fetchAssignmentTask(assignmentTaskUUID: string) {
     const res = await getAssignmentTask(assignmentTaskUUID, access_token)
@@ -84,7 +84,7 @@ export function useAssignmentsTaskDispatch() {
   return context
 }
 
-function assignmentstaskReducer(state: State, action: Action): State {
+function assignmentsTaskReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'setSelectedAssignmentTaskUUID':
       return { ...state, selectedAssignmentTaskUUID: action.payload }

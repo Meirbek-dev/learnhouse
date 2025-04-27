@@ -13,7 +13,9 @@ export const getLinkExtension = () => {
     isAllowedUri: (url: string, ctx: any) => {
       try {
         // construct URL
-        const parsedUrl = url.includes(':') ? new URL(url) : new URL(`${ctx.defaultProtocol}://${url}`)
+        const parsedUrl = url.includes(':')
+          ? new URL(url)
+          : new URL(`${ctx.defaultProtocol}://${url}`)
 
         // use default validation
         if (!ctx.defaultValidate(parsedUrl.href)) {
@@ -29,7 +31,9 @@ export const getLinkExtension = () => {
         }
 
         // only allow protocols specified in ctx.protocols
-        const allowedProtocols = ctx.protocols.map((p: any) => (typeof p === 'string' ? p : p.scheme))
+        const allowedProtocols = ctx.protocols.map((p: any) =>
+          typeof p === 'string' ? p : p.scheme
+        )
 
         if (!allowedProtocols.includes(protocol)) {
           return false
@@ -44,10 +48,15 @@ export const getLinkExtension = () => {
     shouldAutoLink: (url: string) => {
       try {
         // construct URL
-        const parsedUrl = url.includes(':') ? new URL(url) : new URL(`https://${url}`)
+        const parsedUrl = url.includes(':')
+          ? new URL(url)
+          : new URL(`https://${url}`)
 
         // only auto-link if the domain is not in the disallowed list
-        const disallowedDomains = ['example-no-autolink.com', 'another-no-autolink.com']
+        const disallowedDomains = [
+          'example-no-autolink.com',
+          'another-no-autolink.com',
+        ]
         const domain = parsedUrl.hostname
 
         return !disallowedDomains.includes(domain)
@@ -56,4 +65,4 @@ export const getLinkExtension = () => {
       }
     },
   })
-} 
+}

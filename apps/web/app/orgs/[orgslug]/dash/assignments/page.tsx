@@ -60,7 +60,7 @@ function AssignmentsHome() {
       <div className="mr-4 flex w-full flex-col space-y-5 pl-4 tracking-tighter sm:mr-10 sm:pl-10">
         <div className="flex flex-col space-y-2">
           <BreadCrumbs type="assignments" />
-          <h1 className="flex pt-3 text-4xl font-bold">Assignments</h1>
+          <h1 className="flex pt-3 text-4xl font-bold">{t('assignments')}</h1>
         </div>
         <div className="flex w-full flex-col space-y-3">
           {courseAssignments.map((assignments: any, index: number) => (
@@ -166,7 +166,6 @@ function AssignmentsHome() {
 const MiniThumbnail = (props: { course: any }) => {
   const org = useOrg() as any
 
-  // function to remove "course_" from the course_uuid
   function removeCoursePrefix(course_uuid: string) {
     return course_uuid.replace('course_', '')
   }

@@ -54,7 +54,9 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const course = useCourse() as any
   const course_structure = course ? course.courseStructure : {}
   const course_uuid = course ? course.courseStructure.course_uuid : ''
-  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
+  const withUnpublishedActivities = course
+    ? course.withUnpublishedActivities
+    : false
   // New Chapter creation
   const [newChapterModal, setNewChapterModal] = useState(false)
 
@@ -67,7 +69,9 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     const loadingToast = toast.loading(tNotify('creatingChapter'))
     try {
       await createChapter(chapter, access_token)
-      mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
+      mutate(
+        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
+      )
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
       setNewChapterModal(false)

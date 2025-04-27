@@ -34,7 +34,6 @@ import Link from 'next/link'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { useTranslations } from 'next-intl'
 import { getLinkExtension } from './EditorConf'
-import { Link as LinkExtension } from '@tiptap/extension-link'
 
 // Lowlight
 import { common, createLowlight } from 'lowlight'

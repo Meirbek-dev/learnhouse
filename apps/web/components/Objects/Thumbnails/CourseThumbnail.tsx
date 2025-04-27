@@ -4,7 +4,10 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { getUriWithOrg } from '@services/config/config'
 import { deleteCourseFromBackend } from '@services/courses/courses'
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media'
+import {
+  getCourseThumbnailMediaDirectory,
+  getUserAvatarMediaDirectory,
+} from '@services/media/media'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { BookMinus, FilePenLine, Settings2, MoreVertical } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -57,7 +60,9 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
   const org = useOrg() as any
   const session = useLHSession() as any
 
-  const activeAuthors = course.authors?.filter(author => author.authorship_status === 'ACTIVE') || []
+  const activeAuthors =
+    course.authors?.filter((author) => author.authorship_status === 'ACTIVE') ||
+    []
   const displayedAuthors = activeAuthors.slice(0, 3)
   const hasMoreAuthors = activeAuthors.length > 3
   const remainingAuthorsCount = activeAuthors.length - 3
@@ -88,7 +93,7 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
     : '../empty_thumbnail.png'
 
   return (
-    <div className="relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden min-w-[280px] w-full max-w-sm shrink-0">
+    <div className="nice-shadow relative flex w-full max-w-sm min-w-[280px] shrink-0 flex-col overflow-hidden rounded-xl bg-white">
       <AdminEditOptions
         course={course}
         orgSlug={orgslug}
@@ -106,27 +111,36 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
         }
       >
         <div
-          className="inset-0 ring-1 ring-inset ring-black/10 rounded-t-xl w-full aspect-video bg-cover bg-center"
+          className="inset-0 aspect-video w-full rounded-t-xl bg-cover bg-center ring-1 ring-black/10 ring-inset"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
       </Link>
-      <div className='flex flex-col w-full p-4 space-y-3'>
+      <div className="flex w-full flex-col space-y-3 p-4">
         <div className="space-y-2">
-          <h2 className="font-bold text-gray-800 leading-tight text-base min-h-[2.75rem] line-clamp-2">{course.name}</h2>
-          <p className='text-xs text-gray-700 leading-normal min-h-[3.75rem] line-clamp-3'>{course.description}</p>
+          <h2 className="line-clamp-2 min-h-[2.75rem] text-base leading-tight font-bold text-gray-800">
+            {course.name}
+          </h2>
+          <p className="line-clamp-3 min-h-[3.75rem] text-xs leading-normal text-gray-700">
+            {course.description}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
           {course.update_date && (
-            <div className="inline-flex h-5 min-w-[140px] items-center justify-center px-2 rounded-md bg-gray-100/80 border border-gray-200">
-              <span className="text-[10px] font-medium text-gray-600 truncate">
-                Updated {new Date(course.update_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            <div className="inline-flex h-5 min-w-[140px] items-center justify-center rounded-md border border-gray-200 bg-gray-100/80 px-2">
+              <span className="truncate text-[10px] font-medium text-gray-600">
+                Updated{' '}
+                {new Date(course.update_date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
               </span>
             </div>
           )}
 
           {displayedAuthors.length > 0 && (
-            <div className="flex -space-x-4 items-center">
+            <div className="flex items-center -space-x-4">
               {displayedAuthors.map((author, index) => (
                 <div
                   key={author.user.user_uuid}
@@ -136,8 +150,17 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
                   <UserAvatar
                     border="border-2"
                     rounded="rounded-full"
-                    avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
-                    predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
+                    avatar_url={
+                      author.user.avatar_image
+                        ? getUserAvatarMediaDirectory(
+                            author.user.user_uuid,
+                            author.user.avatar_image
+                          )
+                        : ''
+                    }
+                    predefined_avatar={
+                      author.user.avatar_image ? undefined : 'empty'
+                    }
                     width={32}
                     showProfilePopup={true}
                     userId={author.user.id}
@@ -145,11 +168,8 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
                 </div>
               ))}
               {hasMoreAuthors && (
-                <div
-                  className="relative -ml-1"
-                  style={{ zIndex: 0 }}
-                >
-                  <div className="flex items-center justify-center w-[32px] h-[32px] text-[11px] font-medium text-gray-600 bg-gray-100 border-2 border-white rounded-full">
+                <div className="relative -ml-1" style={{ zIndex: 0 }}>
+                  <div className="flex h-[32px] w-[32px] items-center justify-center rounded-full border-2 border-white bg-gray-100 text-[11px] font-medium text-gray-600">
                     +{remainingAuthorsCount}
                   </div>
                 </div>
@@ -160,8 +180,15 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
 
         <Link
           prefetch
-          href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
-          className="inline-flex items-center justify-center w-full px-3 py-1.5 bg-black text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          href={
+            customLink
+              ? customLink
+              : getUriWithOrg(
+                  orgslug,
+                  `/course/${removeCoursePrefix(course.course_uuid)}`
+                )
+          }
+          className="inline-flex w-full items-center justify-center rounded-lg bg-black px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800"
         >
           Start Learning
         </Link>

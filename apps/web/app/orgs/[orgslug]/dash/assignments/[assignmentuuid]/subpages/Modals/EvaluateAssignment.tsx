@@ -23,7 +23,6 @@ import { useTranslations } from 'next-intl'
 
 function EvaluateAssignment({ user_id }: any) {
   const t = useTranslations('DashPage.Assignments.EvaluateModal')
-  const generalT = useTranslations('General')
   const assignments = useAssignments() as any
   const session = useLHSession() as any
   const org = useOrg() as any
@@ -82,13 +81,11 @@ function EvaluateAssignment({ user_id }: any) {
                   </div>
                   <div className="flex space-x-2">
                     <div
-                      onClick={() => alert(task.hint)}
+                      onClick={() => alert(task.hint)} // TODO: replace with a toast or something
                       className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900"
                     >
                       <Info size={13} />
-                      <p className="text-xs font-semibold">
-                        {generalT('hint')}
-                      </p>
+                      <p className="text-xs font-semibold">{t('hint')}</p>
                     </div>
                     <Link
                       href={getTaskRefFileDir(

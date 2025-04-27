@@ -7,7 +7,7 @@ interface UseGetAIFeatures {
 
 function useGetAIFeatures(props: UseGetAIFeatures) {
   const org = useOrg() as any
-  const [isEnabled, setisEnabled] = useState(false)
+  const [isEnabled, setIsEnabled] = useState<boolean>(false)
 
   function checkAvailableAIFeaturesOnOrg(feature: string) {
     const config = org?.config?.config?.features.ai.enabled
@@ -19,7 +19,7 @@ function useGetAIFeatures(props: UseGetAIFeatures) {
     if (org) {
       // Check if org is not null or undefined
       let isEnabledStatus = checkAvailableAIFeaturesOnOrg(props.feature)
-      setisEnabled(isEnabledStatus)
+      setIsEnabled(isEnabledStatus)
     }
   }, [org])
 

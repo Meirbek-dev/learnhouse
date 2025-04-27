@@ -24,7 +24,6 @@ import {
   Cuboid,
   FileText,
   ImagePlus,
-  Lightbulb,
   Link2,
   MousePointerClick,
   Sigma,
@@ -50,7 +49,6 @@ export const ToolbarButtons = ({ editor, props }: any) => {
   if (!editor) {
     return null
   }
-
 
   const tableOptions = [
     {
@@ -96,7 +94,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           editor.chain().focus().toggleOrderedList().run()
           editor.chain().focus().toggleBulletList().run()
         }
-      }
+      },
     },
     {
       label: 'Ordered List',
@@ -108,8 +106,8 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           editor.chain().focus().toggleBulletList().run()
           editor.chain().focus().toggleOrderedList().run()
         }
-      }
-    }
+      },
+    },
   ]
 
   const handleLinkClick = () => {
@@ -143,7 +141,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       .setLink({
         href: url,
         target: '_blank',
-        rel: 'noopener noreferrer'
+        rel: 'noopener noreferrer',
       })
       .run()
     setShowLinkInput(false)
@@ -584,7 +582,6 @@ const TableMenuItem = styled.div`
     font-family: 'DM Sans';
   }
 `
-
 
 const ListMenuWrapper = styled.div`
   position: relative;

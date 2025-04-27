@@ -4,168 +4,169 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { getAPIUrl } from '@services/config/config'
 import { updateCourseThumbnail } from '@services/courses/courses'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import {
-  ArrowBigUpDash,
-  UploadCloud,
-  Image as ImageIcon,
-  FileWarning,
-} from 'lucide-react'
+import { ArrowBigUpDash, UploadCloud, Image as ImageIcon } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { mutate } from 'swr'
 import UnsplashImagePicker from './UnsplashImagePicker'
 import { useTranslations } from 'next-intl'
-import toast from 'react-hot-toast'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const
 
-type ValidMimeType = typeof VALID_MIME_TYPES[number];
+type ValidMimeType = (typeof VALID_MIME_TYPES)[number]
 
 function ThumbnailUpdate() {
   const course = useCourse() as any
   const session = useLHSession() as any
   const org = useOrg() as any
-  const [localThumbnail, setLocalThumbnail] = useState<{ file: File; url: string } | null>(null)
+  const [localThumbnail, setLocalThumbnail] = useState<{
+    file: File
+    url: string
+  } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>('')
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
   const t = useTranslations('CourseEdit.General.Thumbnail')
   const tNotify = useTranslations('Notifications')
-  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
+  const withUnpublishedActivities = course
+    ? course.withUnpublishedActivities
+    : false
 
   // Cleanup blob URLs when component unmounts or when thumbnail changes
   useEffect(() => {
     return () => {
       if (localThumbnail?.url) {
-        URL.revokeObjectURL(localThumbnail.url);
+        URL.revokeObjectURL(localThumbnail.url)
       }
-    };
-  }, [localThumbnail]);
+    }
+  }, [localThumbnail])
 
   const validateFile = (file: File): boolean => {
     if (!VALID_MIME_TYPES.includes(file.type as ValidMimeType)) {
-      setError('Please upload only PNG or JPG/JPEG images');
-      return false;
+      setError('Please upload only PNG or JPG/JPEG images')
+      return false
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      setError('File size should be less than 5MB');
-      return false;
+      setError('File size should be less than 5MB')
+      return false
     }
 
-    return true;
+    return true
   }
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file) return
 
     if (!validateFile(file)) {
-      event.target.value = '';
-      return;
+      event.target.value = ''
+      return
     }
 
-    const blobUrl = URL.createObjectURL(file);
-    setLocalThumbnail({ file, url: blobUrl });
-    await updateThumbnail(file);
+    const blobUrl = URL.createObjectURL(file)
+    setLocalThumbnail({ file, url: blobUrl })
+    await updateThumbnail(file)
   }
 
   const handleUnsplashSelect = async (imageUrl: string) => {
     try {
-      setIsLoading(true);
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
+      setIsLoading(true)
+      const response = await fetch(imageUrl)
+      const blob = await response.blob()
 
       if (!VALID_MIME_TYPES.includes(blob.type as ValidMimeType)) {
-        throw new Error('Invalid image format from Unsplash');
+        throw new Error('Invalid image format from Unsplash')
       }
 
-      const file = new File([blob], `unsplash_${Date.now()}.jpg`, { type: blob.type });
+      const file = new File([blob], `unsplash_${Date.now()}.jpg`, {
+        type: blob.type,
+      })
 
       if (!validateFile(file)) {
-        return;
+        return
       }
 
-      const blobUrl = URL.createObjectURL(file);
-      setLocalThumbnail({ file, url: blobUrl });
-      await updateThumbnail(file);
+      const blobUrl = URL.createObjectURL(file)
+      setLocalThumbnail({ file, url: blobUrl })
+      await updateThumbnail(file)
     } catch (err) {
-      setError('Failed to process Unsplash image');
-      setIsLoading(false);
+      setError('Failed to process Unsplash image')
+      setIsLoading(false)
     }
   }
 
   const updateThumbnail = async (file: File) => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       const res = await updateCourseThumbnail(
         course.courseStructure.course_uuid,
         file,
         session.data?.tokens?.access_token
-      );
+      )
 
-      await mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
-      await new Promise((r) => setTimeout(r, 1500));
+      await mutate(
+        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
+      )
+      await new Promise((r) => setTimeout(r, 1500))
 
       if (res.success === false) {
-        setError(res.HTTPmessage);
+        setError(res.HTTPmessage)
       } else {
-        setError('');
+        setError('')
       }
     } catch (err) {
-      setError('Failed to update thumbnail');
+      setError('Failed to update thumbnail')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-1 outline-gray-200">
-      <div className="flex h-full flex-col items-center justify-center">
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex flex-col items-center justify-center">
-            {error && (
-              <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 shadow-xs transition-all">
-                <div className="text-sm font-semibold">{error}</div>
-              </div>
-            )}
-            {localThumbnail ? (
-              <img
-                src={URL.createObjectURL(localThumbnail)}
-                className={`${isLoading ? 'animate-pulse' : ''} h-[100px] w-[200px] rounded-md shadow-sm`}
-              />
-            ) : (
-              <img
-                src={`${
-                  course.courseStructure.thumbnail_image
-                    ? getCourseThumbnailMediaDirectory(
-                        org?.org_uuid,
-                        course.courseStructure.course_uuid,
-                        course.courseStructure.thumbnail_image
-                      )
-                    : '/empty_thumbnail.png'
-                }`}
-                className="h-[100px] w-[200px] rounded-md bg-gray-200 shadow-sm"
-              />
-            )}
+    <div className="light-shadow h-[250px] w-auto rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200">
+      <div className="flex h-full flex-col items-center justify-center space-y-4 p-6">
+        {error && (
+          <div className="absolute top-4 flex items-center justify-center space-x-2 rounded-lg bg-red-50 p-3 text-red-800 transition-all">
+            <div className="text-sm font-medium">{error}</div>
           </div>
-          {isLoading ? (
-            <div className="flex items-center justify-center">
-              <div className="text-gray mt-4 flex animate-pulse items-center rounded-md bg-green-200 px-4 py-2 text-sm font-bold antialiased">
-                <ArrowBigUpDash size={16} className="mr-2" />
-                <span>Uploading</span>
-              </div>
-            </div>
+        )}
+
+        <div className="flex flex-col items-center space-y-4">
+          {localThumbnail ? (
+            <img
+              src={localThumbnail.url}
+              className={`${
+                isLoading ? 'animate-pulse' : ''
+              } h-[140px] w-[280px] rounded-lg border border-gray-200 object-cover shadow-sm`}
+              alt="Course thumbnail"
+            />
           ) : (
-            <div className="flex items-center justify-center space-x-2">
+            <img
+              src={`${
+                course.courseStructure.thumbnail_image
+                  ? getCourseThumbnailMediaDirectory(
+                      org?.org_uuid,
+                      course.courseStructure.course_uuid,
+                      course.courseStructure.thumbnail_image
+                    )
+                  : '/empty_thumbnail.png'
+              }`}
+              className="h-[140px] w-[280px] rounded-lg border border-gray-200 bg-gray-50 object-cover shadow-sm"
+              alt="Course thumbnail"
+            />
+          )}
+
+          {!isLoading && (
+            <div className="flex space-x-2">
               <input
                 type="file"
                 id="fileInput"
                 className="hidden"
                 accept=".jpg,.jpeg,.png"
                 onChange={handleFileChange}
-                accept="image/*"
               />
               <button
                 className="flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-100"
@@ -175,7 +176,7 @@ function ThumbnailUpdate() {
                 {t('uploadImageButton')}
               </button>
               <button
-                className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
+                className="flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-100"
                 onClick={() => setShowUnsplashPicker(true)}
               >
                 <ImageIcon size={16} className="mr-2" />
@@ -203,7 +204,6 @@ function ThumbnailUpdate() {
         <UnsplashImagePicker
           onSelect={handleUnsplashSelect}
           onClose={() => setShowUnsplashPicker(false)}
-          isOpen={showUnsplashPicker}
         />
       )}
     </div>

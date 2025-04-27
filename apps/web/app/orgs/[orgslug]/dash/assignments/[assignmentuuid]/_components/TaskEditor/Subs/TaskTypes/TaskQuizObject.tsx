@@ -58,7 +58,6 @@ function TaskQuizObject({
   user_id,
 }: TaskQuizObjectProps) {
   const t = useTranslations('DashPage.Assignments.TaskQuizObject')
-  const generalT = useTranslations('General')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const assignmentTaskState = useAssignmentsTask() as any
@@ -438,26 +437,26 @@ function TaskQuizObject({
               <div key={qIndex} className="flex flex-col space-y-1.5">
                 <div className="flex items-center space-x-2">
                   {view === 'teacher' ? (
-                    <input
-                      value={question.questionText}
-                      onChange={(e) =>
-                        handleQuestionChange(qIndex, e.target.value)
-                      }
-                      placeholder={t('questionPlaceholder')}
-                      className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600"
-                    />
+                    <>
+                      <input
+                        value={question.questionText}
+                        onChange={(e) =>
+                          handleQuestionChange(qIndex, e.target.value)
+                        }
+                        placeholder={t('questionPlaceholder')}
+                        className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600"
+                      />
+                      <div
+                        className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
+                        onClick={() => removeQuestion(qIndex)}
+                      >
+                        <Minus size={12} className="mx-auto" />
+                      </div>
+                    </>
                   ) : (
                     <p className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600">
                       {question.questionText}
                     </p>
-                  )}
-                  {view === 'teacher' && (
-                    <div
-                      className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
-                      onClick={() => removeQuestion(qIndex)}
-                    >
-                      <Minus size={12} className="mx-auto" />
-                    </div>
                   )}
                 </div>
                 <div className="flex flex-col space-y-2">
@@ -468,7 +467,7 @@ function TaskQuizObject({
                           view === 'student' && chooseOption(qIndex, oIndex)
                         }
                         className={
-                          'answer hover:bg-opacity-100 nice-shadow flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline outline-3 outline-white duration-150 ease-linear hover:shadow-md ' +
+                          'answer hover:bg-opacity-100 nice-shadow flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-3 outline-white duration-150 ease-linear hover:shadow-md ' +
                           (view == 'student' ? 'active:scale-110' : '')
                         }
                       >
@@ -478,22 +477,20 @@ function TaskQuizObject({
                           </p>
                         </div>
                         {view === 'teacher' ? (
-                          <input
-                            type="text"
-                            value={option.text}
-                            onChange={(e) =>
-                              handleOptionChange(qIndex, oIndex, e.target.value)
-                            }
-                            placeholder={t('optionPlaceholder')}
-                            className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600"
-                          />
-                        ) : (
-                          <p className="mx-2 w-full bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600">
-                            {option.text}
-                          </p>
-                        )}
-                        {view === 'teacher' && (
                           <>
+                            <input
+                              type="text"
+                              value={option.text}
+                              onChange={(e) =>
+                                handleOptionChange(
+                                  qIndex,
+                                  oIndex,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={t('optionPlaceholder')}
+                              className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600"
+                            />
                             <div
                               className={`flex h-fit w-fit flex-none items-center space-x-1 rounded-lg px-2 py-0.5 text-xs ${
                                 option.assigned_right_answer
@@ -503,18 +500,19 @@ function TaskQuizObject({
                               onClick={() => toggleOption(qIndex, oIndex)}
                             >
                               {option.assigned_right_answer ? (
-                                <Check size={12} className="mx-auto" />
+                                <>
+                                  <Check size={12} className="mx-auto" />
+                                  <p className="mx-auto text-xs font-bold">
+                                    {t('true')}
+                                  </p>
+                                </>
                               ) : (
-                                <X size={12} className="mx-auto" />
-                              )}
-                              {option.assigned_right_answer ? (
-                                <p className="mx-auto text-xs font-bold">
-                                  {generalT('true')}
-                                </p>
-                              ) : (
-                                <p className="mx-auto text-xs font-bold">
-                                  {generalT('false')}
-                                </p>
+                                <>
+                                  <X size={12} className="mx-auto" />
+                                  <p className="mx-auto text-xs font-bold">
+                                    {t('false')}
+                                  </p>
+                                </>
                               )}
                             </div>
                             <div
@@ -524,6 +522,10 @@ function TaskQuizObject({
                               <Minus size={12} className="mx-auto" />
                             </div>
                           </>
+                        ) : (
+                          <p className="mx-2 w-full bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600">
+                            {option.text}
+                          </p>
                         )}
                         {view === 'grading' && (
                           <>
@@ -535,18 +537,19 @@ function TaskQuizObject({
                               } cursor-pointer text-sm transition-all ease-linear hover:bg-lime-300`}
                             >
                               {option.assigned_right_answer ? (
-                                <Check size={12} className="mx-auto" />
+                                <>
+                                  <Check size={12} className="mx-auto" />
+                                  <p className="mx-auto text-xs font-bold">
+                                    {t('markedAsTrue')}
+                                  </p>
+                                </>
                               ) : (
-                                <X size={12} className="mx-auto" />
-                              )}
-                              {option.assigned_right_answer ? (
-                                <p className="mx-auto text-xs font-bold">
-                                  {t('markedAsTrue')}
-                                </p>
-                              ) : (
-                                <p className="mx-auto text-xs font-bold">
-                                  {t('markedAsFalse')}
-                                </p>
+                                <>
+                                  <X size={12} className="mx-auto" />
+                                  <p className="mx-auto text-xs font-bold">
+                                    {t('markedAsFalse')}
+                                  </p>
+                                </>
                               )}
                             </div>
                           </>
@@ -612,14 +615,13 @@ function TaskQuizObject({
                       </div>
                       {view === 'teacher' &&
                         oIndex === question.options.length - 1 &&
-                        questions[qIndex].options.length <= 4 && (
+                        questions[qIndex].options.length <= 5 && (
                           <div className="mx-auto flex justify-center px-2">
                             <div
-                              className="hover:bg-opacity-100 nice-shadow flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline outline-3 outline-white duration-150 ease-linear hover:shadow-md"
+                              className="hover:bg-opacity-100 nice-shadow flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline-3 outline-white duration-150 ease-linear hover:shadow-md"
                               onClick={() => addOption(qIndex)}
                             >
                               <Plus size={14} className="inline-block" />
-                              <span></span>
                             </div>
                           </div>
                         )}
@@ -629,7 +631,7 @@ function TaskQuizObject({
               </div>
             ))}
         </div>
-        {view === 'teacher' && questions.length <= 5 && (
+        {view === 'teacher' && questions.length <= 10 && (
           <div className="mx-auto flex justify-center px-2">
             <div
               className="text-slate nice-shadow my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear hover:shadow-xs"

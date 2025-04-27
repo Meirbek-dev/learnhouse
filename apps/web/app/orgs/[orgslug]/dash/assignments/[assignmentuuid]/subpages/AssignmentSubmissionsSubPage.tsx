@@ -80,7 +80,6 @@ function AssignmentSubmissionsSubPage({
 
 function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
   const t = useTranslations('DashPage.Assignments')
-  const generalT = useTranslations('General')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [gradeSudmissionModal, setGradeSubmissionModal] = useState({
@@ -101,6 +100,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
             {t('submission')}
           </h2>
           <p className="text-xs font-semibold tracking-tight uppercase">
+            {/* TODO: Add date localization */}
             {new Date(submission.creation_date).toLocaleDateString('en-UK', {
               year: 'numeric',
               month: 'long',
@@ -162,7 +162,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
               dialogDescription={t('evaluateSubmission')}
               dialogTrigger={
                 <div className="cursor-pointer rounded bg-slate-800 px-4 py-2 text-xs font-bold text-white hover:bg-slate-700">
-                  {generalT('evaluate')}
+                  {t('evaluate')}
                 </div>
               }
             />

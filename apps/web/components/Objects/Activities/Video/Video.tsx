@@ -77,7 +77,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
               <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-xs ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
                 <video
                   ref={videoRef}
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                   controls
                   src={getVideoSrc()}
                   onLoadedMetadata={handleVideoLoad}
@@ -98,7 +98,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                       autoplay: activity.details?.autoplay ? 1 : 0,
                       mute: activity.details?.muted ? 1 : 0,
                       start: activity.details?.startTime || 0,
-                      end: activity.details?.endTime || undefined
+                      end: activity.details?.endTime || undefined,
                     },
                   }}
                   videoId={videoId}

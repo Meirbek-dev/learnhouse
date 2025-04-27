@@ -43,14 +43,18 @@ function ChapterElement(props: ChapterElementProps) {
     undefined
   )
   const t = useTranslations('CourseEdit')
-  const course = useCourse() as any;
-  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
+  const course = useCourse() as any
+  const withUnpublishedActivities = course
+    ? course.withUnpublishedActivities
+    : false
 
   const router = useRouter()
 
   const deleteChapterUI = async () => {
     await deleteChapter(props.chapter.id, access_token)
-    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
+    mutate(
+      `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
+    )
     await revalidateTags(['courses'], props.orgslug)
     router.refresh()
   }
@@ -61,7 +65,9 @@ function ChapterElement(props: ChapterElementProps) {
         name: modifiedChapter.chapterName,
       }
       await updateChapter(chapterId, modifiedChapterCopy, access_token)
-      mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
+      mutate(
+        `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
+      )
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
     }

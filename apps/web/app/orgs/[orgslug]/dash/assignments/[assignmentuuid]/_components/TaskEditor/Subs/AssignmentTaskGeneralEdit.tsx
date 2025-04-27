@@ -39,7 +39,6 @@ const SUPPORTED_FILES = constructAcceptValue([
 
 export function AssignmentTaskGeneralEdit() {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit')
-  const generalT = useTranslations('General')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const assignmentTaskState = useAssignmentsTask() as any
@@ -82,10 +81,7 @@ export function AssignmentTaskGeneralEdit() {
   return (
     <FormLayout onSubmit={formik.handleSubmit}>
       <FormField name="title">
-        <FormLabelAndMessage
-          label={generalT('title')}
-          message={formik.errors.title}
-        />
+        <FormLabelAndMessage label={t('title')} message={formik.errors.title} />
         <Form.Control asChild>
           <Input
             onChange={formik.handleChange}
@@ -97,7 +93,7 @@ export function AssignmentTaskGeneralEdit() {
 
       <FormField name="description">
         <FormLabelAndMessage
-          label={generalT('description')}
+          label={t('description')}
           message={formik.errors.description}
         />
         <Form.Control asChild>
@@ -110,10 +106,7 @@ export function AssignmentTaskGeneralEdit() {
       </FormField>
 
       <FormField name="hint">
-        <FormLabelAndMessage
-          label={generalT('hint')}
-          message={formik.errors.hint}
-        />
+        <FormLabelAndMessage label={t('hint')} message={formik.errors.hint} />
         <Form.Control asChild>
           <Textarea onChange={formik.handleChange} value={formik.values.hint} />
         </Form.Control>
@@ -155,7 +148,7 @@ export function AssignmentTaskGeneralEdit() {
           type="submit"
           className="mt-4 flex w-full items-center justify-center rounded-md bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
         >
-          {generalT('submit')}
+          {t('save')}
         </button>
       </Form.Submit>
     </FormLayout>
@@ -164,7 +157,6 @@ export function AssignmentTaskGeneralEdit() {
 
 function UpdateTaskRef() {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit')
-  const generalT = useTranslations('General')
   const session = useLHSession() as any
   const org = useOrg() as any
   const access_token = session?.data?.tokens?.access_token
@@ -187,7 +179,7 @@ function UpdateTaskRef() {
       access_token
     )
     assignmentTaskStateHook({ type: 'reload' })
-    // wait for 1 second to show loading animation
+    // wait for 1.5 second to show loading animation
     await new Promise((r) => setTimeout(r, 1500))
     if (res.success === false) {
       setError(res.data.detail)
@@ -219,7 +211,7 @@ function UpdateTaskRef() {
       access_token
     )
     assignmentTaskStateHook({ type: 'reload' })
-    // wait for 1 second to show loading animation
+    // wait for 1.5 second to show loading animation
     await new Promise((r) => setTimeout(r, 1500))
     if (res.success === false) {
       setError(res.data.detail)
@@ -272,10 +264,10 @@ function UpdateTaskRef() {
                   target="_blank"
                   className="rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white"
                 >
-                  {generalT('download')}
+                  {t('download')}
                 </Link>
                 {/** <button onClick={() => deleteReferenceFile()}
-                                    className='bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>Delete</button> */}
+                                    className='bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>{t('delete')}</button> */}
               </div>
             </div>
           )}
@@ -291,7 +283,7 @@ function UpdateTaskRef() {
               />
               <div className="text-gray mt-4 flex animate-pulse items-center rounded-md bg-slate-200 px-4 py-2 text-sm font-bold antialiased">
                 <Loader size={16} className="mr-2 animate-spin" />
-                <span>{generalT('loading')}</span>
+                <span>{t('loading')}</span>
               </div>
             </div>
           ) : (

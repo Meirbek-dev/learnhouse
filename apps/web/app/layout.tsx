@@ -6,7 +6,22 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server'
 import { DM_Sans } from 'next/font/google'
 
-const dmSans = DM_Sans({ subsets: ['latin'] })
+const dmSans = DM_Sans({
+  weight: [
+    '100',
+    '200',
+    '300',
+    '400',
+    '500',
+    '600',
+    '700',
+    '800',
+    '900',
+    '1000',
+  ],
+  style: ['normal', 'italic'],
+  subsets: ['latin', 'latin-ext'],
+})
 
 export default async function RootLayout({
   children,

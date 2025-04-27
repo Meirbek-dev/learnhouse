@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
 function UnconfiguredPaymentsDisclaimer() {
-  const t = useTranslations('Payments')
+  const t = useTranslations('DashPage.Payments')
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">

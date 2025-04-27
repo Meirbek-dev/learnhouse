@@ -23,19 +23,24 @@ function SaveState(props: { orgslug: string }) {
   const dispatchCourse = useCourseDispatch() as any
   const course_structure = course.courseStructure
   const t = useTranslations('Common')
-  const tNotify = useTranslations('Notifications')
 
-  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
+  const withUnpublishedActivities = course
+    ? course.withUnpublishedActivities
+    : false
   const saveCourseState = async () => {
     if (saved || isLoading) return
     setIsLoading(true)
     try {
       // Course  order
       await changeOrderBackend()
-      mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
+      mutate(
+        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
+      )
       // Course metadata
       await changeMetadataBackend()
-      mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
+      mutate(
+        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
+      )
       await revalidateTags(['courses'], props.orgslug)
       dispatchCourse({ type: 'setIsSaved' })
     } finally {
@@ -43,10 +48,11 @@ function SaveState(props: { orgslug: string }) {
     }
   }
 
-  //
   // Course Order
   const changeOrderBackend = async () => {
-    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
+    mutate(
+      `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
+    )
     await updateCourseOrderStructure(
       course.courseStructure.course_uuid,
       course.courseOrder,
@@ -59,7 +65,9 @@ function SaveState(props: { orgslug: string }) {
 
   // Course metadata
   const changeMetadataBackend = async () => {
-    mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
+    mutate(
+      `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
+    )
     await updateCourse(
       course.courseStructure.course_uuid,
       course.courseStructure,
@@ -110,7 +118,7 @@ function SaveState(props: { orgslug: string }) {
     if (course_structure?.chapters && !saved) {
       changeOrderPayload()
     }
-  }, [course_structure]) // This effect depends on the `course_structure` variable
+  }, [course_structure])
 
   return (
     <div className="flex space-x-4">
@@ -119,7 +127,7 @@ function SaveState(props: { orgslug: string }) {
       ) : (
         <div className="flex items-center space-x-2 text-gray-600 antialiased">
           <Timer size={15} />
-          <div>{tNotify('unsavedChanges')}</div>
+          <div>{t('unsavedChanges')}</div>
         </div>
       )}
       <div
@@ -127,24 +135,26 @@ function SaveState(props: { orgslug: string }) {
           `flex cursor-pointer items-center space-x-2 rounded-lg px-4 py-2 font-bold antialiased drop-shadow-md transition-all ease-linear ` +
           (saved
             ? 'bg-gray-600 text-white'
-            : 'bg-black text-white border hover:bg-gray-900 ') +
-          (isLoading ? 'opacity-50 cursor-not-allowed' : '')
+            : 'border bg-black text-white hover:bg-gray-900') +
+          (isLoading ? 'cursor-not-allowed opacity-50' : '')
         }
         onClick={saveCourseState}
       >
         {isLoading ? (
-          <Loader2 size={20} className="animate-spin" />
+          <>
+            <Loader2 size={20} className="animate-spin" />
+            <div>{t('saving')}</div>
+          </>
         ) : saved ? (
-          <Check size={20} />
+          <>
+            <Check size={20} />
+            <div>{t('saved')}</div>
+          </>
         ) : (
-          <SaveAllIcon size={20} />
-        )}
-        {isLoading ? (
-          <div className="">Saving...</div>
-        ) : saved ? (
-          <div className="">{t('saved')}</div>
-        ) : (
-          <div className="">{t('save')}</div>
+          <>
+            <SaveAllIcon size={20} />
+            <div>{t('save')}</div>
+          </>
         )}
       </div>
     </div>

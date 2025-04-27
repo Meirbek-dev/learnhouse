@@ -20,7 +20,6 @@ const AssignmentTaskContentEdit = dynamic(
 
 function AssignmentTaskEditor({ page }: any) {
   const t = useTranslations('DashPage.Assignments.TaskEditor')
-  const generalT = useTranslations('General')
   const [selectedSubPage, setSelectedSubPage] = useState(page)
   const assignment = useAssignments() as any
   const assignmentTaskState = useAssignmentsTask() as any
@@ -98,7 +97,7 @@ function AssignmentTaskEditor({ page }: any) {
                 >
                   <div className="mx-2 flex items-center space-x-2.5">
                     <Info size={16} />
-                    <div>{generalT('general')}</div>
+                    <div>{t('general')}</div>
                   </div>
                 </div>
                 <div
@@ -109,7 +108,7 @@ function AssignmentTaskEditor({ page }: any) {
                 >
                   <div className="mx-2 flex items-center space-x-2.5">
                     <GalleryVerticalEnd size={16} />
-                    <div>{generalT('content')}</div>
+                    <div>{t('content')}</div>
                   </div>
                 </div>
               </div>

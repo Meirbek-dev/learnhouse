@@ -104,7 +104,6 @@
     "@types/uuid": "^10.0.0",
     "eslint": "^9.25.1",
     "eslint-config-next": "^15.3.1",
-    "eslint-plugin-react-hooks": "6.0.0-rc.1",
     "eslint-plugin-unused-imports": "^4.1.4",
     "postcss": "^8.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",

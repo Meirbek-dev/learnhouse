@@ -60,6 +60,11 @@
       "task": "Задача {index}"
     }
   },
+  "ActivityPage": {
+    "activityTypes": {
+      "learningMaterial": "Учебный материал"
+    }
+  },
   "Auth": {
     "Forgot": {
       "checkEmail": "Проверьте email для получения ссылки сброса пароля",

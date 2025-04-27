@@ -79,7 +79,7 @@ export default function TaskFileObject({
       access_token
     )
 
-    // wait for 1 second to show loading animation
+    // wait for 1.5 second to show loading animation
     await new Promise((r) => setTimeout(r, 1500))
     if (res.success === false) {
       setError(res.data.detail)
@@ -149,7 +149,7 @@ export default function TaskFileObject({
         assignmentTaskStateHook({
           type: 'reload',
         })
-        toast.success('Task saved successfully')
+        toast.success(t('saveSuccess'))
         setShowSavingDisclaimer(false)
       } else {
         toast.error(t('errorSaving'))
@@ -282,7 +282,7 @@ export default function TaskFileObject({
       {view === 'teacher' && (
         <div className="mx-auto flex flex-col justify-center space-y-2 rounded-lg border border-slate-100 bg-slate-50 px-4 py-5 text-center text-xs text-slate-600 sm:flex-row sm:space-y-0 sm:space-x-3 sm:px-2 sm:py-6 sm:text-left sm:text-sm">
           <Info size={18} className="mx-auto text-slate-500 sm:mx-0" />
-          <p>{t('teacherViewInfo')}</p>
+          <p className="ml-1">{t('teacherViewInfo')}</p>
         </div>
       )}
       {view === 'custom-grading' && (
@@ -385,7 +385,7 @@ export default function TaskFileObject({
                     />
                     <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2.5 text-xs font-medium text-slate-600 antialiased sm:px-5 sm:text-sm">
                       <Loader size={15} className="mr-2" />
-                      <span>Loading</span>
+                      <span>t("loading")</span>
                     </div>
                   </div>
                 ) : (

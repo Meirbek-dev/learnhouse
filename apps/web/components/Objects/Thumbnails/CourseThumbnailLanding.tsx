@@ -4,7 +4,10 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { getUriWithOrg } from '@services/config/config'
 import { deleteCourseFromBackend } from '@services/courses/courses'
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media'
+import {
+  getCourseThumbnailMediaDirectory,
+  getUserAvatarMediaDirectory,
+} from '@services/media/media'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { BookMinus, FilePenLine, Settings2, MoreVertical } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -135,7 +138,9 @@ const CourseThumbnailLanding: FC<PropsType> = ({
   const org = useOrg() as any
   const session = useLHSession() as any
 
-  const activeAuthors = course.authors?.filter(author => author.authorship_status === 'ACTIVE') || []
+  const activeAuthors =
+    course.authors?.filter((author) => author.authorship_status === 'ACTIVE') ||
+    []
   const displayedAuthors = activeAuthors.slice(0, 3)
   const hasMoreAuthors = activeAuthors.length > 3
   const remainingAuthorsCount = activeAuthors.length - 3
@@ -208,7 +213,7 @@ const CourseThumbnailLanding: FC<PropsType> = ({
           )}
 
           {displayedAuthors.length > 0 && (
-            <div className="flex -space-x-4 items-center">
+            <div className="flex items-center -space-x-4">
               {displayedAuthors.map((author, index) => (
                 <div
                   key={author.user.user_uuid}
@@ -218,8 +223,17 @@ const CourseThumbnailLanding: FC<PropsType> = ({
                   <UserAvatar
                     border="border-2"
                     rounded="rounded-full"
-                    avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
-                    predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
+                    avatar_url={
+                      author.user.avatar_image
+                        ? getUserAvatarMediaDirectory(
+                            author.user.user_uuid,
+                            author.user.avatar_image
+                          )
+                        : ''
+                    }
+                    predefined_avatar={
+                      author.user.avatar_image ? undefined : 'empty'
+                    }
                     width={32}
                     showProfilePopup={true}
                     userId={author.user.id}
@@ -227,11 +241,8 @@ const CourseThumbnailLanding: FC<PropsType> = ({
                 </div>
               ))}
               {hasMoreAuthors && (
-                <div
-                  className="relative -ml-1"
-                  style={{ zIndex: 0 }}
-                >
-                  <div className="flex items-center justify-center w-[32px] h-[32px] text-[11px] font-medium text-gray-600 bg-gray-100 border-2 border-white rounded-full">
+                <div className="relative -ml-1" style={{ zIndex: 0 }}>
+                  <div className="flex h-[32px] w-[32px] items-center justify-center rounded-full border-2 border-white bg-gray-100 text-[11px] font-medium text-gray-600">
                     +{remainingAuthorsCount}
                   </div>
                 </div>

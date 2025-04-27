@@ -17,13 +17,17 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
   Yup.object().shape({
     old_password: Yup.string().required(
       t('Components.Form.requiredField', {
-        fieldName: t('UserAccount.EditPassword.currentPasswordLabel'),
+        fieldName: t(
+          'DashPage.UserAccountSettings.UserAccount.EditPassword.currentPasswordLabel'
+        ),
       })
     ),
     new_password: Yup.string()
       .required(
         t('Components.Form.requiredField', {
-          fieldName: t('UserAccount.EditPassword.newPasswordLabel'),
+          fieldName: t(
+            'DashPage.UserAccountSettings.UserAccount.EditPassword.newPasswordLabel'
+          ),
         })
       )
       .min(8, t('Components.Form.minChars', { count: 8 })),
@@ -33,7 +37,9 @@ function UserEditPassword() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations()
-  const tPassword = useTranslations('UserAccount.EditPassword')
+  const tPassword = useTranslations(
+    'DashPage.UserAccountSettings.UserAccount.EditPassword'
+  )
   const tNotify = useTranslations('Notifications')
   const validationSchema = useMemo(() => createValidationSchema(t), [t])
 

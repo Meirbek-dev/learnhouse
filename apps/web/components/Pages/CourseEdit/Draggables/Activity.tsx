@@ -36,12 +36,16 @@ function Activity(props: any) {
     undefined
   )
   const t = useTranslations('CourseEdit')
-  const course = useCourse() as any;
-  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
+  const course = useCourse() as any
+  const withUnpublishedActivities = course
+    ? course.withUnpublishedActivities
+    : false
 
   async function removeActivity() {
     await deleteActivity(props.activity.id, session.data?.tokens?.access_token)
-    mutate(`${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`)
+    mutate(
+      `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`
+    )
     await revalidateTags(['courses'], props.orgslug)
     router.refresh()
   }
@@ -56,8 +60,14 @@ function Activity(props: any) {
         name: modifiedActivity.activityName,
       }
 
-      await updateActivity(modifiedActivityCopy, activityId, session.data?.tokens?.access_token)
-      await mutate(`${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`)
+      await updateActivity(
+        modifiedActivityCopy,
+        activityId,
+        session.data?.tokens?.access_token
+      )
+      await mutate(
+        `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`
+      )
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
     }

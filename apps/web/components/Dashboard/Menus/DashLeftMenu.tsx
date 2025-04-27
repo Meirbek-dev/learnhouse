@@ -35,10 +35,7 @@ function DashLeftMenu() {
   const t = useTranslations('DashboardMenu')
 
   function waitForEverythingToLoad() {
-    if (org && session) {
-      return true
-    }
-    return false
+    return org && session
   }
 
   async function logOutUI() {

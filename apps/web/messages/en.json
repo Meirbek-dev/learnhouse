@@ -70,12 +70,25 @@
       "task": "Task {index}"
     }
   },
+  "ActivityIndicators": {
+    "activityTypes": {
+      "assignment": "Assignment",
+      "document": "Document",
+      "learningMaterial": "Learning Material",
+      "page": "Page",
+      "video": "Video"
+    },
+    "completed": "Completed",
+    "currentActivity": "Current Activity",
+    "notStarted": "Not Started"
+  },
   "ActivityPage": {
     "activityCounter": "{current} of {total}",
     "activityTypes": {
       "assignment": "Assignment",
       "document": "Document",
       "dynamic": "Page",
+      "learningMaterial": "Learning Material",
       "video": "Video"
     },
     "assignmentActions": {
@@ -94,6 +107,7 @@
     "courseLessons": "Chapter: ",
     "current": "Current",
     "markAsComplete": "Mark as complete",
+    "markCompleteError": "Failed to mark activity as complete",
     "marking": "Marking...",
     "next": "Next",
     "nextActivityTitle": "Next: {name}",
@@ -108,6 +122,11 @@
     "submitErrorToast": "Failed to submit assignment for grading",
     "submitSuccessToast": "Assignment submitted for grading",
     "unknownGradingType": "Unknown grading type",
+    "unmarkActivity": "Unmark Activity",
+    "unmarkAsComplete": "Unmark as complete",
+    "unmarkCompleteError": "Failed to unmark activity as complete",
+    "unmarkConfirmation": "Are you sure you want to unmark this activity as complete?",
+    "unmarkDialogTitle": "Unmark Activity?",
     "unpublishedActivity": "This activity is not published yet",
     "viewAllActivities": "View all activities"
   },
@@ -184,7 +203,9 @@
   },
   "Common": {
     "save": "Save",
-    "saved": "Saved"
+    "saved": "Saved",
+    "saving": "Saving...",
+    "unsavedChanges": "Unsaved changes"
   },
   "Components": {
     "AddUserGroup": {
@@ -628,8 +649,11 @@
     "deleteChapterTitle": "Delete {name}?",
     "editButton": "Edit"
   },
-  "CourseOverview": {
-    "courseLabel": "Course"
+  "CourseEndView": {
+    "backToCourse": "Back to Course",
+    "completedMessage": "You've successfully completed",
+    "congratulations": "Congratulations! 🎉",
+    "dedicationMessage": "Your dedication and hard work have paid off. You've mastered all the content in this course."
   },
   "CoursePage": {
     "about": "About",
@@ -789,12 +813,16 @@
         "desktopOnlyMessage1": "This page is only available on a desktop device.",
         "desktopOnlyMessage2": "Please switch to a desktop device to view and manage the assignment.",
         "desktopOnlyTitle": "Desktop Only",
+        "edit": "Edit",
         "editDetailsTooltip": "Edit assignment details",
         "editor": "Editor",
+        "preview": "Preview",
         "previewTooltip": "Preview assignment as a student",
+        "publish": "Publish",
         "publishTooltip": "Make your assignment publicly visible and available to students",
         "published": "Published",
         "submissions": "Submissions",
+        "unpublish": "Unpublish",
         "unpublishTooltip": "Make your assignment unavailable to students",
         "unpublished": "Unpublished",
         "updateError": "Error updating assignment, please try again later.",
@@ -804,6 +832,7 @@
       "EvaluateModal": {
         "gradeFinalError": "{message}",
         "gradeFinalSuccess": "{message}",
+        "hint": "Hint",
         "markAsDone": "Mark Activity as Done for user",
         "markDoneError": "{message}",
         "markDoneSuccess": "{message}",
@@ -815,6 +844,7 @@
       },
       "HomePage": {
         "assignment": "Assignment",
+        "assignments": "Assignments",
         "course": "Course",
         "courseEditor": "Course Editor",
         "editor": "Editor",
@@ -830,13 +860,16 @@
         "formTitle": "Form",
         "quizDescription": "Multiple choice questions",
         "quizTitle": "Quiz",
-        "reminderToast": "When editing/adding tasks, make sure you unpublish the assignment to avoid issues for students. You can publish it again when you are ready."
+        "reminderToast": "When editing/adding tasks, make sure you unpublish the assignment to avoid issues for students. You can publish it again when you are ready.",
+        "untitledTaskTitle": "Untitled Task"
       },
       "TaskEditor": {
+        "content": "Content",
         "deleteError": "Error deleting task, please try again later.",
         "deleteSuccess": "Task deleted successfully",
         "deleteTask": "Delete Task",
-        "noTaskSelected": "No task selected"
+        "general": "General",
+        "noTaskSelected": "No Task Selected"
       },
       "TaskFileObject": {
         "allowedFormats": "Allowed formats: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
@@ -848,6 +881,8 @@
         "gradeSuccess": "Task graded successfully with {grade} points",
         "gradedByTeacher": "Graded by teacher: @{username}",
         "gradingViewInfo": "Please download the file and grade it manually, then enter the grade above",
+        "loading": "Loading",
+        "saveSuccess": "Task saved successfully",
         "signInToUpload": "Sign in to upload files",
         "submitFile": "Submit File",
         "teacherViewInfo": "The user will be able to submit a file for this task, you will be able to check it in the Submissions tab"
@@ -855,16 +890,24 @@
       "TaskGeneralEdit": {
         "allowedFormats": "Allowed formats: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
         "changeRefFile": "Change Reference File",
+        "delete": "Delete",
+        "description": "Description",
+        "download": "Download",
         "gradeValidationError": "Value must be between 20 and 100",
+        "hint": "Hint",
+        "loading": "Loading",
         "maxGradeValue": "Maximum Grade Value",
         "refFileUpdateSuccess": "Reference file updated successfully",
         "referenceFile": "Reference File",
+        "save": "Save",
+        "title": "Title",
         "updateError": "Error updating task, please try again later.",
         "updateSuccess": "Task updated successfully"
       },
       "TaskQuizObject": {
         "addQuestion": "Add Question",
         "autoGraded": "Auto graded by the system",
+        "false": "False",
         "gradeError": "Error grading task, please try again later.",
         "gradeSuccess": "Task graded successfully with {finalGrade} points",
         "markedAsFalse": "Marked as False",
@@ -874,7 +917,8 @@
         "optionPlaceholder": "Enter option text",
         "questionPlaceholder": "Enter question text",
         "saveError": "Error saving task, please try again later.",
-        "saveSuccess": "Task saved successfully"
+        "saveSuccess": "Task saved successfully",
+        "true": "True"
       },
       "Tasks": {
         "addTask": "Add Task",
@@ -916,6 +960,9 @@
       },
       "learnhouseLogo": "LearnHouse Logo",
       "learnhouseUniversity": "LearnHouse University"
+    },
+    "CourseOverview": {
+      "courseLabel": "Course"
     },
     "Courses": {
       "CoursePage": {
@@ -1434,10 +1481,6 @@
       "returnToDashboard": "You can now return to the dashboard.",
       "tryAgainOrContact": "Please try again or contact support if the issue persists."
     },
-    "Trail": {
-      "courseLabel": "Course",
-      "quitCourseButton": "Quit Course"
-    },
     "UserAccountSettings": {
       "UserAccount": {
         "EditGeneral": {
@@ -1743,6 +1786,16 @@
       "yourOrganization": "Your Organization"
     }
   },
+  "FixedActivitySecondaryBar": {
+    "activityCounter": "{current} of {total}",
+    "course": "Course",
+    "next": "Next",
+    "nextActivityTitle": "Next: {name}",
+    "noNextActivity": "No next activity",
+    "noPrevActivity": "No previous activity",
+    "prevActivityTitle": "Previous: {name}",
+    "previous": "Previous"
+  },
   "General": {
     "actions": "Actions",
     "active": "Active",
@@ -1912,6 +1965,10 @@
     "inviteCodeInvalid": "The invite code is invalid",
     "inviteCodeValid": "Invite code is valid, you'll be redirected to the signup page in a second!",
     "orgJoinSuccess": " successfully joined the organization."
+  },
+  "Trail": {
+    "courseLabel": "Course",
+    "quitCourseButton": "Quit Course"
   },
   "TrailPage": {
     "metaDescription": "Check your progress using trail and easily navigate through your courses.",

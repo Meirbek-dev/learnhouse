@@ -1,10 +1,6 @@
-import {
-  Button,
-} from "@components/ui/button"
-import {
-  Input
-} from "@components/ui/input"
-import { Label } from "@components/ui/label"
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
+import { Label } from '@components/ui/label'
 import React, { useState } from 'react'
 import * as Form from '@radix-ui/react-form'
 import BarLoader from 'react-spinners/BarLoader'
@@ -38,12 +34,14 @@ function VideoModal({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [name, setName] = React.useState('')
   const [youtubeUrl, setYoutubeUrl] = React.useState('')
-  const [selectedView, setSelectedView] = React.useState<'file' | 'youtube'>('file')
+  const [selectedView, setSelectedView] = React.useState<'file' | 'youtube'>(
+    'file'
+  )
   const [videoDetails, setVideoDetails] = React.useState<VideoDetails>({
     startTime: 0,
     endTime: null,
     autoplay: false,
-    muted: false
+    muted: false,
   })
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,26 +67,22 @@ function VideoModal({
             published_version: 1,
             version: 1,
             course_id: course.id,
-            details: videoDetails
+            details: videoDetails,
           },
           chapterId
         )
       }
-      
+
       if (selectedView === 'youtube') {
         const external_video_object: ExternalVideoObject = {
           name,
           type: 'youtube',
           uri: youtubeUrl,
           chapter_id: chapterId,
-          details: videoDetails
+          details: videoDetails,
         }
 
-        await submitExternalVideo(
-          external_video_object,
-          'activity',
-          chapterId
-        )
+        await submitExternalVideo(external_video_object, 'activity', chapterId)
       }
     } finally {
       setIsSubmitting(false)
@@ -96,8 +90,8 @@ function VideoModal({
   }
 
   const VideoSettingsForm = () => (
-    <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-lg">
-      <h3 className="font-medium text-gray-900 mb-3">Video Settings</h3>
+    <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4">
+      <h3 className="mb-3 font-medium text-gray-900">Video Settings</h3>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="start-time">Start Time (seconds)</Label>
@@ -106,10 +100,12 @@ function VideoModal({
             type="number"
             min="0"
             value={videoDetails.startTime}
-            onChange={(e) => setVideoDetails({
-              ...videoDetails,
-              startTime: Math.max(0, parseInt(e.target.value) || 0)
-            })}
+            onChange={(e) =>
+              setVideoDetails({
+                ...videoDetails,
+                startTime: Math.max(0, parseInt(e.target.value) || 0),
+              })
+            }
             placeholder="0"
           />
         </div>
@@ -121,24 +117,28 @@ function VideoModal({
             type="number"
             min={videoDetails.startTime + 1}
             value={videoDetails.endTime || ''}
-            onChange={(e) => setVideoDetails({
-              ...videoDetails,
-              endTime: e.target.value ? parseInt(e.target.value) : null
-            })}
+            onChange={(e) =>
+              setVideoDetails({
+                ...videoDetails,
+                endTime: e.target.value ? parseInt(e.target.value) : null,
+              })
+            }
             placeholder="Leave empty for full duration"
           />
         </div>
       </div>
 
-      <div className="flex items-center space-x-6 mt-4">
+      <div className="mt-4 flex items-center space-x-6">
         <label className="flex items-center space-x-2">
           <input
             type="checkbox"
             checked={videoDetails.autoplay}
-            onChange={(e) => setVideoDetails({
-              ...videoDetails,
-              autoplay: e.target.checked
-            })}
+            onChange={(e) =>
+              setVideoDetails({
+                ...videoDetails,
+                autoplay: e.target.checked,
+              })
+            }
             className="rounded border-gray-300 text-black focus:ring-black"
           />
           <span className="text-sm text-gray-700">Autoplay video</span>
@@ -148,10 +148,12 @@ function VideoModal({
           <input
             type="checkbox"
             checked={videoDetails.muted}
-            onChange={(e) => setVideoDetails({
-              ...videoDetails,
-              muted: e.target.checked
-            })}
+            onChange={(e) =>
+              setVideoDetails({
+                ...videoDetails,
+                muted: e.target.checked,
+              })
+            }
             className="rounded border-gray-300 text-black focus:ring-black"
           />
           <span className="text-sm text-gray-700">Start muted</span>
@@ -164,12 +166,12 @@ function VideoModal({
     <Form.Root onSubmit={handleSubmit}>
       <div>
         <Label htmlFor="video-activity-name">Activity Name</Label>
-        <Input 
+        <Input
           id="video-activity-name"
           value={name}
-          onChange={(e) => setName(e.target.value)} 
-          type="text" 
-          required 
+          onChange={(e) => setName(e.target.value)}
+          type="text"
+          required
           placeholder="Enter activity name..."
         />
       </div>
@@ -179,10 +181,10 @@ function VideoModal({
           <button
             type="button"
             onClick={() => setSelectedView('file')}
-            className={`flex items-center justify-center p-4 gap-2 ${
+            className={`flex items-center justify-center gap-2 p-4 ${
               selectedView === 'file'
-                ? 'bg-gray-100 border-b-2 border-black'
-                : 'hover:bg-gray-50 border-b border-gray-200'
+                ? 'border-b-2 border-black bg-gray-100'
+                : 'border-b border-gray-200 hover:bg-gray-50'
             }`}
           >
             <Upload size={18} />
@@ -191,10 +193,10 @@ function VideoModal({
           <button
             type="button"
             onClick={() => setSelectedView('youtube')}
-            className={`flex items-center justify-center p-4 gap-2 ${
+            className={`flex items-center justify-center gap-2 p-4 ${
               selectedView === 'youtube'
-                ? 'bg-gray-100 border-b-2 border-black'
-                : 'hover:bg-gray-50 border-b border-gray-200'
+                ? 'border-b-2 border-black bg-gray-100'
+                : 'border-b border-gray-200 hover:bg-gray-50'
             }`}
           >
             <Youtube size={18} />
@@ -214,7 +216,7 @@ function VideoModal({
                     accept={SUPPORTED_FILES}
                     onChange={handleVideoChange}
                     required
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800"
+                    className="w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-800"
                   />
                 </div>
               </div>
@@ -241,9 +243,9 @@ function VideoModal({
         </div>
       </div>
 
-      <div className="flex justify-end mt-6">
-        <Button 
-          type="submit" 
+      <div className="mt-6 flex justify-end">
+        <Button
+          type="submit"
           disabled={isSubmitting}
           className="bg-black text-white hover:bg-black/90"
         >

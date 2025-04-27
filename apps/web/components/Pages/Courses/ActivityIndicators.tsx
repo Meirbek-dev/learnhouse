@@ -1,8 +1,10 @@
+// TODO: Localize this component
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'
 import { Fragment } from 'react'
 import { Video, FileText, Layers, BookOpenCheck, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl';
 
 interface Props {
   course: any
@@ -12,6 +14,7 @@ interface Props {
 }
 
 function ActivityIndicators(props: Props) {
+  const t = useTranslations('ActivityIndicators');
   const course = props.course
   const orgslug = props.orgslug
   const courseid = props.course_uuid.replace('course_', '')
@@ -19,8 +22,6 @@ function ActivityIndicators(props: Props) {
   const done_activity_style = 'bg-teal-600 hover:bg-teal-700'
   const black_activity_style = 'bg-zinc-300 hover:bg-zinc-400'
   const current_activity_style = 'bg-gray-600 animate-pulse hover:bg-gray-700'
-
-  const trail = props.course.trail
 
   function isActivityDone(activity: any) {
     let run = props.course.trail?.runs.find(
@@ -35,10 +36,7 @@ function ActivityIndicators(props: Props) {
 
   function isActivityCurrent(activity: any) {
     let activity_uuid = activity.activity_uuid.replace('activity_', '')
-    if (props.current_activity && props.current_activity == activity_uuid) {
-      return true
-    }
-    return false
+    return props.current_activity && props.current_activity == activity_uuid
   }
 
   function getActivityClass(activity: any) {
@@ -69,15 +67,15 @@ function ActivityIndicators(props: Props) {
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return 'Video'
+        return t('activityTypes.video')
       case 'TYPE_DOCUMENT':
-        return 'Document'
+        return t('activityTypes.document')
       case 'TYPE_DYNAMIC':
-        return 'Page'
+        return t('activityTypes.page')
       case 'TYPE_ASSIGNMENT':
-        return 'Assignment'
+        return t('activityTypes.assignment')
       default:
-        return 'Learning Material'
+        return t('activityTypes.learningMaterial')
     }
   }
 
@@ -130,10 +128,10 @@ function ActivityIndicators(props: Props) {
                           </span>
                           <span className="text-xs text-gray-400">
                             {isCurrent
-                              ? 'Current Activity'
+                              ? t('currentActivity')
                               : isDone
-                                ? 'Completed'
-                                : 'Not Started'}
+                                ? t('completed')
+                                : t('notStarted')}
                           </span>
                         </div>
                       </div>
