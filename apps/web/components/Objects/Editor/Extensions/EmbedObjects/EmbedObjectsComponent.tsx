@@ -143,8 +143,7 @@ const MemoizedEmbed = React.memo(
       return (
         <iframe
           src={processedUrl}
-          className="h-full w-full"
-          frameBorder="0"
+          className="h-full w-full border-0"
           allowFullScreen
         />
       )

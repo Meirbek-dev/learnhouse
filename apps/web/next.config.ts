@@ -3,7 +3,7 @@ import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
   experimental: {
-    turbo: {}, // to disable this warning: "⚠ Webpack is configured while Turbopack is not, which may cause problems."
+    reactCompiler: true,
   },
   async rewrites() {
     return [

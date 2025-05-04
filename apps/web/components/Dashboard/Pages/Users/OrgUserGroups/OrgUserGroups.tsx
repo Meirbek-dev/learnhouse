@@ -21,7 +21,6 @@ function OrgUserGroups() {
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('DashPage.UserSettings.usergroupsSection')
   const tNotify = useTranslations('Notifications')
-  const tGeneral = useTranslations('General')
   const [userGroupManagementModal, setUserGroupManagementModal] =
     useState(false)
   const [createUserGroupModal, setCreateUserGroupModal] = useState(false)
@@ -80,8 +79,8 @@ function OrgUserGroups() {
     }
   }
 
-  if (isLoading) return <div>{tGeneral('loading')}</div>
-  if (error) return <div>Error loading user groups.</div>
+  if (isLoading) return <div>{t('loading')}</div>
+  if (error) return <div>{t('errorLoadingUserGroups')}</div>
 
   return (
     <>

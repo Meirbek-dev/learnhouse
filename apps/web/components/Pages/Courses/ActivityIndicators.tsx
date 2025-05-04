@@ -4,7 +4,7 @@ import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'
 import { Fragment } from 'react'
 import { Video, FileText, Layers, BookOpenCheck, Check } from 'lucide-react'
-import { useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl'
 
 interface Props {
   course: any
@@ -14,7 +14,7 @@ interface Props {
 }
 
 function ActivityIndicators(props: Props) {
-  const t = useTranslations('ActivityIndicators');
+  const t = useTranslations('ActivityIndicators')
   const course = props.course
   const orgslug = props.orgslug
   const courseid = props.course_uuid.replace('course_', '')

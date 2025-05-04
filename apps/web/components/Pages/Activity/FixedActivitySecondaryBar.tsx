@@ -139,7 +139,9 @@ export default function FixedActivitySecondaryBar(
                   orgslug={props.orgslug}
                 />
                 <div className="flex hidden min-w-0 flex-col -space-y-0.5 sm:block">
-                  <p className="text-sm font-medium text-gray-500">{t('course')}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    {t('course')}
+                  </p>
                   <h1 className="truncate text-base font-semibold text-gray-900">
                     {props.course.name}
                   </h1>
@@ -165,11 +167,11 @@ export default function FixedActivitySecondaryBar(
                   >
                     <ChevronLeft size={16} className="shrink-0 sm:h-5 sm:w-5" />
                     <div className="flex hidden flex-col items-start sm:flex">
-                      <span className="text-xs text-gray-500">{t('previous')}</span>
+                      <span className="text-xs text-gray-500">
+                        {t('previous')}
+                      </span>
                       <span className="max-w-[100px] truncate text-left text-sm font-medium sm:max-w-[150px]">
-                        {prevActivity
-                          ? prevActivity.name
-                          : t('noPrevActivity')}
+                        {prevActivity ? prevActivity.name : t('noPrevActivity')}
                       </span>
                     </div>
                   </button>

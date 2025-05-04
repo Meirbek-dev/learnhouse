@@ -320,7 +320,7 @@ function QuizBlockComponent(props: any) {
                   <div
                     key={answer.answer_id}
                     className={twMerge(
-                      'bg-opacity-50 hover:bg-opacity-100 flex min-h-[36px] w-full cursor-pointer items-stretch space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline outline-2 duration-150 ease-linear hover:shadow-md',
+                      'bg-opacity-50 hover:bg-opacity-100 flex min-h-[36px] w-full cursor-pointer items-stretch space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-2 duration-150 ease-linear hover:shadow-md',
                       answer.correct && isEditable
                         ? 'outline-lime-300'
                         : 'outline-white',
@@ -440,7 +440,7 @@ function QuizBlockComponent(props: any) {
                 {isEditable && (
                   <div
                     onClick={() => addAnswer(question.question_id)}
-                    className="hover:bg-opacity-100 flex h-[36px] w-full flex-none cursor-pointer items-center justify-center rounded-lg bg-white text-sm outline outline-2 outline-white duration-150 ease-linear hover:scale-[1.01] hover:shadow-md active:scale-[1.02]"
+                    className="hover:bg-opacity-100 flex h-[36px] w-full flex-none cursor-pointer items-center justify-center rounded-lg bg-white text-sm outline-2 outline-white duration-150 ease-linear hover:scale-[1.01] hover:shadow-md active:scale-[1.02]"
                   >
                     <Plus className="mr-1 text-slate-800" size={15} />
                     <span className="text-sm text-slate-800">
