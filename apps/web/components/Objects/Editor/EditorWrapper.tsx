@@ -16,7 +16,7 @@ interface EditorWrapperProps {
 }
 
 function EditorWrapper(props: EditorWrapperProps): JSX.Element {
-  const t = useTranslations('Editor.EditorWrapper')
+  const t = useTranslations('DashPage.Editor.EditorWrapper')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
 

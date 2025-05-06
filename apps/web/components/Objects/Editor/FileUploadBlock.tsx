@@ -35,7 +35,7 @@ const FileUploadBlockButton: FC<ButtonHTMLAttributes<HTMLButtonElement>> = ({
   className,
   ...props
 }) => {
-  const t = useTranslations('Editor.FileUploadBlock')
+  const t = useTranslations('DashPage.Editor.FileUploadBlock')
   return (
     <button
       className={cn(
@@ -66,7 +66,7 @@ function FileUploadBlock({
   Icon,
   children,
 }: UploadBlockComponentProps) {
-  const t = useTranslations('Editor.FileUploadBlock')
+  const t = useTranslations('DashPage.Editor.FileUploadBlock')
 
   if (isLoading)
     return <Loader className="animate-spin text-gray-200" size={50} />

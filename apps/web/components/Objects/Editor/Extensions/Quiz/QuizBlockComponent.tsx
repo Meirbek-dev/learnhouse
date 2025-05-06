@@ -22,7 +22,7 @@ interface Question {
 }
 
 function QuizBlockComponent(props: any) {
-  const t = useTranslations('Editor.QuizBlock')
+  const t = useTranslations('DashPage.Editor.QuizBlock')
   const [questions, setQuestions] = useState(props.node.attrs.questions) as [
     Question[],
     any,

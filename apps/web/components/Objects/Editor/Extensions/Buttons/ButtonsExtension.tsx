@@ -16,7 +16,7 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { useTranslations } from 'next-intl'
 
 const ButtonsExtension: FC = (props: any) => {
-  const t = useTranslations('Editor.ButtonsExtension')
+  const t = useTranslations('DashPage.Editor.ButtonsExtension')
   const [emoji, setEmoji] = useState(props.node.attrs.emoji)
   const [link, setLink] = useState(props.node.attrs.link)
   const [alignment, setAlignment] = useState(props.node.attrs.alignment)
