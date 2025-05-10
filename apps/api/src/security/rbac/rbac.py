@@ -4,7 +4,11 @@ from sqlalchemy import null
 from sqlmodel import Session, select
 from src.db.collections import Collection
 from src.db.courses.courses import Course
-from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
+from src.db.resource_authors import (
+    ResourceAuthor,
+    ResourceAuthorshipEnum,
+    ResourceAuthorshipStatusEnum,
+)
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization
 from src.security.rbac.utils import check_element_type
@@ -60,7 +64,11 @@ async def authorization_verify_if_user_is_author(
     element_uuid: str,
     db_session: Session,
 ):
-    if action == "update" or "delete" or "read":
+    # For create action, we don't need to check existing resource
+    if action == "create":
+        return True  # Allow creation if user is authenticated
+
+    if action in ["update", "delete", "read"]:
         statement = select(ResourceAuthor).where(
             ResourceAuthor.resource_uuid == element_uuid
         )
@@ -68,10 +76,21 @@ async def authorization_verify_if_user_is_author(
 
         if resource_author:
             if resource_author.user_id == int(user_id):
-                if ((resource_author.authorship == ResourceAuthorshipEnum.CREATOR) or 
-                    (resource_author.authorship == ResourceAuthorshipEnum.MAINTAINER) or 
-                    (resource_author.authorship == ResourceAuthorshipEnum.CONTRIBUTOR)) and \
-                    resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE:
+                if (
+                    (
+                        (resource_author.authorship == ResourceAuthorshipEnum.CREATOR)
+                        or (
+                            resource_author.authorship
+                            == ResourceAuthorshipEnum.MAINTAINER
+                        )
+                        or (
+                            resource_author.authorship
+                            == ResourceAuthorshipEnum.CONTRIBUTOR
+                        )
+                    )
+                    and resource_author.authorship_status
+                    == ResourceAuthorshipStatusEnum.ACTIVE
+                ):
                     return True
                 else:
                     return False
@@ -79,6 +98,7 @@ async def authorization_verify_if_user_is_author(
                 return False
         else:
             return False
+    return False
 
 
 # Tested and working
@@ -101,17 +121,17 @@ async def authorization_verify_based_on_roles(
 
     user_roles_in_organization_and_standard_roles = db_session.exec(statement).all()
 
-    # Find in roles list if there is a role that matches users action for this type of element
+    # Check all roles until we find one that grants the permission
     for role in user_roles_in_organization_and_standard_roles:
         role = Role.model_validate(role)
         if role.rights:
             rights = role.rights
-            if rights[element_type][f"action_{action}"] is True:
+            element_rights = getattr(rights, element_type, None)
+            if element_rights and getattr(element_rights, f"action_{action}", False):
                 return True
-            else:
-                return False
-    else:
-        return False
+
+    # If we get here, no role granted the permission
+    return False
 
 
 async def authorization_verify_based_on_org_admin_status(
@@ -133,13 +153,13 @@ async def authorization_verify_based_on_org_admin_status(
 
     user_roles_in_organization_and_standard_roles = db_session.exec(statement).all()
 
-    # Find in roles list if there is a role that matches users action for this type of element
+    # Check if user has admin role (role_id 1 or 2) in any organization
     for role in user_roles_in_organization_and_standard_roles:
         role = Role.model_validate(role)
-        if role.id == 1 or role.id == 2:
+        if role.id in [1, 2]:  # Assuming 1 and 2 are admin role IDs
             return True
-    else:
-        return False
+
+    return False
 
 
 # Tested and working

@@ -11,7 +11,8 @@ from src.db.organizations import Organization
 from src.db.user_organizations import UserOrganization
 from src.services.courses.courses import search_courses
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class SearchResult(BaseModel):
     courses: List[CourseRead]
@@ -20,6 +21,7 @@ class SearchResult(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
 
 async def search_across_org(
     request: Request,
@@ -38,12 +40,14 @@ async def search_across_org(
     # Get organization
     org_statement = select(Organization).where(Organization.slug == org_slug)
     org = db_session.exec(org_statement).first()
-    
+
     if not org:
         return SearchResult(courses=[], collections=[], users=[])
 
     # Search courses using existing search_courses function
-    courses = await search_courses(request, current_user, org_slug, search_query, db_session, page, limit)
+    courses = await search_courses(
+        request, current_user, org_slug, search_query, db_session, page, limit
+    )
 
     # Search collections
     collections_query = (
@@ -52,7 +56,7 @@ async def search_across_org(
         .where(
             or_(
                 text('LOWER("collection".name) LIKE LOWER(:pattern)'),
-                text('LOWER("collection".description) LIKE LOWER(:pattern)')
+                text('LOWER("collection".description) LIKE LOWER(:pattern)'),
             )
         )
         .params(pattern=f"%{search_query}%")
@@ -61,16 +65,20 @@ async def search_across_org(
     # Search users
     users_query = (
         select(User)
-        .join(UserOrganization, and_(
-            UserOrganization.user_id == User.id,
-            UserOrganization.org_id == org.id
-        ))
+        .join(
+            UserOrganization,
+            and_(
+                UserOrganization.user_id == User.id, UserOrganization.org_id == org.id
+            ),
+        )
         .where(
             or_(
-                text('LOWER("user".username) LIKE LOWER(:pattern) OR ' +
-                     'LOWER("user".first_name) LIKE LOWER(:pattern) OR ' +
-                     'LOWER("user".last_name) LIKE LOWER(:pattern) OR ' +
-                     'LOWER("user".bio) LIKE LOWER(:pattern)')
+                text(
+                    'LOWER("user".username) LIKE LOWER(:pattern) OR '
+                    + 'LOWER("user".first_name) LIKE LOWER(:pattern) OR '
+                    + 'LOWER("user".last_name) LIKE LOWER(:pattern) OR '
+                    + 'LOWER("user".bio) LIKE LOWER(:pattern)'
+                )
             )
         )
         .params(pattern=f"%{search_query}%")
@@ -81,14 +89,8 @@ async def search_across_org(
         collections_query = collections_query.where(Collection.public == sa_true())
     else:
         # For authenticated users, show public collections and those in their org
-        collections_query = (
-            collections_query
-            .where(
-                or_(
-                    Collection.public == sa_true(),
-                    Collection.org_id == org.id
-                )
-            )
+        collections_query = collections_query.where(
+            or_(Collection.public == sa_true(), Collection.org_id == org.id)
         )
 
     # Apply pagination to queries
@@ -102,22 +104,23 @@ async def search_across_org(
         statement = (
             select(Course)
             .select_from(Course)
-            .join(CollectionCourse, and_(
-                CollectionCourse.course_id == Course.id,
-                CollectionCourse.collection_id == collection.id,
-                CollectionCourse.org_id == collection.org_id
-            ))
+            .join(
+                CollectionCourse,
+                and_(
+                    CollectionCourse.course_id == Course.id,
+                    CollectionCourse.collection_id == collection.id,
+                    CollectionCourse.org_id == collection.org_id,
+                ),
+            )
             .distinct()
         )
         collection_courses = list(db_session.exec(statement).all())
-        collection_read = CollectionRead(**collection.model_dump(), courses=collection_courses)
+        collection_read = CollectionRead(
+            **collection.model_dump(), courses=collection_courses
+        )
         collection_reads.append(collection_read)
 
     # Convert users to UserRead objects
     user_reads = [UserRead.model_validate(user) for user in users]
 
-    return SearchResult(
-        courses=courses,
-        collections=collection_reads,
-        users=user_reads
-    ) 
+    return SearchResult(courses=courses, collections=collection_reads, users=user_reads)

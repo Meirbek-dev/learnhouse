@@ -133,7 +133,6 @@ async def create_user_with_invite(
     org_id: int,
     invite_code: str,
 ):
-
     # Check if invite code exists
     inviteCode = await get_invite_code(
         request, org_id, invite_code, current_user, db_session
@@ -148,18 +147,16 @@ async def create_user_with_invite(
     # Usage check
     check_limits_with_usage("members", org_id, db_session)
 
-    
-
     user = await create_user(request, db_session, current_user, user_object, org_id)
 
     # Check if invite code contains UserGroup
-    if inviteCode.get("usergroup_id"): # type: ignore
+    if inviteCode.get("usergroup_id"):  # type: ignore
         # Add user to UserGroup
         await add_users_to_usergroup(
             request,
             db_session,
             InternalUser(id=0),
-            int(inviteCode.get("usergroup_id")), # type: ignore / Convert to int since usergroup_id is expected to be int
+            int(inviteCode.get("usergroup_id")),  # type: ignore / Convert to int since usergroup_id is expected to be int
             str(user.id),
         )
 
@@ -413,8 +410,6 @@ async def read_user_by_uuid(
             detail="User does not exist",
         )
 
-    
-
     user = UserRead.model_validate(user)
 
     return user
@@ -435,8 +430,6 @@ async def read_user_by_username(
             status_code=400,
             detail="User does not exist",
         )
-
-    
 
     user = UserRead.model_validate(user)
 
@@ -512,10 +505,8 @@ async def authorize_user_action(
         )
 
     # RBAC check
-    authorized = (
-        await authorization_verify_based_on_roles_and_authorship(
-            request, current_user.id, action, resource_uuid, db_session
-        )
+    authorized = await authorization_verify_based_on_roles_and_authorship(
+        request, current_user.id, action, resource_uuid, db_session
     )
 
     if authorized:

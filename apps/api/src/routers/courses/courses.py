@@ -134,7 +134,11 @@ async def api_get_course_meta(
     Get single Course Metadata (chapters, activities) by course_uuid
     """
     return await get_course_meta(
-        request, course_uuid, with_unpublished_activities, current_user=current_user, db_session=db_session
+        request,
+        course_uuid,
+        with_unpublished_activities,
+        current_user=current_user,
+        db_session=db_session,
     )
 
 
@@ -213,7 +217,9 @@ async def api_apply_course_contributor(
     """
     Apply to be a contributor for a course
     """
-    return await apply_course_contributor(request, course_uuid, current_user, db_session)
+    return await apply_course_contributor(
+        request, course_uuid, current_user, db_session
+    )
 
 
 @router.get("/{course_uuid}/updates")
@@ -316,5 +322,5 @@ async def api_update_course_contributor(
         authorship,
         authorship_status,
         current_user,
-        db_session
+        db_session,
     )
