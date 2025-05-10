@@ -143,13 +143,8 @@ export function AssignmentTaskGeneralEdit() {
       </FormField>
 
       {/* Submit button */}
-      <Form.Submit>
-        <button
-          type="submit"
-          className="mt-4 flex w-full items-center justify-center rounded-md bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
-        >
-          {t('save')}
-        </button>
+      <Form.Submit className="mt-4 flex w-full items-center justify-center rounded-md bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600">
+        {t('save')}
       </Form.Submit>
     </FormLayout>
   )
