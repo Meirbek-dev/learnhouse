@@ -41,7 +41,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
       props.setInvitesModal(false)
     } else {
       toast.error(
-        t('createInviteError', { error: res.data?.detail || 'Unknown error' })
+        t('createInviteError', { error: res.data?.detail || t("unknownError") })
       )
     }
   }
@@ -53,7 +53,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
       props.setInvitesModal(false)
     } else {
       toast.error(
-        t('createInviteError', { error: res.data?.detail || 'Unknown error' })
+        t('createInviteError', { error: res.data?.detail || t('unknownError') })
       )
     }
   }
@@ -92,7 +92,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
                     onClick={createInviteWithUserGroup}
                     className="flex w-fit items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer"
                   >
-                    <Ticket className="h-4 w-4" />
+                    <Ticket className="size-4" />
                     <span>{t('generateButton')}</span>
                   </button>
                 </div>

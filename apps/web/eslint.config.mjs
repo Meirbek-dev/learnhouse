@@ -27,7 +27,7 @@ export default defineConfig([
       '@next/next/no-page-custom-font': 'off',
       '@next/next/no-img-element': 'off',
       'unused-imports/no-unused-imports': 'warn',
-      'no-console': 'warn',
+      'no-console': 'off',
     },
   },
 ])

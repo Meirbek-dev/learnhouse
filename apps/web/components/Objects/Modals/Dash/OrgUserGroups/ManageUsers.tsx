@@ -48,7 +48,7 @@ function ManageUsers(props: ManageUsersProps) {
       mutate(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`)
     } else {
       toast.error(
-        t('linkError', { error: res.data?.detail || 'Unknown error' })
+        t('linkError', { error: res.data?.detail || t("unknownError") })
       )
     }
   }
@@ -64,7 +64,7 @@ function ManageUsers(props: ManageUsersProps) {
       mutate(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`)
     } else {
       toast.error(
-        t('unlinkError', { error: res.data?.detail || 'Unknown error' })
+        t('unlinkError', { error: res.data?.detail || t('unknownError') })
       )
     }
   }

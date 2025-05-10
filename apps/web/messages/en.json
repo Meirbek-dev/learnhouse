@@ -240,6 +240,10 @@
       "startCourse": "Start Course",
       "youOwnThisCourse": "You own this course"
     },
+    "CourseParidActivityDisclaimer": {
+      "paidContent": "Paid Content",
+      "purchaseToAccess": "This content requires a course purchase to access."
+    },
     "CourseThumbnail": {
       "delete": "Delete course",
       "deleteButtonText": "Delete Course",
@@ -369,6 +373,7 @@
       "linkedHeader": "Linked",
       "linkedStatus": "Linked",
       "notLinkedStatus": "Not Linked",
+      "unknownError": "Unknown error",
       "unlinkButton": "Unlink",
       "unlinkError": "Error unlinking user: {error}",
       "unlinkSuccess": "User unlinked successfully",
@@ -454,7 +459,8 @@
       "linkedTitle": "Invite code linked to group",
       "noUserGroupsAvailable": "No user groups available",
       "normalDescription": "User will not be linked to any group when they sign up",
-      "normalTitle": "Normal Invite Code"
+      "normalTitle": "Normal Invite Code",
+      "unknownError": "Unknown error"
     },
     "OrgMenuLinks": {
       "collections": "Collections",
