@@ -41,7 +41,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
       props.setInvitesModal(false)
     } else {
       toast.error(
-        t('createInviteError', { error: res.data?.detail || t("unknownError") })
+        t('createInviteError', { error: res.data?.detail || t('unknownError') })
       )
     }
   }

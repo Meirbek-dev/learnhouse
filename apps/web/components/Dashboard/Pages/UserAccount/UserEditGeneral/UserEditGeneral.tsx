@@ -408,7 +408,7 @@ const UserEditForm = ({
             <div>
               <Label htmlFor="bio">
                 {t('bio')}
-                <span className="ml-2 text-sm text-gray-500">
+                <span className="ml-1 text-sm text-gray-500">
                   ({400 - (values.bio?.length || 0)} {t('charactersLeft')})
                 </span>
               </Label>
