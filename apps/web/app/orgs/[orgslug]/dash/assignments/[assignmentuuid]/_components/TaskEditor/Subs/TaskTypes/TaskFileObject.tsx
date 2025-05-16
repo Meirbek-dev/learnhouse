@@ -385,7 +385,7 @@ export default function TaskFileObject({
                     />
                     <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2.5 text-xs font-medium text-slate-600 antialiased sm:px-5 sm:text-sm">
                       <Loader size={15} className="mr-2" />
-                      <span>t("loading")</span>
+                      <span>{t('loading')}</span>
                     </div>
                   </div>
                 ) : (

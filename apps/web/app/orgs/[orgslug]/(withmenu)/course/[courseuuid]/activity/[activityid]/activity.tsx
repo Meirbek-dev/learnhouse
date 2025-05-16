@@ -97,6 +97,7 @@ function ActivityActions({
                   activityid={activityid}
                   course={course}
                   orgslug={orgslug}
+                  t={useTranslations('ActivityPage')}
                 />
               </>
             )}
@@ -111,6 +112,7 @@ function ActivityActions({
                     activityid={activityid}
                     course={course}
                     orgslug={orgslug}
+                    t={useTranslations('ActivityPage')}
                   />
                 </AssignmentSubmissionProvider>
               </>
@@ -828,11 +830,11 @@ export function MarkStatus(props: {
   orgslug: string
   t: ReturnType<typeof useTranslations<'ActivityPage'>>
 }) {
+  const t = props.t
   const router = useRouter()
   const session = useLHSession() as any
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [isLoading, setIsLoading] = React.useState(false)
-  const t = props.t
 
   const areAllActivitiesCompleted = () => {
     const run = props.course.trail.runs.find(

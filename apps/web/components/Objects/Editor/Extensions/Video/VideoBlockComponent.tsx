@@ -169,7 +169,7 @@ interface ExtendedNodeViewProps extends Omit<NodeViewProps, 'extension'> {
 }
 
 function VideoBlockComponent(props: ExtendedNodeViewProps) {
-  const t = useTranslations('Editor.VideoBlock')
+  const t = useTranslations('DashPage.Editor.VideoBlock')
   const { node, extension, updateAttributes } = props
   const org = useOrg() as Organization | null
   const course = useCourse() as Course | null

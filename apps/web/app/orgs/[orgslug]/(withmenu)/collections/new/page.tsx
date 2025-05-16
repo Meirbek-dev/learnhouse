@@ -13,12 +13,12 @@ import { toast } from 'react-hot-toast'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { useTranslations } from 'next-intl'
 
-function NewCollection(params: any) {
+function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
   const t = useTranslations('NewCollectionPage')
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const orgslug = params.params.orgslug
+  const { orgslug } = React.use(params)
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
   const [selectedCourses, setSelectedCourses] = React.useState([]) as any
