@@ -35,9 +35,9 @@ function AssignmentSubmissionsSubPage({
   const renderSubmissions = (status: string) => {
     return assignmentSubmission
       ?.filter((submission: any) => submission.submission_status === status)
-      .map((submission: any) => (
+      .map((submission: any, index: number) => (
         <SubmissionBox
-          key={submission.submission_uuid}
+          key={`${submission.submission_uuid}-${index}`}
           submission={submission}
           assignment_uuid={assignment_uuid}
           user_id={submission.user_id}
