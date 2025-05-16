@@ -1,5 +1,5 @@
 'use client'
-import { useMediaQuery } from 'usehooks-ts'
+import { useIsMobile } from '@/hooks/useMobile'
 import {
   Check,
   FileText,
@@ -27,7 +27,7 @@ export default function ActivityChapterDropdown(
 ): React.ReactNode {
   const [isOpen, setIsOpen] = React.useState(false)
   const dropdownRef = React.useRef<HTMLDivElement>(null)
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isMobile = useIsMobile()
   const t = useTranslations('ActivityPage')
 
   // Close dropdown when clicking outside

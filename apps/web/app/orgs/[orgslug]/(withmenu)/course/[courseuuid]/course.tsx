@@ -17,11 +17,11 @@ import {
 } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { CourseProvider } from '@components/Contexts/CourseContext'
-import { useMediaQuery } from 'usehooks-ts'
 import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions'
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors'
 import { useTranslations } from 'next-intl'
+import { useIsMobile } from '@/hooks/useMobile'
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage')
@@ -33,7 +33,7 @@ const CourseClient = (props: any) => {
   const orgslug = props.orgslug
   const course = props.course
   const org = useOrg() as any
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isMobile = useIsMobile()
 
   console.log(course)
 

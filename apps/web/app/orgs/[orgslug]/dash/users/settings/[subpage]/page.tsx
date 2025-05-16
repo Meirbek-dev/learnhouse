@@ -2,7 +2,7 @@
 import { useState, useEffect, use } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { useMediaQuery } from 'usehooks-ts'
+import { useIsMobile } from '@/hooks/useMobile'
 import { getUriWithOrg } from '@services/config/config'
 import {
   Monitor,
@@ -32,7 +32,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
   const t = useTranslations('DashPage.UserSettings')
   const [H1Label, setH1Label] = useState('')
   const [H2Label, setH2Label] = useState('')
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const isMobile = useIsMobile()
 
   function handleLabels() {
     if (params.subpage == 'users') {

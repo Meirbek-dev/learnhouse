@@ -1,12 +1,12 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import ReactConfetti from 'react-confetti'
 import { Trophy, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { useWindowSize } from 'usehooks-ts'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useTranslations } from 'next-intl'
+import { useWindowSize } from '@/hooks/useWindowSize'
 
 interface CourseEndViewProps {
   courseName: string

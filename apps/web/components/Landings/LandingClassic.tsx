@@ -45,7 +45,10 @@ function LandingClassic({
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {collections.map((collection: any) => (
-              <div key={collection.collection_uuid} className="flex flex-col p-3">
+              <div
+                key={collection.collection_uuid}
+                className="flex flex-col p-3"
+              >
                 <CollectionThumbnail
                   collection={collection}
                   orgslug={orgslug}

@@ -52,7 +52,7 @@ import { getUriWithOrg } from '@services/config/config'
 import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects'
 import Badges from './Extensions/Badges/Badges'
 import Buttons from './Extensions/Buttons/Buttons'
-import { useMediaQuery } from 'usehooks-ts'
+import { useIsMobile } from '@/hooks/useMobile'
 import UserAvatar from '../UserAvatar'
 import UserBlock from './Extensions/Users/UserBlock'
 
@@ -168,7 +168,7 @@ function Editor(props: EditorProps) {
     immediatelyRender: false,
   })
 
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const isMobile = useIsMobile()
   if (isMobile) {
     // TODO: Work on a better editor mobile experience
     return (

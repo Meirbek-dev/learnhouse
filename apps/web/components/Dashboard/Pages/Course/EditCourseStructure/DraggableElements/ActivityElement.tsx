@@ -30,7 +30,7 @@ import {
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 import toast from 'react-hot-toast'
-import { useMediaQuery } from 'usehooks-ts'
+import { useIsMobile } from '@/hooks/useMobile'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { useTranslations } from 'next-intl'
 
@@ -58,7 +58,7 @@ function ActivityElement(props: ActivitiyElementProps) {
   >(undefined)
   const [isUpdatingName, setIsUpdatingName] = React.useState<boolean>(false)
   const activityUUID = props.activity.activity_uuid
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const isMobile = useIsMobile()
   const t = useTranslations('CourseEdit.ActivityElement')
   const course = useCourse() as any
   const withUnpublishedActivities = course

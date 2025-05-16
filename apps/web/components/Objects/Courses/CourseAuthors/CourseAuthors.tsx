@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import UserAvatar from '../../UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { useMediaQuery } from 'usehooks-ts'
+import { useIsMobile } from '@/hooks/useMobile'
 import { Rss, PencilLine, TentTree } from 'lucide-react'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -435,7 +435,7 @@ const DeleteUpdateButton = ({ update }: any) => {
 }
 
 const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isMobile = useIsMobile()
 
   // Filter active authors and sort by role priority
   const sortedAuthors = [...authors]

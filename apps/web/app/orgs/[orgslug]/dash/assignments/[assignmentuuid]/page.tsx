@@ -27,7 +27,7 @@ import { updateActivity } from '@services/courses/activities'
 // Lazy Loading
 import dynamic from 'next/dynamic'
 import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage'
-import { useMediaQuery } from 'usehooks-ts'
+import { useIsMobile } from '@/hooks/useMobile'
 import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal'
 import { useTranslations } from 'next-intl'
 const AssignmentSubmissionsSubPage = dynamic(
@@ -41,7 +41,7 @@ function AssignmentEdit() {
   const [selectedSubPage, setSelectedSubPage] = useState(
     searchParams.get('subpage') || 'editor'
   )
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const isMobile = useIsMobile()
 
   if (isMobile) {
     // TODO: Work on a better mobile experience

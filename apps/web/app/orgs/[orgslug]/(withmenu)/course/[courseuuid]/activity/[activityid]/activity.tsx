@@ -46,7 +46,7 @@ import AssignmentSubmissionProvider, {
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { useMediaQuery } from 'usehooks-ts'
+import { useIsMobile } from '@/hooks/useMobile'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
@@ -833,7 +833,7 @@ export function MarkStatus(props: {
   const t = props.t
   const router = useRouter()
   const session = useLHSession() as any
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isMobile = useIsMobile()
   const [isLoading, setIsLoading] = React.useState(false)
 
   const areAllActivitiesCompleted = () => {
@@ -1037,7 +1037,7 @@ function NextActivityButton({
   orgslug: string
 }) {
   const router = useRouter()
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isMobile = useIsMobile()
   const t = useTranslations('ActivityPage')
 
   const findNextActivity = () => {
@@ -1107,7 +1107,7 @@ function PreviousActivityButton({
   orgslug: string
 }) {
   const router = useRouter()
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isMobile = useIsMobile()
 
   const findPreviousActivity = () => {
     let allActivities: any[] = []

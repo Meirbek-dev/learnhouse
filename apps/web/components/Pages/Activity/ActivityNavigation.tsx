@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useMediaQuery } from 'usehooks-ts'
+import { useIsMobile } from '@/hooks/useMobile'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import React from 'react'
@@ -17,7 +17,7 @@ export default function ActivityNavigation(
 ): React.ReactNode {
   const t = useTranslations('ActivityPage')
   const router = useRouter()
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const isMobile = useIsMobile()
   const [isBottomNavVisible, setIsBottomNavVisible] = React.useState(true)
   const bottomNavRef = React.useRef<HTMLDivElement>(null)
   const [navWidth, setNavWidth] = React.useState<number | null>(null)
