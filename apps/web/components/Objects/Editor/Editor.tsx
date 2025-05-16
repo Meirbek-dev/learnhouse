@@ -66,7 +66,7 @@ interface EditorProps {
 }
 
 function Editor(props: EditorProps) {
-  const t = useTranslations('Editor.Editor')
+  const t = useTranslations('DashPage.Editor.Editor')
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' })
@@ -96,6 +96,7 @@ function Editor(props: EditorProps) {
     editable: true,
     extensions: [
       StarterKit.configure({
+        codeBlock: false,
         bulletList: {
           HTMLAttributes: {
             class: 'bullet-list',

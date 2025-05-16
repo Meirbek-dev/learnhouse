@@ -57,8 +57,10 @@ function Canva(props: Editor) {
 
   const editor: any = useEditor({
     editable: isEditable,
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
+        codeBlock: false,
         bulletList: {
           HTMLAttributes: {
             class: 'bullet-list',

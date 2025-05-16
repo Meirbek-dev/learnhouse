@@ -21,7 +21,7 @@ export async function generateMetadata(
   const params = await props.params
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
-  const t = await getTranslations('EditorPage')
+  const t = await getTranslations('DashPage.Editor')
 
   // Get Org context information
   const course_meta = await getCourseMetadata(

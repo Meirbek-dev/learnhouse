@@ -164,7 +164,7 @@ const MemoizedEmbed = React.memo(
 MemoizedEmbed.displayName = 'MemoizedEmbed'
 
 function EmbedObjectsComponent(props: any) {
-  const t = useTranslations('Editor.EmbedObjects')
+  const t = useTranslations('DashPage.Editor.EmbedObjects')
   const [embedType, setEmbedType] = useState<'url' | 'code'>(
     props.node.attrs.embedType || 'url'
   )

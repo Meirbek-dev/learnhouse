@@ -40,7 +40,7 @@ import LinkInputTooltip from './LinkInputTooltip'
 import { useTranslations } from 'next-intl'
 
 export const ToolbarButtons = ({ editor, props }: any) => {
-  const t = useTranslations('Editor.Toolbar')
+  const t = useTranslations('DashPage.Editor.Toolbar')
   const [showTableMenu, setShowTableMenu] = useState(false)
   const [showListMenu, setShowListMenu] = useState(false)
   const [showLinkInput, setShowLinkInput] = useState(false)

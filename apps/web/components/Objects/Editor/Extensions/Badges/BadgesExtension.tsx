@@ -8,7 +8,7 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { useTranslations } from 'next-intl'
 
 const BadgesExtension: FC = (props: any) => {
-  const t = useTranslations('Editor.BadgesExtension')
+  const t = useTranslations('DashPage.Editor.BadgesExtension')
   const [color, setColor] = useState(props.node.attrs.color)
   const [emoji, setEmoji] = useState(props.node.attrs.emoji)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)

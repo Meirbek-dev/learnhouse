@@ -214,7 +214,7 @@ const HelpDropdown = styled.div`
 `
 
 function MathEquationBlockComponent(props: any) {
-  const t = useTranslations('Editor.MathEquationBlock')
+  const t = useTranslations('DashPage.Editor.MathEquationBlock')
   const [equation, setEquation] = useState(props.node.attrs.math_equation)
   const [isEditing, setIsEditing] = useState(true)
   const [showTemplates, setShowTemplates] = useState(false)
