@@ -313,9 +313,10 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
         ?.find((run: CourseRun) => run.course_id === course.id)
         ?.steps?.filter((step) => step.complete)?.length || 0
 
-    const progressPercentage = Math.round(
-      (completedActivities / totalActivities) * 100
-    )
+    const progressPercentage =
+      totalActivities === 0
+        ? 0
+        : Math.round((completedActivities / totalActivities) * 100)
 
     if (!isStarted) {
       return (
@@ -399,10 +400,12 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
                       strokeLinecap="round"
                       strokeDasharray={2 * Math.PI * 28}
                       strokeDashoffset={
-                        2 *
-                        Math.PI *
-                        28 *
-                        (1 - completedActivities / totalActivities)
+                        totalActivities === 0
+                          ? 0
+                          : 2 *
+                            Math.PI *
+                            28 *
+                            (1 - completedActivities / totalActivities)
                       }
                       className="transition-all duration-500 ease-out"
                     />

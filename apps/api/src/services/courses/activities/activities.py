@@ -7,7 +7,12 @@ from src.security.rbac.rbac import (
     authorization_verify_if_element_is_public,
     authorization_verify_if_user_is_anon,
 )
-from src.db.courses.activities import ActivityCreate, Activity, ActivityRead, ActivityUpdate
+from src.db.courses.activities import (
+    ActivityCreate,
+    Activity,
+    ActivityRead,
+    ActivityUpdate,
+)
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.users import AnonymousUser, PublicUser
 from fastapi import HTTPException, Request
@@ -28,7 +33,6 @@ async def create_activity(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
-
     # CHeck if org exists
     statement = select(Chapter).where(Chapter.id == activity_object.chapter_id)
     chapter = db_session.exec(statement).first()
@@ -69,7 +73,7 @@ async def create_activity(
     statement = (
         select(ChapterActivity)
         .where(ChapterActivity.chapter_id == activity_object.chapter_id)
-        .order_by(ChapterActivity.order) # type: ignore
+        .order_by(ChapterActivity.order)  # type: ignore
     )
     chapter_activities = db_session.exec(statement).all()
 
@@ -125,13 +129,16 @@ async def get_activity(
         request=request,
         activity_id=activity.id if activity.id else 0,
         user=current_user,
-        db_session=db_session
+        db_session=db_session,
     )
 
     activity_read = ActivityRead.model_validate(activity)
-    activity_read.content = activity_read.content if has_paid_access else { "paid_access": False }
+    activity_read.content = (
+        activity_read.content if has_paid_access else {"paid_access": False}
+    )
 
     return activity_read
+
 
 async def get_activityby_id(
     request: Request,
@@ -140,11 +147,7 @@ async def get_activityby_id(
     db_session: Session,
 ):
     # Optimize by joining Activity with Course in a single query
-    statement = (
-        select(Activity, Course)
-        .join(Course)
-        .where(Activity.id == activity_id)
-    )
+    statement = select(Activity, Course).join(Course).where(Activity.id == activity_id)
     result = db_session.exec(statement).first()
 
     if not result:
@@ -265,8 +268,7 @@ async def get_activities(
         select(Activity)
         .join(ChapterActivity)
         .where(
-            ChapterActivity.chapter_id == coursechapter_id,
-            Activity.published == True
+            ChapterActivity.chapter_id == coursechapter_id, Activity.published == True
         )
     )
     activities = db_session.exec(statement).all()
@@ -313,8 +315,6 @@ async def rbac_check(
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,
 ):
-
-
     if action == "read":
         if current_user.id == 0:  # Anonymous user
             res = await authorization_verify_if_element_is_public(

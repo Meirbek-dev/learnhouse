@@ -6,6 +6,11 @@ import { useTranslations } from 'next-intl'
 
 export type ContributorStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'INACTIVE'
 
+interface Contributor {
+  user_id: string
+  authorship_status: ContributorStatus
+}
+
 export function useContributorStatus(courseUuid: string) {
   const session = useLHSession() as any
   const [contributorStatus, setContributorStatus] =
@@ -25,9 +30,10 @@ export function useContributorStatus(courseUuid: string) {
         session.data?.tokens?.access_token
       )
 
-      if (response.data) {
+      if (response && response.data && Array.isArray(response.data)) {
         const currentUser = response.data.find(
-          (contributor: any) => contributor.user_id === session.data.user.id
+          (contributor: Contributor) =>
+            contributor.user_id === session.data.user.id
         )
 
         if (currentUser) {
@@ -37,10 +43,13 @@ export function useContributorStatus(courseUuid: string) {
         } else {
           setContributorStatus('NONE')
         }
+      } else {
+        setContributorStatus('NONE')
       }
     } catch (error) {
       console.error(t('checkStatusError') + ': ' + error)
       toast.error(t('checkStatusError'))
+      setContributorStatus('NONE')
     } finally {
       setIsLoading(false)
     }

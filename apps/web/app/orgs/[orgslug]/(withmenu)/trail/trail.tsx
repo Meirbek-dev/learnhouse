@@ -36,6 +36,7 @@ function Trail(params: any) {
             <>
               <TrailCourseElement
                 run={run}
+                key={run.org_id}
                 course={run.course}
                 orgslug={orgslug}
               />

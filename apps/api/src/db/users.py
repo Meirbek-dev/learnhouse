@@ -5,7 +5,6 @@ from sqlalchemy import JSON, Column
 from src.db.roles import RoleRead
 
 
-
 class UserBase(SQLModel):
     username: str
     first_name: str
@@ -15,6 +14,7 @@ class UserBase(SQLModel):
     bio: Optional[str] = ""
     details: Optional[dict] = Field(default={}, sa_column=Column(JSON))
     profile: Optional[dict] = Field(default={}, sa_column=Column(JSON))
+
 
 class UserCreate(UserBase):
     first_name: str = ""
@@ -49,6 +49,7 @@ class PublicUser(UserRead):
 
 class UserRoleWithOrg(BaseModel):
     from src.db.organizations import OrganizationRead
+
     role: RoleRead
     org: OrganizationRead
 
@@ -62,6 +63,7 @@ class AnonymousUser(SQLModel):
     id: int = 0
     user_uuid: str = "user_anonymous"
     username: str = "anonymous"
+
 
 class InternalUser(SQLModel):
     id: int = 0

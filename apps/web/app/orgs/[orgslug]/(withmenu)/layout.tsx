@@ -1,5 +1,5 @@
 'use client'
-import { use } from 'react'
+import { Children, cloneElement, use } from 'react'
 import '@styles/globals.css'
 import Watermark from '@components/Objects/Watermark'
 import { OrgMenu } from '@components/Objects/Menus/OrgMenu'
@@ -13,8 +13,12 @@ export default function RootLayout(props: {
 
   return (
     <>
-      <OrgMenu orgslug={params?.orgslug}></OrgMenu>
-      {children}
+      <OrgMenu key={params?.orgslug + '-orgmenu'} orgslug={params?.orgslug} />
+      {Children.map(children, (child, index) =>
+        cloneElement(child as React.ReactElement, {
+          key: `${params.orgslug}-child-${index}`,
+        })
+      )}
       <Watermark />
     </>
   )

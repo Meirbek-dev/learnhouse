@@ -7,6 +7,7 @@ from src.services.search.search import search_across_org, SearchResult
 
 router = APIRouter()
 
+
 @router.get("/org_slug/{org_slug}", response_model=SearchResult)
 async def api_search_across_org(
     request: Request,
@@ -27,5 +28,5 @@ async def api_search_across_org(
         search_query=query,
         db_session=db_session,
         page=page,
-        limit=limit
-    ) 
+        limit=limit,
+    )
