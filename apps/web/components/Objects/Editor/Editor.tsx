@@ -96,6 +96,7 @@ function Editor(props: EditorProps) {
     editable: true,
     extensions: [
       StarterKit.configure({
+        codeBlock: false,
         bulletList: {
           HTMLAttributes: {
             class: 'bullet-list',

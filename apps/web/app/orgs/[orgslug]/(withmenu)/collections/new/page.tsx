@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { use, useState } from 'react'
 import * as React from 'react'
 import { createCollection } from '@services/courses/collections'
 import useSWR from 'swr'
@@ -18,7 +18,7 @@ function NewCollection(params: any) {
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const orgslug = params.params.orgslug
+  const orgslug: string = use(params.params)
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
   const [selectedCourses, setSelectedCourses] = React.useState([]) as any
