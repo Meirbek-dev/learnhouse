@@ -1,4 +1,3 @@
-// TODO: Localize this component
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'

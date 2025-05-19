@@ -1,5 +1,5 @@
 'use client'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import {
   Check,
   FileText,

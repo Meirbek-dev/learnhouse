@@ -10,7 +10,7 @@ import {
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
-//TODO : depreciate this function
+//TODO : deprecate this function
 export async function getCourseChaptersMetadata(
   course_uuid: any,
   next: any,

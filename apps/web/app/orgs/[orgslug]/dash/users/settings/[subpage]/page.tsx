@@ -2,7 +2,7 @@
 import { useState, useEffect, use } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { getUriWithOrg } from '@services/config/config'
 import {
   Monitor,

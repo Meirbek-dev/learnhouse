@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { Locale, locales } from '@/i18n/config'
 import { setUserLocale } from '@/i18n/locale'
@@ -16,20 +16,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-interface LanguageSwitcherProps {
-  currentLocale: Locale
+interface LocaleSwitcherProps {
   className?: string
 }
 
-export function LanguageSwitcher({
-  currentLocale,
-  className,
-}: LanguageSwitcherProps) {
+export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
   const router = useRouter()
+  const currentLocale = useLocale()
   const [isPending, startTransition] = useTransition()
   const t = useTranslations('Components.LocaleSwitcher')
 
-  const onSelectChange = async (newLocale: Locale) => {
+  const handleLocaleChange = async (newLocale: Locale) => {
     startTransition(async () => {
       await setUserLocale(newLocale)
       router.refresh()
@@ -39,7 +36,7 @@ export function LanguageSwitcher({
   return (
     <Select
       value={currentLocale}
-      onValueChange={(value) => onSelectChange(value as Locale)}
+      onValueChange={(value) => handleLocaleChange(value as Locale)}
       disabled={isPending}
     >
       <SelectTrigger
@@ -61,4 +58,4 @@ export function LanguageSwitcher({
   )
 }
 
-export default LanguageSwitcher
+export default LocaleSwitcher

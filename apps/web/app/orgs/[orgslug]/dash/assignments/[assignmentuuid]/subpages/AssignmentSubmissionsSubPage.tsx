@@ -12,7 +12,7 @@ import EvaluateAssignment from './Modals/EvaluateAssignment'
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext'
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext'
 import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl' // Import useLocale
 
 function AssignmentSubmissionsSubPage({
   assignment_uuid,
@@ -86,6 +86,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
     open: false,
     submission_id: '',
   })
+  const locale = useLocale()
 
   const { data: user, error: userError } = useSWR(
     `${getAPIUrl()}users/id/${user_id}`,
@@ -100,8 +101,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
             {t('submission')}
           </h2>
           <p className="text-xs font-semibold tracking-tight uppercase">
-            {/* TODO: Add date localization */}
-            {new Date(submission.creation_date).toLocaleDateString('en-UK', {
+            {new Date(submission.creation_date).toLocaleDateString(locale, {
               year: 'numeric',
               month: 'long',
               day: 'numeric',

@@ -21,7 +21,7 @@ import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesAct
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors'
 import { useTranslations } from 'next-intl'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage')

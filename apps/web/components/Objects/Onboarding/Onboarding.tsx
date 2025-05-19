@@ -30,6 +30,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { useOrg } from '@components/Contexts/OrgContext'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { useTranslations } from 'next-intl'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 interface OnboardingStep {
   imageSrc: StaticImageData
@@ -52,25 +53,10 @@ const Onboarding: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(true)
   const [isTemporarilyClosed, setIsTemporarilyClosed] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const isMobile = useIsMobile()
   const router = useRouter()
   const org = useOrg() as any
   const isUserAdmin = useAdminStatus() as any
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-
-    // Initial check
-    checkMobile()
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkMobile)
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
   const onboardingData: OnboardingStep[] = [
     {
@@ -162,12 +148,11 @@ const Onboarding: FC = () => {
     },
     {
       imageSrc: OnBoardAssignments,
-      title: 'Create and Grade Assignments',
-      description:
-        'Engage students with assignments, track their progress, and provide feedback through our intuitive grading system.',
+      title: t('step8Title'),
+      description: t('step8Desc'),
       buttons: [
         {
-          label: 'Create Assignment',
+          label: t('step8Button'),
           action: () =>
             router.push(getUriWithOrg(org?.slug, '/dash/assignments?new=true')),
           icon: <Book size={16} />,
@@ -176,12 +161,11 @@ const Onboarding: FC = () => {
     },
     {
       imageSrc: OnBoardPayments,
-      title: 'Monetize Your Content',
-      description:
-        'Set up payment plans, sell courses, and manage subscriptions with our integrated payment system.',
+      title: t('step9Title'),
+      description: t('step9Desc'),
       buttons: [
         {
-          label: 'Payment Settings',
+          label: t('step9Button'),
           action: () =>
             router.push(getUriWithOrg(org?.slug, '/dash/payments/customers')),
           icon: <CreditCard size={16} />,
@@ -190,12 +174,11 @@ const Onboarding: FC = () => {
     },
     {
       imageSrc: OnBoardMore,
-      title: 'To infinity and beyond',
-      description:
-        "To Learn more about LearnHouse, you're welcome to follow our Original courses on the LearnHouse University",
+      title: t('step10Title'),
+      description: t('step10Desc'),
       buttons: [
         {
-          label: 'LearnHouse University',
+          label: t('step10Button'),
           action: () =>
             window.open('https://university.learnhouse.io', '_blank'),
           icon: <Globe size={16} />,
@@ -298,7 +281,7 @@ const Onboarding: FC = () => {
               <div className="fixed bottom-0 w-full bg-linear-to-t from-gray-950/25 from-1% to-transparent pb-10">
                 <div className="mx-auto flex w-fit cursor-pointer items-center space-x-2 rounded-full bg-gray-950 px-5 py-2 font-bold text-gray-200 shadow-md hover:bg-gray-900">
                   <Sprout size={20} />
-                  <p>Onboarding</p>
+                  <p>{t('onboarding')}</p>
                   <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
                   <div
                     className="ml-2 cursor-pointer border-l border-gray-700 pl-2"
@@ -337,6 +320,8 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
   onboardingData,
   setIsModalOpen,
 }) => {
+  const t = useTranslations('Components.Onboarding')
+
   const isLastStep = currentStep === onboardingData.length - 1
 
   return (
@@ -379,7 +364,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
               className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-gray-100 px-5 py-1 font-bold text-gray-600 antialiased hover:bg-gray-200"
               onClick={skipOnboarding}
             >
-              <p>End</p>
+              <p>{t('endButtonLabel')}</p>
               <Check size={16} />
             </div>
           </div>
@@ -399,7 +384,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
                 className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-black px-5 py-1 font-bold whitespace-nowrap text-gray-200 antialiased shadow-md hover:bg-gray-700"
                 onClick={nextStep}
               >
-                <p>Finish Onboarding</p>
+                <p>{t('finishButtonLabel')}</p>
                 <Check size={16} />
               </div>
             ) : (
@@ -407,7 +392,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
                 className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-black px-5 py-1 font-bold whitespace-nowrap text-gray-200 antialiased shadow-md hover:bg-gray-700"
                 onClick={nextStep}
               >
-                <p>Next</p>
+                <p>{t('nextButtonLabel')}</p>
                 <ArrowRight size={16} />
               </div>
             )}

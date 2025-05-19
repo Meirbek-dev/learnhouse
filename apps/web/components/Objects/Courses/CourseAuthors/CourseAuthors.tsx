@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import UserAvatar from '../../UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { Rss, PencilLine, TentTree } from 'lucide-react'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'

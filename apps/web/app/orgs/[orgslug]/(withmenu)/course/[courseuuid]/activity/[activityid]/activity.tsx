@@ -46,7 +46,7 @@ import AssignmentSubmissionProvider, {
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'

@@ -27,7 +27,7 @@ import { updateActivity } from '@services/courses/activities'
 // Lazy Loading
 import dynamic from 'next/dynamic'
 import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal'
 import { useTranslations } from 'next-intl'
 const AssignmentSubmissionsSubPage = dynamic(

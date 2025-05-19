@@ -30,7 +30,7 @@ import {
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 import toast from 'react-hot-toast'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { useTranslations } from 'next-intl'
 

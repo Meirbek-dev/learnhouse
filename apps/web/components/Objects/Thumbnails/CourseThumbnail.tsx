@@ -55,7 +55,6 @@ export const removeCoursePrefix = (course_uuid: string) =>
 
 function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
   const t = useTranslations('Components.CourseThumbnail')
-  const tg = useTranslations('General')
   const router = useRouter()
   const org = useOrg() as any
   const session = useLHSession() as any
@@ -68,7 +67,7 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
   const remainingAuthorsCount = activeAuthors.length - 3
 
   const deleteCourse = async () => {
-    const toastId = toast.loading(tg('deleting'))
+    const toastId = toast.loading(t('deleting'))
     try {
       await deleteCourseFromBackend(
         course.course_uuid,
@@ -129,7 +128,7 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
           {course.update_date && (
             <div className="inline-flex h-5 min-w-[140px] items-center justify-center rounded-md border border-gray-200 bg-gray-100/80 px-2">
               <span className="truncate text-[10px] font-medium text-gray-600">
-                Updated{' '}
+                {t('updated')}{' '}
                 {new Date(course.update_date).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -190,7 +189,7 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
           }
           className="inline-flex w-full items-center justify-center rounded-lg bg-black px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800"
         >
-          Start Learning
+          {t('startLearning')}
         </Link>
       </div>
     </div>

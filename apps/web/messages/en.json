@@ -249,10 +249,15 @@
       "deleteButtonText": "Delete Course",
       "deleteConfirmationMessage": "Are you sure you want to delete this course?",
       "deleteConfirmationTitle": "Delete {courseName}?",
+      "deleting": "Deleting...",
       "editContent": "Edit content",
       "settings": "Settings",
+      "startLearning": "Start Learning",
+      "startLearningButton": "Start Learning",
       "toastDeleteError": "Failed to delete course",
-      "toastDeleteSuccess": "Course deleted successfully"
+      "toastDeleteSuccess": "Course deleted successfully",
+      "updated": "Updated",
+      "updatedDate": "Updated {date}"
     },
     "CourseThumbnailLanding": {
       "deleteButtonText": "Delete Course",
@@ -414,10 +419,14 @@
     },
     "Onboarding": {
       "endButton": "End",
+      "endButtonLabel": "End",
       "finishButton": "Finish Onboarding",
+      "finishButtonLabel": "Finish Onboarding",
       "finishTooltip": "Finish Onboarding",
       "minimizeButtonTooltip": "Close temporarily",
       "nextButton": "Next",
+      "nextButtonLabel": "Next",
+      "onboarding": "Onboarding",
       "step10Button": "LearnHouse University",
       "step10Desc": "To learn more about LearnHouse, you can take our original courses at LearnHouse University",
       "step10Title": "To infinity and beyond",
@@ -512,14 +521,25 @@
       "loadingError": "Failed to load user data"
     },
     "VideoModal": {
+      "activityName": "Activity Name",
+      "activityNamePlaceholder": "Enter activity name...",
+      "autoplay": "Autoplay video",
       "createActivity": "Create Activity",
+      "endTime": "End Time (seconds, optional)",
+      "endTimePlaceholder": "Leave empty for full duration",
+      "startMuted": "Start muted",
+      "startTime": "Start Time (seconds)",
+      "startTimePlaceholder": "0",
+      "uploadVideo": "Upload Video",
       "valueMissingFile": "Please provide a video file for your activity",
       "valueMissingName": "Please provide a name for your video activity",
       "valueMissingUrl": "Please provide a YouTube URL for your activity",
       "videoFile": "Video File",
       "videoName": "Video Name",
+      "videoSettings": "Video Settings",
       "videoUpload": "Video Upload",
       "youtubeUrl": "YouTube URL",
+      "youtubeUrlPlaceholder": "https://youtube.com/watch?v=...",
       "youtubeVideo": "YouTube Video"
     }
   },
@@ -1167,6 +1187,8 @@
       "activityNameUpdateSuccess": "Activity name updated successfully",
       "activityUpdateErrorGeneric": "Failed to update activity",
       "activityUpdateSuccess": "Activity updated successfully",
+      "avatarError": "Failed to update an avatar",
+      "avatarSuccess": "Avatar updated successfully",
       "cannotModifyCreator": "Cannot modify the creator's role or status",
       "changingJoinMethod": "Changing join method...",
       "chapterCreateFailed": "Failed to create chapter",
@@ -1529,6 +1551,12 @@
           "usernamePlaceholder": "Enter your username"
         },
         "EditPassword": {
+          "Notifications": {
+            "passwordUpdateError": "Failed to update password",
+            "passwordUpdateSuccess": "Password updated successfully",
+            "promptLogoutOnPasswordChange": "Please login again with your new password",
+            "updating": "Updating password..."
+          },
           "confirmPasswordLabel": "Confirm Password",
           "currentPasswordLabel": "Current Password",
           "description": "Update your password to keep your account secure",
@@ -2008,5 +2036,6 @@
     "usernameMinLength": "Username must be at least {length} characters",
     "wrongCredentials": "Wrong Email or Password"
   },
+  "failedToLoadUserData": "Failed to load user data.",
   "learnhouse-logo": "learnhouse logo"
 }

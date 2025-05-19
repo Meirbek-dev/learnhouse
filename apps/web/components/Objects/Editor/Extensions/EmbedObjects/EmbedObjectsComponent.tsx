@@ -29,6 +29,7 @@ import {
 import { useRouter } from 'next/navigation'
 import DOMPurify from 'dompurify'
 import { useTranslations } from 'next-intl'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 // Add new type for script-based embeds
 const SCRIPT_BASED_EMBEDS = {
@@ -181,8 +182,8 @@ function EmbedObjectsComponent(props: any) {
   )
   const [isResizing, setIsResizing] = useState(false)
   const [parentWidth, setParentWidth] = useState<number | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
 
+  const isMobile = useIsMobile()
   const resizeRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const editorState = useEditorProvider() as any
@@ -196,9 +197,6 @@ function EmbedObjectsComponent(props: any) {
         const parentElement = containerRef.current.parentElement
         const newParentWidth = parentElement.offsetWidth
         setParentWidth(newParentWidth)
-
-        // Check if we're in a mobile viewport
-        setIsMobile(newParentWidth < 640) // 640px is a common breakpoint for small screens
 
         // If embedWidth is set to a percentage, maintain that percentage
         // Otherwise, adjust to fit parent width

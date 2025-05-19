@@ -40,11 +40,10 @@ function UserEditPassword() {
   const tPassword = useTranslations(
     'DashPage.UserAccountSettings.UserAccount.EditPassword'
   )
-  const tNotify = useTranslations('Notifications')
   const validationSchema = useMemo(() => createValidationSchema(t), [t])
 
   const updatePasswordUI = async (values: any) => {
-    const loadingToast = toast.loading(tNotify('updating'))
+    const loadingToast = toast.loading(t('Notifications.updating'))
     try {
       let user_id = session.data.user.id
       const response = await updatePassword(user_id, values, access_token)
@@ -53,11 +52,11 @@ function UserEditPassword() {
         toast.dismiss(loadingToast)
 
         // Show success message and notify about logout
-        toast.success(tNotify('passwordUpdateSuccess'), { duration: 4000 })
+        toast.success(t('Notifications.passwordUpdateSuccess'), { duration: 4000 })
         toast(
           (t: any) => (
             <div className="flex items-center gap-2">
-              <span>{tNotify('promptLogoutOnPasswordChange')}</span>
+              <span>{t('Notifications.promptLogoutOnPasswordChange')}</span>
             </div>
           ),
           {
@@ -70,10 +69,10 @@ function UserEditPassword() {
         await new Promise((resolve) => setTimeout(resolve, 4000))
         signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })
       } else {
-        toast.error(tNotify('passwordUpdateError'), { id: loadingToast })
+        toast.error(t('Notifications.passwordUpdateError'), { id: loadingToast })
       }
     } catch (error: any) {
-      toast.error(tNotify('passwordUpdateError'), { id: loadingToast })
+      toast.error(t('Notifications.passwordUpdateError'), { id: loadingToast })
       console.error('Password update error:', error)
     }
   }

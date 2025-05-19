@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import React from 'react'

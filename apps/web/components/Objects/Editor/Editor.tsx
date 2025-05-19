@@ -52,7 +52,7 @@ import { getUriWithOrg } from '@services/config/config'
 import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects'
 import Badges from './Extensions/Badges/Badges'
 import Buttons from './Extensions/Buttons/Buttons'
-import { useIsMobile } from '@/hooks/useMobile'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import UserAvatar from '../UserAvatar'
 import UserBlock from './Extensions/Users/UserBlock'
 

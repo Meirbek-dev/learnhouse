@@ -132,7 +132,6 @@ const CourseThumbnailLanding: FC<PropsType> = ({
   customLink,
 }) => {
   const t = useTranslations('Components.CourseThumbnailLanding')
-  const tg = useTranslations('General')
   const tCourseThumb = useTranslations('Components.CourseThumbnail')
   const router = useRouter()
   const org = useOrg() as any
@@ -146,7 +145,7 @@ const CourseThumbnailLanding: FC<PropsType> = ({
   const remainingAuthorsCount = activeAuthors.length - 3
 
   const deleteCourse = async () => {
-    const toastId = toast.loading(tg('deleting'))
+    const toastId = toast.loading(t('deleting'))
     try {
       await deleteCourseFromBackend(
         course.course_uuid,

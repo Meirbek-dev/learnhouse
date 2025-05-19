@@ -44,7 +44,7 @@ import { toast } from 'react-hot-toast'
 import { signOut } from 'next-auth/react'
 import { getUriWithoutOrg } from '@services/config/config'
 import { useDebounce } from '@/hooks/useDebounce'
-import LanguageSwitcher from '@components/Utils/LocaleSwitcher'
+import { LocaleSwitcher } from '@components/Utils/LocaleSwitcher'
 import { getUserLocale } from '@/i18n/locale'
 import { type Locale } from '@/i18n/config'
 import { useTranslations } from 'next-intl'
@@ -271,7 +271,6 @@ interface UserEditFormProps {
     localAvatar: File | null
     handleFileChange: (event: any) => Promise<void>
   }
-  currentLocale: Locale
 }
 
 // Form component to handle the details section
@@ -283,7 +282,6 @@ const UserEditForm = ({
   touched,
   isSubmitting,
   profilePicture,
-  currentLocale,
 }: UserEditFormProps) => {
   const t = useTranslations('DashPage.UserAccountSettings.generalSection')
   // Memoize template handlers
@@ -426,8 +424,8 @@ const UserEditForm = ({
               )}
             </div>
             <div>
-              <Label>{t('language')}</Label>
-              <LanguageSwitcher currentLocale={currentLocale} />
+              <Label className="mb-1.5">{t('language')}</Label>
+              <LocaleSwitcher />
             </div>
             <div className="space-y-4">
               <div className="flex flex-col gap-3">
@@ -618,12 +616,13 @@ function UserEditGeneral() {
   const [userData, setUserData] = useState<any>(null)
   const [currentLocale, setCurrentLocale] = useState<Locale | null>(null)
   const [initialLoading, setInitialLoading] = useState<boolean>(true)
-  const t = useTranslations()
-  const tNotify = useTranslations('Notifications')
-  const tGeneralSection = useTranslations(
-    'DashPage.UserAccountSettings.generalSection'
-  )
+  const t = useTranslations('')
   const validationSchema = React.useMemo(() => createValidationSchema(t), [t])
+
+  // Add a handler to update the state when locale changes
+  const handleLocaleChange = useCallback((newLocale: Locale) => {
+    setCurrentLocale(newLocale)
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -639,7 +638,7 @@ function UserEditGeneral() {
           const errorMessage =
             err instanceof Error ? err.message : 'Unknown error'
           console.error('Error fetching initial data:', errorMessage, err)
-          setError(tGeneralSection('loadingError'))
+          setError('Failed to load user data.')
         } finally {
           setInitialLoading(false)
         }
@@ -649,7 +648,7 @@ function UserEditGeneral() {
     }
 
     fetchData()
-  }, [session?.data?.user?.id, access_token, tGeneralSection])
+  }, [session?.data?.user?.id, access_token])
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -669,25 +668,25 @@ function UserEditGeneral() {
       )
       // await new Promise((r) => setTimeout(r, 1000));
       if (res.success === false) {
-        setError(res.HTTPmessage || tNotify('avatarError'))
+        setError(res.HTTPmessage || t('DashPage.Notifications.avatarError'))
       } else {
-        setSuccess(tNotify('avatarSuccess'))
+        setSuccess(t('DashPage.Notifications.avatarSuccess'))
       }
     } catch (uploadError) {
       console.error('Avatar upload error:', uploadError)
-      setError(tNotify('avatarError'))
+      setError(t('DashPage.Notifications.avatarError'))
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleEmailChange = async (newEmail: string) => {
-    toast.success(tNotify('profileUpdateSuccess'), { duration: 4000 })
+    toast.success(t('DashPage.Notifications.profileUpdateSuccess'), { duration: 4000 })
 
     toast(
       (t: any) => (
         <div className="flex items-center gap-2">
-          <span>{tNotify('promptLogoutOnEmailChange', { newEmail })}</span>
+          <span>{t('DashPage.Notifications.promptLogoutOnEmailChange', { newEmail })}</span>
         </div>
       ),
       {
@@ -726,7 +725,7 @@ function UserEditGeneral() {
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting }) => {
           const isEmailChanged = values.email !== userData.email
-          const loadingToast = toast.loading(tNotify('updating'))
+          const loadingToast = toast.loading(t('DashPage.Notifications.updating'))
           setSubmitting(true)
 
           try {
@@ -738,11 +737,11 @@ function UserEditGeneral() {
             if (isEmailChanged) {
               await handleEmailChange(values.email)
             } else {
-              toast.success(tNotify('profileUpdateSuccess'))
+              toast.success(t('DashPage.Notifications.profileUpdateSuccess'))
             }
           } catch (updateError) {
             console.error('Profile update error:', updateError)
-            toast.error(tNotify('profileUpdateError'), { id: loadingToast })
+            toast.error(t('DashPage.Notifications.profileUpdateError'), { id: loadingToast })
           } finally {
             setSubmitting(false)
           }
@@ -758,7 +757,6 @@ function UserEditGeneral() {
               localAvatar,
               handleFileChange,
             }}
-            currentLocale={currentLocale}
           />
         )}
       </Formik>
