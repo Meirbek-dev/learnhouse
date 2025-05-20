@@ -29,7 +29,7 @@ services:
       timeout: 4s
       retries: 5
   redis:
-    image: redis:8.0-rc1-alpine
+    image: redis:8.0.1-alpine
     restart: always
     ports:
       - "6379:6379"
@@ -39,7 +39,7 @@ services:
       timeout: 4s
       retries: 5
   chromadb:
-    image: chromadb/chroma:1.0.6
+    image: chromadb/chroma:latest
     restart: always
     ports:
       - "8000:8000"

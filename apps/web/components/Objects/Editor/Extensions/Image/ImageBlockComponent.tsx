@@ -1,5 +1,5 @@
 import { NodeViewWrapper } from '@tiptap/react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Resizable } from 're-resizable'
 import {
   AlertTriangle,
@@ -38,7 +38,6 @@ function ImageBlockComponent(props: any) {
   const [imageSize, setImageSize] = useState({
     width: props.node.attrs.size ? props.node.attrs.size.width : 300,
   })
-
   const [alignment, setAlignment] = useState(
     props.node.attrs.alignment || 'center'
   )
@@ -89,6 +88,13 @@ function ImageBlockComponent(props: any) {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  const handleAlignmentChange = (newAlignment: string) => {
+    setAlignment(newAlignment)
+    props.updateAttributes({
+      alignment: newAlignment,
+    })
   }
 
   useEffect(() => {}, [course, org])

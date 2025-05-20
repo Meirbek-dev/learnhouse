@@ -26,6 +26,8 @@ export default defineConfig([
       '@next/next/no-img-element': 'off',
       'unused-imports/no-unused-imports': 'off',
       'no-console': 'off',
+      'react/no-unescaped-entities': 'off',
+      'react-hooks/exhaustive-deps': 'off',
     },
   },
 ])

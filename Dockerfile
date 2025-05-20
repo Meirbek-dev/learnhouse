@@ -8,7 +8,7 @@ RUN apt update && apt install -y nginx curl build-essential libomp-dev \
   && rm /etc/nginx/sites-enabled/default
 
 # Install Node tools
-RUN curl -fsSL https://deb.nodesource.com/setup_23.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
   && apt-get install -y nodejs \
   && npm install -g corepack pm2
 
