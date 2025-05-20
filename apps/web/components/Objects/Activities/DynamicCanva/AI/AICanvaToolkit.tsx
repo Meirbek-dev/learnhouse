@@ -16,6 +16,7 @@ import {
 } from '@services/ai/ai'
 import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 type AICanvaToolkitProps = {
   editor: Editor
@@ -23,6 +24,7 @@ type AICanvaToolkitProps = {
 }
 
 function AICanvaToolkit(props: AICanvaToolkitProps) {
+  const t = useTranslations('Activities.AICanvaToolkit')
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' })
   const [isBubbleMenuAvailable, setIsButtonAvailable] = useState(false)
 
@@ -52,9 +54,9 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
                 className="rounded-lg outline-neutral-200/10"
                 width={24}
                 src={learnhouseAI_icon}
-                alt=""
-              />{' '}
-              <div>AI</div>{' '}
+                alt={t('aiIconAlt')}
+              />
+              <div>{t('aiTitle')}</div>
             </div>
             <div>
               <MoreVertical className="text-white/50" size={12} />
@@ -93,6 +95,7 @@ function AIActionButton(props: {
   label: string
   activity: any
 }) {
+  const t = useTranslations('Activities.AICanvaToolkit')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const dispatchAIChatBot = useAIChatBotDispatch() as any
@@ -114,14 +117,17 @@ function AIActionButton(props: {
   }
 
   const getPrompt = (label: string, selection: string) => {
-    if (label === 'Explain') {
-      return `Explain this part of the course "${selection}" keep this course context in mind.`
-    } else if (label === 'Summarize') {
-      return `Summarize this "${selection}" with the course context in mind.`
-    } else if (label === 'Translate') {
-      return `Translate "${selection}" to another language.`
-    } else {
-      return `Give examples to understand "${selection}" better, if possible give context in the course.`
+    switch (label) {
+      case 'Explain':
+        return t('explainPrompt', { selection })
+      case 'Summarize':
+        return t('summarizePrompt', { selection })
+      case 'Translate':
+        return t('translatePrompt', { selection })
+      case 'Examples':
+        return t('examplesPrompt', { selection })
+      default:
+        return ''
     }
   }
 
@@ -194,17 +200,43 @@ function AIActionButton(props: {
     }
   }
 
-  const tooltipLabel =
-    props.label === 'Explain'
-      ? 'Explain a word or a sentence with AI'
-      : props.label === 'Summarize'
-        ? 'Summarize a long paragraph or text with AI'
-        : props.label === 'Translate'
-          ? 'Translate to different languages with AI'
-          : 'Give examples to understand better with AI'
+  const getTooltipLabel = (label: string) => {
+    switch (label) {
+      case 'Explain':
+        return t('explainTooltip')
+      case 'Summarize':
+        return t('summarizeTooltip')
+      case 'Translate':
+        return t('translateTooltip')
+      case 'Examples':
+        return t('examplesTooltip')
+      default:
+        return ''
+    }
+  }
+
+  const getButtonLabel = (label: string) => {
+    switch (label) {
+      case 'Explain':
+        return t('explainLabel')
+      case 'Summarize':
+        return t('summarizeLabel')
+      case 'Translate':
+        return t('translateLabel')
+      case 'Examples':
+        return t('examplesLabel')
+      default:
+        return label
+    }
+  }
+
   return (
     <div className="flex space-x-2">
-      <ToolTip sideOffset={10} slateBlack content={tooltipLabel}>
+      <ToolTip
+        sideOffset={10}
+        slateBlack
+        content={getTooltipLabel(props.label)}
+      >
         <button
           onClick={() => handleAction(props.label)}
           className="flex items-center space-x-1.5 rounded-md bg-white/10 px-2 py-0.5 text-sm font-semibold text-white/70 outline-neutral-200/20 transition-all delay-75 ease-linear hover:bg-white/20 hover:outline-neutral-200/40"
@@ -213,9 +245,9 @@ function AIActionButton(props: {
           {props.label === 'Summarize' && <FormInput size={16} />}
           {props.label === 'Translate' && <Languages size={16} />}
           {props.label === 'Examples' && (
-            <div className="text-white/50">Ex</div>
+            <div className="text-white/50">{t('examplesAbbr')}</div>
           )}
-          <div>{props.label}</div>
+          <div>{getButtonLabel(props.label)}</div>
         </button>
       </ToolTip>
     </div>

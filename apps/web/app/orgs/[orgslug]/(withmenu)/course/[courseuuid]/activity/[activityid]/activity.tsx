@@ -83,6 +83,7 @@ function ActivityActions({
 }: ActivityActionsProps) {
   const session = useLHSession() as any
   const { contributorStatus } = useContributorStatus(course.course_uuid)
+  const t = useTranslations('ActivityPage');
 
   return (
     <div className="flex items-center space-x-2">
@@ -97,7 +98,7 @@ function ActivityActions({
                   activityid={activityid}
                   course={course}
                   orgslug={orgslug}
-                  t={useTranslations('ActivityPage')}
+                  t={t} // Pass the translation function
                 />
               </>
             )}
@@ -112,7 +113,7 @@ function ActivityActions({
                     activityid={activityid}
                     course={course}
                     orgslug={orgslug}
-                    t={useTranslations('ActivityPage')}
+                    t={t} // Pass the translation function
                   />
                 </AssignmentSubmissionProvider>
               </>

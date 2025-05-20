@@ -1,3 +1,9 @@
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext'
 import {
   BookOpenCheck,
@@ -80,13 +86,17 @@ function EvaluateAssignment({ user_id }: any) {
                     <p className="text-slate-500">{task.description}</p>
                   </div>
                   <div className="flex space-x-2">
-                    <div
-                      onClick={() => alert(task.hint)} // TODO: replace with a toast or something
-                      className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900"
-                    >
-                      <Info size={13} />
-                      <p className="text-xs font-semibold">{t('hint')}</p>
-                    </div>
+                    {task.hint && (
+                      <Popover>
+                        <PopoverTrigger className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
+                          <Info size={13} />
+                          <p className="text-xs font-semibold">{t('hint')}</p>
+                        </PopoverTrigger>
+                        <PopoverContent className="max-h-[200px] overflow-y-auto">
+                          {task.hint}
+                        </PopoverContent>
+                      </Popover>
+                    )}
                     <Link
                       href={getTaskRefFileDir(
                         org?.org_uuid,

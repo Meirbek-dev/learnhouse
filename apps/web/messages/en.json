@@ -1,12 +1,14 @@
 {
   "Activities": {
     "AIActivityAsk": {
+      "AI": "AI",
       "aiSender": "AI",
       "askAI": "Ask AI",
       "errorTitle": "Something wrong happened",
+      "examplesAbbr": "ex. ",
       "experimental": "Experimental",
       "hello": "Hello",
-      "howCanWeHelp": "how can we help today?",
+      "howCanWeHelp": "how can I help?",
       "logoAlt": "LearnHouse AI Logo",
       "placeholder": "Ask AI About this Lecture",
       "questionAbout": "What is this Activity about?",
@@ -1178,7 +1180,9 @@
         "uploadHint": "Supports MP4 and WebM formats",
         "uploadPlaceholder": "Drop your video here or click to browse",
         "uploading": "Uploading video... {progress}%"
-      }
+      },
+      "activity": "Activity",
+      "metaTitleEdit": "Edit - {activityName} Activity"
     },
     "Notifications": {
       "activityDeleteFailed": "Failed to delete activity",
@@ -2036,6 +2040,7 @@
     "usernameMinLength": "Username must be at least {length} characters",
     "wrongCredentials": "Wrong Email or Password"
   },
+  "activity": "Activity",
   "failedToLoadUserData": "Failed to load user data.",
   "learnhouse-logo": "learnhouse logo"
 }

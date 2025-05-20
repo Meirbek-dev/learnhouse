@@ -31,7 +31,7 @@ export async function generateMetadata(
   )
 
   return {
-    title: t('metaTitleEdit', { activityName: 'Activity' }),
+    title: t('metaTitleEdit', { activityName: course_meta.name }),
     description: course_meta.mini_description,
   }
 }

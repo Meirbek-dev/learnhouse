@@ -242,7 +242,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                   />
                   <span className="text-sm font-semibold text-white/70">
                     {' '}
-                    AI
+                    {t('AI')}
                   </span>
                 </div>
                 <div className="flex items-center space-x-1 rounded-full bg-white/5 px-3 py-0.5 text-white/40">
@@ -416,12 +416,12 @@ const AIMessagePlaceHolder = (props: {
               alt="LearnHouse AI Logo"
             />
             <p className="flex items-center justify-center space-x-2 pt-3 text-2xl font-semibold text-white/70">
-              <span className="items-center">Hello</span>
+              <span className="items-center">{t('hello')}</span>
               <span className="flex items-center space-x-2 capitalize">
                 <UserAvatar rounded="rounded-lg" border="border-2" width={35} />
                 <span>{session.data.user.username},</span>
               </span>
-              <span>how can we help today ?</span>
+              <span>{t('howCanWeHelp')}</span>
             </p>
           </motion.div>
           <motion.div
@@ -481,7 +481,7 @@ const AIChatPredefinedQuestion = (props: {
     >
       {props.label === 'about' && <BadgeInfo size={15} />}
       {props.label === 'flashcards' && <NotebookTabs size={15} />}
-      {props.label === 'examples' && <div className="text-white/50">Ex</div>}
+      {props.label === 'examples' && <div className="text-white/50">{t('examplesAbbr')}</div>}
       <span>{getQuestion(props.label)}</span>
     </div>
   )

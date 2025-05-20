@@ -1,5 +1,5 @@
 'use client'
-import { default as React, type JSX } from 'react'
+import { default as React, type JSX, useEffect, useState } from 'react'
 import Editor from './Editor'
 import { updateActivity } from '@services/courses/activities'
 import { toast } from 'react-hot-toast'
@@ -19,6 +19,13 @@ function EditorWrapper(props: EditorWrapperProps): JSX.Element {
   const t = useTranslations('DashPage.Editor.EditorWrapper')
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    if (!session.isLoading) {
+      setIsReady(true)
+    }
+  }, [session.isLoading])
 
   async function setContent(content: any) {
     let activity = props.activity
@@ -52,25 +59,23 @@ function EditorWrapper(props: EditorWrapperProps): JSX.Element {
     )
   }
 
-  {
-    return (
-      <>
-        <Toast></Toast>
-        <OrgProvider orgslug={props.org.slug}>
-          {!session.isLoading && (
-            <Editor
-              org={props.org}
-              course={props.course}
-              activity={props.activity}
-              content={props.content}
-              setContent={setContent}
-              session={session}
-            ></Editor>
-          )}
-        </OrgProvider>
-      </>
-    )
-  }
+  return (
+    <>
+      <Toast />
+      <OrgProvider orgslug={props.org.slug}>
+        {isReady && (
+          <Editor
+            org={props.org}
+            course={props.course}
+            activity={props.activity}
+            content={props.content}
+            setContent={setContent}
+            session={session}
+          />
+        )}
+      </OrgProvider>
+    </>
+  )
 }
 
 export default EditorWrapper
