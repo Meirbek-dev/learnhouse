@@ -22,7 +22,6 @@ function OrgUsers() {
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('DashPage.UserSettings.usersSection')
   const tNotify = useTranslations('Notifications')
-  const tGeneral = useTranslations('General')
 
   const {
     data: orgUsers,
@@ -160,7 +159,7 @@ function OrgUsers() {
                         colSpan={3}
                         className="py-4 text-center text-gray-500"
                       >
-                        No users found in this organization.
+                        {t('noUsersFound')}
                       </td>
                     </tr>
                   )}

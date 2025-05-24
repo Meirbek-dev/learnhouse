@@ -2,9 +2,6 @@ import { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
-  experimental: {
-    reactCompiler: true,
-  },
   async rewrites() {
     return [
       {
@@ -17,7 +14,7 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  reactStrictMode: false,
+  reactStrictMode: true,
   output: 'standalone',
 }
 

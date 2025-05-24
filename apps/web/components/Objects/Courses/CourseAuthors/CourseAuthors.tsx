@@ -27,6 +27,7 @@ import FormLayout, {
 } from '@components/Objects/StyledElements/Form/Form'
 import { useFormik } from 'formik'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 dayjs.extend(relativeTime)
 
@@ -54,6 +55,7 @@ const MultipleAuthors = ({
   authors: Author[]
   isMobile: boolean
 }) => {
+  const t = useTranslations('Courses.CourseAuthors')
   const displayedAvatars = authors.slice(0, 3)
   const displayedNames = authors.slice(0, 2)
   const remainingCount = Math.max(0, authors.length - 3)
@@ -65,7 +67,7 @@ const MultipleAuthors = ({
   return (
     <div className="flex flex-col items-center space-y-4 px-2 py-2">
       <div className="self-start text-[12px] font-semibold text-neutral-400">
-        Authors & Updates{' '}
+        {t('authorsAndUpdates')}
       </div>
 
       {/* Avatars row */}
@@ -138,7 +140,7 @@ const MultipleAuthors = ({
               ))}
               {authors.length > 2 && (
                 <span className="ml-1 text-neutral-500">
-                  & {authors.length - 2} more
+                  {t('andMoreAuthors', { count: authors.length - 2 })}
                 </span>
               )}
             </>
@@ -155,7 +157,7 @@ const MultipleAuthors = ({
                   {index === 0 &&
                     authors.length > 1 &&
                     index < displayedNames.length - 1 &&
-                    ' & '}
+                    t('and')}
                 </span>
               ))}
             </>
@@ -176,6 +178,7 @@ const UpdatesSection = () => {
     `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`,
     (url) => swrFetcher(url, access_token)
   )
+  const t = useTranslations('Courses.CourseAuthors')
 
   return (
     <div className="mt-2 pt-2">
@@ -184,12 +187,12 @@ const UpdatesSection = () => {
           <div className="flex items-center space-x-2">
             <Rss size={14} className="text-neutral-400" />
             <span className="text-sm font-semibold text-neutral-600">
-              Course Updates
+              {t('courseUpdates')}
             </span>
           </div>
           {updates && updates.length > 0 && (
             <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
-              {updates.length} {updates.length === 1 ? 'update' : 'updates'}
+              {updates.length} {updates.length === 1 ? t('update') : t('updates')}
             </span>
           )}
         </div>
@@ -205,7 +208,7 @@ const UpdatesSection = () => {
             } `}
           >
             <PencilLine size={12} />
-            <span>{selectedView === 'new' ? 'Cancel' : 'New Update'}</span>
+            <span>{selectedView === 'new' ? t('cancel') : t('newUpdate')}</span>
           </button>
         )}
       </div>
@@ -236,6 +239,7 @@ const NewUpdateForm = ({
   const org = useOrg() as any
   const course = useCourse() as any
   const session = useLHSession() as any
+  const t = useTranslations('Courses.CourseAuthors')
 
   const formik = useFormik({
     initialValues: {
@@ -244,8 +248,8 @@ const NewUpdateForm = ({
     },
     validate: (values) => {
       const errors: any = {}
-      if (!values.title) errors.title = 'Title is required'
-      if (!values.content) errors.content = 'Content is required'
+      if (!values.title) errors.title = t('titleRequired')
+      if (!values.content) errors.content = t('contentRequired')
       return errors
     },
     onSubmit: async (values) => {
@@ -260,13 +264,13 @@ const NewUpdateForm = ({
         session.data?.tokens?.access_token
       )
       if (res.status === 200) {
-        toast.success('Update added successfully')
+        toast.success(t('updateAddedSuccess'))
         setSelectedView('list')
         mutate(
           `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`
         )
       } else {
-        toast.error('Failed to add update')
+        toast.error(t('updateAddFailed'))
       }
     },
   })
@@ -276,7 +280,7 @@ const NewUpdateForm = ({
       <FormLayout onSubmit={formik.handleSubmit} className="space-y-4">
         <FormField name="title">
           <FormLabelAndMessage
-            label="Update Title"
+            label={t('updateTitle')}
             message={formik.errors.title}
           />
           <Form.Control asChild>
@@ -285,14 +289,14 @@ const NewUpdateForm = ({
               value={formik.values.title}
               type="text"
               required
-              placeholder="What's new in this update?"
+              placeholder={t('updateTitlePlaceholder')}
               className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
             />
           </Form.Control>
         </FormField>
         <FormField name="content">
           <FormLabelAndMessage
-            label="Update Content"
+            label={t('updateContent')}
             message={formik.errors.content}
           />
           <Form.Control asChild>
@@ -300,7 +304,7 @@ const NewUpdateForm = ({
               onChange={formik.handleChange}
               value={formik.values.content}
               required
-              placeholder="Share the details of your update..."
+              placeholder={t('updateContentPlaceholder')}
               className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
             />
           </Form.Control>
@@ -310,7 +314,7 @@ const NewUpdateForm = ({
             type="submit"
             className="rounded-full bg-neutral-900 px-4 py-1.5 text-xs font-medium text-white transition-colors duration-150 hover:bg-black"
           >
-            Publish Update
+            {t('publishUpdate')}
           </button>
         </div>
       </FormLayout>
@@ -327,14 +331,15 @@ const UpdatesListView = () => {
     `${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`,
     (url) => swrFetcher(url, access_token)
   )
+  const t = useTranslations('Courses.CourseAuthors')
 
   if (!updates || updates.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 px-4 py-8 text-center">
         <TentTree size={28} className="mb-2 text-neutral-400" />
-        <p className="text-sm font-medium text-neutral-600">No updates yet</p>
+        <p className="text-sm font-medium text-neutral-600">{t('noUpdatesYet')}</p>
         <p className="mt-1 text-xs text-neutral-400">
-          Updates about this course will appear here
+          {t('updatesAppearHere')}
         </p>
       </div>
     )
@@ -382,9 +387,10 @@ const UpdatesListView = () => {
 const DeleteUpdateButton = ({ update }: any) => {
   const session = useLHSession() as any
   const course = useCourse() as any
+  const t = useTranslations('Courses.CourseAuthors')
 
   const handleDelete = async () => {
-    const toast_loading = toast.loading('Deleting update...')
+    const toast_loading = toast.loading(t('deletingUpdate'))
     const res = await deleteCourseUpdate(
       course.courseStructure.course_uuid,
       update.courseupdate_uuid,
@@ -393,20 +399,20 @@ const DeleteUpdateButton = ({ update }: any) => {
 
     if (res.status === 200) {
       toast.dismiss(toast_loading)
-      toast.success('Update deleted successfully')
+      toast.success(t('updateDeletedSuccess'))
       mutate(
         `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`
       )
     } else {
-      toast.error('Failed to delete update')
+      toast.error(t('updateDeleteFailed'))
     }
   }
 
   return (
     <ConfirmationModal
-      confirmationButtonText="Delete Update"
-      confirmationMessage="Are you sure you want to delete this update?"
-      dialogTitle="Delete Update?"
+      confirmationButtonText={t('deleteUpdate')}
+      confirmationMessage={t('deleteUpdateConfirmation')}
+      dialogTitle={t('deleteUpdateTitle')}
       buttonid="delete-update-button"
       dialogTrigger={
         <button

@@ -72,9 +72,9 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
     <div className="w-full max-w-full px-2 sm:px-4">
       {activity && (
         <>
-          {activity.activity_sub_type === 'SUBTYPE_VIDEO_HOSTED' && (
-            <div className="my-3 w-full md:my-5">
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-xs ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
+          <div className="my-3 w-full md:my-5">
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-xs ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
+              {activity.activity_sub_type === 'SUBTYPE_VIDEO_HOSTED' && (
                 <video
                   ref={videoRef}
                   className="h-full w-full object-cover"
@@ -82,13 +82,9 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                   src={getVideoSrc()}
                   onLoadedMetadata={handleVideoLoad}
                   onTimeUpdate={handleTimeUpdate}
-                ></video>
-              </div>
-            </div>
-          )}
-          {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (
-            <div className="my-3 w-full md:my-5">
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-xs ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
+                />
+              )}
+              {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (
                 <YouTube
                   className="h-full w-full"
                   opts={{
@@ -103,9 +99,9 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                   }}
                   videoId={videoId}
                 />
-              </div>
+              )}
             </div>
-          )}
+          </div>
         </>
       )}
     </div>

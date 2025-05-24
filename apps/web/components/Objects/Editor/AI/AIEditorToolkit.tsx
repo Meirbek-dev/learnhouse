@@ -26,6 +26,7 @@ import {
 } from '@services/ai/ai'
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 type AIEditorToolkitProps = {
   editor: Editor
@@ -47,6 +48,8 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' })
   const [isToolkitAvailable, setIsToolkitAvailable] = useState(true)
+
+
 
   useEffect(() => {
     if (is_ai_feature_enabled) {
@@ -343,7 +346,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         props.editor.chain().focus().insertContent(spaceNode).run()
       }
 
-      // Wait for 0.3 seconds before adding the next word
+      // Wait for 0.12 seconds before adding the next word
       await new Promise((resolve) => setTimeout(resolve, 120))
     }
   }
@@ -372,7 +375,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         props.editor.chain().focus().insertContent(spaceNode).run()
       }
 
-      // Wait for 0.3 seconds before adding the next word
+      // Wait for 0.12 seconds before adding the next word
       await new Promise((resolve) => setTimeout(resolve, 120))
     }
   }
@@ -496,6 +499,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 const AiEditorToolButton = (props: any) => {
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
+  const t = useTranslations('Activities.AIEditorToolkit')
 
   const handleToolButtonClick = async (
     label:
@@ -542,7 +546,7 @@ const AiEditorToolButton = (props: any) => {
       {props.label === 'MakeLonger' && <FileStack size={14} />}
       {props.label === 'GenerateQuiz' && <HelpCircle size={14} />}
       {props.label === 'Translate' && <Languages size={14} />}
-      <span>{props.label}</span>
+      <span>{t(props.label + 'Label')}</span>
     </button>
   )
 }
@@ -554,6 +558,7 @@ const AiEditorActionScreen = ({
 }) => {
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
+  const t = useTranslations('Activities.AIEditorToolkit')
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     await dispatchAIEditor({
@@ -568,7 +573,7 @@ const AiEditorActionScreen = ({
         !aiEditorState.isWaitingForResponse &&
         !aiEditorState.error.isError && (
           <div className="space-x-2 text-xl font-extrabold text-white/90">
-            <span>Write about...</span>
+            <span>{t('writerPlaceholder')}</span>
           </div>
         )}
       {aiEditorState.selectedTool === 'ContinueWriting' &&
@@ -576,8 +581,7 @@ const AiEditorActionScreen = ({
         !aiEditorState.error.isError && (
           <div className="mx-auto flex flex-col items-center justify-center align-middle">
             <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
-              Place your cursor at the end of a sentence to continue
-              writing{' '}
+              {t('continuePlaceholder')}
             </p>
             <div
               onClick={() => {
@@ -597,7 +601,7 @@ const AiEditorActionScreen = ({
         !aiEditorState.error.isError && (
           <div className="mx-auto flex flex-col items-center justify-center align-middle">
             <p className="mx-auto mt-4 flex justify-center p-2 align-middle text-sm font-bold text-white/80">
-              Select text to make longer{' '}
+              {t('longerPlaceholder')}
             </p>
             <div
               onClick={() => {
@@ -617,11 +621,11 @@ const AiEditorActionScreen = ({
         !aiEditorState.error.isError && (
           <div className="mx-auto flex flex-col items-center justify-center align-middle">
             <div className="mx-auto mt-4 flex justify-center space-x-6 p-2 align-middle text-sm font-bold text-white/80">
-              <p>Translate selected text to </p>
+              <p>{t('translatePlaceholder')}</p>
               <input
                 value={aiEditorState.chatInputValue}
                 onChange={handleChange}
-                placeholder="Japanese, Arabic, German, etc. "
+                placeholder={t('translateExample')}
                 className="py- w-full rounded-lg bg-gray-950/20 px-4 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
               ></input>
             </div>
@@ -660,7 +664,7 @@ const AiEditorActionScreen = ({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          <p className="mt-4 font-bold text-white/90">Thinking...</p>
+          <p className="mt-4 font-bold text-white/90">{t('thinking')}</p>
         </div>
       )}
 
@@ -670,7 +674,7 @@ const AiEditorActionScreen = ({
             <AlertTriangle size={20} className="text-red-500" />
             <div className="flex flex-col">
               <h3 className="font-semibold text-red-200">
-                Something wrong happened
+                {t('errorTitle')}
               </h3>
               <span className="text-sm text-red-100">
                 {aiEditorState.error.error_message}

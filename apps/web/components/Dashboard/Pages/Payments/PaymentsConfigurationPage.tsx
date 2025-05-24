@@ -61,10 +61,9 @@ const PaymentsConfigurationPage: FC = () => {
   const [isOnboarding, setIsOnboarding] = useState(false)
   const [isOnboardingLoading, setIsOnboardingLoading] = useState(false)
   const t = useTranslations('Payments.Configuration')
-  const tNotify = useTranslations('Notifications')
 
   const enableStripe = async () => {
-    const loadingToast = toast.loading(tNotify('enablingStripe'))
+    const loadingToast = toast.loading(t('enablingStripe'))
     try {
       setIsOnboarding(true)
       const newConfig = { provider: 'stripe', enabled: true }
@@ -74,11 +73,11 @@ const PaymentsConfigurationPage: FC = () => {
         'stripe',
         access_token
       )
-      toast.success(tNotify('stripeEnabledSuccess'), { id: loadingToast })
+      toast.success(t('stripeEnabledSuccess'), { id: loadingToast })
       mutate([`/payments/${org.id}/config`, access_token])
     } catch (error) {
       console.error('Error enabling Stripe:', error)
-      toast.error(tNotify('errors.enableStripeFailed'), { id: loadingToast })
+      toast.error(t('errors.enableStripeFailed'), { id: loadingToast })
     } finally {
       setIsOnboarding(false)
     }
@@ -89,21 +88,21 @@ const PaymentsConfigurationPage: FC = () => {
   }
 
   const deleteConfig = async () => {
-    const loadingToast = toast.loading(tNotify('deletingStripeConfig'))
+    const loadingToast = toast.loading(t('deletingStripeConfig'))
     try {
       await deletePaymentConfig(org.id, stripeConfig.id, access_token)
-      toast.success(tNotify('stripeConfigDeletedSuccess'), { id: loadingToast })
+      toast.success(t('stripeConfigDeletedSuccess'), { id: loadingToast })
       mutate([`/payments/${org.id}/config`, access_token])
     } catch (error) {
       console.error('Error deleting Stripe configuration:', error)
-      toast.error(tNotify('errors.deleteStripeConfigFailed'), {
+      toast.error(t('errors.deleteStripeConfigFailed'), {
         id: loadingToast,
       })
     }
   }
 
   const handleStripeOnboarding = async () => {
-    const loadingToast = toast.loading(tNotify('startingStripeOnboarding'))
+    const loadingToast = toast.loading(t('startingStripeOnboarding'))
     try {
       setIsOnboardingLoading(true)
       const { connect_url } = await getStripeOnboardingLink(
@@ -115,7 +114,7 @@ const PaymentsConfigurationPage: FC = () => {
       toast.dismiss(loadingToast)
     } catch (error) {
       console.error('Error getting onboarding link:', error)
-      toast.error(tNotify('errors.startStripeOnboardingFailed'), {
+      toast.error(t('errors.startStripeOnboardingFailed'), {
         id: loadingToast,
       })
     } finally {
@@ -297,7 +296,6 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({
 }) => {
   const [stripeAccountId, setStripeAccountId] = useState('')
   const t = useTranslations('Payments.Configuration')
-  const tNotify = useTranslations('Notifications')
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -309,28 +307,28 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({
         }
       } catch (error) {
         console.error('Error fetching Stripe configuration:', error)
-        toast.error(tNotify('errors.loadStripeConfigFailed'))
+        toast.error(t('errors.loadStripeConfigFailed'))
       }
     }
 
     if (isOpen) {
       fetchConfig()
     }
-  }, [isOpen, orgId, configId, accessToken, tNotify])
+  }, [isOpen, orgId, configId, accessToken])
 
   const handleSubmit = async () => {
-    const loadingToast = toast.loading(tNotify('updatingConfig'))
+    const loadingToast = toast.loading(t('updatingConfig'))
     try {
       const stripe_config = {
         stripe_account_id: stripeAccountId,
       }
       await updateStripeAccountID(orgId, stripe_config, accessToken)
-      toast.success(tNotify('configUpdatedSuccess'), { id: loadingToast })
+      toast.success(t('configUpdatedSuccess'), { id: loadingToast })
       mutate([`/payments/${orgId}/config`, accessToken])
       onClose()
     } catch (error) {
       console.error('Error updating config:', error)
-      toast.error(tNotify('errors.updateConfigFailed'), { id: loadingToast })
+      toast.error(t('errors.updateConfigFailed'), { id: loadingToast })
     }
   }
 
@@ -348,7 +346,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({
               type="text"
               value={stripeAccountId}
               onChange={(e) => setStripeAccountId(e.target.value)}
-              placeholder={t('stripeAccountIdPlaceholder')}
+              placeholder="acct_..."
             />
           </FormField>
           <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>

@@ -528,7 +528,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                   className="ml-auto"
                 >
                   <Download size={14} />
-                  Download
+                  {t('download')}
                 </SizeButton>
               </div>
 

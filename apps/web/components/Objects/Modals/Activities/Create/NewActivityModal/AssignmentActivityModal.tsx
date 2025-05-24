@@ -27,7 +27,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activityDescription, setActivityDescription] = useState('')
   const [dueDate, setDueDate] = useState('')
-  const [gradingType, setGradingType] = useState('ALPHABET')
+  const [gradingType, setGradingType] = useState('PERCENTAGE')
 
   const handleNameChange = (e: any) => {
     setActivityName(e.target.value)
@@ -88,7 +88,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
         closeModal()
       } else {
         toast.error(
-          t('createError', { error: res.data?.detail || 'Unknown error' })
+          t('createError', { error: res.data?.detail || t('unknownError') })
         )
         if (activity_res?.activity_uuid) {
           await deleteActivity(
@@ -100,7 +100,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
     } catch (error: any) {
       toast.error(
         t('createError', {
-          error: error?.message || 'An unexpected error occurred',
+          error: error?.message || t('unexpectedError'),
         })
       )
       if (activity_res?.activity_uuid) {

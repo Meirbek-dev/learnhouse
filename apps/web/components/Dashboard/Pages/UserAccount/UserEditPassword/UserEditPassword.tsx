@@ -52,7 +52,9 @@ function UserEditPassword() {
         toast.dismiss(loadingToast)
 
         // Show success message and notify about logout
-        toast.success(t('Notifications.passwordUpdateSuccess'), { duration: 4000 })
+        toast.success(t('Notifications.passwordUpdateSuccess'), {
+          duration: 4000,
+        })
         toast(
           (t: any) => (
             <div className="flex items-center gap-2">
@@ -69,7 +71,9 @@ function UserEditPassword() {
         await new Promise((resolve) => setTimeout(resolve, 4000))
         signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })
       } else {
-        toast.error(t('Notifications.passwordUpdateError'), { id: loadingToast })
+        toast.error(t('Notifications.passwordUpdateError'), {
+          id: loadingToast,
+        })
       }
     } catch (error: any) {
       toast.error(t('Notifications.passwordUpdateError'), { id: loadingToast })

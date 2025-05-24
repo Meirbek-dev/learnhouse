@@ -43,7 +43,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
       mutate(`${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}`)
     } else {
       toast.error(
-        t('linkError', { error: res.data?.detail || 'Unknown error' })
+        t('linkError', { error: res.data?.detail || t('unknownError') })
       )
     }
   }

@@ -136,7 +136,6 @@ function PaymentsCustomersPage() {
   const access_token = session?.data?.tokens?.access_token
   const { isEnabled, isLoading } = usePaymentsEnabled()
   const t = useTranslations('Payments.CustomersPage')
-  const tNotify = useTranslations('Notifications')
 
   const {
     data: customers,
@@ -152,8 +151,8 @@ function PaymentsCustomersPage() {
   }
 
   if (isLoading || customersLoading) return <PageLoading />
-  if (error) return <div>{tNotify('errors.loadCustomersFailed')}</div>
-  if (!customers) return <div>No customer data available</div>
+  if (error) return <div>{t('errors.loadCustomersFailed')}</div>
+  if (!customers) return <div>{t('noCustomerData')}</div>
 
   return (
     <div className="nice-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">

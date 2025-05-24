@@ -681,12 +681,18 @@ function UserEditGeneral() {
   }
 
   const handleEmailChange = async (newEmail: string) => {
-    toast.success(t('DashPage.Notifications.profileUpdateSuccess'), { duration: 4000 })
+    toast.success(t('DashPage.Notifications.profileUpdateSuccess'), {
+      duration: 4000,
+    })
 
     toast(
       (t: any) => (
         <div className="flex items-center gap-2">
-          <span>{t('DashPage.Notifications.promptLogoutOnEmailChange', { newEmail })}</span>
+          <span>
+            {t('DashPage.Notifications.promptLogoutOnEmailChange', {
+              newEmail,
+            })}
+          </span>
         </div>
       ),
       {
@@ -725,7 +731,9 @@ function UserEditGeneral() {
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting }) => {
           const isEmailChanged = values.email !== userData.email
-          const loadingToast = toast.loading(t('DashPage.Notifications.updating'))
+          const loadingToast = toast.loading(
+            t('DashPage.Notifications.updating')
+          )
           setSubmitting(true)
 
           try {
@@ -741,7 +749,9 @@ function UserEditGeneral() {
             }
           } catch (updateError) {
             console.error('Profile update error:', updateError)
-            toast.error(t('DashPage.Notifications.profileUpdateError'), { id: loadingToast })
+            toast.error(t('DashPage.Notifications.profileUpdateError'), {
+              id: loadingToast,
+            })
           } finally {
             setSubmitting(false)
           }

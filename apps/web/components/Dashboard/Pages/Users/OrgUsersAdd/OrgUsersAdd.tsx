@@ -19,7 +19,6 @@ function OrgUsersAdd() {
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('DashPage.UserSettings.addSection')
   const tNotify = useTranslations('Notifications')
-  const tGeneral = useTranslations('General')
   const [invitedUsers, setInvitedUsers] = useState('')
   const [selectedInviteCode, setSelectedInviteCode] = useState<
     string | undefined
@@ -27,11 +26,11 @@ function OrgUsersAdd() {
 
   async function sendInvites() {
     if (!selectedInviteCode) {
-      toast.error('Please select an invite code.')
+      toast.error(t('selectInviteCode'))
       return
     }
     if (!invitedUsers.trim()) {
-      toast.error('Please enter at least one email address.')
+      toast.error(t('enterEmailAddress'))
       return
     }
 
@@ -193,7 +192,7 @@ function OrgUsersAdd() {
                         colSpan={3}
                         className="py-4 text-center text-gray-500"
                       >
-                        No users have been invited yet.
+                        {t('noInvitedUsers')}
                       </td>
                     </tr>
                   )}

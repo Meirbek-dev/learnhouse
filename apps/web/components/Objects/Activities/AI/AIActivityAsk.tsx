@@ -481,7 +481,9 @@ const AIChatPredefinedQuestion = (props: {
     >
       {props.label === 'about' && <BadgeInfo size={15} />}
       {props.label === 'flashcards' && <NotebookTabs size={15} />}
-      {props.label === 'examples' && <div className="text-white/50">{t('examplesAbbr')}</div>}
+      {props.label === 'examples' && (
+        <div className="text-white/50">{t('examplesAbbr')}</div>
+      )}
       <span>{getQuestion(props.label)}</span>
     </div>
   )

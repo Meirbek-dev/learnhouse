@@ -26,6 +26,7 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useTranslations } from 'next-intl'
 
 dayjs.extend(relativeTime)
 
@@ -38,6 +39,7 @@ function CourseUpdates() {
     (url) => swrFetcher(url, access_token)
   )
   const [isModelOpen, setIsModelOpen] = useState(false)
+  const t = useTranslations('Courses.CourseUpdates')
 
   function handleModelOpen() {
     setIsModelOpen(!isModelOpen)
@@ -70,7 +72,7 @@ function CourseUpdates() {
           <Rss size={16} />{' '}
         </div>
         <div className="flex items-center space-x-2">
-          <span>Updates</span>
+          <span>{t('updates')}</span>
           {updates && (
             <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-900">
               {updates.length}
@@ -99,12 +101,13 @@ function CourseUpdates() {
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list')
   const adminStatus = useAdminStatus()
+  const t = useTranslations('Courses.CourseUpdates')
   return (
     <div className="nice-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
       <div className="flex justify-between rounded-lg bg-gray-50/70 outline-1 outline-neutral-200/40">
         <div className="flex items-center space-x-2 px-4 py-2 font-bold text-gray-500">
           <Rss size={16} />
-          <span>Updates</span>
+          <span>{t('updates')}</span>
         </div>
         {adminStatus.isAdmin && (
           <div
@@ -112,7 +115,7 @@ const UpdatesSection = () => {
             className="flex cursor-pointer items-center space-x-2 bg-gray-100 px-4 py-2 text-xs font-medium outline-1 outline-neutral-200/40 hover:bg-gray-200"
           >
             <PencilLine size={14} />
-            <span>New Update</span>
+            <span>{t('newUpdate')}</span>
           </div>
         )}
       </div>
@@ -130,15 +133,16 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
   const org = useOrg() as any
   const course = useCourse() as any
   const session = useLHSession() as any
+  const t = useTranslations('Courses.CourseUpdates')
 
   const validate = (values: any) => {
     const errors: any = {}
 
     if (!values.title) {
-      errors.title = 'Title is required'
+      errors.title = t('titleRequired')
     }
     if (!values.content) {
-      errors.content = 'Content is required'
+      errors.content = t('contentRequired')
     }
 
     return errors
@@ -161,13 +165,13 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
         session.data?.tokens?.access_token
       )
       if (res.status === 200) {
-        toast.success('Update added successfully')
+        toast.success(t('updateAddedSuccess'))
         setSelectedView('list')
         mutate(
           `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`
         )
       } else {
-        toast.error('Failed to add update')
+        toast.error(t('updateAddFailed'))
       }
     },
     enableReinitialize: true,
@@ -179,16 +183,19 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
     <div className="nice-shadow flex w-[700px] flex-col -space-y-2 overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
       <div className="flex flex-col -space-y-2 px-4 pt-4">
         <div className="rounded-full px-3 py-0.5 text-xs font-semibold text-gray-500">
-          Test Course{' '}
+          {t('testCourse')}
         </div>
         <div className="rounded-full px-3 py-0.5 text-lg font-bold text-black">
-          Add new Course Update
+          {t('addNewCourseUpdate')}
         </div>
       </div>
       <div className="-py-2 px-5">
         <FormLayout onSubmit={formik.handleSubmit}>
           <FormField name="title">
-            <FormLabelAndMessage label="Title" message={formik.errors.title} />
+            <FormLabelAndMessage
+              label={t('title')}
+              message={formik.errors.title}
+            />
             <Form.Control asChild>
               <Input
                 style={{ backgroundColor: 'white' }}
@@ -201,7 +208,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
           </FormField>
           <FormField name="content">
             <FormLabelAndMessage
-              label="Content"
+              label={t('content')}
               message={formik.errors.content}
             />
             <Form.Control asChild>
@@ -218,10 +225,10 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
               onClick={() => setSelectedView('list')}
               className="rounded-md px-4 py-2 text-sm font-bold text-gray-500 antialiased"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button className="rounded-md bg-black px-4 py-2 text-sm font-bold text-white antialiased">
-              Add Update
+              {t('addUpdate')}
             </button>
           </div>
         </FormLayout>
@@ -239,6 +246,7 @@ const UpdatesListView = () => {
     `${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`,
     (url) => swrFetcher(url, access_token)
   )
+  const t = useTranslations('Courses.CourseUpdates')
 
   return (
     <div
@@ -275,7 +283,7 @@ const UpdatesListView = () => {
       {(!updates || updates.length === 0) && (
         <div className="my-10 flex flex-col space-y-2 py-2 text-center text-gray-500">
           <TentTree className="mx-auto" size={40} />
-          <p>No updates yet</p>
+          <p>{t('noUpdatesYet')}</p>
         </div>
       )}
     </div>
@@ -286,6 +294,7 @@ const DeleteUpdateButton = ({ update }: any) => {
   const session = useLHSession() as any
   const course = useCourse() as any
   const org = useOrg() as any
+  const t = useTranslations('Courses.CourseUpdates')
 
   const handleDelete = async () => {
     const res = await deleteCourseUpdate(
@@ -293,30 +302,30 @@ const DeleteUpdateButton = ({ update }: any) => {
       update.courseupdate_uuid,
       session.data?.tokens?.access_token
     )
-    const toast_loading = toast.loading('Deleting update...')
+    const toast_loading = toast.loading(t('deletingUpdate'))
     if (res.status === 200) {
       toast.dismiss(toast_loading)
-      toast.success('Update deleted successfully')
+      toast.success(t('successfullDelete'))
       mutate(
         `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`
       )
     } else {
-      toast.error('Failed to delete update')
+      toast.error(t('failedDelete'))
     }
   }
 
   return (
     <ConfirmationModal
-      confirmationButtonText="Delete Update"
-      confirmationMessage="Are you sure you want to delete this update?"
-      dialogTitle={'Delete Update ?'}
+      confirmationButtonText={t('deleteUpdate')}
+      confirmationMessage={t('areYouSureYouWantToDeleteThisUpdate')}
+      dialogTitle={t('deleteUpdate')}
       buttonid="delete-update-button"
       dialogTrigger={
         <div
           id="delete-update-button"
           className="rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-600 hover:cursor-pointer"
         >
-          Delete
+          {t('delete')}
         </div>
       }
       functionToExecute={() => {

@@ -45,7 +45,7 @@ const SCRIPT_BASED_EMBEDS = {
     src: 'https://www.tiktok.com/embed.js',
     identifier: 'tiktok-embed',
   },
-  // Add more platforms as needed
+  // TODO: Add more platforms
 }
 
 // Helper function to convert YouTube URLs to embed format
@@ -110,7 +110,6 @@ const MemoizedEmbed = React.memo(
           const script = document.createElement('script')
           script.src = config.src
           script.async = true
-          script.charset = 'utf-8'
           document.body.appendChild(script)
 
           return () => {

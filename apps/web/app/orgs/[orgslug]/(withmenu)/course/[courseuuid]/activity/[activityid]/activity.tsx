@@ -83,7 +83,7 @@ function ActivityActions({
 }: ActivityActionsProps) {
   const session = useLHSession() as any
   const { contributorStatus } = useContributorStatus(course.course_uuid)
-  const t = useTranslations('ActivityPage');
+  const t = useTranslations('ActivityPage')
 
   return (
     <div className="flex items-center space-x-2">
