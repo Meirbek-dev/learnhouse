@@ -125,18 +125,6 @@ interface Session {
   }
 }
 
-// Legacy interface for backward compatibility
-interface LegacyVideoBlockObject {
-  block_uuid: string
-  content: {
-    file_id: string
-    file_format: string
-  }
-  size?: {
-    width?: number | string
-  }
-}
-
 interface VideoBlockObject {
   block_uuid: string
   content: {
@@ -147,7 +135,7 @@ interface VideoBlockObject {
 }
 
 interface VideoBlockAttrs {
-  blockObject: VideoBlockObject | LegacyVideoBlockObject | null
+  blockObject: VideoBlockObject | null
 }
 
 interface VideoBlockExtension {
@@ -178,18 +166,6 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const uploadZoneRef = useRef<HTMLDivElement>(null)
 
-  // Convert legacy block object to new format
-  const convertLegacyBlock = useCallback(
-    (block: LegacyVideoBlockObject): VideoBlockObject => {
-      const videoSize = getVideoSizeFromWidth(block.size?.width)
-      return {
-        ...block,
-        size: videoSize,
-      }
-    },
-    []
-  )
-
   const initialBlockObject = useMemo(() => {
     if (!node.attrs.blockObject) return null
     if (
@@ -198,8 +174,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     ) {
       return node.attrs.blockObject as VideoBlockObject
     }
-    return convertLegacyBlock(node.attrs.blockObject as LegacyVideoBlockObject)
-  }, [node.attrs.blockObject, convertLegacyBlock])
+  }, [node.attrs.blockObject])
 
   const [video, setVideo] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -207,7 +182,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [blockObject, setBlockObject] = useState<VideoBlockObject | null>(
-    initialBlockObject
+    initialBlockObject || null
   )
   const [selectedSize, setSelectedSize] = useState<VideoSize>(
     initialBlockObject?.size || 'medium'

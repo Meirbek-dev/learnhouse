@@ -98,7 +98,7 @@ const initializeLearnings = (learningsInput: any): string => {
 function EditCourseGeneral(props: EditCourseStructureProps) {
   const [error, setError] = useState('')
   const course = useCourse()
-  const dispatchCourse = useCourseDispatch()!
+  const dispatchCourse = useCourseDispatch()
   const { isLoading, courseStructure } = course as any
   const t = useTranslations('CourseEdit.General')
 
@@ -114,7 +114,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     validate: (values) => validate(values, t),
     onSubmit: async () => {
       try {
-        dispatchCourse({ type: 'setIsSaved' })
+        dispatchCourse?.({ type: 'setIsSaved' })
       } catch {
         setError(t('errors.saveFailed'))
       }
@@ -130,7 +130,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   )
 
   useEffect(() => {
-    if (!isLoading && courseStructure) {
+    if (!isLoading && courseStructure && dispatchCourse) {
       const { values, initialValues } = formik
       const learningsChanged = values.learnings !== initialValues.learnings
       const otherChanged = (
@@ -157,6 +157,11 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     courseStructure,
     dispatchCourse,
   ])
+
+  // Early return after all hooks have been called
+  if (!dispatchCourse) {
+    return <div>{t('loading')}</div>
+  }
 
   return (
     <div>

@@ -339,10 +339,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
     # Org Config
     org_config = OrganizationConfigBase(
         config_version="1.3",
-        general=OrgGeneralConfig(
-            enabled=True,
-            color="normal"
-        ),
+        general=OrgGeneralConfig(enabled=True, color="normal"),
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),
             members=MemberOrgConfig(

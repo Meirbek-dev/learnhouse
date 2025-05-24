@@ -54,8 +54,7 @@ export default async function middleware(req: NextRequest) {
       response.cookies.set({
         name: 'openu_current_orgslug',
         value: orgslug,
-        domain:
-          OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+        domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
       })
     }
     return response
@@ -67,25 +66,25 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Check if the request is for the Stripe callback URL
-  if (req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
-    const searchParams = req.nextUrl.searchParams
-    const orgslug = searchParams.get('state')?.split('_')[0] // Assuming state parameter contains orgslug_randomstring
+  // if (req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
+  //   const searchParams = req.nextUrl.searchParams
+  //   const orgslug = searchParams.get('state')?.split('_')[0] // Assuming state parameter contains orgslug_randomstring
 
-    // Construct the new URL with the required parameters
-    const redirectUrl = new URL('/payments/stripe/connect/oauth', req.url)
+  //   // Construct the new URL with the required parameters
+  //   const redirectUrl = new URL('/payments/stripe/connect/oauth', req.url)
 
-    // Preserve all original search parameters
-    searchParams.forEach((value, key) => {
-      redirectUrl.searchParams.append(key, value)
-    })
+  //   // Preserve all original search parameters
+  //   searchParams.forEach((value, key) => {
+  //     redirectUrl.searchParams.append(key, value)
+  //   })
 
-    // Add orgslug if available
-    if (orgslug) {
-      redirectUrl.searchParams.set('orgslug', orgslug)
-    }
+  //   // Add orgslug if available
+  //   if (orgslug) {
+  //     redirectUrl.searchParams.set('orgslug', orgslug)
+  //   }
 
-    return NextResponse.rewrite(redirectUrl)
-  }
+  //   return NextResponse.rewrite(redirectUrl)
+  // }
 
   // Health Check
   if (pathname.startsWith('/health')) {

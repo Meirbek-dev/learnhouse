@@ -165,10 +165,7 @@ async def create_org(
 
     org_config = org_config = OrganizationConfigBase(
         config_version="1.1å",
-        general=OrgGeneralConfig(
-            enabled=True,
-            color="normal"
-        ),
+        general=OrgGeneralConfig(enabled=True, color="normal"),
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),
             members=MemberOrgConfig(
