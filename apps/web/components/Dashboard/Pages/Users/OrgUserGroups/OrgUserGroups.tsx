@@ -127,7 +127,11 @@ function OrgUserGroups() {
                       dialogTitle={t('manageUsersModalTitle')}
                       dialogDescription={t('manageUsersModalDescription')}
                       dialogTrigger={
-                        <button className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer">
+                        <button
+                          className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
+                          onClick={() => handleOpenModal('manage', usergroup)}
+                          type="button"
+                        >
                           <Users className="h-4 w-4" />
                           <span>{t('manageUsersButton')}</span>
                         </button>
@@ -144,7 +148,11 @@ function OrgUserGroups() {
                         if (!isOpen) handleCloseModal('edit')
                       }}
                       dialogTrigger={
-                        <button className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer">
+                        <button
+                          className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer"
+                          onClick={() => handleOpenModal('edit', usergroup)}
+                          type="button"
+                        >
                           <Pencil className="size-4" />
                           <span>{t('editButton')}</span>
                         </button>
