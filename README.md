@@ -33,7 +33,7 @@ We prioritize issues depending on the most requested features from our users, pl
 - 👟 Course Progress
 - 🛜 Course Updates
 - 💬 Discussions
-- ✨ LearnHouse AI : The Teachers and Students copilot
+- ✨ OpenU AI : The Teachers and Students copilot
 - 👪 Multiplayer Course edition
 - More to come
 
@@ -85,7 +85,7 @@ LearnHouse uses a number of open source projects to work properly:
 
 ## LearnHouse University
 
-<a href="https://university.learnhouse.io">
+<a href="https://tou.edu.kz/ru/">
 <img width="208" alt="lh_univ" src="https://github.com/learnhouse/learnhouse/assets/29493708/72a892cd-7c5a-4437-9130-ff1682a10b24">
 </a>
 

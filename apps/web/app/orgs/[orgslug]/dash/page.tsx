@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import type { ReactNode } from 'react'
-import learnhousetextlogo from '../../../../public/learnhouse_logo.png'
+import openuTextlogo from '../../../../public/openu_logo.png'
 import { BookCopy, School, Settings, University, Users } from 'lucide-react'
 import Link from 'next/link'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
@@ -13,9 +13,9 @@ async function DashboardHome() {
     <div className="mx-auto mb-16 flex min-h-screen flex-col items-center justify-center p-4 sm:mb-0">
       <div className="mx-auto pb-6 sm:pb-10">
         <Image
-          alt={t('learnhouseLogo')}
+          alt={t('openuLogo')}
           width={230}
-          src={learnhousetextlogo}
+          src={openuTextlogo}
           className="w-48 sm:w-auto"
         />
       </div>
@@ -47,13 +47,13 @@ async function DashboardHome() {
           <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100"></div>
           <div className="flex items-center justify-center">
             <Link
-              href={'https://university.learnhouse.io/'}
+              href={'https://tou.edu.kz/ru/'}
               target="_blank"
               className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-black px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
             >
               <University className="text-gray-100/100" size={20} />
               <div className="text-sm font-bold text-gray-100/100">
-                {t('learnhouseUniversity')}
+                {t('touUniversity')}
               </div>
             </Link>
           </div>

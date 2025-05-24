@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/black_logo.png'
+import openuIcon from 'public/black_logo.png'
 import { getTranslations } from 'next-intl/server'
 
 export default async function NotFound() {
@@ -14,7 +14,7 @@ export default async function NotFound() {
           quality={100}
           width={270}
           height={100}
-          src={learnhouseIcon}
+          src={openuIcon}
           alt="logo"
         />
       </div>

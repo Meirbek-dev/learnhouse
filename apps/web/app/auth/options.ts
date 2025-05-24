@@ -4,7 +4,7 @@ import {
   loginAndGetToken,
   loginWithOAuthToken,
 } from '@services/auth/auth'
-import { LEARNHOUSE_TOP_DOMAIN, getUriWithOrg } from '@services/config/config'
+import { OPENU_TOP_DOMAIN, getUriWithOrg } from '@services/config/config'
 import { getResponseMetadata } from '@services/utils/ts/requests'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
@@ -19,7 +19,7 @@ declare global {
   }
 }
 
-export const isDevEnv = LEARNHOUSE_TOP_DOMAIN == 'localhost'
+export const isDevEnv = OPENU_TOP_DOMAIN == 'localhost'
 
 export const nextAuthOptions = {
   debug: true,
@@ -51,8 +51,8 @@ export const nextAuthOptions = {
       },
     }),
     GoogleProvider({
-      clientId: process.env.LEARNHOUSE_GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.LEARNHOUSE_GOOGLE_CLIENT_SECRET || '',
+      clientId: process.env.OPENU_GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.OPENU_GOOGLE_CLIENT_SECRET || '',
     }),
   ],
   pages: {
@@ -68,7 +68,7 @@ export const nextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         // When working on localhost, the cookie domain must be omitted entirely (https://stackoverflow.com/a/1188145)
-        domain: `.${LEARNHOUSE_TOP_DOMAIN}`,
+        domain: `.${OPENU_TOP_DOMAIN}`,
         secure: !isDevEnv,
       },
     },

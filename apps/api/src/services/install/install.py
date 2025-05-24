@@ -27,12 +27,12 @@ from src.db.organizations import Organization, OrganizationCreate
 from src.db.roles import Permission, Rights, Role, RoleTypeEnum
 from src.db.user_organizations import UserOrganization
 from src.db.users import User, UserCreate, UserRead
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from src.security.security import security_hash_password
 
 
 async def isInstallModeEnabled():
-    config = get_learnhouse_config()
+    config = get_openu_config()
 
     if config.general_config.install_mode:
         return True
@@ -341,8 +341,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
         config_version="1.3",
         general=OrgGeneralConfig(
             enabled=True,
-            color="normal",
-            watermark=True,
+            color="normal"
         ),
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),

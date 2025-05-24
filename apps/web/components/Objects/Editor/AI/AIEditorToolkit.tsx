@@ -1,6 +1,6 @@
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useState, useEffect } from 'react'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
+import openuAI_icon from 'public/openu_ai_simple.png'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import {
@@ -96,7 +96,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                           <Image
                             className="rounded-lg outline-neutral-200/20"
                             width={24}
-                            src={learnhouseAI_icon}
+                            src={openuAI_icon}
                             alt=""
                           />
                           <div className="flex items-center">
@@ -455,7 +455,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
           <Image
             className="rounded-lg outline-neutral-200/20"
             width={24}
-            src={learnhouseAI_icon}
+            src={openuAI_icon}
             alt=""
           />
         </div>

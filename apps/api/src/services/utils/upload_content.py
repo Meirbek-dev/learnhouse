@@ -5,7 +5,7 @@ import os
 
 from fastapi import HTTPException
 
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 
 
 def ensure_directory_exists(directory: str):
@@ -21,13 +21,13 @@ async def upload_content(
     file_and_format: str,
     allowed_formats: Optional[list[str]] = None,
 ):
-    # Get Learnhouse Config
-    learnhouse_config = get_learnhouse_config()
+    # Get OpenU Config
+    openu_config = get_openu_config()
 
     file_format = file_and_format.split(".")[-1].strip().lower()
 
     # Get content delivery method
-    content_delivery = learnhouse_config.hosting_config.content_delivery.type
+    content_delivery = openu_config.hosting_config.content_delivery.type
 
     # Check if format file is allowed
     if allowed_formats:
@@ -54,7 +54,7 @@ async def upload_content(
         print("Uploading to s3...")
         s3 = boto3.client(
             "s3",
-            endpoint_url=learnhouse_config.hosting_config.content_delivery.s3api.endpoint_url,
+            endpoint_url=openu_config.hosting_config.content_delivery.s3api.endpoint_url,
         )
 
         # Upload file to server
@@ -69,7 +69,7 @@ async def upload_content(
         try:
             s3.upload_file(
                 f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
-                "learnhouse-media",
+                "openu-media",
                 f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
             )
         except ClientError as e:
@@ -78,7 +78,7 @@ async def upload_content(
         print("Checking if file exists in s3...")
         try:
             s3.head_object(
-                Bucket="learnhouse-media",
+                Bucket="openu-media",
                 Key=f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
             )
             print("File upload successful!")

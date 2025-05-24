@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from migrations.orgconfigs.orgconfigs_migrations import (
     migrate_to_v1_1,
     migrate_to_v1_2,
@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get("/config")
 async def config():
-    config = get_learnhouse_config()
+    config = get_openu_config()
     return config.dict()
 
 

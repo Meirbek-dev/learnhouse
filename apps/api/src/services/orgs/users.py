@@ -7,7 +7,7 @@ from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 from src.security.features_utils.usage import decrease_feature_usage
 from src.services.orgs.invites import send_invite_email
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from src.services.orgs.orgs import rbac_check
 from src.db.roles import Role, RoleRead
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
@@ -244,7 +244,7 @@ async def invite_batch_users(
     current_user: PublicUser | AnonymousUser,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -333,7 +333,7 @@ async def get_list_of_invited_users(
     current_user: PublicUser | AnonymousUser,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -386,7 +386,7 @@ async def remove_invited_user(
     current_user: PublicUser | AnonymousUser,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:

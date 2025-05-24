@@ -1,8 +1,8 @@
 import { getBackendUrl } from '@services/config/config'
-const LEARNHOUSE_MEDIA_URL = process.env.NEXT_PUBLIC_LEARNHOUSE_MEDIA_URL
+const OPEN_MEDIA_URL = process.env.NEXT_PUBLIC_OPENU_MEDIA_URL
 
 function getMediaUrl() {
-  return LEARNHOUSE_MEDIA_URL || getBackendUrl()
+  return OPEN_MEDIA_URL || getBackendUrl()
 }
 
 export function getCourseThumbnailMediaDirectory(

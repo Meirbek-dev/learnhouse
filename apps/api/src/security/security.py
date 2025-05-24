@@ -1,6 +1,6 @@
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha256
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 
 
 ### 🔒 JWT ##############################################################
@@ -8,7 +8,7 @@ from config.config import get_learnhouse_config
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-SECRET_KEY = get_learnhouse_config().security_config.auth_jwt_secret_key
+SECRET_KEY = get_openu_config().security_config.auth_jwt_secret_key
 ALGORITHM = "HS256"
 
 ### 🔒 JWT ##############################################################

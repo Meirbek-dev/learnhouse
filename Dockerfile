@@ -15,9 +15,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
 # Frontend Build
 FROM base AS deps
 
-ENV NEXT_PUBLIC_LEARNHOUSE_API_URL=http://localhost/api/v1/
-ENV NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL=http://localhost/
-ENV NEXT_PUBLIC_LEARNHOUSE_DOMAIN=localhost
+ENV NEXT_PUBLIC_OPENU_API_URL=http://localhost/api/v1/
+ENV NEXT_PUBLIC_OPENU_BACKEND_URL=http://localhost/
+ENV NEXT_PUBLIC_OPENU_DOMAIN=localhost
 
 WORKDIR /app/web
 COPY ./apps/web/package.json ./apps/web/pnpm-lock.yaml* ./
@@ -49,6 +49,6 @@ COPY ./apps/api ./
 # Run the backend
 WORKDIR /app
 COPY ./extra/nginx.conf /etc/nginx/conf.d/default.conf
-ENV PORT=8000 LEARNHOUSE_PORT=9000 HOSTNAME=0.0.0.0
+ENV PORT=8000 OPENU_PORT=9000 HOSTNAME=0.0.0.0
 COPY ./extra/start.sh /app/start.sh
 CMD ["sh", "start.sh"]

@@ -16,10 +16,10 @@ from langchain.agents.agent_toolkits import (
 
 import chromadb
 
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from src.services.ai.init import get_chromadb_client, get_embedding_function, get_llm
 
-LH_CONFIG = get_learnhouse_config()
+LH_CONFIG = get_openu_config()
 client = (
     chromadb.HttpClient(host=LH_CONFIG.ai_config.chromadb_config.db_host, port=8000)
     if LH_CONFIG.ai_config.chromadb_config.isSeparateDatabaseEnabled == True
@@ -113,7 +113,7 @@ def get_chat_session_history(aichat_uuid: Optional[str] = None) -> Dict[str, Any
     """Get or create a new chat session history"""
     session_id = aichat_uuid if aichat_uuid else f"aichat_{uuid4()}"
 
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if redis_conn_string:

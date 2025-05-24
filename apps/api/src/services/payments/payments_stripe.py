@@ -3,7 +3,7 @@ from typing import Literal
 from fastapi import HTTPException, Request
 from sqlmodel import Session
 import stripe
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from src.db.payments.payments import PaymentsConfigUpdate, PaymentsConfig
 from src.db.payments.payments_products import (
     PaymentPriceTypeEnum,
@@ -40,21 +40,21 @@ async def get_stripe_connected_account_id(
 
 async def get_stripe_internal_credentials():
     # Get payments config from config file
-    learnhouse_config = get_learnhouse_config()
+    openu_config = get_openu_config()
 
-    if not learnhouse_config.payments_config.stripe.stripe_secret_key:
+    if not openu_config.payments_config.stripe.stripe_secret_key:
         raise HTTPException(status_code=400, detail="Stripe secret key not configured")
 
-    if not learnhouse_config.payments_config.stripe.stripe_publishable_key:
+    if not openu_config.payments_config.stripe.stripe_publishable_key:
         raise HTTPException(
             status_code=400, detail="Stripe publishable key not configured"
         )
 
     return {
-        "stripe_secret_key": learnhouse_config.payments_config.stripe.stripe_secret_key,
-        "stripe_publishable_key": learnhouse_config.payments_config.stripe.stripe_publishable_key,
-        "stripe_webhook_standard_secret": learnhouse_config.payments_config.stripe.stripe_webhook_standard_secret,
-        "stripe_webhook_connect_secret": learnhouse_config.payments_config.stripe.stripe_webhook_connect_secret,
+        "stripe_secret_key": openu_config.payments_config.stripe.stripe_secret_key,
+        "stripe_publishable_key": openu_config.payments_config.stripe.stripe_publishable_key,
+        "stripe_webhook_standard_secret": openu_config.payments_config.stripe.stripe_webhook_standard_secret,
+        "stripe_webhook_connect_secret": openu_config.payments_config.stripe.stripe_webhook_connect_secret,
     }
 
 
@@ -351,9 +351,9 @@ async def generate_stripe_connect_link(
     creds = await get_stripe_internal_credentials()
     stripe.api_key = creds.get("stripe_secret_key")
 
-    # Get learnhouse config for client_id
-    learnhouse_config = get_learnhouse_config()
-    client_id = learnhouse_config.payments_config.stripe.stripe_client_id
+    # Get openu config for client_id
+    openu_config = get_openu_config()
+    client_id = openu_config.payments_config.stripe.stripe_client_id
 
     if not client_id:
         raise HTTPException(status_code=400, detail="Stripe client ID not configured")

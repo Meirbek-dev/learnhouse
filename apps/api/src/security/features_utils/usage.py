@@ -1,6 +1,6 @@
 import redis
 from src.db.organization_config import OrganizationConfig
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from typing import Literal, TypeAlias
 from fastapi import HTTPException
 from sqlmodel import Session, select
@@ -44,7 +44,7 @@ def check_limits_with_usage(
             detail=f"{feature.capitalize()} is not enabled for this organization",
         )
 
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -83,7 +83,7 @@ def increase_feature_usage(
     org_id: int,
     db_session: Session,
 ):
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -114,7 +114,7 @@ def decrease_feature_usage(
     org_id: int,
     db_session: Session,
 ):
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:

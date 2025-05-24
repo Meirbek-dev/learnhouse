@@ -1,5 +1,5 @@
 {
-  "name": "learnhouse",
+  "name": "openu",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -62,7 +62,7 @@
     "dompurify": "^3.2.6",
     "emblor": "^1.4.8",
     "formik": "^2.4.6",
-    "framer-motion": "^12.12.1",
+    "framer-motion": "^12.12.2",
     "get-youtube-id": "^1.0.1",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.22",

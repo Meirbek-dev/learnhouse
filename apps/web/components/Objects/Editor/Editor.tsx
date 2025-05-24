@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import learnhouseIcon from 'public/learnhouse_icon.png'
+import openuIcon from 'public/openu_icon.png'
 import { ToolbarButtons } from './Toolbar/ToolbarButtons'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import styled from 'styled-components'
 import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
+import openuAI_icon from 'public/openu_ai_simple.png'
 import {
   AIEditorStateTypes,
   useAIEditor,
@@ -203,11 +203,11 @@ function Editor(props: EditorProps) {
             <EditorDocSection>
               <EditorInfoWrapper>
                 <Link href="/">
-                  <EditorInfoLearnHouseLogo
+                  <EditorInfoOpenULogo
                     width={25}
                     height={25}
-                    src={learnhouseIcon}
-                    alt="LearnHouse Logo"
+                    src={openuIcon}
+                    alt="OpenU Logo"
                   />
                 </Link>
                 <Link target="_blank" href={`/course/${course_uuid}`}>
@@ -258,7 +258,7 @@ function Editor(props: EditorProps) {
                         <Image
                           className=""
                           width={20}
-                          src={learnhouseAI_icon}
+                          src={openuAI_icon}
                           alt="AI Editor Icon"
                         />
                       </i>{' '}
@@ -405,7 +405,7 @@ const EditorUserProfileWrapper = styled.div`
 
 // Inside EditorInfoWrapper
 //..todo
-const EditorInfoLearnHouseLogo = styled(Image)`
+const EditorInfoOpenULogo = styled(Image)`
   border-radius: 6px;
   margin-right: 0px;
 `

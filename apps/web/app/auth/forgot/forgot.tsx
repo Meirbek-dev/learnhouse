@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { useState } from 'react'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import openuIcon from 'public/openu_bigicon_1.png'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
@@ -69,7 +69,7 @@ function ForgotPasswordClient() {
               quality={100}
               width={30}
               height={30}
-              src={learnhouseIcon}
+              src={openuIcon}
               alt=""
             />
           </Link>
@@ -92,7 +92,7 @@ function ForgotPasswordClient() {
                   quality={100}
                   width={70}
                   height={70}
-                  src={learnhouseIcon}
+                  src={openuIcon}
                   alt=""
                 />
               )}

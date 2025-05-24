@@ -1,7 +1,6 @@
 'use client'
 import { Children, cloneElement, use } from 'react'
 import '@styles/globals.css'
-import Watermark from '@components/Objects/Watermark'
 import { OrgMenu } from '@components/Objects/Menus/OrgMenu'
 
 export default function RootLayout(props: {
@@ -19,7 +18,6 @@ export default function RootLayout(props: {
           key: `${params.orgslug}-child-${index}`,
         })
       )}
-      <Watermark />
     </>
   )
 }

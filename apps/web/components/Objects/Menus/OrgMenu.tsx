@@ -89,7 +89,7 @@ export const OrgMenu = (props: any) => {
                       className="rounded-md"
                     />
                   ) : (
-                    <LearnHouseLogo />
+                    <OpenULogo />
                   )}
                 </div>
               </Link>
@@ -169,7 +169,7 @@ export const OrgMenu = (props: any) => {
   )
 }
 
-const LearnHouseLogo = () => {
+const OpenULogo = () => {
   return (
     <svg
       width="133"

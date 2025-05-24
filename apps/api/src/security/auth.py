@@ -2,7 +2,7 @@ from sqlmodel import Session
 from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.users.users import security_get_user
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from pydantic import BaseModel
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -26,7 +26,7 @@ class Settings(BaseModel):
     )
     authjwt_cookie_samesite = "lax"
     authjwt_cookie_secure = True
-    authjwt_cookie_domain = get_learnhouse_config().hosting_config.cookie_config.domain
+    authjwt_cookie_domain = get_openu_config().hosting_config.cookie_config.domain
 
 
 @AuthJWT.load_config  # type: ignore

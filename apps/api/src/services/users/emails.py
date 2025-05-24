@@ -11,13 +11,13 @@ def send_account_creation_email(
     # send email
     return send_email(
         to=email,
-        subject=f"Welcome to LearnHouse, {user.username}!",
+        subject=f"Welcome to OpenU, {user.username}!",
         body=f"""
 <html>
     <body>
         <p>Hello {user.username}</p>
-        <p>Welcome to LearnHouse! , get started by creating your own organization or join a one.</p>
-        <p>Need some help to get started ? <a href="https://university.learnhouse.io">LearnHouse Academy</a></p>
+        <p>Welcome to OpenU! , get started by creating your own organization or join a one.</p>
+        <p>Need some help to get started ? <a href="https://tou.edu.kz/ru/">Toraighyrov University</a></p>
     </body>
 </html>
 """,
@@ -40,7 +40,7 @@ def send_password_reset_email(
         <p>Hello {user.username}</p>
         <p>You have requested to reset your password.</p>
         <p>Here is your reset code: {generated_reset_code}</p>
-        <p>Click <a href="https://{organization.slug}.learnhouse.io/reset?orgslug={organization.slug}&email={email}&resetCode={generated_reset_code}">here</a> to reset your password.</p>
+        <p>Click <a href="https://{organization.slug}.openu.io/reset?orgslug={organization.slug}&email={email}&resetCode={generated_reset_code}">here</a> to reset your password.</p>
     </body>
 </html>
 """,

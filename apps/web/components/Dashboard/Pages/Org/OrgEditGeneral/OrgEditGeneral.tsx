@@ -23,7 +23,7 @@ import { Switch } from '@components/ui/switch'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import Image from 'next/image'
-import learnhouseIcon from '@public/learnhouse_logo.png'
+import openuIcon from '@public/openu_logo.png'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
@@ -256,8 +256,8 @@ const OrgEditGeneral: FC = () => {
                           <Image
                             quality={100}
                             width={120}
-                            src={learnhouseIcon}
-                            alt="LearnHouse"
+                            src={openuIcon}
+                            alt="OpenU"
                             className="rounded-lg"
                           />
                           <span className="mt-1 rounded-md bg-black px-2 py-1 text-[10px] font-semibold text-white">

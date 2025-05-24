@@ -1,32 +1,32 @@
-export const LEARNHOUSE_HTTP_PROTOCOL =
-  process.env.NEXT_PUBLIC_LEARNHOUSE_HTTPS === 'true' ? 'https://' : 'http://'
-const LEARNHOUSE_API_URL = `${process.env.NEXT_PUBLIC_LEARNHOUSE_API_URL}`
-export const LEARNHOUSE_BACKEND_URL = `${process.env.NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL}`
-export const LEARNHOUSE_DOMAIN = process.env.NEXT_PUBLIC_LEARNHOUSE_DOMAIN
-export const LEARNHOUSE_TOP_DOMAIN =
-  process.env.NEXT_PUBLIC_LEARNHOUSE_TOP_DOMAIN
+export const OPENU_HTTP_PROTOCOL =
+  process.env.NEXT_PUBLIC_OPENU_HTTPS === 'true' ? 'https://' : 'http://'
+const OPENU_API_URL = `${process.env.NEXT_PUBLIC_OPENU_API_URL}`
+export const OPENU_BACKEND_URL = `${process.env.NEXT_PUBLIC_OPENU_BACKEND_URL}`
+export const OPENU_DOMAIN = process.env.NEXT_PUBLIC_OPENU_DOMAIN
+export const OPENU_TOP_DOMAIN =
+  process.env.NEXT_PUBLIC_OPENU_TOP_DOMAIN
 
-export const getAPIUrl = () => LEARNHOUSE_API_URL
-export const getBackendUrl = () => LEARNHOUSE_BACKEND_URL
+export const getAPIUrl = () => OPENU_API_URL
+export const getBackendUrl = () => OPENU_BACKEND_URL
 
 // Multi Organization Mode
 export const isMultiOrgModeEnabled = () =>
-  process.env.NEXT_PUBLIC_LEARNHOUSE_MULTI_ORG === 'true' ? true : false
+  process.env.NEXT_PUBLIC_OPENU_MULTI_ORG === 'true' ? true : false
 
 export const getUriWithOrg = (orgslug: string, path: string) => {
   const multi_org = isMultiOrgModeEnabled()
   if (multi_org) {
-    return `${LEARNHOUSE_HTTP_PROTOCOL}${orgslug}.${LEARNHOUSE_DOMAIN}${path}`
+    return `${OPENU_HTTP_PROTOCOL}${orgslug}.${OPENU_DOMAIN}${path}`
   }
-  return `${LEARNHOUSE_HTTP_PROTOCOL}${LEARNHOUSE_DOMAIN}${path}`
+  return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
 }
 
 export const getUriWithoutOrg = (path: string) => {
   const multi_org = isMultiOrgModeEnabled()
   if (multi_org) {
-    return `${LEARNHOUSE_HTTP_PROTOCOL}${LEARNHOUSE_DOMAIN}${path}`
+    return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
   }
-  return `${LEARNHOUSE_HTTP_PROTOCOL}${LEARNHOUSE_DOMAIN}${path}`
+  return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
 }
 
 export const getOrgFromUri = () => {
@@ -37,11 +37,11 @@ export const getOrgFromUri = () => {
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname
 
-      return hostname.replace(`.${LEARNHOUSE_DOMAIN}`, '')
+      return hostname.replace(`.${OPENU_DOMAIN}`, '')
     }
   }
 }
 
 export const getDefaultOrg = () => {
-  return process.env.NEXT_PUBLIC_LEARNHOUSE_DEFAULT_ORG
+  return process.env.NEXT_PUBLIC_OPENU_DEFAULT_ORG
 }

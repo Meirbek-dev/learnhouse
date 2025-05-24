@@ -167,8 +167,7 @@ async def create_org(
         config_version="1.1å",
         general=OrgGeneralConfig(
             enabled=True,
-            color="normal",
-            watermark=True,
+            color="normal"
         ),
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),

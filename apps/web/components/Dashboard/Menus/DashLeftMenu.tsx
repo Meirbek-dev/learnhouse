@@ -2,7 +2,7 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import { signOut } from 'next-auth/react'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import LearnHouseDashboardLogo from '@public/dashLogo.png'
+import OpenUDashboardLogo from '@public/dashLogo.png'
 import {
   Backpack,
   BadgeDollarSign,
@@ -75,9 +75,9 @@ function DashLeftMenu() {
               side="right"
             >
               <Image
-                alt="Learnhouse logo"
+                alt="OpenU logo"
                 width={40}
-                src={LearnHouseDashboardLogo}
+                src={OpenUDashboardLogo}
               />
             </ToolTip>
             <ToolTip

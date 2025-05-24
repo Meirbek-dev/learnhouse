@@ -1,6 +1,6 @@
 import {
-  LEARNHOUSE_DOMAIN,
-  LEARNHOUSE_TOP_DOMAIN,
+  OPENU_DOMAIN,
+  OPENU_TOP_DOMAIN,
   getDefaultOrg,
   getUriWithOrg,
   isMultiOrgModeEnabled,
@@ -31,7 +31,7 @@ export default async function middleware(req: NextRequest) {
   const default_org = getDefaultOrg()
   const { pathname, search } = req.nextUrl
   const fullhost = req.headers ? req.headers.get('host') : ''
-  const cookie_orgslug = req.cookies.get('learnhouse_current_orgslug')?.value
+  const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value
 
   // Out of orgslug paths & rewrite
   const standard_paths = ['/home']
@@ -52,10 +52,10 @@ export default async function middleware(req: NextRequest) {
 
     if (orgslug) {
       response.cookies.set({
-        name: 'learnhouse_current_orgslug',
+        name: 'openu_current_orgslug',
         value: orgslug,
         domain:
-          LEARNHOUSE_TOP_DOMAIN == 'localhost' ? '' : LEARNHOUSE_TOP_DOMAIN,
+          OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
       })
     }
     return response
@@ -117,7 +117,7 @@ export default async function middleware(req: NextRequest) {
 
     if (hosting_mode === 'multi') {
       orgslug = fullhost
-        ? fullhost.replace(`.${LEARNHOUSE_DOMAIN}`, '')
+        ? fullhost.replace(`.${OPENU_DOMAIN}`, '')
         : (default_org as string)
     } else {
       // Single hosting mode
@@ -145,9 +145,9 @@ export default async function middleware(req: NextRequest) {
 
     // Set the cookie with the orgslug value
     response.cookies.set({
-      name: 'learnhouse_current_orgslug',
+      name: 'openu_current_orgslug',
       value: orgslug,
-      domain: LEARNHOUSE_TOP_DOMAIN == 'localhost' ? '' : LEARNHOUSE_TOP_DOMAIN,
+      domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
       path: '/',
     })
 
@@ -158,7 +158,7 @@ export default async function middleware(req: NextRequest) {
   if (hosting_mode === 'multi') {
     // Get the organization slug from the URL
     const orgslug = fullhost
-      ? fullhost.replace(`.${LEARNHOUSE_DOMAIN}`, '')
+      ? fullhost.replace(`.${OPENU_DOMAIN}`, '')
       : (default_org as string)
     const response = NextResponse.rewrite(
       new URL(`/orgs/${orgslug}${pathname}`, req.url)
@@ -166,9 +166,9 @@ export default async function middleware(req: NextRequest) {
 
     // Set the cookie with the orgslug value
     response.cookies.set({
-      name: 'learnhouse_current_orgslug',
+      name: 'openu_current_orgslug',
       value: orgslug,
-      domain: LEARNHOUSE_TOP_DOMAIN == 'localhost' ? '' : LEARNHOUSE_TOP_DOMAIN,
+      domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
       path: '/',
     })
 

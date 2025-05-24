@@ -1,7 +1,7 @@
 import uvicorn
 import logfire
 from fastapi import FastAPI, Request
-from config.config import LearnHouseConfig, get_learnhouse_config
+from config.config import OpenUConfig, get_openu_config
 from src.core.events.events import shutdown_app, startup_app
 from src.router import v1_router
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,27 +13,21 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 # from src.services.mocks.initial import create_initial_data
 
-########################
-# Pre-Alpha Version 0.1.0
-# Author: @swve
-# (c) LearnHouse 2022
-########################
-
-# Get LearnHouse Config
-learnhouse_config: LearnHouseConfig = get_learnhouse_config()
+# Get OpenU Config
+openu_config: OpenUConfig = get_openu_config()
 
 # Global Config
 app = FastAPI(
-    title=learnhouse_config.site_name,
-    description=learnhouse_config.site_description,
-    docs_url="/docs" if learnhouse_config.general_config.development_mode else None,
-    redoc_url="/redoc" if learnhouse_config.general_config.development_mode else None,
+    title=openu_config.site_name,
+    description=openu_config.site_description,
+    docs_url="/docs" if openu_config.general_config.development_mode else None,
+    redoc_url="/redoc" if openu_config.general_config.development_mode else None,
     version="0.1.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=learnhouse_config.hosting_config.allowed_regexp,
+    allow_origin_regex=openu_config.hosting_config.allowed_regexp,
     allow_methods=["*"],
     allow_credentials=True,
     allow_headers=["*"],
@@ -41,7 +35,7 @@ app.add_middleware(
 
 logfire.configure(
     console=False,
-    service_name=learnhouse_config.site_name,
+    service_name=openu_config.site_name,
 )
 logfire.instrument_fastapi(app)
 
@@ -74,12 +68,12 @@ if __name__ == "__main__":
     uvicorn.run(
         "app:app",
         host="0.0.0.0",
-        port=learnhouse_config.hosting_config.port,
-        reload=learnhouse_config.general_config.development_mode,
+        port=openu_config.hosting_config.port,
+        reload=openu_config.general_config.development_mode,
     )
 
 
 # General Routes
 @app.get("/")
 async def root():
-    return {"Message": "Welcome to LearnHouse ✨"}
+    return {"Message": "Welcome to OpenU ✨"}

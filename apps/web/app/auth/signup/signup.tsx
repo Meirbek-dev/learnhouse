@@ -1,5 +1,5 @@
 'use client'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import openuIcon from 'public/openu_bigicon_1.png'
 import Image from 'next/image'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
 import Link from 'next/link'
@@ -56,7 +56,7 @@ function SignUpClient(props: SignUpClientProps) {
               quality={100}
               width={30}
               height={30}
-              src={learnhouseIcon}
+              src={openuIcon}
               alt=""
             />
           </Link>
@@ -71,7 +71,7 @@ function SignUpClient(props: SignUpClientProps) {
                     props.org.org_uuid,
                     props.org?.logo_image
                   )}`}
-                  alt="LearnHouse"
+                  alt="OpenU"
                   style={{ width: 'auto', height: 70 }}
                   className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
                 />
@@ -80,7 +80,7 @@ function SignUpClient(props: SignUpClientProps) {
                   quality={100}
                   width={70}
                   height={70}
-                  src={learnhouseIcon}
+                  src={openuIcon}
                   alt=""
                 />
               )}

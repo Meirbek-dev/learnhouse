@@ -7,7 +7,7 @@ import redis
 from datetime import datetime, timedelta
 from sqlmodel import Session, select
 from src.services.email.utils import send_email
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from src.services.orgs.orgs import rbac_check
 from src.db.users import AnonymousUser, PublicUser, UserRead
 from src.db.organizations import (
@@ -24,7 +24,7 @@ async def create_invite_code(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -102,7 +102,7 @@ async def create_invite_code_with_usergroup(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -180,7 +180,7 @@ async def get_invite_codes(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -233,7 +233,7 @@ async def get_invite_code(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -288,7 +288,7 @@ async def delete_invite_code(
     db_session: Session,
 ):
     # Redis init
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -340,7 +340,7 @@ def send_invite_email(
     user: UserRead,
     email: EmailStr,
 ):
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
     if not redis_conn_string:
@@ -375,7 +375,7 @@ def send_invite_email(
     <body>
         <p>Hello {email}</p>
         <p>You have been invited to {org.name} by @{user.username}. Your invite code is {invite["invite_code"]}.</p>
-        <p>Click <a href="{org.slug}.learnhouse.io/signup?orgslug={org.slug}&inviteCode={invite["invite_code"]}">here</a> to sign up.</p>
+        <p>Click <a href="{org.slug}.openu.io/signup?orgslug={org.slug}&inviteCode={invite["invite_code"]}">here</a> to sign up.</p>
         <p>Thank you</p>
     </body>
 </html>

@@ -80,7 +80,6 @@ class OrgFeatureConfig(BaseModel):
 class OrgGeneralConfig(BaseModel):
     enabled: bool = True
     color: str = "normal"
-    watermark: bool = True
 
 
 # Cloud

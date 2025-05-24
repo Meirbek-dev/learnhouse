@@ -84,11 +84,7 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step3Button'),
-          action: () =>
-            window.open(
-              'https://university.learnhouse.io/course/be89716c-9992-44bb-81df-ef3d76e355ba',
-              '_blank'
-            ),
+          action: () => window.open('https://tou.edu.kz/ru/', '_blank'),
           icon: <Info size={16} />,
         },
       ],
@@ -100,11 +96,7 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step4Button'),
-          action: () =>
-            window.open(
-              'https://university.learnhouse.io/course/be89716c-9992-44bb-81df-ef3d76e355ba',
-              '_blank'
-            ),
+          action: () => window.open('https://tou.edu.kz/ru/', '_blank'),
           icon: <Info size={16} />,
         },
       ],
@@ -179,8 +171,7 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step10Button'),
-          action: () =>
-            window.open('https://university.learnhouse.io', '_blank'),
+          action: () => window.open('https://tou.edu.kz/ru/', '_blank'),
           icon: <Globe size={16} />,
         },
       ],

@@ -3,13 +3,13 @@ from functools import lru_cache
 import chromadb
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.chat_models import ChatOpenAI
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 
 
 @lru_cache()
 def get_chromadb_client():
     """Get cached ChromaDB client instance"""
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     chromadb_config = getattr(LH_CONFIG.ai_config, "chromadb_config", None)
 
     if (
@@ -25,7 +25,7 @@ def get_chromadb_client():
 @lru_cache()
 def get_embedding_function(model_name: str) -> Optional[OpenAIEmbeddings]:
     """Get cached embedding function"""
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     api_key = getattr(LH_CONFIG.ai_config, "openai_api_key", None)
 
     if not api_key:
@@ -39,7 +39,7 @@ def get_embedding_function(model_name: str) -> Optional[OpenAIEmbeddings]:
 @lru_cache()
 def get_llm(model_name: str, temperature: float = 0) -> Optional[ChatOpenAI]:
     """Get cached LLM instance"""
-    LH_CONFIG = get_learnhouse_config()
+    LH_CONFIG = get_openu_config()
     api_key = getattr(LH_CONFIG.ai_config, "openai_api_key", None)
 
     if not api_key:

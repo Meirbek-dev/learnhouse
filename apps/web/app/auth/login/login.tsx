@@ -1,5 +1,5 @@
 'use client'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import openuIcon from 'public/openu_bigicon_1.png'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
@@ -95,7 +95,7 @@ const LoginClient = (props: LoginClientProps) => {
               quality={100}
               width={30}
               height={30}
-              src={learnhouseIcon}
+              src={openuIcon}
               alt=""
             />
           </Link>
@@ -119,7 +119,7 @@ const LoginClient = (props: LoginClientProps) => {
                   quality={100}
                   width={70}
                   height={70}
-                  src={learnhouseIcon}
+                  src={openuIcon}
                   alt=""
                 />
               )}

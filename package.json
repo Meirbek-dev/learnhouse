@@ -1,5 +1,5 @@
 {
-  "name": "learnhouse",
+  "name": "openu",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -9,12 +9,12 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,md}\""
   },
   "devDependencies": {
-    "eslint": "^9.26.0",
+    "eslint": "^9.27.0",
     "prettier": "^3.5.3",
-    "turbo": "^2.5.2"
+    "turbo": "^2.5.3"
   },
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
-    "learnhouse": "file:"
+    "openu": "file:"
   }
 }

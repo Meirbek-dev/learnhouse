@@ -4,13 +4,13 @@
 # export PATH=$PATH:/usr/local/bin # Uncomment and adjust if pm2 is not found
 
 # Start web service
-pm2 start server.js --cwd /app/web --name learnhouse-web > /dev/null 2>&1 || { echo "Failed to start learnhouse-web"; exit 1; }
+pm2 start server.js --cwd /app/web --name openu-web > /dev/null 2>&1 || { echo "Failed to start openu-web"; exit 1; }
 
 # Change to API directory
 cd /app/api || { echo "Failed to change directory to /app/api"; exit 1; }
 
 # Start API service (using 'sh -c' for the command with spaces, safer in pm2)
-pm2 start "sh -c 'uv run app.py'" --name learnhouse-api > /dev/null 2>&1 || { echo "Failed to start learnhouse-api"; exit 1; }
+pm2 start "sh -c 'uv run app.py'" --name openu-api > /dev/null 2>&1 || { echo "Failed to start openu-api"; exit 1; }
 
 # Change back to app root
 cd /app || { echo "Failed to change directory to /app"; exit 1; }

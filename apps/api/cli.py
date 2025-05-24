@@ -5,7 +5,7 @@ from pydantic import EmailStr
 from sqlalchemy import create_engine
 from sqlmodel import SQLModel, Session
 import typer
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 from src.db.organizations import OrganizationCreate
 from src.db.users import UserCreate
 from src.services.install.install import (
@@ -28,9 +28,9 @@ def install(
     short: Annotated[bool, typer.Option(help="Install with predefined values")] = False,
 ):
     # Get the database session
-    learnhouse_config = get_learnhouse_config()
+    openu_config = get_openu_config()
     engine = create_engine(
-        learnhouse_config.database_config.sql_connection_string,
+        openu_config.database_config.sql_connection_string,
         echo=False,
         pool_pre_ping=True,  # type: ignore
     )

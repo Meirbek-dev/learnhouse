@@ -4,9 +4,9 @@ services:
     ports:
       - "80:80"
     volumes:
-      - .:/usr/learnhouse
+      - .:/usr/openu
     env_file:
-      - ./extra/example-learnhouse-conf.env
+      - ./extra/example-openu-conf.env
     depends_on:
       db:
         condition: service_healthy
@@ -18,13 +18,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=learnhouse
-      - POSTGRES_PASSWORD=learnhouse
-      - POSTGRES_DB=learnhouse
+      - POSTGRES_USER=openu
+      - POSTGRES_PASSWORD=openu
+      - POSTGRES_DB=openu
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U learnhouse"]
+      test: ["CMD-SHELL", "pg_isready -U openu"]
       interval: 5s
       timeout: 4s
       retries: 5

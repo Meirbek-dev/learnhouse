@@ -1,13 +1,10 @@
 [project]
-description = "Learnhouse Backend"
-name = "learnhouse-api"
+description = "OpenU Backend"
+name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.2"
-authors = [
-    {name = "Badr B. (swve)"}
-]
 dependencies = [
-    "boto3>=1.38.19",
+    "boto3>=1.38.23",
     "botocore>=1.38.19",
     "faker>=37.3.0",
     "fastapi==0.115.9",
@@ -16,7 +13,7 @@ dependencies = [
     "langchain>=0.2.5",
     "langchain-community>=0.2.5",
     "langchain-openai>=0.1.14",
-    "openai>=1.79.0",
+    "openai>=1.82.0",
     "passlib>=1.7.4",
     "psycopg2-binary>=2.9.10",
     "pydantic[email]>=1.10.21,<2.0.0",
@@ -31,8 +28,8 @@ dependencies = [
     "tiktoken>=0.9.0",
     "uvicorn>=0.34.2",
     "typer>=0.15.4",
-    "chromadb>=1.0.9",
-    "alembic>=1.15.2",
+    "chromadb>=1.0.10",
+    "alembic>=1.16.1",
     "alembic-postgresql-enum>=1.7.0",
     "sqlalchemy-utils>=0.41.2",
     "stripe>=12.1.0",
@@ -48,5 +45,5 @@ ignore_no_config=true
 
 [dependency-groups]
 dev = [
-    "ruff>=0.11.10",
+    "ruff>=0.11.11",
 ]

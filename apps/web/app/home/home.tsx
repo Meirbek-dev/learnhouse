@@ -12,7 +12,7 @@ import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import openuIcon from 'public/openu_bigicon_1.png'
 import { useEffect } from 'react'
 import useSWR from 'swr'
 
@@ -33,8 +33,8 @@ function HomeClient() {
           quality={100}
           width={60}
           height={60}
-          src={learnhouseIcon}
-          alt="LearnHouse Logo"
+          src={openuIcon}
+          alt="OpenU Logo"
         />
       </div>
 

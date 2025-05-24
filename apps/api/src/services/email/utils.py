@@ -1,12 +1,12 @@
 from pydantic import EmailStr
 import resend
-from config.config import get_learnhouse_config
+from config.config import get_openu_config
 
 
 def send_email(to: EmailStr, subject: str, body: str):
-    lh_config = get_learnhouse_config()
+    lh_config = get_openu_config()
     params = {
-        "from": "LearnHouse <" + lh_config.mailing_config.system_email_address + ">",
+        "from": "OpenU <" + lh_config.mailing_config.system_email_address + ">",
         "to": [to],
         "subject": subject,
         "html": body,

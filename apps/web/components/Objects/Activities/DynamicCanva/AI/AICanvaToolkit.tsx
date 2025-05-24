@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Editor } from '@tiptap/core'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
+import openuAI_icon from 'public/openu_ai_simple.png'
 import Image from 'next/image'
 import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react'
 import { BubbleMenu } from '@tiptap/react'
@@ -53,7 +53,7 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
               <Image
                 className="rounded-lg outline-neutral-200/10"
                 width={24}
-                src={learnhouseAI_icon}
+                src={openuAI_icon}
                 alt={t('aiIconAlt')}
               />
               <div>{t('aiTitle')}</div>

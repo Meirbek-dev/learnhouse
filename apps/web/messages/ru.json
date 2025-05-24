@@ -958,8 +958,8 @@
         "description": "Управляйте пользователями и ролями вашей организации",
         "title": "Пользователи"
       },
-      "learnhouseLogo": "Логотип LearnHouse",
-      "learnhouseUniversity": "Университет LearnHouse"
+      "openuLogo": "Логотип LearnHouse",
+      "touUniversity": "Университет LearnHouse"
     },
     "CourseOverview": {
       "courseLabel": "Курс"
@@ -2001,6 +2001,5 @@
     "required": "Обязательно",
     "usernameMinLength": "Имя пользователя должно содержать не менее {length} символов",
     "wrongCredentials": "Неверный Email или пароль"
-  },
-  "learnhouse-logo": "логотип learnhouse"
+  }
 }
