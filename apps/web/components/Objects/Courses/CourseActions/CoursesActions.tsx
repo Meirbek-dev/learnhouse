@@ -159,7 +159,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
           // Redirect to the first activity
           router.push(
             getUriWithOrg(orgslug, '') +
-            `/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
+              `/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
           )
         } else {
           router.refresh()
@@ -167,12 +167,9 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
       }
     } catch (error) {
       console.error('Failed to perform course action:', error)
-      toast.error(
-        isStarted
-          ? t('leaveCourseError')
-          : t('startCourseError'),
-        { id: loadingToast }
-      )
+      toast.error(isStarted ? t('leaveCourseError') : t('startCourseError'), {
+        id: loadingToast,
+      })
     } finally {
       setIsActionLoading(false)
     }
@@ -199,16 +196,10 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
       )
       await revalidateTags(['courses'], orgslug)
       await refetch()
-      toast.success(
-        t('contributorApplicationSuccess'),
-        { id: loadingToast }
-      )
+      toast.success(t('contributorApplicationSuccess'), { id: loadingToast })
     } catch (error) {
       console.error('Failed to apply as contributor:', error)
-      toast.error(
-        t('contributorApplicationError'),
-        { id: loadingToast }
-      )
+      toast.error(t('contributorApplicationError'), { id: loadingToast })
     } finally {
       setIsContributeLoading(false)
     }
@@ -225,7 +216,9 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
             border="border-2"
             borderColor="border-white"
           />
-          <span>{action === 'start' ? t('startCourse') : t('leaveCourse')}</span>
+          <span>
+            {action === 'start' ? t('startCourse') : t('leaveCourse')}
+          </span>
           <ArrowRight className="h-5 w-5" />
         </>
       )
@@ -405,9 +398,9 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
                         totalActivities === 0
                           ? 0
                           : 2 *
-                          Math.PI *
-                          28 *
-                          (1 - completedActivities / totalActivities)
+                            Math.PI *
+                            28 *
+                            (1 - completedActivities / totalActivities)
                       }
                       className="transition-all duration-500 ease-out"
                     />
@@ -426,7 +419,10 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
                     {t('courseProgress')}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {t('completedActivities', { completedActivities, totalActivities })}
+                    {t('completedActivities', {
+                      completedActivities,
+                      totalActivities,
+                    })}
                   </div>
                 </button>
               </div>
@@ -463,10 +459,11 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
               <button
                 onClick={handleCourseAction}
                 disabled={isActionLoading}
-                className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${isStarted
+                className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
+                  isStarted
                     ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
                     : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
-                  }`}
+                }`}
               >
                 {isActionLoading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -481,7 +478,9 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
               <div className="nice-shadow rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="h-5 w-5 text-amber-800" />
-                  <h3 className="font-semibold text-amber-800">{t('paidCourse')}</h3>
+                  <h3 className="font-semibold text-amber-800">
+                    {t('paidCourse')}
+                  </h3>
                 </div>
                 <p className="mt-1 text-sm text-amber-700">
                   {t('courseRequiresPurchase')}
@@ -520,10 +519,11 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
         <button
           onClick={handleCourseAction}
           disabled={isActionLoading}
-          className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${isStarted
+          className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
+            isStarted
               ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
               : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
-            }`}
+          }`}
         >
           {isActionLoading ? (
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />

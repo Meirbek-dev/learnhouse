@@ -192,7 +192,8 @@ const UpdatesSection = () => {
           </div>
           {updates && updates.length > 0 && (
             <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
-              {updates.length} {updates.length === 1 ? t('update') : t('updates')}
+              {updates.length}{' '}
+              {updates.length === 1 ? t('update') : t('updates')}
             </span>
           )}
         </div>
@@ -337,7 +338,9 @@ const UpdatesListView = () => {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 px-4 py-8 text-center">
         <TentTree size={28} className="mb-2 text-neutral-400" />
-        <p className="text-sm font-medium text-neutral-600">{t('noUpdatesYet')}</p>
+        <p className="text-sm font-medium text-neutral-600">
+          {t('noUpdatesYet')}
+        </p>
         <p className="mt-1 text-xs text-neutral-400">
           {t('updatesAppearHere')}
         </p>

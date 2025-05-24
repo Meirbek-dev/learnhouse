@@ -821,7 +821,8 @@
       "updateAddFailed": "Failed to add an update",
       "updateAddedError": "Failed to add update",
       "updateAddedSuccess": "Update added successfully",
-      "updates": "Updates"
+      "updates": "Updates",
+      "createdAtTooltipPrefix": "Created at "
     },
     "CoursesActions": {
       "accessCheckError": "Failed to check course access. Please try again later.",
@@ -1217,7 +1218,8 @@
         "user": "User",
         "video": "Video",
         "warningCallout": "Warning Callout",
-        "youtubeVideo": "YouTube video"
+        "youtubeVideo": "YouTube video",
+        "codeInline": "Code Inline"
       },
       "UserBlock": {
         "errorNotFound": "User not found",

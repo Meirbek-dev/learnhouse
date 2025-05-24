@@ -265,7 +265,7 @@ const UpdatesListView = () => {
                 <span> {update.title}</span>
                 <span
                   title={
-                    'Created at ' +
+                    t('createdAtTooltipPrefix') +
                     dayjs(update.creation_date).format('MMMM D, YYYY')
                   }
                   className="text-xs font-semibold text-gray-300"

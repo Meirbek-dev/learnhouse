@@ -49,8 +49,6 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' })
   const [isToolkitAvailable, setIsToolkitAvailable] = useState(true)
 
-
-
   useEffect(() => {
     if (is_ai_feature_enabled) {
       setIsToolkitAvailable(true)
@@ -673,9 +671,7 @@ const AiEditorActionScreen = ({
           <div className="mx-auto flex w-full flex-col space-y-2 rounded-lg bg-red-500/20 p-5 outline-red-500">
             <AlertTriangle size={20} className="text-red-500" />
             <div className="flex flex-col">
-              <h3 className="font-semibold text-red-200">
-                {t('errorTitle')}
-              </h3>
+              <h3 className="font-semibold text-red-200">{t('errorTitle')}</h3>
               <span className="text-sm text-red-100">
                 {aiEditorState.error.error_message}
               </span>

@@ -8,7 +8,7 @@ import FormLayout, {
 import { useFormik } from 'formik'
 import { AlertTriangle } from 'lucide-react'
 import * as Form from '@radix-ui/react-form'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import ThumbnailUpdate from './ThumbnailUpdate'
 import {
   useCourse,
@@ -23,8 +23,20 @@ type EditCourseStructureProps = {
   course_uuid?: string
 }
 
-const validate = (values: any, t: (key: string, values?: any) => string) => {
-  const errors = {} as any
+interface MyCourseFormValues {
+  name: string
+  description: string
+  about: string
+  learnings: string
+  tags: string
+  public: boolean
+}
+
+const validate = (
+  values: MyCourseFormValues,
+  t: (key: string, values?: any) => string
+) => {
+  const errors: Partial<Record<keyof MyCourseFormValues, string>> = {}
 
   if (!values.name) {
     errors.name = t('errors.required', { fieldName: t('name.label') })
@@ -50,15 +62,14 @@ const validate = (values: any, t: (key: string, values?: any) => string) => {
       } else if (learningItems.length === 0) {
         errors.learnings = t('errors.atLeastOneLearningItem')
       } else {
-        // Check if any item has empty text
         const hasEmptyText = learningItems.some(
-          (item) => !item.text || item.text.trim() === ''
+          (item: any) => !item.text || item.text.trim() === ''
         )
         if (hasEmptyText) {
           errors.learnings = t('errors.allLearningItemsMustHaveText')
         }
       }
-    } catch (e) {
+    } catch {
       errors.learnings = t('errors.invalidJsonFormat')
     }
   }
@@ -66,70 +77,32 @@ const validate = (values: any, t: (key: string, values?: any) => string) => {
   return errors
 }
 
+const initializeLearnings = (learningsInput: any): string => {
+  if (typeof learningsInput === 'string') {
+    try {
+      const parsed = JSON.parse(learningsInput)
+      if (Array.isArray(parsed)) {
+        return learningsInput
+      }
+    } catch {
+      if (learningsInput.trim() !== '') {
+        return JSON.stringify([
+          { id: Date.now().toString(), text: learningsInput, emoji: '📝' },
+        ])
+      }
+    }
+  }
+  return JSON.stringify([{ id: Date.now().toString(), text: '', emoji: '📝' }])
+}
+
 function EditCourseGeneral(props: EditCourseStructureProps) {
   const [error, setError] = useState('')
   const course = useCourse()
-  const dispatchCourse = useCourseDispatch() as any
+  const dispatchCourse = useCourseDispatch()!
   const { isLoading, courseStructure } = course as any
   const t = useTranslations('CourseEdit.General')
 
-  // Initialize learnings as a JSON array if it's not already
-  const initializeLearnings = (learnings: any) => {
-    if (!learnings) {
-      return JSON.stringify([
-        { id: Date.now().toString(), text: '', emoji: '📝' },
-      ])
-    }
-
-    try {
-      // Check if it's already a valid JSON array
-      const parsed = JSON.parse(learnings)
-      if (Array.isArray(parsed)) {
-        // Ensure existing items have the required fields
-        const standardizedItems = parsed.map((item) => ({
-          id: item.id || Date.now().toString(),
-          text: item.text || '',
-          emoji: item.emoji || '📝',
-          link: item.link || undefined,
-        }))
-        return JSON.stringify(standardizedItems)
-      }
-
-      // If it's a string but not a JSON array, convert it to a learning item
-      if (typeof learnings === 'string') {
-        return JSON.stringify([
-          {
-            id: Date.now().toString(),
-            text: learnings,
-            emoji: '📝',
-          },
-        ])
-      }
-
-      // Default empty array
-      return JSON.stringify([
-        { id: Date.now().toString(), text: '', emoji: '📝' },
-      ])
-    } catch (e) {
-      // If it's not valid JSON, convert the string to a learning item
-      if (typeof learnings === 'string') {
-        return JSON.stringify([
-          {
-            id: Date.now().toString(),
-            text: learnings,
-            emoji: '📝',
-          },
-        ])
-      }
-
-      // Default empty array
-      return JSON.stringify([
-        { id: Date.now().toString(), text: '', emoji: '📝' },
-      ])
-    }
-  }
-
-  const formik = useFormik({
+  const formik = useFormik<MyCourseFormValues>({
     initialValues: {
       name: courseStructure?.name || '',
       description: courseStructure?.description || '',
@@ -139,54 +112,55 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       public: courseStructure?.public || false,
     },
     validate: (values) => validate(values, t),
-    onSubmit: async (values) => {
+    onSubmit: async () => {
       try {
-        // The actual save happens in the parent component via context dispatch
-        dispatchCourse({ type: 'setIsSaved' }) // Mark as saved for UI feedback
-        // Parent component should handle the actual API call
-      } catch (e) {
-        setError(t('errors.saveFailed')) // Use translated error
+        dispatchCourse({ type: 'setIsSaved' })
+      } catch {
+        setError(t('errors.saveFailed'))
       }
     },
     enableReinitialize: true,
-  }) as any
+  })
+
+  const handleLearningsChange = useCallback(
+    (newLearningsValue: string) => {
+      formik.setFieldValue('learnings', newLearningsValue)
+    },
+    [formik]
+  )
 
   useEffect(() => {
-    if (!isLoading) {
-      const formikValues = formik.values as any
-      const initialValues = formik.initialValues as any
-      // Deep comparison for learnings (JSON string)
-      const learningsChanged =
-        formikValues.learnings !== initialValues.learnings
-      const otherValuesChanged = Object.keys(formikValues).some(
-        (key) =>
-          key !== 'learnings' &&
-          key !== 'public' &&
-          formikValues[key] !== initialValues[key]
+    if (!isLoading && courseStructure) {
+      const { values, initialValues } = formik
+      const learningsChanged = values.learnings !== initialValues.learnings
+      const otherChanged = (
+        Object.keys(values) as Array<keyof MyCourseFormValues>
       )
+        .filter((k) => k !== 'learnings' && k !== 'public')
+        .some((key) => values[key] !== initialValues[key])
 
-      if (learningsChanged || otherValuesChanged) {
+      if (learningsChanged || otherChanged) {
         dispatchCourse({ type: 'setIsNotSaved' })
-        const updatedCourse = {
-          ...courseStructure,
-          ...formikValues,
-          // Keep existing public value if it's not managed by this form
-          public: courseStructure?.public,
-        }
-        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse })
+        dispatchCourse({
+          type: 'setCourseStructure',
+          payload: {
+            ...courseStructure,
+            ...values,
+          },
+        })
       }
     }
   }, [
     formik.values,
+    formik.initialValues,
     isLoading,
     courseStructure,
     dispatchCourse,
-    formik.initialValues,
-  ]) // Added dependencies
+  ])
 
   return (
     <div>
-      <div className="h-6"></div>
+      <div className="h-6" />
       <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-6 py-5 shadow-xs">
         {courseStructure && (
           <div className="editcourse-form">
@@ -200,14 +174,15 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               <FormField name="name">
                 <FormLabelAndMessage
                   label={t('name.label')}
-                  message={formik.errors.name}
+                  message={formik.touched.name ? formik.errors.name : undefined}
                 />
                 <Form.Control asChild>
                   <Input
                     style={{ backgroundColor: 'white' }}
                     onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     value={formik.values.name}
-                    name="name" // Ensure name prop is set for Formik
+                    name="name"
                     type="text"
                     required
                   />
@@ -217,14 +192,19 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               <FormField name="description">
                 <FormLabelAndMessage
                   label={t('description.label')}
-                  message={formik.errors.description}
+                  message={
+                    formik.touched.description
+                      ? formik.errors.description
+                      : undefined
+                  }
                 />
                 <Form.Control asChild>
                   <Input
                     style={{ backgroundColor: 'white' }}
                     onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     value={formik.values.description}
-                    name="description" // Ensure name prop is set for Formik
+                    name="description"
                     type="text"
                     required
                   />
@@ -234,14 +214,17 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               <FormField name="about">
                 <FormLabelAndMessage
                   label={t('about.label')}
-                  message={formik.errors.about}
+                  message={
+                    formik.touched.about ? formik.errors.about : undefined
+                  }
                 />
                 <Form.Control asChild>
                   <Textarea
                     style={{ backgroundColor: 'white' }}
                     onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     value={formik.values.about}
-                    name="about" // Ensure name prop is set for Formik
+                    name="about"
                   />
                 </Form.Control>
               </FormField>
@@ -249,11 +232,15 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               <FormField name="learnings">
                 <FormLabelAndMessage
                   label={t('learnings.label')}
-                  message={formik.errors.learnings}
+                  message={
+                    formik.touched.learnings
+                      ? formik.errors.learnings
+                      : undefined
+                  }
                 />
                 <LearningItemsList
                   value={formik.values.learnings}
-                  onChange={(value) => formik.setFieldValue('learnings', value)}
+                  onChange={handleLearningsChange}
                   error={formik.errors.learnings}
                 />
               </FormField>
@@ -261,7 +248,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               <FormField name="tags">
                 <FormLabelAndMessage
                   label={t('tags.label')}
-                  message={formik.errors.tags}
+                  message={formik.touched.tags ? formik.errors.tags : undefined}
                 />
                 <FormTagInput
                   placeholder={t('tags.placeholder')}
