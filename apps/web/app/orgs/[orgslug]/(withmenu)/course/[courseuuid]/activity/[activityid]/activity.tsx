@@ -31,7 +31,8 @@ import { CourseProvider } from '@components/Contexts/CourseContext'
 import AIActivityAsk from '@components/Objects/Activities/AI/AIActivityAsk'
 import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import * as React from 'react'
 import {
   getAssignmentFromActivityUUID,
   getFinalGrade,

@@ -1,6 +1,6 @@
 'use client'
 import type { ReactNode } from 'react'
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 import { useLHSession } from '../LHSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
@@ -31,7 +31,7 @@ function AssignmentSubmissionProvider({
 }
 
 export function useAssignmentSubmission() {
-  return useContext(AssignmentSubmissionContext)
+  return use(AssignmentSubmissionContext)
 }
 
 export default AssignmentSubmissionProvider

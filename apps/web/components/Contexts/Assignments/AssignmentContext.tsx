@@ -2,7 +2,7 @@
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import type { ReactNode } from 'react'
-import { useState, createContext, useContext, useEffect } from 'react'
+import { useState, createContext, use, useEffect } from 'react'
 import useSWR from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
@@ -95,5 +95,5 @@ export function AssignmentProvider({
 }
 
 export function useAssignments() {
-  return useContext(AssignmentContext)
+  return use(AssignmentContext)
 }

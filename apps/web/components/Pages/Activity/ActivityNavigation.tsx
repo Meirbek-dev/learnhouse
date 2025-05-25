@@ -3,7 +3,8 @@ import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
-import React from 'react'
+import type { ReactNode } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
 interface ActivityNavigationProps {
@@ -14,13 +15,13 @@ interface ActivityNavigationProps {
 
 export default function ActivityNavigation(
   props: ActivityNavigationProps
-): React.ReactNode {
+): ReactNode {
   const t = useTranslations('ActivityPage')
   const router = useRouter()
   const _isMobile = useIsMobile()
-  const [isBottomNavVisible, setIsBottomNavVisible] = React.useState(true)
-  const bottomNavRef = React.useRef<HTMLDivElement>(null)
-  const [_navWidth, setNavWidth] = React.useState<number | null>(null)
+  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true)
+  const bottomNavRef = useRef<HTMLDivElement>(null)
+  const [_navWidth, setNavWidth] = useState<number | null>(null)
 
   // Function to find the current activity's position in the course
   const findActivityPosition = () => {
@@ -73,7 +74,7 @@ export default function ActivityNavigation(
 
   // Set up intersection observer to detect when bottom nav is out of viewport
   // and measure the width of the bottom navigation
-  React.useEffect(() => {
+  useEffect(() => {
     if (!bottomNavRef.current) return
 
     // Update width when component mounts and on window resize
@@ -136,7 +137,6 @@ export default function ActivityNavigation(
               </span>
             </div>
           </button>
-
           <button
             onClick={() => navigateToActivity(nextActivity)}
             className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
@@ -187,14 +187,12 @@ export default function ActivityNavigation(
               </div>
             </button>
           </div>
-
           <div className="justify-self-center text-sm text-gray-500">
             {t('activityCounter', {
               current: currentIndex + 1,
               total: allActivities.length,
             })}
           </div>
-
           <div className="justify-self-end">
             <button
               onClick={() => navigateToActivity(nextActivity)}

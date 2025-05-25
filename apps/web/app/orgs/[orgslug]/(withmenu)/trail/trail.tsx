@@ -33,14 +33,12 @@ function Trail(params: any) {
       ) : (
         <div className="space-y-6">
           {trail.runs.map((run: any) => (
-            <>
-              <TrailCourseElement
-                run={run}
-                key={run.org_id}
-                course={run.course}
-                orgslug={orgslug}
-              />
-            </>
+            <TrailCourseElement
+              run={run}
+              key={run.org_id}
+              course={run.course}
+              orgslug={orgslug}
+            />
           ))}
         </div>
       )}

@@ -1,6 +1,6 @@
 'use client'
 import type { ReactNode } from 'react'
-import { createContext, useContext, useState } from 'react'
+import { createContext, use, useState } from 'react'
 
 export const EditorProviderContext = createContext(null) as any
 
@@ -27,5 +27,5 @@ function EditorOptionsProvider({ children, options }: EditorProviderProps) {
 export default EditorOptionsProvider
 
 export function useEditorProvider() {
-  return useContext(EditorProviderContext)
+  return use(EditorProviderContext)
 }

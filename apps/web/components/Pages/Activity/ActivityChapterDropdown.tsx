@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'
-import React from 'react'
+import type { ReactNode } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
 interface ActivityChapterDropdownProps {
@@ -24,14 +25,14 @@ interface ActivityChapterDropdownProps {
 
 export default function ActivityChapterDropdown(
   props: ActivityChapterDropdownProps
-): React.ReactNode {
-  const [isOpen, setIsOpen] = React.useState(false)
-  const dropdownRef = React.useRef<HTMLDivElement>(null)
+): ReactNode {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
   const t = useTranslations('ActivityPage')
 
   // Close dropdown when clicking outside
-  React.useEffect(() => {
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&

@@ -2,7 +2,7 @@
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import type { ReactNode } from 'react'
-import { createContext, useContext, useMemo } from 'react'
+import { createContext, use, useMemo } from 'react'
 import useSWR from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import ErrorUI from '@components/Objects/StyledElements/Error/Error'
@@ -68,5 +68,5 @@ export function OrgProvider({
 }
 
 export function useOrg() {
-  return useContext(OrgContext)
+  return use(OrgContext)
 }
