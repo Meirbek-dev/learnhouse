@@ -108,7 +108,7 @@ function CoursesHome(params: CourseProps) {
                 {isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}
               </p>
               {isUserAdmin && (
-                <div className="mt-6">
+                <div className="mt-6 flex justify-center">
                   <AuthenticatedClientElement
                     action="create"
                     ressourceType="courses"

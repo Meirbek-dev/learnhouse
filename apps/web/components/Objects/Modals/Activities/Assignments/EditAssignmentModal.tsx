@@ -16,6 +16,15 @@ import * as Form from '@radix-ui/react-form'
 import { useFormik } from 'formik'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useTranslations } from 'next-intl'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { format, parseISO } from 'date-fns'
+import { CalendarIcon } from 'lucide-react'
 
 interface Assignment {
   assignment_uuid: string
@@ -119,14 +128,49 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({
             {t('valueMissingDueDate')}
           </FormMessage>
         </Flex>
-        <Form.Control asChild>
-          <Input
-            type="date"
-            onChange={formik.handleChange}
-            value={formik.values.due_date}
-            required
-          />
-        </Form.Control>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Form.Control asChild>
+              <button
+                className={cn(
+                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                  !formik.values.due_date && 'text-muted-foreground'
+                )}
+              >
+                {formik.values.due_date ? (
+                  format(new Date(formik.values.due_date), 'PPP')
+                ) : (
+                  <span>Select a deadline for completing the task</span>
+                )}
+                <CalendarIcon className="ml-2 size-4 opacity-50" />
+              </button>
+            </Form.Control>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={
+                formik.values.due_date
+                  ? new Date(formik.values.due_date)
+                  : undefined
+              }
+              onSelect={(date) => {
+                if (date) {
+                  // Format date as YYYY-MM-DD without timezone conversion
+                  const year = date.getFullYear()
+                  const month = String(date.getMonth() + 1).padStart(2, '0')
+                  const day = String(date.getDate()).padStart(2, '0')
+                  const isoDate = `${year}-${month}-${day}`
+                  formik.setFieldValue('due_date', isoDate)
+                } else {
+                  formik.setFieldValue('due_date', '')
+                }
+              }}
+              disabled={false}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
       </FormField>
 
       <FormField name="grading_type">
