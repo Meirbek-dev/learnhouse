@@ -98,8 +98,9 @@ const initializeLearnings = (learningsInput: any): string => {
 function EditCourseGeneral(props: EditCourseStructureProps) {
   const [error, setError] = useState('')
   const course = useCourse()
-  const dispatchCourse = useCourseDispatch()!
-  const { isLoading, courseStructure } = course as any
+  const dispatchCourse = useCourseDispatch()
+  if (!course || !dispatchCourse) throw new Error('Course context not found')
+  const { isLoading, courseStructure } = course
   const t = useTranslations('CourseEdit.General')
 
   const formik = useFormik<MyCourseFormValues>({

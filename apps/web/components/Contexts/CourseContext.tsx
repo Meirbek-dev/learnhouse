@@ -8,8 +8,17 @@ import ErrorUI from '@components/Objects/StyledElements/Error/Error'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import { useTranslations } from 'next-intl'
 
-export const CourseContext = createContext(null)
-export const CourseDispatchContext = createContext(null)
+type CourseDispatch = React.Dispatch<any>
+type CourseState = {
+  courseStructure: any
+  courseOrder: any
+  isSaved: boolean
+  isLoading: boolean
+  withUnpublishedActivities: boolean
+}
+
+export const CourseContext = createContext<CourseState | null>(null)
+export const CourseDispatchContext = createContext<CourseDispatch | null>(null)
 
 export function CourseProvider({
   children,
@@ -55,11 +64,11 @@ export function CourseProvider({
 
   if (courseStructureData) {
     return (
-      <CourseContext value={state}>
-        <CourseDispatchContext value={dispatch}>
+      <CourseContext.Provider value={state}>
+        <CourseDispatchContext.Provider value={dispatch}>
           {children}
-        </CourseDispatchContext>
-      </CourseContext>
+        </CourseDispatchContext.Provider>
+      </CourseContext.Provider>
     )
   }
 }

@@ -16,6 +16,7 @@ import {
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 
 function AssignmentStudentActivity() {
   const t = useTranslations('Activities.AssignmentStudentActivity')
@@ -86,13 +87,17 @@ function AssignmentStudentActivity() {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <div
-                      onClick={() => alert(task.hint)}
-                      className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900"
-                    >
-                      <Info size={13} />
-                      <p className="text-xs font-semibold">{t('hint')}</p>
-                    </div>
+                    {task.hint && (
+                      <Popover>
+                        <PopoverTrigger className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
+                          <Info size={13} />
+                          <p className="text-xs font-semibold">{t('hint')}</p>
+                        </PopoverTrigger>
+                        <PopoverContent className="max-h-[200px] overflow-y-auto">
+                          {task.hint}
+                        </PopoverContent>
+                      </Popover>
+                    )}
                     <Link
                       href={getTaskRefFileDir(
                         org?.org_uuid,
