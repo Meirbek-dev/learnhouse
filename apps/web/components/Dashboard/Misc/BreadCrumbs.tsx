@@ -28,13 +28,13 @@ function BreadCrumbs(props: BreadCrumbsProps) {
 
   return (
     <div>
-      <div className="h-7"></div>
+      <div className="h-7" />
       <div className="flex space-x-1 text-sm font-medium tracking-tight text-gray-400">
         <div className="flex items-center space-x-1">
           {props.type == 'courses' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <Book className="text-gray" size={14}></Book>
+              <Book className="text-gray" size={14} />
               <Link href="/dash/courses">{t('Courses.title')}</Link>
             </div>
           ) : (
@@ -43,7 +43,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'assignments' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <Backpack className="text-gray" size={14}></Backpack>
+              <Backpack className="text-gray" size={14} />
               <Link href="/dash/assignments">{t('Assignments.title')}</Link>
             </div>
           ) : (
@@ -52,7 +52,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'user' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <User className="text-gray" size={14}></User>
+              <User className="text-gray" size={14} />
               <Link href="/dash/user-account/settings/general">
                 {t('UserAccountSettings.title')}
               </Link>
@@ -63,7 +63,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'orgusers' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <Users className="text-gray" size={14}></Users>
+              <Users className="text-gray" size={14} />
               <Link href="/dash/users/settings/users">
                 {t('Card.Users.title')}
               </Link>
@@ -75,7 +75,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'org' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <School className="text-gray" size={14}></School>
+              <School className="text-gray" size={14} />
               <Link href="/dash/users">{t('Card.Organization.title')}</Link>
             </div>
           ) : (
@@ -84,7 +84,7 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'payments' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <CreditCard className="text-gray" size={14}></CreditCard>
+              <CreditCard className="text-gray" size={14} />
               <Link href="/dash/payments">{t('Payments.title')}</Link>
             </div>
           ) : (

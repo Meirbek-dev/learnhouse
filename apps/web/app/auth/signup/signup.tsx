@@ -73,7 +73,7 @@ function SignUpClient(props: SignUpClientProps) {
                   )}`}
                   alt="LearnHouse"
                   style={{ width: 'auto', height: 70 }}
-                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
+                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
                 />
               ) : (
                 <Image
@@ -116,7 +116,7 @@ const LoggedInJoinScreen = (props: any) => {
   const toastT = useTranslations('ToastMessages')
   const session = useLHSession() as any
   const org = useOrg() as any
-  const [isLoading, setIsLoading] = useState(true)
+  const [_isLoading, setIsLoading] = useState(true)
   const [isSumbitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
@@ -185,7 +185,7 @@ const LoggedInJoinScreen = (props: any) => {
   )
 }
 
-const NoTokenScreen = (props: any) => {
+const NoTokenScreen = (_props: any) => {
   const toastT = useTranslations('ToastMessages')
   const t = useTranslations('Auth.Signup')
   const session = useLHSession() as any
@@ -200,7 +200,7 @@ const NoTokenScreen = (props: any) => {
 
   const validateCode = async () => {
     setIsLoading(true)
-    let res = await validateInviteCode(
+    const res = await validateInviteCode(
       org?.id,
       inviteCode,
       session?.user?.tokens.access_token

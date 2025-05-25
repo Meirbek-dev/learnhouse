@@ -55,7 +55,7 @@ function UserAvatar(props: UserAvatarProps) {
   const extractExternalUrl = (url: string): string | null => {
     // Check if the URL contains an embedded external URL
     const matches = url.match(/avatars\/(https?:\/\/[^/]+.*$)/)
-    if (matches && matches[1]) {
+    if (matches?.[1]) {
       return matches[1]
     }
     return null

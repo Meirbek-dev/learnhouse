@@ -15,7 +15,7 @@ export function usePaymentsEnabled() {
     isLoading,
   } = useSWR(
     org && access_token ? [`/payments/${org.id}/config`, access_token] : null,
-    ([url, token]) => getPaymentConfigs(org.id, token)
+    ([_url, token]) => getPaymentConfigs(org.id, token)
   )
 
   const isStripeEnabled = paymentConfigs?.some(

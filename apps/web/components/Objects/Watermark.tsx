@@ -14,9 +14,9 @@ function Watermark() {
 
   if (org?.config?.config?.general?.watermark) {
     return (
-      <div className="fixed right-8 bottom-8">
+      <div className="fixed bottom-8 right-8">
         <Link
-          href={`https://www.learnhouse.app/?source=in-app`}
+          href={'https://www.learnhouse.app/?source=in-app'}
           className="light-shadow flex cursor-pointer items-center space-x-2 rounded-2xl bg-white/80 p-2 px-5 text-xs font-semibold text-gray-700 backdrop-blur-lg"
         >
           <p>{t('madeWith')}</p>

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "maxSize": 10000000,
+    "ignore": []
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab"
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noReactSpecificProps": "off",
+        "noDoubleEquals": "off",
+        "noEmptyBlockStatements": "off",
+        "noShadowRestrictedNames": "off",
+        "useAwait": "off",
+        "noArrayIndexKey": "off"
+      },
+      "correctness": {
+        "noUndeclaredDependencies": "off",
+        "useImportExtensions": "off",
+        "noUnusedVariables": "off",
+        "noUndeclaredVariables": "off",
+        "noUnusedFunctionParameters": "off",
+        "useExhaustiveDependencies": "off",
+        "noUnusedImports": "warn"
+      },
+      "style": {
+        "useNamingConvention": "off",
+        "useTemplate": "warn",
+        "useDefaultParameterLast": "off",
+        "noUselessElse": "warn",
+        "useSelfClosingElements": "warn",
+        "noDefaultExport": "off",
+        "noNamespaceImport": "off",
+        "noImplicitBoolean": "off",
+        "useCollapsedElseIf": "warn"
+      },
+      "complexity": {
+        "noBannedTypes": "off",
+        "noUselessCatch": "off",
+        "noForEach": "off",
+        "useSimplifiedLogicExpression": "warn"
+      },
+      "a11y": {
+        "useButtonType": "off",
+        "useKeyWithClickEvents": "off",
+        "noSvgWithoutTitle": "off"
+      },
+      "performance": {
+        "useTopLevelRegex": "off"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
+}

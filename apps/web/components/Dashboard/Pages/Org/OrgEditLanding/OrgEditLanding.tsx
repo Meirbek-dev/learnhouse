@@ -1,7 +1,7 @@
 'use client'
 import type { FC, ChangeEvent } from 'react'
 import { useState, useEffect, createElement } from 'react'
-import {
+import type {
   LandingObject,
   LandingSection,
   LandingHeroSection,
@@ -144,7 +144,7 @@ const PREDEFINED_GRADIENTS = {
   },
 } as const
 
-const GRADIENT_DIRECTIONS = {
+const _GRADIENT_DIRECTIONS = {
   '45deg': '↗️ Top Right',
   '90deg': '⬆️ Top',
   '135deg': '↖️ Top Left',
@@ -248,9 +248,9 @@ const OrgEditLanding = () => {
       const landingConfig = org.config.config.landing
       setLandingData({
         sections: landingConfig.sections || [],
-        enabled: landingConfig.enabled || false,
+        enabled: landingConfig.enabled,
       })
-      setIsLandingEnabled(landingConfig.enabled || false)
+      setIsLandingEnabled(landingConfig.enabled)
     }
   }, [org])
 
@@ -411,7 +411,7 @@ const OrgEditLanding = () => {
                 onChange={() => setIsLandingEnabled(!isLandingEnabled)}
                 className="peer sr-only"
               />
-              <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-hidden after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+              <div className="peer-focus:outline-hidden peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300" />
             </label>
             <Button
               variant="default"
@@ -451,10 +451,10 @@ const OrgEditLanding = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 onClick={() => setSelectedSection(index)}
-                                className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
+                                className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
                                   selectedSection === index
-                                    ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
-                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
+                                    ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
+                                    : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
                                 } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                               >
                                 <div className="group flex items-center justify-between">
@@ -830,7 +830,7 @@ const HeroSectionEditor: FC<{
                       color: value === 'solid' ? '#ffffff' : undefined,
                       colors:
                         value === 'gradient'
-                          ? PREDEFINED_GRADIENTS['sunrise'].colors
+                          ? PREDEFINED_GRADIENTS.sunrise.colors
                           : undefined,
                       image: value === 'image' ? '' : undefined,
                     },
@@ -924,9 +924,8 @@ const HeroSectionEditor: FC<{
                           ...section,
                           background: {
                             type: 'gradient',
-                            colors: PREDEFINED_GRADIENTS['sunrise'].colors,
-                            direction:
-                              PREDEFINED_GRADIENTS['sunrise'].direction,
+                            colors: PREDEFINED_GRADIENTS.sunrise.colors,
+                            direction: PREDEFINED_GRADIENTS.sunrise.direction,
                           },
                         })
                       }
@@ -1824,7 +1823,10 @@ const PeopleSectionEditor: FC<{
                     value={person.username || ''}
                     onChange={(e) => {
                       const newPeople = [...section.people]
-                      newPeople[index] = { ...person, username: e.target.value }
+                      newPeople[index] = {
+                        ...person,
+                        username: e.target.value,
+                      }
                       onChange({ ...section, people: newPeople })
                     }}
                     placeholder={t('PeopleEditor.usernamePlaceholder')}

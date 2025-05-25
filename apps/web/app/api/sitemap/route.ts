@@ -2,7 +2,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { getOrgCourses } from '@services/courses/courses'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { getOrgCollections } from '@services/courses/collections'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const orgSlug = request.headers.get('X-Sitemap-Orgslug')
@@ -58,7 +58,7 @@ interface SitemapUrl {
   changefreq: string
 }
 
-function generateSitemap(baseUrl: string, urls: SitemapUrl[]): string {
+function generateSitemap(_baseUrl: string, urls: SitemapUrl[]): string {
   const urlEntries = urls
     .map(
       ({ loc, priority, changefreq }) => `

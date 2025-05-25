@@ -96,13 +96,13 @@ function QuizBlockComponent(props: any) {
     const alphabet = Array.from({ length: 26 }, (_, i) =>
       String.fromCharCode('A'.charCodeAt(0) + i)
     )
-    let alphabetID = alphabet[answerIndex]
+    const alphabetID = alphabet[answerIndex]
 
     // Get question index
     const questionIndex = questions.findIndex(
       (question: Question) => question.question_id === questionId
     )
-    let questionID = questionIndex + 1
+    const _questionID = questionIndex + 1
 
     return `${alphabetID}`
   }
@@ -230,7 +230,7 @@ function QuizBlockComponent(props: any) {
           )}
           <div className="flex items-center space-x-2 text-sm">
             <BadgeHelp className="text-slate-400" size={15} />
-            <p className="py-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
+            <p className="py-1 text-xs font-bold uppercase tracking-widest text-slate-400">
               {t('title')}
             </p>
           </div>
@@ -248,7 +248,7 @@ function QuizBlockComponent(props: any) {
             </div>
           )}
 
-          <div className="grow"></div>
+          <div className="grow" />
 
           {/* Action buttons */}
           {isEditable ? (
@@ -296,9 +296,9 @@ function QuizBlockComponent(props: any) {
                         )
                       }
                       className="text-md w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] p-2 font-bold text-slate-800"
-                    ></input>
+                    />
                   ) : (
-                    <p className="text-md w-full rounded-md bg-[#00008b00] p-2 font-bold break-words text-slate-800">
+                    <p className="text-md w-full break-words rounded-md bg-[#00008b00] p-2 font-bold text-slate-800">
                       {question.question}
                     </p>
                   )}
@@ -320,7 +320,7 @@ function QuizBlockComponent(props: any) {
                   <div
                     key={answer.answer_id}
                     className={twMerge(
-                      'bg-opacity-50 hover:bg-opacity-100 flex min-h-[36px] w-full cursor-pointer items-stretch space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-2 duration-150 ease-linear hover:shadow-md',
+                      'flex min-h-[36px] w-full cursor-pointer items-stretch space-x-2 rounded-lg bg-white bg-opacity-50 pr-2 text-sm shadow-sm outline-2 duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md',
                       answer.correct && isEditable
                         ? 'outline-lime-300'
                         : 'outline-white',
@@ -354,7 +354,7 @@ function QuizBlockComponent(props: any) {
                       className={twMerge(
                         'flex w-[40px] items-center justify-center self-stretch rounded-l-md bg-white text-base font-bold text-slate-800',
                         answer.correct && isEditable
-                          ? 'bg-lime-300 text-lime-800 outline-hidden'
+                          ? 'outline-hidden bg-lime-300 text-lime-800'
                           : 'bg-white',
                         userAnswers.some(
                           (userAnswer: any) =>
@@ -363,10 +363,10 @@ function QuizBlockComponent(props: any) {
                             !isEditable &&
                             !submitted
                         )
-                          ? 'bg-blue-400 text-white outline-hidden'
+                          ? 'outline-hidden bg-blue-400 text-white'
                           : '',
                         submitted && answer.correct
-                          ? 'bg-lime-300 text-lime-800 outline-hidden'
+                          ? 'outline-hidden bg-lime-300 text-lime-800'
                           : '',
                         submitted &&
                           !answer.correct &&
@@ -375,7 +375,7 @@ function QuizBlockComponent(props: any) {
                               userAnswer.question_id === question.question_id &&
                               userAnswer.answer_id === answer.answer_id
                           )
-                          ? 'bg-red-400 text-red-800 outline-hidden'
+                          ? 'outline-hidden bg-red-400 text-red-800'
                           : ''
                       )}
                     >
@@ -398,9 +398,9 @@ function QuizBlockComponent(props: any) {
                         }
                         placeholder={t('answerPlaceholder')}
                         className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold text-neutral-600"
-                      ></input>
+                      />
                     ) : (
-                      <p className="mx-2 w-full rounded-md bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold break-words text-neutral-600">
+                      <p className="mx-2 w-full break-words rounded-md bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold text-neutral-600">
                         {answer.answer}
                       </p>
                     )}
@@ -440,7 +440,7 @@ function QuizBlockComponent(props: any) {
                 {isEditable && (
                   <div
                     onClick={() => addAnswer(question.question_id)}
-                    className="hover:bg-opacity-100 flex h-[36px] w-full flex-none cursor-pointer items-center justify-center rounded-lg bg-white text-sm outline-2 outline-white duration-150 ease-linear hover:scale-[1.01] hover:shadow-md active:scale-[1.02]"
+                    className="flex h-[36px] w-full flex-none cursor-pointer items-center justify-center rounded-lg bg-white text-sm outline-2 outline-white duration-150 ease-linear hover:scale-[1.01] hover:bg-opacity-100 hover:shadow-md active:scale-[1.02]"
                   >
                     <Plus className="mr-1 text-slate-800" size={15} />
                     <span className="text-sm text-slate-800">

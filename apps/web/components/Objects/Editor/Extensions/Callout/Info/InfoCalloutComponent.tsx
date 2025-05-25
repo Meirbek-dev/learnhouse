@@ -90,7 +90,7 @@ function InfoCalloutComponent(props: any) {
 
   // Extract options from props or use defaults
   const options: CalloutOptions = {
-    dismissible: props.node?.attrs?.dismissible || false,
+    dismissible: props.node?.attrs?.dismissible,
     variant: props.node?.attrs?.variant || 'default',
     size: props.node?.attrs?.size || 'md',
   }

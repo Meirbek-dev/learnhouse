@@ -16,7 +16,7 @@ export async function updateOrganization(
   access_token: string
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}orgs/` + org_id,
+    `${getAPIUrl()}orgs/${org_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token)
   )
   const res = await errorHandling(result)
@@ -32,7 +32,7 @@ export async function uploadOrganizationLogo(
   const formData = new FormData()
   formData.append('logo_file', logo_file)
   const result: any = await fetch(
-    `${getAPIUrl()}orgs/` + org_id + '/logo',
+    `${getAPIUrl()}orgs/${org_id}/logo`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
   )
   const res = await errorHandling(result)
@@ -48,7 +48,7 @@ export async function uploadOrganizationThumbnail(
   const formData = new FormData()
   formData.append('thumbnail_file', thumbnail_file)
   const result: any = await fetch(
-    `${getAPIUrl()}orgs/` + org_id + '/thumbnail',
+    `${getAPIUrl()}orgs/${org_id}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
   )
   const res = await errorHandling(result)
@@ -64,7 +64,7 @@ export const uploadOrganizationPreview = async (
   formData.append('preview_file', file)
 
   const result: any = await fetch(
-    `${getAPIUrl()}orgs/` + orgId + '/preview',
+    `${getAPIUrl()}orgs/${orgId}/preview`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
   )
   const res = await errorHandling(result)

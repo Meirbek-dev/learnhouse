@@ -1,7 +1,8 @@
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { Label } from '@components/ui/label'
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
 import * as Form from '@radix-ui/react-form'
 import BarLoader from 'react-spinners/BarLoader'
 import { Youtube, Upload } from 'lucide-react'
@@ -104,7 +105,7 @@ function VideoModal({
             onChange={(e) =>
               setVideoDetails({
                 ...videoDetails,
-                startTime: Math.max(0, parseInt(e.target.value) || 0),
+                startTime: Math.max(0, Number.parseInt(e.target.value) || 0),
               })
             }
             placeholder={t('startTimePlaceholder')}
@@ -121,7 +122,9 @@ function VideoModal({
             onChange={(e) =>
               setVideoDetails({
                 ...videoDetails,
-                endTime: e.target.value ? parseInt(e.target.value) : null,
+                endTime: e.target.value
+                  ? Number.parseInt(e.target.value)
+                  : null,
               })
             }
             placeholder={t('endTimePlaceholder')}

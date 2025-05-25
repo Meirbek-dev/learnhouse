@@ -1,8 +1,8 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import CoursesHome from './client'
 import { nextAuthOptions } from 'app/auth/options'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { getOrgCourses } from '@services/courses/courses'
 import { getTranslations } from 'next-intl/server'
 

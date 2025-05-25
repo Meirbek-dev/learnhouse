@@ -15,7 +15,7 @@ export async function updatePassword(
   access_token: any
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}users/change_password/` + user_id,
+    `${getAPIUrl()}users/change_password/${user_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token)
   )
   const res = await getResponseMetadata(result)

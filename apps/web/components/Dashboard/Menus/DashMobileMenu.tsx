@@ -16,12 +16,12 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { useTranslations } from 'next-intl'
 
 function DashMobileMenu() {
-  const org = useOrg() as any
+  const _org = useOrg() as any
   const session = useLHSession() as any
   const t = useTranslations('DashboardMenu')
 
   return (
-    <div className="fixed right-0 bottom-0 left-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
       <div className="flex h-16 items-center justify-around px-2">
         <AdminAuthorization authorizationMode="component">
           <ToolTip
@@ -30,7 +30,7 @@ function DashMobileMenu() {
             sideOffset={8}
             side="top"
           >
-            <Link href={`/`} className="flex flex-col items-center p-2">
+            <Link href={'/'} className="flex flex-col items-center p-2">
               <Home size={20} />
               <span className="mt-1 text-xs">{t('mobile.home')}</span>
             </Link>
@@ -42,7 +42,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={`/dash/courses`}
+              href={'/dash/courses'}
               className="flex flex-col items-center p-2"
             >
               <BookCopy size={20} />
@@ -56,7 +56,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={`/dash/assignments`}
+              href={'/dash/assignments'}
               className="flex flex-col items-center p-2"
             >
               <Backpack size={20} />
@@ -70,7 +70,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={`/dash/payments/customers`}
+              href={'/dash/payments/customers'}
               className="flex flex-col items-center p-2"
             >
               <BadgeDollarSign size={20} />
@@ -84,7 +84,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={`/dash/users/settings/users`}
+              href={'/dash/users/settings/users'}
               className="flex flex-col items-center p-2"
             >
               <Users size={20} />
@@ -98,7 +98,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={`/dash/org/settings/general`}
+              href={'/dash/org/settings/general'}
               className="flex flex-col items-center p-2"
             >
               <School size={20} />

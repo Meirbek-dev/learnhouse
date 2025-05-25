@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import LHSessionProvider from '@components/Contexts/LHSessionContext'
 import { SessionProvider } from 'next-auth/react'
 
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 interface ClientLayoutProps {
   children: ReactNode

@@ -22,7 +22,7 @@ function Courses(props: CourseProps) {
   const orgslug = props.orgslug
   const courses = props.courses
   const searchParams = useSearchParams()
-  const isCreatingCourse = searchParams.get('new') ? true : false
+  const isCreatingCourse = !!searchParams.get('new')
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse)
   const isUserAdmin = useAdminStatus() as any
 

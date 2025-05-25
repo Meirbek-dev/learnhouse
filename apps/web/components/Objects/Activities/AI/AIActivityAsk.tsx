@@ -14,7 +14,7 @@ import learnhouseAI_logo_black from 'public/learnhouse_ai_black_logo.png'
 import type { KeyboardEvent, ChangeEvent } from 'react'
 import { useState, useEffect, useRef } from 'react'
 import {
-  AIChatBotStateTypes,
+  type AIChatBotStateTypes,
   useAIChatBot,
   useAIChatBotDispatch,
 } from '@components/Contexts/AI/AIChatBotContext'
@@ -196,136 +196,130 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
   return (
     <AnimatePresence>
       {aiChatBotState.isModalOpen && (
-        <>
-          <motion.div
-            initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
-            animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-            exit={{ y: 50, opacity: 0, filter: 'blur(25px)' }}
-            transition={{
-              type: 'spring',
-              bounce: 0.35,
-              duration: 1.7,
-              mass: 0.2,
-              velocity: 2,
+        <motion.div
+          initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
+          animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+          exit={{ y: 50, opacity: 0, filter: 'blur(25px)' }}
+          transition={{
+            type: 'spring',
+            bounce: 0.35,
+            duration: 1.7,
+            mass: 0.2,
+            velocity: 2,
+          }}
+          className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center"
+          style={{ pointerEvents: 'none' }}
+        >
+          <div
+            style={{
+              pointerEvents: 'auto',
+              background:
+                'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
             }}
-            className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
-            style={{ pointerEvents: 'none' }}
+            className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-inset ring-white/10 backdrop-blur-md"
           >
-            <div
-              style={{
-                pointerEvents: 'auto',
-                background:
-                  'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
-              }}
-              className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-white/10 backdrop-blur-md ring-inset"
-            >
-              <div className="flex flex-row-reverse items-center justify-between pb-3">
-                <div className="flex items-center space-x-2">
-                  <X
-                    size={20}
-                    className="items-center rounded-full bg-white/10 p-1 text-white/50 hover:cursor-pointer"
-                    onClick={closeModal}
-                  />
-                </div>
-                <div
-                  className={`-ml-[100px] flex items-center space-x-2 ${
-                    aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
-                  }`}
-                >
-                  <Image
-                    className={`rounded-lg outline-neutral-200/20 ${
-                      aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
-                    }`}
-                    width={24}
-                    src={learnhouseAI_icon}
-                    alt={t('askAI')}
-                  />
-                  <span className="text-sm font-semibold text-white/70">
-                    {' '}
-                    {t('AI')}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1 rounded-full bg-white/5 px-3 py-0.5 text-white/40">
-                  <FlaskConical size={14} />
-                  <span className="text-xs font-semibold antialiased">
-                    {t('experimental')}
-                  </span>
-                </div>
+            <div className="flex flex-row-reverse items-center justify-between pb-3">
+              <div className="flex items-center space-x-2">
+                <X
+                  size={20}
+                  className="items-center rounded-full bg-white/10 p-1 text-white/50 hover:cursor-pointer"
+                  onClick={closeModal}
+                />
               </div>
               <div
-                className={`mx-auto mb-3 h-0.5 w-100 rounded-full bg-white/5 ${
+                className={`-ml-[100px] flex items-center space-x-2 ${
                   aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
                 }`}
-              ></div>
-              {aiChatBotState.messages.length > 0 &&
-              !aiChatBotState.error.isError ? (
-                <div className="scrollbar-w-2 scrollbar scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full h-[237px] w-full flex-col space-y-4 overflow-scroll">
-                  {aiChatBotState.messages.map(
-                    (message: AIMessage, index: number) => {
-                      return (
-                        <AIMessage
-                          key={index}
-                          message={message}
-                          animated={message.sender == 'ai' ? true : false}
-                        />
-                      )
-                    }
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              ) : (
-                <AIMessagePlaceHolder
-                  sendMessage={sendMessage}
-                  activity_uuid={props.activity.activity_uuid}
+              >
+                <Image
+                  className={`rounded-lg outline-neutral-200/20 ${
+                    aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
+                  }`}
+                  width={24}
+                  src={learnhouseAI_icon}
+                  alt={t('askAI')}
                 />
-              )}
-              {aiChatBotState.error.isError && (
-                <div className="flex h-[237px] items-center">
-                  <div className="mx-auto flex w-[600px] flex-col space-y-2 rounded-lg bg-red-500/20 p-5 outline-red-500">
-                    <AlertTriangle size={20} className="text-red-500" />
-                    <div className="flex flex-col">
-                      <h3 className="font-semibold text-red-200">
-                        {t('errorTitle')}
-                      </h3>
-                      <span className="text-sm text-red-100">
-                        {aiChatBotState.error.error_message}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center space-x-2">
-                <div className="">
-                  <UserAvatar
-                    rounded="rounded-lg"
-                    border="border-2"
-                    width={35}
-                  />
-                </div>
-                <div className="w-full">
-                  <input
-                    onKeyDown={handleKeyDown}
-                    onChange={handleChange}
-                    disabled={aiChatBotState.isWaitingForResponse}
-                    value={aiChatBotState.chatInputValue}
-                    placeholder={t('placeholder')}
-                    type="text"
-                    className={inputClass}
-                    name=""
-                    id=""
-                  />
-                </div>
-                <div className="">
-                  <MessageCircle
-                    size={20}
-                    className="text-white/50 hover:cursor-pointer"
-                    onClick={() => sendMessage(aiChatBotState.chatInputValue)}
-                  />
-                </div>
+                <span className="text-sm font-semibold text-white/70">
+                  {' '}
+                  {t('AI')}
+                </span>
+              </div>
+              <div className="flex items-center space-x-1 rounded-full bg-white/5 px-3 py-0.5 text-white/40">
+                <FlaskConical size={14} />
+                <span className="text-xs font-semibold antialiased">
+                  {t('experimental')}
+                </span>
               </div>
             </div>
-          </motion.div>
-        </>
+            <div
+              className={`w-100 mx-auto mb-3 h-0.5 rounded-full bg-white/5 ${
+                aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
+              }`}
+            />
+            {aiChatBotState.messages.length > 0 &&
+            !aiChatBotState.error.isError ? (
+              <div className="scrollbar-w-2 scrollbar scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full h-[237px] w-full flex-col space-y-4 overflow-scroll">
+                {aiChatBotState.messages.map(
+                  (message: AIMessage, index: number) => {
+                    return (
+                      <AIMessage
+                        key={index}
+                        message={message}
+                        animated={message.sender == 'ai'}
+                      />
+                    )
+                  }
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            ) : (
+              <AIMessagePlaceHolder
+                sendMessage={sendMessage}
+                activity_uuid={props.activity.activity_uuid}
+              />
+            )}
+            {aiChatBotState.error.isError && (
+              <div className="flex h-[237px] items-center">
+                <div className="mx-auto flex w-[600px] flex-col space-y-2 rounded-lg bg-red-500/20 p-5 outline-red-500">
+                  <AlertTriangle size={20} className="text-red-500" />
+                  <div className="flex flex-col">
+                    <h3 className="font-semibold text-red-200">
+                      {t('errorTitle')}
+                    </h3>
+                    <span className="text-sm text-red-100">
+                      {aiChatBotState.error.error_message}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="flex items-center space-x-2">
+              <div className="">
+                <UserAvatar rounded="rounded-lg" border="border-2" width={35} />
+              </div>
+              <div className="w-full">
+                <input
+                  onKeyDown={handleKeyDown}
+                  onChange={handleChange}
+                  disabled={aiChatBotState.isWaitingForResponse}
+                  value={aiChatBotState.chatInputValue}
+                  placeholder={t('placeholder')}
+                  type="text"
+                  className={inputClass}
+                  name=""
+                  id=""
+                />
+              </div>
+              <div className="">
+                <MessageCircle
+                  size={20}
+                  className="text-white/50 hover:cursor-pointer"
+                  onClick={() => sendMessage(aiChatBotState.chatInputValue)}
+                />
+              </div>
+            </div>
+          </div>
+        </motion.div>
       )}
     </AnimatePresence>
   )
@@ -337,7 +331,7 @@ type AIMessageProps = {
 }
 
 function AIMessage(props: AIMessageProps) {
-  const session = useLHSession() as any
+  const _session = useLHSession() as any
 
   const words = props.message.message.split(' ')
 
@@ -357,7 +351,7 @@ function AIMessage(props: AIMessageProps) {
       </div>
       <div className="w-full">
         <p
-          className="text-md w-full rounded-lg px-2 py-1 text-white outline-hidden placeholder:text-white/30"
+          className="text-md outline-hidden w-full rounded-lg px-2 py-1 text-white placeholder:text-white/30"
           id=""
         >
           <AnimatePresence>
@@ -373,7 +367,7 @@ function AIMessage(props: AIMessageProps) {
                 }
                 transition={props.animated ? { delay: i * 0.1 } : {}}
               >
-                {word + ' '}
+                {`${word} `}
               </motion.span>
             ))}
           </AnimatePresence>
@@ -389,7 +383,7 @@ const AIMessagePlaceHolder = (props: {
 }) => {
   const t = useTranslations('Activities.AIActivityAsk')
   const session = useLHSession() as any
-  const [feedbackModal, setFeedbackModal] = useState(false)
+  const [_feedbackModal, _setFeedbackModal] = useState(false)
   const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
 
   if (!aiChatBotState.error.isError) {
@@ -466,9 +460,11 @@ const AIChatPredefinedQuestion = (props: {
   function getQuestion(label: string) {
     if (label === 'about') {
       return t('questionAbout')
-    } else if (label === 'flashcards') {
+    }
+    if (label === 'flashcards') {
       return t('questionFlashcards')
-    } else if (label === 'examples') {
+    }
+    if (label === 'examples') {
       return t('questionExamples')
     }
     return ''

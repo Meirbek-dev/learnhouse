@@ -9,7 +9,7 @@ function useGetAIFeatures(props: UseGetAIFeatures) {
   const org = useOrg() as any
   const [isEnabled, setIsEnabled] = useState<boolean>(false)
 
-  function checkAvailableAIFeaturesOnOrg(feature: string) {
+  function checkAvailableAIFeaturesOnOrg(_feature: string) {
     const config = org?.config?.config?.features.ai.enabled
 
     return config
@@ -18,7 +18,7 @@ function useGetAIFeatures(props: UseGetAIFeatures) {
   useEffect(() => {
     if (org) {
       // Check if org is not null or undefined
-      let isEnabledStatus = checkAvailableAIFeaturesOnOrg(props.feature)
+      const isEnabledStatus = checkAvailableAIFeaturesOnOrg(props.feature)
       setIsEnabled(isEnabledStatus)
     }
   }, [org])

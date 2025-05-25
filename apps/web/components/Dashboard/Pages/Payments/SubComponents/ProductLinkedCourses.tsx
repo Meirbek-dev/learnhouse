@@ -36,7 +36,7 @@ export default function ProductLinkedCourses({
         session.data?.tokens?.access_token
       )
       setLinkedCourses(response.data || [])
-    } catch (error) {
+    } catch (_error) {
       toast.error(tNotify('errors.fetchLinkedCoursesFailed'))
     }
   }
@@ -63,7 +63,7 @@ export default function ProductLinkedCourses({
           })
         )
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }))
     }
   }

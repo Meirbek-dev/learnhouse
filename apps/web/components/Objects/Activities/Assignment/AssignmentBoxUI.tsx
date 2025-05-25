@@ -93,7 +93,7 @@ function AssignmentBoxUI({
         {/* Right side with buttons and actions */}
         <div className="flex flex-wrap items-center gap-2">
           {showSavingDisclaimer && (
-            <div className="mb-2 flex w-full items-center space-x-2 rounded-full px-3 py-1 font-semibold text-red-400 outline-red-200 outline-dashed sm:mr-5 sm:mb-0 sm:w-auto">
+            <div className="mb-2 flex w-full items-center space-x-2 rounded-full px-3 py-1 font-semibold text-red-400 outline-dashed outline-red-200 sm:mb-0 sm:mr-5 sm:w-auto">
               <InfoIcon size={14} />
               <p className="text-xs">{t('savingDisclaimer')}</p>
             </div>
@@ -102,8 +102,8 @@ function AssignmentBoxUI({
           {/* Teacher button */}
           {view === 'teacher' && (
             <div
-              onClick={() => saveFC && saveFC()}
-              className="linear flex cursor-pointer items-center space-x-2 rounded-md bg-emerald-300/20 bg-linear-to-bl px-2 py-1 text-emerald-700 outline-offset-2 outline-emerald-500/60 transition-all outline-dashed hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1"
+              onClick={() => saveFC?.()}
+              className="linear bg-linear-to-bl flex cursor-pointer items-center space-x-2 rounded-md bg-emerald-300/20 px-2 py-1 text-emerald-700 outline-dashed outline-offset-2 outline-emerald-500/60 transition-all hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1"
             >
               <Save size={14} />
               <p className="text-xs font-semibold">{t('save')}</p>
@@ -116,8 +116,8 @@ function AssignmentBoxUI({
             submission &&
             submission.length <= 0 && (
               <div
-                onClick={() => submitFC && submitFC()}
-                className="linear mx-auto flex w-full cursor-pointer items-center justify-center space-x-2 rounded-md bg-emerald-300/20 bg-linear-to-bl px-2 py-1 text-emerald-700 outline-offset-2 outline-emerald-500/60 transition-all outline-dashed hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1 sm:w-auto"
+                onClick={() => submitFC?.()}
+                className="linear bg-linear-to-bl mx-auto flex w-full cursor-pointer items-center justify-center space-x-2 rounded-md bg-emerald-300/20 px-2 py-1 text-emerald-700 outline-dashed outline-offset-2 outline-emerald-500/60 transition-all hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1 sm:w-auto"
               >
                 <Forward size={14} />
                 <p className="text-xs font-semibold">{t('saveProgress')}</p>
@@ -126,13 +126,13 @@ function AssignmentBoxUI({
 
           {/* Grading button */}
           {view === 'grading' && (
-            <div className="linear flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-md bg-linear-to-bl px-0.5 py-0.5 outline-offset-2 outline-orange-500/60 transition-all outline-dashed hover:outline-offset-4 active:outline-offset-1 sm:w-auto sm:flex-nowrap sm:space-x-2">
+            <div className="linear bg-linear-to-bl flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-md px-0.5 py-0.5 outline-dashed outline-offset-2 outline-orange-500/60 transition-all hover:outline-offset-4 active:outline-offset-1 sm:w-auto sm:flex-nowrap sm:space-x-2">
               <p className="px-2 text-xs font-semibold text-orange-700">
                 {t('currentPoints', { points: currentPoints ?? 0 })}
               </p>
               <div
-                onClick={() => gradeFC && gradeFC()}
-                className="ml-auto flex items-center space-x-2 rounded-md bg-orange-300/20 bg-linear-to-bl px-2 py-1 text-orange-700 hover:bg-orange-300/10"
+                onClick={() => gradeFC?.()}
+                className="bg-linear-to-bl ml-auto flex items-center space-x-2 rounded-md bg-orange-300/20 px-2 py-1 text-orange-700 hover:bg-orange-300/10"
               >
                 <BookPlus size={14} />
                 <p className="text-xs font-semibold">{t('grade')}</p>
@@ -142,20 +142,22 @@ function AssignmentBoxUI({
 
           {/* CustomGrading button */}
           {view === 'custom-grading' && maxPoints && (
-            <div className="linear flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-md bg-linear-to-bl px-0.5 py-0.5 outline-offset-2 outline-orange-500/60 transition-all outline-dashed hover:outline-offset-4 active:outline-offset-1 sm:w-auto sm:flex-nowrap sm:space-x-2">
+            <div className="linear bg-linear-to-bl flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-md px-0.5 py-0.5 outline-dashed outline-offset-2 outline-orange-500/60 transition-all hover:outline-offset-4 active:outline-offset-1 sm:w-auto sm:flex-nowrap sm:space-x-2">
               <p className="w-full px-2 text-xs font-semibold text-orange-700 sm:w-auto">
                 {t('currentPoints', { points: currentPoints ?? 0 })}
               </p>
               <div className="flex w-full items-center gap-2 sm:w-auto">
                 <input
-                  onChange={(e) => setCustomGrade(parseInt(e.target.value))}
+                  onChange={(e) =>
+                    setCustomGrade(Number.parseInt(e.target.value))
+                  }
                   placeholder={maxPoints.toString()}
                   className="light-shadow w-full rounded-lg px-2 py-0.5 text-sm outline outline-gray-200 sm:w-[100px]"
                   type="number"
                 />
                 <div
-                  onClick={() => gradeCustomFC && gradeCustomFC(customGrade)}
-                  className="flex items-center space-x-2 rounded-md bg-orange-300/20 bg-linear-to-bl px-2 py-1 whitespace-nowrap text-orange-700 hover:bg-orange-300/10"
+                  onClick={() => gradeCustomFC?.(customGrade)}
+                  className="bg-linear-to-bl flex items-center space-x-2 whitespace-nowrap rounded-md bg-orange-300/20 px-2 py-1 text-orange-700 hover:bg-orange-300/10"
                 >
                   <BookPlus size={14} />
                   <p className="text-xs font-semibold">{t('grade')}</p>

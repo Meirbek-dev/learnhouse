@@ -293,7 +293,7 @@ const UpdatesListView = () => {
 const DeleteUpdateButton = ({ update }: any) => {
   const session = useLHSession() as any
   const course = useCourse() as any
-  const org = useOrg() as any
+  const _org = useOrg() as any
   const t = useTranslations('Courses.CourseUpdates')
 
   const handleDelete = async () => {
@@ -332,7 +332,7 @@ const DeleteUpdateButton = ({ update }: any) => {
         handleDelete()
       }}
       status="warning"
-    ></ConfirmationModal>
+    />
   )
 }
 

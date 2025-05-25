@@ -11,7 +11,8 @@ function LHSessionProvider({ children }: { children: ReactNode }) {
 
   if (session && session.status == 'loading') {
     return <PageLoading />
-  } else if (session) {
+  }
+  if (session) {
     return <SessionContext value={session}>{children}</SessionContext>
   }
 }

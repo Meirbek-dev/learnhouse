@@ -69,7 +69,7 @@ function ResetPasswordClient() {
     enableReinitialize: true,
     onSubmit: async (values) => {
       setIsSubmitting(true)
-      let res = await resetPassword(
+      const res = await resetPassword(
         values.email,
         values.new_password,
         org?.id,
@@ -114,7 +114,7 @@ function ResetPasswordClient() {
                   )}`}
                   alt={org?.name}
                   style={{ width: 'auto', height: 70 }}
-                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
+                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
                 />
               ) : (
                 <Image
@@ -136,19 +136,19 @@ function ResetPasswordClient() {
           <p className="mb-4 text-sm">{t('enterResetDetails')}</p>
 
           {error && (
-            <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+            <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
               <AlertTriangle size={18} />
               <div className="text-sm font-bold">{error}</div>
             </div>
           )}
           {message && (
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
+              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 transition-all">
                 <Info size={18} />
                 <div className="text-sm font-bold">{t('success')}</div>
               </div>
               <Link
-                href={getUriWithoutOrg('/login?orgslug=' + org.slug)}
+                href={getUriWithoutOrg(`/login?orgslug=${org.slug}`)}
                 className="text-center text-sm text-blue-600 hover:text-blue-800"
               >
                 {t('loginAgain')}

@@ -76,8 +76,7 @@ export function AssignmentProvider({
   ])
 
   const isLoading =
-    !assignment ||
-    !assignment_tasks ||
+    !(assignment && assignment_tasks) ||
     (course_id && !course_object) ||
     (activity_id && !activity_object)
   const hasError =

@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
   const t = useTranslations('Components.DynamicCanvaModal')
   const [activityName, setActivityName] = useState('')
-  const [activityDescription, setActivityDescription] = useState('')
+  const [_activityDescription, setActivityDescription] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleActivityNameChange = (e: any) => {

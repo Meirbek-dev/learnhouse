@@ -81,7 +81,7 @@ function ActivityActions({
   assignment,
   showNavigation = true,
 }: ActivityActionsProps) {
-  const session = useLHSession() as any
+  const _session = useLHSession() as any
   const { contributorStatus } = useContributorStatus(course.course_uuid)
   const t = useTranslations('ActivityPage')
 
@@ -92,31 +92,27 @@ function ActivityActions({
         activity.content.paid_access != false && (
           <AuthenticatedClientElement checkMethod="authentication">
             {activity.activity_type != 'TYPE_ASSIGNMENT' && (
-              <>
-                <MarkStatus
+              <MarkStatus
+                activity={activity}
+                activityid={activityid}
+                course={course}
+                orgslug={orgslug}
+                t={t} // Pass the translation function
+              />
+            )}
+            {activity.activity_type == 'TYPE_ASSIGNMENT' && (
+              <AssignmentSubmissionProvider
+                assignment_uuid={assignment?.assignment_uuid}
+              >
+                <AssignmentTools
+                  assignment={assignment}
                   activity={activity}
                   activityid={activityid}
                   course={course}
                   orgslug={orgslug}
                   t={t} // Pass the translation function
                 />
-              </>
-            )}
-            {activity.activity_type == 'TYPE_ASSIGNMENT' && (
-              <>
-                <AssignmentSubmissionProvider
-                  assignment_uuid={assignment?.assignment_uuid}
-                >
-                  <AssignmentTools
-                    assignment={assignment}
-                    activity={activity}
-                    activityid={activityid}
-                    course={course}
-                    orgslug={orgslug}
-                    t={t} // Pass the translation function
-                  />
-                </AssignmentSubmissionProvider>
-              </>
+              </AssignmentSubmissionProvider>
             )}
             {showNavigation && (
               <NextActivityButton
@@ -132,7 +128,7 @@ function ActivityActions({
 }
 
 function ActivityClient(props: ActivityClientProps) {
-  const t = useTranslations('ActivityPage')
+  const _t = useTranslations('ActivityPage')
   const activityid = props.activityid
   const courseuuid = props.courseuuid
   const orgslug = props.orgslug
@@ -144,7 +140,7 @@ function ActivityClient(props: ActivityClientProps) {
   const access_token = session?.data?.tokens?.access_token
   const [bgColor, setBgColor] = React.useState('bg-white')
   const [assignment, setAssignment] = React.useState(null) as any
-  const [markStatusButtonActive, setMarkStatusButtonActive] =
+  const [_markStatusButtonActive, setMarkStatusButtonActive] =
     React.useState(false)
   const [isFocusMode, setIsFocusMode] = React.useState(false)
   const isInitialRender = useRef(true)
@@ -153,7 +149,7 @@ function ActivityClient(props: ActivityClientProps) {
 
   // Function to find the current activity's position in the course
   const findActivityPosition = () => {
-    let allActivities: any[] = []
+    const allActivities: any[] = []
     let currentIndex = -1
 
     // Flatten all activities from all chapters
@@ -194,8 +190,7 @@ function ActivityClient(props: ActivityClientProps) {
 
     const cleanCourseUuid = course.course_uuid?.replace('course_', '')
     router.push(
-      getUriWithOrg(orgslug, '') +
-        `/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`
+      `${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`
     )
   }
 
@@ -223,9 +218,9 @@ function ActivityClient(props: ActivityClientProps) {
 
   function getChapterNameByActivityId(course: any, activity_id: any) {
     for (let i = 0; i < course.chapters.length; i++) {
-      let chapter = course.chapters[i]
+      const chapter = course.chapters[i]
       for (let j = 0; j < chapter.activities.length; j++) {
-        let activity = chapter.activities[j]
+        const activity = chapter.activities[j]
         if (activity.id === activity_id) {
           return chapter.name
         }
@@ -273,7 +268,7 @@ function ActivityClient(props: ActivityClientProps) {
                   animate={{ y: 0 }}
                   exit={{ y: -100 }}
                   transition={{ duration: 0.3 }}
-                  className="fixed top-0 right-0 left-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-xl"
+                  className="fixed left-0 right-0 top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-xl"
                 >
                   <div className="container mx-auto px-4 py-2">
                     <div className="flex h-14 items-center justify-between">
@@ -311,10 +306,7 @@ function ActivityClient(props: ActivityClientProps) {
                       >
                         <div className="flex">
                           <Link
-                            href={
-                              getUriWithOrg(orgslug, '') +
-                              `/course/${courseuuid}`
-                            }
+                            href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}
                           >
                             <img
                               className="h-[34px] w-[60px] rounded-md drop-shadow-md"
@@ -425,71 +417,69 @@ function ActivityClient(props: ActivityClientProps) {
                 </motion.div>
 
                 {/* Focus Mode Content */}
-                <div className="h-full overflow-auto pt-16 pb-20">
+                <div className="h-full overflow-auto pb-20 pt-16">
                   <div className="container mx-auto px-4">
-                    {activity && activity.published == true && (
-                      <>
-                        {activity.content.paid_access == false ? (
-                          <PaidCourseActivityDisclaimer course={course} />
-                        ) : (
-                          <motion.div
-                            initial={
-                              isInitialRender.current
-                                ? false
-                                : { scale: 0.95, opacity: 0 }
-                            }
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className={`rounded-lg p-7 ${bgColor} mt-4`}
-                          >
-                            {/* Activity Types */}
-                            <div>
-                              {activity.activity_type == 'TYPE_DYNAMIC' && (
-                                <Canva
-                                  content={activity.content}
-                                  activity={activity}
-                                />
-                              )}
-                              {activity.activity_type == 'TYPE_VIDEO' && (
-                                <VideoActivity
-                                  course={course}
-                                  activity={activity}
-                                />
-                              )}
-                              {activity.activity_type == 'TYPE_DOCUMENT' && (
-                                <DocumentPdfActivity
-                                  course={course}
-                                  activity={activity}
-                                />
-                              )}
-                              {activity.activity_type == 'TYPE_ASSIGNMENT' && (
-                                <div>
-                                  {assignment ? (
-                                    <AssignmentProvider
-                                      assignment_uuid={
-                                        assignment?.assignment_uuid
-                                      }
-                                    >
-                                      <AssignmentsTaskProvider>
-                                        <AssignmentSubmissionProvider
-                                          assignment_uuid={
-                                            assignment?.assignment_uuid
-                                          }
-                                        >
-                                          <AssignmentStudentActivity />
-                                        </AssignmentSubmissionProvider>
-                                      </AssignmentsTaskProvider>
-                                    </AssignmentProvider>
-                                  ) : (
-                                    <div></div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </>
-                    )}
+                    {activity &&
+                      activity.published == true &&
+                      (activity.content.paid_access == false ? (
+                        <PaidCourseActivityDisclaimer course={course} />
+                      ) : (
+                        <motion.div
+                          initial={
+                            isInitialRender.current
+                              ? false
+                              : { scale: 0.95, opacity: 0 }
+                          }
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                          className={`rounded-lg p-7 ${bgColor} mt-4`}
+                        >
+                          {/* Activity Types */}
+                          <div>
+                            {activity.activity_type == 'TYPE_DYNAMIC' && (
+                              <Canva
+                                content={activity.content}
+                                activity={activity}
+                              />
+                            )}
+                            {activity.activity_type == 'TYPE_VIDEO' && (
+                              <VideoActivity
+                                course={course}
+                                activity={activity}
+                              />
+                            )}
+                            {activity.activity_type == 'TYPE_DOCUMENT' && (
+                              <DocumentPdfActivity
+                                course={course}
+                                activity={activity}
+                              />
+                            )}
+                            {activity.activity_type == 'TYPE_ASSIGNMENT' && (
+                              <div>
+                                {assignment ? (
+                                  <AssignmentProvider
+                                    assignment_uuid={
+                                      assignment?.assignment_uuid
+                                    }
+                                  >
+                                    <AssignmentsTaskProvider>
+                                      <AssignmentSubmissionProvider
+                                        assignment_uuid={
+                                          assignment?.assignment_uuid
+                                        }
+                                      >
+                                        <AssignmentStudentActivity />
+                                      </AssignmentSubmissionProvider>
+                                    </AssignmentsTaskProvider>
+                                  </AssignmentProvider>
+                                ) : (
+                                  <div />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
                   </div>
                 </div>
 
@@ -502,7 +492,7 @@ function ActivityClient(props: ActivityClientProps) {
                       animate={{ y: 0 }}
                       exit={{ y: 100 }}
                       transition={{ duration: 0.3 }}
-                      className="fixed right-0 bottom-0 left-0 z-50 border-t border-gray-100 bg-white/90 backdrop-blur-xl"
+                      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-100 bg-white/90 backdrop-blur-xl"
                     >
                       <div className="container mx-auto px-4">
                         <div className="flex h-16 items-center justify-between">
@@ -600,10 +590,7 @@ function ActivityClient(props: ActivityClientProps) {
                         <div className="flex space-x-6">
                           <div className="flex">
                             <Link
-                              href={
-                                getUriWithOrg(orgslug, '') +
-                                `/course/${courseuuid}`
-                              }
+                              href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}
                             >
                               <img
                                 className="h-[57px] w-[100px] rounded-md drop-shadow-md"
@@ -655,7 +642,7 @@ function ActivityClient(props: ActivityClientProps) {
                       />
 
                       <div className="flex w-full items-center justify-between">
-                        <div className="flex flex-1/3 items-center space-x-3">
+                        <div className="flex-1/3 flex items-center space-x-3">
                           <button
                             onClick={() => setIsFocusMode(true)}
                             className="nice-shadow cursor-pointer rounded-full bg-white p-2 transition-all duration-200 hover:bg-gray-50"
@@ -698,10 +685,7 @@ function ActivityClient(props: ActivityClientProps) {
                                       activity.activity_type ==
                                         'TYPE_DYNAMIC' && (
                                         <Link
-                                          href={
-                                            getUriWithOrg(orgslug, '') +
-                                            `/course/${courseuuid}/activity/${activityid}/edit`
-                                          }
+                                          href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${activityid}/edit`}
                                           className="flex items-center space-x-2 rounded-full bg-emerald-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
                                         >
                                           <Edit2 size={17} />
@@ -719,7 +703,7 @@ function ActivityClient(props: ActivityClientProps) {
                     </div>
 
                     {activity && activity.published == false && (
-                      <div className="rounded-lg bg-gray-800 p-7 drop-shadow-xs">
+                      <div className="drop-shadow-xs rounded-lg bg-gray-800 p-7">
                         <div className="text-white">
                           <h1 className="text-2xl font-bold">
                             This activity is not published yet
@@ -728,62 +712,60 @@ function ActivityClient(props: ActivityClientProps) {
                       </div>
                     )}
 
-                    {activity && activity.published == true && (
-                      <>
-                        {activity.content.paid_access == false ? (
-                          <PaidCourseActivityDisclaimer course={course} />
-                        ) : (
-                          <div
-                            className={`rounded-lg p-7 drop-shadow-xs ${bgColor}`}
-                          >
-                            {/* Activity Types */}
-                            <div>
-                              {activity.activity_type == 'TYPE_DYNAMIC' && (
-                                <Canva
-                                  content={activity.content}
-                                  activity={activity}
-                                />
-                              )}
-                              {activity.activity_type == 'TYPE_VIDEO' && (
-                                <VideoActivity
-                                  course={course}
-                                  activity={activity}
-                                />
-                              )}
-                              {activity.activity_type == 'TYPE_DOCUMENT' && (
-                                <DocumentPdfActivity
-                                  course={course}
-                                  activity={activity}
-                                />
-                              )}
-                              {activity.activity_type == 'TYPE_ASSIGNMENT' && (
-                                <div>
-                                  {assignment ? (
-                                    <AssignmentProvider
-                                      assignment_uuid={
-                                        assignment?.assignment_uuid
-                                      }
-                                    >
-                                      <AssignmentsTaskProvider>
-                                        <AssignmentSubmissionProvider
-                                          assignment_uuid={
-                                            assignment?.assignment_uuid
-                                          }
-                                        >
-                                          <AssignmentStudentActivity />
-                                        </AssignmentSubmissionProvider>
-                                      </AssignmentsTaskProvider>
-                                    </AssignmentProvider>
-                                  ) : (
-                                    <div></div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
+                    {activity &&
+                      activity.published == true &&
+                      (activity.content.paid_access == false ? (
+                        <PaidCourseActivityDisclaimer course={course} />
+                      ) : (
+                        <div
+                          className={`drop-shadow-xs rounded-lg p-7 ${bgColor}`}
+                        >
+                          {/* Activity Types */}
+                          <div>
+                            {activity.activity_type == 'TYPE_DYNAMIC' && (
+                              <Canva
+                                content={activity.content}
+                                activity={activity}
+                              />
+                            )}
+                            {activity.activity_type == 'TYPE_VIDEO' && (
+                              <VideoActivity
+                                course={course}
+                                activity={activity}
+                              />
+                            )}
+                            {activity.activity_type == 'TYPE_DOCUMENT' && (
+                              <DocumentPdfActivity
+                                course={course}
+                                activity={activity}
+                              />
+                            )}
+                            {activity.activity_type == 'TYPE_ASSIGNMENT' && (
+                              <div>
+                                {assignment ? (
+                                  <AssignmentProvider
+                                    assignment_uuid={
+                                      assignment?.assignment_uuid
+                                    }
+                                  >
+                                    <AssignmentsTaskProvider>
+                                      <AssignmentSubmissionProvider
+                                        assignment_uuid={
+                                          assignment?.assignment_uuid
+                                        }
+                                      >
+                                        <AssignmentStudentActivity />
+                                      </AssignmentSubmissionProvider>
+                                    </AssignmentsTaskProvider>
+                                  </AssignmentProvider>
+                                ) : (
+                                  <div />
+                                )}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </>
-                    )}
+                        </div>
+                      ))}
 
                     {/* Activity Actions below the content box */}
                     {activity &&
@@ -812,7 +794,7 @@ function ActivityClient(props: ActivityClientProps) {
                         />
                       )}
 
-                    <div style={{ height: '100px' }}></div>
+                    <div style={{ height: '100px' }} />
                   </div>
                 </div>
               )}
@@ -890,8 +872,7 @@ export function MarkStatus(props: {
         console.log('Redirecting to end page...')
         const cleanCourseUuid = props.course.course_uuid.replace('course_', '')
         router.push(
-          getUriWithOrg(props.orgslug, '') +
-            `/course/${cleanCourseUuid}/activity/end`
+          `${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/end`
         )
       } else {
         router.refresh()
@@ -907,7 +888,7 @@ export function MarkStatus(props: {
   async function unmarkActivityAsCompleteFront() {
     try {
       setIsLoading(true)
-      const trail = await unmarkActivityAsComplete(
+      const _trail = await unmarkActivityAsComplete(
         props.orgslug,
         props.course.course_uuid,
         props.activity.activity_uuid,
@@ -917,7 +898,7 @@ export function MarkStatus(props: {
       // Mutate the course data to trigger re-render
       await mutate(`${getAPIUrl()}courses/${props.course.course_uuid}/meta`)
       router.refresh()
-    } catch (error) {
+    } catch (_error) {
       toast.error(t('unmarkCompleteError'))
     } finally {
       setIsLoading(false)
@@ -925,7 +906,7 @@ export function MarkStatus(props: {
   }
 
   const isActivityCompleted = () => {
-    let run = props.course.trail.runs.find(
+    const run = props.course.trail.runs.find(
       (run: any) => run.course_id == props.course.id
     )
     if (run) {
@@ -942,7 +923,7 @@ export function MarkStatus(props: {
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-2 rounded-full bg-teal-600 p-2.5 px-5 text-white drop-shadow-md">
             <i>
-              <Check size={17}></Check>
+              <Check size={17} />
             </i>{' '}
             <i className="text-xs font-bold not-italic">
               {t('statusComplete')}
@@ -968,12 +949,12 @@ export function MarkStatus(props: {
                           stroke="currentColor"
                           strokeWidth="4"
                           fill="none"
-                        ></circle>
+                        />
                         <path
                           className="opacity-75"
                           fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
+                        />
                       </svg>
                     </div>
                   ) : (
@@ -1003,17 +984,17 @@ export function MarkStatus(props: {
                     stroke="currentColor"
                     strokeWidth="4"
                     fill="none"
-                  ></circle>
+                  />
                   <path
                     className="opacity-75"
                     fill="currentColor"
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                  />
                 </svg>
               </div>
             ) : (
               <i>
-                <Check size={17}></Check>
+                <Check size={17} />
               </i>
             )}{' '}
             {!isMobile && (
@@ -1038,11 +1019,11 @@ function NextActivityButton({
   orgslug: string
 }) {
   const router = useRouter()
-  const isMobile = useIsMobile()
-  const t = useTranslations('ActivityPage')
+  const _isMobile = useIsMobile()
+  const _t = useTranslations('ActivityPage')
 
   const findNextActivity = () => {
-    let allActivities: any[] = []
+    const allActivities: any[] = []
     let currentIndex = -1
 
     // Flatten all activities from all chapters
@@ -1078,8 +1059,7 @@ function NextActivityButton({
   const navigateToActivity = () => {
     const cleanCourseUuid = course.course_uuid?.replace('course_', '')
     router.push(
-      getUriWithOrg(orgslug, '') +
-        `/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`
+      `${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`
     )
   }
 
@@ -1108,10 +1088,10 @@ function PreviousActivityButton({
   orgslug: string
 }) {
   const router = useRouter()
-  const isMobile = useIsMobile()
+  const _isMobile = useIsMobile()
 
   const findPreviousActivity = () => {
-    let allActivities: any[] = []
+    const allActivities: any[] = []
     let currentIndex = -1
 
     // Flatten all activities from all chapters
@@ -1145,8 +1125,7 @@ function PreviousActivityButton({
   const navigateToActivity = () => {
     const cleanCourseUuid = course.course_uuid?.replace('course_', '')
     router.push(
-      getUriWithOrg(orgslug, '') +
-        `/course/${cleanCourseUuid}/activity/${previousActivity.cleanUuid}`
+      `${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${previousActivity.cleanUuid}`
     )
   }
 
@@ -1213,10 +1192,11 @@ function AssignmentTools(props: {
         case 'NUMERIC':
           displayGrade = `${grade}/${max_grade}`
           break
-        case 'PERCENTAGE':
+        case 'PERCENTAGE': {
           const percentage = (grade / max_grade) * 100
           displayGrade = `${percentage.toFixed(2)}%`
           break
+        }
         default:
           displayGrade = t('unknownGradingType')
       }

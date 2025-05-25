@@ -14,7 +14,7 @@ type EditorProviderState = {
 }
 
 function EditorOptionsProvider({ children, options }: EditorProviderProps) {
-  const [editorOptions, setEditorOptions] =
+  const [editorOptions, _setEditorOptions] =
     useState<EditorProviderState>(options)
 
   return (

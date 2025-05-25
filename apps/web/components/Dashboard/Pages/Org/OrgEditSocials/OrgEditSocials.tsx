@@ -37,7 +37,7 @@ export default function OrgEditSocials() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
-  const router = useRouter()
+  const _router = useRouter()
   const t = useTranslations('DashPage.OrgSettings.Socials')
   const tNotify = useTranslations('Notifications')
   const initialValues: OrganizationValues = {
@@ -53,7 +53,7 @@ export default function OrgEditSocials() {
 
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
       toast.success(tNotify('orgUpdatedSuccess'), { id: loadingToast })
-    } catch (err) {
+    } catch (_err) {
       toast.error(tNotify('orgUpdateFailed'), { id: loadingToast })
     }
   }
@@ -228,7 +228,7 @@ export default function OrgEditSocials() {
                 </div>
               </div>
 
-              <div className="mx-5 mt-3 mb-5 flex flex-row-reverse">
+              <div className="mx-5 mb-5 mt-3 flex flex-row-reverse">
                 <Button
                   type="submit"
                   disabled={isSubmitting}

@@ -4,7 +4,7 @@ import { getUriWithOrg } from '@services/config/config'
 import {
   ImageIcon,
   TextIcon,
-  LucideIcon,
+  type LucideIcon,
   Share2Icon,
   LayoutDashboardIcon,
 } from 'lucide-react'
@@ -46,7 +46,7 @@ function TabLink({
 }) {
   const t = useTranslations('DashPage.OrgSettings')
   return (
-    <Link href={getUriWithOrg(orgslug, '') + `/dash/org/settings/${tab.id}`}>
+    <Link href={`${getUriWithOrg(orgslug, '')}/dash/org/settings/${tab.id}`}>
       <div
         className={`w-fit border-black py-2 text-center transition-all ease-linear ${
           isActive ? 'border-b-4' : 'opacity-50'
@@ -89,10 +89,10 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="nice-shadow flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
-        <BreadCrumbs type="org"></BreadCrumbs>
+      <div className="nice-shadow flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
+        <BreadCrumbs type="org" />
         <div className="my-2 py-2">
-          <div className="flex w-100 flex-col space-y-1">
+          <div className="w-100 flex flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">
               {H1Label}
             </div>
@@ -112,7 +112,7 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
           ))}
         </div>
       </div>
-      <div className="h-6 flex-shrink-0"></div>
+      <div className="h-6 flex-shrink-0" />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

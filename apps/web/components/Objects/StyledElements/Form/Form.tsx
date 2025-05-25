@@ -67,9 +67,9 @@ export const inputStyles = {
   fontSize: 15,
   color: '#7c7c7c',
   background: '#fbfdff',
-  boxShadow: `0 0 0 1px #edeeef`,
-  '&:hover': { boxShadow: `0 0 0 1px #edeeef` },
-  '&:focus': { boxShadow: `0 0 0 2px #edeeef` },
+  boxShadow: '0 0 0 1px #edeeef',
+  '&:hover': { boxShadow: '0 0 0 1px #edeeef' },
+  '&:focus': { boxShadow: '0 0 0 2px #edeeef' },
   '&::selection': { backgroundColor: blackA.blackA9, color: 'white' },
 }
 
@@ -111,7 +111,7 @@ export const ButtonBlack = styled('button', {
   background: '#000000',
   color: '#FFFFFF',
   '&:hover': { backgroundColor: '#181818', cursor: 'pointer' },
-  '&:focus': { boxShadow: `0 0 0 2px black` },
+  '&:focus': { boxShadow: '0 0 0 2px black' },
 })
 
 export default FormLayout

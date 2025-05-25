@@ -68,14 +68,14 @@ function TaskQuizObject({
   const [questions, setQuestions] = useState<QuizSchema[]>([
     {
       questionText: '',
-      questionUUID: 'question_' + uuidv4(),
+      questionUUID: `question_${uuidv4()}`,
       options: [
         {
           text: '',
           fileID: '',
           type: 'text',
           assigned_right_answer: false,
-          optionUUID: 'option_' + uuidv4(),
+          optionUUID: `option_${uuidv4()}`,
         },
       ],
     },
@@ -104,7 +104,7 @@ function TaskQuizObject({
       fileID: '',
       type: 'text',
       assigned_right_answer: false,
-      optionUUID: 'option_' + uuidv4(),
+      optionUUID: `option_${uuidv4()}`,
     })
     setQuestions(updatedQuestions)
   }
@@ -124,14 +124,14 @@ function TaskQuizObject({
       ...questions,
       {
         questionText: '',
-        questionUUID: 'question_' + uuidv4(),
+        questionUUID: `question_${uuidv4()}`,
         options: [
           {
             text: '',
             fileID: '',
             type: 'text',
             assigned_right_answer: false,
-            optionUUID: 'option_' + uuidv4(),
+            optionUUID: `option_${uuidv4()}`,
           },
         ],
       },
@@ -197,12 +197,12 @@ function TaskQuizObject({
     const question = questions[qIndex]
     const option = question?.options[oIndex]
 
-    if (!question || !option) return
+    if (!(question && option)) return
 
     const questionUUID = question.questionUUID
     const optionUUID = option.optionUUID
 
-    if (!questionUUID || !optionUUID) return
+    if (!(questionUUID && optionUUID)) return
 
     const submissionIndex = updatedSubmissions.findIndex(
       (submission) =>
@@ -432,209 +432,196 @@ function TaskQuizObject({
         type="quiz"
       >
         <div className="flex flex-col space-y-6">
-          {questions &&
-            questions.map((question, qIndex) => (
-              <div key={qIndex} className="flex flex-col space-y-1.5">
-                <div className="flex items-center space-x-2">
-                  {view === 'teacher' ? (
-                    <>
-                      <input
-                        value={question.questionText}
-                        onChange={(e) =>
-                          handleQuestionChange(qIndex, e.target.value)
-                        }
-                        placeholder={t('questionPlaceholder')}
-                        className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600"
-                      />
-                      <div
-                        className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
-                        onClick={() => removeQuestion(qIndex)}
-                      >
-                        <Minus size={12} className="mx-auto" />
+          {questions?.map((question, qIndex) => (
+            <div key={qIndex} className="flex flex-col space-y-1.5">
+              <div className="flex items-center space-x-2">
+                {view === 'teacher' ? (
+                  <>
+                    <input
+                      value={question.questionText}
+                      onChange={(e) =>
+                        handleQuestionChange(qIndex, e.target.value)
+                      }
+                      placeholder={t('questionPlaceholder')}
+                      className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600"
+                    />
+                    <div
+                      className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
+                      onClick={() => removeQuestion(qIndex)}
+                    >
+                      <Minus size={12} className="mx-auto" />
+                    </div>
+                  </>
+                ) : (
+                  <p className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600">
+                    {question.questionText}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col space-y-2">
+                {question.options.map((option, oIndex) => (
+                  <div className="flex" key={oIndex}>
+                    <div
+                      onClick={() =>
+                        view === 'student' && chooseOption(qIndex, oIndex)
+                      }
+                      className={`answer nice-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md ${view == 'student' ? 'active:scale-110' : ''}`}
+                    >
+                      <div className="flex h-full w-[40px] items-center rounded-l-md bg-slate-100/80 text-base font-bold text-slate-800">
+                        <p className="mx-auto text-sm font-bold">
+                          {String.fromCharCode(65 + oIndex)}
+                        </p>
                       </div>
-                    </>
-                  ) : (
-                    <p className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600">
-                      {question.questionText}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-col space-y-2">
-                  {question.options.map((option, oIndex) => (
-                    <div className="flex" key={oIndex}>
-                      <div
-                        onClick={() =>
-                          view === 'student' && chooseOption(qIndex, oIndex)
-                        }
-                        className={
-                          'answer hover:bg-opacity-100 nice-shadow flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-3 outline-white duration-150 ease-linear hover:shadow-md ' +
-                          (view == 'student' ? 'active:scale-110' : '')
-                        }
-                      >
-                        <div className="flex h-full w-[40px] items-center rounded-l-md bg-slate-100/80 text-base font-bold text-slate-800">
-                          <p className="mx-auto text-sm font-bold">
-                            {String.fromCharCode(65 + oIndex)}
-                          </p>
-                        </div>
-                        {view === 'teacher' ? (
-                          <>
-                            <input
-                              type="text"
-                              value={option.text}
-                              onChange={(e) =>
-                                handleOptionChange(
-                                  qIndex,
-                                  oIndex,
-                                  e.target.value
-                                )
-                              }
-                              placeholder={t('optionPlaceholder')}
-                              className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600"
-                            />
-                            <div
-                              className={`flex h-fit w-fit flex-none items-center space-x-1 rounded-lg px-2 py-0.5 text-xs ${
-                                option.assigned_right_answer
-                                  ? 'bg-lime-200 text-lime-600'
-                                  : 'bg-rose-200/60 text-rose-500'
-                              } cursor-pointer text-sm transition-all ease-linear hover:bg-lime-300`}
-                              onClick={() => toggleOption(qIndex, oIndex)}
-                            >
-                              {option.assigned_right_answer ? (
-                                <>
-                                  <Check size={12} className="mx-auto" />
-                                  <p className="mx-auto text-xs font-bold">
-                                    {t('true')}
-                                  </p>
-                                </>
-                              ) : (
-                                <>
-                                  <X size={12} className="mx-auto" />
-                                  <p className="mx-auto text-xs font-bold">
-                                    {t('false')}
-                                  </p>
-                                </>
-                              )}
-                            </div>
-                            <div
-                              className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
-                              onClick={() => removeOption(qIndex, oIndex)}
-                            >
-                              <Minus size={12} className="mx-auto" />
-                            </div>
-                          </>
-                        ) : (
-                          <p className="mx-2 w-full bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600">
-                            {option.text}
-                          </p>
-                        )}
-                        {view === 'grading' && (
-                          <>
-                            <div
-                              className={`flex h-fit w-fit flex-none items-center space-x-1 rounded-lg px-2 py-0.5 text-xs ${
-                                option.assigned_right_answer
-                                  ? 'bg-lime-200 text-lime-600'
-                                  : 'bg-rose-200/60 text-rose-500'
-                              } cursor-pointer text-sm transition-all ease-linear hover:bg-lime-300`}
-                            >
-                              {option.assigned_right_answer ? (
-                                <>
-                                  <Check size={12} className="mx-auto" />
-                                  <p className="mx-auto text-xs font-bold">
-                                    {t('markedAsTrue')}
-                                  </p>
-                                </>
-                              ) : (
-                                <>
-                                  <X size={12} className="mx-auto" />
-                                  <p className="mx-auto text-xs font-bold">
-                                    {t('markedAsFalse')}
-                                  </p>
-                                </>
-                              )}
-                            </div>
-                          </>
-                        )}
-                        {view === 'student' && (
+                      {view === 'teacher' ? (
+                        <>
+                          <input
+                            type="text"
+                            value={option.text}
+                            onChange={(e) =>
+                              handleOptionChange(qIndex, oIndex, e.target.value)
+                            }
+                            placeholder={t('optionPlaceholder')}
+                            className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600"
+                          />
                           <div
-                            className={`flex h-[20px] w-[20px] flex-none items-center rounded-lg ${
-                              userSubmissions.submissions.find(
-                                (submission) =>
-                                  submission.questionUUID ===
-                                    question.questionUUID &&
-                                  submission.optionUUID === option.optionUUID &&
-                                  submission.answer
-                              )
-                                ? 'bg-green-200/60 text-green-500 hover:bg-green-300'
-                                : 'bg-slate-200/60 text-slate-500 hover:bg-slate-300'
-                            } cursor-pointer text-sm transition-all ease-linear`}
-                            onClick={() => chooseOption(qIndex, oIndex)}
+                            className={`flex h-fit w-fit flex-none items-center space-x-1 rounded-lg px-2 py-0.5 text-xs ${
+                              option.assigned_right_answer
+                                ? 'bg-lime-200 text-lime-600'
+                                : 'bg-rose-200/60 text-rose-500'
+                            } cursor-pointer text-sm transition-all ease-linear hover:bg-lime-300`}
+                            onClick={() => toggleOption(qIndex, oIndex)}
                           >
-                            {userSubmissions.submissions.find(
+                            {option.assigned_right_answer ? (
+                              <>
+                                <Check size={12} className="mx-auto" />
+                                <p className="mx-auto text-xs font-bold">
+                                  {t('true')}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <X size={12} className="mx-auto" />
+                                <p className="mx-auto text-xs font-bold">
+                                  {t('false')}
+                                </p>
+                              </>
+                            )}
+                          </div>
+                          <div
+                            className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
+                            onClick={() => removeOption(qIndex, oIndex)}
+                          >
+                            <Minus size={12} className="mx-auto" />
+                          </div>
+                        </>
+                      ) : (
+                        <p className="mx-2 w-full bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600">
+                          {option.text}
+                        </p>
+                      )}
+                      {view === 'grading' && (
+                        <div
+                          className={`flex h-fit w-fit flex-none items-center space-x-1 rounded-lg px-2 py-0.5 text-xs ${
+                            option.assigned_right_answer
+                              ? 'bg-lime-200 text-lime-600'
+                              : 'bg-rose-200/60 text-rose-500'
+                          } cursor-pointer text-sm transition-all ease-linear hover:bg-lime-300`}
+                        >
+                          {option.assigned_right_answer ? (
+                            <>
+                              <Check size={12} className="mx-auto" />
+                              <p className="mx-auto text-xs font-bold">
+                                {t('markedAsTrue')}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <X size={12} className="mx-auto" />
+                              <p className="mx-auto text-xs font-bold">
+                                {t('markedAsFalse')}
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {view === 'student' && (
+                        <div
+                          className={`flex h-[20px] w-[20px] flex-none items-center rounded-lg ${
+                            userSubmissions.submissions.find(
                               (submission) =>
                                 submission.questionUUID ===
                                   question.questionUUID &&
                                 submission.optionUUID === option.optionUUID &&
                                 submission.answer
-                            ) ? (
-                              <Check size={12} className="mx-auto" />
-                            ) : (
-                              <X size={12} className="mx-auto" />
-                            )}
-                          </div>
-                        )}
-                        {view === 'grading' && (
-                          <>
-                            <div
-                              className={`flex h-[20px] w-[20px] flex-none items-center rounded-lg ${
-                                userSubmissions.submissions.find(
-                                  (submission) =>
-                                    submission.questionUUID ===
-                                      question.questionUUID &&
-                                    submission.optionUUID ===
-                                      option.optionUUID &&
-                                    submission.answer
-                                )
-                                  ? 'bg-green-200/60 text-green-500'
-                                  : 'bg-slate-200/60 text-slate-500'
-                              } text-sm`}
-                            >
-                              {userSubmissions.submissions.find(
-                                (submission) =>
-                                  submission.questionUUID ===
-                                    question.questionUUID &&
-                                  submission.optionUUID === option.optionUUID &&
-                                  submission.answer
-                              ) ? (
-                                <Check size={12} className="mx-auto" />
-                              ) : (
-                                <X size={12} className="mx-auto" />
-                              )}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                      {view === 'teacher' &&
-                        oIndex === question.options.length - 1 &&
-                        questions[qIndex].options.length <= 5 && (
-                          <div className="mx-auto flex justify-center px-2">
-                            <div
-                              className="hover:bg-opacity-100 nice-shadow flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline-3 outline-white duration-150 ease-linear hover:shadow-md"
-                              onClick={() => addOption(qIndex)}
-                            >
-                              <Plus size={14} className="inline-block" />
-                            </div>
-                          </div>
-                        )}
+                            )
+                              ? 'bg-green-200/60 text-green-500 hover:bg-green-300'
+                              : 'bg-slate-200/60 text-slate-500 hover:bg-slate-300'
+                          } cursor-pointer text-sm transition-all ease-linear`}
+                          onClick={() => chooseOption(qIndex, oIndex)}
+                        >
+                          {userSubmissions.submissions.find(
+                            (submission) =>
+                              submission.questionUUID ===
+                                question.questionUUID &&
+                              submission.optionUUID === option.optionUUID &&
+                              submission.answer
+                          ) ? (
+                            <Check size={12} className="mx-auto" />
+                          ) : (
+                            <X size={12} className="mx-auto" />
+                          )}
+                        </div>
+                      )}
+                      {view === 'grading' && (
+                        <div
+                          className={`flex h-[20px] w-[20px] flex-none items-center rounded-lg ${
+                            userSubmissions.submissions.find(
+                              (submission) =>
+                                submission.questionUUID ===
+                                  question.questionUUID &&
+                                submission.optionUUID === option.optionUUID &&
+                                submission.answer
+                            )
+                              ? 'bg-green-200/60 text-green-500'
+                              : 'bg-slate-200/60 text-slate-500'
+                          } text-sm`}
+                        >
+                          {userSubmissions.submissions.find(
+                            (submission) =>
+                              submission.questionUUID ===
+                                question.questionUUID &&
+                              submission.optionUUID === option.optionUUID &&
+                              submission.answer
+                          ) ? (
+                            <Check size={12} className="mx-auto" />
+                          ) : (
+                            <X size={12} className="mx-auto" />
+                          )}
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
+                    {view === 'teacher' &&
+                      oIndex === question.options.length - 1 &&
+                      questions[qIndex].options.length <= 5 && (
+                        <div className="mx-auto flex justify-center px-2">
+                          <div
+                            className="nice-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md"
+                            onClick={() => addOption(qIndex)}
+                          >
+                            <Plus size={14} className="inline-block" />
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          ))}
         </div>
         {view === 'teacher' && questions.length <= 10 && (
           <div className="mx-auto flex justify-center px-2">
             <div
-              className="text-slate nice-shadow my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear hover:shadow-xs"
+              className="text-slate nice-shadow hover:shadow-xs my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear"
               onClick={addQuestion}
             >
               <PlusCircle size={14} className="inline-block" />
@@ -644,14 +631,13 @@ function TaskQuizObject({
         )}
       </AssignmentBoxUI>
     )
-  } else {
-    return (
-      <div className="flex flex-row items-center space-x-2 text-sm">
-        <Info size={12} />
-        <p>{t('noQuestionsFound')}</p>
-      </div>
-    )
   }
+  return (
+    <div className="flex flex-row items-center space-x-2 text-sm">
+      <Info size={12} />
+      <p>{t('noQuestionsFound')}</p>
+    </div>
+  )
 }
 
 export default TaskQuizObject

@@ -89,7 +89,7 @@ export default async function middleware(req: NextRequest) {
 
   // Health Check
   if (pathname.startsWith('/health')) {
-    return NextResponse.rewrite(new URL(`/api/health`, req.url))
+    return NextResponse.rewrite(new URL('/api/health', req.url))
   }
 
   // Auth Redirects
@@ -107,9 +107,8 @@ export default async function middleware(req: NextRequest) {
         redirectUrl.search = queryString
       }
       return NextResponse.redirect(redirectUrl)
-    } else {
-      return 'Did not find the orgslug in the cookie'
     }
+    return 'Did not find the orgslug in the cookie'
   }
 
   if (pathname.startsWith('/sitemap.xml')) {
@@ -124,7 +123,7 @@ export default async function middleware(req: NextRequest) {
       orgslug = default_org as string
     }
 
-    const sitemapUrl = new URL(`/api/sitemap`, req.url)
+    const sitemapUrl = new URL('/api/sitemap', req.url)
 
     // Create a response object
     const response = NextResponse.rewrite(sitemapUrl)

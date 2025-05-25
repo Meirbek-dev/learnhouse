@@ -2,8 +2,8 @@ import { getActivityWithAuthHeader } from '@services/courses/activities'
 import { getCourseMetadata } from '@services/courses/courses'
 import ActivityClient from './activity'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import { Metadata } from 'next'
-import { getServerSession } from 'next-auth'
+import type { Metadata } from 'next'
+import { getServerSession } from 'next-auth/next'
 import { nextAuthOptions } from 'app/auth/options'
 import { getTranslations } from 'next-intl/server'
 
@@ -39,7 +39,7 @@ export async function generateMetadata(
   const t = await getTranslations('General')
 
   // Get Org context information
-  const org = await getOrganizationContextInfo(params.orgslug, {
+  const _org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
   })

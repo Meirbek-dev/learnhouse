@@ -50,7 +50,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
   const dispatchCourse = useCourseDispatch() as any
 
-  const [order, setOrder] = useState<OrderPayload>()
+  const [_order, _setOrder] = useState<OrderPayload>()
   const course = useCourse() as any
   const course_structure = course ? course.courseStructure : {}
   const course_uuid = course ? course.courseStructure.course_uuid : ''
@@ -126,11 +126,11 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     setwinReady(true)
   }, [props.course_uuid, course_structure, course])
 
-  if (!course) return <PageLoading></PageLoading>
+  if (!course) return <PageLoading />
 
   return (
     <div className="flex flex-col">
-      <div className="h-6"></div>
+      <div className="h-6" />
       {winReady ? (
         <DragDropContext onDragEnd={updateStructure}>
           <Droppable type="chapter" droppableId="chapters" direction="vertical">
@@ -140,18 +140,17 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {course_structure.chapters &&
-                  course_structure.chapters.map((chapter: any, index: any) => {
-                    return (
-                      <ChapterElement
-                        key={chapter.chapter_uuid}
-                        chapterIndex={index}
-                        orgslug={props.orgslug}
-                        course_uuid={course_uuid}
-                        chapter={chapter}
-                      />
-                    )
-                  })}
+                {course_structure.chapters?.map((chapter: any, index: any) => {
+                  return (
+                    <ChapterElement
+                      key={chapter.chapter_uuid}
+                      chapterIndex={index}
+                      orgslug={props.orgslug}
+                      course_uuid={course_uuid}
+                      chapter={chapter}
+                    />
+                  )
+                })}
                 {provided.placeholder}
               </div>
             )}
@@ -167,12 +166,12 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                 course={course ? course.courseStructure : null}
                 closeModal={closeNewChapterModal}
                 submitChapter={submitChapter}
-              ></NewChapterModal>
+              />
             }
             dialogTitle={t('NewChapterModal.title')}
             dialogDescription={t('NewChapterModal.description')}
             dialogTrigger={
-              <div className="mx-auto my-16 flex h-10 w-44 max-w-(--breakpoint-2xl) flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white shadow-xs">
+              <div className="max-w-(--breakpoint-2xl) shadow-xs mx-auto my-16 flex h-10 w-44 flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white">
                 <div className="mx-auto flex items-center space-x-2 hover:cursor-pointer">
                   <Hexagon
                     strokeWidth={3}

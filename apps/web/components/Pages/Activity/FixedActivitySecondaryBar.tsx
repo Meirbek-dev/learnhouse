@@ -2,7 +2,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState, useRef } from 'react'
+import type React from 'react'
+import { useEffect, useState, useRef } from 'react'
 import ActivityChapterDropdown from './ActivityChapterDropdown'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -27,7 +28,7 @@ export default function FixedActivitySecondaryBar(
 
   // Function to find the current activity's position in the course
   const findActivityPosition = () => {
-    let allActivities: any[] = []
+    const allActivities: any[] = []
     let currentIndex = -1
 
     // Flatten all activities from all chapters
@@ -70,8 +71,7 @@ export default function FixedActivitySecondaryBar(
 
     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '')
     router.push(
-      getUriWithOrg(props.orgslug, '') +
-        `/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`
+      `${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`
     )
   }
 
@@ -116,7 +116,7 @@ export default function FixedActivitySecondaryBar(
     <>
       {shouldShow && (
         <div
-          className={`animate-in fade-in slide-in-from-top fixed top-[60px] right-0 left-0 z-40 bg-white/90 backdrop-blur-xl transition-all duration-300 ${
+          className={`animate-in fade-in slide-in-from-top fixed left-0 right-0 top-[60px] z-40 bg-white/90 backdrop-blur-xl transition-all duration-300 ${
             isScrolled ? 'nice-shadow' : ''
           }`}
         >
@@ -138,7 +138,7 @@ export default function FixedActivitySecondaryBar(
                   currentActivityId={props.currentActivityId}
                   orgslug={props.orgslug}
                 />
-                <div className="flex hidden min-w-0 flex-col -space-y-0.5 sm:block">
+                <div className="hidden min-w-0 flex-col -space-y-0.5 sm:block">
                   <p className="text-sm font-medium text-gray-500">
                     {t('course')}
                   </p>
@@ -166,7 +166,7 @@ export default function FixedActivitySecondaryBar(
                     }
                   >
                     <ChevronLeft size={16} className="shrink-0 sm:h-5 sm:w-5" />
-                    <div className="flex hidden flex-col items-start sm:flex">
+                    <div className="hidden flex-col items-start sm:flex">
                       <span className="text-xs text-gray-500">
                         {t('previous')}
                       </span>
@@ -185,7 +185,9 @@ export default function FixedActivitySecondaryBar(
 
                   <button
                     onClick={() => navigateToActivity(nextActivity)}
-                    className={`flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2`}
+                    className={
+                      'flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2'
+                    }
                     disabled={!nextActivity}
                     title={
                       nextActivity
@@ -193,7 +195,7 @@ export default function FixedActivitySecondaryBar(
                         : t('noNextActivity')
                     }
                   >
-                    <div className="flex hidden flex-col items-end sm:flex">
+                    <div className="hidden flex-col items-end sm:flex">
                       <span
                         className={`text-xs ${nextActivity ? 'text-gray-500' : 'text-gray-500'}`}
                       >

@@ -1,6 +1,6 @@
 'use client'
 import { useTranslations } from 'next-intl'
-import React from 'react'
+import type React from 'react'
 
 interface NewCourseButtonProps {
   onClick?: () => void

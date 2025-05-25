@@ -115,7 +115,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
     const { from, to } = editor.state.selection
 
     if (editor.isActive('link')) {
-      const currentLink = editor.getAttributes('link')
+      const _currentLink = editor.getAttributes('link')
       setShowLinkInput(true)
     } else {
       setShowLinkInput(true)
@@ -241,7 +241,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             editor
               .chain()
               .focus()
-              .toggleHeading({ level: parseInt(value) })
+              .toggleHeading({ level: Number.parseInt(value) })
               .run()
           }
         }}

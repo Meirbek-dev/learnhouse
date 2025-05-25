@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import SignUpClient from './signup'
 import { Suspense } from 'react'

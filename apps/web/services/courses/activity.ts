@@ -11,7 +11,7 @@ import { getAPIUrl } from '@services/config/config'
 
 export async function startCourse(
   course_uuid: string,
-  org_slug: string,
+  _org_slug: string,
   access_token: any
 ) {
   const result: any = await fetch(
@@ -24,7 +24,7 @@ export async function startCourse(
 
 export async function removeCourse(
   course_uuid: string,
-  org_slug: string,
+  _org_slug: string,
   access_token: any
 ) {
   const result: any = await fetch(
@@ -36,8 +36,8 @@ export async function removeCourse(
 }
 
 export async function markActivityAsComplete(
-  org_slug: string,
-  course_uuid: string,
+  _org_slug: string,
+  _course_uuid: string,
   activity_uuid: string,
   access_token: any
 ) {
@@ -50,8 +50,8 @@ export async function markActivityAsComplete(
 }
 
 export async function unmarkActivityAsComplete(
-  org_slug: string,
-  course_uuid: string,
+  _org_slug: string,
+  _course_uuid: string,
   activity_uuid: string,
   access_token: any
 ) {

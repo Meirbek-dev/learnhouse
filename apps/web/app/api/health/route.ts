@@ -20,20 +20,19 @@ export async function GET() {
         },
       }
     )
-  } else {
-    return NextResponse.json(
-      {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        health: null,
-        error: health.HTTPmessage,
-      },
-      {
-        status: 503,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
   }
+  return NextResponse.json(
+    {
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      health: null,
+      error: health.HTTPmessage,
+    },
+    {
+      status: 503,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  )
 }

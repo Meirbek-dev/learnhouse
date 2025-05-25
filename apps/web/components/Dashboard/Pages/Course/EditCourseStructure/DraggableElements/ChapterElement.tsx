@@ -61,7 +61,7 @@ function ChapterElement(props: ChapterElementProps) {
 
   async function updateChapterName(chapterId: string) {
     if (modifiedChapter?.chapterId === chapterId) {
-      let modifiedChapterCopy = {
+      const modifiedChapterCopy = {
         name: modifiedChapter.chapterName,
       }
       await updateChapter(chapterId, modifiedChapterCopy, access_token)
@@ -106,7 +106,7 @@ function ChapterElement(props: ChapterElementProps) {
                   <div className="chapter-modification-zone flex items-center space-x-2 rounded-lg bg-neutral-100 px-2 py-1 sm:px-4">
                     <input
                       type="text"
-                      className="w-full max-w-[150px] bg-transparent text-sm text-neutral-700 outline-hidden sm:max-w-none"
+                      className="outline-hidden w-full max-w-[150px] bg-transparent text-sm text-neutral-700 sm:max-w-none"
                       placeholder={t('chapterNamePlaceholder')}
                       value={
                         modifiedChapter

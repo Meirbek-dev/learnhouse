@@ -35,7 +35,7 @@ export function OrgProvider({
     (url) => swrFetcher(url, accessToken)
   )
 
-  const isLoading = !org || !orgs || !session || session.status === 'loading'
+  const isLoading = !(org && orgs && session) || session.status === 'loading'
   const hasError = orgError || orgsError
 
   const isOrgActive = useMemo(

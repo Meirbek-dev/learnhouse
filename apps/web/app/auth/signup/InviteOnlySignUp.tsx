@@ -74,8 +74,8 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
       setError('')
       setMessage('')
       setIsSubmitting(true)
-      let res = await signUpWithInviteCode(values, props.inviteCode)
-      let responseMessage = await res.json()
+      const res = await signUpWithInviteCode(values, props.inviteCode)
+      const responseMessage = await res.json()
       if (res.status == 200) {
         //router.push(`/login`);
         setMessage(t('accountCreated'))
@@ -98,13 +98,13 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
   return (
     <div className="login-form m-auto w-72">
       {error && (
-        <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+        <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
           <AlertTriangle size={18} />
           <div className="text-sm font-bold">{error}</div>
         </div>
       )}
       {message && (
-        <div className="flex flex-col items-center justify-center space-y-4 space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
+        <div className="shadow-xs flex flex-col items-center justify-center space-x-2 space-y-4 rounded-md bg-green-200 p-4 text-green-950 transition-all">
           <div className="flex space-x-2">
             <Check size={18} />
             <div className="text-sm font-bold">{t('accountCreated')}</div>
@@ -192,7 +192,7 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
         </div>
       </FormLayout>
       <div>
-        <div className="mx-10 mt-5 mb-5 flex h-0.5 rounded-2xl bg-slate-100"></div>
+        <div className="mx-10 mb-5 mt-5 flex h-0.5 rounded-2xl bg-slate-100" />
         <button
           onClick={() => signIn('google')}
           className="text-md flex w-full justify-center space-x-3 rounded-md bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm hover:cursor-pointer"

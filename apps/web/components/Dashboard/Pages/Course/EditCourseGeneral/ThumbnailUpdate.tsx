@@ -6,7 +6,8 @@ import { updateCourseThumbnail } from '@services/courses/courses'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { ArrowBigUpDash, UploadCloud, Image as ImageIcon } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import React, { useState, useEffect } from 'react'
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
 import UnsplashImagePicker from './UnsplashImagePicker'
 import { useTranslations } from 'next-intl'
@@ -28,7 +29,7 @@ function ThumbnailUpdate() {
   const [error, setError] = useState<string>('')
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
   const t = useTranslations('CourseEdit.General.Thumbnail')
-  const tNotify = useTranslations('Notifications')
+  const _tNotify = useTranslations('Notifications')
   const withUnpublishedActivities = course
     ? course.withUnpublishedActivities
     : false
@@ -93,7 +94,7 @@ function ThumbnailUpdate() {
       const blobUrl = URL.createObjectURL(file)
       setLocalThumbnail({ file, url: blobUrl })
       await updateThumbnail(file)
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to process Unsplash image')
       setIsLoading(false)
     }
@@ -118,7 +119,7 @@ function ThumbnailUpdate() {
       } else {
         setError('')
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to update thumbnail')
     } finally {
       setIsLoading(false)

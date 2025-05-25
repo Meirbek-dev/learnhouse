@@ -53,7 +53,9 @@ const validate = (
   }
 
   if (!values.learnings) {
-    errors.learnings = t('errors.required', { fieldName: t('learnings.label') })
+    errors.learnings = t('errors.required', {
+      fieldName: t('learnings.label'),
+    })
   } else {
     try {
       const learningItems = JSON.parse(values.learnings)
@@ -95,11 +97,11 @@ const initializeLearnings = (learningsInput: any): string => {
   return JSON.stringify([{ id: Date.now().toString(), text: '', emoji: '📝' }])
 }
 
-function EditCourseGeneral(props: EditCourseStructureProps) {
+function EditCourseGeneral(_props: EditCourseStructureProps) {
   const [error, setError] = useState('')
   const course = useCourse()
   const dispatchCourse = useCourseDispatch()
-  if (!course || !dispatchCourse) throw new Error('Course context not found')
+  if (!(course && dispatchCourse)) throw new Error('Course context not found')
   const { isLoading, courseStructure } = course
   const t = useTranslations('CourseEdit.General')
 
@@ -110,7 +112,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       about: courseStructure?.about || '',
       learnings: initializeLearnings(courseStructure?.learnings),
       tags: courseStructure?.tags || '',
-      public: courseStructure?.public || false,
+      public: courseStructure?.public,
     },
     validate: (values) => validate(values, t),
     onSubmit: async () => {
@@ -162,11 +164,11 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   return (
     <div>
       <div className="h-6" />
-      <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-6 py-5 shadow-xs">
+      <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-6 py-5">
         {courseStructure && (
           <div className="editcourse-form">
             {error && (
-              <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
                 <AlertTriangle size={18} />
                 <div className="text-sm font-bold">{error}</div>
               </div>

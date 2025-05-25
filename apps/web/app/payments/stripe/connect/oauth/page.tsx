@@ -27,12 +27,12 @@ function StripeConnectCallback() {
         const state = searchParams.get('state')
         const orgId = state?.split('=')[1] // Extract org_id value after '='
 
-        if (!code || !orgId) {
+        if (!(code && orgId)) {
           throw new Error(t('missingParameters'))
         }
 
-        const response = await verifyStripeConnection(
-          parseInt(orgId),
+        const _response = await verifyStripeConnection(
+          Number.parseInt(orgId),
           code,
           session?.data?.tokens?.access_token
         )

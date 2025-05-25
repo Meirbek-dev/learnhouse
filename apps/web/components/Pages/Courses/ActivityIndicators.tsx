@@ -23,18 +23,17 @@ function ActivityIndicators(props: Props) {
   const current_activity_style = 'bg-gray-600 animate-pulse hover:bg-gray-700'
 
   function isActivityDone(activity: any) {
-    let run = props.course.trail?.runs.find(
+    const run = props.course.trail?.runs.find(
       (run: any) => run.course_id == props.course.id
     )
     if (run) {
       return run.steps.find((step: any) => step.activity_id == activity.id)
-    } else {
-      return false
     }
+    return false
   }
 
   function isActivityCurrent(activity: any) {
-    let activity_uuid = activity.activity_uuid.replace('activity_', '')
+    const activity_uuid = activity.activity_uuid.replace('activity_', '')
     return props.current_activity && props.current_activity == activity_uuid
   }
 
@@ -139,19 +138,16 @@ function ActivityIndicators(props: Props) {
                   >
                     <Link
                       prefetch={false}
-                      href={
-                        getUriWithOrg(orgslug, '') +
-                        `/course/${courseid}/activity/${activity.activity_uuid.replace(
-                          'activity_',
-                          ''
-                        )}`
-                      }
+                      href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activity.activity_uuid.replace(
+                        'activity_',
+                        ''
+                      )}`}
                     >
                       <div
                         className={`h-[7px] w-auto ${getActivityClass(
                           activity
                         )} rounded-lg`}
-                      ></div>
+                      />
                     </Link>
                   </ToolTip>
                 )

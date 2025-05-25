@@ -88,7 +88,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({
           page: pageNum,
           perPage: IMAGES_PER_PAGE,
         })
-        if (result && result.response) {
+        if (result?.response) {
           setImages((prevImages) =>
             pageNum === 1
               ? result.response.results
@@ -115,11 +115,9 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({
   useEffect(() => {
     if (query) {
       debouncedFetchImages(query)
-    } else {
-      if (images.length > 0 || page > 1) {
-        setImages([])
-        setPage(1)
-      }
+    } else if (images.length > 0 || page > 1) {
+      setImages([])
+      setPage(1)
     }
   }, [query, debouncedFetchImages])
 
@@ -157,10 +155,10 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({
             value={query}
             onChange={handleSearch}
             placeholder={t('searchPlaceholder')}
-            className="w-full rounded-lg border p-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+            className="focus:outline-hidden w-full rounded-lg border p-2 pl-10 focus:ring-2 focus:ring-blue-500"
           />
           <Search
-            className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400"
             size={20}
           />
         </div>

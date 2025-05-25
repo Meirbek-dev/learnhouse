@@ -134,10 +134,7 @@ export default function ActivityChapterDropdown(
                     return (
                       <Link
                         key={activity.id}
-                        href={
-                          getUriWithOrg(props.orgslug, '') +
-                          `/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`
-                        }
+                        href={`${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`}
                         prefetch={false}
                         onClick={() => setIsOpen(false)}
                       >

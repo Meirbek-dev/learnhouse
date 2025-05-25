@@ -30,14 +30,11 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
         courseuuid={getEntireCourseUUID(params.courseuuid)}
         withUnpublishedActivities={true}
       >
-        <div className="nice-shadow z-10 bg-[#fcfbfc] pr-10 pl-10 text-sm tracking-tight">
+        <div className="nice-shadow z-10 bg-[#fcfbfc] pl-10 pr-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
           <div className="flex space-x-3 text-sm font-black">
             <Link
-              href={
-                getUriWithOrg(params.orgslug, '') +
-                `/dash/courses/course/${params.courseuuid}/general`
-              }
+              href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/general`}
             >
               <div
                 className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
@@ -54,10 +51,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
             </Link>
 
             <Link
-              href={
-                getUriWithOrg(params.orgslug, '') +
-                `/dash/courses/course/${params.courseuuid}/content`
-              }
+              href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/content`}
             >
               <div
                 className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
@@ -73,10 +67,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               </div>
             </Link>
             <Link
-              href={
-                getUriWithOrg(params.orgslug, '') +
-                `/dash/courses/course/${params.courseuuid}/access`
-              }
+              href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/access`}
             >
               <div
                 className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
@@ -92,10 +83,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               </div>
             </Link>
             <Link
-              href={
-                getUriWithOrg(params.orgslug, '') +
-                `/dash/courses/course/${params.courseuuid}/contributors`
-              }
+              href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/contributors`}
             >
               <div
                 className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${

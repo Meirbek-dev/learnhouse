@@ -76,7 +76,7 @@ const CourseProgress: FC<CourseProgressProps> = ({
     totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0
   const radius = 40
   const circumference = 2 * Math.PI * radius
-  const strokeDashoffset =
+  const _strokeDashoffset =
     circumference - (progressPercentage / 100) * circumference
 
   const dialogContent = (
@@ -97,10 +97,7 @@ const CourseProgress: FC<CourseProgressProps> = ({
               return (
                 <Link
                   key={activity.activity_uuid}
-                  href={
-                    getUriWithOrg(orgslug, '') +
-                    `/course/${courseId}/activity/${activityId}`
-                  }
+                  href={`${getUriWithOrg(orgslug, '')}/course/${courseId}/activity/${activityId}`}
                 >
                   <div className="group flex items-center px-4 py-3 transition-colors hover:bg-gray-100">
                     <div className="flex flex-1 items-center space-x-3">
@@ -112,7 +109,7 @@ const CourseProgress: FC<CourseProgressProps> = ({
                           />
                           <Check
                             size={18}
-                            className="absolute top-0 left-0 stroke-[2.5] text-teal-600"
+                            className="absolute left-0 top-0 stroke-[2.5] text-teal-600"
                           />
                         </div>
                       ) : (

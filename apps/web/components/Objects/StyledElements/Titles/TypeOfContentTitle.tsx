@@ -10,9 +10,11 @@ function TypeOfContentTitle(props: { title: string; type: string }) {
   function getLogo() {
     if (props.type == 'col') {
       return CollectionsLogo
-    } else if (props.type == 'cou') {
+    }
+    if (props.type == 'cou') {
       return CoursesLogo
-    } else if (props.type == 'tra') {
+    }
+    if (props.type == 'tra') {
       return TrailLogo
     }
   }
@@ -25,7 +27,7 @@ function TypeOfContentTitle(props: { title: string; type: string }) {
 
   return (
     <div className="home_category_title my-5 flex items-center">
-      <div className="my-auto mr-4 ml-2 rounded-full p-2 shadow-inner ring-1 ring-slate-900/5">
+      <div className="my-auto ml-2 mr-4 rounded-full p-2 shadow-inner ring-1 ring-slate-900/5">
         <Image unoptimized className="" src={getLogo()} alt={logoAlt} />
       </div>
       <h1 className="text-2xl font-bold">{props.title}</h1>

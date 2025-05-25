@@ -5,8 +5,8 @@ import { getResponseMetadata } from '@services/utils/ts/requests'
 export async function searchOrgContent(
   org_slug: string,
   query: string,
-  page: number = 1,
-  limit: number = 10,
+  page = 1,
+  limit = 10,
   next: any,
   access_token?: any
 ) {

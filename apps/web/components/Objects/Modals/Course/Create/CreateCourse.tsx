@@ -88,7 +88,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         } else {
           toast.error(res.data.detail || t('toastError'))
         }
-      } catch (error) {
+      } catch (_error) {
         toast.error(t('toastError'))
       } finally {
         setSubmitting(false)
@@ -126,7 +126,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         type: 'image/jpeg',
       })
       formik.setFieldValue('thumbnail', file)
-    } catch (error) {
+    } catch (_error) {
       toast.error(t('toastErrorUnsplash'))
     } finally {
       setIsUploading(false)

@@ -14,9 +14,9 @@ import {
   MoreVertical,
   X,
 } from 'lucide-react'
-import { Editor } from '@tiptap/react'
+import type { Editor } from '@tiptap/react'
 import {
-  AIEditorStateTypes,
+  type AIEditorStateTypes,
   useAIEditor,
   useAIEditorDispatch,
 } from '@components/Contexts/AI/AIEditorContext'
@@ -72,7 +72,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                   mass: 0.2,
                   velocity: 2,
                 }}
-                className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
+                className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
                 <>
@@ -88,7 +88,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                       background:
                         'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
                     }}
-                    className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 backdrop-blur-md ring-inset"
+                    className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
                   >
                     <div className="flex space-x-2">
                       <div className="pr-1">
@@ -190,45 +190,44 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         payload: { sender: 'ai', message: response.data.message, type: 'ai' },
       })
       return response.data.message
-    } else {
-      await dispatchAIEditor({
-        type: 'addMessage',
-        payload: { sender: 'user', message: message, type: 'user' },
-      })
-      await dispatchAIEditor({ type: 'setIsWaitingForResponse' })
-      const response = await startActivityAIChatSession(
-        message,
-        access_token,
-        props.activity.activity_uuid
-      )
-      if (response.success === false) {
-        await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' })
-        await dispatchAIEditor({ type: 'setIsModalClose' })
-        // wait for 200ms before opening the modal again
-        await new Promise((resolve) => setTimeout(resolve, 200))
-        await dispatchAIEditor({
-          type: 'setError',
-          payload: {
-            isError: true,
-            status: response.status,
-            error_message: response.data.detail,
-          },
-        })
-        await dispatchAIEditor({ type: 'setIsModalOpen' })
-        return ''
-      }
-      await dispatchAIEditor({
-        type: 'setAichat_uuid',
-        payload: response.data.aichat_uuid,
-      })
-      await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' })
-      await dispatchAIEditor({ type: 'setChatInputValue', payload: '' })
-      await dispatchAIEditor({
-        type: 'addMessage',
-        payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      })
-      return response.data.message
     }
+    await dispatchAIEditor({
+      type: 'addMessage',
+      payload: { sender: 'user', message: message, type: 'user' },
+    })
+    await dispatchAIEditor({ type: 'setIsWaitingForResponse' })
+    const response = await startActivityAIChatSession(
+      message,
+      access_token,
+      props.activity.activity_uuid
+    )
+    if (response.success === false) {
+      await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' })
+      await dispatchAIEditor({ type: 'setIsModalClose' })
+      // wait for 200ms before opening the modal again
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      await dispatchAIEditor({
+        type: 'setError',
+        payload: {
+          isError: true,
+          status: response.status,
+          error_message: response.data.detail,
+        },
+      })
+      await dispatchAIEditor({ type: 'setIsModalOpen' })
+      return ''
+    }
+    await dispatchAIEditor({
+      type: 'setAichat_uuid',
+      payload: response.data.aichat_uuid,
+    })
+    await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' })
+    await dispatchAIEditor({ type: 'setChatInputValue', payload: '' })
+    await dispatchAIEditor({
+      type: 'addMessage',
+      payload: { sender: 'ai', message: response.data.message, type: 'ai' },
+    })
+    return response.data.message
   }
 
   const handleKeyPress = async (event: KeyboardEvent<HTMLInputElement>) => {
@@ -255,7 +254,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     // Check what operation that was
     if (label === 'Writer') {
       let ai_message = ''
-      let prompt = getPrompt({ label: label, selection: message })
+      const prompt = getPrompt({ label: label, selection: message })
       await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: true })
       if (prompt) {
         await dispatchAIEditor({
@@ -266,12 +265,15 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         ai_message = await sendReqWithMessage(prompt)
         await fillEditorWithText(ai_message)
         await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' })
-        await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: true })
+        await dispatchAIEditor({
+          type: 'setIsUserInputEnabled',
+          payload: true,
+        })
       }
     } else if (label === 'ContinueWriting') {
       let ai_message = ''
-      let text_selection = getTipTapEditorSelectedTextGlobal()
-      let prompt = getPrompt({ label: label, selection: text_selection })
+      const text_selection = getTipTapEditorSelectedTextGlobal()
+      const prompt = getPrompt({ label: label, selection: text_selection })
       if (prompt) {
         await dispatchAIEditor({ type: 'setIsWaitingForResponse' })
         ai_message = await sendReqWithMessage(prompt)
@@ -284,8 +286,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       }
     } else if (label === 'MakeLonger') {
       let ai_message = ''
-      let text_selection = getTipTapEditorSelectedText()
-      let prompt = getPrompt({ label: label, selection: text_selection })
+      const text_selection = getTipTapEditorSelectedText()
+      const prompt = getPrompt({ label: label, selection: text_selection })
       if (prompt) {
         await dispatchAIEditor({ type: 'setIsWaitingForResponse' })
         ai_message = await sendReqWithMessage(prompt)
@@ -296,8 +298,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       // will be implemented in future stages
     } else if (label === 'Translate') {
       let ai_message = ''
-      let text_selection = getTipTapEditorSelectedText()
-      let prompt = getPrompt({ label: label, selection: text_selection })
+      const text_selection = getTipTapEditorSelectedText()
+      const prompt = getPrompt({ label: label, selection: text_selection })
       if (prompt) {
         await dispatchAIEditor({ type: 'setIsWaitingForResponse' })
         ai_message = await sendReqWithMessage(prompt)
@@ -318,9 +320,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       const regex = new RegExp(phrase, 'g')
       const newText = original.replace(regex, '')
       return newText
-    } else {
-      return originalText
     }
+    return originalText
   }
 
   async function fillEditorWithText(text: string) {
@@ -383,11 +384,14 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
     if (label === 'Writer') {
       return `Write 3 sentences about ${selection}`
-    } else if (label === 'ContinueWriting') {
+    }
+    if (label === 'ContinueWriting') {
       return `Continue writing 3 more sentences based on "${selection}"`
-    } else if (label === 'MakeLonger') {
+    }
+    if (label === 'MakeLonger') {
       return `Make longer this text longer : "${selection}"`
-    } else if (label === 'GenerateQuiz') {
+    }
+    if (label === 'GenerateQuiz') {
       return `Generate a quiz about "${selection}", only return an array of objects, every object should respect the following interface:
             interface Answer {
                 answer_id: string;
@@ -401,12 +405,9 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                 answers: Answer[];
               }
             " `
-    } else if (label === 'Translate') {
-      return (
-        `Translate "${selection}" to the ` +
-        aiEditorState.chatInputValue +
-        ` language`
-      )
+    }
+    if (label === 'Translate') {
+      return `Translate "${selection}" to the ${aiEditorState.chatInputValue} language`
     }
   }
 
@@ -440,7 +441,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         mass: 0.2,
         velocity: 2,
       }}
-      className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center backdrop-blur-md"
+      className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center backdrop-blur-md"
       style={{ pointerEvents: 'none' }}
     >
       <div
@@ -449,7 +450,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
           background:
             'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 95%)',
         }}
-        className="fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 backdrop-blur-md ring-inset"
+        className="max-w-(--breakpoint-2xl) fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
       >
         <div className="flex justify-center space-x-2">
           <Image
@@ -471,8 +472,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               value={aiEditorState.chatInputValue}
               onChange={handleChange}
               placeholder="Ask AI"
-              className="w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
-            ></input>
+              className="outline-hidden w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-inset ring-white/20 placeholder:text-white/30"
+            />
             <div
               onClick={() =>
                 handleOperation(
@@ -496,7 +497,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
 const AiEditorToolButton = (props: any) => {
   const dispatchAIEditor = useAIEditorDispatch() as any
-  const aiEditorState = useAIEditor() as AIEditorStateTypes
+  const _aiEditorState = useAIEditor() as AIEditorStateTypes
   const t = useTranslations('Activities.AIEditorToolkit')
 
   const handleToolButtonClick = async (
@@ -544,7 +545,7 @@ const AiEditorToolButton = (props: any) => {
       {props.label === 'MakeLonger' && <FileStack size={14} />}
       {props.label === 'GenerateQuiz' && <HelpCircle size={14} />}
       {props.label === 'Translate' && <Languages size={14} />}
-      <span>{t(props.label + 'Label')}</span>
+      <span>{t(`${props.label}Label`)}</span>
     </button>
   )
 }
@@ -624,8 +625,8 @@ const AiEditorActionScreen = ({
                 value={aiEditorState.chatInputValue}
                 onChange={handleChange}
                 placeholder={t('translateExample')}
-                className="py- w-full rounded-lg bg-gray-950/20 px-4 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
-              ></input>
+                className="py- outline-hidden w-full rounded-lg bg-gray-950/20 px-4 text-sm text-white ring-1 ring-inset ring-white/20 placeholder:text-white/30"
+              />
             </div>
             <div
               onClick={() => {
@@ -655,12 +656,12 @@ const AiEditorActionScreen = ({
               r="10"
               stroke="currentColor"
               stroke-width="4"
-            ></circle>
+            />
             <path
               className="opacity-75"
               fill="currentColor"
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
+            />
           </svg>
           <p className="mt-4 font-bold text-white/90">{t('thinking')}</p>
         </div>

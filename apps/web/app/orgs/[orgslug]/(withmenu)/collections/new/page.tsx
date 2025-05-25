@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { use, useState } from 'react'
+import { useState } from 'react'
 import * as React from 'react'
 import { createCollection } from '@services/courses/collections'
 import useSWR from 'swr'
@@ -26,7 +26,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
   const router = useRouter()
   const {
     data: courses,
-    error: error,
+    error,
     isLoading,
   } = useSWR(
     `${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/10`,
@@ -79,7 +79,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
       await revalidateTags(['collections'], org.slug)
       toast.success(t('toast.success'))
       router.push(getUriWithOrg(orgslug, '/collections'))
-    } catch (error) {
+    } catch (_error) {
       toast.error(t('toast.failure'))
     } finally {
       setIsSubmitting(false)
@@ -113,7 +113,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 placeholder={t('namePlaceholder')}
                 value={name}
                 onChange={handleNameChange}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 maxLength={100}
               />
             </label>
@@ -124,7 +124,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
               </span>
               <select
                 onChange={handleVisibilityChange}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 defaultValue={isPublic}
               >
                 <option value="true">{t('visibilityPublic')}</option>
@@ -141,7 +141,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 value={description}
                 onChange={handleDescriptionChange}
                 rows={4}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 maxLength={500}
               />
             </label>
@@ -231,14 +231,14 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
             <button
               type="button"
               onClick={() => router.back()}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden"
+              className="focus:outline-hidden rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               {t('cancelButton')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center space-x-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white shadow-xs transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+              className="shadow-xs focus:outline-hidden flex items-center space-x-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               <span>

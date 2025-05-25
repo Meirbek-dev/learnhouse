@@ -60,7 +60,7 @@ function EvaluateAssignment({ user_id }: any) {
   }
 
   async function rejectAssignment() {
-    const res = await deleteUserSubmission(
+    const _res = await deleteUserSubmission(
       user_id,
       assignments?.assignment_object.assignment_uuid,
       session.data?.tokens?.access_token
@@ -71,78 +71,77 @@ function EvaluateAssignment({ user_id }: any) {
 
   return (
     <div className="min-h-fit flex-col space-y-4 overflow-y-auto px-3 py-3">
-      {assignments &&
-        assignments?.assignment_tasks
-          ?.sort((a: any, b: any) => a.id - b.id)
-          .map((task: any, index: number) => {
-            return (
-              <div
-                className="flex flex-col space-y-2"
-                key={task.assignment_task_uuid}
-              >
-                <div className="flex justify-between py-2">
-                  <div className="flex space-x-2 font-semibold text-slate-800">
-                    <p>{t('taskLabel', { index: index + 1 })} : </p>
-                    <p className="text-slate-500">{task.description}</p>
-                  </div>
-                  <div className="flex space-x-2">
-                    {task.hint && (
-                      <Popover>
-                        <PopoverTrigger className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
-                          <Info size={13} />
-                          <p className="text-xs font-semibold">{t('hint')}</p>
-                        </PopoverTrigger>
-                        <PopoverContent className="max-h-[200px] overflow-y-auto">
-                          {task.hint}
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                    <Link
-                      href={getTaskRefFileDir(
-                        org?.org_uuid,
-                        assignments?.course_object.course_uuid,
-                        assignments?.activity_object.activity_uuid,
-                        assignments?.assignment_object.assignment_uuid,
-                        task.assignment_task_uuid,
-                        task.reference_file
-                      )}
-                      target="_blank"
-                      download={true}
-                      className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900"
-                    >
-                      <Download size={13} />
-                      <div className="flex items-center space-x-2">
-                        {task.reference_file && (
-                          <span className="relative">
-                            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white"></span>
-                          </span>
-                        )}
-                        <p className="text-xs font-semibold">{t('refDoc')}</p>
-                      </div>
-                    </Link>
-                  </div>
+      {assignments?.assignment_tasks
+        ?.sort((a: any, b: any) => a.id - b.id)
+        .map((task: any, index: number) => {
+          return (
+            <div
+              className="flex flex-col space-y-2"
+              key={task.assignment_task_uuid}
+            >
+              <div className="flex justify-between py-2">
+                <div className="flex space-x-2 font-semibold text-slate-800">
+                  <p>{t('taskLabel', { index: index + 1 })} : </p>
+                  <p className="text-slate-500">{task.description}</p>
                 </div>
-                <div className="min-h-full">
-                  {task.assignment_type === 'QUIZ' && (
-                    <TaskQuizObject
-                      key={task.assignment_task_uuid}
-                      view="grading"
-                      user_id={user_id}
-                      assignmentTaskUUID={task.assignment_task_uuid}
-                    />
+                <div className="flex space-x-2">
+                  {task.hint && (
+                    <Popover>
+                      <PopoverTrigger className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
+                        <Info size={13} />
+                        <p className="text-xs font-semibold">{t('hint')}</p>
+                      </PopoverTrigger>
+                      <PopoverContent className="max-h-[200px] overflow-y-auto">
+                        {task.hint}
+                      </PopoverContent>
+                    </Popover>
                   )}
-                  {task.assignment_type === 'FILE_SUBMISSION' && (
-                    <TaskFileObject
-                      key={task.assignment_task_uuid}
-                      view="custom-grading"
-                      user_id={user_id}
-                      assignmentTaskUUID={task.assignment_task_uuid}
-                    />
-                  )}
+                  <Link
+                    href={getTaskRefFileDir(
+                      org?.org_uuid,
+                      assignments?.course_object.course_uuid,
+                      assignments?.activity_object.activity_uuid,
+                      assignments?.assignment_object.assignment_uuid,
+                      task.assignment_task_uuid,
+                      task.reference_file
+                    )}
+                    target="_blank"
+                    download={true}
+                    className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900"
+                  >
+                    <Download size={13} />
+                    <div className="flex items-center space-x-2">
+                      {task.reference_file && (
+                        <span className="relative">
+                          <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
+                        </span>
+                      )}
+                      <p className="text-xs font-semibold">{t('refDoc')}</p>
+                    </div>
+                  </Link>
                 </div>
               </div>
-            )
-          })}
+              <div className="min-h-full">
+                {task.assignment_type === 'QUIZ' && (
+                  <TaskQuizObject
+                    key={task.assignment_task_uuid}
+                    view="grading"
+                    user_id={user_id}
+                    assignmentTaskUUID={task.assignment_task_uuid}
+                  />
+                )}
+                {task.assignment_type === 'FILE_SUBMISSION' && (
+                  <TaskFileObject
+                    key={task.assignment_task_uuid}
+                    view="custom-grading"
+                    user_id={user_id}
+                    assignmentTaskUUID={task.assignment_task_uuid}
+                  />
+                )}
+              </div>
+            </div>
+          )
+        })}
       <div className="flex items-center justify-between space-x-4 font-semibold">
         <button
           onClick={rejectAssignment}

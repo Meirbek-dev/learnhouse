@@ -44,7 +44,7 @@ async function DashboardHome() {
       </AdminAuthorization>
       <div className="mt-6 flex flex-col gap-6 sm:mt-10 sm:gap-10">
         <AdminAuthorization authorizationMode="component">
-          <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100"></div>
+          <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100" />
           <div className="flex items-center justify-center">
             <Link
               href={'https://university.learnhouse.io/'}
@@ -57,7 +57,7 @@ async function DashboardHome() {
               </div>
             </Link>
           </div>
-          <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-neutral-200/100 sm:mt-[40px]"></div>
+          <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-neutral-200/100 sm:mt-[40px]" />
         </AdminAuthorization>
 
         <Link

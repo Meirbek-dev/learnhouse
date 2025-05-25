@@ -4,15 +4,19 @@
   </a>
 </p>
 
-LearnHouse is an open source platform that makes it easy for anyone to provide world-class educational content and it offers a variety of content types : Dynamic Pages, Videos, Documents & more..
+LearnHouse is an open source platform that makes it easy for anyone to provide world-class
+educational content and it offers a variety of content types : Dynamic Pages, Videos, Documents &
+more..
 
 ## Progress
 
-🚧 LearnHouse is still on early development (alpha), as we reach stability we will release a stable version and add more features.
+🚧 LearnHouse is still on early development (alpha), as we reach stability we will release a stable
+version and add more features.
 
 ## Roadmap
 
-We prioritize issues depending on the most requested features from our users, please help us prioritize issues by commenting on them and sharing your thoughts
+We prioritize issues depending on the most requested features from our users, please help us
+prioritize issues by commenting on them and sharing your thoughts
 
 [🚢 LearnHouse General Roadmap](https://www.learnhouse.app/roadmap)
 
@@ -93,6 +97,7 @@ Learn about LearnHouse and how to use it, using LearnHouse
 
 ## A word
 
-Learnhouse is made with 💜, from the UI to the features it is carefully designed to make students and teachers lives easier and make education software more enjoyable.
+Learnhouse is made with 💜, from the UI to the features it is carefully designed to make students
+and teachers lives easier and make education software more enjoyable.
 
 Thank you and have fun using/developing/testing LearnHouse !

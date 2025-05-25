@@ -12,7 +12,7 @@ function InfoUI(params: {
 }) {
   const t = useTranslations('Components.InfoUI')
   return (
-    <div className="mx-auto flex flex-col items-center space-y-6 bg-linear-to-b from-yellow-100 to-yellow-100/5 py-10 antialiased">
+    <div className="bg-linear-to-b mx-auto flex flex-col items-center space-y-6 from-yellow-100 to-yellow-100/5 py-10 antialiased">
       <div className="flex flex-row items-center space-x-5 rounded-xl">
         <Diamond className="text-yellow-700" size={45} />
         <div className="flex flex-col">

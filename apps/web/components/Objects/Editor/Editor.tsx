@@ -10,7 +10,7 @@ import styled from 'styled-components'
 import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons'
 import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
 import {
-  AIEditorStateTypes,
+  type AIEditorStateTypes,
   useAIEditor,
   useAIEditorDispatch,
 } from '@components/Contexts/AI/AIEditorContext'
@@ -199,7 +199,7 @@ function Editor(props: EditorProps) {
           }}
           exit={{ opacity: 0 }}
         >
-          <EditorTop className="bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125">
+          <EditorTop className="fixed bg-white bg-opacity-95 backdrop-blur-sm backdrop-brightness-125">
             <EditorDocSection>
               <EditorInfoWrapper>
                 <Link href="/">
@@ -222,7 +222,7 @@ function Editor(props: EditorProps) {
                         : getUriWithOrg(props.org?.slug, '/empty_thumbnail.png')
                     }`}
                     alt={`${props.course.name} Thumbnail`}
-                  ></EditorInfoThumbnail>
+                  />
                 </Link>
                 <EditorInfoDocName>
                   {' '}

@@ -41,7 +41,7 @@ function DashLeftMenu() {
   async function logOutUI() {
     const res = await signOut({
       redirect: true,
-      callbackUrl: getUriWithoutOrg('/login?orgslug=' + org.slug),
+      callbackUrl: getUriWithoutOrg(`/login?orgslug=${org.slug}`),
     })
     if (res) {
       getUriWithOrg(org.slug, '/')
@@ -105,7 +105,7 @@ function DashLeftMenu() {
             >
               <Link
                 className="rounded-lg bg-white/5 p-2 transition-all ease-linear hover:bg-white/10"
-                href={`/dash`}
+                href={'/dash'}
               >
                 <Home size={18} />
               </Link>
@@ -118,7 +118,7 @@ function DashLeftMenu() {
             >
               <Link
                 className="rounded-lg bg-white/5 p-2 transition-all ease-linear hover:bg-white/10"
-                href={`/dash/courses`}
+                href={'/dash/courses'}
               >
                 <BookCopy size={18} />
               </Link>
@@ -131,7 +131,7 @@ function DashLeftMenu() {
             >
               <Link
                 className="rounded-lg bg-white/5 p-2 transition-all ease-linear hover:bg-white/10"
-                href={`/dash/assignments`}
+                href={'/dash/assignments'}
               >
                 <Backpack size={18} />
               </Link>
@@ -144,7 +144,7 @@ function DashLeftMenu() {
             >
               <Link
                 className="rounded-lg bg-white/5 p-2 transition-all ease-linear hover:bg-white/10"
-                href={`/dash/users/settings/users`}
+                href={'/dash/users/settings/users'}
               >
                 <Users size={18} />
               </Link>
@@ -158,7 +158,7 @@ function DashLeftMenu() {
               >
                 <Link
                   className="rounded-lg bg-white/5 p-2 transition-all ease-linear hover:bg-white/10"
-                  href={`/dash/payments/customers`}
+                  href={'/dash/payments/customers'}
                 >
                   <BadgeDollarSign size={18} />
                 </Link>
@@ -172,7 +172,7 @@ function DashLeftMenu() {
             >
               <Link
                 className="rounded-lg bg-white/5 p-2 transition-all ease-linear hover:bg-white/10"
-                href={`/dash/org/settings/general`}
+                href={'/dash/org/settings/general'}
               >
                 <School size={18} />
               </Link>
@@ -182,7 +182,7 @@ function DashLeftMenu() {
         <div className="mx-auto flex flex-col space-y-2 pb-7">
           <div className="flex flex-col items-center space-y-2">
             <ToolTip
-              content={'@' + session.data.user.username}
+              content={`@${session.data.user.username}`}
               slateBlack
               sideOffset={8}
               side="right"

@@ -50,35 +50,32 @@ function AssignmentTasks({ assignment_uuid }: any) {
             }
           />
         )}
-        {assignments &&
-          assignments?.assignment_tasks?.map((task: any) => {
-            return (
-              <div
-                key={task.id}
-                className="nice-shadow flex w-[250px] flex-col rounded-md bg-white p-3 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]"
-                onClick={() => setSelectTask(task.assignment_task_uuid)}
-              >
-                <div className="flex items-center justify-between px-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-gray-500">
-                      {task.assignment_type === 'QUIZ' && (
-                        <ListTodo size={15} />
-                      )}
-                      {task.assignment_type === 'FILE_SUBMISSION' && (
-                        <FileUp size={15} />
-                      )}
-                    </div>
-                    <div className="text-sm font-semibold">{task.title}</div>
+        {assignments?.assignment_tasks?.map((task: any) => {
+          return (
+            <div
+              key={task.id}
+              className="nice-shadow flex w-[250px] flex-col rounded-md bg-white p-3 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]"
+              onClick={() => setSelectTask(task.assignment_task_uuid)}
+            >
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center space-x-3">
+                  <div className="text-gray-500">
+                    {task.assignment_type === 'QUIZ' && <ListTodo size={15} />}
+                    {task.assignment_type === 'FILE_SUBMISSION' && (
+                      <FileUp size={15} />
+                    )}
                   </div>
-                  <button
-                    className={`outline-gray-200 ${task.assignment_task_uuid == assignmentTask.selectedAssignmentTaskUUID ? 'bg-slate-100' : ''} rounded-md px-3 py-2 font-bold text-gray-500 transition-all ease-linear hover:bg-slate-100/50`}
-                  >
-                    <PanelLeftOpen size={16} />
-                  </button>
+                  <div className="text-sm font-semibold">{task.title}</div>
                 </div>
+                <button
+                  className={`outline-gray-200 ${task.assignment_task_uuid == assignmentTask.selectedAssignmentTaskUUID ? 'bg-slate-100' : ''} rounded-md px-3 py-2 font-bold text-gray-500 transition-all ease-linear hover:bg-slate-100/50`}
+                >
+                  <PanelLeftOpen size={16} />
+                </button>
               </div>
-            )
-          })}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

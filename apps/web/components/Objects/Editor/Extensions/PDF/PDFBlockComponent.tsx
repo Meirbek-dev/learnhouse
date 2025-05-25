@@ -39,7 +39,7 @@ function PDFBlockComponent(props: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault()
     setIsLoading(true)
-    let object = await uploadNewPDFFile(
+    const object = await uploadNewPDFFile(
       pdf,
       props.extension.options.activity.activity_uuid,
       access_token
@@ -108,7 +108,7 @@ function PDFBlockComponent(props: any) {
             {!isEditable && (
               <button
                 onClick={handleDownload}
-                className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                 title="Download PDF"
               >
                 <Download className="h-4 w-4 text-white" />
@@ -139,4 +139,4 @@ const BlockPDF = styled.div`
     object-fit: cover;
   }
 `
-const PDFNotFound = styled.div``
+const _PDFNotFound = styled.div``

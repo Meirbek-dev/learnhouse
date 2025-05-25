@@ -1,12 +1,11 @@
-import { default as React } from 'react'
 import { getCourseMetadata } from '@services/courses/courses'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { getActivityWithAuthHeader } from '@services/courses/activities'
 import { getOrganizationContextInfoWithId } from '@services/organizations/orgs'
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext'
 import AIEditorProvider from '@components/Contexts/AI/AIEditorContext'
 import { nextAuthOptions } from 'app/auth/options'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper'
 import { getTranslations } from 'next-intl/server'
 
@@ -69,7 +68,7 @@ const EditActivity = async (params: any) => {
           course={courseInfo}
           activity={activity}
           content={activity.content}
-        ></EditorWrapper>
+        />
       </AIEditorProvider>
     </EditorOptionsProvider>
   )

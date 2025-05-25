@@ -26,11 +26,11 @@ export function useContributorStatus(courseUuid: string) {
 
     try {
       const response = await getCourseContributors(
-        'course_' + courseUuid,
+        `course_${courseUuid}`,
         session.data?.tokens?.access_token
       )
 
-      if (response && response.data && Array.isArray(response.data)) {
+      if (response?.data && Array.isArray(response.data)) {
         const currentUser = response.data.find(
           (contributor: Contributor) =>
             contributor.user_id === session.data.user.id
@@ -47,7 +47,7 @@ export function useContributorStatus(courseUuid: string) {
         setContributorStatus('NONE')
       }
     } catch (error) {
-      console.error(t('checkStatusError') + ': ' + error)
+      console.error(`${t('checkStatusError')}: ${error}`)
       toast.error(t('checkStatusError'))
       setContributorStatus('NONE')
     } finally {

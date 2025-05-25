@@ -45,7 +45,7 @@ function UserEditPassword() {
   const updatePasswordUI = async (values: any) => {
     const loadingToast = toast.loading(t('Notifications.updating'))
     try {
-      let user_id = session.data.user.id
+      const user_id = session.data.user.id
       const response = await updatePassword(user_id, values, access_token)
 
       if (response.success) {

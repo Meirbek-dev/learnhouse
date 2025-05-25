@@ -1,5 +1,5 @@
 'use client'
-import { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk'
+import type { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk'
 import type { ReactNode } from 'react'
 import { createContext, useContext, useReducer } from 'react'
 export const AIEditorContext = createContext(null) as any

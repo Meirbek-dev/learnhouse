@@ -12,13 +12,13 @@ import useSWR from 'swr'
 import { useTranslations } from 'next-intl'
 
 function Trail(params: any) {
-  let orgslug = params.orgslug
+  const orgslug = params.orgslug
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const orgID = org?.id
   const t = useTranslations('TrailPage')
-  const { data: trail, error: error } = useSWR(
+  const { data: trail, error } = useSWR(
     `${getAPIUrl()}trail/org/${orgID}/trail`,
     (url) => swrFetcher(url, access_token)
   )
@@ -29,7 +29,7 @@ function Trail(params: any) {
     <GeneralWrapperStyled>
       <TypeOfContentTitle title={t('title')} type="tra" />
       {!trail ? (
-        <PageLoading></PageLoading>
+        <PageLoading />
       ) : (
         <div className="space-y-6">
           {trail.runs.map((run: any) => (

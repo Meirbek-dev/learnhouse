@@ -90,7 +90,7 @@ interface OrganizationValues {
 }
 
 const OrgEditGeneral: FC = () => {
-  const router = useRouter()
+  const _router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
@@ -112,7 +112,7 @@ const OrgEditGeneral: FC = () => {
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
       toast.success(tNotify('orgUpdatedSuccess'), { id: loadingToast })
-    } catch (err) {
+    } catch (_err) {
       toast.error(tNotify('orgUpdateFailed'), { id: loadingToast })
     }
   }
@@ -281,7 +281,7 @@ const OrgEditGeneral: FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
+              <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
                 <Button
                   type="submit"
                   disabled={isSubmitting}

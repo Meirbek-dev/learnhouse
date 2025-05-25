@@ -73,10 +73,10 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
 
   return (
     <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
-      <div className="z-10 bg-[#fcfbfc] pr-10 pl-10 tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
-        <BreadCrumbs type="orgusers"></BreadCrumbs>
+      <div className="z-10 bg-[#fcfbfc] pl-10 pr-10 tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+        <BreadCrumbs type="orgusers" />
         <div className="my-2 py-3">
-          <div className="flex w-100 flex-col space-y-1">
+          <div className="w-100 flex flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">
               {H1Label}
             </div>
@@ -87,9 +87,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
         </div>
         <div className="flex space-x-5 text-sm font-black">
           <Link
-            href={
-              getUriWithOrg(params.orgslug, '') + `/dash/users/settings/users`
-            }
+            href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/users`}
           >
             <div
               className={`w-fit border-black py-2 text-center transition-all ease-linear ${
@@ -105,10 +103,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             </div>
           </Link>
           <Link
-            href={
-              getUriWithOrg(params.orgslug, '') +
-              `/dash/users/settings/usergroups`
-            }
+            href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/usergroups`}
           >
             <div
               className={`w-fit border-black py-2 text-center transition-all ease-linear ${
@@ -124,9 +119,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             </div>
           </Link>
           <Link
-            href={
-              getUriWithOrg(params.orgslug, '') + `/dash/users/settings/signups`
-            }
+            href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/signups`}
           >
             <div
               className={`w-fit border-black py-2 text-center transition-all ease-linear ${
@@ -142,9 +135,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             </div>
           </Link>
           <Link
-            href={
-              getUriWithOrg(params.orgslug, '') + `/dash/users/settings/add`
-            }
+            href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/add`}
           >
             <div
               className={`w-fit border-black py-2 text-center transition-all ease-linear ${

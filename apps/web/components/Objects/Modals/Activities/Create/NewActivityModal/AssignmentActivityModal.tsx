@@ -177,7 +177,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
             <Form.Control asChild>
               <button
                 className={cn(
-                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
                   !dueDate && 'text-muted-foreground'
                 )}
               >

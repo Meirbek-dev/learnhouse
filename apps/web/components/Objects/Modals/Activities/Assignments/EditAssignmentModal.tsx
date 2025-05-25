@@ -23,7 +23,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { format, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 
 interface Assignment {
@@ -77,7 +77,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({
         } else {
           toast.error(t('updateError'))
         }
-      } catch (error) {
+      } catch (_error) {
         toast.error(t('updateErrorGeneric'))
       } finally {
         toast.dismiss(toast_loading)
@@ -133,7 +133,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({
             <Form.Control asChild>
               <button
                 className={cn(
-                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
                   !formik.values.due_date && 'text-muted-foreground'
                 )}
               >

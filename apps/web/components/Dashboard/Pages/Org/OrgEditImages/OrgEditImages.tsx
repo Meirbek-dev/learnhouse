@@ -43,7 +43,7 @@ import {
   DragDropContext,
   Droppable,
   Draggable,
-  DropResult,
+  type DropResult,
 } from '@hello-pangea/dnd'
 import { useTranslations } from 'next-intl'
 
@@ -127,7 +127,7 @@ export default function OrgEditImages() {
 
     // Initialize with video previews
     const videoPreviews = (org?.previews?.videos || [])
-      .filter((video: any) => video && video.id)
+      .filter((video: any) => video?.id)
       .map((video: any, index: number) => ({
         id: video.id,
         url: video.url,
@@ -159,7 +159,7 @@ export default function OrgEditImages() {
         await new Promise((r) => setTimeout(r, 1500))
         toast.success(tNotify('logoUpdatedSuccess'), { id: loadingToast })
         router.refresh()
-      } catch (err) {
+      } catch (_err) {
         toast.error(tNotify('logoUploadFailed'), { id: loadingToast })
       } finally {
         setIsLogoUploading(false)
@@ -180,7 +180,7 @@ export default function OrgEditImages() {
         await new Promise((r) => setTimeout(r, 1500))
         toast.success(tNotify('thumbnailUpdatedSuccess'), { id: loadingToast })
         router.refresh()
-      } catch (err) {
+      } catch (_err) {
         toast.error(tNotify('thumbnailUploadFailed'), { id: loadingToast })
       } finally {
         setIsThumbnailUploading(false)
@@ -256,7 +256,7 @@ export default function OrgEditImages() {
           { id: loadingToast }
         )
         router.refresh()
-      } catch (err) {
+      } catch (_err) {
         toast.error(tNotify('previewsUploadFailed'), { id: loadingToast })
       } finally {
         setIsPreviewUploading(false)
@@ -283,7 +283,7 @@ export default function OrgEditImages() {
       setPreviews(updatedPreviews)
       toast.success(tNotify('previewRemovedSuccess'), { id: loadingToast })
       router.refresh()
-    } catch (err) {
+    } catch (_err) {
       toast.error(tNotify('previewRemoveFailed'), { id: loadingToast })
     }
   }
@@ -297,7 +297,8 @@ export default function OrgEditImages() {
         /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
       const match = url.match(regex)
       return match ? match[1] : null
-    } else if (type === 'loom') {
+    }
+    if (type === 'loom') {
       const regex = /(?:loom\.com\/(?:share|embed)\/)([a-zA-Z0-9]+)/
       const match = url.match(regex)
       return match ? match[1] : null
@@ -369,7 +370,7 @@ export default function OrgEditImages() {
       setVideoDialogOpen(false)
       toast.success(tNotify('videoPreviewAddedSuccess'), { id: loadingToast })
       router.refresh()
-    } catch (err) {
+    } catch (_err) {
       toast.error(tNotify('videoPreviewAddFailed'), { id: loadingToast })
     }
   }
@@ -415,9 +416,11 @@ export default function OrgEditImages() {
         access_token
       )
 
-      toast.success(tNotify('previewOrderUpdatedSuccess'), { id: loadingToast })
+      toast.success(tNotify('previewOrderUpdatedSuccess'), {
+        id: loadingToast,
+      })
       router.refresh()
-    } catch (err) {
+    } catch (_err) {
       toast.error(tNotify('previewOrderUpdateFailed'), { id: loadingToast })
       setPreviews(previews)
     }
@@ -439,21 +442,21 @@ export default function OrgEditImages() {
         <TabsList className="grid w-full grid-cols-3 rounded-lg bg-gray-100 p-1">
           <TabsTrigger
             value="logo"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
           >
             <StarIcon size={16} />
             <span>{t('Tabs.logo')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="thumbnail"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
           >
             <ImageIcon size={16} />
             <span>{t('Tabs.thumbnail')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="previews"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
           >
             <Images size={16} />
             <span>{t('Tabs.previews')}</span>
@@ -462,7 +465,7 @@ export default function OrgEditImages() {
 
         <TabsContent value="logo" className="mt-2">
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <div
@@ -526,7 +529,7 @@ export default function OrgEditImages() {
 
         <TabsContent value="thumbnail" className="mt-2">
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <div
@@ -593,7 +596,7 @@ export default function OrgEditImages() {
 
         <TabsContent value="previews" className="mt-4">
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-6 transition-all duration-300">
+            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-6 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable droppableId="previews" direction="horizontal">
@@ -627,8 +630,8 @@ export default function OrgEditImages() {
                                 <button
                                   onClick={() => removePreview(preview.id)}
                                   className={cn(
-                                    'absolute -top-2 -right-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
-                                    'z-10 opacity-0 shadow-xs group-hover:opacity-100',
+                                    'absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
+                                    'shadow-xs z-10 opacity-0 group-hover:opacity-100',
                                     'transition-opacity duration-200'
                                   )}
                                 >
@@ -637,8 +640,8 @@ export default function OrgEditImages() {
                                 <div
                                   {...provided.dragHandleProps}
                                   className={cn(
-                                    'absolute -top-2 -left-2 rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
-                                    'z-10 cursor-grab opacity-0 shadow-xs group-hover:opacity-100 active:cursor-grabbing',
+                                    'absolute -left-2 -top-2 rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
+                                    'shadow-xs z-10 cursor-grab opacity-0 active:cursor-grabbing group-hover:opacity-100',
                                     'transition-opacity duration-200'
                                   )}
                                 >
@@ -674,7 +677,7 @@ export default function OrgEditImages() {
                                         backgroundImage: `url(${preview.thumbnailUrl})`,
                                       }}
                                     />
-                                    <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black backdrop-blur-[2px]">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-[2px]">
                                       {preview.type === 'youtube' ? (
                                         <SiYoutube className="h-10 w-10 text-red-500" />
                                       ) : (

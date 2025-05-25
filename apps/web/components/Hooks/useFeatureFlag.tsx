@@ -19,7 +19,7 @@ function useFeatureFlag(feature: FeatureType) {
         if (currentValue && typeof currentValue === 'object') {
           currentValue = currentValue[key]
         } else {
-          currentValue = feature.defaultValue || false
+          currentValue = feature.defaultValue
           break
         }
       }

@@ -14,9 +14,8 @@ export default function AuthLayout({
   const orgslug = searchParams.get('orgslug')
   if (orgslug) {
     return <OrgProvider orgslug={orgslug}>{children}</OrgProvider>
-  } else {
-    return (
-      <ErrorUI message={t('orgNotSpecified')} submessage={t('accessFromOrg')} />
-    )
   }
+  return (
+    <ErrorUI message={t('orgNotSpecified')} submessage={t('accessFromOrg')} />
+  )
 }

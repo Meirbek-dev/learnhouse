@@ -35,7 +35,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
   const t = useTranslations('CourseEdit.NewActivityModal')
   const tNotify = useTranslations('Notifications')
 
-  const openNewActivityModal = async (chapterId: any) => {
+  const openNewActivityModal = async (_chapterId: any) => {
     setNewActivityModal(true)
   }
 
@@ -45,7 +45,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
 
   // Submit new activity
   const submitActivity = async (activity: any) => {
-    let org = await getOrganizationContextInfoWithoutCredentials(
+    const org = await getOrganizationContextInfoWithoutCredentials(
       props.orgslug,
       { revalidate: 1800 }
     )
@@ -85,7 +85,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
   const submitExternalVideo = async (
     external_video_data: any,
     activity: any,
-    chapterId: string
+    _chapterId: string
   ) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'))
     await createExternalVideoActivity(
@@ -122,7 +122,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
             submitActivity={submitActivity}
             chapterId={props.chapterId}
             course={course}
-          ></NewActivityModal>
+          />
         }
         dialogTitle={t('title')}
         dialogDescription={t('description')}

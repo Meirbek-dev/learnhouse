@@ -67,7 +67,7 @@ const LoginClient = (props: LoginClientProps) => {
         password: values.password,
         callbackUrl: '/redirect_from_auth',
       })
-      if (res && res.error) {
+      if (res?.error) {
         setError(t('wrongCredentials'))
         setIsSubmitting(false)
       } else {
@@ -112,7 +112,7 @@ const LoginClient = (props: LoginClientProps) => {
                   )}`}
                   alt={props.org?.name}
                   style={{ width: 'auto', height: 70 }}
-                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
+                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
                 />
               ) : (
                 <Image
@@ -131,7 +131,7 @@ const LoginClient = (props: LoginClientProps) => {
       <div className="left-login-part flex flex-row bg-white">
         <div className="login-form m-auto w-72">
           {error && (
-            <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+            <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
               <AlertTriangle size={18} />
               <div className="text-sm font-bold">{t('wrongCredentials')}</div>
             </div>
@@ -187,7 +187,7 @@ const LoginClient = (props: LoginClientProps) => {
               </Form.Submit>
             </div>
           </FormLayout>
-          <div className="mx-10 mt-5 flex h-0.5 rounded-2xl bg-slate-100"></div>
+          <div className="mx-10 mt-5 flex h-0.5 rounded-2xl bg-slate-100" />
           <div className="mx-auto flex justify-center py-5">{t('or')}</div>
           <div className="flex flex-col space-y-4">
             <Link
