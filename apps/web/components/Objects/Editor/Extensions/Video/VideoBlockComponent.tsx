@@ -389,7 +389,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   }
 
   // If we're in preview mode but don't have a video, show nothing
-  if (!isEditable && !(blockObject && videoUrl)) {
+  if (!(isEditable || (blockObject && videoUrl))) {
     return null
   }
 

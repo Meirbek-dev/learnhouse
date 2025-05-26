@@ -20,6 +20,7 @@ import { CourseProvider } from '@components/Contexts/CourseContext'
 import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions'
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors'
+import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs'
 import { useTranslations } from 'next-intl'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -134,7 +135,8 @@ const CourseClient = (props: any) => {
       ) : (
         <>
           <GeneralWrapperStyled>
-            <div className="flex flex-col items-start justify-between pb-2 pt-5 md:flex-row md:items-center">
+            <CourseBreadcrumbs course={course} orgslug={orgslug} />
+            <div className="flex flex-col items-start justify-between pb-2 pt-3 md:flex-row md:items-center">
               <div>
                 <p className="text-md pb-2 font-bold text-gray-400">
                   {t('title')}
