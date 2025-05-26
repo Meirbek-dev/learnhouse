@@ -31,7 +31,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
   )
 
   async function createInviteWithUserGroup() {
-    let res = await createInviteCodeWithUserGroup(
+    const res = await createInviteCodeWithUserGroup(
       org.id,
       usergroup_id,
       session.data?.tokens?.access_token
@@ -41,19 +41,26 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
       props.setInvitesModal(false)
     } else {
       toast.error(
-        t('createInviteError', { error: res.data?.detail || t('unknownError') })
+        t('createInviteError', {
+          error: res.data?.detail || t('unknownError'),
+        })
       )
     }
   }
 
   async function createInvite() {
-    let res = await createInviteCode(org.id, session.data?.tokens?.access_token)
+    const res = await createInviteCode(
+      org.id,
+      session.data?.tokens?.access_token
+    )
     if (res.status == 200) {
       mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
       props.setInvitesModal(false)
     } else {
       toast.error(
-        t('createInviteError', { error: res.data?.detail || t('unknownError') })
+        t('createInviteError', {
+          error: res.data?.detail || t('unknownError'),
+        })
       )
     }
   }

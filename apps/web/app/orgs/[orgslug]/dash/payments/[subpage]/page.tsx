@@ -22,8 +22,8 @@ export type PaymentsParams = {
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
   const params = use(props.params)
   const t = useTranslations('DashPage.Payments')
-  const session = useLHSession() as any
-  const org = useOrg() as any
+  const _session = useLHSession() as any
+  const _org = useOrg() as any
   const subpage = params.subpage || 'customers'
 
   const isPaymentsEnabled = useFeatureFlag({
@@ -72,10 +72,10 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
 
   return (
     <div className="flex h-screen w-full flex-col bg-[#f8f8f8]">
-      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
         <BreadCrumbs type="payments" />
         <div className="my-2 py-2">
-          <div className="flex w-100 flex-col space-y-1">
+          <div className="w-100 flex flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">
               {h1}
             </div>
@@ -103,7 +103,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
           />
         </div>
       </div>
-      <div className="h-6 flex-shrink-0"></div>
+      <div className="h-6 flex-shrink-0" />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

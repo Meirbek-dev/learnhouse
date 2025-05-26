@@ -3,7 +3,8 @@ import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
-import React from 'react'
+import type { ReactNode } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
 interface ActivityNavigationProps {
@@ -14,17 +15,17 @@ interface ActivityNavigationProps {
 
 export default function ActivityNavigation(
   props: ActivityNavigationProps
-): React.ReactNode {
+): ReactNode {
   const t = useTranslations('ActivityPage')
   const router = useRouter()
-  const isMobile = useIsMobile()
-  const [isBottomNavVisible, setIsBottomNavVisible] = React.useState(true)
-  const bottomNavRef = React.useRef<HTMLDivElement>(null)
-  const [navWidth, setNavWidth] = React.useState<number | null>(null)
+  const _isMobile = useIsMobile()
+  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true)
+  const bottomNavRef = useRef<HTMLDivElement>(null)
+  const [_navWidth, setNavWidth] = useState<number | null>(null)
 
   // Function to find the current activity's position in the course
   const findActivityPosition = () => {
-    let allActivities: any[] = []
+    const allActivities: any[] = []
     let currentIndex = -1
 
     // Flatten all activities from all chapters
@@ -67,14 +68,13 @@ export default function ActivityNavigation(
 
     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '')
     router.push(
-      getUriWithOrg(props.orgslug, '') +
-        `/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`
+      `${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`
     )
   }
 
   // Set up intersection observer to detect when bottom nav is out of viewport
   // and measure the width of the bottom navigation
-  React.useEffect(() => {
+  useEffect(() => {
     if (!bottomNavRef.current) return
 
     // Update width when component mounts and on window resize
@@ -137,7 +137,6 @@ export default function ActivityNavigation(
               </span>
             </div>
           </button>
-
           <button
             onClick={() => navigateToActivity(nextActivity)}
             className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
@@ -188,14 +187,12 @@ export default function ActivityNavigation(
               </div>
             </button>
           </div>
-
           <div className="justify-self-center text-sm text-gray-500">
             {t('activityCounter', {
               current: currentIndex + 1,
               total: allActivities.length,
             })}
           </div>
-
           <div className="justify-self-end">
             <button
               onClick={() => navigateToActivity(nextActivity)}
@@ -228,14 +225,14 @@ export default function ActivityNavigation(
   return (
     <>
       {/* Bottom navigation (in-place) */}
-      <div ref={bottomNavRef} className="mt-6 mb-2 w-full">
+      <div ref={bottomNavRef} className="mb-2 mt-6 w-full">
         <NavigationButtons isFloating={false} />
       </div>
 
       {/* Floating bottom navigation - shown when bottom nav is not visible */}
       {!isBottomNavVisible && (
         <div className="fixed bottom-8 left-1/2 z-50 w-[85%] max-w-lg -translate-x-1/2 transform transition-all duration-300 ease-in-out sm:w-auto sm:min-w-[350px]">
-          <div className="animate-in fade-in slide-in-from-bottom rounded-full bg-white/90 px-2.5 py-1.5 shadow-xs backdrop-blur-xl duration-300">
+          <div className="animate-in fade-in slide-in-from-bottom shadow-xs rounded-full bg-white/90 px-2.5 py-1.5 backdrop-blur-xl duration-300">
             <NavigationButtons isFloating={true} />
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { Loader } from 'lucide-react'
 import { UploadIcon } from '@radix-ui/react-icons'
 import type { FC, ReactNode } from 'react'
-import {
+import type {
   ButtonHTMLAttributes,
   HTMLAttributes,
   InputHTMLAttributes,

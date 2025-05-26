@@ -18,6 +18,15 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { createActivity, deleteActivity } from '@services/courses/activities'
 import toast from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
+import { CalendarIcon } from 'lucide-react'
 
 function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
   const t = useTranslations('Components.NewAssignmentModal')
@@ -37,8 +46,17 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
     setActivityDescription(e.target.value)
   }
 
-  const handleDueDateChange = (e: any) => {
-    setDueDate(e.target.value)
+  const handleDueDateChange = (date: any) => {
+    if (date) {
+      // Format date as YYYY-MM-DD without timezone conversion
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const isoDate = `${year}-${month}-${day}`
+      setDueDate(isoDate)
+    } else {
+      setDueDate('')
+    }
   }
 
   const handleGradingTypeChange = (e: any) => {
@@ -154,9 +172,34 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
             {t('valueMissingDueDate')}
           </FormMessage>
         </Flex>
-        <Form.Control asChild>
-          <Input onChange={handleDueDateChange} type="date" required />
-        </Form.Control>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Form.Control asChild>
+              <button
+                className={cn(
+                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
+                  !dueDate && 'text-muted-foreground'
+                )}
+              >
+                {dueDate ? (
+                  format(new Date(dueDate), 'PPP')
+                ) : (
+                  <span>Select a deadline for completing the task</span> //{t('pickDate')}
+                )}
+                <CalendarIcon className="ml-2 size-4 opacity-50" />
+              </button>
+            </Form.Control>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dueDate ? new Date(dueDate) : undefined}
+              onSelect={handleDueDateChange}
+              disabled={false}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
       </FormField>
 
       {/* Grading type  */}

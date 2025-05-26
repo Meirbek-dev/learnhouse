@@ -4,8 +4,8 @@ import { getCollectionById } from '@services/courses/collections'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { nextAuthOptions } from 'app/auth/options'
-import { Metadata } from 'next'
-import { getServerSession } from 'next-auth'
+import type { Metadata } from 'next'
+import { getServerSession } from 'next-auth/next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
@@ -85,11 +85,11 @@ const CollectionPage = async (params: any) => {
             <Link
               href={getUriWithOrg(
                 orgslug,
-                '/course/' + removeCoursePrefix(course.course_uuid)
+                `/course/${removeCoursePrefix(course.course_uuid)}`
               )}
             >
               <div
-                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
+                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
                 style={{
                   backgroundImage: `url(${getCourseThumbnailMediaDirectory(
                     org.org_uuid,
@@ -97,7 +97,7 @@ const CollectionPage = async (params: any) => {
                     course.thumbnail_image
                   )})`,
                 }}
-              ></div>
+              />
             </Link>
             <h2 className="w-[250px] py-2 text-lg font-bold">{course.name}</h2>
           </div>

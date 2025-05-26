@@ -366,7 +366,7 @@ const UpdatesListView = () => {
                 </h4>
                 <span
                   title={dayjs(update.creation_date).format('MMMM D, YYYY')}
-                  className="text-[11px] font-medium whitespace-nowrap text-neutral-400"
+                  className="whitespace-nowrap text-[11px] font-medium text-neutral-400"
                 >
                   {dayjs(update.creation_date).fromNow()}
                 </span>

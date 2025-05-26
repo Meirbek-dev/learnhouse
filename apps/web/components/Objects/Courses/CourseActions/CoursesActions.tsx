@@ -84,7 +84,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
           session.data?.tokens?.access_token
         )
         setLinkedProducts(response.data || [])
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to fetch linked products')
       } finally {
         setIsLoading(false)
@@ -99,12 +99,12 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
       if (!session.data?.user) return
       try {
         const response = await checkPaidAccess(
-          parseInt(course.id),
+          Number.parseInt(course.id),
           course.org_id,
           session.data?.tokens?.access_token
         )
         setHasAccess(response.has_access)
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to check course access')
         toast.error('Failed to check course access. Please try again later.')
         setHasAccess(false)
@@ -135,7 +135,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
     try {
       if (isStarted) {
         await removeCourse(
-          'course_' + courseuuid,
+          `course_${courseuuid}`,
           orgslug,
           session.data?.tokens?.access_token
         )
@@ -144,7 +144,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
         router.refresh()
       } else {
         await startCourse(
-          'course_' + courseuuid,
+          `course_${courseuuid}`,
           orgslug,
           session.data?.tokens?.access_token
         )
@@ -158,8 +158,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
         if (firstActivity) {
           // Redirect to the first activity
           router.push(
-            getUriWithOrg(orgslug, '') +
-              `/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
+            `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
           )
         } else {
           router.refresh()
@@ -190,7 +189,7 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
       }
 
       await applyForContributor(
-        'course_' + courseuuid,
+        `course_${courseuuid}`,
         data,
         session.data?.tokens?.access_token
       )

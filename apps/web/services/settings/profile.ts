@@ -15,7 +15,7 @@ export async function updateProfile(
   access_token: string
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}users/` + user_id,
+    `${getAPIUrl()}users/${user_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token)
   )
   const res = await getResponseMetadata(result)

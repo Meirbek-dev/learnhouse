@@ -69,7 +69,7 @@ function AssignmentsHome() {
               className="nice-shadow flex w-full flex-col space-y-2 rounded-xl bg-white p-3 sm:p-4"
             >
               <div>
-                <div className="flex w-full flex-col items-start justify-between space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
+                <div className="flex w-full flex-col items-start justify-between space-y-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0">
                   <div className="flex items-center space-x-2">
                     <MiniThumbnail course={courses[index]} />
                     <div className="flex flex-col text-lg font-bold">
@@ -95,64 +95,61 @@ function AssignmentsHome() {
                   </Link>
                 </div>
 
-                {assignments &&
-                  assignments.map((assignment: any) => (
-                    <div
-                      key={assignment.assignment_uuid}
-                      className="light-shadow mt-3 flex w-full flex-col items-start justify-between space-y-2 rounded bg-gray-50 p-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2 sm:p-3"
-                    >
-                      <div className="flex flex-col items-start space-y-1 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
-                        <div className="flex h-fit rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold text-gray-700">
-                          <p>{t('assignment')}</p>
-                        </div>
-                        <div className="flex text-lg font-semibold">
-                          {assignment.title}
-                        </div>
-                        <div className="flex rounded px-2 py-0.5 font-semibold text-gray-600 outline outline-gray-200/70">
-                          {assignment.description}
-                        </div>
+                {assignments?.map((assignment: any) => (
+                  <div
+                    key={assignment.assignment_uuid}
+                    className="light-shadow mt-3 flex w-full flex-col items-start justify-between space-y-2 rounded bg-gray-50 p-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0 sm:p-3"
+                  >
+                    <div className="flex flex-col items-start space-y-1 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0">
+                      <div className="flex h-fit rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold text-gray-700">
+                        <p>{t('assignment')}</p>
                       </div>
-                      <div className="flex items-center space-x-2 text-sm font-bold">
-                        <EllipsisVertical className="text-gray-500" size={17} />
-                        <Link
-                          href={{
-                            pathname: getUriWithOrg(
-                              org.slug,
-                              `/dash/assignments/${removeAssignmentPrefix(assignment.assignment_uuid)}`
-                            ),
-                            query: { subpage: 'editor' },
-                          }}
-                          prefetch
-                          className="nice-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
-                        >
-                          <Layers2 size={15} />
-                          <p>{t('editor')}</p>
-                        </Link>
-                        <Link
-                          href={{
-                            pathname: getUriWithOrg(
-                              org.slug,
-                              `/dash/assignments/${removeAssignmentPrefix(assignment.assignment_uuid)}`
-                            ),
-                            query: { subpage: 'submissions' },
-                          }}
-                          prefetch
-                          className="nice-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
-                        >
-                          <UserRoundPen size={15} />
-                          <p>{t('submissions')}</p>
-                        </Link>
+                      <div className="flex text-lg font-semibold">
+                        {assignment.title}
+                      </div>
+                      <div className="flex rounded px-2 py-0.5 font-semibold text-gray-600 outline outline-gray-200/70">
+                        {assignment.description}
                       </div>
                     </div>
-                  ))}
+                    <div className="flex items-center space-x-2 text-sm font-bold">
+                      <EllipsisVertical className="text-gray-500" size={17} />
+                      <Link
+                        href={{
+                          pathname: getUriWithOrg(
+                            org.slug,
+                            `/dash/assignments/${removeAssignmentPrefix(assignment.assignment_uuid)}`
+                          ),
+                          query: { subpage: 'editor' },
+                        }}
+                        prefetch
+                        className="nice-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
+                      >
+                        <Layers2 size={15} />
+                        <p>{t('editor')}</p>
+                      </Link>
+                      <Link
+                        href={{
+                          pathname: getUriWithOrg(
+                            org.slug,
+                            `/dash/assignments/${removeAssignmentPrefix(assignment.assignment_uuid)}`
+                          ),
+                          query: { subpage: 'submissions' },
+                        }}
+                        prefetch
+                        className="nice-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
+                      >
+                        <UserRoundPen size={15} />
+                        <p>{t('submissions')}</p>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
 
                 {assignments.length === 0 && (
-                  <>
-                    <div className="mx-auto mt-3 flex items-center space-x-2 font-semibold text-gray-600">
-                      <Info size={20} />
-                      <p>{t('noAssignments')}</p>
-                    </div>
-                  </>
+                  <div className="mx-auto mt-3 flex items-center space-x-2 font-semibold text-gray-600">
+                    <Info size={20} />
+                    <p>{t('noAssignments')}</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -174,12 +171,12 @@ const MiniThumbnail = (props: { course: any }) => {
     <Link
       href={getUriWithOrg(
         org.orgslug,
-        '/course/' + removeCoursePrefix(props.course.course_uuid)
+        `/course/${removeCoursePrefix(props.course.course_uuid)}`
       )}
     >
       {props.course.thumbnail_image ? (
         <div
-          className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
+          className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
           style={{
             backgroundImage: `url(${getCourseThumbnailMediaDirectory(
               org?.org_uuid,
@@ -190,7 +187,7 @@ const MiniThumbnail = (props: { course: any }) => {
         />
       ) : (
         <div
-          className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
+          className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
           style={{
             backgroundImage: `url('../empty_thumbnail.png')`,
             backgroundSize: 'contain',

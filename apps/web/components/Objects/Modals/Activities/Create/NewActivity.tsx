@@ -38,7 +38,7 @@ function NewActivityModal({
                 quality={100}
                 alt={t('dynamicPage')}
                 src={DynamicPageActivityImage}
-              ></Image>
+              />
             </div>
             <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
               {t('dynamicPage')}
@@ -55,7 +55,7 @@ function NewActivityModal({
                 quality={100}
                 alt={t('video')}
                 src={VideoPageActivityImage}
-              ></Image>
+              />
             </div>
             <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
               {t('video')}
@@ -72,7 +72,7 @@ function NewActivityModal({
                 quality={100}
                 alt={t('document')}
                 src={DocumentPdfPageActivityImage}
-              ></Image>
+              />
             </div>
             <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
               {t('document')}
@@ -89,7 +89,7 @@ function NewActivityModal({
                 quality={100}
                 alt={t('assignments')}
                 src={AssignmentActivityImage}
-              ></Image>
+              />
             </div>
             <div className="flex h-5 items-center justify-center text-center text-sm font-medium text-gray-500">
               {t('assignments')}

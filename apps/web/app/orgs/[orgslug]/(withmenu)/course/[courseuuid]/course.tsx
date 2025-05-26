@@ -20,6 +20,7 @@ import { CourseProvider } from '@components/Contexts/CourseContext'
 import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions'
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors'
+import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs'
 import { useTranslations } from 'next-intl'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -51,7 +52,7 @@ const CourseClient = (props: any) => {
         setLearnings(parsedLearnings)
         return
       }
-    } catch (e) {
+    } catch (_e) {
       // Not valid JSON, continue to legacy format handling
     }
 
@@ -97,7 +98,7 @@ const CourseClient = (props: any) => {
     }
   }
 
-  const getActivityTypeBadgeColor = (activityType: string) => {
+  const _getActivityTypeBadgeColor = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
         return 'bg-neutral-100 text-neutral-500'
@@ -129,12 +130,13 @@ const CourseClient = (props: any) => {
 
   return (
     <>
-      {!course && !org ? (
-        <PageLoading></PageLoading>
+      {!(course || org) ? (
+        <PageLoading />
       ) : (
         <>
           <GeneralWrapperStyled>
-            <div className="flex flex-col items-start justify-between pt-5 pb-2 md:flex-row md:items-center">
+            <CourseBreadcrumbs course={course} orgslug={orgslug} />
+            <div className="flex flex-col items-start justify-between pb-2 pt-3 md:flex-row md:items-center">
               <div>
                 <p className="text-md pb-2 font-bold text-gray-400">
                   {t('title')}
@@ -149,7 +151,7 @@ const CourseClient = (props: any) => {
               <div className="w-full space-y-4 md:w-3/4">
                 {props.course?.thumbnail_image && org ? (
                   <div
-                    className="relative inset-0 h-[200px] w-full rounded-lg bg-cover bg-center shadow-xl ring-1 ring-black/10 ring-inset md:h-[400px]"
+                    className="relative inset-0 h-[200px] w-full rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset ring-black/10 md:h-[400px]"
                     style={{
                       backgroundImage: `url(${getCourseThumbnailMediaDirectory(
                         org?.org_uuid,
@@ -157,15 +159,15 @@ const CourseClient = (props: any) => {
                         course?.thumbnail_image
                       )})`,
                     }}
-                  ></div>
+                  />
                 ) : (
                   <div
-                    className="relative inset-0 h-[400px] w-full rounded-lg bg-cover bg-center shadow-xl ring-1 ring-black/10 ring-inset"
+                    className="relative inset-0 h-[400px] w-full rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset ring-black/10"
                     style={{
                       backgroundImage: `url('../empty_thumbnail.png')`,
                       backgroundSize: 'auto',
                     }}
-                  ></div>
+                  />
                 )}
 
                 {course?.trail?.runs?.find(
@@ -180,7 +182,7 @@ const CourseClient = (props: any) => {
 
                 <div className="course_metadata_left space-y-2">
                   <div className="">
-                    <p className="py-5 whitespace-pre-wrap">{course.about}</p>
+                    <p className="whitespace-pre-wrap py-5">{course.about}</p>
                   </div>
                 </div>
               </div>
@@ -282,7 +284,7 @@ const CourseClient = (props: any) => {
                           {chapter.name}
                         </h3>
                         <div className="flex items-center space-x-3">
-                          <p className="shrink-0 rounded-full px-3 py-[2px] text-sm font-normal whitespace-nowrap text-neutral-400 outline-1 outline-neutral-200">
+                          <p className="shrink-0 whitespace-nowrap rounded-full px-3 py-[2px] text-sm font-normal text-neutral-400 outline-1 outline-neutral-200">
                             {t('activities', {
                               activitiesLength: chapter.activities.length,
                             })}
@@ -310,13 +312,10 @@ const CourseClient = (props: any) => {
                             return (
                               <Link
                                 key={activity.activity_uuid}
-                                href={
-                                  getUriWithOrg(orgslug, '') +
-                                  `/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`
-                                }
+                                href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
                                 rel="noopener noreferrer"
                                 prefetch={false}
-                                className="group activity-container block px-4 py-4 transition-all duration-200"
+                                className="activity-container group block px-4 py-4 transition-all duration-200"
                               >
                                 <div className="flex items-center space-x-3">
                                   <div className="flex items-center">
@@ -328,7 +327,7 @@ const CourseClient = (props: any) => {
                                         />
                                         <Check
                                           size={16}
-                                          className="absolute top-0 left-0 stroke-[2.5] text-teal-600"
+                                          className="absolute left-0 top-0 stroke-[2.5] text-teal-600"
                                         />
                                       </div>
                                     ) : (
@@ -388,7 +387,7 @@ const CourseClient = (props: any) => {
           </GeneralWrapperStyled>
 
           {isMobile && (
-            <div className="fixed right-0 bottom-0 left-0 z-50 p-4">
+            <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
               <CourseActionsMobile
                 courseuuid={courseuuid}
                 orgslug={orgslug}

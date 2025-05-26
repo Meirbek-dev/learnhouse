@@ -24,10 +24,10 @@ function AssignmentEditorSubPage({
           <LayoutList size={18} />
           <p>{t('tasks')}</p>
         </div>
-        <AssignmentTasks assignment_uuid={'assignment_' + assignmentuuid} />
+        <AssignmentTasks assignment_uuid={`assignment_${assignmentuuid}`} />
       </div>
       <div className="nice-shadow flex h-full w-full grow bg-[#fefcfe]">
-        <AssignmentProvider assignment_uuid={'assignment_' + assignmentuuid}>
+        <AssignmentProvider assignment_uuid={`assignment_${assignmentuuid}`}>
           <AssignmentTaskEditor page="general" />
         </AssignmentProvider>
       </div>

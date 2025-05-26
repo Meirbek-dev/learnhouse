@@ -71,62 +71,58 @@ function ManageUsers(props: ManageUsersProps) {
 
   return (
     <div className="py-3">
-      <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
-        <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
+      <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
+        <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
           <tr className="font-bolder text-sm">
             <th className="px-4 py-3">{t('userHeader')}</th>
             <th className="px-4 py-3">{t('linkedHeader')}</th>
             <th className="px-4 py-3">{t('actionsHeader')}</th>
           </tr>
         </thead>
-        <>
-          <tbody className="mt-5 rounded-md bg-white">
-            {OrgUsers?.map((user: any) => (
-              <tr
-                key={user.user.id}
-                className="border-b border-dashed border-gray-200 text-sm"
-              >
-                <td className="flex items-center space-x-2 px-4 py-3">
-                  <span>
-                    {user.user.first_name + ' ' + user.user.last_name}
-                  </span>
-                  <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
-                    @{user.user.username}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {isUserPartOfGroup(user.user.id) ? (
-                    <div className="flex w-fit items-center space-x-1 rounded-full bg-cyan-100 px-4 py-1 text-cyan-800">
-                      <Check size={16} />
-                      <span>{t('linkedStatus')}</span>
-                    </div>
-                  ) : (
-                    <div className="flex w-fit items-center space-x-1 rounded-full bg-gray-100 px-4 py-1 text-gray-800">
-                      <X size={16} />
-                      <span>{t('notLinkedStatus')}</span>
-                    </div>
-                  )}
-                </td>
-                <td className="flex items-end space-x-2 px-4 py-3">
-                  <button
-                    onClick={() => handleLinkUser(user.user.id)}
-                    className="flex items-center space-x-2 rounded-md bg-cyan-700 p-1 px-3 text-sm font-bold text-cyan-100 hover:cursor-pointer"
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span>{t('linkButton')}</span>
-                  </button>
-                  <button
-                    onClick={() => handleUnlinkUser(user.user.id)}
-                    className="flex items-center space-x-2 rounded-md bg-gray-700 p-1 px-3 text-sm font-bold text-gray-100 hover:cursor-pointer"
-                  >
-                    <X className="h-4 w-4" />
-                    <span>{t('unlinkButton')}</span>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </>
+        <tbody className="mt-5 rounded-md bg-white">
+          {OrgUsers?.map((user: any) => (
+            <tr
+              key={user.user.id}
+              className="border-b border-dashed border-gray-200 text-sm"
+            >
+              <td className="flex items-center space-x-2 px-4 py-3">
+                <span>{`${user.user.first_name} ${user.user.last_name}`}</span>
+                <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
+                  @{user.user.username}
+                </span>
+              </td>
+              <td className="px-4 py-3">
+                {isUserPartOfGroup(user.user.id) ? (
+                  <div className="flex w-fit items-center space-x-1 rounded-full bg-cyan-100 px-4 py-1 text-cyan-800">
+                    <Check size={16} />
+                    <span>{t('linkedStatus')}</span>
+                  </div>
+                ) : (
+                  <div className="flex w-fit items-center space-x-1 rounded-full bg-gray-100 px-4 py-1 text-gray-800">
+                    <X size={16} />
+                    <span>{t('notLinkedStatus')}</span>
+                  </div>
+                )}
+              </td>
+              <td className="flex items-end space-x-2 px-4 py-3">
+                <button
+                  onClick={() => handleLinkUser(user.user.id)}
+                  className="flex items-center space-x-2 rounded-md bg-cyan-700 p-1 px-3 text-sm font-bold text-cyan-100 hover:cursor-pointer"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>{t('linkButton')}</span>
+                </button>
+                <button
+                  onClick={() => handleUnlinkUser(user.user.id)}
+                  className="flex items-center space-x-2 rounded-md bg-gray-700 p-1 px-3 text-sm font-bold text-gray-100 hover:cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                  <span>{t('unlinkButton')}</span>
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   )

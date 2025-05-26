@@ -2,8 +2,8 @@ import { getActivityWithAuthHeader } from '@services/courses/activities'
 import { getCourseMetadata } from '@services/courses/courses'
 import ActivityClient from './activity'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import { Metadata } from 'next'
-import { getServerSession } from 'next-auth'
+import type { Metadata } from 'next'
+import { getServerSession } from 'next-auth/next'
 import { nextAuthOptions } from 'app/auth/options'
 import { getTranslations } from 'next-intl/server'
 
@@ -25,7 +25,7 @@ async function fetchCourseMetadata(
 ) {
   return await getCourseMetadata(
     courseuuid,
-    { revalidate: 0, tags: ['courses'] },
+    { revalidate: 30, tags: ['courses'] },
     access_token || null
   )
 }
@@ -39,7 +39,7 @@ export async function generateMetadata(
   const t = await getTranslations('General')
 
   // Get Org context information
-  const org = await getOrganizationContextInfo(params.orgslug, {
+  const _org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
   })
@@ -85,7 +85,7 @@ const ActivityPage = async (params: any) => {
     fetchCourseMetadata(courseuuid, access_token),
     getActivityWithAuthHeader(
       activityid,
-      { revalidate: 0, tags: ['activities'] },
+      { revalidate: 60, tags: ['activities'] },
       access_token || null
     ),
   ])

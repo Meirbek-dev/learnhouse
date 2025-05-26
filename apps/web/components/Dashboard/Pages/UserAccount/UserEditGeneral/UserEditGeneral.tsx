@@ -46,7 +46,7 @@ import { getUriWithoutOrg } from '@services/config/config'
 import { useDebounce } from '@/hooks/useDebounce'
 import { LocaleSwitcher } from '@components/Utils/LocaleSwitcher'
 import { getUserLocale } from '@/i18n/locale'
-import { type Locale } from '@/i18n/config'
+import type { Locale } from '@/i18n/config'
 import { useTranslations } from 'next-intl'
 
 const SUPPORTED_FILES = constructAcceptValue(['image'])
@@ -285,7 +285,7 @@ const UserEditForm = ({
 }: UserEditFormProps) => {
   const t = useTranslations('DashPage.UserAccountSettings.generalSection')
   // Memoize template handlers
-  const templateHandlers = useMemo(
+  const _templateHandlers = useMemo(
     () =>
       Object.entries(DETAIL_TEMPLATES).reduce(
         (acc, [key, template]) => ({
@@ -309,7 +309,7 @@ const UserEditForm = ({
   )
 
   // Memoize detail handlers
-  const detailHandlers = useMemo(
+  const _detailHandlers = useMemo(
     () => ({
       handleDetailUpdate: (
         id: string,
@@ -592,7 +592,7 @@ const UserEditForm = ({
             </div>
           </div>
         </div>
-        <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
+        <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
           <Button
             type="submit"
             disabled={isSubmitting}
@@ -620,7 +620,7 @@ function UserEditGeneral() {
   const validationSchema = React.useMemo(() => createValidationSchema(t), [t])
 
   // Add a handler to update the state when locale changes
-  const handleLocaleChange = useCallback((newLocale: Locale) => {
+  const _handleLocaleChange = useCallback((newLocale: Locale) => {
     setCurrentLocale(newLocale)
   }, [])
 
@@ -710,7 +710,7 @@ function UserEditGeneral() {
     return (
       <div className="nice-shadow mx-0 rounded-xl bg-white p-8 sm:mx-10">
         <div className="flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
         </div>
       </div>
     )

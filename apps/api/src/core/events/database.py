@@ -39,7 +39,7 @@ engine = create_engine(
     echo=False,
     pool_pre_ping=True,  # type: ignore
     pool_size=10,
-    max_overflow=20,
+    max_overflow=0,
     pool_recycle=300,  # Recycle connections after 5 minutes
     pool_timeout=30,
 )

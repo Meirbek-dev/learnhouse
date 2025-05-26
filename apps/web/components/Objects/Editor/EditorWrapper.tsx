@@ -1,5 +1,5 @@
 'use client'
-import { default as React, type JSX, useEffect, useState } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import Editor from './Editor'
 import { updateActivity } from '@services/courses/activities'
 import { toast } from 'react-hot-toast'
@@ -28,7 +28,7 @@ function EditorWrapper(props: EditorWrapperProps): JSX.Element {
   }, [session.isLoading])
 
   async function setContent(content: any) {
-    let activity = props.activity
+    const activity = props.activity
     activity.content = content
 
     toast.promise(

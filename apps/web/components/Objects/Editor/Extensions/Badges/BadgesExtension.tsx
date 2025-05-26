@@ -181,8 +181,8 @@ const BadgesExtension: FC = (props: any) => {
           </div>
           <NodeViewContent
             contentEditable={isEditable}
-            className="content text tracking-wide capitalize"
-          ></NodeViewContent>
+            className="content text capitalize tracking-wide"
+          />
           {isEditable && (
             <div className="relative flex items-center justify-center space-x-2">
               <button onClick={() => setShowColorPicker(!showColorPicker)}>
@@ -197,7 +197,7 @@ const BadgesExtension: FC = (props: any) => {
                     {colors.map((c) => (
                       <button
                         key={c}
-                        className={`h-8 w-8 rounded-full ${getBadgeColor(c)} hover:ring-opacity-50 focus:ring-opacity-50 hover:ring-2 focus:ring-2 focus:outline-hidden`}
+                        className={`h-8 w-8 rounded-full ${getBadgeColor(c)} focus:outline-hidden hover:ring-2 hover:ring-opacity-50 focus:ring-2 focus:ring-opacity-50`}
                         onClick={() => handleColorSelect(c)}
                       />
                     ))}
@@ -218,7 +218,7 @@ const BadgesExtension: FC = (props: any) => {
         )}
 
         {isEditable && showPredefinedCallouts && (
-          <div className="nice-shadow absolute top-full left-0 z-10 mt-2 flex flex-wrap gap-2 rounded-lg bg-white/90 p-2 backdrop-blur-md">
+          <div className="nice-shadow absolute left-0 top-full z-10 mt-2 flex flex-wrap gap-2 rounded-lg bg-white/90 p-2 backdrop-blur-md">
             {predefinedBadges.map((badge, index) => (
               <button
                 key={index}

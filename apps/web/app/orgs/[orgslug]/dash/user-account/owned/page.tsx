@@ -21,14 +21,14 @@ function OwnedCoursesPage() {
     isLoading,
   } = useSWR(
     org ? [`/payments/${org.id}/courses/owned`, access_token] : null,
-    ([url, token]) => getOwnedCourses(org.id, token)
+    ([_url, token]) => getOwnedCourses(org.id, token)
   )
 
   if (isLoading) return <PageLoading />
   if (error) return <div>{t('error')}</div>
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] pt-5 pr-10 pl-10">
+    <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10 pt-5">
       <div className="nice-shadow mb-6 flex flex-col rounded-md bg-white px-5 py-3">
         <div className="flex items-center gap-4">
           <Package2 className="h-8 w-8 text-gray-800" />

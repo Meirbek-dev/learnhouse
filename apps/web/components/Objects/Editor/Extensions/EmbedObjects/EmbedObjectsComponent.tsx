@@ -70,7 +70,7 @@ const getYouTubeEmbedUrl = (url: string): string => {
       /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
     const match = url.match(youtubeRegex)
 
-    if (match && match[1]) {
+    if (match?.[1]) {
       // Validate the video ID format (should be exactly 11 characters)
       const videoId = match[1]
       if (videoId.length === 11) {
@@ -81,7 +81,7 @@ const getYouTubeEmbedUrl = (url: string): string => {
 
     // If no valid match found, return the original URL
     return url
-  } catch (e) {
+  } catch (_e) {
     // If URL parsing fails, return the original URL
     return url
   }
@@ -131,7 +131,7 @@ const MemoizedEmbed = React.memo(
           url.hostname === 'www.youtube.com' ||
           url.hostname === 'youtu.be' ||
           url.hostname === 'www.youtu.be'
-      } catch (e) {
+      } catch (_e) {
         // Invalid URL format, not a YouTube URL
         isYoutubeUrl = false
       }
@@ -187,12 +187,12 @@ function EmbedObjectsComponent(props: any) {
   const containerRef = useRef<HTMLDivElement>(null)
   const editorState = useEditorProvider() as any
   const isEditable = editorState.isEditable
-  const router = useRouter()
+  const _router = useRouter()
 
   // Add ResizeObserver to track parent container size changes
   useEffect(() => {
     const updateDimensions = () => {
-      if (containerRef.current && containerRef.current.parentElement) {
+      if (containerRef.current?.parentElement) {
         const parentElement = containerRef.current.parentElement
         const newParentWidth = parentElement.offsetWidth
         setParentWidth(newParentWidth)
@@ -200,11 +200,11 @@ function EmbedObjectsComponent(props: any) {
         // If embedWidth is set to a percentage, maintain that percentage
         // Otherwise, adjust to fit parent width
         if (typeof embedWidth === 'string' && embedWidth.endsWith('%')) {
-          const percentage = parseInt(embedWidth, 10)
+          const percentage = Number.parseInt(embedWidth, 10)
           const newWidth = `${Math.min(100, percentage)}%`
           setEmbedWidth(newWidth)
           props.updateAttributes({ embedWidth: newWidth })
-        } else if (newParentWidth < parseInt(String(embedWidth), 10)) {
+        } else if (newParentWidth < Number.parseInt(String(embedWidth), 10)) {
           // If parent is smaller than current width, adjust to fit
           setEmbedWidth('100%')
           props.updateAttributes({ embedWidth: '100%' })
@@ -220,7 +220,7 @@ function EmbedObjectsComponent(props: any) {
       updateDimensions()
     })
 
-    if (containerRef.current && containerRef.current.parentElement) {
+    if (containerRef.current?.parentElement) {
       resizeObserver.observe(containerRef.current.parentElement)
     }
 
@@ -328,7 +328,7 @@ function EmbedObjectsComponent(props: any) {
     }
   }, [embedCode, embedType])
 
-  const handleEmbedTypeChange = (type: 'url' | 'code') => {
+  const _handleEmbedTypeChange = (type: 'url' | 'code') => {
     setEmbedType(type)
     props.updateAttributes({ embedType: type })
   }
@@ -356,7 +356,7 @@ function EmbedObjectsComponent(props: any) {
             url.protocol = 'https:'
             validatedUrl = url.toString()
           }
-        } catch (e) {
+        } catch (_e) {
           // If it's not a valid URL, prepend https:// to make it valid
           // Only do this if it's not empty and doesn't already start with a protocol
           if (sanitizedUrl && !sanitizedUrl.match(/^[a-zA-Z]+:\/\//)) {
@@ -450,7 +450,7 @@ function EmbedObjectsComponent(props: any) {
     props.updateAttributes({ alignment: newAlignment })
   }
 
-  const handleProductClick = (guide: string) => {
+  const _handleProductClick = (guide: string) => {
     window.open(guide, '_blank', 'noopener,noreferrer')
   }
 
@@ -470,7 +470,7 @@ function EmbedObjectsComponent(props: any) {
         styles.minWidth = 'unset'
       } else {
         // For desktop, use the set width but ensure it's not wider than parent
-        styles.minWidth = Math.min(parentWidth, 400) + 'px'
+        styles.minWidth = `${Math.min(parentWidth, 400)}px`
         styles.maxWidth = '100%'
       }
     }
@@ -551,7 +551,7 @@ function EmbedObjectsComponent(props: any) {
             {embedContent}
             {/* Minimal toolbar for existing embeds */}
             {isEditable && (
-              <div className="bg-opacity-90 absolute top-2 right-2 flex items-center gap-1.5 rounded-lg bg-white p-1 opacity-70 shadow-xs backdrop-blur-xs transition-opacity hover:opacity-100">
+              <div className="shadow-xs backdrop-blur-xs absolute right-2 top-2 flex items-center gap-1.5 rounded-lg bg-white bg-opacity-90 p-1 opacity-70 transition-opacity hover:opacity-100">
                 <button
                   onClick={() => setActiveInput(embedType)}
                   className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100"
@@ -568,7 +568,7 @@ function EmbedObjectsComponent(props: any) {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"></path>
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z" />
                   </svg>
                 </button>
                 <button
@@ -605,9 +605,9 @@ function EmbedObjectsComponent(props: any) {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M3 6h18"></path>
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                   </svg>
                 </button>
               </div>
@@ -641,7 +641,7 @@ function EmbedObjectsComponent(props: any) {
                 </button>
               ))}
             </div>
-            <p className="mt-3 mb-2 max-w-md text-center text-xs text-gray-500">
+            <p className="mb-2 mt-3 max-w-md text-center text-xs text-gray-500">
               {t('clickServiceToAdd')}
             </p>
             {/* Direct input options */}
@@ -652,7 +652,7 @@ function EmbedObjectsComponent(props: any) {
                     setEmbedType('url')
                     setActiveInput('url')
                   }}
-                  className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 shadow-xs transition-all hover:shadow-md"
+                  className="shadow-xs flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 transition-all hover:shadow-md"
                 >
                   <LinkIcon size={14} />
                   <span>{t('urlButton')}</span>
@@ -662,7 +662,7 @@ function EmbedObjectsComponent(props: any) {
                     setEmbedType('code')
                     setActiveInput('code')
                   }}
-                  className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 shadow-xs transition-all hover:shadow-md"
+                  className="shadow-xs flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 transition-all hover:shadow-md"
                 >
                   <Code size={14} />
                   <span>{t('codeButton')}</span>
@@ -674,7 +674,7 @@ function EmbedObjectsComponent(props: any) {
 
         {/* Inline input UI - appears in place without covering content */}
         {isEditable && activeInput !== 'none' && (
-          <div className="bg-opacity-95 absolute inset-0 z-10 flex items-center justify-center bg-gray-100 p-4 backdrop-blur-xs">
+          <div className="backdrop-blur-xs absolute inset-0 z-10 flex items-center justify-center bg-gray-100 bg-opacity-95 p-4">
             <form
               onSubmit={handleInputSubmit}
               className="w-full max-w-lg rounded-xl bg-white p-4 shadow-lg"
@@ -716,8 +716,8 @@ function EmbedObjectsComponent(props: any) {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 </button>
               </div>
@@ -725,7 +725,7 @@ function EmbedObjectsComponent(props: any) {
               {activeInput === 'url' ? (
                 <>
                   <div className="relative mb-2">
-                    <div className="absolute top-1/2 left-3 -translate-y-1/2 transform text-blue-500">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 transform text-blue-500">
                       <LinkIcon size={16} />
                     </div>
                     <input
@@ -733,7 +733,7 @@ function EmbedObjectsComponent(props: any) {
                       type="text"
                       value={embedUrl}
                       onChange={handleUrlChange}
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                      className="focus:outline-hidden w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       placeholder={
                         selectedProduct
                           ? t('productUrlPlaceholder', {
@@ -741,7 +741,6 @@ function EmbedObjectsComponent(props: any) {
                             })
                           : t('urlPlaceholder')
                       }
-                      autoFocus
                     />
                   </div>
                   <div className="mb-4 flex items-center justify-between">
@@ -767,9 +766,9 @@ function EmbedObjectsComponent(props: any) {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                          <line x1="12" y1="17" x2="12.01" y2="17" />
                         </svg>
                         {t('howToEmbed', { productName: selectedProduct.name })}
                       </button>
@@ -783,9 +782,8 @@ function EmbedObjectsComponent(props: any) {
                       ref={codeInputRef}
                       value={embedCode}
                       onChange={handleCodeChange}
-                      className="h-32 w-full rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                      className="focus:outline-hidden h-32 w-full rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       placeholder={t('codePlaceholder')}
-                      autoFocus
                     />
                   </div>
                   <div className="mb-4 flex items-center justify-between">
@@ -807,9 +805,9 @@ function EmbedObjectsComponent(props: any) {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                          <line x1="12" y1="17" x2="12.01" y2="17" />
                         </svg>
                         {t('howToEmbed', { productName: selectedProduct.name })}
                       </button>
@@ -845,13 +843,13 @@ function EmbedObjectsComponent(props: any) {
         {isEditable && (
           <>
             <div
-              className="bg-opacity-70 hover:bg-opacity-100 absolute top-0 right-0 bottom-0 flex w-4 cursor-ew-resize items-center justify-center bg-white transition-opacity"
+              className="absolute bottom-0 right-0 top-0 flex w-4 cursor-ew-resize items-center justify-center bg-white bg-opacity-70 transition-opacity hover:bg-opacity-100"
               onMouseDown={(e) => handleResizeStart(e, 'horizontal')}
             >
               <GripVertical size={16} className="text-gray-600" />
             </div>
             <div
-              className="bg-opacity-70 hover:bg-opacity-100 absolute right-0 bottom-0 left-0 flex h-4 cursor-ns-resize items-center justify-center bg-white transition-opacity"
+              className="absolute bottom-0 left-0 right-0 flex h-4 cursor-ns-resize items-center justify-center bg-white bg-opacity-70 transition-opacity hover:bg-opacity-100"
               onMouseDown={(e) => handleResizeStart(e, 'vertical')}
             >
               <GripHorizontal size={16} className="text-gray-600" />

@@ -1,4 +1,4 @@
-import { NextConfig } from 'next'
+import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
@@ -6,15 +6,15 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/umami/script.js',
-        destination: `https://eu.umami.is/script.js`,
+        destination: 'https://eu.umami.is/script.js',
       },
       {
         source: '/umami/api/send',
-        destination: `https://eu.umami.is/api/send`,
+        destination: 'https://eu.umami.is/api/send',
       },
     ]
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
   output: 'standalone',
 }
 

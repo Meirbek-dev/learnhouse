@@ -1,7 +1,7 @@
 'use client'
 
-import { NodeViewProps, NodeViewWrapper } from '@tiptap/react'
-import { Node } from '@tiptap/core'
+import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react'
+import type { Node } from '@tiptap/core'
 import {
   Loader2,
   Video,
@@ -44,7 +44,7 @@ const getVideoSizeFromWidth = (
   if (!width) return 'medium'
   if (width === '100%') return 'full'
 
-  const numWidth = typeof width === 'string' ? parseInt(width) : width
+  const numWidth = typeof width === 'string' ? Number.parseInt(width) : width
 
   if (numWidth <= VIDEO_SIZES.small.width) return 'small'
   if (numWidth <= VIDEO_SIZES.medium.width) return 'medium'
@@ -176,7 +176,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     }
   }, [node.attrs.blockObject])
 
-  const [video, setVideo] = useState<File | null>(null)
+  const [_video, setVideo] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -280,7 +280,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
       setTimeout(() => {
         setUploadProgress(0)
       }, 1000)
-    } catch (err) {
+    } catch (_err) {
       setError(t('errorUpload'))
     } finally {
       setIsLoading(false)
@@ -351,7 +351,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               />
               <button
                 onClick={handleDownload}
-                className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                 title="Download video"
               >
                 <Download className="h-4 w-4 text-white" />
@@ -364,7 +364,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   }
 
   // If we're in preview mode but don't have a video, show nothing
-  if (!isEditable && (!blockObject || !videoUrl)) {
+  if (!(isEditable || (blockObject && videoUrl))) {
     return null
   }
 
@@ -395,7 +395,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
             )}
           </div>
 
-          {(!blockObject || !videoUrl) && (
+          {!(blockObject && videoUrl) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}

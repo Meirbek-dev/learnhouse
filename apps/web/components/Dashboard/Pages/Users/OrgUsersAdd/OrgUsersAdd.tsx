@@ -36,7 +36,7 @@ function OrgUsersAdd() {
 
     const toastId = toast.loading(tNotify('sendingInvite'))
     try {
-      let res = await inviteBatchUsers(
+      const res = await inviteBatchUsers(
         org.id,
         invitedUsers,
         selectedInviteCode,
@@ -49,7 +49,7 @@ function OrgUsersAdd() {
       } else {
         toast.error(tNotify('errors.sendInviteFailed'), { id: toastId })
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error(tNotify('errors.sendInviteFailed'), { id: toastId })
     }
   }
@@ -73,13 +73,13 @@ function OrgUsersAdd() {
 
   return (
     <>
-      <Toast></Toast>
+      <Toast />
       {isLoading ? (
         <PageLoading />
       ) : (
         <>
-          <div className="h-6"></div>
-          <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
+          <div className="h-6" />
+          <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
               <h2 className="text-md text-gray-500">{t('description')}</h2>
@@ -88,7 +88,7 @@ function OrgUsersAdd() {
               <textarea
                 value={invitedUsers}
                 onChange={(e) => setInvitedUsers(e.target.value)}
-                className="h-[200px] w-full rounded-md border bg-gray-100/40 px-3 py-2 placeholder:text-slate-300 placeholder:italic"
+                className="h-[200px] w-full rounded-md border bg-gray-100/40 px-3 py-2 placeholder:italic placeholder:text-slate-300"
                 placeholder={t('textAreaPlaceholder')}
                 name="invitedUsers"
                 id="invitedUsersTextArea"
@@ -130,7 +130,7 @@ function OrgUsersAdd() {
                 <button
                   onClick={sendInvites}
                   className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={!selectedInviteCode || !invitedUsers.trim()}
+                  disabled={!(selectedInviteCode && invitedUsers.trim())}
                 >
                   <UserPlus className="h-4 w-4" />
                   <span>{t('sendInvitesButton')}</span>
@@ -138,7 +138,7 @@ function OrgUsersAdd() {
               </div>
             </div>
 
-            <div className="mt-3 mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+            <div className="mb-3 mt-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">
                 {t('invitedUsersTitle')}
               </h1>
@@ -147,8 +147,8 @@ function OrgUsersAdd() {
               </h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
-                <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
+              <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
+                <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
                   <tr className="font-bolder text-sm">
                     <th className="px-4 py-3">{t('emailHeader')}</th>
                     <th className="px-4 py-3">{t('signupStatusHeader')}</th>

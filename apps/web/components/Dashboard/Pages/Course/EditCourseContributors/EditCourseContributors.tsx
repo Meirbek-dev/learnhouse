@@ -52,7 +52,7 @@ interface Contributor {
   }
 }
 
-function EditCourseContributors(props: EditCourseContributorsProps) {
+function EditCourseContributors(_props: EditCourseContributorsProps) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const course = useCourse() as any
@@ -138,10 +138,12 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
         )
       } else {
         toast.error(
-          tNotify('contributorUpdateErrorDetailed', { error: res.data?.detail })
+          tNotify('contributorUpdateErrorDetailed', {
+            error: res.data?.detail,
+          })
         )
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error(tNotify('contributorUpdateErrorGeneric'))
     }
   }
@@ -271,8 +273,8 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
     <div>
       {courseStructure && (
         <div>
-          <div className="h-6"></div>
-          <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
+          <div className="h-6" />
+          <div className="shadow-xs mx-4 rounded-xl bg-white px-4 py-4 sm:mx-10">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
               <h1 className="text-lg font-bold text-gray-800 sm:text-xl">
                 {t('title')}
@@ -281,7 +283,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 {t('description')}
               </h2>
             </div>
-            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
               <ConfirmationModal
                 confirmationButtonText={t('openToContributorsButton')}
                 confirmationMessage={t('openConfirmMsg')}
@@ -345,7 +347,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[50px]"></TableHead>
+                    <TableHead className="w-[50px]" />
                     <TableHead>{t('tableHeaderName')}</TableHead>
                     <TableHead>{t('tableHeaderEmail')}</TableHead>
                     <TableHead>{t('tableHeaderRole')}</TableHead>

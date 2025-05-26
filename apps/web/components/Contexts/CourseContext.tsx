@@ -1,15 +1,24 @@
 'use client'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { createContext, useContext, useEffect, useReducer } from 'react'
+import { createContext, use, useEffect, useReducer } from 'react'
 import useSWR from 'swr'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import ErrorUI from '@components/Objects/StyledElements/Error/Error'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import { useTranslations } from 'next-intl'
 
-export const CourseContext = createContext<any>(null)
-export const CourseDispatchContext = createContext<any>(null)
+type CourseDispatch = React.Dispatch<any>
+type CourseState = {
+  courseStructure: any
+  courseOrder: any
+  isSaved: boolean
+  isLoading: boolean
+  withUnpublishedActivities: boolean
+}
+
+export const CourseContext = createContext<CourseState | null>(null)
+export const CourseDispatchContext = createContext<CourseDispatch | null>(null)
 
 export function CourseProvider({
   children,
@@ -65,11 +74,11 @@ export function CourseProvider({
 }
 
 export function useCourse() {
-  return useContext(CourseContext)
+  return use(CourseContext)
 }
 
 export function useCourseDispatch() {
-  return useContext(CourseDispatchContext)
+  return use(CourseDispatchContext)
 }
 
 function courseReducer(state: any, action: any) {

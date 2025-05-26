@@ -252,7 +252,7 @@ const UserProfileBuilder = () => {
     type: keyof typeof SECTION_TYPE_KEYS
   ): ProfileSection => {
     const sectionTypesConfig = getSectionTypesConfig(t)
-    const sectionTypeKey = SECTION_TYPE_KEYS[type]
+    const _sectionTypeKey = SECTION_TYPE_KEYS[type]
     const baseSection = {
       id: `section-${Date.now()}`,
       type,
@@ -382,7 +382,7 @@ const UserProfileBuilder = () => {
     return (
       <div className="nice-shadow mx-0 rounded-xl bg-white p-6 sm:mx-10">
         <div className="flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
         </div>
       </div>
     )
@@ -436,10 +436,10 @@ const UserProfileBuilder = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             onClick={() => setSelectedSection(index)}
-                            className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
+                            className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
                               selectedSection === index
-                                ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
-                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
+                                ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
+                                : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
                             } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                           >
                             <div className="group flex items-center justify-between">
@@ -1191,7 +1191,10 @@ const EducationEditor: FC<{
                       value={edu.degree}
                       onChange={(e) => {
                         const newEducation = [...section.education]
-                        newEducation[index] = { ...edu, degree: e.target.value }
+                        newEducation[index] = {
+                          ...edu,
+                          degree: e.target.value,
+                        }
                         onChange({ ...section, education: newEducation })
                       }}
                       placeholder="Degree type"
@@ -1475,7 +1478,7 @@ const CoursesEditor: FC<{
           />
         </div>
 
-        <div className="text-sm text-gray-500 italic">
+        <div className="text-sm italic text-gray-500">
           Your authored courses will be automatically displayed in this section.
         </div>
       </div>

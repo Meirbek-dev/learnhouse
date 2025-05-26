@@ -46,7 +46,7 @@ function AssignmentSubmissionsSubPage({
   }
 
   return (
-    <div className="mr-10 flex w-full flex-col pt-3 pl-10">
+    <div className="mr-10 flex w-full flex-col pl-10 pt-3">
       <div className="flex w-full flex-row">
         <div className="flex-1">
           <div className="mx-auto my-5 flex w-fit items-center space-x-2 rounded-full bg-rose-600/80 px-3.5 py-1 text-sm font-bold text-white">
@@ -97,10 +97,10 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
     <div className="nice-shadow mx-auto flex w-[350px] flex-row rounded-lg bg-white p-4 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
       <div className="flex w-full flex-col space-y-2">
         <div className="flex w-full justify-between">
-          <h2 className="text-xs font-semibold tracking-tight text-slate-400 uppercase">
+          <h2 className="text-xs font-semibold uppercase tracking-tight text-slate-400">
             {t('submission')}
           </h2>
-          <p className="text-xs font-semibold tracking-tight uppercase">
+          <p className="text-xs font-semibold uppercase tracking-tight">
             {new Date(submission.creation_date).toLocaleDateString(locale, {
               year: 'numeric',
               month: 'long',
@@ -147,11 +147,11 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
               minWidth="lg"
               dialogContent={
                 <AssignmentProvider
-                  assignment_uuid={'assignment_' + assignment_uuid}
+                  assignment_uuid={`assignment_${assignment_uuid}`}
                 >
                   <AssignmentsTaskProvider>
                     <AssignmentSubmissionProvider
-                      assignment_uuid={'assignment_' + assignment_uuid}
+                      assignment_uuid={`assignment_${assignment_uuid}`}
                     >
                       <EvaluateAssignment user_id={user_id} />
                     </AssignmentSubmissionProvider>

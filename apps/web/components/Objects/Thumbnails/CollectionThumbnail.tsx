@@ -46,15 +46,14 @@ function CollectionThumbnail(props: PropsType) {
                     backgroundPosition: 'center',
                     zIndex: 3 - index,
                   }}
-                ></div>
+                />
               ))}
           </div>
           <div className="flex flex-col">
             <Link
               href={getUriWithOrg(
                 props.orgslug,
-                '/collection/' +
-                  removeCollectionPrefix(props.collection.collection_uuid)
+                `/collection/${removeCollectionPrefix(props.collection.collection_uuid)}`
               )}
               className="text-2xl font-bold text-white hover:underline"
             >
@@ -104,7 +103,7 @@ const CollectionAdminEditsArea = (props: any) => {
           })}
           dialogTrigger={
             <button
-              className="absolute top-2 right-2 rounded-full bg-red-500 p-2 text-white transition-colors duration-300 hover:bg-red-600"
+              className="absolute right-2 top-2 rounded-full bg-red-500 p-2 text-white transition-colors duration-300 hover:bg-red-600"
               rel="noopener noreferrer"
             >
               <X size={18} />
@@ -112,7 +111,7 @@ const CollectionAdminEditsArea = (props: any) => {
           }
           functionToExecute={() => deleteCollectionUI(props.collection_uuid)}
           status="warning"
-        ></ConfirmationModal>
+        />
       </div>
     </AuthenticatedClientElement>
   )

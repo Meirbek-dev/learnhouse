@@ -20,7 +20,7 @@ type CourseProps = {
 
 function CoursesHome(params: CourseProps) {
   const searchParams = useSearchParams()
-  const isCreatingCourse = searchParams.get('new') ? true : false
+  const isCreatingCourse = !!searchParams.get('new')
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse)
   const orgslug = params.orgslug
   const courses = params.courses
@@ -32,7 +32,7 @@ function CoursesHome(params: CourseProps) {
   }
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] pr-10 pl-10">
+    <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
       <div className="mb-6">
         <BreadCrumbs type="courses" />
         <div className="mt-4 flex flex-col items-start justify-between sm:flex-row sm:items-center">
@@ -108,7 +108,7 @@ function CoursesHome(params: CourseProps) {
                 {isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}
               </p>
               {isUserAdmin && (
-                <div className="mt-6">
+                <div className="mt-6 flex justify-center">
                   <AuthenticatedClientElement
                     action="create"
                     ressourceType="courses"

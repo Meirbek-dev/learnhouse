@@ -8,22 +8,14 @@ function MenuLinks(props: { orgslug: string }) {
   return (
     <div className="pl-1">
       <ul className="flex space-x-5">
-        <LinkItem
-          link="/courses"
-          type="courses"
-          orgslug={props.orgslug}
-        ></LinkItem>
+        <LinkItem link="/courses" type="courses" orgslug={props.orgslug} />
         <LinkItem
           link="/collections"
           type="collections"
           orgslug={props.orgslug}
-        ></LinkItem>
+        />
         <AuthenticatedClientElement checkMethod="authentication">
-          <LinkItem
-            link="/trail"
-            type="trail"
-            orgslug={props.orgslug}
-          ></LinkItem>
+          <LinkItem link="/trail" type="trail" orgslug={props.orgslug} />
         </AuthenticatedClientElement>
       </ul>
     </div>

@@ -1,10 +1,10 @@
 import CourseClient from './course'
 import { getCourseMetadata } from '@services/courses/courses'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { nextAuthOptions } from 'app/auth/options'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
@@ -26,7 +26,7 @@ export async function generateMetadata(
   })
   const course_meta = await getCourseMetadata(
     params.courseuuid,
-    { revalidate: 1800, tags: ['courses'] },
+    { revalidate: 30, tags: ['courses'] },
     access_token ? access_token : null
   )
 
@@ -46,7 +46,7 @@ export async function generateMetadata(
       },
     },
     openGraph: {
-      title: course_meta.name + ` — ${org.name}`,
+      title: `${course_meta.name} — ${org.name}`,
       description: course_meta.description ? course_meta.description : '',
       images: [
         {
@@ -75,7 +75,7 @@ const CoursePage = async (params: any) => {
   const awaitedParams = await params.params
   const course_meta = await getCourseMetadata(
     awaitedParams.courseuuid,
-    { revalidate: 0, tags: ['courses'] },
+    { revalidate: 30, tags: ['courses'] },
     access_token ? access_token : null
   )
 

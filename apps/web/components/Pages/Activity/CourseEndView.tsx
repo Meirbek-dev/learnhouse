@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import type React from 'react'
 import ReactConfetti from 'react-confetti'
 import { Trophy, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -69,10 +69,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
 
         <div className="pt-6">
           <Link
-            href={
-              getUriWithOrg(orgslug, '') +
-              `/course/${courseUuid.replace('course_', '')}`
-            }
+            href={`${getUriWithOrg(orgslug, '')}/course/${courseUuid.replace('course_', '')}`}
             className="inline-flex items-center space-x-2 rounded-full bg-gray-800 px-6 py-3 text-white transition duration-200 hover:bg-gray-700"
           >
             <ArrowLeft className="h-5 w-5" />

@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import ResetPasswordClient from './reset'
 import { getTranslations } from 'next-intl/server'
 

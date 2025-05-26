@@ -1,7 +1,7 @@
 'use client'
-import { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk'
+import type { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk'
 import type { ReactNode } from 'react'
-import { createContext, useContext, useReducer } from 'react'
+import { createContext, use, useReducer } from 'react'
 export const AIEditorContext = createContext(null) as any
 export const AIEditorDispatchContext = createContext(null) as any
 
@@ -52,11 +52,11 @@ function AIEditorProvider({ children }: { children: ReactNode }) {
 export default AIEditorProvider
 
 export function useAIEditor() {
-  return useContext(AIEditorContext)
+  return use(AIEditorContext)
 }
 
 export function useAIEditorDispatch() {
-  return useContext(AIEditorDispatchContext)
+  return use(AIEditorDispatchContext)
 }
 
 function aIEditorReducer(state: any, action: any) {

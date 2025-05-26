@@ -101,7 +101,9 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
         resetForm()
         onSuccess()
       } else {
-        toast.error(tNotify('errors.createProductFailed'), { id: loadingToast })
+        toast.error(tNotify('errors.createProductFailed'), {
+          id: loadingToast,
+        })
       }
     } catch (error) {
       console.error('Error creating product:', error)

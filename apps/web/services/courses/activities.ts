@@ -13,7 +13,7 @@ export async function createActivity(
 ) {
   data.content = {}
   // remove chapter_id from data
-  delete data.chapterId
+  data.chapterId = undefined
 
   const result = await fetch(
     `${getAPIUrl()}activities/?coursechapter_id=${chapter_id}&org_id=${org_id}`,
@@ -46,8 +46,8 @@ export async function createFileActivity(
         JSON.stringify({
           startTime: data.details.startTime || 0,
           endTime: data.details.endTime || null,
-          autoplay: data.details.autoplay || false,
-          muted: data.details.muted || false,
+          autoplay: data.details.autoplay,
+          muted: data.details.muted,
         })
       )
     }

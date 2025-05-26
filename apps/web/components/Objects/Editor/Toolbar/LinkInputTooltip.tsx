@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons'
 

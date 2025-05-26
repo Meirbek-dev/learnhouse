@@ -55,7 +55,7 @@ function Activity(props: any) {
       modifiedActivity?.activityId === activityId &&
       selectedActivity !== undefined
     ) {
-      let modifiedActivityCopy = {
+      const modifiedActivityCopy = {
         ...props.activity,
         name: modifiedActivity.activityName,
       }
@@ -82,7 +82,7 @@ function Activity(props: any) {
     >
       {(provided) => (
         <div
-          className="my-2 flex w-auto flex-row items-center space-x-1 rounded-md bg-gray-50 py-2 text-gray-500 shadow-xs ring-1 ring-gray-400/10 transition-all delay-100 duration-75 ease-linear ring-inset hover:scale-102 hover:bg-gray-100 hover:shadow-sm"
+          className="shadow-xs hover:scale-102 my-2 flex w-auto flex-row items-center space-x-1 rounded-md bg-gray-50 py-2 text-gray-500 ring-1 ring-inset ring-gray-400/10 transition-all delay-100 duration-75 ease-linear hover:bg-gray-100 hover:shadow-sm"
           key={props.activity.id}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -90,36 +90,30 @@ function Activity(props: any) {
         >
           <div className="w-28 space-x-1 px-3 text-gray-300">
             {props.activity.type === 'video' && (
-              <>
-                <div className="flex items-center space-x-2">
-                  <Video size={16} />{' '}
-                  <div className="mx-auto justify-center rounded-full bg-gray-200 px-2 py-1 align-middle text-xs font-bold text-gray-400">
-                    {t('activityTypes.video')}
-                  </div>{' '}
-                </div>
-              </>
+              <div className="flex items-center space-x-2">
+                <Video size={16} />{' '}
+                <div className="mx-auto justify-center rounded-full bg-gray-200 px-2 py-1 align-middle text-xs font-bold text-gray-400">
+                  {t('activityTypes.video')}
+                </div>{' '}
+              </div>
             )}
             {props.activity.type === 'documentpdf' && (
-              <>
-                <div className="flex items-center space-x-2">
-                  <div className="w-[30px]">
-                    <File size={16} />{' '}
-                  </div>
-                  <div className="rounded-full bg-gray-200 px-2 py-1 text-xs font-bold text-gray-400">
-                    {t('activityTypes.document')}
-                  </div>{' '}
+              <div className="flex items-center space-x-2">
+                <div className="w-[30px]">
+                  <File size={16} />{' '}
                 </div>
-              </>
+                <div className="rounded-full bg-gray-200 px-2 py-1 text-xs font-bold text-gray-400">
+                  {t('activityTypes.document')}
+                </div>{' '}
+              </div>
             )}
             {props.activity.type === 'dynamic' && (
-              <>
-                <div className="flex items-center space-x-2">
-                  <Sparkles size={16} />{' '}
-                  <div className="rounded-full bg-gray-200 px-2 py-1 text-xs font-bold text-gray-400">
-                    {t('activityTypes.dynamic')}
-                  </div>{' '}
-                </div>
-              </>
+              <div className="flex items-center space-x-2">
+                <Sparkles size={16} />{' '}
+                <div className="rounded-full bg-gray-200 px-2 py-1 text-xs font-bold text-gray-400">
+                  {t('activityTypes.dynamic')}
+                </div>{' '}
+              </div>
             )}
           </div>
 
@@ -128,7 +122,7 @@ function Activity(props: any) {
               <div className="chapter-modification-zone space-x-3 rounded-lg bg-gray-200/60 px-4 py-1 text-[7px] text-gray-600 shadow-inner">
                 <input
                   type="text"
-                  className="bg-transparent text-xs text-gray-500 outline-hidden"
+                  className="outline-hidden bg-transparent text-xs text-gray-500"
                   placeholder={t('activityNamePlaceholder')}
                   value={
                     modifiedActivity
@@ -164,33 +158,25 @@ function Activity(props: any) {
 
           <div className="flex flex-row space-x-2">
             {props.activity.type === 'TYPE_DYNAMIC' && (
-              <>
-                <Link
-                  href={
-                    getUriWithOrg(props.orgslug, '') +
-                    `/course/${
-                      props.courseid
-                    }/activity/${props.activity.uuid.replace(
-                      'activity_',
-                      ''
-                    )}/edit`
-                  }
-                  className="items-center rounded-md bg-sky-700 p-1 px-3 hover:cursor-pointer"
-                  rel="noopener noreferrer"
-                >
-                  <div className="text-xs font-bold text-sky-100">
-                    {t('editButton')}{' '}
-                  </div>
-                </Link>
-              </>
+              <Link
+                href={`${getUriWithOrg(props.orgslug, '')}/course/${
+                  props.courseid
+                }/activity/${props.activity.uuid.replace(
+                  'activity_',
+                  ''
+                )}/edit`}
+                className="items-center rounded-md bg-sky-700 p-1 px-3 hover:cursor-pointer"
+                rel="noopener noreferrer"
+              >
+                <div className="text-xs font-bold text-sky-100">
+                  {t('editButton')}{' '}
+                </div>
+              </Link>
             )}
             <Link
-              href={
-                getUriWithOrg(props.orgslug, '') +
-                `/course/${
-                  props.courseid
-                }/activity/${props.activity.uuid.replace('activity_', '')}`
-              }
+              href={`${getUriWithOrg(props.orgslug, '')}/course/${
+                props.courseid
+              }/activity/${props.activity.uuid.replace('activity_', '')}`}
               className="rounded-md bg-gray-200 p-1 px-3 hover:cursor-pointer"
               rel="noopener noreferrer"
             >
@@ -215,7 +201,7 @@ function Activity(props: any) {
               }
               functionToExecute={() => removeActivity()}
               status="warning"
-            ></ConfirmationModal>
+            />
           </div>
         </div>
       )}

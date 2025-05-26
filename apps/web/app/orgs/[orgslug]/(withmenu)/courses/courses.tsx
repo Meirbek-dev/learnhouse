@@ -22,7 +22,7 @@ function Courses(props: CourseProps) {
   const orgslug = props.orgslug
   const courses = props.courses
   const searchParams = useSearchParams()
-  const isCreatingCourse = searchParams.get('new') ? true : false
+  const isCreatingCourse = !!searchParams.get('new')
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse)
   const isUserAdmin = useAdminStatus() as any
 
@@ -102,7 +102,7 @@ function Courses(props: CourseProps) {
                     {isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}
                   </p>
                   {isUserAdmin && (
-                    <div className="mt-4">
+                    <div className="mt-4 flex justify-center">
                       <AuthenticatedClientElement
                         action="create"
                         ressourceType="courses"

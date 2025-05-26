@@ -1,6 +1,6 @@
 'use client'
 
-import { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types'
+import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types'
 import useSWR from 'swr'
 import { getOrgCourses } from '@services/courses/courses'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -136,7 +136,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                   {section.title}
                 </h2>
                 <div className="prose prose-lg prose-gray max-w-none">
-                  <p className="text-base leading-relaxed whitespace-pre-line text-gray-600 md:text-lg">
+                  <p className="whitespace-pre-line text-base leading-relaxed text-gray-600 md:text-lg">
                     {section.text}
                   </p>
                 </div>
@@ -145,7 +145,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                     <a
                       key={index}
                       href={button.link}
-                      className="rounded-xl px-6 py-3 font-medium shadow-xs transition-all duration-200 hover:scale-105"
+                      className="shadow-xs rounded-xl px-6 py-3 font-medium transition-all duration-200 hover:scale-105"
                       style={{
                         backgroundColor: button.background,
                         color: button.color,
@@ -158,7 +158,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               </div>
               <div className="w-full flex-1 md:w-auto">
                 <div className="relative mx-auto w-full max-w-[500px] px-4 md:px-8">
-                  <div className="relative aspect-4/3 w-full">
+                  <div className="aspect-4/3 relative w-full">
                     <img
                       src={section.image.url}
                       alt={section.image.alt}
@@ -242,7 +242,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             </div>
           </div>
         )
-      case 'featured-courses':
+      case 'featured-courses': {
         if (!allCourses) {
           return (
             <div
@@ -288,13 +288,14 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             </div>
           </div>
         )
+      }
       default:
         return null
     }
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between px-4 sm:px-6 lg:px-16">
+    <div className="max-w-(--breakpoint-2xl) mx-auto flex h-full w-full flex-col items-center justify-between px-4 sm:px-6 lg:px-16">
       {landing.sections.map((section) => renderSection(section))}
     </div>
   )

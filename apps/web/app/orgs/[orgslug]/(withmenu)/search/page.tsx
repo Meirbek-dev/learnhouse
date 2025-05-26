@@ -99,7 +99,7 @@ function SearchPage() {
 
   // URL parameters
   const query = searchParams.get('q') || ''
-  const page = parseInt(searchParams.get('page') || '1')
+  const page = Number.parseInt(searchParams.get('page') || '1')
   const type = (searchParams.get('type') as ContentType) || 'all'
   const perPage = 9
 
@@ -293,7 +293,7 @@ function SearchPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('searchInputPlaceholder')}
-                className="nice-shadow h-12 w-full rounded-xl bg-white pr-4 pl-12 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:ring-1 focus:ring-black/5 focus:outline-none"
+                className="nice-shadow h-12 w-full rounded-xl bg-white pl-12 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
               />
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <Search

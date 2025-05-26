@@ -98,14 +98,14 @@ function SaveState(props: { orgslug: string }) {
   }
 
   const initOrderPayload = () => {
-    if (course_structure && course_structure.chapters) {
+    if (course_structure?.chapters) {
       handleCourseOrder(course_structure)
       dispatchCourse({ type: 'setIsSaved' })
     }
   }
 
   const changeOrderPayload = () => {
-    if (course_structure && course_structure.chapters) {
+    if (course_structure?.chapters) {
       handleCourseOrder(course_structure)
       dispatchCourse({ type: 'setIsNotSaved' })
     }
@@ -131,13 +131,11 @@ function SaveState(props: { orgslug: string }) {
         </div>
       )}
       <div
-        className={
-          `flex cursor-pointer items-center space-x-2 rounded-lg px-4 py-2 font-bold antialiased drop-shadow-md transition-all ease-linear ` +
-          (saved
+        className={`flex cursor-pointer items-center space-x-2 rounded-lg px-4 py-2 font-bold antialiased drop-shadow-md transition-all ease-linear ${
+          saved
             ? 'bg-gray-600 text-white'
-            : 'border bg-black text-white hover:bg-gray-900') +
-          (isLoading ? 'cursor-not-allowed opacity-50' : '')
-        }
+            : 'border bg-black text-white hover:bg-gray-900'
+        }${isLoading ? 'cursor-not-allowed opacity-50' : ''}`}
         onClick={saveCourseState}
       >
         {isLoading ? (

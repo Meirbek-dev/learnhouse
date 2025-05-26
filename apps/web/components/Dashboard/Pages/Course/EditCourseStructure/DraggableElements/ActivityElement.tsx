@@ -111,7 +111,7 @@ function ActivityElement(props: ActivitiyElementProps) {
     ) {
       setIsUpdatingName(true)
 
-      let modifiedActivityCopy = {
+      const modifiedActivityCopy = {
         ...props.activity,
         name: modifiedActivity.activityName,
       }
@@ -147,9 +147,9 @@ function ActivityElement(props: ActivitiyElementProps) {
         <div
           className={`my-2 grid w-full grid-cols-[auto_1fr_auto] gap-2 rounded-md px-3 py-2 text-gray-500 ${
             snapshot.isDragging
-              ? 'nice-shadow z-50 scale-[1.04] rotate-1 bg-white ring-2 ring-blue-500/20'
+              ? 'nice-shadow z-50 rotate-1 scale-[1.04] bg-white ring-2 ring-blue-500/20'
               : 'nice-shadow bg-gray-50 hover:bg-gray-100'
-          } items-center border-1 border-gray-200`}
+          } border-1 items-center border-gray-200`}
           key={props.activity.id}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -171,7 +171,7 @@ function ActivityElement(props: ActivitiyElementProps) {
               <div className="chapter-modification-zone space-x-3 rounded-lg bg-gray-200/60 px-4 py-1 text-[7px] text-gray-600 shadow-inner">
                 <input
                   type="text"
-                  className="bg-transparent text-xs text-gray-500 outline-hidden"
+                  className="outline-hidden bg-transparent text-xs text-gray-500"
                   placeholder="Activity name"
                   value={
                     modifiedActivity
@@ -223,8 +223,8 @@ function ActivityElement(props: ActivitiyElementProps) {
             <button
               className={`flex items-center space-x-1 rounded-md border p-1 px-2 text-xs font-bold shadow-md transition-colors duration-200 sm:px-3 ${
                 !props.activity.published
-                  ? 'border-green-600/10 bg-linear-to-bl from-green-400/50 to-lime-200/80 text-green-800 hover:from-green-500/50 hover:to-lime-300/80'
-                  : 'border-gray-600/10 bg-linear-to-bl from-gray-400/50 to-gray-200/80 text-gray-800 hover:from-gray-500/50 hover:to-gray-300/80'
+                  ? 'bg-linear-to-bl border-green-600/10 from-green-400/50 to-lime-200/80 text-green-800 hover:from-green-500/50 hover:to-lime-300/80'
+                  : 'bg-linear-to-bl border-gray-600/10 from-gray-400/50 to-gray-200/80 text-gray-800 hover:from-gray-500/50 hover:to-gray-300/80'
               }`}
               onClick={() => changePublicStatus()}
             >
@@ -238,17 +238,14 @@ function ActivityElement(props: ActivitiyElementProps) {
             <div className="mx-1 hidden h-3 w-px self-center rounded-full bg-gray-300 sm:block" />
             <ToolTip content="Preview Activity" sideOffset={8}>
               <Link
-                href={
-                  getUriWithOrg(props.orgslug, '') +
-                  `/course/${props.course_uuid.replace(
-                    'course_',
-                    ''
-                  )}/activity/${props.activity.activity_uuid.replace(
-                    'activity_',
-                    ''
-                  )}`
-                }
-                className="flex items-center space-x-1 rounded-md border border-cyan-600/10 bg-linear-to-bl from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-bold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
+                href={`${getUriWithOrg(props.orgslug, '')}/course/${props.course_uuid.replace(
+                  'course_',
+                  ''
+                )}/activity/${props.activity.activity_uuid.replace(
+                  'activity_',
+                  ''
+                )}`}
+                className="bg-linear-to-bl flex items-center space-x-1 rounded-md border border-cyan-600/10 from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-bold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
                 rel="noopener noreferrer"
               >
                 <Eye strokeWidth={2} size={14} className="text-sky-600" />
@@ -258,7 +255,7 @@ function ActivityElement(props: ActivitiyElementProps) {
             <ConfirmationModal
               confirmationMessage="Are you sure you want to delete this activity ?"
               confirmationButtonText="Delete Activity"
-              dialogTitle={'Delete ' + props.activity.name + ' ?'}
+              dialogTitle={`Delete ${props.activity.name} ?`}
               dialogTrigger={
                 <button
                   className="flex items-center space-x-1 rounded-md bg-red-600 p-1 px-2 shadow-md transition-colors duration-200 hover:bg-red-700 sm:px-3"
@@ -341,7 +338,7 @@ const ActivityElementOptions = ({
       activityUUID,
       access_token
     )
-    if (assignment && assignment.data) {
+    if (assignment?.data) {
       return assignment.data.assignment_uuid
     }
     return undefined
@@ -364,43 +361,30 @@ const ActivityElementOptions = ({
   return (
     <>
       {activity.activity_type === 'TYPE_DYNAMIC' && (
-        <>
-          <Link
-            href={
-              getUriWithOrg(org.slug, '') +
-              `/course/${course?.courseStructure.course_uuid.replace(
-                'course_',
-                ''
-              )}/activity/${activity.activity_uuid.replace(
-                'activity_',
-                ''
-              )}/edit`
-            }
-            className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-sky-700`}
-            target="_blank"
-          >
-            <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
-              <FilePenLine size={12} />
-              <span>{t('editPageButton')}</span>
-            </div>
-          </Link>
-        </>
+        <Link
+          href={`${getUriWithOrg(org.slug, '')}/course/${course?.courseStructure.course_uuid.replace(
+            'course_',
+            ''
+          )}/activity/${activity.activity_uuid.replace('activity_', '')}/edit`}
+          className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-sky-700`}
+          target="_blank"
+        >
+          <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
+            <FilePenLine size={12} />
+            <span>{t('editPageButton')}</span>
+          </div>
+        </Link>
       )}
       {activity.activity_type === 'TYPE_ASSIGNMENT' && assignmentUUID && (
-        <>
-          <Link
-            href={
-              getUriWithOrg(org.slug, '') +
-              `/dash/assignments/${assignmentUUID}`
-            }
-            className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-teal-700`}
-          >
-            <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
-              <FilePenLine size={12} />{' '}
-              {!isMobile && <span>{t('editAssignmentButton')}</span>}
-            </div>
-          </Link>
-        </>
+        <Link
+          href={`${getUriWithOrg(org.slug, '')}/dash/assignments/${assignmentUUID}`}
+          className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-teal-700`}
+        >
+          <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
+            <FilePenLine size={12} />{' '}
+            {!isMobile && <span>{t('editAssignmentButton')}</span>}
+          </div>
+        </Link>
       )}
     </>
   )

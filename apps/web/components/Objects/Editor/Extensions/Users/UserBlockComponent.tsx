@@ -75,7 +75,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 function UserBlockComponent(props: any) {
   const t = useTranslations('DashPage.Editor.UserBlock')
   const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+  const _access_token = session?.data?.tokens?.access_token
   const editorState = useEditorProvider() as any
   const isEditable = editorState.isEditable
   const router = useRouter()
@@ -210,7 +210,7 @@ function UserBlockComponent(props: any) {
           <div className="absolute inset-0 h-28 rounded-t-lg bg-gradient-to-b from-gray-100/30 to-transparent" />
 
           {/* Content */}
-          <div className="relative px-5 pt-5 pb-4">
+          <div className="relative px-5 pb-4 pt-5">
             <div className="flex items-start gap-4">
               {/* Avatar */}
               <div className="flex-shrink-0">
@@ -275,7 +275,7 @@ function UserBlockComponent(props: any) {
 
         {/* Details */}
         {userData.details && Object.values(userData.details).length > 0 && (
-          <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
+          <div className="space-y-2.5 border-t border-gray-100 px-5 pb-4 pt-3.5">
             {Object.values(userData.details).map((detail) => (
               <div key={detail.id} className="flex items-center gap-2.5">
                 <IconComponent iconName={detail.icon} />

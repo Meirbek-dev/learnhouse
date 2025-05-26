@@ -35,7 +35,7 @@ export const AuthenticatedClientElement = (
       // Check if the role is for the right organization
       if (role.org.org_uuid === org_uuid) {
         // Check if the user has the role for the resource type
-        if (role.role.rights && role.role.rights[resourceType]) {
+        if (role.role.rights?.[resourceType]) {
           // Check if the user is allowed to execute the action
           const actionKey = `action_${action}`
           if (role.role.rights[resourceType][actionKey] === true) {
@@ -53,19 +53,18 @@ export const AuthenticatedClientElement = (
     if (session.status == 'unauthenticated') {
       setIsAllowed(false)
       return
-    } else {
-      if (props.checkMethod === 'authentication') {
-        setIsAllowed(session.status == 'authenticated')
-      } else if (props.checkMethod === 'roles') {
-        return setIsAllowed(
-          isUserAllowed(
-            session?.data?.roles,
-            props.action!,
-            props.ressourceType!,
-            org?.org_uuid
-          )
+    }
+    if (props.checkMethod === 'authentication') {
+      setIsAllowed(session.status == 'authenticated')
+    } else if (props.checkMethod === 'roles') {
+      return setIsAllowed(
+        isUserAllowed(
+          session?.data?.roles,
+          props.action!,
+          props.ressourceType!,
+          org?.org_uuid
         )
-      }
+      )
     }
   }
 

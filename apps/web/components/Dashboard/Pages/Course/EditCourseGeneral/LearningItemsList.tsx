@@ -212,10 +212,8 @@ const LearningItemsList = ({
         if (linkInputFieldRefs.current[focusedItemId]) {
           linkInputFieldRefs.current[focusedItemId]?.focus()
         }
-      } else {
-        if (inputRefs.current[focusedItemId]) {
-          inputRefs.current[focusedItemId]?.focus()
-        }
+      } else if (inputRefs.current[focusedItemId]) {
+        inputRefs.current[focusedItemId]?.focus()
       }
 
       if (items.length > 5 && scrollContainerRef.current) {
@@ -279,8 +277,10 @@ const LearningItemsList = ({
     setTimeout(() => {
       if (
         !document.activeElement ||
-        (!document.activeElement.classList.contains('learning-item-input') &&
-          !document.activeElement.closest('[data-emoji-mart="true"]')) // Check if focus moved to emoji picker
+        !(
+          document.activeElement.classList.contains('learning-item-input') ||
+          document.activeElement.closest('[data-emoji-mart="true"]')
+        ) // Check if focus moved to emoji picker
       ) {
         // Only clear focusedItemId if focus is truly lost from the component's interactive elements
         // setShowLinkInput(null); // Consider if this should also happen on blur.
@@ -408,7 +408,7 @@ const LearningItemsList = ({
             {showLinkInput === item.id && (
               <div
                 ref={linkInputRef}
-                className="mt-1 rounded-lg border border-gray-200 bg-white p-2 shadow-xs"
+                className="shadow-xs mt-1 rounded-lg border border-gray-200 bg-white p-2"
               >
                 <Input
                   ref={setLinkInputRef(item.id)}

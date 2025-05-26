@@ -160,7 +160,7 @@ const CourseActionsMobile = ({
           session.data?.tokens?.access_token
         )
         setLinkedProducts(response.data || [])
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to fetch linked products')
       } finally {
         setIsLoading(false)
@@ -175,12 +175,12 @@ const CourseActionsMobile = ({
       if (!session.data?.user) return
       try {
         const response = await checkPaidAccess(
-          parseInt(course.id),
+          Number.parseInt(course.id),
           course.org_id,
           session.data?.tokens?.access_token
         )
         setHasAccess(response.has_access)
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to check course access')
         setHasAccess(false)
       }
@@ -206,7 +206,7 @@ const CourseActionsMobile = ({
     try {
       if (isStarted) {
         await removeCourse(
-          'course_' + courseuuid,
+          `course_${courseuuid}`,
           orgslug,
           session.data?.tokens?.access_token
         )
@@ -214,7 +214,7 @@ const CourseActionsMobile = ({
         router.refresh()
       } else {
         await startCourse(
-          'course_' + courseuuid,
+          `course_${courseuuid}`,
           orgslug,
           session.data?.tokens?.access_token
         )
@@ -226,9 +226,9 @@ const CourseActionsMobile = ({
 
         if (firstActivity) {
           // Redirect to the first activity
+          await revalidateTags(['activities'], orgslug)
           router.push(
-            getUriWithOrg(orgslug, '') +
-              `/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
+            `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
           )
         } else {
           router.refresh()
@@ -238,12 +238,13 @@ const CourseActionsMobile = ({
       console.error('Failed to perform course action:', error)
     } finally {
       setIsActionLoading(false)
+      await revalidateTags(['courses'], orgslug)
     }
   }
 
   if (isLoading) {
     return (
-      <div className="mt-4 mb-8 h-16 animate-pulse rounded-lg bg-gray-100" />
+      <div className="mb-8 mt-4 h-16 animate-pulse rounded-lg bg-gray-100" />
     )
   }
 

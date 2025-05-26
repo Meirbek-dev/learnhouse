@@ -45,7 +45,7 @@ function ForgotPasswordClient() {
     validateOnBlur: true,
     onSubmit: async (values) => {
       setIsSubmitting(true)
-      let res = await sendResetLink(values.email, org?.id)
+      const res = await sendResetLink(values.email, org?.id)
       if (res.status == 200) {
         setMessage(t('checkEmail'))
       } else {
@@ -85,7 +85,7 @@ function ForgotPasswordClient() {
                   )}`}
                   alt={org?.name}
                   style={{ width: 'auto', height: 70 }}
-                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
+                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
                 />
               ) : (
                 <Image
@@ -107,13 +107,13 @@ function ForgotPasswordClient() {
           <p className="mb-4 text-sm">{t('enterEmailMessage')}</p>
 
           {error && (
-            <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+            <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
               <AlertTriangle size={18} />
               <div className="text-sm font-bold">{error}</div>
             </div>
           )}
           {message && (
-            <div className="flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
+            <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 transition-all">
               <Info size={18} />
               <div className="text-sm font-bold">{t('checkEmail')}</div>
             </div>

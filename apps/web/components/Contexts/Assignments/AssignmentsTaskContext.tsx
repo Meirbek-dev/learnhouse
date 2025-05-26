@@ -1,6 +1,6 @@
 'use client'
 import type { ReactNode } from 'react'
-import { createContext, useContext, useEffect, useReducer } from 'react'
+import { createContext, use, useEffect, useReducer } from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getAssignmentTask } from '@services/courses/assignments'
 import { useAssignments } from './AssignmentContext'
@@ -65,7 +65,7 @@ export function AssignmentsTaskProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAssignmentsTask() {
-  const context = useContext(AssignmentsTaskContext)
+  const context = use(AssignmentsTaskContext)
   if (context === undefined) {
     throw new Error(
       'useAssignmentsTask must be used within an AssignmentsTaskProvider'
@@ -75,7 +75,7 @@ export function useAssignmentsTask() {
 }
 
 export function useAssignmentsTaskDispatch() {
-  const context = useContext(AssignmentsTaskDispatchContext)
+  const context = use(AssignmentsTaskDispatchContext)
   if (context === undefined) {
     throw new Error(
       'useAssignmentsTaskDispatch must be used within an AssignmentsTaskProvider'

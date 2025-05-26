@@ -12,7 +12,7 @@ export default function RootLayout(props: {
 
   return (
     <>
-      <OrgMenu key={params?.orgslug + '-orgmenu'} orgslug={params?.orgslug} />
+      <OrgMenu key={`${params?.orgslug}-orgmenu`} orgslug={params?.orgslug} />
       {Children.map(children, (child, index) =>
         cloneElement(child as React.ReactElement, {
           key: `${params.orgslug}-child-${index}`,

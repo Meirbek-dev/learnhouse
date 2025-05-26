@@ -19,7 +19,7 @@ export async function checkHealth() {
 
     const res = await getResponseMetadata(result)
     return res
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       status: 503,

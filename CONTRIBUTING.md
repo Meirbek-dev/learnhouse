@@ -13,11 +13,13 @@
 
 Use the Docker Image available in `./Dockerfile`
 
-> Make sure your container runtime has at least 4GB of RAM allocated, as default settings may vary by tool.
+> Make sure your container runtime has at least 4GB of RAM allocated, as default settings may vary
+> by tool.
 
     docker-compose up -d
 
-Initiate a dev environment, please check the official guide [here](https://docs.learnhouse.app/setup-dev-environment)
+Initiate a dev environment, please check the official guide
+[here](https://docs.learnhouse.app/setup-dev-environment)
 
 ## Frontend Codebase
 
@@ -33,15 +35,18 @@ Initiate a dev environment, please check the official guide [here](https://docs.
 
 ### Get started
 
-Use the Docker Image available in `web/Dockerfile`, or install the frontend package on your computer for greater performance.
+Use the Docker Image available in `web/Dockerfile`, or install the frontend package on your computer
+for greater performance.
 
 #### Start the Backend server first
 
-You need to have the backend running, to initiate a dev environment please check the official guide [here](https://docs.learnhouse.app/setup-dev-environment)
+You need to have the backend running, to initiate a dev environment please check the official guide
+[here](https://docs.learnhouse.app/setup-dev-environment)
 
 #### Environment Files
 
-Please check if you initiated your `.env` files, here is a [guide](https://docs.learnhouse.app/setup-dev-environment) on how to do it.
+Please check if you initiated your `.env` files, here is a
+[guide](https://docs.learnhouse.app/setup-dev-environment) on how to do it.
 
 #### Install the frontend package
 
@@ -53,7 +58,9 @@ Please check if you initiated your `.env` files, here is a [guide](https://docs.
 
 ## Submitting Contributions
 
-This project follows [GitHub's standard forking model](https://guides.github.com/activities/forking/). Please fork the project to submit pull requests.
+This project follows
+[GitHub's standard forking model](https://guides.github.com/activities/forking/). Please fork the
+project to submit pull requests.
 
 ### Submitting a bug/fix
 
@@ -63,7 +70,8 @@ This project follows [GitHub's standard forking model](https://guides.github.com
 
 ### Submitting a feature / idea
 
-- Start a Discussion [here](https://github.com/learnhouse/learnhouse/discussions/categories/ideas) to propose your idea and how it should be implemented.
+- Start a Discussion [here](https://github.com/learnhouse/learnhouse/discussions/categories/ideas)
+  to propose your idea and how it should be implemented.
 - Someone from the team will review your idea and will give you a go ahead.
 - Start an issue & link the discussion to it.
 - Clone your fork locally

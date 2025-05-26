@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'
-import React from 'react'
+import type { ReactNode } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
 interface ActivityChapterDropdownProps {
@@ -24,14 +25,14 @@ interface ActivityChapterDropdownProps {
 
 export default function ActivityChapterDropdown(
   props: ActivityChapterDropdownProps
-): React.ReactNode {
-  const [isOpen, setIsOpen] = React.useState(false)
-  const dropdownRef = React.useRef<HTMLDivElement>(null)
+): ReactNode {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
   const t = useTranslations('ActivityPage')
 
   // Close dropdown when clicking outside
-  React.useEffect(() => {
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
@@ -85,16 +86,17 @@ export default function ActivityChapterDropdown(
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className="nice-shadow flex cursor-pointer items-center justify-center rounded-full bg-white p-2"
+        className="nice-shadow flex items-center space-x-2 rounded-full bg-white p-2.5 px-5 text-gray-700 transition delay-150 duration-300 ease-in-out hover:bg-gray-50"
         aria-label={t('viewAllActivities')}
         title={t('viewAllActivities')}
       >
-        <ListTree size={16} className="text-gray-700" />
+        <ListTree size={17} />
+        <span className="text-xs font-bold">{t('chapters')}</span>
       </button>
 
       {isOpen && (
         <div
-          className={`absolute z-50 mt-2 ${isMobile ? 'left-0 w-[90vw] sm:w-72' : 'left-0 w-72'} animate-in fade-in max-h-[70vh] cursor-pointer overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-xl duration-200`}
+          className={`absolute z-50 mt-2 ${isMobile ? 'right-0 w-[90vw] sm:w-72' : 'right-0 w-72'} animate-in fade-in max-h-[70vh] cursor-pointer overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-xl duration-200`}
         >
           <div className="flex items-center justify-between border-b border-gray-100 px-3 py-1.5">
             <h3 className="text-sm font-semibold text-gray-800">
@@ -134,10 +136,7 @@ export default function ActivityChapterDropdown(
                     return (
                       <Link
                         key={activity.id}
-                        href={
-                          getUriWithOrg(props.orgslug, '') +
-                          `/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`
-                        }
+                        href={`${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`}
                         prefetch={false}
                         onClick={() => setIsOpen(false)}
                       >

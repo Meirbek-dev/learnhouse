@@ -33,7 +33,7 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault()
     setIsSubmitting(true)
-    let status = await submitFileActivity(
+    const _status = await submitFileActivity(
       documentpdf,
       'documentpdf',
       {

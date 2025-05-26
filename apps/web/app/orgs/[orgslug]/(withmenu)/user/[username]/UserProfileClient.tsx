@@ -198,7 +198,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                 {userData.bio ? (
                   <p className="text-gray-700">{userData.bio}</p>
                 ) : (
-                  <p className="text-gray-500 italic">{t('noBiography')}</p>
+                  <p className="italic text-gray-500">{t('noBiography')}</p>
                 )}
               </div>
 
@@ -371,7 +371,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                         <div>
                           {isLoadingCourses ? (
                             <div className="flex items-center justify-center py-8">
-                              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+                              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
                             </div>
                           ) : userCourses.length > 0 ? (
                             <div className="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

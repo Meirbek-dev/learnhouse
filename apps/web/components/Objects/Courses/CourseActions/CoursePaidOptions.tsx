@@ -43,7 +43,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
             session.data?.tokens?.access_token,
           ]
         : null,
-    ([url, token]) => getProductsByCourse(course.org_id, course.id, token)
+    ([_url, token]) => getProductsByCourse(course.org_id, course.id, token)
   )
 
   const handleCheckout = async (productId: number) => {
@@ -68,7 +68,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
       } else {
         toast.error(t('checkoutError'))
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error(t('requestError'))
     } finally {
       setIsProcessing((prev) => ({ ...prev, [productId]: false }))

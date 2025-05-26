@@ -53,7 +53,7 @@ function OrgUsers() {
       } else {
         toast.error(tNotify('errors.removeUserFailed'), { id: toastId })
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error(tNotify('errors.removeUserFailed'), { id: toastId })
     }
   }
@@ -66,9 +66,9 @@ function OrgUsers() {
         </div>
       ) : (
         <>
-          <Toast></Toast>
-          <div className="h-6"></div>
-          <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
+          <Toast />
+          <div className="h-6" />
+          <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">
                 {t('activeUsersTitle')}
@@ -76,8 +76,8 @@ function OrgUsers() {
               <h2 className="text-md text-gray-500"> {t('description')}</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
-                <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
+              <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
+                <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
                   <tr className="font-bolder text-sm">
                     <th className="px-4 py-3">{t('userHeader')}</th>
                     <th className="px-4 py-3">{t('roleHeader')}</th>
@@ -92,7 +92,7 @@ function OrgUsers() {
                     >
                       <td className="flex items-center space-x-2 px-4 py-3">
                         <span>
-                          {user.user.first_name + ' ' + user.user.last_name}
+                          {`${user.user.first_name} ${user.user.last_name}`}
                         </span>
                         <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
                           @{user.user.username}
@@ -155,7 +155,7 @@ function OrgUsers() {
                             handleRemoveUser(user.user.id)
                           }}
                           status="warning"
-                        ></ConfirmationModal>
+                        />
                       </td>
                     </tr>
                   ))}

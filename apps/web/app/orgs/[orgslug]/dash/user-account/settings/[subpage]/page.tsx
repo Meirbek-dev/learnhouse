@@ -6,7 +6,7 @@ import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGen
 import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
-import { Info, Lock, LucideIcon, User } from 'lucide-react'
+import { Info, Lock, type LucideIcon, User } from 'lucide-react'
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile'
@@ -105,10 +105,10 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
         <BreadCrumbs type="user" last_breadcrumb={session?.user?.username} />
         <div className="my-2 tracking-tighter">
-          <div className="flex w-100 justify-between">
+          <div className="w-100 flex justify-between">
             <div className="flex pt-3 text-4xl font-bold">{t('title')}</div>
           </div>
         </div>

@@ -35,7 +35,7 @@ function Chapter(props: any) {
 
   async function updateChapterName(chapterId: string) {
     if (modifiedChapter?.chapterId === chapterId) {
-      let modifiedChapterCopy = {
+      const modifiedChapterCopy = {
         name: modifiedChapter.chapterName,
       }
       await updateChapter(
@@ -58,16 +58,16 @@ function Chapter(props: any) {
       draggableId={String(props.info.list.chapter.uuid)}
       index={props.index}
     >
-      {(provided, snapshot) => (
+      {(provided, _snapshot) => (
         <ChapterWrapper
           {...provided.dragHandleProps}
           {...provided.draggableProps}
           ref={provided.innerRef}
           //  isDragging={snapshot.isDragging}
-          className="mx-auto max-w-(--breakpoint-2xl) bg-white px-5"
+          className="max-w-(--breakpoint-2xl) mx-auto bg-white px-5"
           key={props.info.list.chapter.id}
         >
-          <div className="text-md flex items-center space-x-2 pt-3 pr-3 font-bold">
+          <div className="text-md flex items-center space-x-2 pr-3 pt-3 font-bold">
             <div className="flex grow items-center space-x-3 rounded-md px-3 py-1 text-lg">
               <div className="rounded-md bg-neutral-100 p-2">
                 <Hexagon
@@ -82,7 +82,7 @@ function Chapter(props: any) {
                   <div className="chapter-modification-zone space-x-3 rounded-lg bg-neutral-100 px-4 py-1">
                     <input
                       type="text"
-                      className="bg-transparent text-sm text-neutral-700 outline-hidden"
+                      className="outline-hidden bg-transparent text-sm text-neutral-700"
                       placeholder={t('chapterNamePlaceholder')}
                       value={
                         modifiedChapter
@@ -142,7 +142,7 @@ function Chapter(props: any) {
                 props.deleteChapter(props.info.list.chapter.id)
               }
               status="warning"
-            ></ConfirmationModal>
+            />
           </div>
           <Droppable
             key={props.info.list.chapter.id}
@@ -163,7 +163,7 @@ function Chapter(props: any) {
                         key={activity.id}
                         activity={activity}
                         index={index}
-                      ></Activity>
+                      />
                     )
                   )}
                   {provided.placeholder}

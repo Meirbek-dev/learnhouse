@@ -2,7 +2,7 @@ import { useCourse } from '@components/Contexts/CourseContext'
 import { useEffect } from 'react'
 import BreadCrumbs from './BreadCrumbs'
 import SaveState from './SaveState'
-import { CourseOverviewParams } from 'app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page'
+import type { CourseOverviewParams } from 'app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page'
 import { getUriWithOrg } from '@services/config/config'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
@@ -27,18 +27,18 @@ export function CourseOverviewTop({
       <BreadCrumbs
         type="courses"
         last_breadcrumb={course.courseStructure.name}
-      ></BreadCrumbs>
+      />
       <div className="flex">
         <div className="flex grow items-center py-3">
           <Link
-            href={getUriWithOrg(org?.slug, '') + `/course/${params.courseuuid}`}
+            href={`${getUriWithOrg(org?.slug, '')}/course/${params.courseuuid}`}
           >
             {course?.courseStructure?.thumbnail_image ? (
               <img
                 className="h-[57px] w-[100px] rounded-md drop-shadow-md"
                 src={`${getCourseThumbnailMediaDirectory(
                   org?.org_uuid,
-                  'course_' + params.courseuuid,
+                  `course_${params.courseuuid}`,
                   course.courseStructure.thumbnail_image
                 )}`}
                 alt=""

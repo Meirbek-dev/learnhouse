@@ -67,7 +67,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({
     }
 
     if (!isUserAuthenticated) {
-      router.push(getUriWithoutOrg('/login?orgslug=' + org.slug))
+      router.push(getUriWithoutOrg(`/login?orgslug=${org.slug}`))
       return
     }
 

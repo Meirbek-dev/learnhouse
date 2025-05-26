@@ -1,5 +1,5 @@
 import { getUserByUsername } from '@services/users/users'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import UserProfileClient from './UserProfileClient'
 import { getTranslations } from 'next-intl/server'
 
@@ -34,7 +34,7 @@ export async function generateMetadata({
           lastName: userData.last_name,
         }),
     }
-  } catch (error) {
+  } catch (_error) {
     return {
       title: t('metaTitleError'),
     }

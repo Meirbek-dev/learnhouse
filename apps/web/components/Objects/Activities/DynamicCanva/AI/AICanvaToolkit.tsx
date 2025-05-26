@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Editor } from '@tiptap/core'
+import type { Editor } from '@tiptap/core'
 import openuAI_icon from 'public/openu_ai_simple.png'
 import Image from 'next/image'
 import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react'
 import { BubbleMenu } from '@tiptap/react'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import {
-  AIChatBotStateTypes,
+  type AIChatBotStateTypes,
   useAIChatBot,
   useAIChatBotDispatch,
 } from '@components/Contexts/AI/AIChatBotContext'

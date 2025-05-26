@@ -1,6 +1,6 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import LoginClient from './login'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
@@ -33,7 +33,7 @@ const Login = async (params: MetadataProps) => {
 
   return (
     <div>
-      <LoginClient org={org}></LoginClient>
+      <LoginClient org={org} />
     </div>
   )
 }

@@ -71,12 +71,11 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
               onChange={(e) => setSelectedUserGroup(e.target.value)}
               defaultValue={selectedUserGroup}
             >
-              {usergroups &&
-                usergroups.map((group: any) => (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
-                  </option>
-                ))}
+              {usergroups?.map((group: any) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
             </select>
           </div>
         )}

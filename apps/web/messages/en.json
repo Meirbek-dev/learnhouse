@@ -9,7 +9,7 @@
       "experimental": "Experimental",
       "hello": "Hello",
       "howCanWeHelp": "how can I help?",
-      "logoAlt": "OpenU AI Logo",
+      "logoAlt": "LearnHouse AI Logo",
       "placeholder": "Ask AI About this Lecture",
       "questionAbout": "What is this Activity about?",
       "questionExamples": "Explain this Activity in practical examples",
@@ -105,6 +105,7 @@
     },
     "contributeToActivity": "Contribute to activity",
     "course": "Course",
+    "chapters": "Chapters",
     "courseContent": "Course Content",
     "courseLessons": "Chapter: ",
     "current": "Current",
@@ -432,13 +433,13 @@
       "nextButton": "Next",
       "nextButtonLabel": "Next",
       "onboarding": "Onboarding",
-      "step10Button": "ToU University",
-      "step10Desc": "To learn more about OpenU, you can take our original courses at ToU University",
+      "step10Button": "LearnHouse University",
+      "step10Desc": "To learn more about LearnHouse, you can take our original courses at LearnHouse University",
       "step10Title": "To infinity and beyond",
-      "step1Desc": "Welcome to OpenU, the LMS built for simplicity, usability and performance. Meet the new way to create, share and interact with educational content.",
+      "step1Desc": "Welcome to LearnHouse, the LMS built for simplicity, usability and performance. Meet the new way to create, share and interact with educational content.",
       "step1Title": "Teach the world!",
       "step2Button": "Create a new Course",
-      "step2Desc": "Courses are the main building blocks of OpenU, they always contain Chapters and Chapters contain Activities.",
+      "step2Desc": "Courses are the main building blocks of LearnHouse, they always contain Chapters and Chapters contain Activities.",
       "step2Title": "Create Courses",
       "step3Button": "Learn more about Activities",
       "step3Desc": "Activities are the elements you can add to your Courses via Chapters: Dynamic Pages, Videos, Documents, Assignments and more coming soon.",
@@ -446,8 +447,8 @@
       "step4Button": "Learn more about Dynamic Pages and the Editor",
       "step4Desc": "Dynamic pages are pages with dynamic content like Notion pages, they can include different components like Quizzes, Images, Videos, Documents, etc.",
       "step4Title": "Dynamic Pages and the Editor",
-      "step5Button": "Learn more about OpenU AI",
-      "step5Desc": "Thought tools made for both teachers and students, context aware, they can answer based on your courses and the unique content you create within OpenU",
+      "step5Button": "Learn more about LearnHouse AI",
+      "step5Desc": "Thought tools made for both teachers and students, context aware, they can answer based on your courses and the unique content you create within LearnHouse",
       "step5Title": "Artificial Intelligence",
       "step6Button": "Create User Groups",
       "step6Desc": "With User Groups, you can divide students into Groups and provide access to Courses depending on their needs",
@@ -1047,8 +1048,8 @@
         "description": "Manage your organization's users and roles",
         "title": "Users"
       },
-      "openuLogo": "OpenU Logo",
-      "touUniversity": "Toraighyrov University"
+      "learnhouseLogo": "LearnHouse Logo",
+      "learnhouseUniversity": "LearnHouse University"
     },
     "CourseOverview": {
       "courseLabel": "Course"
@@ -1075,7 +1076,7 @@
       "purchasedCourses": "Courses you have purchased or subscribed to",
       "title": "Courses"
     },
-    "DashboardTitle": "OpenU Dashboard",
+    "DashboardTitle": "LearnHouse Dashboard",
     "Editor": {
       "BadgesExtension": {
         "deepDive": "Deep Dive",
@@ -2005,6 +2006,7 @@
     "loadingCourses": "Loading courses...",
     "noFeaturedCourses": "No featured courses selected"
   },
+  "LearnhouseUniversity": "LearnHouse University",
   "NewCollectionPage": {
     "cancelButton": "Cancel",
     "createButton": "Create Collection",
@@ -2165,5 +2167,6 @@
     "wrongCredentials": "Wrong Email or Password"
   },
   "activity": "Activity",
-  "failedToLoadUserData": "Failed to load user data."
+  "failedToLoadUserData": "Failed to load user data.",
+  "learnhouse-logo": "learnhouse logo"
 }

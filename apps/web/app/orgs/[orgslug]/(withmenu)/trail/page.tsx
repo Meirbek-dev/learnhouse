@@ -1,7 +1,7 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import Trail from './trail'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { nextAuthOptions } from 'app/auth/options'
 import { getTranslations } from 'next-intl/server'
 
@@ -33,7 +33,7 @@ export async function generateMetadata(
 }
 
 const TrailPage = async (params: any) => {
-  let orgslug = (await params.params).orgslug
+  const orgslug = (await params.params).orgslug
 
   return (
     <div>

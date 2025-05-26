@@ -1,7 +1,7 @@
 'use client'
-import { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk'
+import type { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk'
 import type { ReactNode } from 'react'
-import { createContext, useContext, useReducer } from 'react'
+import { createContext, use, useReducer } from 'react'
 export const AIChatBotContext = createContext(null) as any
 export const AIChatBotDispatchContext = createContext(null) as any
 
@@ -41,11 +41,11 @@ function AIChatBotProvider({ children }: { children: ReactNode }) {
 export default AIChatBotProvider
 
 export function useAIChatBot() {
-  return useContext(AIChatBotContext)
+  return use(AIChatBotContext)
 }
 
 export function useAIChatBotDispatch() {
-  return useContext(AIChatBotDispatchContext)
+  return use(AIChatBotDispatchContext)
 }
 
 function aiChatBotReducer(state: any, action: any) {
