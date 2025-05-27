@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import YouTube from 'react-youtube'
 import { getActivityMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
-
+import ARTPlayer from './Artplayer'
 interface VideoDetails {
   startTime?: number
   endTime?: number | null
@@ -74,13 +74,11 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
         <div className="my-3 w-full md:my-5">
           <div className="shadow-xs relative aspect-video w-full overflow-hidden rounded-lg ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_HOSTED' && (
-              <video
-                ref={videoRef}
+              <ARTPlayer
+                option={{
+                  url: getVideoSrc(),
+                }}
                 className="h-full w-full object-cover"
-                controls
-                src={getVideoSrc()}
-                onLoadedMetadata={handleVideoLoad}
-                onTimeUpdate={handleTimeUpdate}
               />
             )}
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (
