@@ -14,32 +14,22 @@ export const isMultiOrgModeEnabled = () =>
   process.env.NEXT_PUBLIC_LEARNHOUSE_MULTI_ORG === 'true'
 
 export const getUriWithOrg = (orgslug: string, path: string) => {
-  const multi_org = isMultiOrgModeEnabled()
-  if (multi_org) {
-    return `${LEARNHOUSE_HTTP_PROTOCOL}${orgslug}.${LEARNHOUSE_DOMAIN}${path}`
-  }
-  return `${LEARNHOUSE_HTTP_PROTOCOL}${LEARNHOUSE_DOMAIN}${path}`
+  return isMultiOrgModeEnabled()
+    ? `${LEARNHOUSE_HTTP_PROTOCOL}${orgslug}.${LEARNHOUSE_DOMAIN}${path}`
+    : `${LEARNHOUSE_HTTP_PROTOCOL}${LEARNHOUSE_DOMAIN}${path}`
 }
 
-export const getUriWithoutOrg = (path: string) => {
-  const multi_org = isMultiOrgModeEnabled()
-  if (multi_org) {
-    return `${LEARNHOUSE_HTTP_PROTOCOL}${LEARNHOUSE_DOMAIN}${path}`
-  }
-  return `${LEARNHOUSE_HTTP_PROTOCOL}${LEARNHOUSE_DOMAIN}${path}`
-}
+export const getUriWithoutOrg = (path: string) =>
+  `${LEARNHOUSE_HTTP_PROTOCOL}${LEARNHOUSE_DOMAIN}${path}`
 
 export const getOrgFromUri = () => {
-  const multi_org = isMultiOrgModeEnabled()
-  if (multi_org) {
-    getDefaultOrg()
+  if (isMultiOrgModeEnabled()) {
+    return getDefaultOrg()
   } else if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
-
     return hostname.replace(`.${LEARNHOUSE_DOMAIN}`, '')
   }
 }
 
-export const getDefaultOrg = () => {
-  return process.env.NEXT_PUBLIC_LEARNHOUSE_DEFAULT_ORG
-}
+export const getDefaultOrg = () =>
+  process.env.NEXT_PUBLIC_LEARNHOUSE_DEFAULT_ORG

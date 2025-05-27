@@ -4,7 +4,12 @@ import { Diamond, Home, PersonStanding } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
-function InfoUI(params: {
+function InfoUI({
+  message,
+  submessage,
+  cta,
+  href,
+}: {
   message?: string
   submessage?: string
   cta?: string
@@ -17,23 +22,21 @@ function InfoUI(params: {
         <Diamond className="text-yellow-700" size={45} />
         <div className="flex flex-col">
           <p className="text-3xl font-bold text-yellow-700">
-            {params.message ? params.message : t('defaultMessage')}
+            {message ? message : t('defaultMessage')}
           </p>
-          {params.submessage && (
-            <p className="text-lg font-bold text-yellow-700">
-              {params.submessage}
-            </p>
+          {submessage && (
+            <p className="text-lg font-bold text-yellow-700">{submessage}</p>
           )}
         </div>
       </div>
-      {params.cta && (
+      {cta && (
         <div className="flex space-x-4">
           <Link
-            href={params.href}
+            href={href}
             className="flex items-center space-x-2 rounded-full bg-yellow-700 px-4 py-1 text-yellow-200 shadow-lg transition-all ease-linear hover:bg-yellow-800"
           >
             <PersonStanding className="text-yellow-200" size={17} />
-            <span className="text-md font-bold">{params.cta}</span>
+            <span className="text-md font-bold">{cta}</span>
           </Link>
           <Link
             href={getUriWithoutOrg('/home')}

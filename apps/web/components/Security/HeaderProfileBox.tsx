@@ -21,14 +21,14 @@ export const HeaderProfileBox = () => {
 
   return (
     <ProfileArea>
-      {session.status == 'unauthenticated' && (
+      {session.status === 'unauthenticated' && (
         <UnidentifiedArea className="flex rounded-lg p-1.5 px-2 text-sm font-bold text-gray-700">
           <ul className="flex items-center space-x-3">
             <li>
               <Link
                 href={{
                   pathname: getUriWithoutOrg('/login'),
-                  query: org ? { orgslug: org.slug } : null,
+                  query: org ? { orgslug: org.slug } : undefined,
                 }}
               >
                 {t('login')}
@@ -38,7 +38,7 @@ export const HeaderProfileBox = () => {
               <Link
                 href={{
                   pathname: getUriWithoutOrg('/signup'),
-                  query: org ? { orgslug: org.slug } : null,
+                  query: org ? { orgslug: org.slug } : undefined,
                 }}
               >
                 {t('signUp')}
@@ -47,7 +47,7 @@ export const HeaderProfileBox = () => {
           </ul>
         </UnidentifiedArea>
       )}
-      {session.status == 'authenticated' && (
+      {session.status === 'authenticated' && (
         <AccountArea className="space-x-0">
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-2">
@@ -58,25 +58,13 @@ export const HeaderProfileBox = () => {
                 </div>
               )}
             </div>
-
             <div className="flex items-center space-x-2">
-              <Tooltip
-                content={t('tooltips.ownedCourses')}
-                sideOffset={15}
-                side="bottom"
-              >
-                <Link
-                  className="text-gray-600"
-                  href={'/dash/user-account/owned'}
-                >
+              <Tooltip content={t('tooltips.ownedCourses')} sideOffset={15} side="bottom">
+                <Link className="text-gray-600" href={'/dash/user-account/owned'}>
                   <Package2 size={14} />
                 </Link>
               </Tooltip>
-              <Tooltip
-                content={t('tooltips.yourSettings')}
-                sideOffset={15}
-                side="bottom"
-              >
+              <Tooltip content={t('tooltips.yourSettings')} sideOffset={15} side="bottom">
                 <Link className="text-gray-600" href={'/dash'}>
                   <Settings size={14} />
                 </Link>
@@ -94,8 +82,7 @@ export const HeaderProfileBox = () => {
 
 const AccountArea = styled.div`
   display: flex;
-  place-items: center;
-
+  align-items: center;
   img {
     width: 29px;
   }
@@ -103,12 +90,11 @@ const AccountArea = styled.div`
 
 const ProfileArea = styled.div`
   display: flex;
-  place-items: stretch;
-  place-items: center;
+  align-items: center;
 `
 
 const UnidentifiedArea = styled.div`
   display: flex;
-  place-items: stretch;
-  grow: 1;
+  flex-grow: 1;
+  align-items: stretch;
 `

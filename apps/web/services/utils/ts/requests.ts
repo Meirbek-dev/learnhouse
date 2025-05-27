@@ -51,7 +51,13 @@ export const RequestBodyFormWithAuthHeader = (
 ) => createRequestOptions(method, data, next, null, access_token, true)
 
 export const swrFetcher = async (url: string, token?: string) => {
-  const options = createRequestOptions('GET', null, undefined, 'application/json', token)
+  const options = createRequestOptions(
+    'GET',
+    null,
+    undefined,
+    'application/json',
+    token
+  )
   try {
     const res = await fetch(url, options)
     return await errorHandling(res)

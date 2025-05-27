@@ -14,12 +14,11 @@ export async function startCourse(
   _org_slug: string,
   access_token: any
 ) {
-  const result: any = await fetch(
+  const result = await fetch(
     `${getAPIUrl()}trail/add_course/${course_uuid}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token)
   )
-  const res = await errorHandling(result)
-  return res
+  return errorHandling(result)
 }
 
 export async function removeCourse(
@@ -27,12 +26,11 @@ export async function removeCourse(
   _org_slug: string,
   access_token: any
 ) {
-  const result: any = await fetch(
+  const result = await fetch(
     `${getAPIUrl()}trail/remove_course/${course_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token)
   )
-  const res = await errorHandling(result)
-  return res
+  return errorHandling(result)
 }
 
 export async function markActivityAsComplete(
@@ -41,12 +39,11 @@ export async function markActivityAsComplete(
   activity_uuid: string,
   access_token: any
 ) {
-  const result: any = await fetch(
+  const result = await fetch(
     `${getAPIUrl()}trail/add_activity/${activity_uuid}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token)
   )
-  const res = await errorHandling(result)
-  return res
+  return errorHandling(result)
 }
 
 export async function unmarkActivityAsComplete(
@@ -55,10 +52,9 @@ export async function unmarkActivityAsComplete(
   activity_uuid: string,
   access_token: any
 ) {
-  const result: any = await fetch(
+  const result = await fetch(
     `${getAPIUrl()}trail/remove_activity/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token)
   )
-  const res = await errorHandling(result)
-  return res
+  return errorHandling(result)
 }

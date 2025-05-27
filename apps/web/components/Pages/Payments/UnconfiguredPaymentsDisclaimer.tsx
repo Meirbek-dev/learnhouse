@@ -3,9 +3,11 @@ import { Alert, AlertTitle, AlertDescription } from '@components/ui/alert'
 import { AlertTriangle, ShoppingCart, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { useMemo } from 'react'
 
 function UnconfiguredPaymentsDisclaimer() {
-  const t = useTranslations('DashPage.Payments')
+  // Memoize translation function to avoid unnecessary re-renders
+  const t = useMemo(() => useTranslations('DashPage.Payments'), [])
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">

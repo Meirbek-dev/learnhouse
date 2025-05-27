@@ -10,13 +10,11 @@ interface FormLayoutProps {
   className?: string
 }
 
-const FormLayout = ({ children, onSubmit, className }: FormLayoutProps) => {
-  return (
-    <FormRoot onSubmit={onSubmit} className={className}>
-      {children}
-    </FormRoot>
-  )
-}
+const FormLayout = ({ children, onSubmit, className }: FormLayoutProps) => (
+  <FormRoot onSubmit={onSubmit} className={className}>
+    {children}
+  </FormRoot>
+)
 
 export const FormLabelAndMessage = (props: {
   label: string

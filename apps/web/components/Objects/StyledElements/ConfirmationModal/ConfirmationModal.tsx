@@ -23,27 +23,19 @@ const ConfirmationModal = (params: ModalParams) => {
   const warningButtonColors = 'text-white bg-red-500 hover:bg-red-600'
   const infoButtonColors = 'text-white bg-blue-500 hover:bg-blue-600'
 
-  const onOpenChange = useCallback(
-    (open: any) => {
-      setIsDialogOpen(open)
-    },
-    [setIsDialogOpen]
-  )
+  const onOpenChange = useCallback((open: boolean) => setIsDialogOpen(open), [])
 
   return (
     <Dialog.Root open={isDialogOpen} onOpenChange={onOpenChange}>
       {params.dialogTrigger ? (
         <Dialog.Trigger asChild>{params.dialogTrigger}</Dialog.Trigger>
       ) : null}
-
       <Dialog.Portal>
         <DialogOverlay />
         <DialogContent>
           <div className="flex space-x-4 tracking-tight">
             <div
-              className={`icon align-content-center flex items-center rounded-xl p-6 ${
-                params.status === 'warning' ? warningColors : infoColors
-              }`}
+              className={`icon align-content-center flex items-center rounded-xl p-6 ${params.status === 'warning' ? warningColors : infoColors}`}
             >
               {params.status === 'warning' ? (
                 <AlertTriangle size={35} />
@@ -61,11 +53,7 @@ const ConfirmationModal = (params: ModalParams) => {
               <div className="mt-4 flex flex-row-reverse">
                 <div
                   id={params.buttonid}
-                  className={`flex items-center justify-center rounded-md px-3 py-2 text-sm font-bold hover:cursor-pointer ${
-                    params.status === 'warning'
-                      ? warningButtonColors
-                      : infoButtonColors
-                  } transition duration-300 ease-in-out hover:shadow-lg`}
+                  className={`flex items-center justify-center rounded-md px-3 py-2 text-sm font-bold hover:cursor-pointer ${params.status === 'warning' ? warningButtonColors : infoButtonColors} transition duration-300 ease-in-out hover:shadow-lg`}
                   onClick={() => {
                     params.functionToExecute()
                     setIsDialogOpen(false)

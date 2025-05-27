@@ -13,7 +13,7 @@ export const ACCEPTED_FILE_FORMATS = {
 } as const
 
 /**
- * Constructs the 'accept' attribute value for an input element
+ * Constructs the 'accept' attribute value for an input element.
  */
 export function constructAcceptValue(
   types: (keyof typeof ACCEPTED_FILE_FORMATS)[]

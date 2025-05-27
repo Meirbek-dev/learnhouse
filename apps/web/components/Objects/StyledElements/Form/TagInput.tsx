@@ -24,10 +24,7 @@ const FormTagInput = ({
       ? value
           .split(separator)
           .filter((text) => text.trim())
-          .map((text, i) => ({
-            id: i.toString(),
-            text: text.trim(),
-          }))
+          .map((text, i) => ({ id: i.toString(), text: text.trim() }))
       : []
   )
 
@@ -36,10 +33,7 @@ const FormTagInput = ({
       const newTags = value
         .split(separator)
         .filter((text) => text.trim())
-        .map((text, i) => ({
-          id: i.toString(),
-          text: text.trim(),
-        }))
+        .map((text, i) => ({ id: i.toString(), text: text.trim() }))
       setTags(newTags)
     } else {
       setTags([])
@@ -55,7 +49,6 @@ const FormTagInput = ({
       typeof newTagsOrUpdater === 'function'
         ? newTagsOrUpdater(tags)
         : newTagsOrUpdater
-
     setTags(newTags)
     onChange(newTags.map((tag) => tag.text).join(separator))
   }

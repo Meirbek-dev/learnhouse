@@ -123,7 +123,6 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
             {course.description}
           </p>
         </div>
-
         <div className="flex flex-wrap items-center justify-between gap-2">
           {course.update_date && (
             <div className="inline-flex h-5 min-w-[140px] items-center justify-center rounded-md border border-gray-200 bg-gray-100/80 px-2">
@@ -137,7 +136,6 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
               </span>
             </div>
           )}
-
           {displayedAuthors.length > 0 && (
             <div className="flex items-center -space-x-4">
               {displayedAuthors.map((author, index) => (
@@ -176,7 +174,6 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
             </div>
           )}
         </div>
-
         <Link
           prefetch
           href={

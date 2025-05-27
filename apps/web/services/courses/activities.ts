@@ -14,13 +14,11 @@ export async function createActivity(
   data.content = {}
   // remove chapter_id from data
   data.chapterId = undefined
-
   const result = await fetch(
     `${getAPIUrl()}activities/?coursechapter_id=${chapter_id}&org_id=${org_id}`,
     RequestBodyWithAuthHeader('POST', data, null, access_token)
   )
-  const res = await result.json()
-  return res
+  return result.json()
 }
 
 export async function createFileActivity(
@@ -33,9 +31,7 @@ export async function createFileActivity(
   // Send file thumbnail as form data
   const formData = new FormData()
   formData.append('chapter_id', chapter_id)
-
   let endpoint = ''
-
   if (type === 'video') {
     formData.append('name', data.name)
     formData.append('video_file', file)
@@ -56,16 +52,12 @@ export async function createFileActivity(
     formData.append('pdf_file', file)
     formData.append('name', data.name)
     endpoint = `${getAPIUrl()}activities/documentpdf`
-  } else {
-    // Handle other file types here
   }
-
-  const result: any = await fetch(
+  const result = await fetch(
     endpoint,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token)
   )
-  const res = await result.json()
-  return res
+  return result.json()
 }
 
 export async function createExternalVideoActivity(
@@ -85,7 +77,6 @@ export async function createExternalVideoActivity(
     autoplay: false,
     muted: false,
   }
-
   const videoDetails = data.details
     ? {
         startTime: data.details.startTime ?? defaultDetails.startTime,
@@ -94,15 +85,12 @@ export async function createExternalVideoActivity(
         muted: data.details.muted ?? defaultDetails.muted,
       }
     : defaultDetails
-
   data.details = JSON.stringify(videoDetails)
-
   const result = await fetch(
     `${getAPIUrl()}activities/external_video`,
     RequestBodyWithAuthHeader('POST', data, null, access_token)
   )
-  const res = await result.json()
-  return res
+  return result.json()
 }
 
 export async function getActivity(
@@ -114,8 +102,7 @@ export async function getActivity(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
-  const res = await result.json()
-  return res
+  return result.json()
 }
 
 export async function getActivityByID(
@@ -127,8 +114,7 @@ export async function getActivityByID(
     `${getAPIUrl()}activities/id/${activity_id}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
-  const res = await result.json()
-  return res
+  return result.json()
 }
 
 export async function deleteActivity(activity_uuid: any, access_token: string) {
@@ -136,8 +122,7 @@ export async function deleteActivity(activity_uuid: any, access_token: string) {
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token)
   )
-  const res = await result.json()
-  return res
+  return result.json()
 }
 
 export async function getActivityWithAuthHeader(
@@ -149,8 +134,7 @@ export async function getActivityWithAuthHeader(
     `${getAPIUrl()}activities/activity_${activity_uuid}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token || undefined)
   )
-  const res = await result.json()
-  return res
+  return result.json()
 }
 
 export async function updateActivity(
@@ -162,6 +146,5 @@ export async function updateActivity(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token)
   )
-  const res = await getResponseMetadata(result)
-  return res
+  return getResponseMetadata(result)
 }
