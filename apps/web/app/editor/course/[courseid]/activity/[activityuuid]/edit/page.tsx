@@ -27,7 +27,7 @@ export async function generateMetadata(
       params.courseid,
       { revalidate: 30, tags: ['courses'] },
       access_token ?? null
-    )
+    ),
   ])
 
   return {
@@ -41,7 +41,7 @@ const EditActivity = async (params: any) => {
   const access_token = session?.tokens?.access_token
   const [activityuuid, courseid] = await Promise.all([
     params.params.activityuuid,
-    params.params.courseid
+    params.params.courseid,
   ])
 
   const [courseInfo, activity] = await Promise.all([
@@ -54,7 +54,7 @@ const EditActivity = async (params: any) => {
       activityuuid,
       { revalidate: 0, tags: ['activities'] },
       access_token ?? null
-    )
+    ),
   ])
 
   const org = await getOrganizationContextInfoWithId(

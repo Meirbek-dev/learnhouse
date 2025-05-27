@@ -5,7 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-function ErrorUI({ message, submessage }: { message?: string; submessage?: string }) {
+function ErrorUI({
+  message,
+  submessage,
+}: {
+  message?: string
+  submessage?: string
+}) {
   const t = useTranslations('Components.ErrorUI')
   const router = useRouter()
 
@@ -23,9 +29,7 @@ function ErrorUI({ message, submessage }: { message?: string; submessage?: strin
             {message || t('defaultMessage')}
           </p>
           {submessage && (
-            <p className="text-lg font-bold text-rose-700">
-              {submessage}
-            </p>
+            <p className="text-lg font-bold text-rose-700">{submessage}</p>
           )}
         </div>
       </div>

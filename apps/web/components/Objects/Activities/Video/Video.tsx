@@ -78,7 +78,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                 option={{
                   url: getVideoSrc(),
                 }}
-                className="h-full w-full object-cover"
+                className="size-full"
               />
             )}
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (

@@ -12,7 +12,9 @@ export function useDebounce<T>(value: T, delay: number): T
 // Implementation
 export function useDebounce<T>(valueOrCallback: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(valueOrCallback)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  )
 
   useEffect(() => {
     // If it's a function, return a debounced version of it

@@ -1,5 +1,7 @@
 import { useEffect, useRef, RefObject } from 'react'
 import Artplayer from 'artplayer'
+import { useLocale } from 'next-intl'
+import { es, fr, id, kz, ru, tr } from '@/i18n/Artplayer'
 
 interface PlayerProps {
   option: any
@@ -13,6 +15,7 @@ export default function ARTPlayer({
   ...rest
 }: PlayerProps) {
   const artRef = useRef<HTMLDivElement>(null)
+  const locale = useLocale()
 
   const captionsSVGString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-captions-icon lucide-captions"><rect width="18" height="14" x="3" y="5" rx="2" ry="2" /><path d="M7 15h4M15 15h2M7 11h2M13 11h4" /></svg>`
 
@@ -25,7 +28,8 @@ export default function ARTPlayer({
       muted: false,
       autoplay: false,
       pip: true,
-      autoSize: false,
+      autoOrientation: true,
+      autoSize: true,
       // autoMini: true,
       screenshot: false,
       setting: true,
@@ -35,18 +39,24 @@ export default function ARTPlayer({
       aspectRatio: false,
       fullscreen: true,
       fullscreenWeb: false,
+      hotkey: true,
       subtitleOffset: false,
-      // miniProgressBar: true,
-      // mutex: true,
+      miniProgressBar: false,
+      mutex: true,
       // backdrop: true,
       // playsInline: false,
       autoPlayback: true,
-      // airplay: true,
+      airplay: true,
       theme: '#23ade5',
-      // lang: navigator.language.toLowerCase(),
-      // moreVideoAttr: {
-      //   crossOrigin: 'anonymous',
-      // },
+      i18n: {
+        ru: ru,
+        es: es,
+        fr: fr,
+        id: id,
+        kz: kz,
+        tr: tr,
+      },
+      lang: locale,
       settings: [
         {
           width: 200,
@@ -93,13 +103,22 @@ export default function ARTPlayer({
       //     url: '/assets/sample/video.mp4?q=720',
       //   },
       // ],
+      // contextmenu: [
+      //   {
+      //     html: 'your-menu',
+      //     click: function (...args) {
+      //       console.info('click', args)
+      //       art.contextmenu.show = false
+      //     },
+      //   },
+      // ],
       subtitle: {
         url: '/assets/sample/subtitle.srt',
         type: 'srt',
         style: {
           color: '#ffffff',
           fontSize: '20px',
-          backgroundColor: '#000000',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
           textAlign: 'center',
         },
         encoding: 'utf-8',
