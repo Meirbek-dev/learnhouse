@@ -26,7 +26,7 @@ export function useContributorStatus(courseUuid: string) {
 
     try {
       const response = await getCourseContributors(
-        `course_${courseUuid}`,
+        courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`,
         session.data?.tokens?.access_token
       )
 

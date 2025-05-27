@@ -30,14 +30,14 @@ dependencies = [
     "sqlmodel>=0.0.24",
     "tiktoken>=0.9.0",
     "uvicorn>=0.34.2",
-    "typer>=0.15.4",
+    "typer>=0.16.0",
     "chromadb>=1.0.10",
     "alembic>=1.16.1",
     "alembic-postgresql-enum>=1.7.0",
     "sqlalchemy-utils>=0.41.2",
     "stripe>=12.1.0",
     "python-jose>=3.4.0",
-    "logfire[sqlalchemy]>=3.16.0",
+    "logfire[sqlalchemy]>=3.16.1",
 ]
 
 [tool.ruff]

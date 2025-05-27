@@ -119,7 +119,7 @@ function Courses(props: CourseProps) {
                               orgslug={orgslug}
                             />
                           }
-                          dialogTitle={"t('createCourse')"}
+                          dialogTitle={t('createCourse')}
                           dialogDescription={t('createCourseDescription')}
                           dialogTrigger={<NewCourseButton />}
                         />
