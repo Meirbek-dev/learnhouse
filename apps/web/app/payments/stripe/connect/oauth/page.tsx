@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { verifyStripeConnection } from '@services/payments/payments'
 import Image from 'next/image'
-import openuIcon from 'public/openu_bigicon_1.png'
+import openuIcon from 'public/openu_icon.png'
 import { useTranslations } from 'next-intl'
 
 function StripeConnectCallback() {
@@ -62,13 +62,7 @@ function StripeConnectCallback() {
     <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8]">
       <div className="flex flex-col items-center">
         <div className="mb-10">
-          <Image
-            quality={100}
-            width={50}
-            height={50}
-            src={openuIcon}
-            alt=""
-          />
+          <Image quality={100} width={50} height={50} src={openuIcon} alt="" />
         </div>
 
         <motion.div

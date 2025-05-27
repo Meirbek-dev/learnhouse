@@ -1,5 +1,5 @@
 'use client'
-import openuIcon from 'public/openu_bigicon_1.png'
+import openuIcon from 'public/openu_icon.png'
 import Image from 'next/image'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
 import Link from 'next/link'

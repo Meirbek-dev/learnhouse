@@ -9,8 +9,8 @@ import { AlertTriangle, BadgeInfo, NotebookTabs } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FlaskConical, MessageCircle, X } from 'lucide-react'
 import Image from 'next/image'
-import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
-import learnhouseAI_logo_black from 'public/learnhouse_ai_black_logo.png'
+import openuAI_icon from 'public/openu_ai_simple.png'
+import openuAI_logo_black from 'public/openu_ai_black_logo.png'
 import type { KeyboardEvent, ChangeEvent } from 'react'
 import { useState, useEffect, useRef } from 'react'
 import {
@@ -56,7 +56,7 @@ function AIActivityAsk(props: AIActivityAskProps) {
               <Image
                 className="rounded-md outline-neutral-200/20"
                 width={20}
-                src={learnhouseAI_icon}
+                src={openuAI_icon}
                 alt={t('askAI')}
               />
             </i>{' '}
@@ -236,7 +236,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                     aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
                   }`}
                   width={24}
-                  src={learnhouseAI_icon}
+                  src={openuAI_icon}
                   alt={t('askAI')}
                 />
                 <span className="text-sm font-semibold text-white/70">
@@ -406,8 +406,8 @@ const AIMessagePlaceHolder = (props: {
             <Image
               width={100}
               className="mx-auto"
-              src={learnhouseAI_logo_black}
-              alt="LearnHouse AI Logo"
+              src={openuAI_logo_black}
+              alt="Openu AI Logo"
             />
             <p className="flex items-center justify-center space-x-2 pt-3 text-2xl font-semibold text-white/70">
               <span className="items-center">{t('hello')}</span>

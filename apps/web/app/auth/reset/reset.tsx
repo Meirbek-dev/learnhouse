@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { useState } from 'react'
-import openuIcon from 'public/openu_bigicon_1.png'
+import openuIcon from 'public/openu_icon.png'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,

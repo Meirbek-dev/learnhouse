@@ -1,5 +1,6 @@
 import type React from 'react'
 import { motion } from 'framer-motion'
+import { X } from 'lucide-react'
 
 interface MiniInfoTooltipProps {
   icon?: React.ReactNode
@@ -41,16 +42,7 @@ export default function MiniInfoTooltip({
         onClick={onClose}
         className="absolute right-1 top-1 text-gray-400 hover:text-gray-600"
       >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M18 6L6 18M6 6l12 12" />
-        </svg>
+        <X size={14} />
       </button>
     </motion.div>
   )

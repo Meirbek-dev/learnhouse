@@ -3,8 +3,7 @@ export const OPENU_HTTP_PROTOCOL =
 const OPENU_API_URL = `${process.env.NEXT_PUBLIC_OPENU_API_URL}`
 export const OPENU_BACKEND_URL = `${process.env.NEXT_PUBLIC_OPENU_BACKEND_URL}`
 export const OPENU_DOMAIN = process.env.NEXT_PUBLIC_OPENU_DOMAIN
-export const OPENU_TOP_DOMAIN =
-  process.env.NEXT_PUBLIC_OPENU_TOP_DOMAIN
+export const OPENU_TOP_DOMAIN = process.env.NEXT_PUBLIC_OPENU_TOP_DOMAIN
 
 export const getAPIUrl = () => OPENU_API_URL
 export const getBackendUrl = () => OPENU_BACKEND_URL

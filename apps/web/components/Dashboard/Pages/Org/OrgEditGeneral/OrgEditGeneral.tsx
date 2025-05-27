@@ -245,39 +245,6 @@ const OrgEditGeneral: FC = () => {
                         </p>
                       )}
                     </div>
-
-                    <div className="nice-shadow mt-6 flex items-center justify-between space-x-2 rounded-lg bg-gray-50/50 p-4">
-                      <div className="flex items-center space-x-4">
-                        <Link
-                          href="https://www.learnhouse.app/explore"
-                          target="_blank"
-                          className="flex items-center space-x-2"
-                        >
-                          <Image
-                            quality={100}
-                            width={120}
-                            src={openuIcon}
-                            alt="OpenU"
-                            className="rounded-lg"
-                          />
-                          <span className="mt-1 rounded-md bg-black px-2 py-1 text-[10px] font-semibold text-white">
-                            {t('Form.exploreLabel')}
-                          </span>
-                        </Link>
-                        <div className="space-y-0.5">
-                          <p className="text-sm text-gray-500">
-                            {t('Form.exploreDescription')}
-                          </p>
-                        </div>
-                      </div>
-                      <Switch
-                        name="explore"
-                        checked={values.explore ?? false}
-                        onCheckedChange={(checked) =>
-                          setFieldValue('explore', checked)
-                        }
-                      />
-                    </div>
                   </div>
                 </div>
               </div>

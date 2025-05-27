@@ -74,11 +74,7 @@ function DashLeftMenu() {
               sideOffset={8}
               side="right"
             >
-              <Image
-                alt="OpenU logo"
-                width={40}
-                src={OpenUDashboardLogo}
-              />
+              <Image alt="OpenU logo" width={40} src={OpenUDashboardLogo} />
             </ToolTip>
             <ToolTip
               content={t('tooltips.yourOrganization')}

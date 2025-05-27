@@ -17,6 +17,6 @@
 	},
 	"packageManager": "pnpm@10.10.0",
 	"dependencies": {
-		"learnhouse": "file:"
+		"openu": "file:"
 	}
 }

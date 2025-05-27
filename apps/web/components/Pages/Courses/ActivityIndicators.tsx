@@ -238,12 +238,10 @@ function ActivityIndicators(props: Props) {
             >
               <Link
                 prefetch={false}
-                href={
-                  `${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activity.activity_uuid.replace(
-                    'activity_',
-                    ''
-                  )}`
-                }
+                href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activity.activity_uuid.replace(
+                  'activity_',
+                  ''
+                )}`}
                 className={`${isCurrent ? 'flex-[2]' : 'flex-1'} mx-1`}
               >
                 <div

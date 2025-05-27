@@ -1526,7 +1526,7 @@
           "confirmPasswordLabel": "Подтвердите пароль",
           "currentPasswordLabel": "Текущий пароль",
           "description": "Обновите ваш пароль для безопасности аккаунта",
-          "logoutWarning": "Вы будете выйти из системы после смены пароля",
+          "logoutWarning": "Вы выйдете из системы после смены пароля",
           "newPasswordLabel": "Новый пароль",
           "title": "Сменить пароль",
           "updateButton": "Обновить пароль",

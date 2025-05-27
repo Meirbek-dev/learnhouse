@@ -12,7 +12,7 @@ import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import openuIcon from 'public/openu_bigicon_1.png'
+import openuIcon from 'public/openu_icon.png'
 import { useEffect } from 'react'
 import useSWR from 'swr'
 

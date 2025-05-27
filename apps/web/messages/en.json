@@ -1048,8 +1048,8 @@
         "description": "Manage your organization's users and roles",
         "title": "Users"
       },
-      "learnhouseLogo": "LearnHouse Logo",
-      "learnhouseUniversity": "LearnHouse University"
+      "openuLogo": "LearnHouse Logo",
+      "openuUniversity": "LearnHouse University"
     },
     "CourseOverview": {
       "courseLabel": "Course"
@@ -2006,7 +2006,7 @@
     "loadingCourses": "Loading courses...",
     "noFeaturedCourses": "No featured courses selected"
   },
-  "LearnhouseUniversity": "LearnHouse University",
+  "OpenuUniversity": "LearnHouse University",
   "NewCollectionPage": {
     "cancelButton": "Cancel",
     "createButton": "Create Collection",
@@ -2168,5 +2168,5 @@
   },
   "activity": "Activity",
   "failedToLoadUserData": "Failed to load user data.",
-  "learnhouse-logo": "learnhouse logo"
+  "openu-logo": "learnhouse logo"
 }

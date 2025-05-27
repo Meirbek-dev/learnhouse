@@ -14,6 +14,7 @@ import {
   StickyNote,
   Video,
   Square,
+  ChevronUp,
 } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { CourseProvider } from '@components/Contexts/CourseContext'
@@ -282,6 +283,7 @@ const CourseClient = (props: any) => {
                       >
                         <h3 className="mr-3 grow break-words">
                           {chapter.name}
+                          {chapter.name}
                         </h3>
                         <div className="flex items-center space-x-3">
                           <p className="shrink-0 whitespace-nowrap rounded-full px-3 py-[2px] text-sm font-normal text-neutral-400 outline-1 outline-neutral-200">
@@ -289,19 +291,7 @@ const CourseClient = (props: any) => {
                               activitiesLength: chapter.activities.length,
                             })}
                           </p>
-                          <svg
-                            className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
+                          <ChevronUp size={16}/>
                         </div>
                       </div>
                       <div

@@ -106,33 +106,6 @@ const CollectionsPage = async (params: any) => {
           {collections.length === 0 && (
             <div className="col-span-full flex items-center justify-center py-8">
               <div className="text-center">
-                <div className="mb-4">
-                  <svg
-                    width="50"
-                    height="50"
-                    viewBox="0 0 295 295"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="mx-auto"
-                  >
-                    <rect
-                      opacity="0.51"
-                      x="10"
-                      y="10"
-                      width="275"
-                      height="275"
-                      rx="75"
-                      stroke="#4B5564"
-                      strokeOpacity="0.15"
-                      strokeWidth="20"
-                    />
-                    <path
-                      d="M135.8 200.8V130L122.2 114.6L135.8 110.4V102.8L122.2 87.4L159.8 76V200.8L174.6 218H121L135.8 200.8Z"
-                      fill="#4B5564"
-                      fillOpacity="0.08"
-                    />
-                  </svg>
-                </div>
                 <h1 className="mb-2 text-xl font-bold text-gray-600">
                   {t('noContent')}
                 </h1>
