@@ -872,7 +872,7 @@
 				"noTaskSelected": "Задача не выбрана"
 			},
 			"TaskFileObject": {
-				"allowedFormats": "Разрешенные форматы: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+				"allowedFormats": "Разрешенные форматы: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
 				"authRequiredSubmit": "Требуется аутентификация. Пожалуйста, войдите, чтобы сдать задание.",
 				"authRequiredUpload": "Требуется аутентификация. Пожалуйста, войдите, чтобы загрузить файлы.",
 				"errorSaving": "Ошибка при сохранении задачи, пожалуйста, попробуйте позже.",
@@ -888,7 +888,7 @@
 				"teacherViewInfo": "Пользователь сможет отправить файл для этого задания, вы сможете проверить его на вкладке 'Отправки'"
 			},
 			"TaskGeneralEdit": {
-				"allowedFormats": "Разрешенные форматы: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+				"allowedFormats": "Разрешенные форматы: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
 				"changeRefFile": "Изменить эталонный файл",
 				"delete": "Удалить",
 				"description": "Описание",
@@ -1140,7 +1140,7 @@
 				"usernamePlaceholder": "Введите имя пользователя"
 			},
 			"VideoBlock": {
-				"errorFormat": "Пожалуйста, загрузите видео в поддерживаемом формате (MP4 или WebM)",
+				"errorFormat": "Пожалуйста, загрузите видео в поддерживаемом формате (MP4, MKV или WebM)",
 				"errorUpload": "Не удалось загрузить видео. Пожалуйста, попробуйте снова.",
 				"remove": "Удалить",
 				"sizeFull": "Полная ширина",
@@ -1149,7 +1149,7 @@
 				"sizeMedium": "Средний",
 				"sizeSmall": "Маленький",
 				"title": "Блок видео",
-				"uploadHint": "Поддерживаются форматы MP4 и WebM",
+				"uploadHint": "Поддерживаются форматы MP4, MKV и WebM",
 				"uploadPlaceholder": "Перетащите ваше видео сюда или нажмите, чтобы выбрать файл",
 				"uploading": "Загрузка видео... {progress}%"
 			},

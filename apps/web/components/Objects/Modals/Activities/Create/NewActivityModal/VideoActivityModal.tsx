@@ -9,7 +9,7 @@ import { Youtube, Upload } from 'lucide-react'
 import { constructAcceptValue } from '@/lib/constants'
 import { useTranslations } from 'next-intl'
 
-const SUPPORTED_FILES = constructAcceptValue(['mp4', 'webm'])
+const SUPPORTED_FILES = constructAcceptValue(['mp4', 'mkv', 'webm'])
 
 interface VideoDetails {
   startTime: number

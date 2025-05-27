@@ -26,7 +26,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import styled from 'styled-components'
 import { useTranslations } from 'next-intl'
 
-const SUPPORTED_FILES = constructAcceptValue(['webm', 'mp4'])
+const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4'])
 
 const VIDEO_SIZES = {
   small: { width: 480, label: 'sizeSmall' },
@@ -262,7 +262,11 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     const file = e.dataTransfer.files[0]
     const fileExtension = file?.name.split('.').pop()?.toLowerCase()
 
-    if (file && fileExtension && ['mp4', 'webm'].includes(fileExtension)) {
+    if (
+      file &&
+      fileExtension &&
+      ['mkv', 'mp4', 'webm'].includes(fileExtension)
+    ) {
       setVideo(file)
       setError(null)
       handleUpload(file)

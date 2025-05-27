@@ -31,6 +31,7 @@ const SUPPORTED_FILES = constructAcceptValue([
   'pdf',
   'docx',
   'mp4',
+  'mkv',
   'jpg',
   'png',
   'pptx',

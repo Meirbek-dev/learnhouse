@@ -962,7 +962,7 @@
 				"noTaskSelected": "No Task Selected"
 			},
 			"TaskFileObject": {
-				"allowedFormats": "Allowed formats: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+				"allowedFormats": "Allowed formats: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
 				"authRequiredSubmit": "Authentication required. Please sign in to submit assignment.",
 				"authRequiredUpload": "Authentication required. Please sign in to upload files.",
 				"errorSaving": "Error saving task, please try again later.",
@@ -978,7 +978,7 @@
 				"teacherViewInfo": "The user will be able to submit a file for this task, you will be able to check it in the Submissions tab"
 			},
 			"TaskGeneralEdit": {
-				"allowedFormats": "Allowed formats: pdf, docx, mp4, jpg, jpeg, png, pptx, zip",
+				"allowedFormats": "Allowed formats: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
 				"changeRefFile": "Change Reference File",
 				"delete": "Delete",
 				"description": "Description",
@@ -1232,7 +1232,7 @@
 			},
 			"VideoBlock": {
 				"download": "Download",
-				"errorFormat": "Please upload a supported video format (MP4 or WebM)",
+				"errorFormat": "Please upload a supported video format (MP4, MKV or WebM)",
 				"errorUpload": "Failed to upload video. Please try again.",
 				"remove": "Remove",
 				"sizeFull": "Full Width",
@@ -1241,7 +1241,7 @@
 				"sizeMedium": "Medium",
 				"sizeSmall": "Small",
 				"title": "Video Block",
-				"uploadHint": "Supports MP4 and WebM formats",
+				"uploadHint": "Supports MP4, MKV and WebM formats",
 				"uploadPlaceholder": "Drop your video here or click to browse",
 				"uploading": "Uploading video... {progress}%"
 			},

@@ -28,7 +28,6 @@ interface VideoActivityProps {
 function VideoActivity({ activity, course }: VideoActivityProps) {
   const org = useOrg() as any
   const [videoId, setVideoId] = useState('')
-  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     if (activity?.content?.uri) {
@@ -48,26 +47,6 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
     )
   }
 
-  // Handle native video time update
-  const handleTimeUpdate = () => {
-    const video = videoRef.current
-    if (video && activity.details?.endTime) {
-      if (video.currentTime >= activity.details.endTime) {
-        video.pause()
-      }
-    }
-  }
-
-  // Handle native video load
-  const handleVideoLoad = () => {
-    const video = videoRef.current
-    if (video && activity.details) {
-      video.currentTime = activity.details.startTime || 0
-      video.autoplay = activity.details.autoplay || false
-      video.muted = activity.details.muted || false
-    }
-  }
-
   return (
     <div className="w-full max-w-full px-2 sm:px-4">
       {activity && (
@@ -77,6 +56,8 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
               <ARTPlayer
                 option={{
                   url: getVideoSrc(),
+                  muted: activity.details?.muted,
+                  autoplay: activity.details?.autoplay,
                 }}
                 className="size-full"
               />
