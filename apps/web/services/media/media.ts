@@ -32,8 +32,17 @@ export function getActivityBlockMediaDirectory(
   fileId: any,
   type: string
 ) {
-  if (type == 'pdfBlock' || type == 'videoBlock' || type == 'imageBlock') {
-    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/{type}/${blockId}/${fileId}`
+  if (type == 'pdfBlock') {
+    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/pdfBlock/${blockId}/${fileId}`
+    return uri
+  }
+  if (type == 'videoBlock') {
+    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/videoBlock/${blockId}/${fileId}`
+    return uri
+  }
+  if (type == 'imageBlock') {
+    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/imageBlock/${blockId}/${fileId}`
+    return uri
   }
 }
 
@@ -68,8 +77,13 @@ export function getActivityMediaDirectory(
   fileId: string,
   activityType: string
 ) {
-  if (activityType == 'video' || activityType == 'documentpdf') {
-    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/{type}/${fileId}`
+  if (activityType == 'video') {
+    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/${fileId}`
+    return uri
+  }
+  if (activityType == 'documentpdf') {
+    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/documentpdf/${fileId}`
+    return uri
   }
 }
 
