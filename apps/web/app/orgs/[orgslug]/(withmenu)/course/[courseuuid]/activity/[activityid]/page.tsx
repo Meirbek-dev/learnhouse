@@ -33,19 +33,19 @@ async function fetchCourseMetadata(
 export async function generateMetadata(
   props: MetadataProps
 ): Promise<Metadata> {
-  const params = await props.params
+  const { orgslug, courseuuid, activityid } = await props.params
   const session = (await getServerSession(nextAuthOptions as any)) as Session
   const access_token = session?.tokens?.access_token || null
   const t = await getTranslations('General')
 
   // Get Org context information
-  const _org = await getOrganizationContextInfo(params.orgslug, {
+  const _org = await getOrganizationContextInfo(orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
   })
-  const course_meta = await fetchCourseMetadata(params.courseuuid, access_token)
+  const course_meta = await fetchCourseMetadata(courseuuid, access_token)
   const activity = await getActivityWithAuthHeader(
-    params.activityid,
+    activityid,
     { revalidate: 1800, tags: ['activities'] },
     access_token || null
   )
@@ -75,11 +75,10 @@ export async function generateMetadata(
 }
 
 const ActivityPage = async (params: any) => {
+  // Destructure params directly
+  const { orgslug, courseuuid, activityid } = await params.params
   const session = (await getServerSession(nextAuthOptions as any)) as Session
   const access_token = session?.tokens?.access_token || null
-  const activityid = (await params.params).activityid
-  const courseuuid = (await params.params).courseuuid
-  const orgslug = (await params.params).orgslug
 
   const [course_meta, activity] = await Promise.all([
     fetchCourseMetadata(courseuuid, access_token),

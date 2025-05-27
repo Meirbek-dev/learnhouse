@@ -1,7 +1,7 @@
 import { getBackendUrl } from '@services/config/config'
 const LEARNHOUSE_MEDIA_URL = process.env.NEXT_PUBLIC_LEARNHOUSE_MEDIA_URL
 
-function getMediaUrl() {
+function getMediaUrl(): string {
   return LEARNHOUSE_MEDIA_URL || getBackendUrl()
 }
 
@@ -9,41 +9,43 @@ export function getCourseThumbnailMediaDirectory(
   orgUUID: string,
   courseUUID: string,
   fileId: string
-) {
-  const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/thumbnails/${fileId}`
-  return uri
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/thumbnails/${fileId}`
 }
 
-export function getOrgLandingMediaDirectory(orgUUID: string, fileId: string) {
-  const uri = `${getMediaUrl()}content/orgs/${orgUUID}/landing/${fileId}`
-  return uri
+export function getOrgLandingMediaDirectory(
+  orgUUID: string,
+  fileId: string
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/landing/${fileId}`
 }
 
-export function getUserAvatarMediaDirectory(userUUID: string, fileId: string) {
-  const uri = `${getMediaUrl()}content/users/${userUUID}/avatars/${fileId}`
-  return uri
+export function getUserAvatarMediaDirectory(
+  userUUID: string,
+  fileId: string
+): string {
+  return `${getMediaUrl()}content/users/${userUUID}/avatars/${fileId}`
 }
 
 export function getActivityBlockMediaDirectory(
   orgUUID: string,
   courseId: string,
   activityId: string,
-  blockId: any,
-  fileId: any,
+  blockId: string,
+  fileId: string,
   type: string
-) {
-  if (type == 'pdfBlock') {
-    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/pdfBlock/${blockId}/${fileId}`
-    return uri
-  }
-  if (type == 'videoBlock') {
-    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/videoBlock/${blockId}/${fileId}`
-    return uri
-  }
-  if (type == 'imageBlock') {
-    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/imageBlock/${blockId}/${fileId}`
-    return uri
-  }
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/${type}/${blockId}/${fileId}`
+}
+
+export function getVideoSubtitleDirectory(
+  orgUUID: string,
+  courseId: string,
+  activityId: string,
+  blockId: string,
+  fileId: string
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/videoBlock/${blockId}/subtitles/${fileId}`
 }
 
 export function getTaskRefFileDir(
@@ -53,9 +55,8 @@ export function getTaskRefFileDir(
   assignmentUUID: string,
   assignmentTaskUUID: string,
   fileID: string
-) {
-  const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/${fileID}`
-  return uri
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/${fileID}`
 }
 
 export function getTaskFileSubmissionDir(
@@ -65,9 +66,8 @@ export function getTaskFileSubmissionDir(
   assignmentUUID: string,
   assignmentTaskUUID: string,
   fileSubID: string
-) {
-  const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/subs/${fileSubID}`
-  return uri
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/subs/${fileSubID}`
 }
 
 export function getActivityMediaDirectory(
@@ -76,28 +76,33 @@ export function getActivityMediaDirectory(
   activityUUID: string,
   fileId: string,
   activityType: string
-) {
-  if (activityType == 'video') {
-    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/${fileId}`
-    return uri
+): string | undefined {
+  if (activityType === 'video') {
+    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/${fileId}`
   }
-  if (activityType == 'documentpdf') {
-    const uri = `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/documentpdf/${fileId}`
-    return uri
+  if (activityType === 'documentpdf') {
+    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/documentpdf/${fileId}`
   }
+  return undefined
 }
 
-export function getOrgLogoMediaDirectory(orgUUID: string, fileId: string) {
-  const uri = `${getMediaUrl()}content/orgs/${orgUUID}/logos/${fileId}`
-  return uri
+export function getOrgLogoMediaDirectory(
+  orgUUID: string,
+  fileId: string
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/logos/${fileId}`
 }
 
-export function getOrgThumbnailMediaDirectory(orgUUID: string, fileId: string) {
-  const uri = `${getMediaUrl()}content/orgs/${orgUUID}/thumbnails/${fileId}`
-  return uri
+export function getOrgThumbnailMediaDirectory(
+  orgUUID: string,
+  fileId: string
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/thumbnails/${fileId}`
 }
 
-export function getOrgPreviewMediaDirectory(orgUUID: string, fileId: string) {
-  const uri = `${getMediaUrl()}content/orgs/${orgUUID}/previews/${fileId}`
-  return uri
+export function getOrgPreviewMediaDirectory(
+  orgUUID: string,
+  fileId: string
+): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/previews/${fileId}`
 }
