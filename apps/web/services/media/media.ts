@@ -38,16 +38,6 @@ export function getActivityBlockMediaDirectory(
   return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/${type}/${blockId}/${fileId}`
 }
 
-export function getVideoSubtitleDirectory(
-  orgUUID: string,
-  courseId: string,
-  activityId: string,
-  blockId: string,
-  fileId: string
-): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/videoBlock/${blockId}/subtitles/${fileId}`
-}
-
 export function getTaskRefFileDir(
   orgUUID: string,
   courseUUID: string,
@@ -84,6 +74,15 @@ export function getActivityMediaDirectory(
     return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/documentpdf/${fileId}`
   }
   return undefined
+}
+
+export function getVideoSubtitlesDirectory(
+  orgUUID: string,
+  courseUUID: string,
+  activityUUID: string,
+  fileId: string
+): string | undefined {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/${fileId}` // change to better subtitles dir
 }
 
 export function getOrgLogoMediaDirectory(

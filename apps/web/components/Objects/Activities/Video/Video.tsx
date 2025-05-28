@@ -1,8 +1,13 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import YouTube from 'react-youtube'
-import { getActivityMediaDirectory } from '@services/media/media'
+import {
+  getActivityMediaDirectory,
+  getVideoSubtitlesDirectory,
+} from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
 import ARTPlayer from './Artplayer'
+import { useLocale } from 'next-intl'
+
 interface VideoDetails {
   startTime?: number
   endTime?: number | null
@@ -28,6 +33,7 @@ interface VideoActivityProps {
 function VideoActivity({ activity, course }: VideoActivityProps) {
   const org = useOrg() as any
   const [videoId, setVideoId] = useState('')
+  const locale = useLocale()
 
   useEffect(() => {
     if (activity?.content?.uri) {
@@ -46,6 +52,15 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
       'video'
     )
   }
+  const getSubtitlesSrc = () => {
+    if (!activity.content?.filename) return ''
+    return getVideoSubtitlesDirectory(
+      org?.org_uuid,
+      course?.course_uuid,
+      activity.activity_uuid,
+      activity.content.filename
+    )
+  }
 
   return (
     <div className="w-full max-w-full px-2 sm:px-4">
@@ -58,6 +73,18 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                   url: getVideoSrc(),
                   muted: activity.details?.muted,
                   autoplay: activity.details?.autoplay,
+                  lang: locale,
+                }}
+                subtitle={{
+                  url: `/subtitle.${locale}.srt`,
+                  type: 'srt',
+                  style: {
+                    color: '#ffffff',
+                    fontSize: '20px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    textAlign: 'center',
+                  },
+                  encoding: 'utf-8',
                 }}
                 className="size-full"
               />

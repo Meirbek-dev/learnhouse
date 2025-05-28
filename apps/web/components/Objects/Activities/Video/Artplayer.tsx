@@ -1,11 +1,16 @@
 import { useEffect, useRef } from 'react'
 import Artplayer from 'artplayer'
-import { useLocale } from 'next-intl'
 import { es, fr, id, kz, ru, tr } from '@/i18n/Artplayer'
+
+interface SubtitleEntry {
+  html: string
+  url: string
+}
 
 interface PlayerProps {
   option: any
   getInstance?: (art: any) => void
+  subtitle?: any // new prop for subtitle config
   [key: string]: any
 }
 const captionsSVGString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-captions-icon lucide-captions"><rect width="18" height="14" x="3" y="5" rx="2" ry="2" /><path d="M7 15h4M15 15h2M7 11h2M13 11h4" /></svg>`
@@ -13,10 +18,11 @@ const captionsSVGString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" he
 export default function ARTPlayer({
   option,
   getInstance,
+  subtitle,
+  locale,
   ...rest
 }: PlayerProps) {
   const artRef = useRef<HTMLDivElement>(null)
-  const locale = useLocale()
 
   useEffect(() => {
     const art = new Artplayer({
@@ -51,7 +57,6 @@ export default function ARTPlayer({
         kz: kz,
         tr: tr,
       },
-      lang: locale,
       settings: [
         {
           width: 200,
@@ -60,8 +65,8 @@ export default function ARTPlayer({
           selector: [
             {
               html: 'Display',
-              switch: false,
-              onSwitch: function (item) {
+              switch: true,
+              onSwitch: (item) => {
                 art.subtitle.show = !item.switch
                 return !item.switch
               },
@@ -69,7 +74,8 @@ export default function ARTPlayer({
             {
               html: 'Russian',
               url: '/subtitle.ru.srt',
-            },{
+            },
+            {
               html: 'English',
               url: '/subtitle.en.srt',
             },
@@ -78,7 +84,7 @@ export default function ARTPlayer({
               url: '/subtitle.kz.srt',
             },
           ],
-          onSelect: function (item) {
+          onSelect: (item) => {
             art.subtitle.switch(item.url, {
               name: item.html,
             })
@@ -86,17 +92,8 @@ export default function ARTPlayer({
           },
         },
       ],
-      // contextmenu: [
-      //   {
-      //     html: 'your-menu',
-      //     click: function (...args) {
-      //       console.info('click', args)
-      //       art.contextmenu.show = false
-      //     },
-      //   },
-      // ],
-      subtitle: {
-        url: '/assets/sample/subtitle.srt',
+      subtitle: subtitle || {
+        url: `/subtitle.${locale}.srt`,
         type: 'srt',
         style: {
           color: '#ffffff',

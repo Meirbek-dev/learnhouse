@@ -15,7 +15,7 @@ const createRequestOptions = (
   next: any,
   contentType: string | null = 'application/json',
   token?: string,
-  rawBody: boolean = false
+  rawBody = false
 ) => {
   const options: any = {
     method,
