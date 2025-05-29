@@ -35,7 +35,7 @@ function Trail(params: any) {
           {trail.runs.map((run: any) => (
             <TrailCourseElement
               run={run}
-              key={run.org_id}
+              key={`${run.id ?? run.course_id}`}
               course={run.course}
               orgslug={orgslug}
             />

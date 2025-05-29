@@ -25,6 +25,39 @@ from uuid import uuid4
 from datetime import datetime
 
 
+def validate_video_file(video_file: UploadFile | None) -> str:
+    """Validate video file and return format"""
+    if not video_file:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Video : No video file provided",
+        )
+
+    if video_file.content_type not in [
+        "video/mp4",
+        "video/webm",
+        "video/x-matroska",
+    ]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Video : Wrong video format",
+        )
+
+    video_format = (
+        video_file.filename.rsplit(".", 1)[-1]
+        if video_file.filename and "." in video_file.filename
+        else None
+    )
+
+    if not video_format:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Video : No video file provided or invalid filename",
+        )
+
+    return video_format
+
+
 async def create_video_activity(
     request: Request,
     name: str,
@@ -70,31 +103,8 @@ async def create_video_activity(
     # generate activity_uuid
     activity_uuid = str(f"activity_{uuid4()}")
 
-    # check if video_file is not None
-    if not video_file:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Video : No video file provided",
-        )
-
-    if video_file.content_type not in [
-        "video/mp4",
-        "video/webm",
-        "video/x-matroska",
-    ]:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Video : Wrong video format"
-        )
-
-    # get video format
-    if video_file.filename:
-        video_format = video_file.filename.split(".")[-1]
-
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Video : No video file provided",
-        )
+    # Validate video file and get format
+    video_format = validate_video_file(video_file)
 
     activity_object = Activity(
         name=name,
@@ -105,7 +115,7 @@ async def create_video_activity(
         course_id=coursechapter.course_id,
         published_version=1,
         content={
-            "filename": "video." + video_format,
+            "filename": f"video.{video_format}",
             "activity_uuid": activity_uuid,
         },
         details=details,

@@ -1420,21 +1420,6 @@
         "manageUsersModalTitle": "Manage UserGroup Users",
         "title": "Manage UserGroups & Users",
         "userGroupHeader": "UserGroup"
-      },
-      "usersSection": {
-        "actionsHeader": "Actions",
-        "activeUsersTitle": "Active users",
-        "description": "Manage your organization users, assign roles and permissions",
-        "editRoleButton": "Edit Role",
-        "noUsersFound": "No users found in this organization.",
-        "removeFromOrgButton": "Remove from organization",
-        "removeUserButton": "Remove User",
-        "removeUserModalMessage": "Are you sure you want remove this user from the organization?",
-        "removeUserModalTitle": "Remove {username}?",
-        "roleHeader": "Role",
-        "updateRoleModalDescription": "Update @{username}'s role",
-        "updateRoleModalTitle": "Update Role",
-        "userHeader": "User"
       }
     },
     "Payments": {
@@ -1863,6 +1848,7 @@
         "activeUsersTitle": "Active users",
         "description": "Manage your organization users, assign roles and permissions",
         "editRoleButton": "Edit Role",
+        "noUsersFound": "No users found in this organization.",
         "removeFromOrgButton": "Remove from organization",
         "removeUserButton": "Remove User",
         "removeUserModalMessage": "Are you sure you want remove this user from the organization?",

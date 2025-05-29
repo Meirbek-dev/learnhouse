@@ -100,62 +100,69 @@ function OrgUsers() {
                       </td>
                       <td className="px-4 py-3">{user.role.name}</td>
                       <td className="flex items-end space-x-2 px-4 py-3">
-                        <Modal
-                          isDialogOpen={
-                            rolesModal &&
-                            selectedUser?.user?.user_uuid ===
-                              user.user.user_uuid
-                          }
-                          onOpenChange={(isOpen) => {
-                            if (!isOpen) handleCloseRolesModal()
-                          }}
-                          minHeight="no-min"
-                          dialogContent={
-                            selectedUser && (
-                              <RolesUpdate
-                                alreadyAssignedRole={
-                                  selectedUser.role.role_uuid
+                        {user.role.name === 'admin' ? (
+                          <>
+                            <Modal
+                              isDialogOpen={
+                                rolesModal &&
+                                selectedUser?.user?.user_uuid ===
+                                  user.user.user_uuid
+                              }
+                              onOpenChange={(isOpen) => {
+                                if (!isOpen) handleCloseRolesModal()
+                              }}
+                              minHeight="no-min"
+                              dialogContent={
+                                selectedUser && (
+                                  <RolesUpdate
+                                    alreadyAssignedRole={
+                                      selectedUser.role.role_uuid
+                                    }
+                                    setRolesModal={setRolesModal}
+                                    user={selectedUser}
+                                  />
+                                )
+                              }
+                              dialogTitle={t('updateRoleModalTitle')}
+                              dialogDescription={t(
+                                'updateRoleModalDescription',
+                                {
+                                  username: user.user.username,
                                 }
-                                setRolesModal={setRolesModal}
-                                user={selectedUser}
-                              />
-                            )
-                          }
-                          dialogTitle={t('updateRoleModalTitle')}
-                          dialogDescription={t('updateRoleModalDescription', {
-                            username: user.user.username,
-                          })}
-                          dialogTrigger={
-                            <button
-                              className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
-                              onClick={() => handleRolesModal(user)}
-                            >
-                              <KeyRound className="h-4 w-4" />
-                              <span>{t('editRoleButton')}</span>
-                            </button>
-                          }
-                        />
+                              )}
+                              dialogTrigger={
+                                <button
+                                  className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
+                                  onClick={() => handleRolesModal(user)}
+                                >
+                                  <KeyRound className="h-4 w-4" />
+                                  <span>{t('editRoleButton')}</span>
+                                </button>
+                              }
+                            />
 
-                        <ConfirmationModal
-                          confirmationButtonText={t('removeUserButton')}
-                          confirmationMessage={t('removeUserModalMessage')}
-                          dialogTitle={t('removeUserModalTitle', {
-                            username: user.user.username,
-                          })}
-                          dialogTrigger={
-                            <button
-                              className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer"
-                              onClick={() => handleRemoveUser(user.user.id)}
-                            >
-                              <LogOut className="h-4 w-4" />
-                              <span>{t('removeFromOrgButton')}</span>
-                            </button>
-                          }
-                          functionToExecute={() => {
-                            handleRemoveUser(user.user.id)
-                          }}
-                          status="warning"
-                        />
+                            <ConfirmationModal
+                              confirmationButtonText={t('removeUserButton')}
+                              confirmationMessage={t('removeUserModalMessage')}
+                              dialogTitle={t('removeUserModalTitle', {
+                                username: user.user.username,
+                              })}
+                              dialogTrigger={
+                                <button
+                                  className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer"
+                                  onClick={() => handleRemoveUser(user.user.id)}
+                                >
+                                  <LogOut className="h-4 w-4" />
+                                  <span>{t('removeFromOrgButton')}</span>
+                                </button>
+                              }
+                              functionToExecute={() => {
+                                handleRemoveUser(user.user.id)
+                              }}
+                              status="warning"
+                            />
+                          </>
+                        ) : (<div>No actions for administrators</div>)}
                       </td>
                     </tr>
                   ))}

@@ -317,15 +317,13 @@ async def rbac_check(
 ):
     if action == "read":
         if current_user.id == 0:  # Anonymous user
-            res = await authorization_verify_if_element_is_public(
+            return await authorization_verify_if_element_is_public(
                 request, element_uuid, action, db_session
             )
-            return res
         else:
-            res = await authorization_verify_based_on_roles_and_authorship(
+            return await authorization_verify_based_on_roles_and_authorship(
                 request, current_user.id, action, element_uuid, db_session
             )
-            return res
     else:
         # For non-read actions, proceed with regular RBAC checks
         await authorization_verify_if_user_is_anon(current_user.id)

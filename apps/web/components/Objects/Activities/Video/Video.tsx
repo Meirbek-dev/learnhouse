@@ -15,6 +15,11 @@ interface VideoDetails {
   muted?: boolean
 }
 
+interface SubtitleEntry {
+  html: string
+  url: string
+}
+
 interface VideoActivityProps {
   activity: {
     activity_sub_type: string
@@ -34,6 +39,12 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
   const org = useOrg() as any
   const [videoId, setVideoId] = useState('')
   const locale = useLocale()
+
+  const subtitleEntries: SubtitleEntry[] = [
+    { html: 'Russian', url: '/subtitle.ru.srt' },
+    { html: 'English', url: '/subtitle.en.srt' },
+    { html: 'Kazakh', url: '/subtitle.kz.srt' },
+  ]
 
   useEffect(() => {
     if (activity?.content?.uri) {
@@ -86,6 +97,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                   },
                   encoding: 'utf-8',
                 }}
+                subtitleEntries={subtitleEntries}
                 className="size-full"
               />
             )}
