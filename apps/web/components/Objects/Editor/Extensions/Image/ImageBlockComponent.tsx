@@ -52,6 +52,7 @@ function ImageBlockComponent(props: any) {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
+    if (!image) return;
     setIsLoading(true)
     const object = await uploadNewImageFile(
       image,
@@ -174,7 +175,7 @@ function ImageBlockComponent(props: any) {
                   course?.courseStructure.course_uuid,
                   props.extension.options.activity.activity_uuid,
                   blockObject.block_uuid,
-                  blockObject ? fileId : ' ',
+                  fileId || '',
                   'imageBlock'
                 )}`}
                 alt=""
@@ -218,7 +219,7 @@ function ImageBlockComponent(props: any) {
                 course?.courseStructure.course_uuid,
                 props.extension.options.activity.activity_uuid,
                 blockObject.block_uuid,
-                blockObject ? fileId : ' ',
+                fileId || '',
                 'imageBlock'
               )}`}
               alt=""

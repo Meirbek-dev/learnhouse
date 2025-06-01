@@ -38,6 +38,7 @@ function PDFBlockComponent(props: any) {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
+    if (!pdf) return // Guard: only proceed if pdf is not null
     setIsLoading(true)
     const object = await uploadNewPDFFile(
       pdf,
@@ -74,7 +75,7 @@ function PDFBlockComponent(props: any) {
     document.body.removeChild(link)
   }
 
-  useEffect(() => {}, [course, org])
+  useEffect(() => { }, [course, org])
 
   return (
     <NodeViewWrapper className="block-pdf">
@@ -96,14 +97,18 @@ function PDFBlockComponent(props: any) {
           <div className="relative">
             <iframe
               className="h-96 w-full rounded-lg bg-black object-scale-down shadow-sm"
-              src={`${getActivityBlockMediaDirectory(
-                org?.org_uuid,
-                course?.courseStructure.course_uuid,
-                props.extension.options.activity.activity_uuid,
-                blockObject.block_uuid,
-                blockObject ? fileId : ' ',
-                'pdfBlock'
-              )}`}
+              src={
+                blockObject && fileId && blockObject.block_uuid
+                  ? getActivityBlockMediaDirectory(
+                    org?.org_uuid || '',
+                    course?.courseStructure.course_uuid || '',
+                    props.extension.options.activity.activity_uuid || '',
+                    blockObject.block_uuid || '',
+                    fileId,
+                    'pdfBlock'
+                  )
+                  : ''
+              }
             />
             {!isEditable && (
               <button

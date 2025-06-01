@@ -93,7 +93,6 @@ interface ActivityClientProps {
   orgslug: string
   activity: any
   course: any
-  t: ReturnType<typeof useTranslations<'ActivityPage'>>
 }
 
 interface ActivityActionsProps {
@@ -141,8 +140,6 @@ function ActivityActions({
   assignment,
   showNavigation = true,
 }: ActivityActionsProps) {
-  const _session = useLHSession() as any
-  const { contributorStatus } = useContributorStatus(course.course_uuid)
   const t = useTranslations('ActivityPage')
 
   return (

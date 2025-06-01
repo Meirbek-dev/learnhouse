@@ -15,8 +15,7 @@ const nextConfig: NextConfig = {
     ]
   },
   experimental: {
-    reactCompiler: true,
-    ppr: true,
+    reactCompiler: true
   },
   compiler: {
     styledComponents: true,
