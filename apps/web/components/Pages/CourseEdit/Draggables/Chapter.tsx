@@ -135,7 +135,7 @@ function Chapter(props: any) {
                   rel="noopener noreferrer"
                 >
                   <X size={15} className="font-bold text-rose-200" />
-                  <p>Delete Chapter</p>
+                  <p>{t('deleteChapter')}</p>
                 </div>
               }
               functionToExecute={() =>

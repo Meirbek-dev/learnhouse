@@ -59,9 +59,6 @@ function EditCourseContributors(_props: EditCourseContributorsProps) {
   const { isLoading, courseStructure } = course as any
   const dispatchCourse = useCourseDispatch() as any
   const t = useTranslations('DashPage.Courses.Contributors')
-  const tNotify = useTranslations('Notifications')
-  const tGeneral = useTranslations('General')
-  const tAccess = useTranslations('DashPage.Courses.Access')
 
   const { data: contributors } = useSWR<Contributor[]>(
     courseStructure
@@ -113,7 +110,7 @@ function EditCourseContributors(_props: EditCourseContributorsProps) {
 
       // Don't allow editing if the user is a CREATOR
       if (currentContributor.authorship === 'CREATOR') {
-        toast.error(tNotify('cannotModifyCreator'))
+        toast.error(t('cannotModifyCreator'))
         return
       }
 
@@ -132,19 +129,19 @@ function EditCourseContributors(_props: EditCourseContributorsProps) {
         access_token
       )
       if (res.status === 200 && res.data?.status === 'success') {
-        toast.success(res.data.detail || tNotify('contributorUpdateSuccess'))
+        toast.success(res.data.detail || t('contributorUpdateSuccess'))
         mutate(
           `${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors`
         )
       } else {
         toast.error(
-          tNotify('contributorUpdateErrorDetailed', {
+          t('contributorUpdateErrorDetailed', {
             error: res.data?.detail,
           })
         )
       }
     } catch (_error) {
-      toast.error(tNotify('contributorUpdateErrorGeneric'))
+      toast.error(t('contributorUpdateErrorGeneric'))
     }
   }
 
@@ -158,7 +155,7 @@ function EditCourseContributors(_props: EditCourseContributorsProps) {
       case 'REPORTER':
         return t('roleReporter')
       case 'CREATOR':
-        return tGeneral('role')
+        return t('role')
       default:
         return role
     }
@@ -292,7 +289,7 @@ function EditCourseContributors(_props: EditCourseContributorsProps) {
                   <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
                     {isOpenToContributors && (
                       <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                        {tAccess('activeBadge')}
+                        {t('activeBadge')}
                       </div>
                     )}
                     <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
@@ -317,7 +314,7 @@ function EditCourseContributors(_props: EditCourseContributorsProps) {
                   <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
                     {!isOpenToContributors && (
                       <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
-                        {tAccess('activeBadge')}
+                        {t('activeBadge')}
                       </div>
                     )}
                     <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
@@ -356,7 +353,7 @@ function EditCourseContributors(_props: EditCourseContributorsProps) {
                 </TableHeader>
                 <TableBody>
                   {sortContributors(contributors)?.map((contributor) => (
-                    <TableRow key={contributor.id}>
+                    <TableRow key={contributor.user_id}>
                       <TableCell>
                         <UserAvatar
                           width={30}

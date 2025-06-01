@@ -18,7 +18,6 @@ function OrgUsersAdd() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('DashPage.UserSettings.addSection')
-  const tNotify = useTranslations('Notifications')
   const [invitedUsers, setInvitedUsers] = useState('')
   const [selectedInviteCode, setSelectedInviteCode] = useState<
     string | undefined
@@ -34,7 +33,7 @@ function OrgUsersAdd() {
       return
     }
 
-    const toastId = toast.loading(tNotify('sendingInvite'))
+    const toastId = toast.loading(t('sendingInvite'))
     try {
       const res = await inviteBatchUsers(
         org.id,
@@ -44,13 +43,13 @@ function OrgUsersAdd() {
       )
       if (res.status == 200) {
         mutate(`${getAPIUrl()}orgs/${org?.id}/invites/users`)
-        toast.success(tNotify('inviteSentSuccess'), { id: toastId })
+        toast.success(t('inviteSentSuccess'), { id: toastId })
         setInvitedUsers('')
       } else {
-        toast.error(tNotify('errors.sendInviteFailed'), { id: toastId })
+        toast.error(t('errors.sendInviteFailed'), { id: toastId })
       }
     } catch (_error) {
-      toast.error(tNotify('errors.sendInviteFailed'), { id: toastId })
+      toast.error(t('errors.sendInviteFailed'), { id: toastId })
     }
   }
 
@@ -107,7 +106,7 @@ function OrgUsersAdd() {
                   disabled={!invites || invites.length === 0}
                 >
                   {invites?.length === 0 && (
-                    <option value="">No invite codes available</option>
+                    <option value="">{t('noInviteCodesAvailable')}</option>
                   )}
                   {invites?.map((invite: any) => (
                     <option

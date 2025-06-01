@@ -186,8 +186,8 @@ const LoggedInJoinScreen = (props: any) => {
 }
 
 const NoTokenScreen = (_props: any) => {
-  const toastT = useTranslations('ToastMessages')
   const t = useTranslations('Auth.Signup')
+  const toastT = useTranslations('ToastMessages')
   const session = useLHSession() as any
   const org = useOrg() as any
   const router = useRouter()

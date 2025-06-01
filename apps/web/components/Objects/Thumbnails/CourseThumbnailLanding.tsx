@@ -126,8 +126,7 @@ const CourseThumbnailLanding: FC<PropsType> = ({
   orgslug,
   customLink,
 }) => {
-  const t = useTranslations('Components.CourseThumbnailLanding')
-  const tCourseThumb = useTranslations('Components.CourseThumbnail')
+  const t = useTranslations('Components.CourseThumbnail')
   const router = useRouter()
   const org = useOrg() as any
   const session = useLHSession() as any
@@ -146,10 +145,10 @@ const CourseThumbnailLanding: FC<PropsType> = ({
         session.data?.tokens?.access_token
       )
       await revalidateTags(['courses'], orgslug)
-      toast.success(tCourseThumb('toastDeleteSuccess'))
+      toast.success(t('toastDeleteSuccess'))
       router.refresh()
     } catch {
-      toast.error(tCourseThumb('toastDeleteError'))
+      toast.error(t('toastDeleteError'))
     } finally {
       toast.dismiss(toastId)
     }

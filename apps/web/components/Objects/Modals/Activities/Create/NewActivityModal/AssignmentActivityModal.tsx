@@ -184,7 +184,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
                 {dueDate ? (
                   format(new Date(dueDate), 'PPP')
                 ) : (
-                  <span>Select a deadline for completing the task</span> //{t('pickDate')}
+                  <span>{t('selectDeadline')}</span>
                 )}
                 <CalendarIcon className="ml-2 size-4 opacity-50" />
               </button>

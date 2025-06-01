@@ -17,7 +17,6 @@ import { useTranslations } from 'next-intl'
 
 function OpenSignUpComponent() {
   const validationT = useTranslations('Validation')
-  const generalT = useTranslations('General')
   const t = useTranslations('Auth.Signup')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const org = useOrg() as any
@@ -85,7 +84,7 @@ function OpenSignUpComponent() {
       ) {
         setError(responseMessage.detail)
       } else {
-        setError(generalT('errorSomethingWentWrong'))
+        setError(t('errorSomethingWentWrong'))
       }
       setIsSubmitting(false)
     },
@@ -184,7 +183,7 @@ function OpenSignUpComponent() {
         <div className="flex py-4">
           <Form.Submit asChild>
             <button className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md hover:cursor-pointer">
-              {isSubmitting ? generalT('loading') : t('createAccount')}
+              {isSubmitting ? t('loading') : t('createAccount')}
             </button>
           </Form.Submit>
         </div>

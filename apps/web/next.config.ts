@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  experimental: {
+    reactCompiler: true,
+    ppr: true,
+  },
+  compiler: {
+    styledComponents: true,
+  },
   reactStrictMode: false,
   output: 'standalone',
 }

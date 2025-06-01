@@ -66,7 +66,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
         <div className="course_top">
           <div className="course_info flex">
             <div className="course_basic flex-end flex flex-col -space-y-2">
-              <p className="p-0 text-sm font-bold text-gray-700">
+              <p className="p-0 pb-1 text-sm font-bold text-gray-700">
                 {t('courseLabel')}
               </p>
               <div className="course_progress flex items-center space-x-2">

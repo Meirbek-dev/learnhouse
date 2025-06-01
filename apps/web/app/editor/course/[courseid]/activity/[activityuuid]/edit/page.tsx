@@ -36,13 +36,13 @@ export async function generateMetadata(
   }
 }
 
-const EditActivity = async (params: any) => {
+const EditActivity = async (props: {
+  params: Promise<{ courseid: string; activityuuid: string }>
+}) => {
+  const params = await props.params
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
-  const [activityuuid, courseid] = await Promise.all([
-    params.params.activityuuid,
-    params.params.courseid,
-  ])
+  const { activityuuid, courseid } = params
 
   const [courseInfo, activity] = await Promise.all([
     getCourseMetadata(

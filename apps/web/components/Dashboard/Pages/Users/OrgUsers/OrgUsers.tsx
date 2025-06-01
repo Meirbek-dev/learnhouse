@@ -21,7 +21,6 @@ function OrgUsers() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('DashPage.UserSettings.usersSection')
-  const tNotify = useTranslations('Notifications')
 
   const {
     data: orgUsers,
@@ -44,17 +43,17 @@ function OrgUsers() {
   }
 
   const handleRemoveUser = async (user_id: any) => {
-    const toastId = toast.loading(tNotify('removingUser'))
+    const toastId = toast.loading(t('removingUser'))
     try {
       const res = await removeUserFromOrg(org.id, user_id, access_token)
       if (res.status === 200) {
         await mutate(`${getAPIUrl()}orgs/${org.id}/users`)
-        toast.success(tNotify('userRemovedSuccess'), { id: toastId })
+        toast.success(t('userRemovedSuccess'), { id: toastId })
       } else {
-        toast.error(tNotify('errors.removeUserFailed'), { id: toastId })
+        toast.error(t('errors.removeUserFailed'), { id: toastId })
       }
     } catch (_error) {
-      toast.error(tNotify('errors.removeUserFailed'), { id: toastId })
+      toast.error(t('errors.removeUserFailed'), { id: toastId })
     }
   }
 
@@ -162,7 +161,11 @@ function OrgUsers() {
                               status="warning"
                             />
                           </>
-                        ) : (<div>No actions for administrators</div>)}
+                        ) : (
+                          <div className="text-neutral-500">
+                            {t('noActionsForAdministrators')}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}

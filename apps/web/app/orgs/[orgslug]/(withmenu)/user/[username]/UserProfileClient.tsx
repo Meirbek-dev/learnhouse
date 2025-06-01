@@ -317,7 +317,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                                   {edu.institution}
                                 </h3>
                                 <p className="text-gray-600">
-                                  {edu.degree} in {edu.field}
+                                  {edu.degree} {t('in')} {edu.field}
                                 </p>
                                 <p className="text-sm text-gray-500">
                                   {edu.startDate} -{' '}

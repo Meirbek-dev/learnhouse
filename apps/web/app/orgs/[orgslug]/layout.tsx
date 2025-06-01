@@ -22,7 +22,7 @@ export default function RootLayout(props: {
           initialPosition={0.3}
           height={4}
           easing={'ease'}
-          speed={800}
+          speed={1000}
           showSpinner={false}
         />
         <Toast />

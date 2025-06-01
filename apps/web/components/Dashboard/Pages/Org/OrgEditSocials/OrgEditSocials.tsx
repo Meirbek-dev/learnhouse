@@ -37,24 +37,22 @@ export default function OrgEditSocials() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
-  const _router = useRouter()
   const t = useTranslations('DashPage.OrgSettings.Socials')
-  const tNotify = useTranslations('Notifications')
   const initialValues: OrganizationValues = {
     socials: org?.socials || {},
     links: org?.links || {},
   }
 
   const updateOrg = async (values: OrganizationValues) => {
-    const loadingToast = toast.loading(tNotify('updatingOrg'))
+    const loadingToast = toast.loading(t('updatingOrg'))
     try {
       await updateOrganization(org.id, values, access_token)
       await revalidateTags(['organizations'], org.slug)
 
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
-      toast.success(tNotify('orgUpdatedSuccess'), { id: loadingToast })
+      toast.success(t('orgUpdatedSuccess'), { id: loadingToast })
     } catch (_err) {
-      toast.error(tNotify('orgUpdateFailed'), { id: loadingToast })
+      toast.error(t('orgUpdateFailed'), { id: loadingToast })
     }
   }
 
@@ -97,7 +95,7 @@ export default function OrgEditSocials() {
                             name="socials.twitter"
                             value={values.socials.twitter || ''}
                             onChange={handleChange}
-                            placeholder={t('Form.twitterPlaceholder')}
+                            placeholder={t('Form.xPlaceholder')}
                             className="h-9 bg-white"
                           />
                         </div>

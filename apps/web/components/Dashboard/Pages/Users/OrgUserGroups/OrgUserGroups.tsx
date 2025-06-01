@@ -9,7 +9,7 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { getAPIUrl } from '@services/config/config'
 import { deleteUserGroup } from '@services/usergroups/usergroups'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Pencil, SquareUserRound, Users, X } from 'lucide-react'
+import { Loader, Pencil, SquareUserRound, Users, X } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
@@ -20,7 +20,6 @@ function OrgUserGroups() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('DashPage.UserSettings.usergroupsSection')
-  const tNotify = useTranslations('Notifications')
   const [userGroupManagementModal, setUserGroupManagementModal] =
     useState(false)
   const [createUserGroupModal, setCreateUserGroupModal] = useState(false)
@@ -41,17 +40,17 @@ function OrgUserGroups() {
   )
 
   const deleteUserGroupUI = async (usergroup_id: any) => {
-    const toastId = toast.loading(tNotify('deletingUserGroup'))
+    const toastId = toast.loading(t('deletingUserGroup'))
     try {
       const res = await deleteUserGroup(usergroup_id, access_token)
       if (res.status == 200) {
         mutate(`${getAPIUrl()}usergroups/org/${org.id}`)
-        toast.success(tNotify('userGroupDeletedSuccess'), { id: toastId })
+        toast.success(t('userGroupDeletedSuccess'), { id: toastId })
       } else {
-        toast.error(tNotify('errors.deleteUserGroupFailed'), { id: toastId })
+        toast.error(t('errors.deleteUserGroupFailed'), { id: toastId })
       }
     } catch (_error) {
-      toast.error(tNotify('errors.deleteUserGroupFailed'), { id: toastId })
+      toast.error(t('errors.deleteUserGroupFailed'), { id: toastId })
     }
   }
 
@@ -79,7 +78,7 @@ function OrgUserGroups() {
     }
   }
 
-  if (isLoading) return <div>{t('loading')}</div>
+  if (isLoading) return <Loader size={16} className="mr-2 animate-spin" />
   if (error) return <div>{t('errorLoadingUserGroups')}</div>
 
   return (
@@ -186,7 +185,7 @@ function OrgUserGroups() {
               {(!usergroups || usergroups.length === 0) && (
                 <tr>
                   <td colSpan={4} className="py-4 text-center text-gray-500">
-                    No user groups found.
+                    {t('noUserGroupsFound')}
                   </td>
                 </tr>
               )}

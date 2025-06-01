@@ -60,10 +60,30 @@ const ORG_LABELS = [
 ] as const
 
 const getOrgLabels = (t: Function) =>
-  ORG_LABELS.map((item) => ({
-    value: item.value,
-    label: t(`OrgLabels.${item.value}` as any),
-  }))
+  ORG_LABELS.map((item) => {
+    try {
+      // Try to get the translated version
+      const translatedLabel = t(`OrgLabels.${item.value}` as any)
+      // If translation exists and is not the key itself, use it
+      if (translatedLabel && !translatedLabel.startsWith('OrgLabels.')) {
+        return {
+          value: item.value,
+          label: translatedLabel,
+        }
+      }
+      // Fallback to hardcoded label
+      return {
+        value: item.value,
+        label: item.label,
+      }
+    } catch (error) {
+      // If translation fails, use hardcoded label
+      return {
+        value: item.value,
+        label: item.label,
+      }
+    }
+  })
 
 const validationSchema = Yup.object().shape({
   name: Yup.string()
@@ -90,12 +110,10 @@ interface OrganizationValues {
 }
 
 const OrgEditGeneral: FC = () => {
-  const _router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const t = useTranslations('DashPage.OrgSettings.General')
-  const tNotify = useTranslations('Notifications')
 
   const initialValues: OrganizationValues = {
     name: org?.name,
@@ -106,14 +124,14 @@ const OrgEditGeneral: FC = () => {
   }
 
   const updateOrg = async (values: OrganizationValues) => {
-    const loadingToast = toast.loading(tNotify('updatingOrg'))
+    const loadingToast = toast.loading(t('updatingOrg'))
     try {
       await updateOrganization(org.id, values, access_token)
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
-      toast.success(tNotify('orgUpdatedSuccess'), { id: loadingToast })
+      toast.success(t('orgUpdatedSuccess'), { id: loadingToast })
     } catch (_err) {
-      toast.error(tNotify('orgUpdateFailed'), { id: loadingToast })
+      toast.error(t('orgUpdateFailed'), { id: loadingToast })
     }
   }
 
@@ -153,7 +171,7 @@ const OrgEditGeneral: FC = () => {
                     <div>
                       <Label htmlFor="name">
                         {t('Form.nameLabel')}
-                        <span className="ml-2 text-sm text-gray-500">
+                        <span className="text-sm text-gray-500">
                           ({60 - (values.name?.length || 0)}{' '}
                           {t('Form.charsLeft')}
                         </span>
@@ -176,7 +194,7 @@ const OrgEditGeneral: FC = () => {
                     <div>
                       <Label htmlFor="description">
                         {t('Form.descriptionLabel')}
-                        <span className="ml-2 text-sm text-gray-500">
+                        <span className="text-sm text-gray-500">
                           ({100 - (values.description?.length || 0)}{' '}
                           {t('Form.charsLeft')}
                         </span>
@@ -225,7 +243,7 @@ const OrgEditGeneral: FC = () => {
                     <div>
                       <Label htmlFor="about">
                         {t('Form.aboutLabel')}
-                        <span className="ml-2 text-sm text-gray-500">
+                        <span className="text-sm text-gray-500">
                           ({400 - (values.about?.length || 0)}{' '}
                           {t('Form.charsLeft')}
                         </span>
@@ -265,6 +283,9 @@ const OrgEditGeneral: FC = () => {
                           </span>
                         </Link>
                         <div className="space-y-0.5">
+                          <Label className="text-base">
+                            {t('Form.exploreTitle')}
+                          </Label>
                           <p className="text-sm text-gray-500">
                             {t('Form.exploreDescription')}
                           </p>

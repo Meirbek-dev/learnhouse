@@ -116,18 +116,18 @@ const DETAIL_TEMPLATES = {
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   Yup.object().shape({
     email: Yup.string()
-      .email(t('Components.Form.invalidEmail'))
-      .required(t('Components.Form.requiredField', { fieldName: 'Email' })),
+      .email(t('Form.invalidEmail'))
+      .required(t('Form.requiredField', { fieldName: 'Email' })),
     username: Yup.string().required(
-      t('Components.Form.requiredField', { fieldName: 'Username' })
+      t('Form.requiredField', { fieldName: 'Username' })
     ),
     first_name: Yup.string().required(
-      t('Components.Form.requiredField', { fieldName: 'First name' })
+      t('Form.requiredField', { fieldName: 'First name' })
     ),
     last_name: Yup.string().required(
-      t('Components.Form.requiredField', { fieldName: 'Last name' })
+      t('Form.requiredField', { fieldName: 'Last name' })
     ),
-    bio: Yup.string().max(400, t('Components.Form.maxChars', { count: 400 })),
+    bio: Yup.string().max(400, t('Form.maxChars', { count: 400 })),
     details: Yup.object().shape({}),
   })
 
@@ -616,7 +616,7 @@ function UserEditGeneral() {
   const [userData, setUserData] = useState<any>(null)
   const [currentLocale, setCurrentLocale] = useState<Locale | null>(null)
   const [initialLoading, setInitialLoading] = useState<boolean>(true)
-  const t = useTranslations('')
+  const t = useTranslations('DashPage.Notifications')
   const validationSchema = React.useMemo(() => createValidationSchema(t), [t])
 
   // Add a handler to update the state when locale changes
@@ -668,20 +668,20 @@ function UserEditGeneral() {
       )
       // await new Promise((r) => setTimeout(r, 1000));
       if (res.success === false) {
-        setError(res.HTTPmessage || t('DashPage.Notifications.avatarError'))
+        setError(res.HTTPmessage || t('avatarError'))
       } else {
-        setSuccess(t('DashPage.Notifications.avatarSuccess'))
+        setSuccess(t('avatarSuccess'))
       }
     } catch (uploadError) {
       console.error('Avatar upload error:', uploadError)
-      setError(t('DashPage.Notifications.avatarError'))
+      setError(t('avatarError'))
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleEmailChange = async (newEmail: string) => {
-    toast.success(t('DashPage.Notifications.profileUpdateSuccess'), {
+    toast.success(t('profileUpdateSuccess'), {
       duration: 4000,
     })
 
@@ -689,7 +689,7 @@ function UserEditGeneral() {
       (t: any) => (
         <div className="flex items-center gap-2">
           <span>
-            {t('DashPage.Notifications.promptLogoutOnEmailChange', {
+            {t('promptLogoutOnEmailChange', {
               newEmail,
             })}
           </span>
@@ -731,9 +731,7 @@ function UserEditGeneral() {
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting }) => {
           const isEmailChanged = values.email !== userData.email
-          const loadingToast = toast.loading(
-            t('DashPage.Notifications.updating')
-          )
+          const loadingToast = toast.loading(t('updating'))
           setSubmitting(true)
 
           try {
@@ -745,11 +743,11 @@ function UserEditGeneral() {
             if (isEmailChanged) {
               await handleEmailChange(values.email)
             } else {
-              toast.success(t('DashPage.Notifications.profileUpdateSuccess'))
+              toast.success(t('profileUpdateSuccess'))
             }
           } catch (updateError) {
             console.error('Profile update error:', updateError)
-            toast.error(t('DashPage.Notifications.profileUpdateError'), {
+            toast.error(t('profileUpdateError'), {
               id: loadingToast,
             })
           } finally {

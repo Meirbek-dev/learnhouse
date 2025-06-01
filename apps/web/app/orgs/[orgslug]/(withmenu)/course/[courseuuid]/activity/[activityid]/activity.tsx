@@ -93,6 +93,7 @@ interface ActivityClientProps {
   orgslug: string
   activity: any
   course: any
+  t: ReturnType<typeof useTranslations<'ActivityPage'>>
 }
 
 interface ActivityActionsProps {
@@ -206,6 +207,19 @@ function getRelativeTime(date: Date): string {
   return 'just now'
 }
 
+// Helper to ensure Tiptap always receives a valid document
+function getValidTiptapContent(content: any): any {
+  if (
+    content &&
+    typeof content === 'object' &&
+    content.type === 'doc' &&
+    Array.isArray(content.content)
+  ) {
+    return content
+  }
+  return { type: 'doc', content: [{ type: 'paragraph' }] }
+}
+
 function ActivityClient(props: ActivityClientProps) {
   const activityid = props.activityid
   const courseuuid = props.courseuuid
@@ -224,6 +238,7 @@ function ActivityClient(props: ActivityClientProps) {
   const isInitialRender = useRef(true)
   const { contributorStatus } = useContributorStatus(courseuuid)
   const router = useRouter()
+  const t = useTranslations('ActivityPage')
 
   // Memoize activity position calculation
   const { allActivities, currentIndex } = useActivityPosition(
@@ -248,7 +263,10 @@ function ActivityClient(props: ActivityClientProps) {
       case 'TYPE_DYNAMIC':
         return (
           <Suspense fallback={<LoadingFallback />}>
-            <Canva content={activity.content} activity={activity} />
+            <Canva
+              content={getValidTiptapContent(activity.content)}
+              activity={activity}
+            />
           </Suspense>
         )
       case 'TYPE_VIDEO':
@@ -448,7 +466,7 @@ function ActivityClient(props: ActivityClientProps) {
                               ?.find((run: any) => run.course_id === course.id)
                               ?.steps?.filter((step: any) => step.complete)
                               ?.length || 0}{' '}
-                            of{' '}
+                            {/* of{' '} */}
                             {course.chapters?.reduce(
                               (acc: number, chapter: any) =>
                                 acc + chapter.activities.length,
@@ -485,7 +503,7 @@ function ActivityClient(props: ActivityClientProps) {
                           </div>
                           <div className="flex flex-col -space-y-1">
                             <p className="text-sm font-bold text-gray-700">
-                              Course{' '}
+                              {t('courseTitle')}{' '}
                             </p>
                             <h1 className="text-lg font-bold text-gray-950 first-letter:uppercase">
                               {course.name}
@@ -521,7 +539,7 @@ function ActivityClient(props: ActivityClientProps) {
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setIsFocusMode(false)}
                             className="nice-shadow cursor-pointer rounded-full bg-white p-2 hover:bg-gray-50"
-                            title="Exit focus mode"
+                            title={t('exitFocusMode')}
                           >
                             <Minimize2 size={16} className="text-gray-700" />
                           </motion.button>
@@ -579,8 +597,10 @@ function ActivityClient(props: ActivityClientProps) {
                                 disabled={!prevActivity}
                                 title={
                                   prevActivity
-                                    ? `Previous: ${prevActivity.name}`
-                                    : 'No previous activity'
+                                    ? t('previousActivityTooltip', {
+                                        activityName: prevActivity.name,
+                                      })
+                                    : t('noPreviousActivity')
                                 }
                               >
                                 <ChevronLeft
@@ -589,12 +609,12 @@ function ActivityClient(props: ActivityClientProps) {
                                 />
                                 <div className="flex flex-col items-start">
                                   <span className="text-xs text-gray-500">
-                                    Previous
+                                    {t('previous')}
                                   </span>
                                   <span className="text-left text-sm font-semibold capitalize">
                                     {prevActivity
                                       ? prevActivity.name
-                                      : 'No previous activity'}
+                                      : t('noPreviousActivity')}
                                   </span>
                                 </div>
                               </button>
@@ -618,18 +638,20 @@ function ActivityClient(props: ActivityClientProps) {
                                 disabled={!nextActivity}
                                 title={
                                   nextActivity
-                                    ? `Next: ${nextActivity.name}`
-                                    : 'No next activity'
+                                    ? t('nextActivityTooltip', {
+                                        activityName: nextActivity.name,
+                                      })
+                                    : t('noNextActivity')
                                 }
                               >
                                 <div className="flex flex-col items-end">
                                   <span className="text-xs text-gray-500">
-                                    Next
+                                    {t('next')}
                                   </span>
                                   <span className="text-right text-sm font-semibold capitalize">
                                     {nextActivity
                                       ? nextActivity.name
-                                      : 'No next activity'}
+                                      : t('noNextActivity')}
                                   </span>
                                 </div>
                                 <ChevronRight
@@ -682,7 +704,7 @@ function ActivityClient(props: ActivityClientProps) {
                             </div>
                             <div className="flex flex-col -space-y-1">
                               <p className="text-md font-bold text-gray-700">
-                                Course{' '}
+                                {t('courseTitle')}{' '}
                               </p>
                               <h1 className="text-3xl font-bold text-gray-950 first-letter:uppercase">
                                 {course.name}
@@ -723,7 +745,7 @@ function ActivityClient(props: ActivityClientProps) {
                           <div className="flex-1/3 flex items-center space-x-3">
                             <div className="flex flex-col -space-y-1">
                               <p className="text-md font-bold text-gray-700">
-                                Chapter :{' '}
+                                {t('chapter')}:{' '}
                                 {getChapterNameByActivityId(
                                   course,
                                   activity.id
@@ -793,7 +815,7 @@ function ActivityClient(props: ActivityClientProps) {
                                         (a: any) =>
                                           a.authorship_status === 'ACTIVE'
                                       ).length > 1 && (
-                                        <span>Co-created by </span>
+                                        <span>{t('coCreatedBy')} </span>
                                       )}
                                       {course.authors
                                         .filter(
@@ -860,7 +882,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 {/* Dates */}
                                 <div className="flex items-center gap-2 text-xs text-gray-500">
                                   <span>
-                                    Created on{' '}
+                                    {t('createdOn')}{' '}
                                     {new Date(
                                       course.creation_date
                                     ).toLocaleDateString(undefined, {
@@ -871,7 +893,7 @@ function ActivityClient(props: ActivityClientProps) {
                                   </span>
                                   <span className="mx-1">•</span>
                                   <span>
-                                    Last updated{' '}
+                                    {t('lastUpdated')}{' '}
                                     {getRelativeTime(
                                       new Date(
                                         course.updated_at ||
@@ -917,7 +939,7 @@ function ActivityClient(props: ActivityClientProps) {
                                           >
                                             <Edit2 size={17} />
                                             <span className="text-xs font-bold">
-                                              Contribute
+                                              {t('contribute')}
                                             </span>
                                           </Link>
                                         )}
@@ -933,7 +955,7 @@ function ActivityClient(props: ActivityClientProps) {
                         <div className="drop-shadow-xs rounded-lg bg-gray-800 p-7">
                           <div className="text-white">
                             <h1 className="text-2xl font-bold">
-                              This activity is not published yet
+                              {t('activityNotPublished')}
                             </h1>
                           </div>
                         </div>
@@ -950,7 +972,7 @@ function ActivityClient(props: ActivityClientProps) {
                             <button
                               onClick={() => setIsFocusMode(true)}
                               className="nice-shadow group pointer-events-auto absolute right-4 top-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
-                              title="Enter focus mode"
+                              title={t('enterFocusMode')}
                             >
                               <div className="flex items-center">
                                 <Maximize2
@@ -958,7 +980,7 @@ function ActivityClient(props: ActivityClientProps) {
                                   className="text-gray-700"
                                 />
                                 <span className="w-0 whitespace-nowrap text-xs font-bold text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
-                                  Focus Mode
+                                  {t('focusMode')}
                                 </span>
                               </div>
                             </button>
@@ -1113,13 +1135,13 @@ export function MarkStatus(props: {
       setIsLoading(true)
       // refresh the page after marking the activity as complete
       await revalidateTags(['courses'], props.orgslug)
-      router.refresh()
       await markActivityAsComplete(
         props.orgslug,
         props.course.course_uuid,
         props.activity.activity_uuid,
         session.data?.tokens?.access_token
       )
+      router.refresh()
 
       await mutate(`${getAPIUrl()}courses/${props.course.course_uuid}/meta`)
 
@@ -1226,7 +1248,7 @@ export function MarkStatus(props: {
             {showMarkedTooltip && (
               <MiniInfoTooltip
                 icon={infoIcon}
-                message="Click the checkbox to unmark as complete if needed"
+                message={t('markStatus.unmarkTooltipMessage')}
                 onClose={handleMarkedTooltipClose}
                 iconColor="text-teal-600"
                 iconSize={24}
@@ -1282,7 +1304,7 @@ export function MarkStatus(props: {
             {showUnmarkedTooltip && (
               <MiniInfoTooltip
                 icon={infoIcon}
-                message="Click the checkbox to mark this activity as complete"
+                message={t('markStatus.markTooltipMessage')}
                 onClose={handleUnmarkedTooltipClose}
                 iconColor="text-gray-600"
                 iconSize={24}
@@ -1306,6 +1328,7 @@ function NextActivityButton({
   orgslug: string
 }) {
   const router = useRouter()
+  const t = useTranslations('ActivityPage')
   const findNextActivity = () => {
     const allActivities: any[] = []
     let currentIndex = -1
@@ -1352,7 +1375,7 @@ function NextActivityButton({
       onClick={navigateToActivity}
       className="nice-shadow flex items-center space-x-1 rounded-full bg-white p-2.5 px-5 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
     >
-      <span className="text-xs font-bold text-gray-500">Next</span>
+      <span className="text-xs font-bold text-gray-500">{t('next')}</span>
       <EllipsisVertical className="text-gray-400" size={13} />
       <span className="max-w-[200px] truncate text-sm font-semibold">
         {nextActivity.name}
@@ -1372,6 +1395,7 @@ function PreviousActivityButton({
   orgslug: string
 }) {
   const router = useRouter()
+  const t = useTranslations('ActivityPage')
 
   const findPreviousActivity = () => {
     const allActivities: any[] = []
@@ -1418,7 +1442,7 @@ function PreviousActivityButton({
       className="nice-shadow flex items-center space-x-1 rounded-full bg-white p-2.5 px-5 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
     >
       <ChevronLeft size={17} />
-      <span className="text-xs font-bold text-gray-500">Previous</span>
+      <span className="text-xs font-bold text-gray-500">{t('previous')}</span>
       <EllipsisVertical className="text-gray-400" size={13} />
       <span className="max-w-[200px] truncate text-sm font-semibold">
         {previousActivity.name}

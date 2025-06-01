@@ -28,6 +28,14 @@ function AssignmentTaskEditor({ page }: any) {
   const access_token = session?.data?.tokens?.access_token
 
   async function deleteTaskUI() {
+    if (!assignment?.assignment_object?.assignment_uuid) {
+      console.error(
+        'Assignment object or its UUID is missing. Cannot delete task.'
+      )
+      toast.error(t('assignmentObjectMissingError'))
+      return
+    }
+
     const res = await deleteAssignmentTask(
       assignmentTaskState.assignmentTask.assignment_task_uuid,
       assignment.assignment_object.assignment_uuid,

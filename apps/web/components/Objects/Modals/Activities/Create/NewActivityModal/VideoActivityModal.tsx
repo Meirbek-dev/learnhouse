@@ -143,7 +143,7 @@ function VideoModal({
       onValueChange={setAccordionOpen}
     >
       <AccordionItem value="additional-settings">
-        <AccordionTrigger>Additional Settings</AccordionTrigger>
+        <AccordionTrigger>{t('additionalSettings')}</AccordionTrigger>
         <AccordionContent>
           <VideoSettingsForm />
           <SubtitleSettingsForm />

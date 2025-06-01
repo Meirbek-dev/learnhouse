@@ -26,8 +26,6 @@ function OrgAccess() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const t = useTranslations('DashPage.UserSettings.signupsSection')
-  const tNotify = useTranslations('Notifications')
-  const _tGeneral = useTranslations('General')
 
   const { data: invites } = useSWR(
     org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null,
@@ -53,7 +51,7 @@ function OrgAccess() {
   }, [invites, joinMethod])
 
   async function deleteInvite(invite: any) {
-    const toastId = toast.loading(tNotify('deletingInvite'))
+    const toastId = toast.loading(t('deletingInvite'))
     try {
       const res = await deleteInviteCode(
         org.id,
@@ -62,31 +60,31 @@ function OrgAccess() {
       )
       if (res.status == 200) {
         mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
-        toast.success(tNotify('inviteDeletedSuccess'), { id: toastId })
+        toast.success(t('inviteDeletedSuccess'), { id: toastId })
       } else {
-        toast.error(tNotify('errors.deleteInviteFailed'), { id: toastId })
+        toast.error(t('deleteInviteFailed'), { id: toastId })
       }
     } catch (_error) {
-      toast.error(tNotify('errors.deleteInviteFailed'), { id: toastId })
+      toast.error(t('deleteInviteFailed'), { id: toastId })
     }
   }
 
   async function changeJoinMethod(method: 'open' | 'inviteOnly') {
-    const toastId = toast.loading(tNotify('changingJoinMethod'))
+    const toastId = toast.loading(t('changingJoinMethod'))
     try {
       const res = await changeSignupMechanism(org.id, method, access_token)
       if (res.status == 200) {
         router.refresh()
         mutate(`${getAPIUrl()}orgs/slug/${org?.slug}`)
-        toast.success(tNotify('joinMethodChangedSuccess', { method }), {
+        toast.success(t('joinMethodChangedSuccess', { method }), {
           id: toastId,
         })
         setJoinMethod(method)
       } else {
-        toast.error(tNotify('errors.changeJoinMethodFailed'), { id: toastId })
+        toast.error(t('changeJoinMethodFailed'), { id: toastId })
       }
     } catch (_error) {
-      toast.error(tNotify('errors.changeJoinMethodFailed'), { id: toastId })
+      toast.error(t('changeJoinMethodFailed'), { id: toastId })
     }
   }
 
@@ -249,7 +247,7 @@ function OrgAccess() {
                           colSpan={5}
                           className="py-4 text-center text-gray-500"
                         >
-                          No invite codes generated yet.
+                          {t('noInviteCodesGenerated')}
                         </td>
                       </tr>
                     )}

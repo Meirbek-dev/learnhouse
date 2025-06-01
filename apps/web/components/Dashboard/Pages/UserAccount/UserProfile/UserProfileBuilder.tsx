@@ -202,8 +202,8 @@ interface ProfileData {
 const UserProfileBuilder = () => {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('Dashboard.UserProfileBuilder')
-  const tNotify = useTranslations('Notifications')
+  const tNotify = useTranslations('DashPage.Notifications')
+  const t = useTranslations('DashPage.UserProfileBuilder')
   const [profileData, setProfileData] = useState<ProfileData>({
     sections: [],
   })
@@ -236,8 +236,7 @@ const UserProfileBuilder = () => {
           }
         } catch (error) {
           console.error('Error fetching user data:', error)
-          toast.error('Failed to load profile data')
-          toast.error(tNotify('profileLoadFailed'))
+          toast.error(t('Errors.profileLoadFailed'))
         } finally {
           setIsLoading(false)
         }
@@ -252,7 +251,6 @@ const UserProfileBuilder = () => {
     type: keyof typeof SECTION_TYPE_KEYS
   ): ProfileSection => {
     const sectionTypesConfig = getSectionTypesConfig(t)
-    const _sectionTypeKey = SECTION_TYPE_KEYS[type]
     const baseSection = {
       id: `section-${Date.now()}`,
       type,
@@ -572,7 +570,7 @@ const UserProfileBuilder = () => {
               />
             ) : (
               <div className="flex h-full items-center justify-center text-gray-500">
-                Select a section to edit or add a new one
+                {t('EmptyEditor.message')}
               </div>
             )}
           </div>
@@ -620,24 +618,24 @@ const ImageGalleryEditor: FC<{
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <ImageIcon className="h-5 w-5 text-gray-500" />
-        <h3 className="text-lg font-medium">Image Gallery</h3>
+        <h3 className="text-lg font-medium">{t('ImageGalleryEditor.title')}</h3>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <Label htmlFor="title">Section Title</Label>
+          <Label htmlFor="title">{t('Common.sectionTitle')}</Label>
           <Input
             id="title"
             value={section.title}
             onChange={(e) => onChange({ ...section, title: e.target.value })}
-            placeholder="Enter section title"
+            placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
 
         {/* Images */}
         <div>
-          <Label>Images</Label>
+          <Label>{t('ImageGalleryEditor.imagesLabel')}</Label>
           <div className="mt-2 space-y-3">
             {section.images.map((image, index) => (
               <div
@@ -645,7 +643,7 @@ const ImageGalleryEditor: FC<{
                 className="grid grid-cols-[2fr_1fr_auto] gap-4 rounded-lg border p-4"
               >
                 <div>
-                  <Label>Image URL</Label>
+                  <Label>{t('ImageGalleryEditor.imageUrlLabel')}</Label>
                   <Input
                     value={image.url}
                     onChange={(e) => {
@@ -653,11 +651,11 @@ const ImageGalleryEditor: FC<{
                       newImages[index] = { ...image, url: e.target.value }
                       onChange({ ...section, images: newImages })
                     }}
-                    placeholder="Enter image URL"
+                    placeholder={t('ImageGalleryEditor.imageUrlPlaceholder')}
                   />
                 </div>
                 <div>
-                  <Label>Caption</Label>
+                  <Label>{t('ImageGalleryEditor.captionLabel')}</Label>
                   <Input
                     value={image.caption || ''}
                     onChange={(e) => {
@@ -665,7 +663,7 @@ const ImageGalleryEditor: FC<{
                       newImages[index] = { ...image, caption: e.target.value }
                       onChange({ ...section, images: newImages })
                     }}
-                    placeholder="Image caption"
+                    placeholder={t('ImageGalleryEditor.captionPlaceholder')}
                   />
                 </div>
                 <div className="flex flex-col justify-between">
@@ -710,7 +708,7 @@ const ImageGalleryEditor: FC<{
               className="w-full"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Image
+              {t('ImageGalleryEditor.addImageButton')}
             </Button>
           </div>
         </div>
@@ -728,29 +726,29 @@ const TextEditor: FC<{
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <TextIcon className="h-5 w-5 text-gray-500" />
-        <h3 className="text-lg font-medium">Text Content</h3>
+        <h3 className="text-lg font-medium">{t('TextEditor.title')}</h3>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <Label htmlFor="title">Section Title</Label>
+          <Label htmlFor="title">{t('Common.sectionTitle')}</Label>
           <Input
             id="title"
             value={section.title}
             onChange={(e) => onChange({ ...section, title: e.target.value })}
-            placeholder="Enter section title"
+            placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
 
         {/* Content */}
         <div>
-          <Label htmlFor="content">Content</Label>
+          <Label htmlFor="content">{t('TextEditor.contentLabel')}</Label>
           <Textarea
             id="content"
             value={section.content}
             onChange={(e) => onChange({ ...section, content: e.target.value })}
-            placeholder="Enter your content here..."
+            placeholder={t('TextEditor.contentPlaceholder')}
             className="min-h-[200px]"
           />
         </div>
@@ -768,24 +766,24 @@ const LinksEditor: FC<{
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <LinkIcon className="h-5 w-5 text-gray-500" />
-        <h3 className="text-lg font-medium">Links</h3>
+        <h3 className="text-lg font-medium">{t('LinksEditor.title')}</h3>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <Label htmlFor="title">Section Title</Label>
+          <Label htmlFor="title">{t('Common.sectionTitle')}</Label>
           <Input
             id="title"
             value={section.title}
             onChange={(e) => onChange({ ...section, title: e.target.value })}
-            placeholder="Enter section title"
+            placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
 
         {/* Links */}
         <div>
-          <Label>Links</Label>
+          <Label>{t('LinksEditor.linksLabel')}</Label>
           <div className="mt-2 space-y-3">
             {section.links.map((link, index) => (
               <div
@@ -799,7 +797,7 @@ const LinksEditor: FC<{
                     newLinks[index] = { ...link, title: e.target.value }
                     onChange({ ...section, links: newLinks })
                   }}
-                  placeholder="Link title"
+                  placeholder={t('LinksEditor.linkTitlePlaceholder')}
                 />
                 <Input
                   value={link.url}
@@ -808,7 +806,7 @@ const LinksEditor: FC<{
                     newLinks[index] = { ...link, url: e.target.value }
                     onChange({ ...section, links: newLinks })
                   }}
-                  placeholder="URL"
+                  placeholder={t('LinksEditor.urlPlaceholder')}
                 />
                 <Button
                   variant="ghost"
@@ -838,7 +836,7 @@ const LinksEditor: FC<{
               className="w-full"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Link
+              {t('LinksEditor.addLinkButton')}
             </Button>
           </div>
         </div>
@@ -856,24 +854,24 @@ const SkillsEditor: FC<{
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <Award className="h-5 w-5 text-gray-500" />
-        <h3 className="text-lg font-medium">Skills</h3>
+        <h3 className="text-lg font-medium">{t('SkillsEditor.title')}</h3>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <Label htmlFor="title">Section Title</Label>
+          <Label htmlFor="title">{t('Common.sectionTitle')}</Label>
           <Input
             id="title"
             value={section.title}
             onChange={(e) => onChange({ ...section, title: e.target.value })}
-            placeholder="Enter section title"
+            placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
 
         {/* Skills */}
         <div>
-          <Label>Skills</Label>
+          <Label>{t('SkillsEditor.skillsLabel')}</Label>
           <div className="mt-2 space-y-3">
             {section.skills.map((skill, index) => (
               <div
@@ -887,7 +885,7 @@ const SkillsEditor: FC<{
                     newSkills[index] = { ...skill, name: e.target.value }
                     onChange({ ...section, skills: newSkills })
                   }}
-                  placeholder="Skill name"
+                  placeholder={t('SkillsEditor.skillNamePlaceholder')}
                 />
                 <Select
                   value={skill.level || 'intermediate'}
@@ -901,13 +899,23 @@ const SkillsEditor: FC<{
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select level" />
+                    <SelectValue
+                      placeholder={t('SkillsEditor.selectLevelPlaceholder')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
-                    <SelectItem value="expert">Expert</SelectItem>
+                    <SelectItem value="beginner">
+                      {t('SkillsEditor.levelBeginner')}
+                    </SelectItem>
+                    <SelectItem value="intermediate">
+                      {t('SkillsEditor.levelIntermediate')}
+                    </SelectItem>
+                    <SelectItem value="advanced">
+                      {t('SkillsEditor.levelAdvanced')}
+                    </SelectItem>
+                    <SelectItem value="expert">
+                      {t('SkillsEditor.levelExpert')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <Input
@@ -917,7 +925,7 @@ const SkillsEditor: FC<{
                     newSkills[index] = { ...skill, category: e.target.value }
                     onChange({ ...section, skills: newSkills })
                   }}
-                  placeholder="Category (optional)"
+                  placeholder={t('SkillsEditor.categoryPlaceholder')}
                 />
                 <Button
                   variant="ghost"
@@ -949,7 +957,7 @@ const SkillsEditor: FC<{
               className="w-full"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Skill
+              {t('SkillsEditor.addSkillButton')}
             </Button>
           </div>
         </div>
@@ -967,30 +975,30 @@ const ExperienceEditor: FC<{
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <Briefcase className="h-5 w-5 text-gray-500" />
-        <h3 className="text-lg font-medium">Experience</h3>
+        <h3 className="text-lg font-medium">{t('ExperienceEditor.title')}</h3>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <Label htmlFor="title">Section Title</Label>
+          <Label htmlFor="title">{t('Common.sectionTitle')}</Label>
           <Input
             id="title"
             value={section.title}
             onChange={(e) => onChange({ ...section, title: e.target.value })}
-            placeholder="Enter section title"
+            placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
 
         {/* Experiences */}
         <div>
-          <Label>Experience Items</Label>
+          <Label>{t('ExperienceEditor.experienceItemsLabel')}</Label>
           <div className="mt-2 space-y-4">
             {section.experiences.map((experience, index) => (
               <div key={index} className="space-y-4 rounded-lg border p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Title</Label>
+                    <Label>{t('ExperienceEditor.titleLabel')}</Label>
                     <Input
                       value={experience.title}
                       onChange={(e) => {
@@ -1001,11 +1009,11 @@ const ExperienceEditor: FC<{
                         }
                         onChange({ ...section, experiences: newExperiences })
                       }}
-                      placeholder="Position or role"
+                      placeholder={t('ExperienceEditor.titlePlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label>Organization</Label>
+                    <Label>{t('ExperienceEditor.organizationLabel')}</Label>
                     <Input
                       value={experience.organization}
                       onChange={(e) => {
@@ -1016,14 +1024,16 @@ const ExperienceEditor: FC<{
                         }
                         onChange({ ...section, experiences: newExperiences })
                       }}
-                      placeholder="Company or organization"
+                      placeholder={t(
+                        'ExperienceEditor.organizationPlaceholder'
+                      )}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-4">
                   <div>
-                    <Label>Start Date</Label>
+                    <Label>{t('ExperienceEditor.startDateLabel')}</Label>
                     <Input
                       type="date"
                       value={experience.startDate}
@@ -1038,7 +1048,7 @@ const ExperienceEditor: FC<{
                     />
                   </div>
                   <div>
-                    <Label>End Date</Label>
+                    <Label>{t('ExperienceEditor.endDateLabel')}</Label>
                     <Input
                       type="date"
                       value={experience.endDate || ''}
@@ -1072,13 +1082,15 @@ const ExperienceEditor: FC<{
                         }}
                         className="rounded border-gray-300"
                       />
-                      <Label htmlFor={`current-${index}`}>Current</Label>
+                      <Label htmlFor={`current-${index}`}>
+                        {t('ExperienceEditor.currentLabel')}
+                      </Label>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <Label>Description</Label>
+                  <Label>{t('ExperienceEditor.descriptionLabel')}</Label>
                   <Textarea
                     value={experience.description}
                     onChange={(e) => {
@@ -1089,7 +1101,7 @@ const ExperienceEditor: FC<{
                       }
                       onChange({ ...section, experiences: newExperiences })
                     }}
-                    placeholder="Describe your role and achievements"
+                    placeholder={t('ExperienceEditor.descriptionPlaceholder')}
                     className="min-h-[100px]"
                   />
                 </div>
@@ -1107,7 +1119,7 @@ const ExperienceEditor: FC<{
                     className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Remove
+                    {t('ExperienceEditor.removeButton')}
                   </Button>
                 </div>
               </div>
@@ -1130,7 +1142,7 @@ const ExperienceEditor: FC<{
               className="w-full"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Experience
+              {t('ExperienceEditor.addExperienceButton')}
             </Button>
           </div>
         </div>
@@ -1148,30 +1160,30 @@ const EducationEditor: FC<{
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <GraduationCap className="h-5 w-5 text-gray-500" />
-        <h3 className="text-lg font-medium">Education</h3>
+        <h3 className="text-lg font-medium">{t('EducationEditor.title')}</h3>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <Label htmlFor="title">Section Title</Label>
+          <Label htmlFor="title">{t('Common.sectionTitle')}</Label>
           <Input
             id="title"
             value={section.title}
             onChange={(e) => onChange({ ...section, title: e.target.value })}
-            placeholder="Enter section title"
+            placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
 
         {/* Education Items */}
         <div>
-          <Label>Education Items</Label>
+          <Label>{t('EducationEditor.educationItemsLabel')}</Label>
           <div className="mt-2 space-y-4">
             {section.education.map((edu, index) => (
               <div key={index} className="space-y-4 rounded-lg border p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Institution</Label>
+                    <Label>{t('EducationEditor.institutionLabel')}</Label>
                     <Input
                       value={edu.institution}
                       onChange={(e) => {
@@ -1182,11 +1194,11 @@ const EducationEditor: FC<{
                         }
                         onChange({ ...section, education: newEducation })
                       }}
-                      placeholder="School or university"
+                      placeholder={t('EducationEditor.institutionPlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label>Degree</Label>
+                    <Label>{t('EducationEditor.degreeLabel')}</Label>
                     <Input
                       value={edu.degree}
                       onChange={(e) => {
@@ -1197,13 +1209,13 @@ const EducationEditor: FC<{
                         }
                         onChange({ ...section, education: newEducation })
                       }}
-                      placeholder="Degree type"
+                      placeholder={t('EducationEditor.degreePlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label>Field of Study</Label>
+                  <Label>{t('EducationEditor.fieldOfStudyLabel')}</Label>
                   <Input
                     value={edu.field}
                     onChange={(e) => {
@@ -1211,13 +1223,13 @@ const EducationEditor: FC<{
                       newEducation[index] = { ...edu, field: e.target.value }
                       onChange({ ...section, education: newEducation })
                     }}
-                    placeholder="Major or concentration"
+                    placeholder={t('EducationEditor.fieldOfStudyPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-4">
                   <div>
-                    <Label>Start Date</Label>
+                    <Label>{t('EducationEditor.startDateLabel')}</Label>
                     <Input
                       type="date"
                       value={edu.startDate}
@@ -1232,7 +1244,7 @@ const EducationEditor: FC<{
                     />
                   </div>
                   <div>
-                    <Label>End Date</Label>
+                    <Label>{t('EducationEditor.endDateLabel')}</Label>
                     <Input
                       type="date"
                       value={edu.endDate || ''}
@@ -1264,13 +1276,15 @@ const EducationEditor: FC<{
                         }}
                         className="rounded border-gray-300"
                       />
-                      <Label htmlFor={`current-edu-${index}`}>Current</Label>
+                      <Label htmlFor={`current-edu-${index}`}>
+                        {t('EducationEditor.currentLabel')}
+                      </Label>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <Label>Description</Label>
+                  <Label>{t('EducationEditor.descriptionLabel')}</Label>
                   <Textarea
                     value={edu.description || ''}
                     onChange={(e) => {
@@ -1281,7 +1295,7 @@ const EducationEditor: FC<{
                       }
                       onChange({ ...section, education: newEducation })
                     }}
-                    placeholder="Additional details about your education"
+                    placeholder={t('EducationEditor.descriptionPlaceholder')}
                     className="min-h-[100px]"
                   />
                 </div>
@@ -1299,7 +1313,7 @@ const EducationEditor: FC<{
                     className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Remove
+                    {t('EducationEditor.removeButton')}
                   </Button>
                 </div>
               </div>
@@ -1323,7 +1337,7 @@ const EducationEditor: FC<{
               className="w-full"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Education
+              {t('EducationEditor.addEducationButton')}
             </Button>
           </div>
         </div>
@@ -1341,30 +1355,30 @@ const AffiliationEditor: FC<{
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <MapPin className="h-5 w-5 text-gray-500" />
-        <h3 className="text-lg font-medium">Affiliation</h3>
+        <h3 className="text-lg font-medium">{t('AffiliationEditor.title')}</h3>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <Label htmlFor="title">Section Title</Label>
+          <Label htmlFor="title">{t('Common.sectionTitle')}</Label>
           <Input
             id="title"
             value={section.title}
             onChange={(e) => onChange({ ...section, title: e.target.value })}
-            placeholder="Enter section title"
+            placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
 
         {/* Affiliations */}
         <div>
-          <Label>Affiliations</Label>
+          <Label>{t('AffiliationEditor.affiliationsLabel')}</Label>
           <div className="mt-2 space-y-3">
             {section.affiliations.map((affiliation, index) => (
               <div key={index} className="space-y-4 rounded-lg border p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Name</Label>
+                    <Label>{t('AffiliationEditor.nameLabel')}</Label>
                     <Input
                       value={affiliation.name}
                       onChange={(e) => {
@@ -1375,11 +1389,11 @@ const AffiliationEditor: FC<{
                         }
                         onChange({ ...section, affiliations: newAffiliations })
                       }}
-                      placeholder="Name of the organization"
+                      placeholder={t('AffiliationEditor.namePlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label>Logo URL</Label>
+                    <Label>{t('AffiliationEditor.logoUrlLabel')}</Label>
                     <Input
                       value={affiliation.logoUrl}
                       onChange={(e) => {
@@ -1390,13 +1404,13 @@ const AffiliationEditor: FC<{
                         }
                         onChange({ ...section, affiliations: newAffiliations })
                       }}
-                      placeholder="URL to the organization's logo"
+                      placeholder={t('AffiliationEditor.logoUrlPlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label>Description</Label>
+                  <Label>{t('AffiliationEditor.descriptionLabel')}</Label>
                   <Textarea
                     value={affiliation.description}
                     onChange={(e) => {
@@ -1407,7 +1421,7 @@ const AffiliationEditor: FC<{
                       }
                       onChange({ ...section, affiliations: newAffiliations })
                     }}
-                    placeholder="Description of the organization"
+                    placeholder={t('AffiliationEditor.descriptionPlaceholder')}
                     className="min-h-[100px]"
                   />
                 </div>
@@ -1424,7 +1438,7 @@ const AffiliationEditor: FC<{
                     className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Remove
+                    {t('AffiliationEditor.removeButton')}
                   </Button>
                 </div>
               </div>
@@ -1445,7 +1459,7 @@ const AffiliationEditor: FC<{
               className="w-full"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Affiliation
+              {t('AffiliationEditor.addAffiliationButton')}
             </Button>
           </div>
         </div>
@@ -1463,23 +1477,23 @@ const CoursesEditor: FC<{
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <BookOpen className="h-5 w-5 text-gray-500" />
-        <h3 className="text-lg font-medium">Courses</h3>
+        <h3 className="text-lg font-medium">{t('CoursesEditor.title')}</h3>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <Label htmlFor="title">Section Title</Label>
+          <Label htmlFor="title">{t('Common.sectionTitle')}</Label>
           <Input
             id="title"
             value={section.title}
             onChange={(e) => onChange({ ...section, title: e.target.value })}
-            placeholder="Enter section title"
+            placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
 
         <div className="text-sm italic text-gray-500">
-          Your authored courses will be automatically displayed in this section.
+          {t('CoursesEditor.autoDisplayMessage')}
         </div>
       </div>
     </div>
