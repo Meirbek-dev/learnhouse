@@ -47,25 +47,25 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
   Yup.object().shape({
     name: Yup.string().required(
       t('Components.Form.requiredField', {
-        fieldName: t('Payments.ProductPage.editForm.nameLabel'),
+        fieldName: t('DashPage.Payments.ProductPage.editForm.nameLabel'),
       })
     ),
     description: Yup.string().required(
       t('Components.Form.requiredField', {
-        fieldName: t('Payments.ProductPage.editForm.descriptionLabel'),
+        fieldName: t('DashPage.Payments.ProductPage.editForm.descriptionLabel'),
       })
     ),
     amount: Yup.number()
       .min(0, t('Components.Form.positiveNumber'))
       .required(
         t('Components.Form.requiredField', {
-          fieldName: t('Payments.ProductPage.editForm.priceLabel'),
+          fieldName: t('DashPage.Payments.ProductPage.editForm.priceLabel'),
         })
       ),
     benefits: Yup.string(),
     currency: Yup.string().required(
       t('Components.Form.requiredField', {
-        fieldName: t('Payments.ProductPage.editForm.currencyLabel'),
+        fieldName: t('DashPage.Payments.ProductPage.editForm.currencyLabel'),
       })
     ),
   })
@@ -80,9 +80,7 @@ function PaymentsProductPage() {
   }>({})
   const [isStripeEnabled, setIsStripeEnabled] = useState(false)
   const { isEnabled, isLoading } = usePaymentsEnabled()
-  const t = useTranslations('Payments.ProductPage')
-  const tNotify = useTranslations('Notifications')
-  const tGeneral = useTranslations('General')
+  const t = useTranslations('DashPage.Payments.ProductPage')
 
   const { data: products, error } = useSWR(
     () =>
@@ -121,16 +119,16 @@ function PaymentsProductPage() {
         session.data?.tokens?.access_token,
       ])
       if (res.status === 200) {
-        toast.success(tNotify('productArchivedSuccess'))
+        toast.success(t('productArchivedSuccess'))
       } else {
         toast.error(
-          tNotify('errors.archiveProductFailed', {
+          t('errors.archiveProductFailed', {
             error: res.data?.detail || '',
           })
         )
       }
     } catch (_error) {
-      toast.error(tNotify('errors.archiveProductFailed', { error: '' }))
+      toast.error(t('errors.archiveProductFailed', { error: '' }))
     }
   }
 
@@ -249,12 +247,12 @@ function PaymentsProductPage() {
                       {expandedProducts[product.id] ? (
                         <>
                           <ChevronUp size={16} />
-                          <span>{tGeneral('showLess')}</span>
+                          <span>{t('showLess')}</span>
                         </>
                       ) : (
                         <>
                           <ChevronDown size={16} />
-                          <span>{tGeneral('showMore')}</span>
+                          <span>{t('showMore')}</span>
                         </>
                       )}
                     </button>
@@ -265,7 +263,7 @@ function PaymentsProductPage() {
                       {t('priceLabel')}
                     </span>
                     <span className="text-lg font-semibold">
-                      {new Intl.NumberFormat('en-US', {
+                      {new Intl.NumberFormat(navigator.language, {
                         style: 'currency',
                         currency: product.currency,
                       }).format(product.amount)}
@@ -318,8 +316,7 @@ const EditProductForm = ({
   const [currencies, setCurrencies] = useState<
     { code: string; name: string }[]
   >([])
-  const t = useTranslations('Payments.ProductPage.editForm')
-  const tNotify = useTranslations('Notifications')
+  const t = useTranslations('DashPage.Payments.ProductPage.editForm')
   const validationSchema = useMemo(() => createValidationSchema(t), [t])
 
   useEffect(() => {
@@ -355,9 +352,9 @@ const EditProductForm = ({
         session.data?.tokens?.access_token,
       ])
       onSuccess()
-      toast.success(tNotify('productUpdatedSuccess'))
+      toast.success(t('productUpdatedSuccess'))
     } catch (_error) {
-      toast.error(tNotify('errors.updateProductFailed'))
+      toast.error(t('updateProductFailed'))
     } finally {
       setSubmitting(false)
     }

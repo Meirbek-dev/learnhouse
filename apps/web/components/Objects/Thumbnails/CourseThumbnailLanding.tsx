@@ -24,7 +24,8 @@ import {
 } from '@components/ui/dropdown-menu'
 import { useTranslations } from 'next-intl'
 
-type Course = {
+// Utility types and functions
+export type Course = {
   course_uuid: string
   name: string
   description: string
@@ -45,26 +46,20 @@ type Course = {
   }>
 }
 
-type PropsType = {
+export type PropsType = {
   course: Course
   orgslug: string
   customLink?: string
 }
 
-interface AdminEditOptionsProps {
-  course: Course
-  orgslug: string
-  deleteCourse: () => Promise<void>
-}
-
 export const removeCoursePrefix = (course_uuid: string) =>
   course_uuid.replace('course_', '')
 
-const AdminEditOptions: FC<AdminEditOptionsProps> = ({
-  course,
-  orgslug,
-  deleteCourse,
-}) => {
+const AdminEditOptions: FC<{
+  course: Course
+  orgslug: string
+  deleteCourse: () => Promise<void>
+}> = ({ course, orgslug, deleteCourse }) => {
   const t = useTranslations('Components.CourseThumbnail')
   return (
     <AuthenticatedClientElement
@@ -131,15 +126,13 @@ const CourseThumbnailLanding: FC<PropsType> = ({
   orgslug,
   customLink,
 }) => {
-  const t = useTranslations('Components.CourseThumbnailLanding')
-  const tCourseThumb = useTranslations('Components.CourseThumbnail')
+  const t = useTranslations('Components.CourseThumbnail')
   const router = useRouter()
   const org = useOrg() as any
   const session = useLHSession() as any
 
   const activeAuthors =
-    course.authors?.filter((author) => author.authorship_status === 'ACTIVE') ||
-    []
+    course.authors?.filter((a) => a.authorship_status === 'ACTIVE') || []
   const displayedAuthors = activeAuthors.slice(0, 3)
   const hasMoreAuthors = activeAuthors.length > 3
   const remainingAuthorsCount = activeAuthors.length - 3
@@ -152,10 +145,10 @@ const CourseThumbnailLanding: FC<PropsType> = ({
         session.data?.tokens?.access_token
       )
       await revalidateTags(['courses'], orgslug)
-      toast.success(tCourseThumb('toastDeleteSuccess'))
+      toast.success(t('toastDeleteSuccess'))
       router.refresh()
-    } catch (_error) {
-      toast.error(tCourseThumb('toastDeleteError'))
+    } catch {
+      toast.error(t('toastDeleteError'))
     } finally {
       toast.dismiss(toastId)
     }
@@ -201,7 +194,6 @@ const CourseThumbnailLanding: FC<PropsType> = ({
             {course.description}
           </p>
         </div>
-
         <div className="flex flex-wrap items-center justify-between gap-2">
           {course.update_date && (
             <div className="inline-flex h-5 min-w-[140px] items-center justify-center rounded-md border border-gray-200 bg-gray-100/80 px-2">
@@ -210,14 +202,13 @@ const CourseThumbnailLanding: FC<PropsType> = ({
               </span>
             </div>
           )}
-
           {displayedAuthors.length > 0 && (
             <div className="flex items-center -space-x-4">
-              {displayedAuthors.map((author, index) => (
+              {displayedAuthors.map((author, idx) => (
                 <div
                   key={author.user.user_uuid}
                   className="relative"
-                  style={{ zIndex: displayedAuthors.length - index }}
+                  style={{ zIndex: displayedAuthors.length - idx }}
                 >
                   <UserAvatar
                     border="border-2"
@@ -249,7 +240,6 @@ const CourseThumbnailLanding: FC<PropsType> = ({
             </div>
           )}
         </div>
-
         <Link
           prefetch
           href={

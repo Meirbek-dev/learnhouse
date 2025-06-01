@@ -66,7 +66,7 @@ function ActivityElement(props: ActivitiyElementProps) {
     : false
 
   async function deleteActivityUI() {
-    const toast_loading = toast.loading('Deleting activity...')
+    const toast_loading = toast.loading(t('deletingActivity'))
     // Assignments
     if (props.activity.activity_type === 'TYPE_ASSIGNMENT') {
       await deleteAssignmentUsingActivityUUID(
@@ -289,6 +289,13 @@ const ACTIVITIES = {
   },
 } as const
 
+const ACTIVITY_TYPE_TRANSLATION_KEYS = {
+  TYPE_VIDEO: 'video',
+  TYPE_DOCUMENT: 'document',
+  TYPE_ASSIGNMENT: 'assignment',
+  TYPE_DYNAMIC: 'dynamic',
+} as const
+
 const ActivityTypeIndicator = ({
   activityType,
   isMobile,
@@ -300,7 +307,10 @@ const ActivityTypeIndicator = ({
 }) => {
   const { Icon } = ACTIVITIES[activityType]
 
-  const translatedTypeName = t(activityType as any)
+  // Map internal type to translation key
+  const translationKey =
+    ACTIVITY_TYPE_TRANSLATION_KEYS[activityType] || 'dynamic'
+  const translatedTypeName = t(`ActivityTypes.${translationKey}`)
 
   return (
     <div

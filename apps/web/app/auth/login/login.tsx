@@ -21,8 +21,8 @@ interface LoginClientProps {
 }
 
 const LoginClient = (props: LoginClientProps) => {
-  const t = useTranslations('Auth.Login')
   const validationT = useTranslations('Validation')
+  const t = useTranslations('Auth.Login')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validate = (values: any) => {

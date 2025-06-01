@@ -291,7 +291,7 @@ const CourseClient = (props: any) => {
                               activitiesLength: chapter.activities.length,
                             })}
                           </p>
-                          <ChevronUp size={16}/>
+                          <ChevronUp size={16} />
                         </div>
                       </div>
                       <div

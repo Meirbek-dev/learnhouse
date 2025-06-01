@@ -10,7 +10,8 @@ from langchain_core.messages import SystemMessage
 from langchain.agents.openai_functions_agent.agent_token_buffer_memory import (
     AgentTokenBufferMemory,
 )
-from langchain.agents.agent_toolkits import (
+
+from langchain_core.tools import (
     create_retriever_tool,
 )
 

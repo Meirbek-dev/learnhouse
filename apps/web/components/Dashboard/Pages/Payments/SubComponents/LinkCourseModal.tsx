@@ -95,8 +95,8 @@ export default function LinkCourseModal({
   const [searchTerm, setSearchTerm] = useState('')
   const org = useOrg() as any
   const session = useLHSession() as any
-  const t = useTranslations('Payments.LinkCourseModal')
-  const tNotify = useTranslations('Notifications')
+  const tNotify = useTranslations('DashPage.Notifications')
+  const t = useTranslations('DashPage.Payments.LinkCourseModal')
 
   const { data: coursesData, error: coursesError } = useSWR(
     () =>

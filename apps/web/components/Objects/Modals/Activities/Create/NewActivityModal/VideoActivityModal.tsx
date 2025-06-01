@@ -1,3 +1,19 @@
+import { type Locale, locales } from '@/i18n/config'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import { Label } from '@components/ui/label'
@@ -7,15 +23,22 @@ import * as Form from '@radix-ui/react-form'
 import BarLoader from 'react-spinners/BarLoader'
 import { Youtube, Upload } from 'lucide-react'
 import { constructAcceptValue } from '@/lib/constants'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { Checkbox } from '@components/ui/checkbox'
+import toast from 'react-hot-toast'
 
-const SUPPORTED_FILES = constructAcceptValue(['mp4', 'webm'])
+const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm'])
 
 interface VideoDetails {
   startTime: number
   endTime: number | null
   autoplay: boolean
   muted: boolean
+}
+
+interface SubtitleDetails {
+  autoplay: boolean
+  language: string
 }
 
 interface ExternalVideoObject {
@@ -34,7 +57,10 @@ function VideoModal({
 }: any) {
   const t = useTranslations('Components.VideoModal')
 
+  const locale = useLocale()
+
   const [video, setVideo] = useState<File | null>(null)
+  const [subtitle, setSubtitle] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [name, setName] = useState('')
   const [youtubeUrl, setYoutubeUrl] = useState('')
@@ -45,10 +71,23 @@ function VideoModal({
     autoplay: false,
     muted: false,
   })
+  const [subtitleDetails, setSubtitleDetails] = useState<SubtitleDetails>({
+    autoplay: false,
+    language: locale,
+  })
+  const [accordionOpen, setAccordionOpen] = useState<string | undefined>(
+    'additional-settings'
+  )
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.[0]) {
       setVideo(event.target.files[0])
+    }
+  }
+
+  const handleSubtitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files?.[0]) {
+      setSubtitle(event.target.files[0])
     }
   }
 
@@ -57,7 +96,12 @@ function VideoModal({
     setIsSubmitting(true)
 
     try {
-      if (selectedView === 'file' && video) {
+      if (selectedView === 'file') {
+        if (!video) {
+          toast.error('Please select a video file.')
+          setIsSubmitting(false)
+          return
+        }
         await submitFileActivity(
           video,
           'video',
@@ -90,6 +134,23 @@ function VideoModal({
       setIsSubmitting(false)
     }
   }
+
+  const AdditionalSettingsForm = () => (
+    <Accordion
+      type="single"
+      collapsible
+      value={accordionOpen}
+      onValueChange={setAccordionOpen}
+    >
+      <AccordionItem value="additional-settings">
+        <AccordionTrigger>{t('additionalSettings')}</AccordionTrigger>
+        <AccordionContent>
+          <VideoSettingsForm />
+          <SubtitleSettingsForm />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
 
   const VideoSettingsForm = () => (
     <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4">
@@ -133,35 +194,105 @@ function VideoModal({
       </div>
 
       <div className="mt-4 flex items-center space-x-6">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
+        <Label className="font-normal text-gray-700">
+          <Checkbox
             checked={videoDetails.autoplay}
-            onChange={(e) =>
+            onCheckedChange={(checked) =>
               setVideoDetails({
                 ...videoDetails,
-                autoplay: e.target.checked,
+                autoplay: Boolean(checked),
               })
             }
-            className="rounded border-gray-300 text-black focus:ring-black"
           />
-          <span className="text-sm text-gray-700">{t('autoplay')}</span>
-        </label>
+          {t('autoplay')}
+        </Label>
 
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
+        <Label className="font-normal text-gray-700">
+          <Checkbox
             checked={videoDetails.muted}
-            onChange={(e) =>
+            onCheckedChange={(checked) =>
               setVideoDetails({
                 ...videoDetails,
-                muted: e.target.checked,
+                muted: Boolean(checked),
               })
             }
-            className="rounded border-gray-300 text-black focus:ring-black"
           />
-          <span className="text-sm text-gray-700">{t('startMuted')}</span>
-        </label>
+          {t('startMuted')}
+        </Label>
+      </div>
+    </div>
+  )
+
+  const SubtitleSettingsForm = () => (
+    <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4">
+      <h3 className="mb-3 font-medium text-gray-900">{t('addSubtitles')}</h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Select
+            value={subtitleDetails.language}
+            onValueChange={(value) =>
+              setSubtitleDetails({
+                ...subtitleDetails,
+                language: value,
+              })
+            }
+          >
+            <SelectTrigger
+              className="w-[180px]"
+              aria-label={t('selectLanguage')}
+            >
+              <SelectValue placeholder={t('selectLanguage')} />
+            </SelectTrigger>
+            <SelectContent>
+              {locales.map((locale: Locale) => (
+                <SelectItem key={locale} value={locale}>
+                  {t(locale)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="subtitle-activity-file">{t('subtitleFile')}</Label>
+        <div className="mt-2">
+          <input
+            id="subtitle-activity-file"
+            type="file"
+            accept=".srt,.vtt,.ass"
+            onChange={handleSubtitleChange}
+            className="hidden"
+          />
+        </div>
+        <div className="flex flex-row items-center">
+          <label
+            htmlFor="subtitle-activity-file"
+            className="inline-block cursor-pointer rounded-full bg-black px-4 py-2 font-semibold text-white hover:bg-gray-800"
+          >
+            {'Choose Subtitle File'}
+          </label>
+          {subtitle && (
+            <div className="pl-2 text-sm text-green-700">
+              <i>{subtitle.name}</i> uploaded for {locale} language
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center space-x-6">
+        <Label className="font-normal text-gray-700">
+          <Checkbox
+            checked={subtitleDetails.autoplay}
+            onCheckedChange={(checked) =>
+              setSubtitleDetails({
+                ...subtitleDetails,
+                autoplay: Boolean(checked),
+              })
+            }
+          />
+          {t('autoplaySubtitles')}
+        </Label>
       </div>
     </div>
   )
@@ -217,14 +348,26 @@ function VideoModal({
                   <input
                     id="video-activity-file"
                     type="file"
-                    accept={SUPPORTED_FILES}
+                    accept={SUPPORTED_VIDEO_FILES}
                     onChange={handleVideoChange}
-                    required
-                    className="w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-800"
+                    className="hidden"
                   />
                 </div>
+                <div className="flex flex-row items-center">
+                  <Label
+                    htmlFor="video-activity-file"
+                    className="inline-block cursor-pointer rounded-full bg-black px-4 py-2 font-semibold text-white hover:bg-gray-800"
+                  >
+                    {'Choose Video File'}
+                  </Label>
+                  {video && (
+                    <div className="pl-2 text-sm text-green-700">
+                      <i>{video.name}</i> uploaded
+                    </div>
+                  )}
+                </div>
               </div>
-              <VideoSettingsForm />
+              <AdditionalSettingsForm />
             </div>
           )}
 

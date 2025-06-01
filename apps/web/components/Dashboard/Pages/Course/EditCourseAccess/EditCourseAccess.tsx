@@ -28,7 +28,6 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
   const { isLoading, courseStructure } = course as any
   const dispatchCourse = useCourseDispatch() as any
   const t = useTranslations('DashPage.Courses.Access')
-  const _tNotify = useTranslations('Notifications')
 
   const { data: usergroups } = useSWR(
     courseStructure
@@ -71,10 +70,10 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
           <div className="shadow-xs mx-4 rounded-xl bg-white px-4 py-4 sm:mx-10">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
               <h1 className="text-lg font-bold text-gray-800 sm:text-xl">
-                {t('title')}
+                {t('accessToTheCourse')}
               </h1>
               <h2 className="text-xs text-gray-500 sm:text-sm">
-                {t('description')}
+                {t('accessDescription')}
               </h2>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
@@ -142,9 +141,11 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
   const [userGroupModal, setUserGroupModal] = useState(false)
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('DashPage.Courses.Access.userGroups')
-  const tParent = useTranslations('DashPage.Courses.Access')
-  const tNotify = useTranslations('Notifications')
+  const t = useTranslations('DashPage.Courses.Access')
+
+  // "unlinkUserGroupErrorDetailed": "Failed to unlink user group: {error}",
+  // "unlinkUserGroupErrorGeneric": "Failed to unlink user group",
+  // "unlinkUserGroupSuccess": "Successfully unlinked user group",
 
   const removeUserGroupLink = async (usergroup_id: number) => {
     try {
@@ -154,17 +155,17 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
         access_token
       )
       if (res.status === 200) {
-        toast.success(tNotify('unlinkUserGroupSuccess'))
+        toast.success(t('unlinkUserGroupSuccess'))
         mutate(
           `${getAPIUrl()}usergroups/resource/${course.courseStructure.course_uuid}`
         )
       } else {
         toast.error(
-          tNotify('unlinkUserGroupErrorDetailed', { error: res.data.detail })
+          t('unlinkUserGroupErrorDetailed', { error: res.data.detail })
         )
       }
     } catch (_error) {
-      toast.error(tNotify('unlinkUserGroupErrorGeneric'))
+      toast.error(t('unlinkUserGroupErrorGeneric'))
     }
   }
 
@@ -220,12 +221,12 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
           dialogContent={
             <LinkToUserGroup setUserGroupModal={setUserGroupModal} />
           }
-          dialogTitle={tParent('linkModalTitle')}
-          dialogDescription={tParent('linkModalDescription')}
+          dialogTitle={t('linkModalTitle')}
+          dialogDescription={t('linkModalDescription')}
           dialogTrigger={
             <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-xs font-bold text-green-100 hover:cursor-pointer sm:text-sm">
               <SquareUserRound className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>{tParent('linkToUserGroupButton')}</span>
+              <span>{t('linkToUserGroupButton')}</span>
             </button>
           }
         />

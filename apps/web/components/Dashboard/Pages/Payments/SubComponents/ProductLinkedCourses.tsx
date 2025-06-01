@@ -25,8 +25,8 @@ export default function ProductLinkedCourses({
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false)
   const session = useLHSession() as any
   const org = useOrg() as any
-  const t = useTranslations('Payments.LinkedCourses')
-  const tNotify = useTranslations('Notifications')
+  const tNotify = useTranslations('DashPage.Notifications')
+  const t = useTranslations('DashPage.Payments.LinkedCourses')
 
   const fetchLinkedCourses = async () => {
     try {

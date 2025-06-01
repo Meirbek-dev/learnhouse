@@ -19,7 +19,6 @@ import { useTranslations } from 'next-intl'
 
 function ForgotPasswordClient() {
   const t = useTranslations('Auth.Forgot')
-  const validationT = useTranslations('Validation')
   const org = useOrg() as any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -29,9 +28,9 @@ function ForgotPasswordClient() {
     const errors: any = {}
 
     if (!values.email) {
-      errors.email = validationT('required')
+      errors.email = t('required')
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = validationT('invalidEmail')
+      errors.email = t('invalidEmail')
     }
 
     return errors

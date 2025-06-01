@@ -33,7 +33,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
     ? course.withUnpublishedActivities
     : false
   const t = useTranslations('CourseEdit.NewActivityModal')
-  const tNotify = useTranslations('Notifications')
+  const tNotify = useTranslations('DashPage.Notifications')
 
   const openNewActivityModal = async (_chapterId: any) => {
     setNewActivityModal(true)

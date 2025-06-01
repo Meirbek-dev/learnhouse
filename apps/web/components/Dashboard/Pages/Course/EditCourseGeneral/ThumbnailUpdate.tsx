@@ -29,7 +29,6 @@ function ThumbnailUpdate() {
   const [error, setError] = useState<string>('')
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
   const t = useTranslations('CourseEdit.General.Thumbnail')
-  const _tNotify = useTranslations('Notifications')
   const withUnpublishedActivities = course
     ? course.withUnpublishedActivities
     : false
@@ -181,7 +180,7 @@ function ThumbnailUpdate() {
                 onClick={() => setShowUnsplashPicker(true)}
               >
                 <ImageIcon size={16} className="mr-2" />
-                Gallery
+                {t('gallery')}
               </button>
             </div>
           )}
@@ -191,7 +190,7 @@ function ThumbnailUpdate() {
           <div className="flex items-center justify-center">
             <div className="flex items-center rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-800">
               <ArrowBigUpDash size={16} className="mr-2 animate-bounce" />
-              Uploading...
+              {t('uploading')}
             </div>
           </div>
         )}

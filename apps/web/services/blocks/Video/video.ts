@@ -5,7 +5,7 @@ import {
 } from '@services/utils/ts/requests'
 
 export async function uploadNewVideoFile(
-  file: any,
+  file: File,
   activity_uuid: string,
   access_token: string
 ) {
@@ -13,20 +13,27 @@ export async function uploadNewVideoFile(
   const formData = new FormData()
   formData.append('file_object', file)
   formData.append('activity_uuid', activity_uuid)
-
-  return fetch(
-    `${getAPIUrl()}blocks/video`,
-    RequestBodyFormWithAuthHeader('POST', formData, null, access_token)
-  )
-    .then((result) => result.json())
-    .catch((error) => console.error('error', error))
+  try {
+    const result = await fetch(
+      `${getAPIUrl()}blocks/video`,
+      RequestBodyFormWithAuthHeader('POST', formData, null, access_token)
+    )
+    return await result.json()
+  } catch (error) {
+    console.error('error', error)
+    throw error
+  }
 }
 
 export async function getVideoFile(file_id: string, access_token: string) {
-  return fetch(
-    `${getAPIUrl()}blocks/video?file_id=${file_id}`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token)
-  )
-    .then((result) => result.json())
-    .catch((error) => console.error('error', error))
+  try {
+    const result = await fetch(
+      `${getAPIUrl()}blocks/video?file_id=${file_id}`,
+      RequestBodyWithAuthHeader('GET', null, null, access_token)
+    )
+    return await result.json()
+  } catch (error) {
+    console.error('error', error)
+    throw error
+  }
 }

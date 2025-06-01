@@ -22,7 +22,8 @@ function HomeClient() {
   const access_token = session?.data?.tokens?.access_token
   const { data: orgs } = useSWR(
     `${getAPIUrl()}orgs/user/page/1/limit/10`,
-    (url) => swrFetcher(url, access_token)
+    (url) => swrFetcher(url, access_token),
+    { revalidateOnFocus: false }
   )
 
   useEffect(() => {}, [session, orgs])

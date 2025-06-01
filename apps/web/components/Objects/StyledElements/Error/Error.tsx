@@ -5,7 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-function ErrorUI(params: { message?: string; submessage?: string }) {
+function ErrorUI({
+  message,
+  submessage,
+}: {
+  message?: string
+  submessage?: string
+}) {
   const t = useTranslations('Components.ErrorUI')
   const router = useRouter()
 
@@ -20,12 +26,10 @@ function ErrorUI(params: { message?: string; submessage?: string }) {
         <AlertTriangle className="text-rose-700" size={45} />
         <div className="flex flex-col">
           <p className="text-3xl font-bold text-rose-700">
-            {params.message || t('defaultMessage')}
+            {message || t('defaultMessage')}
           </p>
-          {params.submessage && (
-            <p className="text-lg font-bold text-rose-700">
-              {params.submessage}
-            </p>
+          {submessage && (
+            <p className="text-lg font-bold text-rose-700">{submessage}</p>
           )}
         </div>
       </div>

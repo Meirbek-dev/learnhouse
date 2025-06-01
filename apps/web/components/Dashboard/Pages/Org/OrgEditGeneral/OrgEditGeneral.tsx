@@ -4,7 +4,6 @@ import { Form, Formik } from 'formik'
 import * as Yup from 'yup'
 import { updateOrganization } from '@services/settings/org'
 import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { toast } from 'react-hot-toast'
@@ -19,12 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select'
-import { Switch } from '@components/ui/switch'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
-import Image from 'next/image'
-import openuIcon from '@public/openu_logo.png'
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
 const ORG_LABELS = [
@@ -60,10 +55,30 @@ const ORG_LABELS = [
 ] as const
 
 const getOrgLabels = (t: Function) =>
-  ORG_LABELS.map((item) => ({
-    value: item.value,
-    label: t(`OrgLabels.${item.value}` as any),
-  }))
+  ORG_LABELS.map((item) => {
+    try {
+      // Try to get the translated version
+      const translatedLabel = t(`OrgLabels.${item.value}` as any)
+      // If translation exists and is not the key itself, use it
+      if (translatedLabel && !translatedLabel.startsWith('OrgLabels.')) {
+        return {
+          value: item.value,
+          label: translatedLabel,
+        }
+      }
+      // Fallback to hardcoded label
+      return {
+        value: item.value,
+        label: item.label,
+      }
+    } catch (error) {
+      // If translation fails, use hardcoded label
+      return {
+        value: item.value,
+        label: item.label,
+      }
+    }
+  })
 
 const validationSchema = Yup.object().shape({
   name: Yup.string()
@@ -90,12 +105,10 @@ interface OrganizationValues {
 }
 
 const OrgEditGeneral: FC = () => {
-  const _router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const t = useTranslations('DashPage.OrgSettings.General')
-  const tNotify = useTranslations('Notifications')
 
   const initialValues: OrganizationValues = {
     name: org?.name,
@@ -106,14 +119,14 @@ const OrgEditGeneral: FC = () => {
   }
 
   const updateOrg = async (values: OrganizationValues) => {
-    const loadingToast = toast.loading(tNotify('updatingOrg'))
+    const loadingToast = toast.loading(t('updatingOrg'))
     try {
       await updateOrganization(org.id, values, access_token)
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
-      toast.success(tNotify('orgUpdatedSuccess'), { id: loadingToast })
+      toast.success(t('orgUpdatedSuccess'), { id: loadingToast })
     } catch (_err) {
-      toast.error(tNotify('orgUpdateFailed'), { id: loadingToast })
+      toast.error(t('orgUpdateFailed'), { id: loadingToast })
     }
   }
 
@@ -153,7 +166,7 @@ const OrgEditGeneral: FC = () => {
                     <div>
                       <Label htmlFor="name">
                         {t('Form.nameLabel')}
-                        <span className="ml-2 text-sm text-gray-500">
+                        <span className="text-sm text-gray-500">
                           ({60 - (values.name?.length || 0)}{' '}
                           {t('Form.charsLeft')}
                         </span>
@@ -176,7 +189,7 @@ const OrgEditGeneral: FC = () => {
                     <div>
                       <Label htmlFor="description">
                         {t('Form.descriptionLabel')}
-                        <span className="ml-2 text-sm text-gray-500">
+                        <span className="text-sm text-gray-500">
                           ({100 - (values.description?.length || 0)}{' '}
                           {t('Form.charsLeft')}
                         </span>
@@ -225,7 +238,7 @@ const OrgEditGeneral: FC = () => {
                     <div>
                       <Label htmlFor="about">
                         {t('Form.aboutLabel')}
-                        <span className="ml-2 text-sm text-gray-500">
+                        <span className="text-sm text-gray-500">
                           ({400 - (values.about?.length || 0)}{' '}
                           {t('Form.charsLeft')}
                         </span>

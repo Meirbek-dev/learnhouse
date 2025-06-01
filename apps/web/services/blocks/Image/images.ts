@@ -5,7 +5,7 @@ import {
 } from '@services/utils/ts/requests'
 
 export async function uploadNewImageFile(
-  file: any,
+  file: File,
   activity_uuid: string,
   access_token: string
 ) {
@@ -13,7 +13,6 @@ export async function uploadNewImageFile(
   const formData = new FormData()
   formData.append('file_object', file)
   formData.append('activity_uuid', activity_uuid)
-
   return fetch(
     `${getAPIUrl()}blocks/image`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token)

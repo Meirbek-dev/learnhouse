@@ -57,5 +57,3 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
     </Select>
   )
 }
-
-export default LocaleSwitcher

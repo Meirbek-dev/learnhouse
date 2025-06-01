@@ -233,8 +233,8 @@ const OrgEditLanding = () => {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [isLandingEnabled, setIsLandingEnabled] = useState(false)
+  const tNotify = useTranslations('DashPage.Notifications')
   const t = useTranslations('DashPage.OrgSettings.Landing')
-  const tNotify = useTranslations('Notifications')
   const [landingData, setLandingData] = useState<LandingObject>({
     sections: [],
     enabled: false,
@@ -259,7 +259,7 @@ const OrgEditLanding = () => {
       t,
       type as keyof typeof SECTION_TYPE_KEYS
     )
-    setLandingData((prev) => ({
+    setLandingData((prev: LandingObject) => ({
       ...prev,
       sections: [...prev.sections, newSection],
     }))
@@ -330,16 +330,18 @@ const OrgEditLanding = () => {
   const updateSection = (index: number, updatedSection: LandingSection) => {
     const newSections = [...landingData.sections]
     newSections[index] = updatedSection
-    setLandingData((prev) => ({
+    setLandingData((prev: LandingObject) => ({
       ...prev,
       sections: newSections,
     }))
   }
 
   const deleteSection = (index: number) => {
-    setLandingData((prev) => ({
+    setLandingData((prev: LandingObject) => ({
       ...prev,
-      sections: prev.sections.filter((_, i) => i !== index),
+      sections: prev.sections.filter(
+        (_: LandingSection, i: number) => i !== index
+      ),
     }))
     setSelectedSection(null)
   }
@@ -351,7 +353,7 @@ const OrgEditLanding = () => {
     const [reorderedItem] = items.splice(result.source.index, 1)
     items.splice(result.destination.index, 0, reorderedItem)
 
-    setLandingData((prev) => ({
+    setLandingData((prev: LandingObject) => ({
       ...prev,
       sections: items,
     }))
@@ -407,7 +409,7 @@ const OrgEditLanding = () => {
             <label className="relative inline-flex cursor-pointer items-center">
               <input
                 type="checkbox"
-                checked={isLandingEnabled}
+                checked={!!isLandingEnabled}
                 onChange={() => setIsLandingEnabled(!isLandingEnabled)}
                 className="peer sr-only"
               />
@@ -440,90 +442,92 @@ const OrgEditLanding = () => {
                         ref={provided.innerRef}
                         className="space-y-2"
                       >
-                        {landingData.sections.map((section, index) => (
-                          <Draggable
-                            key={`section-${index}`}
-                            draggableId={`section-${index}`}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                onClick={() => setSelectedSection(index)}
-                                className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
-                                  selectedSection === index
-                                    ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
-                                    : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
-                                } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
-                              >
-                                <div className="group flex items-center justify-between">
-                                  <div className="flex items-center space-x-3">
-                                    <div
-                                      {...provided.dragHandleProps}
-                                      className={`rounded-md p-1.5 transition-colors duration-200 ${
-                                        selectedSection === index
-                                          ? 'bg-blue-100/50 text-blue-500'
-                                          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-                                      }`}
-                                    >
-                                      <GripVertical size={16} />
+                        {landingData.sections.map(
+                          (section: LandingSection, index: number) => (
+                            <Draggable
+                              key={`section-${index}`}
+                              draggableId={`section-${index}`}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  onClick={() => setSelectedSection(index)}
+                                  className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
+                                    selectedSection === index
+                                      ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
+                                      : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
+                                  } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
+                                >
+                                  <div className="group flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className={`rounded-md p-1.5 transition-colors duration-200 ${
+                                          selectedSection === index
+                                            ? 'bg-blue-100/50 text-blue-500'
+                                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                                        }`}
+                                      >
+                                        <GripVertical size={16} />
+                                      </div>
+                                      <div
+                                        className={`rounded-md p-1.5 ${
+                                          selectedSection === index
+                                            ? 'bg-blue-100/50 text-blue-600'
+                                            : 'bg-gray-100/50 text-gray-600'
+                                        }`}
+                                      >
+                                        {createElement(
+                                          SECTION_TYPES[
+                                            section.type as keyof typeof SECTION_TYPES
+                                          ].icon,
+                                          {
+                                            size: 16,
+                                          }
+                                        )}
+                                      </div>
+                                      <span
+                                        className={`truncate text-sm font-medium capitalize ${
+                                          selectedSection === index
+                                            ? 'text-blue-700'
+                                            : 'text-gray-700'
+                                        }`}
+                                      >
+                                        {getSectionDisplayName(t, section)}
+                                      </span>
                                     </div>
-                                    <div
-                                      className={`rounded-md p-1.5 ${
-                                        selectedSection === index
-                                          ? 'bg-blue-100/50 text-blue-600'
-                                          : 'bg-gray-100/50 text-gray-600'
-                                      }`}
-                                    >
-                                      {createElement(
-                                        SECTION_TYPES[
-                                          section.type as keyof typeof SECTION_TYPES
-                                        ].icon,
-                                        {
-                                          size: 16,
-                                        }
-                                      )}
+                                    <div className="flex space-x-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedSection(index)
+                                        }}
+                                        className={`rounded-md p-1.5 transition-colors duration-200 ${
+                                          selectedSection === index
+                                            ? 'text-blue-500 hover:bg-blue-100'
+                                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                                        }`}
+                                      >
+                                        <Edit size={14} />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          deleteSection(index)
+                                        }}
+                                        className="rounded-md p-1.5 text-red-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
                                     </div>
-                                    <span
-                                      className={`truncate text-sm font-medium capitalize ${
-                                        selectedSection === index
-                                          ? 'text-blue-700'
-                                          : 'text-gray-700'
-                                      }`}
-                                    >
-                                      {getSectionDisplayName(t, section)}
-                                    </span>
-                                  </div>
-                                  <div className="flex space-x-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        setSelectedSection(index)
-                                      }}
-                                      className={`rounded-md p-1.5 transition-colors duration-200 ${
-                                        selectedSection === index
-                                          ? 'text-blue-500 hover:bg-blue-100'
-                                          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-                                      }`}
-                                    >
-                                      <Edit size={14} />
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        deleteSection(index)
-                                      }}
-                                      className="rounded-md p-1.5 text-red-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
-                                    >
-                                      <Trash2 size={14} />
-                                    </button>
                                   </div>
                                 </div>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
+                              )}
+                            </Draggable>
+                          )
+                        )}
                         {provided.placeholder}
                       </div>
                     )}
@@ -544,7 +548,7 @@ const OrgEditLanding = () => {
                           variant="default"
                           className="w-full bg-black text-white hover:bg-black/90"
                         >
-                          <Plus className="mr-2 h-4 w-4" />
+                          <Plus className="mr-2 h-4 w-4" color="white" />
                           {t('SectionsPanel.addSectionButton')}
                         </Button>
                       </div>
@@ -653,7 +657,7 @@ const HeroSectionEditor: FC<{
 
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1">
         <LayoutTemplate className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
           {t('SectionTypes.hero.label')} {t('Editor.titleSuffix')}
@@ -676,28 +680,25 @@ const HeroSectionEditor: FC<{
           <TabsList className="grid w-full grid-cols-4 rounded-lg bg-gray-100 p-1">
             <TabsTrigger
               value="content"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-1"
             >
               <TextIcon className="h-4 w-4" />
               <span>{t('HeroEditor.Tabs.content')}</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="background"
-              className="flex items-center space-x-2"
-            >
+            <TabsTrigger value="background" className="flex items-center">
               <LayoutTemplate className="h-4 w-4" />
               <span>{t('HeroEditor.Tabs.background')}</span>
             </TabsTrigger>
             <TabsTrigger
               value="buttons"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-1"
             >
               <Button className="h-4 w-4" />
               <span>{t('HeroEditor.Tabs.buttons')}</span>
             </TabsTrigger>
             <TabsTrigger
               value="illustration"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-1"
             >
               <ImageIcon className="h-4 w-4" />
               <span>{t('HeroEditor.Tabs.illustration')}</span>
@@ -727,7 +728,7 @@ const HeroSectionEditor: FC<{
                 <Label htmlFor="headingColor">
                   {t('HeroEditor.Content.headingColorLabel')}
                 </Label>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
                   <Input
                     id="headingColor"
                     type="color"
@@ -780,7 +781,7 @@ const HeroSectionEditor: FC<{
                 <Label htmlFor="subheadingColor">
                   {t('HeroEditor.Content.subheadingColorLabel')}
                 </Label>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
                   <Input
                     id="subheadingColor"
                     type="color"
@@ -861,7 +862,7 @@ const HeroSectionEditor: FC<{
                 <Label htmlFor="backgroundColor">
                   {t('HeroEditor.Background.colorLabel')}
                 </Label>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
                   <Input
                     id="backgroundColor"
                     type="color"
@@ -959,7 +960,7 @@ const HeroSectionEditor: FC<{
                       <Label>
                         {t('HeroEditor.Background.startColorLabel')}
                       </Label>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
                         <Input
                           type="color"
                           value={section.background.colors?.[0] || '#ffffff'}
@@ -999,7 +1000,7 @@ const HeroSectionEditor: FC<{
 
                     <div>
                       <Label>{t('HeroEditor.Background.endColorLabel')}</Label>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
                         <Input
                           type="color"
                           value={section.background.colors?.[1] || '#f0f0f0'}
@@ -1079,7 +1080,7 @@ const HeroSectionEditor: FC<{
                       <SelectContent>
                         {Object.entries(PREDEFINED_GRADIENTS).map(([name]) => (
                           <SelectItem key={name} value={name}>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               <div
                                 className="h-8 w-8 rounded-md"
                                 style={{
@@ -1179,7 +1180,7 @@ const HeroSectionEditor: FC<{
 
           <TabsContent value="buttons" className="mt-4 space-y-4">
             <div className="space-y-3">
-              {section.buttons.map((button, index) => (
+              {section.buttons.map((button: LandingButton, index: number) => (
                 <div
                   key={index}
                   className="grid grid-cols-[1fr_1fr_auto] gap-2 rounded-lg border p-4"
@@ -1195,7 +1196,7 @@ const HeroSectionEditor: FC<{
                       }}
                       placeholder={t('HeroEditor.Buttons.textPlaceholder')}
                     />
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
                       <div className="space-y-1">
                         <Label className="text-xs">
                           {t('HeroEditor.Buttons.textColorLabel')}
@@ -1236,7 +1237,7 @@ const HeroSectionEditor: FC<{
                   </div>
                   <div className="space-y-2">
                     <Label>{t('HeroEditor.Buttons.linkLabel')}</Label>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
                       <Link className="h-4 w-4 text-gray-500" />
                       <Input
                         value={button.link}
@@ -1255,16 +1256,16 @@ const HeroSectionEditor: FC<{
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation()
                       const newButtons = section.buttons.filter(
-                        (_, i) => i !== index
+                        (_: LandingButton, i: number) => i !== index
                       )
                       onChange({ ...section, buttons: newButtons })
                     }}
                     className="mt-8 self-start text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="mr-1 h-4 w-4" />
-                    {t('HeroEditor.Buttons.removeButton')}
                   </Button>
                 </div>
               ))}
@@ -1458,7 +1459,6 @@ const HeroSectionEditor: FC<{
                   className="w-full text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  {t('HeroEditor.Illustration.removeButton')}
                 </Button>
               )}
             </div>
@@ -1488,7 +1488,7 @@ const ImageUploader: FC<ImageUploaderProps> = ({
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [isUploading, setIsUploading] = useState(false)
-  const tNotify = useTranslations('Notifications')
+  const tNotify = useTranslations('DashPage.Notifications')
   const inputId = `imageUpload-${id}`
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -1526,9 +1526,7 @@ const ImageUploader: FC<ImageUploaderProps> = ({
         className="w-full"
       >
         <Upload className="mr-2 h-4 w-4" />
-        {isUploading
-          ? t('ImageUploader.uploading')
-          : buttonText || t('ImageUploader.defaultButtonText')}
+        {isUploading ? t('ImageUploader.uploading') : buttonText}
       </Button>
       <input
         id={inputId}
@@ -1548,7 +1546,7 @@ const TextAndImageSectionEditor: FC<{
 }> = ({ t, section, onChange }) => {
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1">
         <ImageIcon className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
           {t('SectionTypes.textAndImage.label')} {t('Editor.titleSuffix')}
@@ -1652,7 +1650,7 @@ const TextAndImageSectionEditor: FC<{
             <div className="mt-4">
               <img
                 src={section.image.url}
-                alt={t('TextAndImageEditor.imagePreviewAlt')}
+                alt={section.image.alt}
                 className="max-h-40 rounded-lg object-cover"
               />
             </div>
@@ -1670,7 +1668,7 @@ const LogosSectionEditor: FC<{
 }> = ({ t, section, onChange }) => {
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1">
         <Award className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
           {t('SectionTypes.logos.label')} {t('Editor.titleSuffix')}
@@ -1691,7 +1689,7 @@ const LogosSectionEditor: FC<{
             />
           </div>
 
-          {section.logos.map((logo, index) => (
+          {section.logos.map((logo: LandingImage, index: number) => (
             <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-2">
               <div className="space-y-2">
                 <Input
@@ -1735,14 +1733,16 @@ const LogosSectionEditor: FC<{
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => {
-                  const newLogos = section.logos.filter((_, i) => i !== index)
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const newLogos = section.logos.filter(
+                    (_: LandingImage, i: number) => i !== index
+                  )
                   onChange({ ...section, logos: newLogos })
                 }}
                 className="text-red-500 hover:bg-red-50 hover:text-red-600"
               >
                 <Trash2 className="h-4 w-4" />
-                {t('LogosEditor.removeButton')}
               </Button>
             </div>
           ))}
@@ -1776,7 +1776,7 @@ const PeopleSectionEditor: FC<{
 }> = ({ t, section, onChange }) => {
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1">
         <Users className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
           {t('SectionTypes.people.label')} {t('Editor.titleSuffix')}
@@ -1799,7 +1799,7 @@ const PeopleSectionEditor: FC<{
         <div>
           <Label>{t('PeopleEditor.peopleLabel')}</Label>
           <div className="mt-2 space-y-4">
-            {section.people.map((person, index) => (
+            {section.people.map((person: any, index: number) => (
               <div
                 key={index}
                 className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 rounded-lg border p-4"
@@ -1891,16 +1891,16 @@ const PeopleSectionEditor: FC<{
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation()
                       const newPeople = section.people.filter(
-                        (_, i) => i !== index
+                        (_: any, i: number) => i !== index
                       )
                       onChange({ ...section, people: newPeople })
                     }}
                     className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="mr-1 h-4 w-4" />
-                    {t('PeopleEditor.removeButton')}
                   </Button>
                 </div>
               </div>
@@ -1948,7 +1948,7 @@ const FeaturedCoursesEditor: FC<{
 
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1">
         <BookOpen className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
           {t('SectionTypes.featuredCourses.label')} {t('Editor.titleSuffix')}

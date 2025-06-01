@@ -15,11 +15,8 @@ cd /app/api || {
   exit 1
 }
 
-# Start API service (using 'sh -c' for the command with spaces, safer in pm2)
-pm2 start "sh -c 'uv run app.py'" --name openu-api > /dev/null 2>&1 || {
-  echo "Failed to start openu-api"
-  exit 1
-}
+# Start API service
+pm2 start app.py --cwd /app/api --interpreter /app/api/.venv/bin/python --name openu-api > /dev/null 2>&1 || { echo "Failed to start openu-api"; exit 1; }
 
 # Change back to app root
 cd /app || {

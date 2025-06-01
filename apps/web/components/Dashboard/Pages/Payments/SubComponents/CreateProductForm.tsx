@@ -59,8 +59,8 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const [currencies, setCurrencies] = useState<
     { code: string; name: string }[]
   >([])
+  const tNotify = useTranslations('DashPage.Notifications')
   const t = useTranslations('Payments.ProductForm')
-  const tNotify = useTranslations('Notifications')
   const validationSchema = useMemo(() => createValidationSchema(t), [t])
 
   useEffect(() => {

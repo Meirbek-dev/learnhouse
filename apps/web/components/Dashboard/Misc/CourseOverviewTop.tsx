@@ -49,6 +49,7 @@ export function CourseOverviewTop({
                 className="h-[57px] rounded-md drop-shadow-md"
                 src={EmptyThumbnailImage}
                 alt=""
+                style={{ width: 'auto', height: 'auto' }}
               />
             )}
           </Link>

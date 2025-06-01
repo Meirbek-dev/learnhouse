@@ -276,14 +276,13 @@ const LearningItemsList = ({
   const handleInputBlur = () => {
     setTimeout(() => {
       if (
-        !document.activeElement ||
-        !(
+        !(document.activeElement &&(
           document.activeElement.classList.contains('learning-item-input') ||
           document.activeElement.closest('[data-emoji-mart="true"]')
-        ) // Check if focus moved to emoji picker
-      ) {
+        ) // Check if focus moved to emoji picker) // Check if focus moved to emoji picker
+      ) ){
         // Only clear focusedItemId if focus is truly lost from the component's interactive elements
-        // setShowLinkInput(null); // Consider if this should also happen on blur.
+        setShowLinkInput(null); // Consider if this should also happen on blur.
       }
     }, 100) // Delay allows other focus events to occur
   }

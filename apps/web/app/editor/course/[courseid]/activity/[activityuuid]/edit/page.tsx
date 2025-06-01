@@ -22,12 +22,13 @@ export async function generateMetadata(
   const access_token = session?.tokens?.access_token
   const t = await getTranslations('DashPage.Editor')
 
-  // Get Org context information
-  const course_meta = await getCourseMetadata(
-    params.courseid,
-    { revalidate: 30, tags: ['courses'] },
-    access_token ? access_token : null
-  )
+  const [course_meta] = await Promise.all([
+    getCourseMetadata(
+      params.courseid,
+      { revalidate: 30, tags: ['courses'] },
+      access_token ?? null
+    ),
+  ])
 
   return {
     title: t('metaTitleEdit', { activityName: course_meta.name }),
@@ -35,21 +36,26 @@ export async function generateMetadata(
   }
 }
 
-const EditActivity = async (params: any) => {
+const EditActivity = async (props: {
+  params: Promise<{ courseid: string; activityuuid: string }>
+}) => {
+  const params = await props.params
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
-  const activityuuid = (await params.params).activityuuid
-  const courseid = (await params.params).courseid
-  const courseInfo = await getCourseMetadata(
-    courseid,
-    { revalidate: 30, tags: ['courses'] },
-    access_token ? access_token : null
-  )
-  const activity = await getActivityWithAuthHeader(
-    activityuuid,
-    { revalidate: 0, tags: ['activities'] },
-    access_token ? access_token : null
-  )
+  const { activityuuid, courseid } = params
+
+  const [courseInfo, activity] = await Promise.all([
+    getCourseMetadata(
+      courseid,
+      { revalidate: 30, tags: ['courses'] },
+      access_token ?? null
+    ),
+    getActivityWithAuthHeader(
+      activityuuid,
+      { revalidate: 0, tags: ['activities'] },
+      access_token ?? null
+    ),
+  ])
 
   const org = await getOrganizationContextInfoWithId(
     courseInfo.org_id,

@@ -19,8 +19,8 @@ import { resetPassword } from '@services/auth/auth'
 import { useTranslations } from 'next-intl'
 
 function ResetPasswordClient() {
-  const t = useTranslations('Auth.Reset')
   const validationT = useTranslations('Validation')
+  const t = useTranslations('Auth.Reset')
   const org = useOrg() as any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const searchParams = useSearchParams()

@@ -46,7 +46,6 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   // Check window availability
   const [winReady, setwinReady] = useState(false)
   const t = useTranslations('CourseEdit.Structure')
-  const tNotify = useTranslations('Notifications')
 
   const dispatchCourse = useCourseDispatch() as any
 
@@ -66,7 +65,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
   // Submit new chapter
   const submitChapter = async (chapter: any) => {
-    const loadingToast = toast.loading(tNotify('creatingChapter'))
+    const loadingToast = toast.loading(t('creatingChapter'))
     try {
       await createChapter(chapter, access_token)
       mutate(
@@ -75,10 +74,10 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
       setNewChapterModal(false)
-      toast.success(tNotify('chapterCreatedSuccess'), { id: loadingToast })
+      toast.success(t('chapterCreatedSuccess'), { id: loadingToast })
     } catch (error) {
       console.error('Error creating chapter:', error)
-      toast.error(tNotify('chapterCreateFailed'), { id: loadingToast })
+      toast.error(t('chapterCreateFailed'), { id: loadingToast })
     }
   }
 

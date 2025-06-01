@@ -72,6 +72,7 @@ async def upload_org_landing_content(file: UploadFile, org_uuid: str) -> str:
             "gif",
             "webp",
             "mp4",
+            "mkv",
             "webm",
             "pdf",
         ],  # Common web content formats

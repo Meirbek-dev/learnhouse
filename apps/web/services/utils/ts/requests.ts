@@ -1,108 +1,74 @@
 import { getUriWithOrg } from '@services/config/config'
 
-export const RequestBody = (method: string, data: any, next: any) => {
-  const HeadersConfig = new Headers({ 'Content-Type': 'application/json' })
+// Helper to create headers
+const createHeaders = (contentType?: string, token?: string) => {
+  const headers: Record<string, string> = {}
+  if (contentType) headers['Content-Type'] = contentType
+  if (token) headers.Authorization = `Bearer ${token}`
+  return new Headers(headers)
+}
+
+// Generalized request body creator
+const createRequestOptions = (
+  method: string,
+  data: any,
+  next: any,
+  contentType: string | null = 'application/json',
+  token?: string,
+  rawBody = false
+) => {
   const options: any = {
-    method: method,
-    headers: HeadersConfig,
+    method,
+    headers: createHeaders(contentType || undefined, token),
     redirect: 'follow',
     credentials: 'include',
-    // Next.js
-    next: next,
+    next,
   }
-  if (data) {
-    options.body = JSON.stringify(data)
+  if (data && (method === 'POST' || method === 'PUT')) {
+    options.body = rawBody ? data : JSON.stringify(data)
   }
   return options
 }
+
+export const RequestBody = (method: string, data: any, next: any) =>
+  createRequestOptions(method, data, next)
 
 export const RequestBodyWithAuthHeader = (
   method: string,
   data: any,
   next: any,
   token?: string
-) => {
-  const HeadersConfig = new Headers(
-    token
-      ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
-      : { 'Content-Type': 'application/json' }
-  )
-  const options: any = {
-    method: method,
-    headers: HeadersConfig,
-    redirect: 'follow',
-    credentials: 'include',
-    body: method === 'POST' || method === 'PUT' ? JSON.stringify(data) : null,
-    // Next.js
-    next: next,
-  }
-  return options
-}
+) => createRequestOptions(method, data, next, 'application/json', token)
 
-export const RequestBodyForm = (method: string, data: any, next: any) => {
-  const HeadersConfig = new Headers({})
-  const options: any = {
-    method: method,
-    headers: HeadersConfig,
-    redirect: 'follow',
-    credentials: 'include',
-    body: method === 'POST' || method === 'PUT' ? JSON.stringify(data) : null,
-    // Next.js
-    next: next,
-  }
-  return options
-}
+export const RequestBodyForm = (method: string, data: any, next: any) =>
+  createRequestOptions(method, data, next, null)
 
 export const RequestBodyFormWithAuthHeader = (
   method: string,
   data: any,
   next: any,
   access_token: string
-) => {
-  const HeadersConfig = new Headers({
-    Authorization: `Bearer ${access_token}`,
-  })
-  const options: any = {
-    method: method,
-    headers: HeadersConfig,
-    redirect: 'follow',
-    credentials: 'include',
-    body: data,
-    // Next.js
-    next: next,
-  }
-  return options
-}
+) => createRequestOptions(method, data, next, null, access_token, true)
 
 export const swrFetcher = async (url: string, token?: string) => {
-  // Create the request options
-  const HeadersConfig = new Headers(
+  const options = createRequestOptions(
+    'GET',
+    null,
+    undefined,
+    'application/json',
     token
-      ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
-      : { 'Content-Type': 'application/json' }
   )
-  const options: any = {
-    method: 'GET',
-    headers: HeadersConfig,
-    redirect: 'follow',
-    credentials: 'include',
-  }
-
   try {
-    // Fetch the data
-    const request = await fetch(url, options)
-    const res = errorHandling(request)
-
-    // Return the data
-    return res
-  } catch (error: any) {
+    const res = await fetch(url, options)
+    return await errorHandling(res)
+  } catch (error) {
     throw error
   }
 }
 
-export const errorHandling = (res: any) => {
+export const errorHandling = async (res: Response) => {
   if (!res.ok) {
-    const error: any = new Error(`${res.statusText}`)
+    const error: any = new Error(res.statusText)
     error.status = res.status
     throw error
   }

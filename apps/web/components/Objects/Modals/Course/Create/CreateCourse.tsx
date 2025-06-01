@@ -182,11 +182,13 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
               {formik.values.thumbnail ? (
                 <img
                   src={URL.createObjectURL(formik.values.thumbnail)}
+                  alt={`Thumbnail preview for ${formik.values.name || 'course'}`}
                   className={`${isUploading ? 'animate-pulse' : ''} h-[100px] w-[200px] rounded-md shadow-sm`}
                 />
               ) : (
                 <img
                   src="/empty_thumbnail.png"
+                  alt=""
                   className="h-[100px] w-[200px] rounded-md bg-gray-200 shadow-sm"
                 />
               )}

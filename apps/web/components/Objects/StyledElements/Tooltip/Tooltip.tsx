@@ -12,27 +12,30 @@ type TooltipProps = {
   unstyled?: boolean // new prop to remove default styling
 }
 
-const ToolTip = (props: TooltipProps) => {
-  return (
-    <TooltipPrimitive.Provider delayDuration={200}>
-      <TooltipPrimitive.Root>
-        <TooltipPrimitive.Trigger asChild>
-          {props.children}
-        </TooltipPrimitive.Trigger>
-        <TooltipPrimitive.Portal>
-          <TooltipContent
-            slateBlack={props.slateBlack}
-            unstyled={props.unstyled}
-            side={props.side ? props.side : 'bottom'}
-            sideOffset={props.sideOffset}
-          >
-            {props.content}
-          </TooltipContent>
-        </TooltipPrimitive.Portal>
-      </TooltipPrimitive.Root>
-    </TooltipPrimitive.Provider>
-  )
-}
+const ToolTip = ({
+  sideOffset,
+  content,
+  children,
+  side = 'bottom',
+  slateBlack,
+  unstyled,
+}: TooltipProps) => (
+  <TooltipPrimitive.Provider delayDuration={200}>
+    <TooltipPrimitive.Root>
+      <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
+      <TooltipPrimitive.Portal>
+        <TooltipContent
+          slateBlack={slateBlack}
+          unstyled={unstyled}
+          side={side}
+          sideOffset={sideOffset}
+        >
+          {content}
+        </TooltipContent>
+      </TooltipPrimitive.Portal>
+    </TooltipPrimitive.Root>
+  </TooltipPrimitive.Provider>
+)
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },

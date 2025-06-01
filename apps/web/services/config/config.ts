@@ -13,32 +13,21 @@ export const isMultiOrgModeEnabled = () =>
   process.env.NEXT_PUBLIC_OPENU_MULTI_ORG === 'true'
 
 export const getUriWithOrg = (orgslug: string, path: string) => {
-  const multi_org = isMultiOrgModeEnabled()
-  if (multi_org) {
-    return `${OPENU_HTTP_PROTOCOL}${orgslug}.${OPENU_DOMAIN}${path}`
-  }
-  return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
+  return isMultiOrgModeEnabled()
+    ? `${OPENU_HTTP_PROTOCOL}${orgslug}.${OPENU_DOMAIN}${path}`
+    : `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
 }
 
-export const getUriWithoutOrg = (path: string) => {
-  const multi_org = isMultiOrgModeEnabled()
-  if (multi_org) {
-    return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
-  }
-  return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
-}
+export const getUriWithoutOrg = (path: string) =>
+  `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
 
 export const getOrgFromUri = () => {
-  const multi_org = isMultiOrgModeEnabled()
-  if (multi_org) {
-    getDefaultOrg()
-  } else if (typeof window !== 'undefined') {
+  if (isMultiOrgModeEnabled()) {
+    return getDefaultOrg()
+  }if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
-
     return hostname.replace(`.${OPENU_DOMAIN}`, '')
   }
 }
 
-export const getDefaultOrg = () => {
-  return process.env.NEXT_PUBLIC_OPENU_DEFAULT_ORG
-}
+export const getDefaultOrg = () => process.env.NEXT_PUBLIC_OPENU_DEFAULT_ORG

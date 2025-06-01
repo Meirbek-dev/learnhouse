@@ -6,7 +6,7 @@ import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGen
 import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
-import { Info, Lock, type LucideIcon, User } from 'lucide-react'
+import { Info, Lock, type LucideIcon, User as UserIcon } from 'lucide-react'
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile'
@@ -88,7 +88,7 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
     {
       id: 'profile',
       label: 'profile',
-      icon: User,
+      icon: UserIcon,
       component: UserProfile,
     },
     {

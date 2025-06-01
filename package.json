@@ -10,10 +10,10 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"eslint": "^9.27.0",
+		"eslint": "^9.28.0",
 		"prettier": "^3.5.3",
-		"prettier-plugin-tailwindcss": "^0.6.11",
-		"turbo": "^2.5.3"
+		"prettier-plugin-tailwindcss": "^0.6.12",
+		"turbo": "^2.5.4"
 	},
 	"packageManager": "pnpm@10.10.0",
 	"dependencies": {

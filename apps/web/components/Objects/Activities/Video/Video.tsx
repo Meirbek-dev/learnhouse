@@ -1,13 +1,23 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import YouTube from 'react-youtube'
-import { getActivityMediaDirectory } from '@services/media/media'
+import {
+  getActivityMediaDirectory,
+  getVideoSubtitlesDirectory,
+} from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
+import ARTPlayer from './Artplayer'
+import { useLocale } from 'next-intl'
 
 interface VideoDetails {
   startTime?: number
   endTime?: number | null
   autoplay?: boolean
   muted?: boolean
+}
+
+interface SubtitleEntry {
+  html: string
+  url: string
 }
 
 interface VideoActivityProps {
@@ -28,7 +38,13 @@ interface VideoActivityProps {
 function VideoActivity({ activity, course }: VideoActivityProps) {
   const org = useOrg() as any
   const [videoId, setVideoId] = useState('')
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const locale = useLocale()
+
+  const subtitleEntries: SubtitleEntry[] = [
+    { html: 'Russian', url: '/subtitle.ru.srt' },
+    { html: 'English', url: '/subtitle.en.srt' },
+    { html: 'Kazakh', url: '/subtitle.kz.srt' },
+  ]
 
   useEffect(() => {
     if (activity?.content?.uri) {
@@ -47,25 +63,14 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
       'video'
     )
   }
-
-  // Handle native video time update
-  const handleTimeUpdate = () => {
-    const video = videoRef.current
-    if (video && activity.details?.endTime) {
-      if (video.currentTime >= activity.details.endTime) {
-        video.pause()
-      }
-    }
-  }
-
-  // Handle native video load
-  const handleVideoLoad = () => {
-    const video = videoRef.current
-    if (video && activity.details) {
-      video.currentTime = activity.details.startTime || 0
-      video.autoplay = activity.details.autoplay || false
-      video.muted = activity.details.muted || false
-    }
+  const getSubtitlesSrc = () => {
+    if (!activity.content?.filename) return ''
+    return getVideoSubtitlesDirectory(
+      org?.org_uuid,
+      course?.course_uuid,
+      activity.activity_uuid,
+      activity.content.filename
+    )
   }
 
   return (
@@ -74,13 +79,26 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
         <div className="my-3 w-full md:my-5">
           <div className="shadow-xs relative aspect-video w-full overflow-hidden rounded-lg ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_HOSTED' && (
-              <video
-                ref={videoRef}
-                className="h-full w-full object-cover"
-                controls
-                src={getVideoSrc()}
-                onLoadedMetadata={handleVideoLoad}
-                onTimeUpdate={handleTimeUpdate}
+              <ARTPlayer
+                option={{
+                  url: getVideoSrc(),
+                  muted: activity.details?.muted,
+                  autoplay: activity.details?.autoplay,
+                  lang: locale,
+                }}
+                subtitle={{
+                  url: `/subtitle.${locale}.srt`,
+                  type: 'srt',
+                  style: {
+                    color: '#ffffff',
+                    fontSize: '20px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    textAlign: 'center',
+                  },
+                  encoding: 'utf-8',
+                }}
+                subtitleEntries={subtitleEntries}
+                className="size-full"
               />
             )}
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (

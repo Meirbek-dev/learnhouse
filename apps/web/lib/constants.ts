@@ -1,6 +1,7 @@
 export const ACCEPTED_FILE_FORMATS = {
   video: 'video/*',
   mp4: 'video/mp4',
+  mkv: 'video/x-matroska',
   webm: 'video/webm',
   image: 'image/*',
   jpg: 'image/jpeg',
@@ -13,7 +14,7 @@ export const ACCEPTED_FILE_FORMATS = {
 } as const
 
 /**
- * Constructs the 'accept' attribute value for an input element
+ * Constructs the 'accept' attribute value for an input element.
  */
 export function constructAcceptValue(
   types: (keyof typeof ACCEPTED_FILE_FORMATS)[]

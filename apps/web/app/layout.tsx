@@ -7,20 +7,12 @@ import { getLocale, getMessages, setRequestLocale } from 'next-intl/server'
 import { DM_Sans } from 'next/font/google'
 
 const dmSans = DM_Sans({
-  weight: [
-    '100',
-    '200',
-    '300',
-    '400',
-    '500',
-    '600',
-    '700',
-    '800',
-    '900',
-    '1000',
-  ],
-  style: ['normal', 'italic'],
   subsets: ['latin', 'latin-ext'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+  preload: true,
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  style: ['normal', 'italic'],
 })
 
 export default async function RootLayout({

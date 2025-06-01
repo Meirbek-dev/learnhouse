@@ -13,6 +13,7 @@ import {
 import { ButtonBlack } from '../Form/Form'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 
 type ModalParams = {
   dialogTitle?: string
@@ -81,12 +82,18 @@ const Modal = (params: ModalParams) => {
           params.customWidth
         )}
       >
-        {params.dialogTitle && params.dialogDescription && (
-          <DialogHeader className="flex w-full flex-col space-y-0.5 text-center">
+        <DialogHeader className="flex w-full flex-col space-y-0.5 text-center">
+          {params.dialogTitle ? (
             <DialogTitle>{params.dialogTitle}</DialogTitle>
+          ) : (
+            <VisuallyHidden.Root>
+              <DialogTitle>{t('dialog')}</DialogTitle>
+            </VisuallyHidden.Root>
+          )}
+          {params.dialogDescription && (
             <DialogDescription>{params.dialogDescription}</DialogDescription>
-          </DialogHeader>
-        )}
+          )}
+        </DialogHeader>
         <div className="overflow-auto">{params.dialogContent}</div>
         {(params.dialogClose || params.addDefCloseButton) && (
           <DialogFooter>

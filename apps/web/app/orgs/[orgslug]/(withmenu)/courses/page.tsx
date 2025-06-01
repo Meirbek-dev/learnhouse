@@ -16,8 +16,7 @@ export async function generateMetadata(
   props: MetadataProps
 ): Promise<Metadata> {
   const params = await props.params
-  const tGeneral = await getTranslations('General')
-  const tCoursesPage = await getTranslations('CoursesPage')
+  const t = await getTranslations('General')
 
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 0,
@@ -26,9 +25,9 @@ export async function generateMetadata(
 
   // SEO
   return {
-    title: `${tCoursesPage('title')} — ${org.name}`,
+    title: `${t('courses')} — ${org.name}`,
     description: org.description,
-    keywords: `${org.name}, ${org.description}, ${tGeneral('courses')}, ${tGeneral('learning')}, ${tGeneral('education')}, ${tGeneral('onlineLearning')}, ${tGeneral('edu')}, ${tGeneral('onlineCourses')}, ${org.name} ${tGeneral('courses')}`,
+    keywords: `${org.name}, ${org.description}, ${t('courses')}, ${t('learning')}, ${t('education')}, ${t('onlineLearning')}, ${t('edu')}, ${t('onlineCourses')}, ${org.name} ${t('courses')}`,
     robots: {
       index: true,
       follow: true,
@@ -40,7 +39,7 @@ export async function generateMetadata(
       },
     },
     openGraph: {
-      title: `${tCoursesPage('title')} — ${org.name}`,
+      title: `${t('courses')} — ${org.name}`,
       description: org.description,
       type: 'website',
       images: [

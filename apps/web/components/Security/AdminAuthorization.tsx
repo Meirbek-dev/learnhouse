@@ -42,35 +42,24 @@ const AdminAuthorization: FC<AuthorizationProps> = ({
   )
 
   const checkPathname = useCallback((pattern: string, pathname: string) => {
-    // Ensure the inputs are strings
-    if (typeof pattern !== 'string' || typeof pathname !== 'string') {
+    if (typeof pattern !== 'string' || typeof pathname !== 'string')
       return false
-    }
-
-    // Convert pattern to a regex pattern
     const regexPattern = new RegExp(
-      `^${pattern.replace(/[\/.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`
+      `^${pattern.replace(/[\/.+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`
     )
-
-    // Test the pathname against the regex pattern
     return regexPattern.test(pathname)
   }, [])
 
-  const isAdminPath = useMemo(
-    () => ADMIN_PATHS.some((path) => checkPathname(path, pathname)),
-    [pathname, checkPathname]
-  )
+  const isAdminPath = useMemo(() => {
+    return ADMIN_PATHS.some((path) => checkPathname(path, pathname))
+  }, [pathname, checkPathname])
 
   const authorizeUser = useCallback(() => {
-    if (loading) {
-      return // Wait until the admin status is determined
-    }
-
+    if (loading) return
     if (!isUserAuthenticated) {
-      router.push(getUriWithoutOrg(`/login?orgslug=${org.slug}`))
+      router.push(getUriWithoutOrg(`/login?orgslug=${org?.slug ?? ''}`))
       return
     }
-
     if (authorizationMode === 'page') {
       if (isAdminPath) {
         if (isAdmin) {
@@ -92,6 +81,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({
     isAdminPath,
     authorizationMode,
     router,
+    org?.slug,
   ])
 
   useEffect(() => {
@@ -114,7 +104,8 @@ const AdminAuthorization: FC<AuthorizationProps> = ({
     )
   }
 
-  return <>{isAuthorized && children}</>
+  // Always return a ReactNode
+  return isAuthorized ? <>{children}</> : null
 }
 
 export default AdminAuthorization

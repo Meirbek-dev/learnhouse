@@ -140,7 +140,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({
                 {formik.values.due_date ? (
                   format(new Date(formik.values.due_date), 'PPP')
                 ) : (
-                  <span>Select a deadline for completing the task</span>
+                  <span>{t('selectDeadline')}</span>
                 )}
                 <CalendarIcon className="ml-2 size-4 opacity-50" />
               </button>

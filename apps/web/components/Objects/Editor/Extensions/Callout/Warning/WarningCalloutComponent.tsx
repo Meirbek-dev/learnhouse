@@ -14,7 +14,7 @@ const IconWrapper = styled.div<{ size?: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  shrink: 0;
+  flex-shrink: 0;
   margin-right: 0.5rem;
   padding-left: 0.5rem;
 
