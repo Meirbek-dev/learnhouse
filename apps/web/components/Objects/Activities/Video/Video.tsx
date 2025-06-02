@@ -65,12 +65,13 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
   }
   const getSubtitlesSrc = () => {
     if (!activity.content?.filename) return ''
-    return getVideoSubtitlesDirectory(
+    const subDir = getVideoSubtitlesDirectory(
       org?.org_uuid,
       course?.course_uuid,
       activity.activity_uuid,
       activity.content.filename
     )
+    return subDir
   }
 
   return (

@@ -82,7 +82,7 @@ export function getVideoSubtitlesDirectory(
   activityUUID: string,
   fileId: string
 ): string | undefined {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/${fileId}` // change to better subtitles dir
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/subtitles`
 }
 
 export function getOrgLogoMediaDirectory(

@@ -33,11 +33,21 @@ function EvaluateAssignment({ user_id }: any) {
   const session = useLHSession() as any
   const org = useOrg() as any
 
+  // Guard clause for missing assignment data
+  if (!assignments || !assignments.assignment_object) {
+    return (
+      <div className="flex items-center justify-center min-h-[120px] text-gray-500">
+        {t('assignmentDataMissing', { defaultValue: 'Assignment data is unavailable.' })}
+      </div>
+    )
+  }
+
   async function gradeAssignment() {
+    if (!assignments?.assignment_object?.assignment_uuid || !session?.data?.tokens?.access_token) return
     const res = await putFinalGrade(
       user_id,
-      assignments?.assignment_object.assignment_uuid,
-      session.data?.tokens?.access_token
+      assignments.assignment_object.assignment_uuid,
+      session.data.tokens.access_token
     )
     if (res.success) {
       toast.success(t('gradeFinalSuccess', { message: res.data.message }))
@@ -47,10 +57,11 @@ function EvaluateAssignment({ user_id }: any) {
   }
 
   async function markActivityAsDone() {
+    if (!assignments?.assignment_object?.assignment_uuid || !session?.data?.tokens?.access_token) return
     const res = await markActivityAsDoneForUser(
       user_id,
-      assignments?.assignment_object.assignment_uuid,
-      session.data?.tokens?.access_token
+      assignments.assignment_object.assignment_uuid,
+      session.data.tokens.access_token
     )
     if (res.success) {
       toast.success(t('markDoneSuccess', { message: res.data.message }))
@@ -60,10 +71,11 @@ function EvaluateAssignment({ user_id }: any) {
   }
 
   async function rejectAssignment() {
+    if (!assignments?.assignment_object?.assignment_uuid || !session?.data?.tokens?.access_token) return
     const _res = await deleteUserSubmission(
       user_id,
-      assignments?.assignment_object.assignment_uuid,
-      session.data?.tokens?.access_token
+      assignments.assignment_object.assignment_uuid,
+      session.data.tokens.access_token
     )
     toast.success(t('rejectSuccess'))
     window.location.reload()
