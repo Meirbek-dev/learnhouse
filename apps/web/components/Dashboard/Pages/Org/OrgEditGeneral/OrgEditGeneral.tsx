@@ -254,7 +254,7 @@ const OrgEditGeneral: FC = () => {
                         value={values.about}
                         onChange={handleChange}
                         placeholder={t('Form.aboutPlaceholder')}
-                        className="min-h-[150px]"
+                        className="min-h-[250px]"
                         maxLength={400}
                       />
                       {touched.about && errors.about && (

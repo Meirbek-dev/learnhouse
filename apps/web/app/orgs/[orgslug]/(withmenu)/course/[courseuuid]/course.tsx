@@ -138,10 +138,7 @@ const CourseClient = (props: any) => {
             <CourseBreadcrumbs course={course} orgslug={orgslug} />
             <div className="flex flex-col items-start justify-between pb-2 pt-3 md:flex-row md:items-center">
               <div>
-                <p className="text-md pb-2 font-bold text-gray-400">
-                  {t('title')}
-                </p>
-                <h1 className="-mt-3 text-3xl font-bold md:text-3xl">
+                <h1 className="text-3xl font-bold md:text-3xl">
                   {course.name}
                 </h1>
               </div>
