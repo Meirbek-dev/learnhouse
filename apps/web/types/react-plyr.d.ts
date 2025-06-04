@@ -14,4 +14,4 @@ declare module 'react-plyr' {
   }
 
   export default class Plyr extends Component<PlyrProps> {}
-} 
+}

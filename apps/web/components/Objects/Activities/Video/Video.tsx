@@ -1,15 +1,24 @@
-import React from 'react'
+import { useState, useEffect } from 'react'
 import YouTube from 'react-youtube'
-import { getActivityMediaDirectory } from '@services/media/media'
+import {
+  getActivityMediaDirectory,
+  getVideoSubtitlesDirectory,
+} from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
-import LearnHousePlayer from './LearnHousePlayer'
 import ArtPlayer from './ArtPlayer'
+import type ArtplayerType from 'artplayer'
+import { useLocale } from 'next-intl'
 
 interface VideoDetails {
   startTime?: number
   endTime?: number | null
   autoplay?: boolean
   muted?: boolean
+}
+
+interface SubtitleEntry {
+  html: string
+  url: string
 }
 
 interface VideoActivityProps {
@@ -29,11 +38,18 @@ interface VideoActivityProps {
 
 function VideoActivity({ activity, course }: VideoActivityProps) {
   const org = useOrg() as any
-  const [videoId, setVideoId] = React.useState('')
+  const [videoId, setVideoId] = useState('')
+  const locale = useLocale()
 
-  React.useEffect(() => {
+  const subtitleEntries: SubtitleEntry[] = [
+    { html: 'Russian', url: '/subtitle.ru.srt' },
+    { html: 'English', url: '/subtitle.en.srt' },
+    { html: 'Kazakh', url: '/subtitle.kz.srt' },
+  ]
+
+  useEffect(() => {
     if (activity?.content?.uri) {
-      var getYouTubeID = require('get-youtube-id')
+      const getYouTubeID = require('get-youtube-id')
       setVideoId(getYouTubeID(activity.content.uri))
     }
   }, [activity, org])
@@ -48,57 +64,73 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
       'video'
     )
   }
+  const getSubtitlesSrc = () => {
+    if (!activity.content?.filename) return ''
+    return getVideoSubtitlesDirectory(
+      org?.org_uuid,
+      course?.course_uuid,
+      activity.activity_uuid,
+      activity.content.filename
+    )
+  }
 
   return (
     <div className="w-full max-w-full px-2 sm:px-4">
       {activity && (
-        <>
-          {console.log('Activity type:', activity.activity_sub_type)}
-          {console.log('Video source:', getVideoSrc())}
-          {activity.activity_sub_type === 'SUBTYPE_VIDEO_HOSTED' && (
-            <div className="my-3 w-full md:my-5">
-              <div className="shadow-xs relative aspect-video w-full overflow-hidden rounded-lg ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
-                {(() => {
-                  const src = getVideoSrc()
-                  return src ? (
-                    <div>
-                      <LearnHousePlayer src={src} details={activity.details} />
-                      <ArtPlayer />
-                    </div>
-                  ) : null
-                })()}
-              </div>
-            </div>
-          )}
-          {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (
-            <div className="my-3 w-full md:my-5">
-              <div className="shadow-xs relative aspect-video w-full overflow-hidden rounded-lg ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
-                <YouTube
-                  className="h-full w-full"
-                  opts={{
-                    width: '100%',
-                    height: '100%',
-                    playerVars: {
-                      autoplay: activity.details?.autoplay ? 1 : 0,
-                      mute: activity.details?.muted ? 1 : 0,
-                      start: activity.details?.startTime || 0,
-                      end: activity.details?.endTime || undefined,
-                      controls: 1,
-                      modestbranding: 1,
-                      rel: 0,
-                    },
-                  }}
-                  videoId={videoId}
-                  onReady={(event) => {
-                    if (activity.details?.startTime) {
-                      event.target.seekTo(activity.details.startTime, true)
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </>
+        <div className="my-3 w-full md:my-5">
+          <div className="shadow-xs relative aspect-video w-full overflow-hidden rounded-lg ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
+            {activity.activity_sub_type === 'SUBTYPE_VIDEO_HOSTED' && (
+              <ArtPlayer
+                option={{
+                  url: getVideoSrc(),
+                  muted: activity.details?.muted,
+                  autoplay: activity.details?.autoplay,
+                  lang: locale,
+                }}
+                subtitle={{
+                  url: `/subtitle.${locale}.srt`,
+                  type: 'srt',
+                  style: {
+                    color: '#ffffff',
+                    fontSize: '2.5rem',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    textAlign: 'center',
+                  },
+                  encoding: 'utf-8',
+                }}
+                subtitleEntries={subtitleEntries}
+                className="size-full"
+                startTime={activity.details?.startTime}
+                endTime={activity.details?.endTime}
+                onPlayerReady={(art: ArtplayerType) => {}}
+              />
+            )}
+            {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (
+              <YouTube
+                className="h-full w-full"
+                opts={{
+                  width: '100%',
+                  height: '100%',
+                  playerVars: {
+                    autoplay: activity.details?.autoplay ? 1 : 0,
+                    mute: activity.details?.muted ? 1 : 0,
+                    start: activity.details?.startTime || 0,
+                    end: activity.details?.endTime || undefined,
+                    controls: 1,
+                    modestbranding: 1,
+                    rel: 0,
+                  },
+                }}
+                videoId={videoId}
+                onReady={(event) => {
+                  if (activity.details?.startTime) {
+                    event.target.seekTo(activity.details.startTime, true)
+                  }
+                }}
+              />
+            )}
+          </div>
+        </div>
       )}
     </div>
   )

@@ -75,7 +75,7 @@ function PDFBlockComponent(props: any) {
     document.body.removeChild(link)
   }
 
-  useEffect(() => { }, [course, org])
+  useEffect(() => {}, [course, org])
 
   return (
     <NodeViewWrapper className="block-pdf">
@@ -100,13 +100,13 @@ function PDFBlockComponent(props: any) {
               src={
                 blockObject && fileId && blockObject.block_uuid
                   ? getActivityBlockMediaDirectory(
-                    org?.org_uuid || '',
-                    course?.courseStructure.course_uuid || '',
-                    props.extension.options.activity.activity_uuid || '',
-                    blockObject.block_uuid || '',
-                    fileId,
-                    'pdfBlock'
-                  )
+                      org?.org_uuid || '',
+                      course?.courseStructure.course_uuid || '',
+                      props.extension.options.activity.activity_uuid || '',
+                      blockObject.block_uuid || '',
+                      fileId,
+                      'pdfBlock'
+                    )
                   : ''
               }
             />

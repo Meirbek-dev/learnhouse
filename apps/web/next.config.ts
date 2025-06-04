@@ -15,7 +15,8 @@ const nextConfig: NextConfig = {
     ]
   },
   experimental: {
-    reactCompiler: true
+    reactCompiler: true,
+    useLightningcss: true,
   },
   compiler: {
     styledComponents: true,

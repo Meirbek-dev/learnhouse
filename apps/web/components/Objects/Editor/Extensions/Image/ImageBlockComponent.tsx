@@ -52,7 +52,7 @@ function ImageBlockComponent(props: any) {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
-    if (!image) return;
+    if (!image) return
     setIsLoading(true)
     const object = await uploadNewImageFile(
       image,
