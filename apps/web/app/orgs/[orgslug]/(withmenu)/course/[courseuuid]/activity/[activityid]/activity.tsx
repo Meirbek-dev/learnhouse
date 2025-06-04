@@ -690,11 +690,15 @@ function ActivityClient(props: ActivityClientProps) {
                               >
                                 <img
                                   className="h-[57px] w-[100px] rounded-md drop-shadow-md"
-                                  src={`${getCourseThumbnailMediaDirectory(
-                                    org?.org_uuid,
-                                    course.course_uuid,
+                                  src={
                                     course.thumbnail_image
-                                  )}`}
+                                      ? `${getCourseThumbnailMediaDirectory(
+                                          org?.org_uuid,
+                                          course.course_uuid,
+                                          course.thumbnail_image
+                                        )}`
+                                      : `/empty_thumbnail.png`
+                                  }
                                   alt=""
                                 />
                               </Link>
