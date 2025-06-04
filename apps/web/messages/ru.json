@@ -248,14 +248,9 @@
       "editContent": "Редактировать содержимое",
       "settings": "Настройки",
       "toastDeleteError": "Не удалось удалить курс",
-      "toastDeleteSuccess": "Курс успешно удален"
-    },
-    "CourseThumbnailLanding": {
-      "deleteButtonText": "Удалить курс",
-      "deleteConfirmationMessage": "Вы уверены, что хотите удалить этот курс?",
-      "deleteConfirmationTitle": "Удалить {courseName}?",
+      "toastDeleteSuccess": "Курс успешно удален",
       "startLearningButton": "Начать обучение",
-      "updatedDate": "Обновлено {date, date, short}"
+      "updatedDate": "Обновлено {updateDate, date, medium}"
     },
     "CreateCourseModal": {
       "createCourse": "Создать курс",

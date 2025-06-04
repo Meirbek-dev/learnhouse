@@ -279,7 +279,7 @@
       "toastDeleteError": "Failed to delete course",
       "toastDeleteSuccess": "Course deleted successfully",
       "updated": "Updated",
-      "updatedDate": "Updated {date}"
+      "updatedDate": "Updated {updateDate, date, medium}"
     },
     "CreateCourseModal": {
       "createCourse": "Create Course",
@@ -1517,6 +1517,7 @@
         "positiveNumber": "Must be a positive number",
         "requiredField": "{fieldName} is required"
       },
+      "activityCreatedSuccess": "Activity created successfully",
       "currentPasswordLabel": "Current Password",
       "newPasswordLabel": "New Password",
       "orgIdNotFound": "Organization ID not found",

@@ -3,6 +3,7 @@ import YouTube from 'react-youtube'
 import { getActivityMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
 import LearnHousePlayer from './LearnHousePlayer'
+import ArtPlayer from './ArtPlayer'
 
 interface VideoDetails {
   startTime?: number
@@ -60,7 +61,10 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                 {(() => {
                   const src = getVideoSrc()
                   return src ? (
-                    <LearnHousePlayer src={src} details={activity.details} />
+                    <div>
+                      <LearnHousePlayer src={src} details={activity.details} />
+                      <ArtPlayer />
+                    </div>
                   ) : null
                 })()}
               </div>

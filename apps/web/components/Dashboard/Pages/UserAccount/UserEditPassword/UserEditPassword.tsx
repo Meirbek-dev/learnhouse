@@ -16,21 +16,17 @@ import { useTranslations } from 'next-intl'
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   Yup.object().shape({
     old_password: Yup.string().required(
-      t('DashPage.Notifications.Form.requiredField', {
-        fieldName: t(
-          'DashPage.UserAccountSettings.passwordSection.currentPasswordLabel'
-        ),
+      t('Form.requiredField', {
+        fieldName: t('currentPasswordLabel'),
       })
     ),
     new_password: Yup.string()
       .required(
-        t('DashPage.Notifications.Form.requiredField', {
-          fieldName: t(
-            'DashPage.UserAccountSettings.passwordSection.newPasswordLabel'
-          ),
+        t('Form.requiredField', {
+          fieldName: t('newPasswordLabel'),
         })
       )
-      .min(8, t('DashPage.Notifications.Form.minChars', { count: 8 })),
+      .min(8, t('Form.minChars', { count: 8 })),
   })
 
 function UserEditPassword() {
