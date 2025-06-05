@@ -125,7 +125,10 @@ function VideoModal({
                   min="0"
                   value={startTimeParts.minutes}
                   onChange={(e) => {
-                    const minutes = Math.max(0, parseInt(e.target.value) || 0)
+                    const minutes = Math.max(
+                      0,
+                      Number.parseInt(e.target.value) || 0
+                    )
                     const seconds = startTimeParts.seconds
                     setVideoDetails({
                       ...videoDetails,
@@ -149,7 +152,7 @@ function VideoModal({
                     const minutes = startTimeParts.minutes
                     const seconds = Math.max(
                       0,
-                      Math.min(59, parseInt(e.target.value) || 0)
+                      Math.min(59, Number.parseInt(e.target.value) || 0)
                     )
                     setVideoDetails({
                       ...videoDetails,
@@ -175,7 +178,10 @@ function VideoModal({
                   min="0"
                   value={endTimeParts.minutes}
                   onChange={(e) => {
-                    const minutes = Math.max(0, parseInt(e.target.value) || 0)
+                    const minutes = Math.max(
+                      0,
+                      Number.parseInt(e.target.value) || 0
+                    )
                     const seconds = endTimeParts.seconds
                     const totalSeconds = convertToSeconds(minutes, seconds)
                     if (totalSeconds > videoDetails.startTime) {
@@ -202,7 +208,7 @@ function VideoModal({
                     const minutes = endTimeParts.minutes
                     const seconds = Math.max(
                       0,
-                      Math.min(59, parseInt(e.target.value) || 0)
+                      Math.min(59, Number.parseInt(e.target.value) || 0)
                     )
                     const totalSeconds = convertToSeconds(minutes, seconds)
                     if (totalSeconds > videoDetails.startTime) {

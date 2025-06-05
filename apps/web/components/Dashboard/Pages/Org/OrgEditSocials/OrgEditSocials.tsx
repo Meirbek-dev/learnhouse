@@ -15,7 +15,6 @@ import {
   SiYoutube,
 } from '@icons-pack/react-simple-icons'
 import { Plus, X as XIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import { useTranslations } from 'next-intl'
