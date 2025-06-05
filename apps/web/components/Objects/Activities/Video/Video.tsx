@@ -5,7 +5,7 @@ import {
   getVideoSubtitlesDirectory,
 } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
-import ArtPlayer from './ArtPlayer'
+import ArtPlayer from '@components/Objects/Activities/Video/ArtPlayer'
 import type ArtplayerType from 'artplayer'
 import { useLocale } from 'next-intl'
 
