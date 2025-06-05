@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import Artplayer from 'artplayer'
-import { es, fr, id, kz, ru, tr } from '@/messages/ArtPlayer'
+import { es, fr, id, kz, ru, tr } from '@/messages/Artplayer'
 
 interface SubtitleEntry {
   html: string
