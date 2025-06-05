@@ -32,6 +32,7 @@ import {
   Video,
   List,
   ListOrdered,
+  Globe,
 } from 'lucide-react'
 import { SiYoutube } from '@icons-pack/react-simple-icons'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
@@ -469,6 +470,21 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           }
         >
           <User size={15} />
+        </ToolBtn>
+      </ToolTip>
+      <ToolTip content={'Web Preview'}>
+        <ToolBtn
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'blockWebPreview',
+              })
+              .run()
+          }
+        >
+          <Globe size={15} />
         </ToolBtn>
       </ToolTip>
     </ToolButtonsWrapper>

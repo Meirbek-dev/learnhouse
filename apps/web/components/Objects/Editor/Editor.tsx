@@ -34,6 +34,8 @@ import Link from 'next/link'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { useTranslations } from 'next-intl'
 import { getLinkExtension } from './EditorConf'
+import { Link as LinkExtension } from '@tiptap/extension-link'
+import WebPreview from './Extensions/WebPreview/WebPreview'
 
 // Lowlight
 import { common, createLowlight } from 'lowlight'
@@ -164,6 +166,10 @@ function Editor(props: EditorProps) {
       TableHeader,
       TableCell,
       getLinkExtension(),
+      WebPreview.configure({
+        editable: true,
+        activity: props.activity,
+      }),
     ],
     content: props.content,
     immediatelyRender: false,
