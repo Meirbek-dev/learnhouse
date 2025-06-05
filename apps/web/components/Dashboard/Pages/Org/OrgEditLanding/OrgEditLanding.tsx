@@ -52,6 +52,7 @@ import toast from 'react-hot-toast'
 import useSWR from 'swr'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui/tabs'
 import { useTranslations } from 'next-intl'
+import { ButtonIcon } from '@radix-ui/react-icons'
 
 const SECTION_TYPES = {
   hero: {
@@ -543,8 +544,8 @@ const OrgEditLanding = () => {
                     }}
                   >
                     <SelectTrigger className="w-full border-0 bg-black p-0">
-                      <div className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-black text-sm font-medium text-white">
-                        <Plus color="white" />
+                      <div className="hover:bg-primary/90 inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-black text-sm font-medium text-white outline-none transition-all">
+                        <Plus size="8" color="white" />
                         {t('SectionsPanel.addSectionButton')}
                       </div>
                     </SelectTrigger>
@@ -688,7 +689,7 @@ const HeroSectionEditor: FC<{
               value="buttons"
               className="flex items-center space-x-1"
             >
-              <Button className="h-4 w-4" />
+              <ButtonIcon className="h-4 w-4" />
               <span>{t('HeroEditor.Tabs.buttons')}</span>
             </TabsTrigger>
             <TabsTrigger
