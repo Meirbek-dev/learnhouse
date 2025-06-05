@@ -1,6 +1,7 @@
 import { Book, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
+import { useTranslations } from 'next-intl'
 
 interface ActivityBreadcrumbsProps {
   course: any
@@ -14,13 +15,16 @@ export default function ActivityBreadcrumbs({
   orgslug,
 }: ActivityBreadcrumbsProps) {
   const cleanCourseUuid = course.course_uuid?.replace('course_', '')
+  const t = useTranslations('General')
 
   return (
     <div className="mb-4 flex space-x-1 text-sm font-medium tracking-tight text-gray-400">
       <div className="flex items-center space-x-1">
         <div className="flex items-center space-x-2">
           <Book className="text-gray" size={14} />
-          <Link href={`${getUriWithOrg(orgslug, '')}/courses`}>Courses</Link>
+          <Link href={`${getUriWithOrg(orgslug, '')}/courses`}>
+            {t('courses')}
+          </Link>
         </div>
         <ChevronRight size={14} />
         <Link href={`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}`}>

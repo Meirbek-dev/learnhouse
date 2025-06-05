@@ -54,7 +54,6 @@
     "@tiptap/pm": "^2.12.0",
     "@tiptap/react": "^2.12.0",
     "@tiptap/starter-kit": "^2.12.0",
-    "@types/dompurify": "^3.2.0",
     "@types/randomcolor": "^0.5.9",
     "artplayer": "^5.2.3",
     "avvvatars-react": "^0.4.2",
@@ -73,7 +72,7 @@
     "katex": "^0.16.22",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.513.0",
-    "next": "15.4.0-canary.57",
+    "next": "15.4.0-canary.67",
     "next-auth": "^4.24.11",
     "next-intl": "4.1.0",
     "nextjs-toploader": "^3.8.16",
@@ -106,7 +105,7 @@
     "@tailwindcss/postcss": "4.1.8",
     "@types/node": "22.15.29",
     "@types/react": "19.1.6",
-    "@types/react-dom": "19.1.5",
+    "@types/react-dom": "19.1.6",
     "@types/react-katex": "^3.0.4",
     "@types/react-transition-group": "^4.4.12",
     "@types/styled-components": "^5.1.34",
@@ -122,7 +121,7 @@
   "pnpm": {
     "overrides": {
       "@types/react": "19.1.6",
-      "@types/react-dom": "19.1.5"
+      "@types/react-dom": "19.1.6"
     }
   }
 }

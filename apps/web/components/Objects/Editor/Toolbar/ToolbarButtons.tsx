@@ -85,7 +85,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
 
   const listOptions = [
     {
-      label: 'Bullet List',
+      label: t('listOptions.bulletList'),
       icon: <List size={15} />,
       action: () => {
         if (editor.isActive('bulletList')) {
@@ -97,7 +97,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       },
     },
     {
-      label: 'Ordered List',
+      label: t('listOptions.orderedList'),
       icon: <ListOrdered size={15} />,
       action: () => {
         if (editor.isActive('orderedList')) {

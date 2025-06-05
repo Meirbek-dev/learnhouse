@@ -49,7 +49,14 @@
       "translatePlaceholder": "Translate selected text to",
       "userInputPlaceholder": "Ask AI",
       "writerLabel": "Writer",
-      "writerPlaceholder": "Write about..."
+      "writerPlaceholder": "Write about...",
+      "aiEditorTitle": "AI Editor",
+      "aiIconAlt": "LearnHouse AI Icon",
+      "prompt_writer": "Write about {selection}",
+      "prompt_continueWriting": "Continue writing about {selection}",
+      "prompt_makeLonger": "Make this text longer: {selection}",
+      "prompt_translateTo": "Translate to {language}: {selection}",
+      "translateToLanguageMissing": "Please enter a language to translate to"
     },
     "AssignmentBoxUI": {
       "currentPoints": "Current points: {points}",
@@ -533,6 +540,13 @@
       "loadingError": "Failed to load user data"
     },
     "VideoModal": {
+      "videoSettingsHeading": "Video Settings",
+      "startTimeLabel": "Start Time",
+      "endTimeLabel": "End Time",
+      "minutesPlaceholder": "minutes",
+      "secondsPlaceholder": "seconds",
+      "chooseVideoFile": "Choose Video File",
+      "fileUploadedSuffix": "uploaded",
       "activityName": "Activity Name",
       "activityNamePlaceholder": "Enter activity name...",
       "addSubtitles": "Add Subtitles",
@@ -558,7 +572,6 @@
       "valueMissingUrl": "Please provide a YouTube URL for your activity",
       "videoFile": "Video File",
       "videoName": "Video Name",
-      "videoSettings": "Video Settings",
       "videoUpload": "Video Upload",
       "youtubeUrl": "YouTube URL",
       "youtubeUrlPlaceholder": "https://youtube.com/watch?v=...",
@@ -597,6 +610,9 @@
       "activityUpdateSuccess": "Activity updated succesfully",
       "activityDeletedSuccess": "Activity deleted successfully",
       "deletingActivity": "Deleting activity...",
+      "activityNameUpdatedSuccess": "Activity name updated successfully",
+      "failedToUpdateActivityName": "Failed to update activity name",
+      "activityNamePlaceholder": "Activity name",
       "ActivityTypes": {
         "video": "Video",
         "document": "Document",
@@ -682,7 +698,16 @@
         "uploading": "Uploading..."
       },
       "Thumbnail": {
-        "uploadImageButton": "Upload",
+        "errors": {
+          "invalidMimeType": "Please upload only PNG or JPG/JPEG images",
+          "fileTooLarge": "File size should be less than 5MB",
+          "unsplashInvalidFormat": "Invalid image format from Unsplash",
+          "unsplashProcessFailed": "Failed to process Unsplash image",
+          "updateFailed": "Failed to update thumbnail"
+        },
+        "imageAltText": "Course thumbnail",
+        "supportedFormats": "Supported formats: PNG, JPG/JPEG",
+        "uploadImageButton": "Upload Image",
         "gallery": "Gallery",
         "uploading": "Uploading..."
       }
@@ -898,6 +923,7 @@
       "paidCourseTitle": "Paid Course",
       "purchaseCourse": "Purchase Course",
       "readyToBegin": "Ready to Begin?",
+      "startLearningJourney": "Start your learning journey with {totalActivities} exciting {totalActivities, plural, one {activity} other {activities}}",
       "selectPaymentOption": "Select a payment option to access this course",
       "startCourse": "Start Course",
       "startCourseError": "Failed to start the course. Please try again later.",
@@ -1450,6 +1476,21 @@
         "title": "Quiz"
       },
       "Toolbar": {
+        "listOptions": {
+          "bulletList": "Bullet List",
+          "orderedList": "Ordered List"
+        },
+        "heading1": "Heading 1",
+        "heading2": "Heading 2",
+        "heading3": "Heading 3",
+        "youtube": "YouTube",
+        "calloutDefault": "Callout (Default)",
+        "calloutInfo": "Callout (Info)",
+        "calloutWarning": "Callout (Warning)",
+        "calloutError": "Callout (Error)",
+        "equation": "Equation",
+        "document": "Document",
+        "badge": "Badge",
         "addColumnRight": "Add column right",
         "addRowBelow": "Add row below",
         "badges": "Badges",
@@ -2512,6 +2553,18 @@
     }
   },
   "FixedActivitySecondaryBar": {
+    "NavigationButtons": {
+      "previousActivityTitle": "Previous: {activityName}",
+      "noPreviousActivity": "No previous activity",
+      "previous": "Previous",
+      "currentOfTotal": "{currentIndex} of {totalActivities}",
+      "nextActivityTitle": "Next: {activityName}",
+      "noNextActivity": "No next activity",
+      "next": "Next"
+    },
+    "CourseInfo": {
+      "course": "Course"
+    },
     "activityCounter": "{current} of {total}",
     "course": "Course",
     "next": "Next",

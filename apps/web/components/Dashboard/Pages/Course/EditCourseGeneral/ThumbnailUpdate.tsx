@@ -44,12 +44,12 @@ function ThumbnailUpdate() {
 
   const validateFile = (file: File): boolean => {
     if (!VALID_MIME_TYPES.includes(file.type as ValidMimeType)) {
-      setError('Please upload only PNG or JPG/JPEG images')
+      setError(t('errors.invalidMimeType'))
       return false
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      setError('File size should be less than 5MB')
+      setError(t('errors.fileTooLarge'))
       return false
     }
 
@@ -79,7 +79,7 @@ function ThumbnailUpdate() {
       const blob = await response.blob()
 
       if (!VALID_MIME_TYPES.includes(blob.type as ValidMimeType)) {
-        throw new Error('Invalid image format from Unsplash')
+        throw new Error(t('errors.unsplashInvalidFormat'))
       }
 
       const file = new File([blob], `unsplash_${Date.now()}.jpg`, {
@@ -94,7 +94,7 @@ function ThumbnailUpdate() {
       setLocalThumbnail({ file, url: blobUrl })
       await updateThumbnail(file)
     } catch (_err) {
-      setError('Failed to process Unsplash image')
+      setError(t('errors.unsplashProcessFailed'))
       setIsLoading(false)
     }
   }
@@ -119,7 +119,7 @@ function ThumbnailUpdate() {
         setError('')
       }
     } catch (_err) {
-      setError('Failed to update thumbnail')
+      setError(t('errors.updateFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -141,7 +141,7 @@ function ThumbnailUpdate() {
               className={`${
                 isLoading ? 'animate-pulse' : ''
               } h-[140px] w-[280px] rounded-lg border border-gray-200 object-cover shadow-sm`}
-              alt="Course thumbnail"
+              alt={t('imageAltText')}
             />
           ) : (
             <img
@@ -155,7 +155,7 @@ function ThumbnailUpdate() {
                   : '/empty_thumbnail.png'
               }`}
               className="h-[140px] w-[280px] rounded-lg border border-gray-200 bg-gray-50 object-cover shadow-sm"
-              alt="Course thumbnail"
+              alt={t('imageAltText')}
             />
           )}
 
@@ -195,9 +195,7 @@ function ThumbnailUpdate() {
           </div>
         )}
 
-        <p className="text-xs text-gray-500">
-          Supported formats: PNG, JPG/JPEG
-        </p>
+        <p className="text-xs text-gray-500">{t('supportedFormats')}</p>
       </div>
 
       {showUnsplashPicker && (

@@ -112,10 +112,12 @@ function VideoModal({
 
     return (
       <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4">
-        <h3 className="mb-3 font-medium text-gray-900">Video Settings</h3>
+        <h3 className="mb-3 font-medium text-gray-900">
+          {t('videoSettingsHeading')}
+        </h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label>Start Time</Label>
+            <Label>{t('startTimeLabel')}</Label>
             <div className="mt-1 flex gap-2">
               <div className="flex-1">
                 <Input
@@ -130,7 +132,7 @@ function VideoModal({
                       startTime: convertToSeconds(minutes, seconds),
                     })
                   }}
-                  placeholder="0"
+                  placeholder={t('minutesPlaceholder')}
                   className="w-full"
                 />
                 <span className="mt-1 block text-xs text-gray-500">
@@ -154,7 +156,7 @@ function VideoModal({
                       startTime: convertToSeconds(minutes, seconds),
                     })
                   }}
-                  placeholder="0"
+                  placeholder={t('secondsPlaceholder')}
                   className="w-full"
                 />
                 <span className="mt-1 block text-xs text-gray-500">
@@ -165,7 +167,7 @@ function VideoModal({
           </div>
 
           <div>
-            <Label>End Time (optional)</Label>
+            <Label>{t('endTimeLabel')} (optional)</Label>
             <div className="mt-1 flex gap-2">
               <div className="flex-1">
                 <Input
@@ -183,7 +185,7 @@ function VideoModal({
                       })
                     }
                   }}
-                  placeholder="0"
+                  placeholder={t('secondsPlaceholder')}
                   className="w-full"
                 />
                 <span className="mt-1 block text-xs text-gray-500">
@@ -210,7 +212,7 @@ function VideoModal({
                       })
                     }
                   }}
-                  placeholder="0"
+                  placeholder={t('secondsPlaceholder')}
                   className="w-full"
                 />
                 <span className="mt-1 block text-xs text-gray-500">
@@ -234,7 +236,7 @@ function VideoModal({
               }
               className="rounded border-gray-300 text-black focus:ring-black"
             />
-            <span className="text-sm text-gray-700">Autoplay video</span>
+            <span className="text-sm text-gray-700">{t('autoplay')}</span>
           </label>
 
           <label className="flex items-center space-x-2">
@@ -249,7 +251,7 @@ function VideoModal({
               }
               className="rounded border-gray-300 text-black focus:ring-black"
             />
-            <span className="text-sm text-gray-700">Start muted</span>
+            <span className="text-sm text-gray-700">{t('startMuted')}</span>
           </label>
         </div>
       </div>
@@ -317,11 +319,11 @@ function VideoModal({
                     htmlFor="video-activity-file"
                     className="inline-block cursor-pointer rounded-full bg-black px-4 py-2 font-semibold text-white hover:bg-gray-800"
                   >
-                    {'Choose Video File'}
+                    {t('chooseVideoFile')}
                   </Label>
                   {video && (
                     <div className="pl-2 text-sm text-green-700">
-                      <i>{video.name}</i> uploaded
+                      <i>{video.name}</i> {t('fileUploadedSuffix')}
                     </div>
                   )}
                 </div>

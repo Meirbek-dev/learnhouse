@@ -52,7 +52,7 @@ import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/Ge
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators'
 import { revalidateTags } from '@services/utils/ts/requests'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 // Lazy load heavy components
 const Canva = lazy(
@@ -236,6 +236,7 @@ function ActivityClient(props: ActivityClientProps) {
   const { contributorStatus } = useContributorStatus(courseuuid)
   const router = useRouter()
   const t = useTranslations('ActivityPage')
+  const locale = useLocale()
 
   // Memoize activity position calculation
   const { allActivities, currentIndex } = useActivityPosition(
@@ -489,11 +490,15 @@ function ActivityClient(props: ActivityClientProps) {
                             >
                               <img
                                 className="h-[34px] w-[60px] rounded-md drop-shadow-md"
-                                src={`${getCourseThumbnailMediaDirectory(
-                                  org?.org_uuid,
-                                  course.course_uuid,
+                                src={
                                   course.thumbnail_image
-                                )}`}
+                                    ? `${getCourseThumbnailMediaDirectory(
+                                        org?.org_uuid,
+                                        course.course_uuid,
+                                        course.thumbnail_image
+                                      )}`
+                                    : '/empty_thumbnail.png'
+                                }
                                 alt=""
                               />
                             </Link>
@@ -886,7 +891,7 @@ function ActivityClient(props: ActivityClientProps) {
                                     {t('createdOn')}{' '}
                                     {new Date(
                                       course.creation_date
-                                    ).toLocaleDateString(undefined, {
+                                    ).toLocaleDateString(locale, {
                                       year: 'numeric',
                                       month: 'long',
                                       day: 'numeric',

@@ -122,10 +122,10 @@ function ActivityElement(props: ActivitiyElementProps) {
           `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
         )
         await revalidateTags(['courses'], props.orgslug)
-        toast.success('Activity name updated successfully')
+        toast.success(t('activityNameUpdatedSuccess'))
         router.refresh()
       } catch (error) {
-        toast.error('Failed to update activity name')
+        toast.error(t('failedToUpdateActivityName'))
         console.error('Error updating activity name:', error)
       } finally {
         setIsUpdatingName(false)
@@ -172,7 +172,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                 <input
                   type="text"
                   className="outline-hidden bg-transparent text-xs text-gray-500"
-                  placeholder="Activity name"
+                  placeholder={t('activityNamePlaceholder')}
                   value={
                     modifiedActivity
                       ? modifiedActivity?.activityName

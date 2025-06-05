@@ -543,14 +543,9 @@ const OrgEditLanding = () => {
                     }}
                   >
                     <SelectTrigger className="w-full border-0 bg-black p-0">
-                      <div className="w-full">
-                        <Button
-                          variant="default"
-                          className="w-full bg-black text-white hover:bg-black/90"
-                        >
-                          <Plus className="mr-2 h-4 w-4" color="white" />
-                          {t('SectionsPanel.addSectionButton')}
-                        </Button>
+                      <div className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-black text-sm font-medium text-white">
+                        <Plus color="white" />
+                        {t('SectionsPanel.addSectionButton')}
                       </div>
                     </SelectTrigger>
                     <SelectContent>
