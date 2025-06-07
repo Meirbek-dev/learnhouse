@@ -1,17 +1,54 @@
-# 
-FROM python:3.10.5
+# Base image
+FROM python:3.13.3-slim-bookworm AS base
 
-# 
-WORKDIR /usr/learnhouse
+# Install Nginx, curl, and build-essential
+RUN apt update && apt install -y nginx curl build-essential libomp-dev \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm /etc/nginx/sites-enabled/default
 
-# 
-COPY ./requirements.txt /usr/learnhouse/requirements.txt
+# Install Node tools
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+  && apt-get install -y nodejs \
+  && npm install -g corepack pm2
 
-# 
-RUN pip install --no-cache-dir --upgrade -r /usr/learnhouse/requirements.txt
+# Frontend Build
+FROM base AS deps
 
-# 
-COPY ./ /usr/learnhouse
+ENV NEXT_PUBLIC_LEARNHOUSE_API_URL=http://localhost/api/v1/
+ENV NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL=http://localhost/
+ENV NEXT_PUBLIC_LEARNHOUSE_DOMAIN=localhost
 
-# 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80" , "--reload"]
+WORKDIR /app/web
+COPY ./apps/web/package.json ./apps/web/pnpm-lock.yaml* ./
+COPY ./apps/web /app/web
+RUN rm -f .env*
+RUN if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile && pnpm run build; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+# Final image
+FROM base AS runner
+RUN addgroup --system --gid 1001 system \
+  && adduser --system --uid 1001 app \
+  && mkdir .next \
+  && chown app:system .next
+COPY --from=deps /app/web/public ./app/web/public
+COPY --from=deps --chown=app:system /app/web/.next/standalone ./app/web/
+COPY --from=deps --chown=app:system /app/web/.next/static ./app/web/.next/static
+
+# Backend Build
+WORKDIR /app/api
+COPY ./apps/api/uv.lock ./
+COPY ./apps/api/pyproject.toml ./
+RUN pip install --upgrade pip \
+  && pip install uv \
+  && uv sync
+COPY ./apps/api ./
+
+# Run the backend
+WORKDIR /app
+COPY ./extra/nginx.conf /etc/nginx/conf.d/default.conf
+ENV PORT=8000 LEARNHOUSE_PORT=9000 HOSTNAME=0.0.0.0
+COPY ./extra/start.sh /app/start.sh
+CMD ["sh", "start.sh"]

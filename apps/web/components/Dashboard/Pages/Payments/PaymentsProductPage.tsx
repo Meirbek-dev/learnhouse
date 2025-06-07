@@ -1,0 +1,469 @@
+'use client'
+import { useMemo, useState, useEffect } from 'react'
+import currencyCodes from 'currency-codes'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import useSWR, { mutate } from 'swr'
+import {
+  getProducts,
+  updateProduct,
+  archiveProduct,
+} from '@services/payments/products'
+import {
+  Plus,
+  Pencil,
+  Info,
+  RefreshCcw,
+  SquareCheck,
+  ChevronDown,
+  ChevronUp,
+  Archive,
+} from 'lucide-react'
+import Modal from '@components/Objects/StyledElements/Modal/Modal'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
+import toast from 'react-hot-toast'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select'
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
+import * as Yup from 'yup'
+import { Label } from '@components/ui/label'
+import { Badge } from '@components/ui/badge'
+import { getPaymentConfigs } from '@services/payments/payments'
+import ProductLinkedCourses from './SubComponents/ProductLinkedCourses'
+import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled'
+import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer'
+import CreateProductForm from './SubComponents/CreateProductForm'
+import { useTranslations } from 'next-intl'
+
+const createValidationSchema = (t: (key: string, values?: any) => string) =>
+  Yup.object().shape({
+    name: Yup.string().required(
+      t('Components.Form.requiredField', {
+        fieldName: t('DashPage.Payments.ProductPage.editForm.nameLabel'),
+      })
+    ),
+    description: Yup.string().required(
+      t('Components.Form.requiredField', {
+        fieldName: t('DashPage.Payments.ProductPage.editForm.descriptionLabel'),
+      })
+    ),
+    amount: Yup.number()
+      .min(0, t('Components.Form.positiveNumber'))
+      .required(
+        t('Components.Form.requiredField', {
+          fieldName: t('DashPage.Payments.ProductPage.editForm.priceLabel'),
+        })
+      ),
+    benefits: Yup.string(),
+    currency: Yup.string().required(
+      t('Components.Form.requiredField', {
+        fieldName: t('DashPage.Payments.ProductPage.editForm.currencyLabel'),
+      })
+    ),
+  })
+
+function PaymentsProductPage() {
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [editingProductId, setEditingProductId] = useState<string | null>(null)
+  const [expandedProducts, setExpandedProducts] = useState<{
+    [key: string]: boolean
+  }>({})
+  const [isStripeEnabled, setIsStripeEnabled] = useState(false)
+  const { isEnabled, isLoading } = usePaymentsEnabled()
+  const t = useTranslations('DashPage.Payments.ProductPage')
+
+  const { data: products, error } = useSWR(
+    () =>
+      org && session
+        ? [`/payments/${org.id}/products`, session.data?.tokens?.access_token]
+        : null,
+    ([_url, token]) => getProducts(org.id, token)
+  )
+
+  const { data: paymentConfigs, error: paymentConfigError } = useSWR(
+    () =>
+      org && session
+        ? [`/payments/${org.id}/config`, session.data?.tokens?.access_token]
+        : null,
+    ([_url, token]) => getPaymentConfigs(org.id, token)
+  )
+
+  useEffect(() => {
+    if (paymentConfigs) {
+      const stripeConfig = paymentConfigs.find(
+        (config: any) => config.provider === 'stripe'
+      )
+      setIsStripeEnabled(!!stripeConfig)
+    }
+  }, [paymentConfigs])
+
+  const handleArchiveProduct = async (productId: string) => {
+    try {
+      const res = await archiveProduct(
+        org.id,
+        productId,
+        session.data?.tokens?.access_token
+      )
+      mutate([
+        `/payments/${org.id}/products`,
+        session.data?.tokens?.access_token,
+      ])
+      if (res.status === 200) {
+        toast.success(t('productArchivedSuccess'))
+      } else {
+        toast.error(
+          t('errors.archiveProductFailed', {
+            error: res.data?.detail || '',
+          })
+        )
+      }
+    } catch (_error) {
+      toast.error(t('errors.archiveProductFailed', { error: '' }))
+    }
+  }
+
+  const toggleProductExpansion = (productId: string) => {
+    setExpandedProducts((prev) => ({
+      ...prev,
+      [productId]: !prev[productId],
+    }))
+  }
+
+  if (!(isEnabled || isLoading)) {
+    return <UnconfiguredPaymentsDisclaimer />
+  }
+
+  if (error) return <div>{t('loadError')}</div>
+  if (!products) return <div>{t('loading')}</div>
+
+  return (
+    <div className="h-full w-full bg-[#f8f8f8]">
+      <div className="mx-auto pl-10 pr-10">
+        <Modal
+          isDialogOpen={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          dialogTitle={t('createModalTitle')}
+          dialogDescription={t('createModalDescription')}
+          dialogContent={
+            <CreateProductForm onSuccess={() => setIsCreateModalOpen(false)} />
+          }
+        />
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {products.data.map((product: any) => (
+            <div
+              key={product.id}
+              className="nice-shadow flex h-full flex-col rounded-lg bg-white p-4"
+            >
+              {editingProductId === product.id ? (
+                <EditProductForm
+                  product={product}
+                  onSuccess={() => setEditingProductId(null)}
+                  onCancel={() => setEditingProductId(null)}
+                />
+              ) : (
+                <div className="flex h-full flex-col">
+                  <div className="mb-2 flex items-start justify-between">
+                    <div className="flex flex-col items-start space-y-1">
+                      <Badge
+                        className="flex w-fit items-center space-x-2"
+                        variant="outline"
+                      >
+                        {product.product_type === 'subscription' ? (
+                          <RefreshCcw size={12} />
+                        ) : (
+                          <SquareCheck size={12} />
+                        )}
+                        <span className="text-sm">
+                          {product.product_type === 'subscription'
+                            ? t('subscriptionType')
+                            : t('oneTimeType')}
+                        </span>
+                      </Badge>
+                      <h3 className="text-lg font-bold">{product.name}</h3>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => setEditingProductId(product.id)}
+                        className={`text-blue-500 hover:text-blue-700 ${isStripeEnabled ? '' : 'cursor-not-allowed opacity-50'}`}
+                        disabled={!isStripeEnabled}
+                        title={t('editButton')}
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <ConfirmationModal
+                        confirmationButtonText={t('archiveConfirmButton')}
+                        confirmationMessage={t('archiveConfirmationMessage')}
+                        dialogTitle={t('archiveConfirmationTitle', {
+                          productName: product.name,
+                        })}
+                        dialogTrigger={
+                          <button
+                            className="text-red-500 hover:text-red-700"
+                            title={t('archiveButton')}
+                          >
+                            <Archive size={16} />
+                          </button>
+                        }
+                        functionToExecute={() =>
+                          handleArchiveProduct(product.id)
+                        }
+                        status="warning"
+                      />
+                    </div>
+                  </div>
+                  <div className="grow overflow-hidden">
+                    <div
+                      className={`transition-all duration-300 ease-in-out ${expandedProducts[product.id] ? 'max-h-[1000px]' : 'max-h-24'} overflow-hidden`}
+                    >
+                      <p className="text-gray-600">{product.description}</p>
+                      {product.benefits && (
+                        <div className="mt-2">
+                          <h4 className="text-sm font-semibold">
+                            {t('benefitsLabel')}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {product.benefits}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <button
+                      onClick={() => toggleProductExpansion(product.id)}
+                      className="flex items-center text-sm text-slate-500 hover:text-slate-700"
+                    >
+                      {expandedProducts[product.id] ? (
+                        <>
+                          <ChevronUp size={16} />
+                          <span>{t('showLess')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown size={16} />
+                          <span>{t('showMore')}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <ProductLinkedCourses productId={product.id} />
+                  <div className="mt-2 flex items-center justify-between rounded-md bg-gray-100 p-2">
+                    <span className="text-sm text-gray-600">
+                      {t('priceLabel')}
+                    </span>
+                    <span className="text-lg font-semibold">
+                      {new Intl.NumberFormat(navigator.language, {
+                        style: 'currency',
+                        currency: product.currency,
+                      }).format(product.amount)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {products.data.length === 0 && (
+          <div className="mx-auto mt-3 flex items-center space-x-2 font-semibold text-gray-600">
+            <Info size={20} />
+            <p>{t('noProducts')}</p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-center py-10">
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className={`nice-shadow bg-linear-to-bl mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
+              isStripeEnabled
+                ? 'hover:from-gray-600 hover:to-gray-800'
+                : 'cursor-not-allowed opacity-50'
+            }`}
+            disabled={!isStripeEnabled}
+          >
+            <Plus size={18} />
+            <span className="text-sm font-bold">
+              {t('createProductButton')}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const EditProductForm = ({
+  product,
+  onSuccess,
+  onCancel,
+}: {
+  product: any
+  onSuccess: () => void
+  onCancel: () => void
+}) => {
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const [currencies, setCurrencies] = useState<
+    { code: string; name: string }[]
+  >([])
+  const t = useTranslations('DashPage.Payments.ProductPage.editForm')
+  const validationSchema = useMemo(() => createValidationSchema(t), [t])
+
+  useEffect(() => {
+    const allCurrencies = currencyCodes.data.map((currency) => ({
+      code: currency.code,
+      name: `${currency.code} - ${currency.currency}`,
+    }))
+    setCurrencies(allCurrencies)
+  }, [])
+
+  const initialValues = {
+    name: product.name,
+    description: product.description,
+    amount: product.amount,
+    benefits: product.benefits || '',
+    currency: product.currency || '',
+    product_type: product.product_type,
+  }
+
+  const handleSubmit = async (
+    values: typeof initialValues,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
+    try {
+      await updateProduct(
+        org.id,
+        product.id,
+        values,
+        session.data?.tokens?.access_token
+      )
+      mutate([
+        `/payments/${org.id}/products`,
+        session.data?.tokens?.access_token,
+      ])
+      onSuccess()
+      toast.success(t('productUpdatedSuccess'))
+    } catch (_error) {
+      toast.error(t('updateProductFailed'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ isSubmitting, values, setFieldValue }) => (
+        <Form className="space-y-4">
+          <div className="flex-col space-y-3 px-1.5 py-2">
+            <div>
+              <Label htmlFor="name">{t('nameLabel')}</Label>
+              <Field
+                name="name"
+                as={Input}
+                placeholder={t('namePlaceholder')}
+              />
+              <ErrorMessage
+                name="name"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description">{t('descriptionLabel')}</Label>
+              <Field
+                name="description"
+                as={Textarea}
+                placeholder={t('descriptionPlaceholder')}
+              />
+              <ErrorMessage
+                name="description"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
+            </div>
+
+            <div className="flex space-x-2">
+              <div className="grow">
+                <Label htmlFor="amount">{t('priceLabel')}</Label>
+                <Field
+                  name="amount"
+                  as={Input}
+                  type="number"
+                  placeholder={t('pricePlaceholder')}
+                />
+                <ErrorMessage
+                  name="amount"
+                  component="div"
+                  className="mt-1 text-sm text-red-500"
+                />
+              </div>
+              <div className="w-1/3">
+                <Label htmlFor="currency">{t('currencyLabel')}</Label>
+                <Select
+                  value={values.currency}
+                  onValueChange={(value) => setFieldValue('currency', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('currencyPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map((currency) => (
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <ErrorMessage
+                  name="currency"
+                  component="div"
+                  className="mt-1 text-sm text-red-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="benefits">{t('benefitsLabel')}</Label>
+              <Field
+                name="benefits"
+                as={Textarea}
+                placeholder={t('benefitsPlaceholder')}
+              />
+              <ErrorMessage
+                name="benefits"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              {t('cancelButton')}
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? t('savingButton') : t('saveButton')}
+            </Button>
+          </div>
+        </Form>
+      )}
+    </Formik>
+  )
+}
+
+export default PaymentsProductPage

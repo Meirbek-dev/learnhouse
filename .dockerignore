@@ -1,0 +1,46 @@
+# All node_modules directories
+**/node_modules
+**/dist
+**/.next
+
+# All secrets
+**/.env.local
+**/.env.*.local
+
+# By default all git files
+.git
+**/.gitignore
+.gitattributes
+.github
+
+# Tools caches
+.cache
+**/*.tsbuildinfo
+**/.eslintcache
+**/__pycache__
+**/.ruff_cache
+
+# Docker related
+dockers
+*docker-compose*
+
+# Log files
+logs
+**/*.log
+
+# Temp files
+tmp
+*.tmp
+
+# IDE related
+.idea
+.vscode
+
+# other
+**/.assets
+**/.temporary
+**.DS_Store
+out
+.env*
+**/.venv
+.logfire

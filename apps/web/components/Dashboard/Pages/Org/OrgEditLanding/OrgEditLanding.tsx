@@ -1,0 +1,2035 @@
+'use client'
+import type { FC, ChangeEvent } from 'react'
+import { useState, useEffect, createElement } from 'react'
+import type {
+  LandingObject,
+  LandingSection,
+  LandingHeroSection,
+  LandingTextAndImageSection,
+  LandingLogos,
+  LandingPeople,
+  LandingBackground,
+  LandingButton,
+  LandingImage,
+  LandingFeaturedCourses,
+} from './landing_types'
+import {
+  Plus,
+  Trash2,
+  GripVertical,
+  LayoutTemplate,
+  ImageIcon,
+  Users,
+  Award,
+  Edit,
+  Link,
+  Upload,
+  Save,
+  BookOpen,
+  TextIcon,
+} from 'lucide-react'
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import { Label } from '@components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select'
+import { Button } from '@components/ui/button'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import {
+  updateOrgLanding,
+  uploadLandingContent,
+} from '@services/organizations/orgs'
+import { getOrgLandingMediaDirectory } from '@services/media/media'
+import { getOrgCourses } from '@services/courses/courses'
+import toast from 'react-hot-toast'
+import useSWR from 'swr'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui/tabs'
+import { useTranslations } from 'next-intl'
+import { ButtonIcon } from '@radix-ui/react-icons'
+
+const SECTION_TYPES = {
+  hero: {
+    icon: LayoutTemplate,
+    label: 'Hero',
+    description: 'Add a hero section with heading and call-to-action',
+  },
+  'text-and-image': {
+    icon: ImageIcon,
+    label: 'Text & Image',
+    description: 'Add a section with text and an image',
+  },
+  logos: {
+    icon: Award,
+    label: 'Logos',
+    description: 'Add a section to showcase logos',
+  },
+  people: {
+    icon: Users,
+    label: 'People',
+    description: 'Add a section to highlight team members',
+  },
+  'featured-courses': {
+    icon: BookOpen,
+    label: 'Courses',
+    description: 'Add a section to showcase selected courses',
+  },
+} as const
+
+const PREDEFINED_GRADIENTS = {
+  sunrise: {
+    colors: ['#fef9f3', '#ffecd2'] as Array<string>,
+    direction: '45deg',
+  },
+  'mint-breeze': {
+    colors: ['#f0fff4', '#dcfce7'] as Array<string>,
+    direction: '45deg',
+  },
+  'deep-ocean': {
+    colors: ['#0f172a', '#1e3a8a'] as Array<string>,
+    direction: '135deg',
+  },
+  'sunset-blaze': {
+    colors: ['#7f1d1d', '#ea580c'] as Array<string>,
+    direction: '45deg',
+  },
+  'midnight-purple': {
+    colors: ['#581c87', '#7e22ce'] as Array<string>,
+    direction: '90deg',
+  },
+  'forest-depths': {
+    colors: ['#064e3b', '#059669'] as Array<string>,
+    direction: '225deg',
+  },
+  'berry-fusion': {
+    colors: ['#831843', '#be185d'] as Array<string>,
+    direction: '135deg',
+  },
+  'cosmic-night': {
+    colors: ['#1e1b4b', '#4338ca'] as Array<string>,
+    direction: '45deg',
+  },
+  'autumn-fire': {
+    colors: ['#7c2d12', '#c2410c'] as Array<string>,
+    direction: '90deg',
+  },
+  'emerald-depths': {
+    colors: ['#064e3b', '#10b981'] as Array<string>,
+    direction: '135deg',
+  },
+  'royal-navy': {
+    colors: ['#1e3a8a', '#3b82f6'] as Array<string>,
+    direction: '225deg',
+  },
+  volcanic: {
+    colors: ['#991b1b', '#f97316'] as Array<string>,
+    direction: '315deg',
+  },
+  'arctic-night': {
+    colors: ['#0f172a', '#475569'] as Array<string>,
+    direction: '90deg',
+  },
+  'grape-punch': {
+    colors: ['#6b21a8', '#d946ef'] as Array<string>,
+    direction: '135deg',
+  },
+  'marine-blue': {
+    colors: ['#0c4a6e', '#0ea5e9'] as Array<string>,
+    direction: '45deg',
+  },
+} as const
+
+const _GRADIENT_DIRECTIONS = {
+  '45deg': '↗️ Top Right',
+  '90deg': '⬆️ Top',
+  '135deg': '↖️ Top Left',
+  '180deg': '⬅️ Left',
+  '225deg': '↙️ Bottom Left',
+  '270deg': '⬇️ Bottom',
+  '315deg': '↘️ Bottom Right',
+  '0deg': '➡️ Right',
+} as const
+
+// Map section type keys to translation keys
+const SECTION_TYPE_KEYS: { [key in LandingSection['type']]: string } = {
+  hero: 'hero',
+  'text-and-image': 'textAndImage',
+  logos: 'logos',
+  people: 'people',
+  'featured-courses': 'featuredCourses',
+}
+
+// Function to get translated section types
+const getSectionTypes = (t: Function) => ({
+  hero: {
+    icon: LayoutTemplate,
+    label: t('SectionTypes.hero.label'),
+    description: t('SectionTypes.hero.description'),
+  },
+  'text-and-image': {
+    icon: ImageIcon,
+    label: t('SectionTypes.textAndImage.label'),
+    description: t('SectionTypes.textAndImage.description'),
+  },
+  logos: {
+    icon: Award,
+    label: t('SectionTypes.logos.label'),
+    description: t('SectionTypes.logos.description'),
+  },
+  people: {
+    icon: Users,
+    label: t('SectionTypes.people.label'),
+    description: t('SectionTypes.people.description'),
+  },
+  'featured-courses': {
+    icon: BookOpen,
+    label: t('SectionTypes.featuredCourses.label'),
+    description: t('SectionTypes.featuredCourses.description'),
+  },
+})
+
+// Map gradient direction keys to translation keys
+const GRADIENT_DIRECTION_KEYS: { [key: string]: string } = {
+  '45deg': 'topRight',
+  '90deg': 'top',
+  '135deg': 'topLeft',
+  '180deg': 'left',
+  '225deg': 'bottomLeft',
+  '270deg': 'bottom',
+  '315deg': 'bottomRight',
+  '0deg': 'right',
+}
+
+// Function to get translated gradient directions
+const getGradientDirections = (t: Function) => {
+  return Object.entries(GRADIENT_DIRECTION_KEYS).reduce(
+    (acc, [key, tKey]) => {
+      acc[key] = t(`GradientDirections.${tKey}`)
+      return acc
+    },
+    {} as { [key: string]: string }
+  )
+}
+
+// Function to get translated gradient preset names
+const getGradientPresetName = (t: Function, name: string) => {
+  // Assumes keys like GradientPresets.sunrise, GradientPresets.mintBreeze etc.
+  return t(`GradientPresets.${name.replace('-', '_')}`)
+}
+
+// Function to get translated section display name
+const getSectionDisplayName = (t: Function, section: LandingSection) => {
+  const sectionTypeKey = SECTION_TYPE_KEYS[section.type]
+  return t(`SectionTypes.${sectionTypeKey}.label`)
+}
+
+const OrgEditLanding = () => {
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+  const [isLandingEnabled, setIsLandingEnabled] = useState(false)
+  const tNotify = useTranslations('DashPage.Notifications')
+  const t = useTranslations('DashPage.OrgSettings.Landing')
+  const [landingData, setLandingData] = useState<LandingObject>({
+    sections: [],
+    enabled: false,
+  })
+  const [selectedSection, setSelectedSection] = useState<number | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Initialize landing data from org config
+  useEffect(() => {
+    if (org?.config?.config?.landing) {
+      const landingConfig = org.config.config.landing
+      setLandingData({
+        sections: landingConfig.sections || [],
+        enabled: landingConfig.enabled,
+      })
+      setIsLandingEnabled(landingConfig.enabled)
+    }
+  }, [org])
+
+  const addSection = (type: string) => {
+    const newSection: LandingSection = createEmptySection(
+      t,
+      type as keyof typeof SECTION_TYPE_KEYS
+    )
+    setLandingData((prev: LandingObject) => ({
+      ...prev,
+      sections: [...prev.sections, newSection],
+    }))
+  }
+
+  const createEmptySection = (
+    t: Function,
+    type: keyof typeof SECTION_TYPE_KEYS
+  ): LandingSection => {
+    switch (type) {
+      case 'hero':
+        return {
+          type: 'hero',
+          title: t('EmptySections.hero.title'),
+          background: {
+            type: 'solid',
+            color: '#ffffff',
+          },
+          heading: {
+            text: t('EmptySections.hero.heading'),
+            color: '#000000',
+            size: 'large',
+          },
+          subheading: {
+            text: t('EmptySections.hero.subheading'),
+            color: '#666666',
+            size: 'medium',
+          },
+          buttons: [],
+          illustration: undefined,
+          contentAlign: 'center',
+        }
+      case 'text-and-image':
+        return {
+          type: 'text-and-image',
+          title: t('EmptySections.textAndImage.title'),
+          text: t('EmptySections.textAndImage.text'),
+          flow: 'left',
+          image: {
+            url: '',
+            alt: '',
+          },
+          buttons: [],
+        }
+      case 'logos':
+        return {
+          type: 'logos',
+          title: t('EmptySections.logos.title'),
+          logos: [],
+        }
+      case 'people':
+        return {
+          type: 'people',
+          title: t('EmptySections.people.title'),
+          people: [],
+        }
+      case 'featured-courses':
+        return {
+          type: 'featured-courses',
+          title: t('EmptySections.featuredCourses.title'),
+          courses: [],
+        }
+      default:
+        throw new Error(t('Errors.invalidSectionType'))
+    }
+  }
+
+  const updateSection = (index: number, updatedSection: LandingSection) => {
+    const newSections = [...landingData.sections]
+    newSections[index] = updatedSection
+    setLandingData((prev: LandingObject) => ({
+      ...prev,
+      sections: newSections,
+    }))
+  }
+
+  const deleteSection = (index: number) => {
+    setLandingData((prev: LandingObject) => ({
+      ...prev,
+      sections: prev.sections.filter(
+        (_: LandingSection, i: number) => i !== index
+      ),
+    }))
+    setSelectedSection(null)
+  }
+
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return
+
+    const items = Array.from(landingData.sections)
+    const [reorderedItem] = items.splice(result.source.index, 1)
+    items.splice(result.destination.index, 0, reorderedItem)
+
+    setLandingData((prev: LandingObject) => ({
+      ...prev,
+      sections: items,
+    }))
+    setSelectedSection(result.destination.index)
+  }
+
+  const handleSave = async () => {
+    if (!org?.id) {
+      toast.error(tNotify('orgIdNotFound'))
+      return
+    }
+
+    setIsSaving(true)
+    const loadingToast = toast.loading(tNotify('savingLandingPage'))
+    try {
+      const res = await updateOrgLanding(
+        org.id,
+        {
+          sections: landingData.sections,
+          enabled: isLandingEnabled,
+        },
+        access_token
+      )
+
+      if (res.status === 200) {
+        toast.success(tNotify('landingPageSavedSuccess'), { id: loadingToast })
+      } else {
+        toast.error(tNotify('landingPageSaveError'), { id: loadingToast })
+      }
+    } catch (error) {
+      toast.error(tNotify('landingPageSaveError'), { id: loadingToast })
+      console.error('Error saving landing page:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+      <div className="space-y-6 p-6">
+        {/* Enable/Disable Landing Page */}
+        <div className="flex items-center justify-between border-b pb-4">
+          <div>
+            <h2 className="flex items-center text-xl font-semibold">
+              {t('title')}{' '}
+              <div className="ml-2 rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
+                {t('betaBadge')}
+              </div>
+            </h2>
+            <p className="text-gray-600">{t('description')}</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                checked={!!isLandingEnabled}
+                onChange={() => setIsLandingEnabled(!isLandingEnabled)}
+                className="peer sr-only"
+              />
+              <div className="peer-focus:outline-hidden peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300" />
+            </label>
+            <Button
+              variant="default"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-black hover:bg-black/90"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {isSaving ? t('savingButton') : t('saveButton')}
+            </Button>
+          </div>
+        </div>
+
+        {isLandingEnabled && (
+          <>
+            {/* Section List */}
+            <div className="grid grid-cols-4 gap-6">
+              {/* Sections Panel */}
+              <div className="col-span-1 border-r pr-4">
+                <h3 className="mb-4 font-medium">{t('SectionsPanel.title')}</h3>
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable droppableId="sections">
+                    {(provided) => (
+                      <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className="space-y-2"
+                      >
+                        {landingData.sections.map(
+                          (section: LandingSection, index: number) => (
+                            <Draggable
+                              key={`section-${index}`}
+                              draggableId={`section-${index}`}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  onClick={() => setSelectedSection(index)}
+                                  className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
+                                    selectedSection === index
+                                      ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
+                                      : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
+                                  } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
+                                >
+                                  <div className="group flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className={`rounded-md p-1.5 transition-colors duration-200 ${
+                                          selectedSection === index
+                                            ? 'bg-blue-100/50 text-blue-500'
+                                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                                        }`}
+                                      >
+                                        <GripVertical size={16} />
+                                      </div>
+                                      <div
+                                        className={`rounded-md p-1.5 ${
+                                          selectedSection === index
+                                            ? 'bg-blue-100/50 text-blue-600'
+                                            : 'bg-gray-100/50 text-gray-600'
+                                        }`}
+                                      >
+                                        {createElement(
+                                          SECTION_TYPES[
+                                            section.type as keyof typeof SECTION_TYPES
+                                          ].icon,
+                                          {
+                                            size: 16,
+                                          }
+                                        )}
+                                      </div>
+                                      <span
+                                        className={`truncate text-sm font-medium capitalize ${
+                                          selectedSection === index
+                                            ? 'text-blue-700'
+                                            : 'text-gray-700'
+                                        }`}
+                                      >
+                                        {getSectionDisplayName(t, section)}
+                                      </span>
+                                    </div>
+                                    <div className="flex space-x-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedSection(index)
+                                        }}
+                                        className={`rounded-md p-1.5 transition-colors duration-200 ${
+                                          selectedSection === index
+                                            ? 'text-blue-500 hover:bg-blue-100'
+                                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                                        }`}
+                                      >
+                                        <Edit size={14} />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          deleteSection(index)
+                                        }}
+                                        className="rounded-md p-1.5 text-red-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          )
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+
+                <div className="pt-4">
+                  <Select
+                    onValueChange={(value: string) => {
+                      if (value) {
+                        addSection(value)
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full border-0 bg-black p-0">
+                      <div className="hover:bg-primary/90 inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-black text-sm font-medium text-white outline-none transition-all">
+                        <Plus size="8" color="white" />
+                        {t('SectionsPanel.addSectionButton')}
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(getSectionTypes(t)).map(
+                        ([type, { icon: Icon, label, description }]) => (
+                          <SelectItem key={type} value={type}>
+                            <div className="flex items-center space-x-3 py-1">
+                              <div className="rounded-md bg-gray-50 p-1.5">
+                                <Icon size={16} className="text-gray-600" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-gray-700">
+                                  {label}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {description}
+                                </div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Editor Panel */}
+              <div className="col-span-3">
+                {selectedSection !== null ? (
+                  <SectionEditor
+                    t={t}
+                    section={landingData.sections[selectedSection]}
+                    onChange={(updatedSection) =>
+                      updateSection(selectedSection, updatedSection)
+                    }
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-gray-500">
+                    {t('EditorPanel.emptyState')}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+interface SectionEditorProps {
+  t: Function
+  section: LandingSection
+  onChange: (section: LandingSection) => void
+}
+
+const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
+  switch (section.type) {
+    case 'hero':
+      return <HeroSectionEditor t={t} section={section} onChange={onChange} />
+    case 'text-and-image':
+      return (
+        <TextAndImageSectionEditor
+          t={t}
+          section={section}
+          onChange={onChange}
+        />
+      )
+    case 'logos':
+      return <LogosSectionEditor t={t} section={section} onChange={onChange} />
+    case 'people':
+      return <PeopleSectionEditor t={t} section={section} onChange={onChange} />
+    case 'featured-courses':
+      return (
+        <FeaturedCoursesEditor t={t} section={section} onChange={onChange} />
+      )
+    default:
+      return <div>{t('Errors.unknownSectionType')}</div>
+  }
+}
+
+const HeroSectionEditor: FC<{
+  t: Function
+  section: LandingHeroSection
+  onChange: (section: LandingHeroSection) => void
+}> = ({ t, section, onChange }) => {
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        onChange({
+          ...section,
+          background: {
+            type: 'image',
+            image: reader.result as string,
+          },
+        })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  return (
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+      <div className="flex items-center space-x-1">
+        <LayoutTemplate className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
+          {t('SectionTypes.hero.label')} {t('Editor.titleSuffix')}
+        </h3>
+      </div>
+
+      <div className="space-y-4">
+        {/* Title */}
+        <div>
+          <Label htmlFor="title">{t('Editor.sectionTitleLabel')}</Label>
+          <Input
+            id="title"
+            value={section.title}
+            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            placeholder={t('Editor.sectionTitlePlaceholder')}
+          />
+        </div>
+
+        <Tabs defaultValue="content" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 rounded-lg bg-gray-100 p-1">
+            <TabsTrigger
+              value="content"
+              className="flex items-center space-x-1"
+            >
+              <TextIcon className="h-4 w-4" />
+              <span>{t('HeroEditor.Tabs.content')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="background" className="flex items-center">
+              <LayoutTemplate className="h-4 w-4" />
+              <span>{t('HeroEditor.Tabs.background')}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="buttons"
+              className="flex items-center space-x-1"
+            >
+              <ButtonIcon className="h-4 w-4" />
+              <span>{t('HeroEditor.Tabs.buttons')}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="illustration"
+              className="flex items-center space-x-1"
+            >
+              <ImageIcon className="h-4 w-4" />
+              <span>{t('HeroEditor.Tabs.illustration')}</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="content" className="mt-4 space-y-4">
+            {/* Heading */}
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="heading">
+                  {t('HeroEditor.Content.headingLabel')}
+                </Label>
+                <Input
+                  id="heading"
+                  value={section.heading.text}
+                  onChange={(e) =>
+                    onChange({
+                      ...section,
+                      heading: { ...section.heading, text: e.target.value },
+                    })
+                  }
+                  placeholder={t('HeroEditor.Content.headingPlaceholder')}
+                />
+              </div>
+              <div>
+                <Label htmlFor="headingColor">
+                  {t('HeroEditor.Content.headingColorLabel')}
+                </Label>
+                <div className="flex items-center space-x-1">
+                  <Input
+                    id="headingColor"
+                    type="color"
+                    value={section.heading.color}
+                    onChange={(e) =>
+                      onChange({
+                        ...section,
+                        heading: { ...section.heading, color: e.target.value },
+                      })
+                    }
+                    className="h-10 w-20 p-1"
+                  />
+                  <Input
+                    value={section.heading.color}
+                    onChange={(e) =>
+                      onChange({
+                        ...section,
+                        heading: { ...section.heading, color: e.target.value },
+                      })
+                    }
+                    placeholder="#000000"
+                    className="font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Subheading */}
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="subheading">
+                  {t('HeroEditor.Content.subheadingLabel')}
+                </Label>
+                <Input
+                  id="subheading"
+                  value={section.subheading.text}
+                  onChange={(e) =>
+                    onChange({
+                      ...section,
+                      subheading: {
+                        ...section.subheading,
+                        text: e.target.value,
+                      },
+                    })
+                  }
+                  placeholder={t('HeroEditor.Content.subheadingPlaceholder')}
+                />
+              </div>
+              <div>
+                <Label htmlFor="subheadingColor">
+                  {t('HeroEditor.Content.subheadingColorLabel')}
+                </Label>
+                <div className="flex items-center space-x-1">
+                  <Input
+                    id="subheadingColor"
+                    type="color"
+                    value={section.subheading.color}
+                    onChange={(e) =>
+                      onChange({
+                        ...section,
+                        subheading: {
+                          ...section.subheading,
+                          color: e.target.value,
+                        },
+                      })
+                    }
+                    className="h-10 w-20 p-1"
+                  />
+                  <Input
+                    value={section.subheading.color}
+                    onChange={(e) =>
+                      onChange({
+                        ...section,
+                        subheading: {
+                          ...section.subheading,
+                          color: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="#666666"
+                    className="font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="background" className="mt-4 space-y-4">
+            <div>
+              <Label htmlFor="background">
+                {t('HeroEditor.Background.typeLabel')}
+              </Label>
+              <Select
+                value={section.background.type}
+                onValueChange={(value) => {
+                  onChange({
+                    ...section,
+                    background: {
+                      type: value as LandingBackground['type'],
+                      color: value === 'solid' ? '#ffffff' : undefined,
+                      colors:
+                        value === 'gradient'
+                          ? PREDEFINED_GRADIENTS.sunrise.colors
+                          : undefined,
+                      image: value === 'image' ? '' : undefined,
+                    },
+                  })
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={t('HeroEditor.Background.typePlaceholder')}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="solid">
+                    {t('HeroEditor.Background.solid')}
+                  </SelectItem>
+                  <SelectItem value="gradient">
+                    {t('HeroEditor.Background.gradient')}
+                  </SelectItem>
+                  <SelectItem value="image">
+                    {t('HeroEditor.Background.image')}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {section.background.type === 'solid' && (
+              <div>
+                <Label htmlFor="backgroundColor">
+                  {t('HeroEditor.Background.colorLabel')}
+                </Label>
+                <div className="flex items-center space-x-1">
+                  <Input
+                    id="backgroundColor"
+                    type="color"
+                    value={section.background.color || '#ffffff'}
+                    onChange={(e) =>
+                      onChange({
+                        ...section,
+                        background: {
+                          ...section.background,
+                          color: e.target.value,
+                        },
+                      })
+                    }
+                    className="h-10 w-20 p-1"
+                  />
+                  <Input
+                    value={section.background.color || '#ffffff'}
+                    onChange={(e) =>
+                      onChange({
+                        ...section,
+                        background: {
+                          ...section.background,
+                          color: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="#ffffff"
+                    className="font-mono"
+                  />
+                </div>
+              </div>
+            )}
+
+            {section.background.type === 'gradient' && (
+              <div className="space-y-4">
+                <div>
+                  <Label>{t('HeroEditor.Background.gradientTypeLabel')}</Label>
+                  <Select
+                    value={
+                      Object.values(PREDEFINED_GRADIENTS).some(
+                        (preset) =>
+                          preset.colors[0] === section.background.colors?.[0] &&
+                          preset.colors[1] === section.background.colors?.[1]
+                      )
+                        ? 'preset'
+                        : 'custom'
+                    }
+                    onValueChange={(value) => {
+                      if (value === 'custom') {
+                        onChange({
+                          ...section,
+                          background: {
+                            type: 'gradient',
+                            colors: ['#ffffff', '#f0f0f0'],
+                            direction: section.background.direction || '45deg',
+                          },
+                        })
+                      } else {
+                        onChange({
+                          ...section,
+                          background: {
+                            type: 'gradient',
+                            colors: PREDEFINED_GRADIENTS.sunrise.colors,
+                            direction: PREDEFINED_GRADIENTS.sunrise.direction,
+                          },
+                        })
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t(
+                          'HeroEditor.Background.gradientTypePlaceholder'
+                        )}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="preset">
+                        {t('HeroEditor.Background.presetGradients')}
+                      </SelectItem>
+                      <SelectItem value="custom">
+                        {t('HeroEditor.Background.customGradient')}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {!Object.values(PREDEFINED_GRADIENTS).some(
+                  (preset) =>
+                    preset.colors[0] === section.background.colors?.[0] &&
+                    preset.colors[1] === section.background.colors?.[1]
+                ) ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label>
+                        {t('HeroEditor.Background.startColorLabel')}
+                      </Label>
+                      <div className="flex items-center space-x-1">
+                        <Input
+                          type="color"
+                          value={section.background.colors?.[0] || '#ffffff'}
+                          onChange={(e) =>
+                            onChange({
+                              ...section,
+                              background: {
+                                ...section.background,
+                                colors: [
+                                  e.target.value,
+                                  section.background.colors?.[1] || '#f0f0f0',
+                                ],
+                              },
+                            })
+                          }
+                          className="h-10 w-20 p-1"
+                        />
+                        <Input
+                          value={section.background.colors?.[0] || '#ffffff'}
+                          onChange={(e) =>
+                            onChange({
+                              ...section,
+                              background: {
+                                ...section.background,
+                                colors: [
+                                  e.target.value,
+                                  section.background.colors?.[1] || '#f0f0f0',
+                                ],
+                              },
+                            })
+                          }
+                          placeholder="#ffffff"
+                          className="font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>{t('HeroEditor.Background.endColorLabel')}</Label>
+                      <div className="flex items-center space-x-1">
+                        <Input
+                          type="color"
+                          value={section.background.colors?.[1] || '#f0f0f0'}
+                          onChange={(e) =>
+                            onChange({
+                              ...section,
+                              background: {
+                                ...section.background,
+                                colors: [
+                                  section.background.colors?.[0] || '#ffffff',
+                                  e.target.value,
+                                ],
+                              },
+                            })
+                          }
+                          className="h-10 w-20 p-1"
+                        />
+                        <Input
+                          value={section.background.colors?.[1] || '#f0f0f0'}
+                          onChange={(e) =>
+                            onChange({
+                              ...section,
+                              background: {
+                                ...section.background,
+                                colors: [
+                                  section.background.colors?.[0] || '#ffffff',
+                                  e.target.value,
+                                ],
+                              },
+                            })
+                          }
+                          placeholder="#f0f0f0"
+                          className="font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <Label>
+                      {t('HeroEditor.Background.gradientPresetLabel')}
+                    </Label>
+                    <Select
+                      value={
+                        Object.entries(PREDEFINED_GRADIENTS).find(
+                          ([_, gradient]) =>
+                            gradient.colors[0] ===
+                              section.background.colors?.[0] &&
+                            gradient.colors[1] ===
+                              section.background.colors?.[1]
+                        )?.[0] || 'sunrise'
+                      }
+                      onValueChange={(value) =>
+                        onChange({
+                          ...section,
+                          background: {
+                            ...section.background,
+                            colors:
+                              PREDEFINED_GRADIENTS[
+                                value as keyof typeof PREDEFINED_GRADIENTS
+                              ].colors,
+                            direction:
+                              PREDEFINED_GRADIENTS[
+                                value as keyof typeof PREDEFINED_GRADIENTS
+                              ].direction,
+                          },
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={t(
+                            'HeroEditor.Background.gradientPresetPlaceholder'
+                          )}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(PREDEFINED_GRADIENTS).map(([name]) => (
+                          <SelectItem key={name} value={name}>
+                            <div className="flex items-center space-x-1">
+                              <div
+                                className="h-8 w-8 rounded-md"
+                                style={{
+                                  background: `linear-gradient(${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].direction}, ${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].colors.join(', ')})`,
+                                }}
+                              />
+                              <span className="capitalize">
+                                {getGradientPresetName(t, name)}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <div>
+                  <Label>
+                    {t('HeroEditor.Background.gradientDirectionLabel')}
+                  </Label>
+                  <Select
+                    value={section.background.direction || '45deg'}
+                    onValueChange={(value) =>
+                      onChange({
+                        ...section,
+                        background: { ...section.background, direction: value },
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t(
+                          'HeroEditor.Background.gradientDirectionPlaceholder'
+                        )}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(getGradientDirections(t)).map(
+                        ([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="mt-2">
+                  <div
+                    className="h-20 w-full rounded-lg"
+                    style={{
+                      background: `linear-gradient(${section.background.direction}, ${section.background.colors?.join(', ')})`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {section.background.type === 'image' && (
+              <div className="space-y-4">
+                <div>
+                  <Label>{t('HeroEditor.Background.imageLabel')}</Label>
+                  <div className="mt-2 flex items-center space-x-4">
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        document.getElementById('imageUpload')?.click()
+                      }
+                      className="w-full"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      {t('HeroEditor.Background.uploadImageButton')}
+                    </Button>
+                    <input
+                      id="imageUpload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </div>
+                  {section.background.image && (
+                    <div className="mt-4">
+                      <img
+                        src={section.background.image}
+                        alt={t('HeroEditor.Background.imagePreviewAlt')}
+                        className="max-h-40 rounded-lg object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="buttons" className="mt-4 space-y-4">
+            <div className="space-y-3">
+              {section.buttons.map((button: LandingButton, index: number) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-[1fr_1fr_auto] gap-2 rounded-lg border p-4"
+                >
+                  <div className="space-y-2">
+                    <Label>{t('HeroEditor.Buttons.textAndColorsLabel')}</Label>
+                    <Input
+                      value={button.text}
+                      onChange={(e) => {
+                        const newButtons = [...section.buttons]
+                        newButtons[index] = { ...button, text: e.target.value }
+                        onChange({ ...section, buttons: newButtons })
+                      }}
+                      placeholder={t('HeroEditor.Buttons.textPlaceholder')}
+                    />
+                    <div className="flex items-center space-x-1">
+                      <div className="space-y-1">
+                        <Label className="text-xs">
+                          {t('HeroEditor.Buttons.textColorLabel')}
+                        </Label>
+                        <Input
+                          type="color"
+                          value={button.color}
+                          onChange={(e) => {
+                            const newButtons = [...section.buttons]
+                            newButtons[index] = {
+                              ...button,
+                              color: e.target.value,
+                            }
+                            onChange({ ...section, buttons: newButtons })
+                          }}
+                          className="h-8 w-full p-1"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">
+                          {t('HeroEditor.Buttons.bgColorLabel')}
+                        </Label>
+                        <Input
+                          type="color"
+                          value={button.background}
+                          onChange={(e) => {
+                            const newButtons = [...section.buttons]
+                            newButtons[index] = {
+                              ...button,
+                              background: e.target.value,
+                            }
+                            onChange({ ...section, buttons: newButtons })
+                          }}
+                          className="h-8 w-full p-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('HeroEditor.Buttons.linkLabel')}</Label>
+                    <div className="flex items-center space-x-1">
+                      <Link className="h-4 w-4 text-gray-500" />
+                      <Input
+                        value={button.link}
+                        onChange={(e) => {
+                          const newButtons = [...section.buttons]
+                          newButtons[index] = {
+                            ...button,
+                            link: e.target.value,
+                          }
+                          onChange({ ...section, buttons: newButtons })
+                        }}
+                        placeholder={t('HeroEditor.Buttons.linkPlaceholder')}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const newButtons = section.buttons.filter(
+                        (_: LandingButton, i: number) => i !== index
+                      )
+                      onChange({ ...section, buttons: newButtons })
+                    }}
+                    className="mt-8 self-start text-red-500 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Trash2 className="mr-1 h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {section.buttons.length < 2 && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const newButton: LandingButton = {
+                      text: t('HeroEditor.Buttons.newButtonDefaultText'),
+                      link: '#',
+                      color: '#ffffff',
+                      background: '#000000',
+                    }
+                    onChange({
+                      ...section,
+                      buttons: [...section.buttons, newButton],
+                    })
+                  }}
+                  className="w-full"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t('HeroEditor.Buttons.addButton')}
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="illustration" className="mt-4 space-y-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>{t('HeroEditor.Illustration.imageLabel')}</Label>
+                <Input
+                  value={section.illustration?.image.url || ''}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      onChange({
+                        ...section,
+                        illustration: {
+                          image: {
+                            url: e.target.value,
+                            alt: section.illustration?.image.alt || '',
+                          },
+                          position: 'left',
+                          verticalAlign: 'center',
+                          size: 'medium',
+                        },
+                      })
+                    }
+                  }}
+                  placeholder={t('HeroEditor.Illustration.imageUrlPlaceholder')}
+                />
+                <Input
+                  value={section.illustration?.image.alt || ''}
+                  onChange={(e) => {
+                    if (section.illustration?.image.url) {
+                      onChange({
+                        ...section,
+                        illustration: {
+                          ...section.illustration,
+                          image: {
+                            ...section.illustration.image,
+                            alt: e.target.value,
+                          },
+                        },
+                      })
+                    }
+                  }}
+                  placeholder={t('HeroEditor.Illustration.imageAltPlaceholder')}
+                />
+                <ImageUploader
+                  id="hero-illustration"
+                  onImageUploaded={(url) =>
+                    onChange({
+                      ...section,
+                      illustration: {
+                        image: {
+                          url,
+                          alt: section.illustration?.image.alt || '',
+                        },
+                        position: 'left',
+                        verticalAlign: 'center',
+                        size: 'medium',
+                      },
+                    })
+                  }
+                  buttonText={t('HeroEditor.Illustration.uploadButton')}
+                  t={t}
+                />
+                {section.illustration?.image.url && (
+                  <img
+                    src={section.illustration?.image.url}
+                    alt={t('HeroEditor.Illustration.imagePreviewAlt')}
+                    className="h-12 object-contain"
+                  />
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('HeroEditor.Illustration.positionLabel')}</Label>
+                  <Select
+                    value={section.illustration?.position || 'left'}
+                    onValueChange={(value: 'left' | 'right') =>
+                      onChange({
+                        ...section,
+                        illustration: {
+                          ...section.illustration,
+                          position: value,
+                          image: section.illustration?.image || {
+                            url: '',
+                            alt: '',
+                          },
+                          size: section.illustration?.size || 'medium',
+                          verticalAlign:
+                            section.illustration?.verticalAlign || 'center',
+                        },
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t(
+                          'HeroEditor.Illustration.positionPlaceholder'
+                        )}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="left">
+                        {t('HeroEditor.Illustration.positionLeft')}
+                      </SelectItem>
+                      <SelectItem value="right">
+                        {t('HeroEditor.Illustration.positionRight')}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('HeroEditor.Illustration.sizeLabel')}</Label>
+                  <Select
+                    value={section.illustration?.size || 'medium'}
+                    onValueChange={(value: 'small' | 'medium' | 'large') =>
+                      onChange({
+                        ...section,
+                        illustration: {
+                          ...section.illustration,
+                          size: value,
+                          image: section.illustration?.image || {
+                            url: '',
+                            alt: '',
+                          },
+                          position: (section.illustration?.position ||
+                            'left') as 'left' | 'right',
+                          verticalAlign:
+                            section.illustration?.verticalAlign || 'center',
+                        },
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t(
+                          'HeroEditor.Illustration.sizePlaceholder'
+                        )}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">
+                        {t('HeroEditor.Illustration.sizeSmall')}
+                      </SelectItem>
+                      <SelectItem value="medium">
+                        {t('HeroEditor.Illustration.sizeMedium')}
+                      </SelectItem>
+                      <SelectItem value="large">
+                        {t('HeroEditor.Illustration.sizeLarge')}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {section.illustration?.image.url && (
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    onChange({
+                      ...section,
+                      illustration: undefined,
+                    })
+                  }
+                  className="w-full text-red-500 hover:bg-red-50 hover:text-red-600"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  )
+}
+
+interface ImageUploaderProps {
+  t: Function
+  onImageUploaded: (imageUrl: string) => void
+  className?: string
+  buttonText?: string
+  id: string
+}
+
+const ImageUploader: FC<ImageUploaderProps> = ({
+  t,
+  onImageUploaded,
+  className,
+  buttonText,
+  id,
+}) => {
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+  const [isUploading, setIsUploading] = useState(false)
+  const tNotify = useTranslations('DashPage.Notifications')
+  const inputId = `imageUpload-${id}`
+
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    const loadingToast = toast.loading(tNotify('uploadingImage'))
+    try {
+      const response = await uploadLandingContent(org.id, file, access_token)
+      if (response.status === 200) {
+        const imageUrl = getOrgLandingMediaDirectory(
+          org.org_uuid,
+          response.data.filename
+        )
+        onImageUploaded(imageUrl)
+        toast.success(tNotify('imageUploadSuccess'), { id: loadingToast })
+      } else {
+        toast.error(tNotify('imageUploadFailed'), { id: loadingToast })
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      toast.error(tNotify('imageUploadFailed'), { id: loadingToast })
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return (
+    <div className={className}>
+      <Button
+        variant="outline"
+        onClick={() => document.getElementById(inputId)?.click()}
+        disabled={isUploading}
+        className="w-full"
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {isUploading ? t('ImageUploader.uploading') : buttonText}
+      </Button>
+      <input
+        id={inputId}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+    </div>
+  )
+}
+
+const TextAndImageSectionEditor: FC<{
+  t: Function
+  section: LandingTextAndImageSection
+  onChange: (section: LandingTextAndImageSection) => void
+}> = ({ t, section, onChange }) => {
+  return (
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+      <div className="flex items-center space-x-1">
+        <ImageIcon className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
+          {t('SectionTypes.textAndImage.label')} {t('Editor.titleSuffix')}
+        </h3>
+      </div>
+
+      <div className="space-y-4">
+        {/* Title */}
+        <div>
+          <Label htmlFor="title">{t('Editor.sectionTitleLabel')}</Label>
+          <Input
+            id="title"
+            value={section.title}
+            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            placeholder={t('Editor.sectionTitlePlaceholder')}
+          />
+        </div>
+
+        {/* Text */}
+        <div>
+          <Label htmlFor="content">
+            {t('TextAndImageEditor.contentLabel')}
+          </Label>
+          <Textarea
+            id="content"
+            value={section.text}
+            onChange={(e) => onChange({ ...section, text: e.target.value })}
+            placeholder={t('TextAndImageEditor.contentPlaceholder')}
+            className="min-h-[100px]"
+          />
+        </div>
+
+        {/* Flow */}
+        <div>
+          <Label htmlFor="flow">
+            {t('TextAndImageEditor.imagePositionLabel')}
+          </Label>
+          <Select
+            value={section.flow}
+            onValueChange={(value) =>
+              onChange({ ...section, flow: value as 'left' | 'right' })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder={t('TextAndImageEditor.imagePositionPlaceholder')}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="left">
+                {t('TextAndImageEditor.positionLeft')}
+              </SelectItem>
+              <SelectItem value="right">
+                {t('TextAndImageEditor.positionRight')}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Image */}
+        <div>
+          <Label>{t('TextAndImageEditor.imageLabel')}</Label>
+          <div className="mt-2 grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Input
+                value={section.image.url}
+                onChange={(e) =>
+                  onChange({
+                    ...section,
+                    image: { ...section.image, url: e.target.value },
+                  })
+                }
+                placeholder={t('TextAndImageEditor.imageUrlPlaceholder')}
+              />
+              <ImageUploader
+                id="text-image-section"
+                onImageUploaded={(url) =>
+                  onChange({
+                    ...section,
+                    image: { ...section.image, url },
+                  })
+                }
+                buttonText={t('TextAndImageEditor.uploadImageButton')}
+                t={t}
+              />
+            </div>
+            <div>
+              <Input
+                value={section.image.alt}
+                onChange={(e) =>
+                  onChange({
+                    ...section,
+                    image: { ...section.image, alt: e.target.value },
+                  })
+                }
+                placeholder={t('TextAndImageEditor.imageAltPlaceholder')}
+              />
+            </div>
+          </div>
+          {section.image.url && (
+            <div className="mt-4">
+              <img
+                src={section.image.url}
+                alt={section.image.alt}
+                className="max-h-40 rounded-lg object-cover"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const LogosSectionEditor: FC<{
+  t: Function
+  section: LandingLogos
+  onChange: (section: LandingLogos) => void
+}> = ({ t, section, onChange }) => {
+  return (
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+      <div className="flex items-center space-x-1">
+        <Award className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
+          {t('SectionTypes.logos.label')} {t('Editor.titleSuffix')}
+        </h3>
+      </div>
+
+      <div>
+        <Label>{t('LogosEditor.logosLabel')}</Label>
+        <div className="mt-2 space-y-3">
+          {/* Title */}
+          <div>
+            <Label htmlFor="title">{t('Editor.sectionTitleLabel')}</Label>
+            <Input
+              id="title"
+              value={section.title}
+              onChange={(e) => onChange({ ...section, title: e.target.value })}
+              placeholder={t('Editor.sectionTitlePlaceholder')}
+            />
+          </div>
+
+          {section.logos.map((logo: LandingImage, index: number) => (
+            <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+              <div className="space-y-2">
+                <Input
+                  value={logo.url}
+                  onChange={(e) => {
+                    const newLogos = [...section.logos]
+                    newLogos[index] = { ...logo, url: e.target.value }
+                    onChange({ ...section, logos: newLogos })
+                  }}
+                  placeholder={t('LogosEditor.logoUrlPlaceholder')}
+                />
+                <ImageUploader
+                  id={`logo-${index}`}
+                  onImageUploaded={(url) => {
+                    const newLogos = [...section.logos]
+                    newLogos[index] = { ...section.logos[index], url }
+                    onChange({ ...section, logos: newLogos })
+                  }}
+                  buttonText={t('LogosEditor.uploadButton')}
+                  t={t}
+                />
+              </div>
+              <div className="space-y-2">
+                <Input
+                  value={logo.alt}
+                  onChange={(e) => {
+                    const newLogos = [...section.logos]
+                    newLogos[index] = { ...logo, alt: e.target.value }
+                    onChange({ ...section, logos: newLogos })
+                  }}
+                  placeholder={t('LogosEditor.logoAltPlaceholder')}
+                />
+                {logo.url && (
+                  <img
+                    src={logo.url}
+                    alt={logo.alt}
+                    className="h-10 object-contain"
+                  />
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const newLogos = section.logos.filter(
+                    (_: LandingImage, i: number) => i !== index
+                  )
+                  onChange({ ...section, logos: newLogos })
+                }}
+                className="text-red-500 hover:bg-red-50 hover:text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            onClick={() => {
+              const newLogo: LandingImage = {
+                url: '',
+                alt: '',
+              }
+              onChange({
+                ...section,
+                logos: [...section.logos, newLogo],
+              })
+            }}
+            className="w-full"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {t('LogosEditor.addButton')}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const PeopleSectionEditor: FC<{
+  t: Function
+  section: LandingPeople
+  onChange: (section: LandingPeople) => void
+}> = ({ t, section, onChange }) => {
+  return (
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+      <div className="flex items-center space-x-1">
+        <Users className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
+          {t('SectionTypes.people.label')} {t('Editor.titleSuffix')}
+        </h3>
+      </div>
+
+      <div className="space-y-4">
+        {/* Title */}
+        <div>
+          <Label htmlFor="title">{t('Editor.sectionTitleLabel')}</Label>
+          <Input
+            id="title"
+            value={section.title}
+            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            placeholder={t('Editor.sectionTitlePlaceholder')}
+          />
+        </div>
+
+        {/* People List */}
+        <div>
+          <Label>{t('PeopleEditor.peopleLabel')}</Label>
+          <div className="mt-2 space-y-4">
+            {section.people.map((person: any, index: number) => (
+              <div
+                key={index}
+                className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 rounded-lg border p-4"
+              >
+                <div className="space-y-2">
+                  <Label>{t('PeopleEditor.nameLabel')}</Label>
+                  <Input
+                    value={person.name}
+                    onChange={(e) => {
+                      const newPeople = [...section.people]
+                      newPeople[index] = { ...person, name: e.target.value }
+                      onChange({ ...section, people: newPeople })
+                    }}
+                    placeholder={t('PeopleEditor.namePlaceholder')}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('PeopleEditor.usernameLabel')}</Label>
+                  <Input
+                    value={person.username || ''}
+                    onChange={(e) => {
+                      const newPeople = [...section.people]
+                      newPeople[index] = {
+                        ...person,
+                        username: e.target.value,
+                      }
+                      onChange({ ...section, people: newPeople })
+                    }}
+                    placeholder={t('PeopleEditor.usernamePlaceholder')}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('PeopleEditor.imageLabel')}</Label>
+                  <div className="space-y-2">
+                    <Input
+                      value={person.image_url}
+                      onChange={(e) => {
+                        const newPeople = [...section.people]
+                        newPeople[index] = {
+                          ...person,
+                          image_url: e.target.value,
+                        }
+                        onChange({ ...section, people: newPeople })
+                      }}
+                      placeholder={t('PeopleEditor.imageUrlPlaceholder')}
+                    />
+                    <ImageUploader
+                      id={`person-${index}`}
+                      onImageUploaded={(url) => {
+                        const newPeople = [...section.people]
+                        newPeople[index] = {
+                          ...section.people[index],
+                          image_url: url,
+                        }
+                        onChange({ ...section, people: newPeople })
+                      }}
+                      buttonText={t('PeopleEditor.uploadAvatarButton')}
+                      t={t}
+                    />
+                    {person.image_url && (
+                      <img
+                        src={person.image_url}
+                        alt={person.name}
+                        className="h-12 w-12 rounded-full object-cover"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('PeopleEditor.descriptionLabel')}</Label>
+                  <Input
+                    value={person.description}
+                    onChange={(e) => {
+                      const newPeople = [...section.people]
+                      newPeople[index] = {
+                        ...person,
+                        description: e.target.value,
+                      }
+                      onChange({ ...section, people: newPeople })
+                    }}
+                    placeholder={t('PeopleEditor.descriptionPlaceholder')}
+                  />
+                </div>
+
+                <div className="flex items-end">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const newPeople = section.people.filter(
+                        (_: any, i: number) => i !== index
+                      )
+                      onChange({ ...section, people: newPeople })
+                    }}
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Trash2 className="mr-1 h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newPerson = {
+                  user_uuid: '',
+                  name: '',
+                  description: '',
+                  image_url: '',
+                  username: '',
+                }
+                onChange({
+                  ...section,
+                  people: [...section.people, newPerson],
+                })
+              }}
+              className="w-full"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {t('PeopleEditor.addButton')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const FeaturedCoursesEditor: FC<{
+  t: Function
+  section: LandingFeaturedCourses
+  onChange: (section: LandingFeaturedCourses) => void
+}> = ({ t, section, onChange }) => {
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+
+  const { data: courses } = useSWR(
+    org?.slug ? [org.slug, access_token] : null,
+    ([orgSlug, token]) => getOrgCourses(orgSlug, null, token)
+  )
+
+  return (
+    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+      <div className="flex items-center space-x-1">
+        <BookOpen className="h-5 w-5 text-gray-500" />
+        <h3 className="text-lg font-medium">
+          {t('SectionTypes.featuredCourses.label')} {t('Editor.titleSuffix')}
+        </h3>
+      </div>
+
+      <div className="space-y-4">
+        {/* Title */}
+        <div>
+          <Label htmlFor="title">{t('Editor.sectionTitleLabel')}</Label>
+          <Input
+            id="title"
+            value={section.title}
+            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            placeholder={t('Editor.sectionTitlePlaceholder')}
+          />
+        </div>
+
+        {/* Course Selection */}
+        <div>
+          <Label>{t('FeaturedCoursesEditor.selectCoursesLabel')}</Label>
+          <div className="mt-2 space-y-4">
+            {courses ? (
+              <div className="grid gap-4">
+                {courses.map((course: any) => (
+                  <div
+                    key={course.course_uuid}
+                    className="flex items-center justify-between rounded-lg border p-4"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="h-12 w-12 overflow-hidden rounded-md bg-gray-100">
+                        {course.course_thumbnail && (
+                          <img
+                            src={course.course_thumbnail}
+                            alt={course.name}
+                            className="h-full w-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-medium">{course.name}</h4>
+                        <p className="text-sm text-gray-500">
+                          {course.description}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant={
+                        section.courses.includes(course.course_uuid)
+                          ? 'default'
+                          : 'outline'
+                      }
+                      onClick={() => {
+                        const newCourses = section.courses.includes(
+                          course.course_uuid
+                        )
+                          ? section.courses.filter(
+                              (id) => id !== course.course_uuid
+                            )
+                          : [...section.courses, course.course_uuid]
+                        onChange({ ...section, courses: newCourses })
+                      }}
+                      className={
+                        section.courses.includes(course.course_uuid)
+                          ? 'bg-black hover:bg-black/90'
+                          : ''
+                      }
+                    >
+                      {section.courses.includes(course.course_uuid)
+                        ? t('FeaturedCoursesEditor.selectedButton')
+                        : t('FeaturedCoursesEditor.selectButton')}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-gray-500">
+                {t('FeaturedCoursesEditor.loadingCourses')}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default OrgEditLanding

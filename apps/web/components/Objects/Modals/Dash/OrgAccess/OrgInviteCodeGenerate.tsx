@@ -1,0 +1,151 @@
+'use client'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { getAPIUrl, getUriWithOrg } from '@services/config/config'
+import {
+  createInviteCode,
+  createInviteCodeWithUserGroup,
+} from '@services/organizations/invites'
+import { swrFetcher } from '@services/utils/ts/requests'
+import { Ticket } from 'lucide-react'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
+import useSWR, { mutate } from 'swr'
+import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+
+type OrgInviteCodeGenerateProps = {
+  setInvitesModal: any
+}
+
+function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
+  const t = useTranslations('Components.OrgInviteCodeGenerate')
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+  const [usergroup_id, setUsergroup_id] = useState(0)
+
+  const { data: usergroups } = useSWR(
+    org ? `${getAPIUrl()}usergroups/org/${org.id}` : null,
+    (url) => swrFetcher(url, access_token)
+  )
+
+  async function createInviteWithUserGroup() {
+    const res = await createInviteCodeWithUserGroup(
+      org.id,
+      usergroup_id,
+      session.data?.tokens?.access_token
+    )
+    if (res.status == 200) {
+      mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
+      props.setInvitesModal(false)
+    } else {
+      toast.error(
+        t('createInviteError', {
+          error: res.data?.detail || t('unknownError'),
+        })
+      )
+    }
+  }
+
+  async function createInvite() {
+    const res = await createInviteCode(
+      org.id,
+      session.data?.tokens?.access_token
+    )
+    if (res.status == 200) {
+      mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
+      props.setInvitesModal(false)
+    } else {
+      toast.error(
+        t('createInviteError', {
+          error: res.data?.detail || t('unknownError'),
+        })
+      )
+    }
+  }
+
+  useEffect(() => {
+    if (usergroups && usergroups.length > 0) {
+      setUsergroup_id(usergroups[0].id)
+    }
+  }, [usergroups])
+  return (
+    <div className="flex space-x-2 pt-2">
+      <div className="flex h-[140px] w-full rounded-lg bg-slate-100">
+        <div className="mx-auto flex flex-col">
+          <h1 className="mx-auto pt-4 font-medium text-gray-600">
+            {t('linkedTitle')}
+          </h1>
+          <h2 className="mx-auto text-xs font-medium text-gray-600">
+            {t('linkedDescription')}
+          </h2>
+          <div className="mx-auto flex items-center space-x-4 pt-3">
+            {usergroups?.length >= 1 && (
+              <div className="flex items-center space-x-4">
+                <select
+                  defaultValue={usergroup_id}
+                  className="flex w-fit rounded-md border-2 border-slate-300 bg-gray-100 p-2 text-sm"
+                >
+                  {usergroups?.map((usergroup: any) => (
+                    <option key={usergroup.id} value={usergroup.id}>
+                      {usergroup.name}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="">
+                  <button
+                    onClick={createInviteWithUserGroup}
+                    className="flex w-fit items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer"
+                  >
+                    <Ticket className="size-4" />
+                    <span>{t('generateButton')}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+            {usergroups?.length == 0 && (
+              <div className="flex items-center space-x-3 pt-3 text-xs">
+                <span className="mx-3 rounded-full px-3 py-1 font-bold text-yellow-700">
+                  {t('noUserGroupsAvailable')}
+                </span>
+                <Link
+                  className="mx-1 rounded-full bg-blue-100 px-3 py-1 font-bold text-blue-700"
+                  target="_blank"
+                  href={getUriWithOrg(
+                    org.slug,
+                    '/dash/users/settings/usergroups'
+                  )}
+                >
+                  {t('createUserGroupLink')}
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex h-[140px] w-full rounded-lg bg-slate-100">
+        <div className="mx-auto flex flex-col">
+          <h1 className="mx-auto pt-4 font-medium text-gray-600">
+            {t('normalTitle')}
+          </h1>
+          <h2 className="mx-auto text-xs font-medium text-gray-600">
+            {t('normalDescription')}
+          </h2>
+          <div className="mx-auto pt-4">
+            <button
+              onClick={createInvite}
+              className="flex w-fit items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer"
+            >
+              <Ticket className="h-4 w-4" />
+              <span>{t('generateButton')}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default OrgInviteCodeGenerate

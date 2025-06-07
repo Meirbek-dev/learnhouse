@@ -48,9 +48,3 @@ __pycache__/
 .flyio/
 fly.toml
 .idea
-
-.next
-.turbo
-node_modules
-
-apps/api/content
