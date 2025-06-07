@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import Artplayer from 'artplayer'
-import { es, fr, id, kz, ru, tr } from '@/messages/Artplayer'
+import type ArtplayerType from 'artplayer'
 
 interface SubtitleEntry {
   html: string
@@ -19,11 +19,21 @@ interface PlayerProps {
 }
 const captionsSVGString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-captions-icon lucide-captions"><rect width="18" height="14" x="3" y="5" rx="2" ry="2" /><path d="M7 15h4M15 15h2M7 11h2M13 11h4" /></svg>`
 
+function getArtplayerLocale(locale: string) {
+  // Only import the required language object
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require(`@/messages/Artplayer`)[locale] || undefined
+  } catch {
+    return undefined
+  }
+}
+
 export default function ArtPlayer({
   option,
   getInstance,
   subtitle,
-  locale,
+  locale = 'en',
   subtitleEntries = [],
   startTime,
   endTime,
@@ -33,7 +43,8 @@ export default function ArtPlayer({
   const artRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const art = new Artplayer({
+    const i18nLocale = getArtplayerLocale(locale)
+    const art: ArtplayerType = new Artplayer({
       ...option,
       container: artRef.current,
       volume: 1,
@@ -57,14 +68,7 @@ export default function ArtPlayer({
       autoPlayback: true,
       airplay: true,
       theme: '#23ade5',
-      i18n: {
-        ru: ru,
-        es: es,
-        fr: fr,
-        id: id,
-        kz: kz,
-        tr: tr,
-      },
+      i18n: i18nLocale ? { [locale]: i18nLocale } : undefined,
       settings: [
         {
           width: 200,

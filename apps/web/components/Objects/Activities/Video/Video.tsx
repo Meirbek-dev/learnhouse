@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react'
 import YouTube from 'react-youtube'
 import {
   getActivityMediaDirectory,
-  getVideoSubtitlesDirectory,
 } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer'
 import type ArtplayerType from 'artplayer'
 import { useLocale } from 'next-intl'
+import getYouTubeID from 'get-youtube-id'
 
 interface VideoDetails {
   startTime?: number
@@ -49,8 +49,8 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
 
   useEffect(() => {
     if (activity?.content?.uri) {
-      const getYouTubeID = require('get-youtube-id')
-      setVideoId(getYouTubeID(activity.content.uri))
+      const id = getYouTubeID(activity.content.uri)
+      setVideoId(id || '')
     }
   }, [activity, org])
 
@@ -62,15 +62,6 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
       activity.activity_uuid,
       activity.content.filename,
       'video'
-    )
-  }
-  const getSubtitlesSrc = () => {
-    if (!activity.content?.filename) return ''
-    return getVideoSubtitlesDirectory(
-      org?.org_uuid,
-      course?.course_uuid,
-      activity.activity_uuid,
-      activity.content.filename
     )
   }
 

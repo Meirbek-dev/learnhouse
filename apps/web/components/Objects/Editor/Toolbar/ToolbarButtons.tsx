@@ -453,7 +453,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                 content: [
                   {
                     type: 'text',
-                    text: 'Click me',
+                    text: t('clickMe'),
                   },
                 ],
               })
@@ -472,7 +472,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <User size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Web Preview'}>
+      <ToolTip content={t('webPreview')}>
         <ToolBtn
           onClick={() =>
             editor

@@ -110,9 +110,10 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
               )
         }
       >
-        <div
+        <img
           className="inset-0 aspect-video w-full rounded-t-xl bg-cover bg-center ring-1 ring-inset ring-black/10"
-          style={{ backgroundImage: `url(${thumbnailImage})` }}
+          src={thumbnailImage}
+          alt={course.name}
         />
       </Link>
       <div className="flex w-full flex-col space-y-3 p-4">
