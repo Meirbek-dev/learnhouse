@@ -4,7 +4,7 @@ import { getUriWithOrg } from '@services/config/config'
 const createHeaders = (contentType?: string, token?: string) => {
   const headers: Record<string, string> = {}
   if (contentType) headers['Content-Type'] = contentType
-  if (token) headers['Authorization'] = `Bearer ${token}`
+  if (token) headers.Authorization = `Bearer ${token}`
   return new Headers(headers)
 }
 

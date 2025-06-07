@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
+import type React from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { NodeViewWrapper } from '@tiptap/react'
 import {
   Globe,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { getUrlPreview } from '@services/courses/activities'
+import { useTranslations } from 'next-intl'
 
 interface EditorContext {
   isEditable: boolean
@@ -36,6 +38,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
   updateAttributes,
   deleteNode,
 }) => {
+  const t = useTranslations('Components.WebPreview')
   const [inputUrl, setInputUrl] = useState(node.attrs.url || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +61,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
   const hasPreview = !!previewData.title
 
   const [buttonLabel, setButtonLabel] = useState(
-    node.attrs.buttonLabel || 'Visit Site'
+    node.attrs.buttonLabel || t('visitSite')
   )
   const [showButton, setShowButton] = useState(node.attrs.showButton !== false)
 
@@ -67,12 +70,12 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
     setError(null)
     try {
       const res = await getUrlPreview(url)
-      if (!res) throw new Error('Failed to fetch preview')
+      if (!res) throw new Error(t('errorFetchingPreview'))
       const data = res
       updateAttributes({ ...data, url })
       setEditing(false)
     } catch (err: any) {
-      setError(err.message || 'Error fetching preview')
+      setError(err.message || t('errorFetchingPreview'))
     } finally {
       setLoading(false)
     }
@@ -91,7 +94,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
   }, [editing])
 
   useEffect(() => {
-    setButtonLabel(node.attrs.buttonLabel || 'Visit Site')
+    setButtonLabel(node.attrs.buttonLabel || t('visitSite'))
     setShowButton(!!node.attrs.showButton)
   }, [node.attrs.buttonLabel, node.attrs.showButton])
 
@@ -143,10 +146,8 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
   return (
     <NodeViewWrapper className="web-preview-block relative">
       <div className={`flex w-full ${alignClass}`}>
-        {' '}
         {/* CardWrapper */}
         <div className="nice-shadow relative my-2 min-w-[260px] max-w-[420px] rounded-xl bg-white px-6 pb-4 pt-6">
-          {' '}
           {/* PreviewCard */}
           {/* Floating edit and delete buttons (only if not editing and isEditable) */}
           {isEditable && !editing && (
@@ -154,7 +155,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
               <button
                 className="flex items-center justify-center rounded-md border border-yellow-200 bg-yellow-50 p-1.5 text-yellow-700 shadow-md hover:bg-yellow-100"
                 onClick={handleEdit}
-                title="Edit URL"
+                title={t('editUrl')}
                 type="button"
               >
                 <Edit2 size={16} />
@@ -162,7 +163,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
               <button
                 className="flex items-center justify-center rounded-md border border-red-200 bg-red-50 p-1.5 text-red-700 shadow-md hover:bg-red-100"
                 onClick={handleDelete}
-                title="Delete Card"
+                title={t('deleteCard')}
                 type="button"
               >
                 <Trash size={16} />
@@ -173,13 +174,12 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
           {isEditable && editing && (
             <>
               <div className="mb-2 flex items-center gap-2">
-                {' '}
                 {/* EditBar */}
                 <Globe size={18} style={{ opacity: 0.7, marginRight: 4 }} />
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder="Enter website URL..."
+                  placeholder={t('enterWebsiteUrl')}
                   value={inputUrl}
                   onChange={(e) => setInputUrl(e.target.value)}
                   disabled={loading}
@@ -191,16 +191,16 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                 <button
                   onClick={handleSaveEdit}
                   disabled={loading || !inputUrl}
-                  title="Save"
+                  title={t('save')}
                   type="button"
                   className="flex cursor-pointer items-center justify-center rounded-md border-none bg-gray-100 p-1 text-gray-700 transition-colors duration-150 hover:bg-gray-200 disabled:opacity-50 aria-pressed:bg-blue-600 aria-pressed:text-white"
                   aria-pressed={false}
                 >
-                  {loading ? <Save size={16} /> : <Save size={16} />}
+                  <Save size={16} />
                 </button>
                 <button
                   onClick={handleCancelEdit}
-                  title="Cancel"
+                  title={t('cancel')}
                   type="button"
                   className="flex cursor-pointer items-center justify-center rounded-md border-none bg-gray-100 p-1 text-gray-700 transition-colors duration-150 hover:bg-gray-200"
                 >
@@ -219,7 +219,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                     }}
                     className="accent-blue-600"
                   />
-                  Show button
+                  {t('showButton')}
                 </label>
                 {showButton && (
                   <input
@@ -229,7 +229,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                       setButtonLabel(e.target.value)
                       updateAttributes({ buttonLabel: e.target.value })
                     }}
-                    placeholder="Button label"
+                    placeholder={t('buttonLabel')}
                     className="rounded-md border border-gray-200 px-2 py-1 font-sans text-sm focus:border-gray-400 focus:outline-none"
                     style={{ minWidth: 100 }}
                   />
@@ -237,7 +237,11 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
               </div>
             </>
           )}
-          {error && <div className="mt-2 text-xs text-red-600">{error}</div>}
+          {error && (
+            <div className="mt-2 text-xs text-red-600">
+              {t('errorFetchingPreview', { error })}
+            </div>
+          )}
           {/* Only show preview card when not editing */}
           {hasPreview && !editing && (
             <>
@@ -252,7 +256,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                   <div className="-mx-6 -mt-6 mb-0 overflow-hidden rounded-t-xl">
                     <img
                       src={previewData.og_image}
-                      alt="preview"
+                      alt={t('previewImageAlt')}
                       className="block h-40 w-full object-cover"
                     />
                   </div>
@@ -276,7 +280,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                 {previewData.favicon && (
                   <img
                     src={previewData.favicon}
-                    alt="favicon"
+                    alt={t('faviconAlt')}
                     className="mr-2 h-[18px] w-[18px] rounded bg-gray-100"
                   />
                 )}
@@ -292,28 +296,27 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                   className="nice-shadow mt-4 block w-full rounded-xl bg-white px-4 py-2.5 text-center text-[16px] font-semibold text-purple-600 no-underline transition-all hover:bg-gray-50 hover:shadow-lg [&:hover]:text-black [&:not(:hover)]:text-black"
                   style={{ textDecoration: 'none', color: 'black' }}
                 >
-                  {buttonLabel || 'Visit Site'}
+                  {buttonLabel || t('visitSite')}
                 </a>
               )}
             </>
           )}
           {isEditable && !editing && (
             <div className="mt-2 flex items-center gap-1">
-              {' '}
               {/* AlignmentBar */}
-              <span className="mr-1 text-xs text-gray-500">Align:</span>
+              <span className="mr-1 text-xs text-gray-500">{t('align')}:</span>
               {ALIGNMENTS.map((opt) => (
                 <button
                   key={opt.value}
                   aria-pressed={alignment === opt.value}
                   onClick={() => handleAlignmentChange(opt.value)}
-                  title={`Align ${opt.value}`}
+                  title={t('alignOption', { value: t(opt.value) })}
                   type="button"
                   className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
                     alignment === opt.value
                       ? 'border-gray-600 bg-gray-600 text-white hover:bg-gray-700'
                       : 'border-gray-200 bg-white hover:bg-gray-100'
-                  } `}
+                  }`}
                 >
                   {opt.label}
                 </button>

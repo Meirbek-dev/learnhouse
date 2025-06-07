@@ -10,14 +10,13 @@ pm2 start server.js --cwd /app/web --name learnhouse-web > /dev/null 2>&1 || { e
 cd /app/api || { echo "Failed to change directory to /app/api"; exit 1; }
 
 # Start API service
-pm2 start app.py --cwd /app/api --interpreter /app/api/.venv/bin/python --name learnhouse-api > /dev/null 2>&1 || { echo "Failed to start learnhouse-api"; exit 1; }
+pm2 start app.py --cwd /app/api --interpreter /app/api/.venv/bin/python --name learnhouse-api > /dev/null 2>&1 || { echo "Failed to start learnhouse-api"; exit 1; }1
 
 # Change back to app root
 cd /app || { echo "Failed to change directory to /app"; exit 1; }
 
 # Check if the services are running and log the status
 pm2 status
-echo "SUCCESSSUCCESSSUCCESSSUCCESSSUCCESSSUCCESS"
 # Start Nginx in the background
 nginx -g 'daemon off;' &
 

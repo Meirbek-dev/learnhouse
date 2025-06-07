@@ -432,9 +432,10 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
   const getTipTapEditorSelectedText = () => {
     const selection = props.editor.state.selection
-    const from = selection.from
-    const to = selection.to
-    const text = props.editor.state.doc.textBetween(from, to)
+    const text = props.editor.state.doc.textBetween(
+      selection.from,
+      selection.to
+    )
     return text
   }
 
@@ -480,7 +481,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               onKeyDown={handleKeyPress}
               value={aiEditorState.chatInputValue}
               onChange={handleChange}
-              placeholder="Ask AI"
+              placeholder={t('askAI')}
               className="outline-hidden w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-inset ring-white/20 placeholder:text-white/30"
             />
             <div
@@ -518,30 +519,12 @@ const AiEditorToolButton = (props: any) => {
       | 'Translate'
   ) => {
     if (label === 'Writer') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
       await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: true })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
-    }
-    if (label === 'ContinueWriting') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
+    } else {
       await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
     }
-    if (label === 'MakeLonger') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
-      await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
-    }
-    if (label === 'GenerateQuiz') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
-      await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
-    }
-    if (label === 'Translate') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
-      await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
-    }
+    await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
+    await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
   }
 
   return (

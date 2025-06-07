@@ -702,7 +702,7 @@ function ActivityClient(props: ActivityClientProps) {
                                           course.course_uuid,
                                           course.thumbnail_image
                                         )}`
-                                      : `/empty_thumbnail.png`
+                                      : '/empty_thumbnail.png'
                                   }
                                   alt=""
                                 />

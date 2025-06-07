@@ -25,7 +25,8 @@ export const getUriWithoutOrg = (path: string) =>
 export const getOrgFromUri = () => {
   if (isMultiOrgModeEnabled()) {
     return getDefaultOrg()
-  } else if (typeof window !== 'undefined') {
+  }
+  if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
     return hostname.replace(`.${LEARNHOUSE_DOMAIN}`, '')
   }

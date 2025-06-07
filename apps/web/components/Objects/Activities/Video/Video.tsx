@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import YouTube from 'react-youtube'
-import {
-  getActivityMediaDirectory,
-} from '@services/media/media'
+import { getActivityMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer'
 import type ArtplayerType from 'artplayer'

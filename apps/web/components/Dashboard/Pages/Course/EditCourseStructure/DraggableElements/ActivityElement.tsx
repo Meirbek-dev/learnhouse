@@ -200,8 +200,7 @@ function ActivityElement(props: ActivitiyElementProps) {
               </div>
             ) : (
               <p className="text-center first-letter:uppercase sm:text-left">
-                {' '}
-                {props.activity.name}{' '}
+                {props.activity.name}
               </p>
             )}
             <Pencil
@@ -227,16 +226,22 @@ function ActivityElement(props: ActivitiyElementProps) {
                   : 'bg-linear-to-bl border-gray-600/10 from-gray-400/50 to-gray-200/80 text-gray-800 hover:from-gray-500/50 hover:to-gray-300/80'
               }`}
               onClick={() => changePublicStatus()}
+              aria-label={
+                !props.activity.published ? t('publishButton') : t('unpublishButton')
+              }
+              title={
+                !props.activity.published ? t('publishButton') : t('unpublishButton')
+              }
             >
               {!props.activity.published ? (
                 <Globe strokeWidth={2} size={12} className="text-green-600" />
               ) : (
                 <Lock strokeWidth={2} size={12} className="text-gray-600" />
               )}
-              <span>{!props.activity.published ? 'Publish' : 'Unpublish'}</span>
+              <span>{!props.activity.published ? t('publish') : t('unpublish')}</span>
             </button>
             <div className="mx-1 hidden h-3 w-px self-center rounded-full bg-gray-300 sm:block" />
-            <ToolTip content="Preview Activity" sideOffset={8}>
+            <ToolTip content={t('previewTooltip')} sideOffset={8}>
               <Link
                 href={`${getUriWithOrg(props.orgslug, '')}/course/${props.course_uuid.replace(
                   'course_',
@@ -247,19 +252,23 @@ function ActivityElement(props: ActivitiyElementProps) {
                 )}`}
                 className="bg-linear-to-bl flex items-center space-x-1 rounded-md border border-cyan-600/10 from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-bold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
                 rel="noopener noreferrer"
+                aria-label={t('previewTooltip')}
+                title={t('previewTooltip')}
               >
                 <Eye strokeWidth={2} size={14} className="text-sky-600" />
               </Link>
             </ToolTip>
             {/*   Delete Button  */}
             <ConfirmationModal
-              confirmationMessage="Are you sure you want to delete this activity ?"
-              confirmationButtonText="Delete Activity"
-              dialogTitle={`Delete ${props.activity.name} ?`}
+              confirmationMessage={t('deleteConfirmation')}
+              confirmationButtonText={t('deleteButton')}
+              dialogTitle={t('deleteTitle', { name: props.activity.name })}
               dialogTrigger={
                 <button
                   className="flex items-center space-x-1 rounded-md bg-red-600 p-1 px-2 shadow-md transition-colors duration-200 hover:bg-red-700 sm:px-3"
                   rel="noopener noreferrer"
+                  aria-label={t('deleteButton')}
+                  title={t('deleteButton')}
                 >
                   <X size={15} className="font-bold text-rose-200" />
                 </button>

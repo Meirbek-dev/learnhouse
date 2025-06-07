@@ -22,8 +22,7 @@ const captionsSVGString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" he
 function getArtplayerLocale(locale: string) {
   // Only import the required language object
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require(`@/messages/Artplayer`)[locale] || undefined
+    return require('@/messages/Artplayer')[locale] || undefined
   } catch {
     return undefined
   }
@@ -130,11 +129,11 @@ export default function ArtPlayer({
     }
 
     return () => {
-      if (art && art.destroy) {
+      if (art?.destroy) {
         art.destroy(false)
       }
     }
   }, [])
 
-  return <div ref={artRef} {...rest}></div>
+  return <div ref={artRef} {...rest} />
 }
