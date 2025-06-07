@@ -2,7 +2,7 @@ name: App Build
 on:
   push:
     branches:
-      - feat/intl
+      - dev
     paths:
       - "**"
   pull_request:
