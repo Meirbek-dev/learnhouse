@@ -67,7 +67,7 @@ export default function ArtPlayer({
       autoPlayback: true,
       airplay: true,
       theme: '#23ade5',
-      i18n: i18nLocale ? { [locale]: i18nLocale } : undefined,
+      i18n: i18nLocale ? { [locale]: i18nLocale } : {},
       settings: [
         {
           width: 200,

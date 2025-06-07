@@ -139,7 +139,7 @@ function VideoModal({
                   className="w-full"
                 />
                 <span className="mt-1 block text-xs text-gray-500">
-                  Minutes
+                  {t('minutes')}
                 </span>
               </div>
               <div className="flex-1">
@@ -163,14 +163,14 @@ function VideoModal({
                   className="w-full"
                 />
                 <span className="mt-1 block text-xs text-gray-500">
-                  Seconds
+                  {t('seconds')}
                 </span>
               </div>
             </div>
           </div>
 
           <div>
-            <Label>{t('endTimeLabel')} (optional)</Label>
+            <Label>{t('endTimeLabel')}</Label>
             <div className="mt-1 flex gap-2">
               <div className="flex-1">
                 <Input
@@ -195,7 +195,7 @@ function VideoModal({
                   className="w-full"
                 />
                 <span className="mt-1 block text-xs text-gray-500">
-                  Minutes
+                  {t('minutes')}
                 </span>
               </div>
               <div className="flex-1">
@@ -222,7 +222,7 @@ function VideoModal({
                   className="w-full"
                 />
                 <span className="mt-1 block text-xs text-gray-500">
-                  Seconds
+                  {t('seconds')}
                 </span>
               </div>
             </div>
