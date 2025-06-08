@@ -227,10 +227,14 @@ function ActivityElement(props: ActivitiyElementProps) {
               }`}
               onClick={() => changePublicStatus()}
               aria-label={
-                !props.activity.published ? t('publishButton') : t('unpublishButton')
+                !props.activity.published
+                  ? t('publishButton')
+                  : t('unpublishButton')
               }
               title={
-                !props.activity.published ? t('publishButton') : t('unpublishButton')
+                !props.activity.published
+                  ? t('publishButton')
+                  : t('unpublishButton')
               }
             >
               {!props.activity.published ? (
@@ -238,7 +242,9 @@ function ActivityElement(props: ActivitiyElementProps) {
               ) : (
                 <Lock strokeWidth={2} size={12} className="text-gray-600" />
               )}
-              <span>{!props.activity.published ? t('publish') : t('unpublish')}</span>
+              <span>
+                {!props.activity.published ? t('publish') : t('unpublish')}
+              </span>
             </button>
             <div className="mx-1 hidden h-3 w-px self-center rounded-full bg-gray-300 sm:block" />
             <ToolTip content={t('previewTooltip')} sideOffset={8}>
