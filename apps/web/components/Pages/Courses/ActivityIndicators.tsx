@@ -13,6 +13,7 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 interface Props {
   course: any
@@ -23,18 +24,21 @@ interface Props {
 }
 
 // Helper functions
-function getActivityTypeLabel(activityType: string): string {
+function getActivityTypeLabel(
+  activityType: string,
+  t: (key: string) => string
+): string {
   switch (activityType) {
     case 'TYPE_VIDEO':
-      return 'Video'
+      return t('activityTypes.video')
     case 'TYPE_DOCUMENT':
-      return 'Document'
+      return t('activityTypes.document')
     case 'TYPE_DYNAMIC':
-      return 'Interactive'
+      return t('activityTypes.interactive')
     case 'TYPE_ASSIGNMENT':
-      return 'Assignment'
+      return t('activityTypes.assignment')
     default:
-      return 'Unknown'
+      return t('unknownActivity')
   }
 }
 
@@ -81,38 +85,42 @@ const ActivityTooltipContent = memo(
     activity: any
     isDone: boolean
     isCurrent: boolean
-  }) => (
-    <div className="nice-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
-      <div className="flex items-center gap-2">
-        <ActivityTypeIcon activityType={activity.activity_type} />
-        <span className="text-sm text-gray-700">{activity.name}</span>
-        {isDone && (
-          <span className="ml-auto text-gray-400">
-            <Check size={14} />
+  }) => {
+    const t = useTranslations('ActivityIndicators')
+    return (
+      <div className="nice-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
+        <div className="flex items-center gap-2">
+          <ActivityTypeIcon activityType={activity.activity_type} />
+          <span className="text-sm text-gray-700">{activity.name}</span>
+          {isDone && (
+            <span className="ml-auto text-gray-400">
+              <Check size={14} />
+            </span>
+          )}
+        </div>
+        <div className="mt-2 flex items-center gap-2">
+          <span
+            className={`rounded-full px-2 py-0.5 text-xs ${getActivityTypeBadgeColor(activity.activity_type)}`}
+          >
+            {getActivityTypeLabel(activity.activity_type, t)}
           </span>
-        )}
+          <span className="text-xs text-gray-400">
+            {isCurrent
+              ? t('currentActivity')
+              : isDone
+                ? t('completed')
+                : t('notStarted')}
+          </span>
+        </div>
       </div>
-      <div className="mt-2 flex items-center gap-2">
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs ${getActivityTypeBadgeColor(activity.activity_type)}`}
-        >
-          {getActivityTypeLabel(activity.activity_type)}
-        </span>
-        <span className="text-xs text-gray-400">
-          {isCurrent
-            ? 'Current Activity'
-            : isDone
-              ? 'Completed'
-              : 'Not Started'}
-        </span>
-      </div>
-    </div>
-  )
+    )
+  }
 )
 
 ActivityTooltipContent.displayName = 'ActivityTooltipContent'
 
 function ActivityIndicators(props: Props) {
+  const t = useTranslations('ActivityIndicators')
   const course = props.course
   const orgslug = props.orgslug
   const courseid = props.course_uuid.replace('course_', '')
@@ -213,7 +221,7 @@ function ActivityIndicators(props: Props) {
           onClick={navigateToPrevious}
           disabled={currentActivityIndex <= 0}
           className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Previous activity"
+          aria-label={t('previousActivity')}
         >
           <ChevronLeft size={20} className="text-gray-600" />
         </button>
@@ -258,7 +266,7 @@ function ActivityIndicators(props: Props) {
           onClick={navigateToNext}
           disabled={currentActivityIndex >= allActivities.length - 1}
           className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Next activity"
+          aria-label={t('nextActivity')}
         >
           <ChevronRight size={20} className="text-gray-600" />
         </button>

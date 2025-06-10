@@ -95,7 +95,7 @@ def ai_start_activity_chat_session(
     org_config = result.first()
 
     org_config = OrganizationConfig.model_validate(org_config)
-    embeddings = "text-embedding-ada-002"
+    embeddings = "text-embedding-3-small"
     ai_model = org_config.config["features"]["ai"]["model"]
 
     chat_session = get_chat_session_history()
@@ -186,7 +186,7 @@ def ai_send_activity_chat_message(
     org_config = result.first()
 
     org_config = OrganizationConfig.model_validate(org_config)
-    embeddings = "text-embedding-ada-002"
+    embeddings = "text-embedding-3-small"
     ai_model = org_config.config["features"]["ai"]["model"]
 
     chat_session = get_chat_session_history(chat_session_object.aichat_uuid)

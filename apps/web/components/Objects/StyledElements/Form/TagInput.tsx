@@ -14,7 +14,7 @@ interface FormTagInputProps {
 const FormTagInput = ({
   value,
   onChange,
-  separator = '|',
+  separator = ' | ',
   error,
   placeholder,
 }: FormTagInputProps) => {

@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
     styledComponents: true,
   },
   reactStrictMode: false,
+  devIndicators: false,
   output: 'standalone',
 }
 

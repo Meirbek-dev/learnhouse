@@ -37,12 +37,13 @@ interface VideoActivityProps {
 function VideoActivity({ activity, course }: VideoActivityProps) {
   const org = useOrg() as any
   const [videoId, setVideoId] = useState('')
-  const locale = useLocale()
+  const fullLocale = useLocale()
+  const locale = fullLocale.split('-')[0]
 
   const subtitleEntries: SubtitleEntry[] = [
-    { html: 'Russian', url: '/subtitle.ru.srt' },
+    { html: 'Русский', url: '/subtitle.ru.srt' },
     { html: 'English', url: '/subtitle.en.srt' },
-    { html: 'Kazakh', url: '/subtitle.kz.srt' },
+    { html: 'Қазақша', url: '/subtitle.kz.srt' },
   ]
 
   useEffect(() => {
@@ -87,6 +88,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                   },
                   encoding: 'utf-8',
                 }}
+                locale={locale}
                 subtitleEntries={subtitleEntries}
                 className="size-full"
                 startTime={activity.details?.startTime}

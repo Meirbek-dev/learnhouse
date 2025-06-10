@@ -1,83 +1,255 @@
 ﻿1
-00:00:01,420 --> 00:00:05,120
-Hiring a transcriber saves time and resources.
+00:00:00,000 --> 00:00:08,240
+Hello, dear listeners! My name is Aizhan Kumarkyzy Kairbayeva. I am a computer graphics instructor.
 
 2
-00:00:05,460 --> 00:00:08,340
-Professional transcribers will ensure 
+00:00:08,240 --> 00:00:13,630
+Welcome to the Blender software course!
 
 3
-00:00:08,520 --> 00:00:11,600
-that your audio file is translated into text 
+00:00:34,000 --> 00:00:39,090
+The first video will be an introduction. Therefore, I will show you how to install the Blender software and introduce you to its interface.
 
 4
-00:00:11,760 --> 00:00:12,660
-accurately 
+00:00:41,200 --> 00:00:43,000
+I use Blender version 4.3.
 
 5
-00:00:12,720 --> 00:00:13,880
-and efficiently.
+00:01:05,000 --> 00:01:06,000
+You can download the program from the official website blender.org.
 
 6
-00:00:14,200 --> 00:00:17,600
-Transcribers are trained and tested in certain niches
+00:01:06,850 --> 00:01:10,730
+The website interface may change, but the Download Blender button is always in a prominent place.
 
 7
-00:00:17,860 --> 00:00:19,600
-from legal and medical
+00:01:10,730 --> 00:01:13,210
+Clicking it will take you to the download page.
 
 8
-00:00:19,700 --> 00:00:20,920
-to academic.
+00:01:13,210 --> 00:01:16,790
+Choose your Blender version, save the file, install, and launch the program.
 
 9
-00:00:21,100 --> 00:00:22,160
-Here's how it works.
+00:01:37,000 --> 00:01:39,690
+When you first launch the program, you will be asked a few questions.
 
 10
-00:00:22,400 --> 00:00:24,700
-First, an audio file is received.
+00:01:39,690 --> 00:01:47,330
+For example, if you have used Blender before, you can choose the settings from that version.
 
 11
-00:00:25,200 --> 00:00:28,000
-Next, the file is pre-screened
+00:01:47,330 --> 00:01:52,630
+It also suggests choosing which mouse button you will use to select objects: right or left.
 
 12
-00:00:28,000 --> 00:00:30,520
-to be matched with the perfect transcriber
+00:01:52,630 --> 00:01:54,830
+— this does not affect the program's functionality.
 
 13
-00:00:30,520 --> 00:00:33,960
-who is then assigned the task of creating the transcript.
+00:01:54,830 --> 00:02:00,470
+Additionally, the Spacebar key can be set to play animation (Play).
 
 14
-00:00:34,220 --> 00:00:36,180
-Once the transcript is created,
+00:02:09,000 --> 00:02:14,830
+After launching Blender, you will always be greeted by the Splash Screen window, which you can exit by clicking outside of it.
 
 15
-00:00:36,420 --> 00:00:39,800
-the document goes through rigorous quality-control channels
+00:02:15,690 --> 00:02:18,790
+And now, after exiting the initial setup window,
 
 16
-00:00:39,880 --> 00:00:42,200
-before being submitted to the client.
+00:02:18,790 --> 00:02:22,150
+you will enter the main Blender interface.
 
 17
-00:00:42,540 --> 00:00:45,420
-We provide uncompromising quality,
+00:02:23,440 --> 00:02:24,990
+It is divided into several windows:
 
 18
-00:00:45,800 --> 00:00:47,460
-rates within your budget,
+00:02:26,000 --> 00:02:27,770
+The largest is the 3D Viewport,
 
 19
-00:00:47,460 --> 00:00:49,460
-timely and convenient delivery.
+00:02:28,440 --> 00:02:30,520
+this is the main workspace,
 
 20
-00:00:49,600 --> 00:00:51,160
-Upload your file now.
+00:02:31,370 --> 00:02:32,890
+where objects are created and modified,
 
 21
-00:00:51,240 --> 00:00:53,160
-We do the rest.
+00:02:34,000 --> 00:02:39,000
+as well as scenes, materials, lighting, camera movement, and so on.
+
+22
+00:02:39,560 --> 00:02:40,990
+Below it
+
+23
+00:02:41,880 --> 00:02:46,170
+is the Timeline window — this is a timeline for placing keyframes
+
+24
+00:02:46,750 --> 00:02:49,750
+for object animation.
+
+25
+00:02:50,330 --> 00:02:54,100
+On the right is the Outliner window, where all objects in the scene are displayed in a schematic view.
+
+26
+00:02:55,000 --> 00:02:57,340
+They can be selected and grouped into collections.
+
+27
+00:02:57,570 --> 00:03:03,770
+Collections are very convenient for working with large projects, where there are hundreds, or even thousands, of objects.
+
+28
+00:03:04,220 --> 00:03:07,340
+At the bottom are tabs with various settings.
+
+29
+00:03:07,340 --> 00:03:12,000
+We will look at them in the next videos, as they require separate attention.
+
+30
+00:03:24,000 --> 00:03:27,660
+And now I would like to briefly talk about the 3D-Viewport window in Blender.
+
+31
+00:04:00,000 --> 00:04:03,130
+Navigation in Blender is done using the mouse wheel.
+
+32
+00:04:03,770 --> 00:04:06,500
+If you press the wheel and rotate it, you can rotate the object around itself.
+
+33
+00:04:07,000 --> 00:04:08,920
+By default, rotation
+
+34
+00:04:09,000 --> 00:04:11,390
+occurs relative to an undefined point.
+
+35
+00:04:11,390 --> 00:04:14,400
+To rotate relative to the selected object,
+
+36
+00:04:14,400 --> 00:04:20,990
+you need to go to Edit > Preferences > Navigation and enable the Orbit Around Selection parameter.
+
+37
+00:04:20,990 --> 00:04:24,340
+Be sure to enable this parameter — it significantly simplifies your work.
+
+38
+00:04:33,000 --> 00:04:38,640
+Now, after selecting an object, if you press the mouse wheel and rotate it, the view will move around that object.
+
+39
+00:04:39,000 --> 00:04:42,000
+For example, if you select the camera, you will orbit around the camera;
+
+40
+00:04:42,000 --> 00:04:44,880
+if you select a light source — you will orbit around the light source.
+
+41
+00:04:45,000 --> 00:04:47,750
+To zoom in or out, rotate the mouse wheel.
+
+42
+00:04:57,000 --> 00:05:00,000
+To move around the scene, press the Shift key and, while holding it, press the mouse wheel and move the mouse.
+
+43
+00:05:01,000 --> 00:05:02,470
+And now, let's review:
+
+44
+00:05:03,000 --> 00:05:05,950
+Pressing and moving the mouse wheel — rotating the object.
+
+45
+00:05:06,560 --> 00:05:08,700
+Rotating the mouse wheel — zooming in and out.
+
+46
+00:05:09,000 --> 00:05:15,300
+Shift and pressing with mouse wheel movement — moving left, right, up, down in the scene.
+
+47
+00:05:37,000 --> 00:05:39,990
+Hotkeys are used to move objects in the scene.
+
+48
+00:05:39,990 --> 00:05:43,000
+For example, the G key allows you to move an object.
+
+49
+00:05:43,000 --> 00:05:45,840
+And to move only along the X, Y, or Z axes,
+
+50
+00:05:46,000 --> 00:05:51,770
+after pressing the G key, you need to press the X, Y, or Z key.
+
+51
+00:05:53,000 --> 00:05:55,000
+To rotate, you need to press the R key.
+
+52
+00:05:55,000 --> 00:05:57,890
+Rotation can only be done along the X, Y, or Z axes.
+
+53
+00:05:59,000 --> 00:06:01,000
+And to change the size, you need to press the S key.
+
+54
+00:06:01,000 --> 00:06:03,970
+The size can be changed along the X, Y, or Z axes.
+
+55
+00:06:04,650 --> 00:06:06,650
+These hotkeys significantly speed up your work.
+
+56
+00:06:06,650 --> 00:06:09,500
+To add a new object to the scene, press Shift and A.
+
+57
+00:06:10,410 --> 00:06:12,120
+The add object menu will open,
+
+58
+00:06:13,090 --> 00:06:14,770
+where objects are grouped by categories.
+
+59
+00:06:15,400 --> 00:06:18,180
+For example, in the Mesh category,
+
+60
+00:06:18,990 --> 00:06:23,640
+there are cubes, spheres, cylinders, cones, and other geometric objects.
+
+61
+00:06:23,640 --> 00:06:30,640
+In this video, we covered the interface, navigation, and basic object operations: moving, rotating, and scaling.
+
+62
+00:06:31,640 --> 00:06:34,420
+In the next video, I will discuss more advanced Blender functions.
+
+63
+00:06:35,550 --> 00:06:37,430
+Thank you for your attention!
+
+64
+00:06:37,430 --> 00:06:39,640
+See you in the next videos!

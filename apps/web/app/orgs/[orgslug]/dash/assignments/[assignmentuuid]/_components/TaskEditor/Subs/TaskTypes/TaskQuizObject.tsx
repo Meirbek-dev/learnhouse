@@ -465,7 +465,21 @@ function TaskQuizObject({
                       onClick={() =>
                         view === 'student' && chooseOption(qIndex, oIndex)
                       }
-                      className={`answer nice-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md ${view == 'student' ? 'active:scale-110' : ''}`}
+                      className={`answer nice-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md ${
+                        view == 'student'
+                          ? `active:scale-110 ${
+                              userSubmissions.submissions.find(
+                                (submission) =>
+                                  submission.questionUUID ===
+                                    question.questionUUID &&
+                                  submission.optionUUID === option.optionUUID &&
+                                  submission.answer
+                              )
+                                ? 'ring-1 ring-green-400'
+                                : ''
+                            }`
+                          : ''
+                      }`}
                     >
                       <div className="flex h-full w-[40px] items-center rounded-l-md bg-slate-100/80 text-base font-bold text-slate-800">
                         <p className="mx-auto text-sm font-bold">

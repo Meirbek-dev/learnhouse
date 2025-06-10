@@ -85,11 +85,15 @@
       "document": "Document",
       "learningMaterial": "Learning Material",
       "page": "Page",
-      "video": "Video"
+      "video": "Video",
+      "interactive": "Interactive"
     },
     "completed": "Completed",
     "currentActivity": "Current Activity",
-    "notStarted": "Not Started"
+    "notStarted": "Not Started",
+    "unknownActivity": "Unknown Activity",
+    "previousActivity": "Previous activity",
+    "nextActivity": "Next activity"
   },
   "ActivityPage": {
     "activityCounter": "{current} of {total}",

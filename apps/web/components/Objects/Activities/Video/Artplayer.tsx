@@ -71,11 +71,11 @@ export default function ArtPlayer({
       settings: [
         {
           width: 200,
-          html: 'Subtitles',
+          html: 'Субтитры',
           icon: captionsSVGString,
           selector: [
             {
-              html: 'Display',
+              html: 'Включить',
               switch: true,
               onSwitch: (item) => {
                 art.subtitle.show = !item.switch

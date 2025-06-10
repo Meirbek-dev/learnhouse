@@ -85,11 +85,15 @@
       "document": "Құжат",
       "learningMaterial": "Оқу материалы",
       "page": "Бет",
-      "video": "Бейне"
+      "video": "Бейне",
+      "interactive": "Интерактивті"
     },
     "completed": "Аяқталды",
-    "currentActivity": "Ағымдағы белсенділік",
-    "notStarted": "Басталмаған"
+    "currentActivity": "Ағымдағы әрекет",
+    "notStarted": "Басталмаған",
+    "unknownActivity": "Белгісіз әрекет",
+    "previousActivity": "Алдыңғы әрекет",
+    "nextActivity": "Келесі әрекет"
   },
   "ActivityPage": {
     "activityCounter": "{current} / {total}",

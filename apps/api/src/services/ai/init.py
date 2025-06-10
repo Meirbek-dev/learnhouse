@@ -31,7 +31,7 @@ def get_embedding_function(model_name: str) -> Optional[OpenAIEmbeddings]:
     if not api_key:
         return None
 
-    if model_name == "text-embedding-ada-002":
+    if model_name == "text-embedding-3-small":
         return OpenAIEmbeddings(model=model_name, api_key=api_key)
     return None
 
