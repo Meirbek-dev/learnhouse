@@ -32,6 +32,7 @@ import {
   Video,
   List,
   ListOrdered,
+  Globe,
 } from 'lucide-react'
 import { SiYoutube } from '@icons-pack/react-simple-icons'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
@@ -85,7 +86,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
 
   const listOptions = [
     {
-      label: 'Bullet List',
+      label: t('listOptions.bulletList'),
       icon: <List size={15} />,
       action: () => {
         if (editor.isActive('bulletList')) {
@@ -97,7 +98,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       },
     },
     {
-      label: 'Ordered List',
+      label: t('listOptions.orderedList'),
       icon: <ListOrdered size={15} />,
       action: () => {
         if (editor.isActive('orderedList')) {
@@ -452,7 +453,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                 content: [
                   {
                     type: 'text',
-                    text: 'Click me',
+                    text: t('clickMe'),
                   },
                 ],
               })
@@ -469,6 +470,21 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           }
         >
           <User size={15} />
+        </ToolBtn>
+      </ToolTip>
+      <ToolTip content={t('webPreview')}>
+        <ToolBtn
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'blockWebPreview',
+              })
+              .run()
+          }
+        >
+          <Globe size={15} />
         </ToolBtn>
       </ToolTip>
     </ToolButtonsWrapper>

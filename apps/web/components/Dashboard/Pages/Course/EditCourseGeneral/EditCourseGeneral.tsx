@@ -228,7 +228,11 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                 />
                 <Form.Control asChild>
                   <Textarea
-                    style={{ backgroundColor: 'white' }}
+                    style={{
+                      backgroundColor: 'white',
+                      height: '200px',
+                      minHeight: '200px',
+                    }}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.about}

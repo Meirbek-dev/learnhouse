@@ -26,10 +26,9 @@ cd /app || {
 
 # Check if the services are running and log the status
 pm2 status
-echo "SUCCESSSUCCESSSUCCESSSUCCESSSUCCESSSUCCESS"
-
 # Start Nginx in the background
 nginx -g 'daemon off;' &
 
 # Tail Nginx error and access logs
 pm2 logs
+

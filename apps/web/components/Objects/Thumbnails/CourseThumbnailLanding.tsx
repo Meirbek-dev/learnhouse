@@ -198,7 +198,7 @@ const CourseThumbnailLanding: FC<PropsType> = ({
           {course.update_date && (
             <div className="inline-flex h-5 min-w-[140px] items-center justify-center rounded-md border border-gray-200 bg-gray-100/80 px-2">
               <span className="truncate text-[10px] font-medium text-gray-600">
-                {t('updatedDate', { date: new Date(course.update_date) })}
+                {t('updatedDate', { updateDate: new Date(course.update_date) })}
               </span>
             </div>
           )}

@@ -21,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 type Course = {
   course_uuid: string
@@ -55,6 +55,7 @@ export const removeCoursePrefix = (course_uuid: string) =>
 
 function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
   const t = useTranslations('Components.CourseThumbnail')
+  const locale = useLocale()
   const router = useRouter()
   const org = useOrg() as any
   const session = useLHSession() as any
@@ -109,9 +110,10 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
               )
         }
       >
-        <div
+        <img
           className="inset-0 aspect-video w-full rounded-t-xl bg-cover bg-center ring-1 ring-inset ring-black/10"
-          style={{ backgroundImage: `url(${thumbnailImage})` }}
+          src={thumbnailImage}
+          alt={course.name}
         />
       </Link>
       <div className="flex w-full flex-col space-y-3 p-4">
@@ -128,7 +130,7 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
             <div className="inline-flex h-5 min-w-[140px] items-center justify-center rounded-md border border-gray-200 bg-gray-100/80 px-2">
               <span className="truncate text-[10px] font-medium text-gray-600">
                 {t('updated')}{' '}
-                {new Date(course.update_date).toLocaleDateString('en-US', {
+                {new Date(course.update_date).toLocaleDateString(locale, {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric',

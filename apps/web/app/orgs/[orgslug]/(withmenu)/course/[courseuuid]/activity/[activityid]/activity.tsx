@@ -52,7 +52,7 @@ import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/Ge
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators'
 import { revalidateTags } from '@services/utils/ts/requests'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations, useFormatter } from 'next-intl'
 
 // Lazy load heavy components
 const Canva = lazy(
@@ -184,26 +184,6 @@ function ActivityActions({
   )
 }
 
-function getRelativeTime(date: Date): string {
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const seconds = Math.floor(diff / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
-  const weeks = Math.floor(days / 7)
-  const months = Math.floor(days / 30)
-  const years = Math.floor(days / 365)
-
-  if (years > 0) return `${years} year${years > 1 ? 's' : ''} ago`
-  if (months > 0) return `${months} month${months > 1 ? 's' : ''} ago`
-  if (weeks > 0) return `${weeks} week${weeks > 1 ? 's' : ''} ago`
-  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`
-  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`
-  if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`
-  return 'just now'
-}
-
 // Helper to ensure Tiptap always receives a valid document
 function getValidTiptapContent(content: any): any {
   if (
@@ -236,6 +216,14 @@ function ActivityClient(props: ActivityClientProps) {
   const { contributorStatus } = useContributorStatus(courseuuid)
   const router = useRouter()
   const t = useTranslations('ActivityPage')
+  const locale = useLocale()
+  const format = useFormatter()
+
+  // Helper to get relative time using next-intl
+  const getRelativeTimeIntl = (date: Date) => {
+    const now = new Date()
+    return format.relativeTime(date, now)
+  }
 
   // Memoize activity position calculation
   const { allActivities, currentIndex } = useActivityPosition(
@@ -489,11 +477,15 @@ function ActivityClient(props: ActivityClientProps) {
                             >
                               <img
                                 className="h-[34px] w-[60px] rounded-md drop-shadow-md"
-                                src={`${getCourseThumbnailMediaDirectory(
-                                  org?.org_uuid,
-                                  course.course_uuid,
+                                src={
                                   course.thumbnail_image
-                                )}`}
+                                    ? `${getCourseThumbnailMediaDirectory(
+                                        org?.org_uuid,
+                                        course.course_uuid,
+                                        course.thumbnail_image
+                                      )}`
+                                    : '/empty_thumbnail.png'
+                                }
                                 alt=""
                               />
                             </Link>
@@ -690,11 +682,15 @@ function ActivityClient(props: ActivityClientProps) {
                               >
                                 <img
                                   className="h-[57px] w-[100px] rounded-md drop-shadow-md"
-                                  src={`${getCourseThumbnailMediaDirectory(
-                                    org?.org_uuid,
-                                    course.course_uuid,
+                                  src={
                                     course.thumbnail_image
-                                  )}`}
+                                      ? `${getCourseThumbnailMediaDirectory(
+                                          org?.org_uuid,
+                                          course.course_uuid,
+                                          course.thumbnail_image
+                                        )}`
+                                      : '/empty_thumbnail.png'
+                                  }
                                   alt=""
                                 />
                               </Link>
@@ -882,7 +878,7 @@ function ActivityClient(props: ActivityClientProps) {
                                     {t('createdOn')}{' '}
                                     {new Date(
                                       course.creation_date
-                                    ).toLocaleDateString(undefined, {
+                                    ).toLocaleDateString(locale, {
                                       year: 'numeric',
                                       month: 'long',
                                       day: 'numeric',
@@ -891,7 +887,7 @@ function ActivityClient(props: ActivityClientProps) {
                                   <span className="mx-1">•</span>
                                   <span>
                                     {t('lastUpdated')}{' '}
-                                    {getRelativeTime(
+                                    {getRelativeTimeIntl(
                                       new Date(
                                         course.updated_at ||
                                           course.last_updated ||

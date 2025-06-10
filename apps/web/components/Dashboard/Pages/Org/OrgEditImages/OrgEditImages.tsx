@@ -475,7 +475,9 @@ export default function OrgEditImages() {
                       isLogoUploading && 'opacity-50'
                     )}
                     style={{
-                      backgroundImage: `url(${localLogo || getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)})`,
+                      backgroundImage: org?.logo_image
+                        ? `url(${localLogo || getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)})`
+                        : 'url(/empty_thumbnail.png)',
                     }}
                   />
                 </div>
@@ -539,7 +541,9 @@ export default function OrgEditImages() {
                       isThumbnailUploading && 'opacity-50'
                     )}
                     style={{
-                      backgroundImage: `url(${localThumbnail || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)})`,
+                      backgroundImage: org?.thumbnail_image
+                        ? `url(${localThumbnail || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)})`
+                        : 'url(/empty_thumbnail.png)',
                     }}
                   />
                 </div>

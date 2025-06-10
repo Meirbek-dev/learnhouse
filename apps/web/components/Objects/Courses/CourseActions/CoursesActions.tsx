@@ -346,11 +346,11 @@ function CoursesActions({ courseuuid, orgslug, course }: CourseActionsProps) {
                     <div className="text-sm font-medium text-gray-900">
                       {t('readyToBegin')}
                     </div>
-                    <div className="text-sm text-gray-500">
-                      Start your learning journey with {totalActivities}{' '}
-                      exciting{' '}
-                      {totalActivities === 1 ? 'activity' : 'activities'}
-                    </div>
+                    {totalActivities > 0 && (
+                      <div className="text-sm text-gray-500">
+                        {t('startLearningJourney', { totalActivities })}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

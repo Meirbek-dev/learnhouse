@@ -185,3 +185,29 @@ export async function applyForContributor(
   const res = await getResponseMetadata(result)
   return res
 }
+
+export async function bulkAddContributors(
+  course_uuid: string,
+  data: any,
+  access_token: string | null | undefined
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}courses/${course_uuid}/bulk-add-contributors`,
+    RequestBodyWithAuthHeader('POST', data, null, access_token || undefined)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function bulkRemoveContributors(
+  course_uuid: string,
+  data: any,
+  access_token: string | null | undefined
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}courses/${course_uuid}/bulk-remove-contributors`,
+    RequestBodyWithAuthHeader('PUT', data, null, access_token || undefined)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}

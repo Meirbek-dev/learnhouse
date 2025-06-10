@@ -35,6 +35,7 @@ import UserBlock from '@components/Objects/Editor/Extensions/Users/UserBlock'
 import { getLinkExtension } from '@components/Objects/Editor/EditorConf'
 import TableOfContents from './TableOfContents'
 import { CustomHeading } from './CustomHeadingExtenstion'
+import WebPreview from '@components/Objects/Editor/Extensions/WebPreview/WebPreview'
 
 interface Editor {
   content: string
@@ -131,6 +132,10 @@ function Canva(props: Editor) {
         resizable: true,
       }),
       getLinkExtension(),
+      WebPreview.configure({
+        editable: true,
+        activity: props.activity,
+      }),
       TableRow,
       TableHeader,
       TableCell,
@@ -169,6 +174,26 @@ const ContentWrapper = styled.div`
 
   > div:last-child {
     width: 80%;
+  }
+
+  // Only apply flex layout when there are multiple children (table of contents present)
+  &:has(> div:first-child:not(:last-child)) {
+    > div:first-child {
+      width: 20%;
+      padding-right: 1rem;
+    }
+
+    > div:last-child {
+      width: 80%;
+    }
+  }
+
+  // When there's only one child (no table of contents), make it full width
+  &:has(> div:first-child:last-child) {
+    > div:first-child {
+      width: 100%;
+      padding-right: 0;
+    }
   }
 
   .ProseMirror {

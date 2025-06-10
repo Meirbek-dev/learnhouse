@@ -1,4 +1,5 @@
 'use client'
+import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { useRouter } from 'next/navigation'
@@ -22,12 +23,14 @@ const NavigationButtons = memo(
     currentIndex,
     allActivities,
     navigateToActivity,
+    t,
   }: {
     prevActivity: any
     nextActivity: any
     currentIndex: number
     allActivities: any[]
     navigateToActivity: (activity: any) => void
+    t: (key: string, values?: Record<string, any>) => string
   }) => (
     <div className="flex items-center space-x-2 sm:space-x-3">
       <button
@@ -40,21 +43,30 @@ const NavigationButtons = memo(
         disabled={!prevActivity}
         title={
           prevActivity
-            ? `Previous: ${prevActivity.name}`
-            : 'No previous activity'
+            ? t('NavigationButtons.previousActivityTitle', {
+                activityName: prevActivity.name,
+              })
+            : t('NavigationButtons.noPreviousActivity')
         }
       >
         <ChevronLeft size={16} className="shrink-0 sm:h-5 sm:w-5" />
         <div className="hidden flex-col items-start sm:flex">
-          <span className="text-xs text-gray-500">Previous</span>
+          <span className="text-xs text-gray-500">
+            {t('NavigationButtons.previous')}
+          </span>
           <span className="max-w-[100px] truncate text-left text-sm font-medium sm:max-w-[150px]">
-            {prevActivity ? prevActivity.name : 'No previous activity'}
+            {prevActivity
+              ? prevActivity.name
+              : t('NavigationButtons.noPreviousActivity')}
           </span>
         </div>
       </button>
 
       <span className="px-1 text-sm font-medium text-gray-500 sm:px-2">
-        {currentIndex + 1} of {allActivities.length}
+        {t('NavigationButtons.currentOfTotal', {
+          currentIndex: currentIndex + 1,
+          totalActivities: allActivities.length,
+        })}
       </span>
 
       <button
@@ -63,16 +75,24 @@ const NavigationButtons = memo(
           'flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2'
         }
         disabled={!nextActivity}
-        title={nextActivity ? `Next: ${nextActivity.name}` : 'No next activity'}
+        title={
+          nextActivity
+            ? t('NavigationButtons.nextActivityTitle', {
+                activityName: nextActivity.name,
+              })
+            : t('NavigationButtons.noNextActivity')
+        }
       >
         <div className="hidden flex-col items-end sm:flex">
           <span
             className={`text-xs ${nextActivity ? 'text-gray-500' : 'text-gray-500'}`}
           >
-            Next
+            {t('NavigationButtons.next')}
           </span>
           <span className="max-w-[100px] truncate text-right text-sm font-medium sm:max-w-[150px]">
-            {nextActivity ? nextActivity.name : 'No next activity'}
+            {nextActivity
+              ? nextActivity.name
+              : t('NavigationButtons.noNextActivity')}
           </span>
         </div>
         <ChevronRight size={16} className="shrink-0 sm:h-5 sm:w-5" />
@@ -84,25 +104,41 @@ const NavigationButtons = memo(
 NavigationButtons.displayName = 'NavigationButtons'
 
 // Memoized course info component
-const CourseInfo = memo(({ course, org }: { course: any; org: any }) => (
-  <div className="flex min-w-0 flex-shrink items-center space-x-2 sm:space-x-4">
-    <img
-      className="h-[20px] w-[35px] flex-shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"
-      src={`${getCourseThumbnailMediaDirectory(
-        org?.org_uuid,
-        course.course_uuid,
-        course.thumbnail_image
-      )}`}
-      alt=""
-    />
-    <div className="hidden min-w-0 flex-col -space-y-0.5 sm:block">
-      <p className="text-sm font-medium text-gray-500">Course</p>
-      <h1 className="truncate text-base font-semibold text-gray-900">
-        {course.name}
-      </h1>
+const CourseInfo = memo(
+  ({
+    course,
+    org,
+    t,
+  }: {
+    course: any
+    org: any
+    t: (key: string, values?: Record<string, any>) => string
+  }) => (
+    <div className="flex min-w-0 flex-shrink items-center space-x-2 sm:space-x-4">
+      <img
+        className="h-[20px] w-[35px] flex-shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"
+        src={
+          course.thumbnail_image
+            ? `${getCourseThumbnailMediaDirectory(
+                org?.org_uuid,
+                course.course_uuid,
+                course.thumbnail_image
+              )}`
+            : '/empty_thumbnail.png'
+        }
+        alt=""
+      />
+      <div className="hidden min-w-0 flex-col -space-y-0.5 sm:block">
+        <p className="text-sm font-medium text-gray-500">
+          {t('CourseInfo.course')}
+        </p>
+        <h1 className="truncate text-base font-semibold text-gray-900">
+          {course.name}
+        </h1>
+      </div>
     </div>
-  </div>
-))
+  )
+)
 
 CourseInfo.displayName = 'CourseInfo'
 
@@ -110,6 +146,7 @@ export default function FixedActivitySecondaryBar(
   props: FixedActivitySecondaryBarProps
 ): React.ReactNode {
   const router = useRouter()
+  const t = useTranslations('FixedActivitySecondaryBar')
   const [isScrolled, setIsScrolled] = useState(false)
   const [shouldShow, setShouldShow] = useState(false)
   const mainActivityInfoRef = useRef<HTMLDivElement | null>(null)
@@ -199,7 +236,7 @@ export default function FixedActivitySecondaryBar(
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between py-2">
-          <CourseInfo course={props.course} org={org} />
+          <CourseInfo course={props.course} org={org} t={t} />
 
           <div className="flex flex-shrink-0 items-center">
             <NavigationButtons
@@ -208,6 +245,7 @@ export default function FixedActivitySecondaryBar(
               currentIndex={currentIndex}
               allActivities={allActivities}
               navigateToActivity={navigateToActivity}
+              t={t}
             />
           </div>
         </div>

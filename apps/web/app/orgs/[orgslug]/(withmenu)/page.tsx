@@ -8,6 +8,7 @@ import { nextAuthOptions } from 'app/auth/options'
 import { getOrgThumbnailMediaDirectory } from '@services/media/media'
 import LandingClassic from '@components/Landings/LandingClassic'
 import LandingCustom from '@components/Landings/LandingCustom'
+import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string }>
@@ -23,10 +24,11 @@ export async function generateMetadata(
     revalidate: 0,
     tags: ['organizations'],
   })
+  const t = await getTranslations('General')
 
   // SEO
   return {
-    title: `Home — ${org.name}`,
+    title: `${t('home')} — ${org.name}`,
     description: org.description,
     robots: {
       index: true,
@@ -39,7 +41,7 @@ export async function generateMetadata(
       },
     },
     openGraph: {
-      title: `Home — ${org.name}`,
+      title: `${t('home')} — ${org.name}`,
       description: org.description,
       type: 'website',
       images: [

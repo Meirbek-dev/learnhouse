@@ -1,4 +1,5 @@
 import type { ChangeEvent, KeyboardEvent } from 'react'
+import toast from 'react-hot-toast'
 import { useState, useEffect } from 'react'
 import openuAI_icon from 'public/openu_ai_simple.png'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -46,6 +47,7 @@ type AIPromptsLabels = {
 function AIEditorToolkit(props: AIEditorToolkitProps) {
   const dispatchAIEditor = useAIEditorDispatch() as any
   const aiEditorState = useAIEditor() as AIEditorStateTypes
+  const t = useTranslations('Activities.AIEditorToolkit')
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' })
   const [isToolkitAvailable, setIsToolkitAvailable] = useState(true)
 
@@ -97,10 +99,10 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                             className="rounded-lg outline-neutral-200/20"
                             width={24}
                             src={openuAI_icon}
-                            alt=""
+                            alt={t('aiIconAlt')}
                           />
                           <div className="flex items-center">
-                            AI Editor{' '}
+                            {t('aiEditorTitle')}{' '}
                             <span className="ml-3 rounded-3xl bg-white/10 px-2 py-1 text-[10px] uppercase">
                               PRE-ALPHA
                             </span>
@@ -146,6 +148,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   const aiEditorState = useAIEditor() as AIEditorStateTypes
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const t = useTranslations('Activities.AIEditorToolkit')
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     await dispatchAIEditor({
@@ -297,13 +300,23 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     } else if (label === 'GenerateQuiz') {
       // will be implemented in future stages
     } else if (label === 'Translate') {
-      let ai_message = ''
-      const text_selection = getTipTapEditorSelectedText()
+      const text_selection = getTipTapEditorSelectedText() // Text to translate
+      const targetLanguage = message // This is aiEditorState.chatInputValue from handleOperation's 'message' param
+
+      if (text_selection && !targetLanguage) {
+        toast.error(t('translateToLanguageMissing'))
+        return
+      }
+
       const prompt = getPrompt({ label: label, selection: text_selection })
+
       if (prompt) {
         await dispatchAIEditor({ type: 'setIsWaitingForResponse' })
-        ai_message = await sendReqWithMessage(prompt)
-        await replaceSelectedTextWithText(ai_message)
+        const ai_message = await sendReqWithMessage(prompt)
+        if (ai_message) {
+          // Check if message is not empty
+          await replaceSelectedTextWithText(ai_message)
+        }
         await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' })
       }
     }
@@ -383,31 +396,27 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     const { label, selection } = args
 
     if (label === 'Writer') {
-      return `Write 3 sentences about ${selection}`
+      if (selection === '') return ''
+      return t('prompt_writer', { selection: selection })
     }
     if (label === 'ContinueWriting') {
-      return `Continue writing 3 more sentences based on "${selection}"`
+      if (selection === '') return ''
+      return t('prompt_continueWriting', { selection: selection })
     }
     if (label === 'MakeLonger') {
-      return `Make longer this text longer : "${selection}"`
+      if (selection === '') return ''
+      return t('prompt_makeLonger', { selection: selection })
     }
     if (label === 'GenerateQuiz') {
-      return `Generate a quiz about "${selection}", only return an array of objects, every object should respect the following interface:
-            interface Answer {
-                answer_id: string;
-                answer: string;
-                correct: boolean;
-              }
-              interface Question {
-                question_id: string;
-                question: string;
-                type: "multiple_choice"
-                answers: Answer[];
-              }
-            " `
+      // will be implemented in future stages
+      return ''
     }
     if (label === 'Translate') {
-      return `Translate "${selection}" to the ${aiEditorState.chatInputValue} language`
+      if (selection === '' || !aiEditorState.chatInputValue) return ''
+      return t('prompt_translateTo', {
+        language: aiEditorState.chatInputValue,
+        selection: selection,
+      })
     }
   }
 
@@ -423,9 +432,10 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
   const getTipTapEditorSelectedText = () => {
     const selection = props.editor.state.selection
-    const from = selection.from
-    const to = selection.to
-    const text = props.editor.state.doc.textBetween(from, to)
+    const text = props.editor.state.doc.textBetween(
+      selection.from,
+      selection.to
+    )
     return text
   }
 
@@ -471,7 +481,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               onKeyDown={handleKeyPress}
               value={aiEditorState.chatInputValue}
               onChange={handleChange}
-              placeholder="Ask AI"
+              placeholder={t('askAI')}
               className="outline-hidden w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-inset ring-white/20 placeholder:text-white/30"
             />
             <div
@@ -509,30 +519,12 @@ const AiEditorToolButton = (props: any) => {
       | 'Translate'
   ) => {
     if (label === 'Writer') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
       await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: true })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
-    }
-    if (label === 'ContinueWriting') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
+    } else {
       await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
     }
-    if (label === 'MakeLonger') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
-      await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
-    }
-    if (label === 'GenerateQuiz') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
-      await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
-    }
-    if (label === 'Translate') {
-      await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
-      await dispatchAIEditor({ type: 'setIsUserInputEnabled', payload: false })
-      await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
-    }
+    await dispatchAIEditor({ type: 'setSelectedTool', payload: label })
+    await dispatchAIEditor({ type: 'setIsFeedbackModalOpen' })
   }
 
   return (

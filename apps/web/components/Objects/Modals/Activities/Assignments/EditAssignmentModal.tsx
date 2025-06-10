@@ -167,7 +167,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({
                 }
               }}
               disabled={false}
-              initialFocus
+              autoFocus
             />
           </PopoverContent>
         </Popover>

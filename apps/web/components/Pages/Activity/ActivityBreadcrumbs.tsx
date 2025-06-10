@@ -15,7 +15,7 @@ export default function ActivityBreadcrumbs({
   orgslug,
 }: ActivityBreadcrumbsProps) {
   const cleanCourseUuid = course.course_uuid?.replace('course_', '')
-  const t = useTranslations('Components.OrgMenuLinks')
+  const t = useTranslations('General')
 
   return (
     <div className="mb-4 flex space-x-1 text-sm font-medium tracking-tight text-gray-400">

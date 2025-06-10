@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import YouTube from 'react-youtube'
-import {
-  getActivityMediaDirectory,
-  getVideoSubtitlesDirectory,
-} from '@services/media/media'
+import { getActivityMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
-import ARTPlayer from './Artplayer'
+import ArtPlayer from '@components/Objects/Activities/Video/Artplayer'
+import type ArtplayerType from 'artplayer'
 import { useLocale } from 'next-intl'
+import getYouTubeID from 'get-youtube-id'
 
 interface VideoDetails {
   startTime?: number
@@ -48,8 +47,8 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
 
   useEffect(() => {
     if (activity?.content?.uri) {
-      const getYouTubeID = require('get-youtube-id')
-      setVideoId(getYouTubeID(activity.content.uri))
+      const id = getYouTubeID(activity.content.uri)
+      setVideoId(id || '')
     }
   }, [activity, org])
 
@@ -63,16 +62,6 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
       'video'
     )
   }
-  const getSubtitlesSrc = () => {
-    if (!activity.content?.filename) return ''
-    const subDir = getVideoSubtitlesDirectory(
-      org?.org_uuid,
-      course?.course_uuid,
-      activity.activity_uuid,
-      activity.content.filename
-    )
-    return subDir
-  }
 
   return (
     <div className="w-full max-w-full px-2 sm:px-4">
@@ -80,7 +69,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
         <div className="my-3 w-full md:my-5">
           <div className="shadow-xs relative aspect-video w-full overflow-hidden rounded-lg ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_HOSTED' && (
-              <ARTPlayer
+              <ArtPlayer
                 option={{
                   url: getVideoSrc(),
                   muted: activity.details?.muted,
@@ -92,14 +81,17 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                   type: 'srt',
                   style: {
                     color: '#ffffff',
-                    fontSize: '20px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    fontSize: '2.5rem',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     textAlign: 'center',
                   },
                   encoding: 'utf-8',
                 }}
                 subtitleEntries={subtitleEntries}
                 className="size-full"
+                startTime={activity.details?.startTime}
+                endTime={activity.details?.endTime}
+                onPlayerReady={(art: ArtplayerType) => {}}
               />
             )}
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (
@@ -113,9 +105,17 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                     mute: activity.details?.muted ? 1 : 0,
                     start: activity.details?.startTime || 0,
                     end: activity.details?.endTime || undefined,
+                    controls: 1,
+                    modestbranding: 1,
+                    rel: 0,
                   },
                 }}
                 videoId={videoId}
+                onReady={(event) => {
+                  if (activity.details?.startTime) {
+                    event.target.seekTo(activity.details.startTime, true)
+                  }
+                }}
               />
             )}
           </div>
