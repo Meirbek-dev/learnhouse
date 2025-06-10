@@ -26,7 +26,7 @@ export async function generateMetadata(
   })
   const course_meta = await getCourseMetadata(
     params.courseuuid,
-    { revalidate: 30, tags: ['courses'] },
+    { revalidate: 0, tags: ['courses'] },
     access_token ? access_token : null
   )
 
@@ -75,7 +75,7 @@ const CoursePage = async (params: any) => {
   const awaitedParams = await params.params
   const course_meta = await getCourseMetadata(
     awaitedParams.courseuuid,
-    { revalidate: 30, tags: ['courses'] },
+    { revalidate: 0, tags: ['courses'] },
     access_token ? access_token : null
   )
 

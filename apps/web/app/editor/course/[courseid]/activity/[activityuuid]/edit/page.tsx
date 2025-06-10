@@ -25,7 +25,7 @@ export async function generateMetadata(
   const [course_meta] = await Promise.all([
     getCourseMetadata(
       params.courseid,
-      { revalidate: 30, tags: ['courses'] },
+      { revalidate: 0, tags: ['courses'] },
       access_token ?? null
     ),
   ])
@@ -47,7 +47,7 @@ const EditActivity = async (props: {
   const [courseInfo, activity] = await Promise.all([
     getCourseMetadata(
       courseid,
-      { revalidate: 30, tags: ['courses'] },
+      { revalidate: 0, tags: ['courses'] },
       access_token ?? null
     ),
     getActivityWithAuthHeader(

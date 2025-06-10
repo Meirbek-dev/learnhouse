@@ -22,3 +22,4 @@ nginx -g 'daemon off;' &
 
 # Tail Nginx error and access logs
 pm2 logs
+

@@ -7,6 +7,7 @@ import {
   type LucideIcon,
   Share2Icon,
   LayoutDashboardIcon,
+  CodeIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect, use } from 'react'
@@ -16,6 +17,7 @@ import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEdit
 import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials'
 import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding'
 import { useTranslations } from 'next-intl'
+import OrgEditOther from '@components/Dashboard/Pages/Org/OrgEditOther/OrgEditOther'
 
 export type OrgParams = {
   subpage: string
@@ -33,6 +35,7 @@ const SETTING_TABS: TabItem[] = [
   { id: 'landing', label: 'landing', icon: LayoutDashboardIcon },
   { id: 'previews', label: 'previews', icon: ImageIcon },
   { id: 'socials', label: 'socials', icon: Share2Icon },
+  { id: 'other', label: 'other', icon: CodeIcon },
 ]
 
 function TabLink({
@@ -80,6 +83,9 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
     } else if (params.subpage == 'landing') {
       setH1Label(t('landingTitle'))
       setH2Label(t('landingDescription'))
+    } else if (params.subpage == 'other') {
+      setH1Label(t('other'))
+      setH2Label(t('Manage additional organization settings'))
     }
   }
 
@@ -124,6 +130,7 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
         {params.subpage == 'previews' ? <OrgEditImages /> : ''}
         {params.subpage == 'socials' ? <OrgEditSocials /> : ''}
         {params.subpage == 'landing' ? <OrgEditLanding /> : ''}
+        {params.subpage == 'other' ? <OrgEditOther /> : ''}
       </motion.div>
     </div>
   )

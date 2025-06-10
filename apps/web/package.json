@@ -16,7 +16,7 @@
 		"@emoji-mart/data": "^1.2.1",
 		"@emoji-mart/react": "^1.1.1",
 		"@hello-pangea/dnd": "^18.0.1",
-		"@icons-pack/react-simple-icons": "^13.0.0",
+		"@icons-pack/react-simple-icons": "^13.1.0",
 		"@radix-ui/colors": "^3.0.0",
 		"@radix-ui/react-accordion": "^1.2.11",
 		"@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -103,8 +103,8 @@
 		"@eslint/eslintrc": "^3.3.1",
 		"@eslint/js": "^9.28.0",
 		"@tailwindcss/postcss": "4.1.8",
-		"@types/node": "22.15.30",
-		"@types/react": "19.1.6",
+		"@types/node": "24.0.0",
+		"@types/react": "19.1.7",
 		"@types/react-dom": "19.1.6",
 		"@types/react-katex": "^3.0.4",
 		"@types/react-transition-group": "^4.4.12",
@@ -120,7 +120,7 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"@types/react": "19.1.6",
+			"@types/react": "19.1.7",
 			"@types/react-dom": "19.1.6"
 		}
 	}
