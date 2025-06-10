@@ -380,13 +380,13 @@
       "userGroupNameLabel": "Group Name"
     },
     "LocaleSwitcher": {
-      "en": "English",
-      "fr": "French",
-      "kz": "Kazakh",
+      "en-US": "English",
+      "fr-FR": "French",
+      "kz-KZ": "Kazakh",
       "label": "Language",
-      "ru": "Russian",
+      "ru-RU": "Russian",
       "selectLanguage": "Select language",
-      "sp": "Spanish"
+      "sp-SP": "Spanish"
     },
     "ManageUsers": {
       "actionsHeader": "Actions",
@@ -1982,14 +1982,16 @@
       }
     },
     "Other": {
-      "addFirstScript": "Add your first script to get started",
+      "addFirstScript": "Add your first script to get started.",
       "addScript": "Add Script",
       "cancel": "cancel",
-      "deletingScript": "Deleting script",
-      "noScripts": "No scripts added yet",
+      "cancelButton": "Cancel",
+      "deletingScript": "Deleting script...",
+      "noScripts": "No scripts yet",
       "saveScript": "Save Script",
+      "saveScriptButton": "Save Script",
       "saving": "Saving...",
-      "scriptContentLabel": "Script content",
+      "scriptContentLabel": "Script Content",
       "scriptContentPlaceholder": "Enter JavaScript code",
       "scriptDeleteError": "Failed to delete script",
       "scriptDeletedSuccess": "Script deleted successfully",
@@ -1998,8 +2000,9 @@
       "scriptSaveError": "Failed to save script",
       "scriptSavedSuccess": "Script saved successfully",
       "scripts": "Scripts",
-      "scriptsDescription": "Add custom JavaScript scripts to your organization",
+      "scriptsDescription": "Manage custom scripts for your organization. Use with caution.",
       "scriptsWarning": "For your organization's safety, please ensure you trust and understand any scripts before adding them. Scripts can interact with your organization's pages.",
+      "tooltipWarning": "Scripts are powerful and can affect your site's security and performance. Only add scripts from trusted sources. Ensure scripts comply with privacy regulations and handle user data responsibly. Incorrectly implemented scripts can break functionality or expose vulnerabilities.",
       "updatingOrganization": "Updating organization...",
       "validation": {
         "contentRequired": "Script content is required",

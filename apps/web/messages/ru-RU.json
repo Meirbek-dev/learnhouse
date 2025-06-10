@@ -155,24 +155,7 @@
     "unmarkConfirmation": "Вы уверены, что хотите снять отметку о завершении активности?",
     "unmarkDialogTitle": "Снять отметку о завершении активности?",
     "unpublishedActivity": "Эта активность еще не опубликована",
-    "viewAllActivities": "Посмотреть все активности",
-    "markStatus": {
-      "unmarkTooltipMessage": "Нажмите на флажок, чтобы снять отметку о завершении, если необходимо",
-      "markTooltipMessage": "Нажмите на флажок, чтобы отметить эту активность как завершенную"
-    },
-    "courseTitle": "Курс",
-    "previousActivityTooltip": "Предыдущая: {activityName}",
-    "noPreviousActivity": "Нет предыдущей активности",
-    "nextActivityTooltip": "Далее: {activityName}",
-    "chapter": "Глава",
-    "coCreatedBy": "Соавторство",
-    "createdOn": "Создано",
-    "lastUpdated": "Последнее обновление",
-    "contribute": "Внести вклад",
-    "activityNotPublished": "Эта активность еще не опубликована",
-    "enterFocusMode": "Войти в режим фокусировки",
-    "focusMode": "Режим фокусировки",
-    "exitFocusMode": "Выйти из режима фокусировки"
+    "viewAllActivities": "Посмотреть все активности"
   },
   "Auth": {
     "Forgot": {
@@ -184,9 +167,7 @@
       "loading": "Загрузка...",
       "required": "Обязательно",
       "sendResetLink": "Отправить ссылку для сброса",
-      "title": "Забыли пароль",
-      "required": "Обязательно",
-      "invalidEmail": "Неверный адрес электронной почты"
+      "title": "Забыли пароль"
     },
     "Layout": {
       "accessFromOrg": "Пожалуйста, получите доступ к этой странице через организацию",
@@ -237,7 +218,7 @@
       "inviteCodeRequired": "Для присоединения к {orgName} требуется код приглашения",
       "invitedToJoin": "Вас пригласили присоединиться",
       "join": "Присоединиться",
-      "joinQuestion": "Вы хотите присоединиться к {orgName}?",
+      "joinQuestion": "хотите присоединиться к {orgName}?",
       "loading": "Загрузка...",
       "loginToAccount": "Войти",
       "password": "Пароль",
@@ -277,7 +258,7 @@
       "deleteConfirmationTitle": "Удалить {collectionName}?"
     },
     "CourseActions": {
-      "authenticateToStart": "Аутентифицируйтесь, чтобы начать курс",
+      "authenticateToStart": "Авторизуйтесь, чтобы начать курс",
       "author": "Автор",
       "fullAccess": "Вы приобрели этот курс и имеете полный доступ ко всему содержимому.",
       "leaveCourse": "Покинуть курс",
@@ -368,8 +349,7 @@
       "valueMissingDescription": "Пожалуйста, предоставьте описание для вашего задания",
       "valueMissingDueDate": "Пожалуйста, укажите срок сдачи вашего задания",
       "valueMissingGradingType": "Пожалуйста, укажите тип оценивания для вашего задания",
-      "valueMissingTitle": "Пожалуйста, укажите название для вашего задания",
-      "selectDeadline": "Выберите срок выполнения задачи"
+      "valueMissingTitle": "Пожалуйста, укажите название для вашего задания"
     },
     "EditUserGroup": {
       "descriptionLabel": "Описание",
@@ -400,13 +380,13 @@
       "userGroupNameLabel": "Название группы"
     },
     "LocaleSwitcher": {
-      "en": "Английский",
-      "fr": "Французский",
-      "kz": "Казахский",
+      "en-US": "Английский",
+      "fr-FR": "Французский",
+      "kz-KZ": "Казахский",
       "label": "Язык",
-      "ru": "Русский",
+      "ru-RU": "Русский",
       "selectLanguage": "Выберите язык",
-      "sp": "Испанский"
+      "sp-SP": "Испанский"
     },
     "ManageUsers": {
       "actionsHeader": "Действия",
@@ -486,7 +466,7 @@
       "step5Button": "Узнать больше об ИИ LearnHouse",
       "step5Desc": "Инструменты, созданные как для учителей, так и для студентов, учитывающие контекст, они могут отвечать на основе ваших курсов и уникального контента, который вы создаете в LearnHouse",
       "step5Title": "Искусственный интеллект",
-      "step6Button": "Создание групп пользователей",
+      "step6Button": "Создать группы пользователей",
       "step6Desc": "С помощью групп пользователей вы можете разделить студентов на группы и предоставить доступ к курсам в зависимости от их потребностей",
       "step6Title": "Группируйте студентов и упрощайте доступ",
       "step7Desc": "Вы можете сделать Курсы доступными для поисковых систем и неаутентифицированных пользователей или предоставить доступ только аутентифицированным пользователям",
@@ -553,7 +533,7 @@
     },
     "UnconfiguredPaymentsDisclaimer": {
       "configureButton": "Настроить платежи",
-      "message": "Для использования функции платежей требуется настройка.",
+      "message": "Функция платежей требует настройки перед использованием.",
       "title": "Платежи не настроены"
     },
     "UserAvatar": {
@@ -741,7 +721,7 @@
         "saveFailed": "Не удалось сохранить общую информацию о курсе."
       },
       "learnings": {
-        "label": "Что вы узнаете"
+        "label": "Чему вы научитесь"
       },
       "name": {
         "label": "Название курса"
@@ -754,11 +734,6 @@
         "chooseFromGalleryButton": "Выбрать из галереи",
         "label": "Обложка курса",
         "uploadImageButton": "Загрузить изображение",
-        "uploading": "Загрузка..."
-      },
-      "Thumbnail": {
-        "uploadImageButton": "Загрузить",
-        "gallery": "Галерея",
         "uploading": "Загрузка..."
       }
     },
@@ -793,8 +768,7 @@
     "deleteChapterButton": "Удалить главу",
     "deleteChapterConfirmation": "Вы уверены, что хотите удалить эту главу?",
     "deleteChapterTitle": "Удалить {name}?",
-    "editButton": "Редактировать",
-    "deleteChapter": "Удалить главу"
+    "editButton": "Редактировать"
   },
   "CourseEndView": {
     "backToCourse": "Вернуться к курсу",
@@ -1013,166 +987,6 @@
     "title": "Курсы"
   },
   "DashPage": {
-    "UserProfileBuilder": {
-      "SectionTypes": {
-        "imageGallery": {
-          "label": "Галерея изображений",
-          "description": "Добавить коллекцию изображений"
-        },
-        "text": {
-          "label": "Текст",
-          "description": "Добавить форматированный текстовый контент"
-        },
-        "links": {
-          "label": "Ссылки",
-          "description": "Добавить социальные или профессиональные ссылки"
-        },
-        "skills": {
-          "label": "Навыки",
-          "description": "Продемонстрируйте свои навыки и опыт"
-        },
-        "experience": {
-          "label": "Опыт",
-          "description": "Добавить опыт работы или проектов"
-        },
-        "education": {
-          "label": "Образование",
-          "description": "Добавить сведения об образовании"
-        },
-        "affiliation": {
-          "label": "Принадлежность",
-          "description": "Добавить организационные принадлежности"
-        },
-        "courses": {
-          "label": "Курсы",
-          "description": "Показать авторские курсы"
-        },
-        "hero": {
-          "label": "Герой",
-          "description": "Добавить раздел-герой с заголовком и призывом к действию"
-        },
-        "textAndImage": {
-          "label": "Текст и изображения",
-          "description": "Добавить раздел с текстом и изображением"
-        },
-        "logos": {
-          "label": "Логотипы",
-          "description": "Добавить раздел для демонстрации логотипов"
-        },
-        "people": {
-          "label": "Люди",
-          "description": "Добавить раздел для выделения членов команды"
-        },
-        "featuredCourses": {
-          "label": "Курсы",
-          "description": "Добавить раздел для демонстрации выбранных курсов"
-        }
-      },
-      "title": "Конструктор профиля",
-      "betaBadge": "БЕТА",
-      "description": "Настройте свой профессиональный профиль",
-      "savingButton": "Сохранение...",
-      "saveButton": "Сохранить изменения",
-      "SectionsPanel": {
-        "title": "Разделы",
-        "addSectionButton": "Добавить раздел"
-      },
-      "EmptyEditor": {
-        "message": "Выберите раздел для редактирования или добавьте новый"
-      },
-      "Errors": {
-        "unknownSectionType": "Неизвестный тип раздела",
-        "profileLoadFailed": "Не удалось загрузить данные профиля"
-      },
-      "Common": {
-        "sectionTitle": "Название раздела",
-        "enterSectionTitlePlaceholder": "Введите название раздела"
-      },
-      "ImageGalleryEditor": {
-        "title": "Галерея изображений",
-        "imagesLabel": "Изображения",
-        "imageUrlLabel": "URL изображения",
-        "imageUrlPlaceholder": "Введите URL изображения",
-        "captionLabel": "Подпись",
-        "captionPlaceholder": "Подпись к изображению",
-        "addImageButton": "Добавить изображение"
-      },
-      "TextEditor": {
-        "title": "Текстовое содержимое",
-        "contentLabel": "Содержимое",
-        "contentPlaceholder": "Введите свое содержимое здесь..."
-      },
-      "LinksEditor": {
-        "title": "Ссылки",
-        "linksLabel": "Ссылки",
-        "linkTitlePlaceholder": "Название ссылки",
-        "urlPlaceholder": "URL",
-        "addLinkButton": "Добавить ссылку"
-      },
-      "SkillsEditor": {
-        "title": "Навыки",
-        "skillsLabel": "Навыки",
-        "skillNamePlaceholder": "Название навыка",
-        "selectLevelPlaceholder": "Выберите уровень",
-        "levelBeginner": "Начальный",
-        "levelIntermediate": "Средний",
-        "levelAdvanced": "Продвинутый",
-        "levelExpert": "Эксперт",
-        "categoryPlaceholder": "Категория (необязательно)",
-        "addSkillButton": "Добавить навык"
-      },
-      "ExperienceEditor": {
-        "title": "Опыт",
-        "experienceItemsLabel": "Пункты опыта",
-        "titleLabel": "Название",
-        "titlePlaceholder": "Должность или роль",
-        "organizationLabel": "Организация",
-        "organizationPlaceholder": "Компания или организация",
-        "startDateLabel": "Дата начала",
-        "endDateLabel": "Дата окончания",
-        "currentLabel": "Настоящее время",
-        "descriptionLabel": "Описание",
-        "descriptionPlaceholder": "Опишите свою роль и достижения",
-        "removeButton": "Удалить",
-        "addExperienceButton": "Добавить опыт"
-      },
-      "EducationEditor": {
-        "title": "Образование",
-        "educationItemsLabel": "Пункты образования",
-        "institutionLabel": "Учреждение",
-        "institutionPlaceholder": "Школа или университет",
-        "degreeLabel": "Степень",
-        "degreePlaceholder": "Тип степени",
-        "fieldOfStudyLabel": "Область исследования",
-        "fieldOfStudyPlaceholder": "Специальность или специализация",
-        "startDateLabel": "Дата начала",
-        "endDateLabel": "Дата окончания",
-        "currentLabel": "Настоящее время",
-        "descriptionLabel": "Описание",
-        "descriptionPlaceholder": "Дополнительные сведения о вашем образовании",
-        "removeButton": "Удалить",
-        "addEducationButton": "Добавить образование"
-      },
-      "AffiliationEditor": {
-        "title": "Принадлежность",
-        "affiliationsLabel": "Принадлежности",
-        "nameLabel": "Название",
-        "namePlaceholder": "Название организации",
-        "logoUrlLabel": "URL логотипа",
-        "logoUrlPlaceholder": "URL логотипа организации",
-        "descriptionLabel": "Описание",
-        "descriptionPlaceholder": "Описание организации",
-        "removeButton": "Удалить",
-        "addAffiliationButton": "Добавить принадлежность"
-      },
-      "CoursesEditor": {
-        "title": "Курсы",
-        "autoDisplayMessage": "Ваши авторские курсы будут автоматически отображаться в этом разделе."
-      },
-      "EmptySections": {
-        "defaultTitle": "Раздел {sectionName}"
-      }
-    },
     "Assignments": {
       "AssignmentPage": {
         "assignmentTools": "Инструменты для заданий",
@@ -1206,8 +1020,7 @@
         "rejectAssignment": "Отклонить задание",
         "rejectSuccess": "Задание успешно отклонено",
         "setFinalGrade": "Установить итоговую оценку",
-        "taskLabel": "Задание {index}",
-        "assignmentDataMissing": "Задание отсутствует"
+        "taskLabel": "Задание {index}"
       },
       "HomePage": {
         "assignment": "Задание",
@@ -1248,7 +1061,7 @@
         "gradeRangeError": "Оценка не может превышать {maxGradeValue} баллов",
         "gradeSuccess": "Задание успешно оценено на {grade} баллов",
         "gradedByTeacher": "Оценено преподавателем: @{username}",
-        "gradingViewInfo": "Пожалуйста, загрузите файл и оцените его вручную, затем введите оценку выше",
+        "gradingViewInfo": "Пожалуйста, скачайте файл и оцените его вручную, затем введите оценку выше",
         "loading": "Загрузка",
         "saveSuccess": "Задание успешно сохранено",
         "signInToUpload": "Войдите, чтобы загрузить файлы",
@@ -1326,8 +1139,8 @@
         "description": "Управляйте пользователями и ролями вашей организации",
         "title": "Пользователи"
       },
-      "learnhouseLogo": "Логотип OpenU",
-      "openuUniversity": "Университет OpenU"
+      "learnhouseLogo": "Логотип LearnHouse",
+      "learnhouseUniversity": "Университет LearnHouse"
     },
     "CourseOverview": {
       "courseLabel": "Курс"
@@ -1361,38 +1174,7 @@
         "usersOnlyDescription": "Курс доступен только для вошедших в систему пользователей, кроме того, вы можете выбрать, какие группы пользователей могут получить доступ к этому курсу",
         "usersOnlyLabel": "Только для пользователей"
       },
-      "Contributors": {
-        "activeBadge": "Активно",
-        "cannotModifyCreator": "Невозможно изменить роль или статус создателя",
-        "closeConfirmMsg": "Вы уверены, что хотите закрыть этот курс для соавторов?",
-        "closeConfirmTitle": "Закрыть для соавторов?",
-        "closeToContributorsButton": "Закрыть для соавторов",
-        "closedDescription": "Курс закрыт для соавторов. Только существующие соавторы могут изменять содержание курса.",
-        "closedLabel": "Закрыто для соавторов",
-        "contributorUpdateErrorDetailed": "Не удалось обновить соавтора: {error}",
-        "contributorUpdateErrorGeneric": "Не удалось обновить соавтора",
-        "contributorUpdateSuccess": "Соавтор успешно обновлен",
-        "currentContributorsDescription": "Управляйте текущими соавторами курса",
-        "currentContributorsTitle": "Текущие соавторы",
-        "description": "Выберите, будет ли ваш курс открыт для соавторов, и управляйте существующими соавторами",
-        "openConfirmMsg": "Вы уверены, что хотите открыть этот курс для соавторов?",
-        "openConfirmTitle": "Открыть для соавторов?",
-        "openDescription": "Курс открыт для соавторов. Пользователи могут подать заявку, чтобы стать соавторами и помочь улучшить содержание курса.",
-        "openToContributorsButton": "Открыть для соавторов",
-        "role": "Роль",
-        "roleContributor": "Соавтор",
-        "roleMaintainer": "Сопровождающий",
-        "roleReporter": "Репортер",
-        "statusActive": "Активно",
-        "statusInactive": "Неактивно",
-        "statusPending": "В ожидании",
-        "tableHeaderEmail": "Email",
-        "tableHeaderName": "Имя",
-        "tableHeaderRole": "Роль",
-        "tableHeaderStatus": "Статус",
-        "title": "Соавторы курса"
-      },
-      "CoursePage": {
+            "CoursePage": {
         "access": "Доступ",
         "content": "Содержание",
         "contributors": "Соавторы",
@@ -1538,8 +1320,8 @@
         "productUrlPlaceholder": "Вставьте URL для встраивания {productName}",
         "removeEmbedTitle": "Удалить встраивание",
         "urlButton": "URL",
-        "urlPlaceholder": "Вставьте URL для встраивания (YouTube, Spotify и т. д.)",
-        "urlTip": "Подсказка: Вставьте любой URL встраивания {productName} напрямую"
+        "urlPlaceholder": "Вставьте URL для встраивания (YouTube, Spotify и т.д.)",
+        "urlTip": "Подсказка: Вставьте любой URL для встраивания {productName} напрямую"
       },
       "FileUploadBlock": {
         "noFilePreview": "Нет файла для предварительного просмотра.",
@@ -2200,12 +1982,14 @@
       }
     },
     "Other": {
-      "addFirstScript": "Добавьте свой первый скрипт, чтобы начать",
+      "addFirstScript": "Добавьте свой первый скрипт, чтобы начать.",
       "addScript": "Добавить скрипт",
-      "cancel": "Отмена",
-      "deletingScript": "Удаление скрипта",
-      "noScripts": "Скрипты еще не добавлены",
+      "cancel": "отмена",
+      "cancelButton": "Отмена",
+      "deletingScript": "Удаление скрипта...",
+      "noScripts": "Скриптов пока нет",
       "saveScript": "Сохранить скрипт",
+      "saveScriptButton": "Сохранить скрипт",
       "saving": "Сохранение...",
       "scriptContentLabel": "Содержимое скрипта",
       "scriptContentPlaceholder": "Введите код JavaScript",
@@ -2216,8 +2000,9 @@
       "scriptSaveError": "Не удалось сохранить скрипт",
       "scriptSavedSuccess": "Скрипт успешно сохранен",
       "scripts": "Скрипты",
-      "scriptsDescription": "Добавляйте пользовательские скрипты JavaScript в вашу организацию",
-      "scriptsWarning": "В целях безопасности вашей организации, пожалуйста, убедитесь, что вы доверяете и понимаете любые скрипты перед их добавлением. Скрипты могут взаимодействовать со страницами вашей организации.",
+      "scriptsDescription": "Управляйте пользовательскими скриптами для вашей организации. Используйте с осторожностью.",
+      "scriptsWarning": "Для безопасности вашей организации, пожалуйста, убедитесь, что вы доверяете и понимаете любые скрипты, прежде чем добавлять их. Скрипты могут взаимодействовать со страницами вашей организации.",
+      "tooltipWarning": "Скрипты мощные и могут влиять на безопасность и производительность вашего сайта. Добавляйте скрипты только из надежных источников. Убедитесь, что скрипты соответствуют правилам конфиденциальности и ответственно обрабатывают пользовательские данные. Неправильно реализованные скрипты могут нарушить функциональность или создать уязвимости.",
       "updatingOrganization": "Обновление организации...",
       "validation": {
         "contentRequired": "Содержимое скрипта обязательно",
@@ -2321,7 +2106,7 @@
         "priceTypeLabel": "Тип цены",
         "priceTypePlaceholder": "Выберите тип цены",
         "priceTypes": {
-          "customer_choice": "Выбор клиента (минимальная цена)",
+          "customer_choice": "Выбор клиента (мин. цена)",
           "fixed_price": "Фиксированная цена"
         },
         "productTypeLabel": "Тип продукта",
@@ -2344,8 +2129,6 @@
         "createProductButton": "Создать новый продукт",
         "editButton": "Редактировать",
         "editForm": {
-          "productUpdatedSuccess": "Продукт успешно обновлен",
-          "updateProductFailed": "Не удалось обновить продукт",
           "benefitsLabel": "Преимущества",
           "benefitsPlaceholder": "Преимущества продукта",
           "cancelButton": "Отмена",
@@ -2382,12 +2165,12 @@
       "createProducts": "Создавайте продукты или подписки.",
       "customerInfo": "Просмотр и управление информацией о клиентах",
       "customers": "Клиенты",
-      "goToConfiguration": "Перейти к настройке",
+      "goToConfiguration": "Перейти к конфигурации",
       "notAvailable": "Платежи недоступны",
       "notEnabledMessage": "Функция платежей не включена для этой организации.",
       "overview": "Обзор",
       "paidProducts": "Платные продукты",
-      "paidProductsInfo": "Управление платными продуктами и ценообразованием",
+      "paidProductsInfo": "Управление платными продуктами и ценами",
       "productsSubscriptions": "Продукты и подписки",
       "startSelling": "Начните продавать свои курсы!",
       "title": "Платежи",
@@ -2439,7 +2222,7 @@
           "recommendedSize": "Рекомендуемый размер: 100x100",
           "saveChanges": "Сохранить изменения",
           "saving": "Сохранение...",
-          "title": "Настройки учетной записи",
+          "title": "Настройки аккаунта",
           "uploadingAvatar": "Загрузка",
           "usernameLabel": "Имя пользователя",
           "usernamePlaceholder": "Введите ваше имя пользователя"
@@ -2459,10 +2242,7 @@
           "promptLogoutOnPasswordChange": "Пожалуйста, войдите снова с вашим новым паролем",
           "title": "Изменить пароль",
           "updateButton": "Обновить пароль",
-          "updatingButton": "Обновление...",
-          "currentPasswordLabel": "Текущий пароль",
-          "newPasswordLabel": "Новый пароль",
-          "promptLogoutOnPasswordChange": "Пожалуйста, войдите снова с вашим новым паролем"
+          "updatingButton": "Обновление..."
         }
       },
       "general": "Общие",
@@ -2500,7 +2280,7 @@
         "recommendedSize": "Рекомендуемый размер: 100x100",
         "saveChanges": "Сохранить изменения",
         "saving": "Сохранение...",
-        "title": "Настройки учетной записи",
+        "title": "Настройки аккаунта",
         "uploadingAvatar": "Загрузка",
         "username": "Имя пользователя",
         "usernamePlaceholder": "Введите ваше имя пользователя"
@@ -2773,16 +2553,7 @@
         "statusPending": "В ожидании",
         "statusSigned": "Зарегистрирован",
         "textAreaPlaceholder": "Пример: spike.spiegel@bepop.space, michael.scott@dundermifflin.com",
-        "title": "Пригласить пользователей в вашу организацию",
-        "sendingInvite": "Отправка приглашения...",
-        "inviteSentSuccess": "Приглашение отправлено",
-        "errors": {
-          "sendInviteFailed": "Ошибка отправки приглашения"
-        },
-        "selectInviteCode": "Выбрать код приглашения",
-        "enterEmailAddress": "Введите адрес электронной почты",
-        "noInviteCodesAvailable": "Нет доступных кодов приглашения",
-        "noInvitedUsers": "Приглашенных пользователей нет."
+        "title": "Пригласить пользователей в вашу организацию"
       },
       "addTitle": "Пригласить участников",
       "desktopOnlyMessage1": "Эта страница доступна только с настольного устройства.",
@@ -2791,19 +2562,13 @@
       "signups": "Регистрация и коды приглашения",
       "signupsDescription": "Выберите, откуда пользователи могут присоединиться к вашей организации",
       "signupsSection": {
-        "deleteInviteFailed": "Ошибка удаления кода приглашения.",
-        "inviteDeletedSuccess": "Код приглашения удален.",
-        "changeJoinMethodFailed": "Ошибка изменения метода присоединения.",
-        "joinMethodChangedSuccess": "Метод присоединения изменен на {method}.",
-        "changingJoinMethod": "Изменение метода присоединения...",
-        "deletingInvite": "Удаление кода приглашения...",
         "actionsHeader": "Действия",
         "activeLabel": "Активно",
         "changeJoinMethodFailed": "Ошибка изменения метода присоединения.",
         "changeToClosedButton": "Изменить на закрытый",
         "changeToClosedConfirmation": "Вы уверены, что хотите изменить механизм регистрации на закрытый? Это позволит пользователям присоединяться к вашей организации только по приглашению.",
-        "changeToClosedModalTitle": "Переключить на закрытый?",
-        "changeToOpenButton": "Переключить на открытый",
+        "changeToClosedModalTitle": "Изменить на закрытый?",
+        "changeToOpenButton": "Изменить на открытый",
         "changeToOpenConfirmation": "Вы уверены, что хотите изменить механизм регистрации на открытый? Это позволит пользователям свободно присоединяться к вашей организации.",
         "changeToOpenModalTitle": "Изменить на открытый?",
         "changingJoinMethod": "Изменение метода присоединения...",
@@ -2831,8 +2596,7 @@
         "openDescription": "Пользователи могут свободно присоединяться со страницы регистрации",
         "openTitle": "Открытый доступ",
         "signupLinkHeader": "Ссылка для регистрации",
-        "typeHeader": "Тип",
-        "noInviteCodesGenerated": "Коды приглашения еще не сгенерированы."
+        "typeHeader": "Тип"
       },
       "signupsTitle": "Регистрация и коды приглашения",
       "usergroups": "Группы пользователей",
@@ -3070,7 +2834,7 @@
     "loadingCourses": "Загрузка курсов...",
     "noFeaturedCourses": "Нет выбранных рекомендованных курсов"
   },
-  "LearnhouseUniversity": "Университет OpenU",
+  "LearnhouseUniversity": "Университет LearnHouse",
   "NewCollectionPage": {
     "cancelButton": "Отмена",
     "createButton": "Создать коллекцию",
@@ -3099,71 +2863,6 @@
   "NotFoundPage": {
     "button": "Вернуться на главную",
     "message": "Приносим извинения за неудобства. Похоже, вы пытаетесь получить доступ к странице, которая была удалена или никогда не существовала."
-  },
-  "Payments": {
-    "Configuration": {
-      "aboutStripe": {
-        "acceptPayments": "Принимать платежи за курсы и подписки",
-        "accessAnalytics": "Доступ к подробной аналитике платежей",
-        "handleCurrencies": "Обработка нескольких валют и способов оплаты",
-        "learnMore": "Узнайте больше о Stripe",
-        "manageSubscriptions": "Управление повторяющимися платежами и подписками",
-        "title": "О интеграции Stripe"
-      },
-      "accountNotConfigured": "Идентификатор аккаунта не настроен",
-      "configUpdatedSuccess": "Конфигурация успешно обновлена",
-      "connectButton": "Подключиться к Stripe",
-      "connectedStatus": "Подключено",
-      "connectingButton": "Подключение к Stripe...",
-      "deletingStripeConfig": "Удаление конфигурации Stripe...",
-      "editModalDescription": "Измените свою конфигурацию Stripe",
-      "editModalTitle": "Изменить конфигурацию Stripe",
-      "enableButton": "Включить Stripe",
-      "enablingStripe": "Включение Stripe...",
-      "errorLoading": "Ошибка загрузки конфигурации платежей",
-      "errors": {
-        "deleteStripeConfigFailed": "Не удалось удалить конфигурацию Stripe",
-        "enableStripeFailed": "Не удалось включить Stripe",
-        "loadStripeConfigFailed": "Не удалось загрузить существующую конфигурацию",
-        "startStripeOnboardingFailed": "Не удалось начать подключение Stripe",
-        "updateConfigFailed": "Не удалось обновить конфигурацию"
-      },
-      "linkedAccountLabel": "Связанный аккаунт",
-      "loading": "Загрузка...",
-      "notConnectedStatus": "Не подключено",
-      "pageDescription": "Управление конфигурацией платежей вашей организации",
-      "pageTitle": "Настройка платежей",
-      "removeConnectionButton": "Удалить подключение",
-      "removeConnectionConfirmation": "Вы уверены, что хотите удалить подключение Stripe? Это действие невозможно отменить.",
-      "removeConnectionTitle": "Удалить подключение Stripe",
-      "saveButton": "Сохранить",
-      "startingStripeOnboarding": "Запуск подключения Stripe",
-      "stripeAccountIdLabel": "Идентификатор аккаунта Stripe",
-      "stripeConfigDeletedSuccess": "Конфигурация Stripe успешно удалена",
-      "stripeEnabledSuccess": "Stripe успешно включен",
-      "updatingConfig": "Обновление конфигурации..."
-    },
-    "CustomersPage": {
-      "amountHeader": "Сумма",
-      "description": "Просмотр и управление информацией о ваших клиентах",
-      "errors": {
-        "loadCustomersFailed": "Ошибка загрузки клиентов"
-      },
-      "noCustomerData": "Данные о клиентах отсутствуют",
-      "noCustomers": "Клиенты не найдены",
-      "oneTimeType": "Единовременный",
-      "productHeader": "Продукт",
-      "purchaseDateHeader": "Дата покупки",
-      "statusHeader": "Статус",
-      "subscriptionType": "Подписка",
-      "title": "Клиенты",
-      "typeHeader": "Тип",
-      "userHeader": "Пользователь"
-    },
-    "LinkCourseModal": {
-      "alreadyLinked": "Уже связано",
-      "linkCourseButton": "Связать курс"
-    }
   },
   "SearchPage": {
     "collections": "Коллекции",

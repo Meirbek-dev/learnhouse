@@ -196,7 +196,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
               selected={dueDate ? new Date(dueDate) : undefined}
               onSelect={handleDueDateChange}
               disabled={false}
-              initialFocus
+              autoFocus
             />
           </PopoverContent>
         </Popover>
