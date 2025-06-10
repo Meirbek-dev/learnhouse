@@ -133,7 +133,7 @@ const OrgScripts: React.FC = () => {
             scriptTag.textContent || ''
           )
           scriptElement.textContent = `
-            /* LearnHouse Organization Script - ${scriptName} */
+            /* OpenU Organization Script - ${scriptName} */
             try {
               (function() {
                 'use strict';
@@ -153,7 +153,7 @@ const OrgScripts: React.FC = () => {
         scriptElement.dataset.orgSlug = org?.slug
 
         const comment = document.createComment(
-          ` LearnHouse Organization Script - ${scriptName} (${safeScriptId}) `
+          ` OpenU Organization Script - ${scriptName} (${safeScriptId}) `
         )
         document.body.appendChild(comment)
         document.body.appendChild(scriptElement)
@@ -163,7 +163,7 @@ const OrgScripts: React.FC = () => {
 
         const sanitizedContent = sanitizeScriptContent(scriptContent)
         scriptElement.textContent = `
-          /* LearnHouse Organization Script - ${scriptName} */
+          /* OpenU Organization Script - ${scriptName} */
           try {
             (function() {
               'use strict';
@@ -182,7 +182,7 @@ const OrgScripts: React.FC = () => {
         scriptElement.dataset.orgSlug = org?.slug
 
         const comment = document.createComment(
-          ` LearnHouse Organization Script - ${scriptName} (${safeScriptId}) `
+          ` OpenU Organization Script - ${scriptName} (${safeScriptId}) `
         )
         document.body.appendChild(comment)
         document.body.appendChild(scriptElement)
