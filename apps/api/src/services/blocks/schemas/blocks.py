@@ -8,4 +8,4 @@ class Block(BaseModel):
     course_id: str
     org_id: str
     block_type: Literal["quizBlock", "videoBlock", "pdfBlock", "imageBlock"]
-    block_data: Any
+    block_data: Any = None

@@ -19,19 +19,19 @@ class SecurityConfig(BaseModel):
 
 
 class ChromaDBConfig(BaseModel):
-    isSeparateDatabaseEnabled: bool | None
-    db_host: str | None
+    isSeparateDatabaseEnabled: bool | None = None
+    db_host: str | None = None
 
 
 class AIConfig(BaseModel):
-    openai_api_key: str | None
-    is_ai_enabled: bool | None
-    chromadb_config: ChromaDBConfig | None
+    openai_api_key: str | None = None
+    is_ai_enabled: bool | None = None
+    chromadb_config: ChromaDBConfig | None = None
 
 
 class S3ApiConfig(BaseModel):
-    bucket_name: str | None
-    endpoint_url: str | None
+    bucket_name: str | None = None
+    endpoint_url: str | None = None
 
 
 class ContentDeliveryConfig(BaseModel):
@@ -57,19 +57,19 @@ class MailingConfig(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
-    sql_connection_string: Optional[str]
+    sql_connection_string: Optional[str] = None
 
 
 class RedisConfig(BaseModel):
-    redis_connection_string: Optional[str]
+    redis_connection_string: Optional[str] = None
 
 
 class InternalStripeConfig(BaseModel):
-    stripe_secret_key: str | None
-    stripe_publishable_key: str | None
-    stripe_webhook_standard_secret: str | None
-    stripe_webhook_connect_secret: str | None
-    stripe_client_id: str | None
+    stripe_secret_key: str | None = None
+    stripe_publishable_key: str | None = None
+    stripe_webhook_standard_secret: str | None = None
+    stripe_webhook_connect_secret: str | None = None
+    stripe_client_id: str | None = None
 
 
 class InternalPaymentsConfig(BaseModel):

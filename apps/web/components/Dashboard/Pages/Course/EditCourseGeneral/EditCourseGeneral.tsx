@@ -90,7 +90,11 @@ const initializeLearnings = (learningsInput: any): string => {
       if (learningsInput.trim() !== '') {
         return JSON.stringify([
           // Use a stable placeholder ID for the item created from a simple string
-          { id: 'init-learn-item-from-string', text: learningsInput, emoji: '📝' },
+          {
+            id: 'init-learn-item-from-string',
+            text: learningsInput,
+            emoji: '📝',
+          },
         ])
       }
     }
@@ -155,12 +159,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
         })
       }
     }
-  }, [
-    formik.values,
-    isLoading,
-    courseStructure,
-    dispatchCourse,
-  ])
+  }, [formik.values, isLoading, courseStructure, dispatchCourse])
 
   // Early return after all hooks have been called
   if (!dispatchCourse) {

@@ -64,7 +64,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url))
   }
 
-    // Health Check
+  // Health Check
   if (pathname.startsWith('/health')) {
     return NextResponse.rewrite(new URL('/api/health', req.url))
   }

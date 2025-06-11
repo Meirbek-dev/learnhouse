@@ -9,4 +9,3 @@ router = APIRouter()
 async def config():
     config = get_openu_config()
     return config.dict()
-

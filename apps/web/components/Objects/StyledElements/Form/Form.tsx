@@ -22,12 +22,12 @@ export const FormLabelAndMessage = (props: {
 }) => (
   <div className="flex items-center space-x-3">
     <FormLabel className="grow text-sm">{props.label}</FormLabel>
-    {(props.message && (
+    {props.message && (
       <div className="flex items-center space-x-1 rounded-md text-sm text-red-700">
         <Info size={10} />
         <div>{props.message}</div>
       </div>
-    ))}
+    )}
   </div>
 )
 

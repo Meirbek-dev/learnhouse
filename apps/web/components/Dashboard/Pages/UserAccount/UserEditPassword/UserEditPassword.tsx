@@ -32,14 +32,14 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 function UserEditPassword() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const t2 = useTranslations('DashPage.Notifications')
-  const t = useTranslations(
+  const t = useTranslations('DashPage.Notifications')
+  const tPassword = useTranslations(
     'DashPage.UserAccountSettings.UserAccount.EditPassword'
   )
-  const validationSchema = useMemo(() => createValidationSchema(t2), [t2])
+  const validationSchema = useMemo(() => createValidationSchema(t), [t])
 
   const updatePasswordUI = async (values: any) => {
-    const loadingToast = toast.loading(t2('updating'))
+    const loadingToast = toast.loading(t('updating'))
     try {
       const user_id = session.data.user.id
       const response = await updatePassword(user_id, values, access_token)
@@ -48,7 +48,7 @@ function UserEditPassword() {
         toast.dismiss(loadingToast)
 
         // Show success message and notify about logout
-        toast.success(t2('passwordUpdateSuccess'), {
+        toast.success(t('passwordUpdateSuccess'), {
           duration: 4000,
         })
         toast(
@@ -67,12 +67,12 @@ function UserEditPassword() {
         await new Promise((resolve) => setTimeout(resolve, 4000))
         signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })
       } else {
-        toast.error(t2('passwordUpdateError'), {
+        toast.error(t('passwordUpdateError'), {
           id: loadingToast,
         })
       }
     } catch (error: any) {
-      toast.error(t2('passwordUpdateError'), { id: loadingToast })
+      toast.error(t('passwordUpdateError'), { id: loadingToast })
       console.error('Password update error:', error)
     }
   }
@@ -83,8 +83,10 @@ function UserEditPassword() {
     <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <div className="flex flex-col">
         <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-          <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
-          <h2 className="text-md text-gray-500">{t('description')}</h2>
+          <h1 className="text-xl font-bold text-gray-800">
+            {tPassword('title')}
+          </h1>
+          <h2 className="text-md text-gray-500">{tPassword('description')}</h2>
         </div>
 
         <div className="px-8 py-6">
@@ -102,7 +104,7 @@ function UserEditPassword() {
               <Form className="mx-auto w-full max-w-2xl space-y-6">
                 <div>
                   <Label htmlFor="old_password">
-                    {t('currentPasswordLabel')}
+                    {tPassword('currentPasswordLabel')}
                   </Label>
                   <Input
                     type="password"
@@ -119,7 +121,9 @@ function UserEditPassword() {
                 </div>
 
                 <div>
-                  <Label htmlFor="new_password">{t('newPasswordLabel')}</Label>
+                  <Label htmlFor="new_password">
+                    {tPassword('newPasswordLabel')}
+                  </Label>
                   <Input
                     type="password"
                     id="new_password"
@@ -136,7 +140,7 @@ function UserEditPassword() {
 
                 <div className="flex items-center space-x-2 rounded-md bg-amber-50 p-3 text-amber-600">
                   <AlertTriangle size={16} />
-                  <span className="text-sm">{t('logoutWarning')}</span>
+                  <span className="text-sm">{tPassword('logoutWarning')}</span>
                 </div>
 
                 <div className="flex justify-end pt-2">
@@ -145,7 +149,9 @@ function UserEditPassword() {
                     disabled={isSubmitting}
                     className="bg-black text-white hover:bg-black/90"
                   >
-                    {isSubmitting ? t('updatingButton') : t('updateButton')}
+                    {isSubmitting
+                      ? tPassword('updatingButton')
+                      : tPassword('updateButton')}
                   </Button>
                 </div>
               </Form>

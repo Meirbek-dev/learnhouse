@@ -4,19 +4,19 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.2"
 dependencies = [
-  "boto3>=1.38.34",
-  "botocore>=1.38.34",
-  "faker>=37.3.0",
+  "boto3>=1.38.35",
+  "botocore>=1.38.35",
+  "faker>=37.4.0",
   "fastapi==0.115.9",
-  "fastapi-another-jwt-auth>=0.1.11",
+  "fastapi-jwt-auth>=0.5.0",
   "httpx>=0.28.1",
-  "langchain>=0.3.25",
-  "langchain-community>=0.3.25",
-  "langchain-openai>=0.3.22",
+  "langchain<=0.2.6",
+  "langchain-community<=0.2.6",
+  "langchain-openai>=0.1.14",
   "openai>=1.86.0",
   "passlib>=1.7.4",
   "psycopg2-binary>=2.9.10",
-  "pydantic[email]>=2.11.5",
+  "pydantic[email]>=1.10.22,<2.0.0",
   "pytest>=8.4.0",
   "python-dotenv>=1.1.0",
   "python-multipart>=0.0.20",
@@ -35,7 +35,7 @@ dependencies = [
   "stripe>=12.2.0",
   "python-jose>=3.5.0",
   "logfire[sqlalchemy]>=3.18.0",
-  "beautifulsoup4>=4.13.4"
+  "beautifulsoup4>=4.13.4",
 ]
 
 [tool.ruff]

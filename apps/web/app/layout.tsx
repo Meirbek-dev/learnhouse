@@ -26,12 +26,7 @@ export default async function RootLayout({
 
   return (
     <html className={`${dmSans.className}`} lang={locale}>
-      <head>
-        <script
-          crossOrigin="anonymous"
-          src="//unpkg.com/react-scan/dist/auto.global.js"
-        />
-      </head>
+      <head />
       <body className="antialiased">
         {isDevEnv ? (
           ''

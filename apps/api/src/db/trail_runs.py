@@ -55,10 +55,10 @@ class TrailRunRead(BaseModel):
     org_id: int = Field(default=None, foreign_key="organization.id")
     user_id: int = Field(default=None, foreign_key="user.id")
     # course object
-    course: Optional[dict]
+    course: Optional[dict] = None
     # timestamps
-    creation_date: Optional[str]
-    update_date: Optional[str]
+    creation_date: Optional[str] = None
+    update_date: Optional[str] = None
     # number of activities in course
     course_total_steps: int
     steps: list[TrailStep]

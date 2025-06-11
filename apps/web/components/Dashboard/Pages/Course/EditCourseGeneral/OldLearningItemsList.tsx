@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Plus, X, Link as LinkIcon, Smile } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Plus, X, Link as LinkIcon } from 'lucide-react'
 import Picker from '@emoji-mart/react'
 import data from '@emoji-mart/data'
 import { Input } from '@components/ui/input'
@@ -228,10 +228,7 @@ const LearningItemsList = ({
     // We'll use a small delay to allow other focus events to occur first
     setTimeout(() => {
       // Only clear if we're not focusing another input in this component
-      if (
-        !document.activeElement ||
-        !document.activeElement.classList.contains('learning-item-input')
-      ) {
+      if (!document.activeElement?.classList.contains('learning-item-input')) {
         setFocusedItemId(null)
       }
     }, 100)
