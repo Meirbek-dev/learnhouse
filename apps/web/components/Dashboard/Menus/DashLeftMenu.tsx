@@ -74,17 +74,7 @@ function DashLeftMenu() {
               sideOffset={8}
               side="right"
             >
-              <Image alt="OpenU logo" width={40} src={OpenUDashboardLogo} />
-            </ToolTip>
-            <ToolTip
-              content={t('tooltips.yourOrganization')}
-              slateBlack
-              sideOffset={8}
-              side="right"
-            >
-              <div className="justify-center rounded-md bg-black/40 px-3 py-1 text-center text-[10px] opacity-40">
-                {org?.name}
-              </div>
+              <Image alt="OpenU лого" width={40} src={OpenUDashboardLogo} />
             </ToolTip>
           </Link>
         </div>

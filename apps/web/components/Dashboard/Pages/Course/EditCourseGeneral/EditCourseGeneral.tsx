@@ -89,12 +89,14 @@ const initializeLearnings = (learningsInput: any): string => {
     } catch {
       if (learningsInput.trim() !== '') {
         return JSON.stringify([
-          { id: Date.now().toString(), text: learningsInput, emoji: '📝' },
+          // Use a stable placeholder ID for the item created from a simple string
+          { id: 'init-learn-item-from-string', text: learningsInput, emoji: '📝' },
         ])
       }
     }
   }
-  return JSON.stringify([{ id: Date.now().toString(), text: '', emoji: '📝' }])
+  // Use a stable placeholder ID for the default new learning item
+  return JSON.stringify([{ id: 'init-new-learn-item', text: '', emoji: '📝' }])
 }
 
 function EditCourseGeneral(_props: EditCourseStructureProps) {
@@ -155,7 +157,6 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
     }
   }, [
     formik.values,
-    formik.initialValues,
     isLoading,
     courseStructure,
     dispatchCourse,

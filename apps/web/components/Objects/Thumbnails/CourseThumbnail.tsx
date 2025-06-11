@@ -121,7 +121,7 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
           <h2 className="line-clamp-2 min-h-[2.75rem] text-base font-bold leading-tight text-gray-800">
             {course.name}
           </h2>
-          <p className="line-clamp-3 min-h-[3.75rem] text-xs leading-normal text-gray-700">
+          <p className="line-clamp-3 min-h-[2.75rem] text-xs leading-normal text-gray-700">
             {course.description}
           </p>
         </div>
