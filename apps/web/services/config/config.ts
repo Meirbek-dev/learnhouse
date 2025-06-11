@@ -8,23 +8,14 @@ export const OPENU_TOP_DOMAIN = process.env.NEXT_PUBLIC_OPENU_TOP_DOMAIN
 export const getAPIUrl = () => OPENU_API_URL
 export const getBackendUrl = () => OPENU_BACKEND_URL
 
-// Multi Organization Mode
-export const isMultiOrgModeEnabled = () =>
-  process.env.NEXT_PUBLIC_OPENU_MULTI_ORG === 'true'
-
 export const getUriWithOrg = (orgslug: string, path: string) => {
-  return isMultiOrgModeEnabled()
-    ? `${OPENU_HTTP_PROTOCOL}${orgslug}.${OPENU_DOMAIN}${path}`
-    : `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
+  return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
 }
 
 export const getUriWithoutOrg = (path: string) =>
   `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`
 
 export const getOrgFromUri = () => {
-  if (isMultiOrgModeEnabled()) {
-    return getDefaultOrg()
-  }
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
     return hostname.replace(`.${OPENU_DOMAIN}`, '')

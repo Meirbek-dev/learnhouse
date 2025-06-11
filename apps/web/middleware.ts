@@ -1,9 +1,7 @@
 import {
-  OPENU_DOMAIN,
   OPENU_TOP_DOMAIN,
   getDefaultOrg,
   getUriWithOrg,
-  isMultiOrgModeEnabled,
 } from './services/config/config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -25,18 +23,6 @@ export const config = {
   ],
 }
 
-// Helper to get orgslug from host or default
-function extractOrgslug(
-  fullhost: string,
-  default_org: string,
-  hosting_mode: string
-): string {
-  if (hosting_mode === 'multi') {
-    return fullhost ? fullhost.replace(`.${OPENU_DOMAIN}`, '') : default_org
-  }
-  return default_org
-}
-
 // Helper to set orgslug cookie
 function setOrgslugCookie(response: NextResponse, orgslug: string) {
   response.cookies.set({
@@ -49,10 +35,8 @@ function setOrgslugCookie(response: NextResponse, orgslug: string) {
 
 export default async function middleware(req: NextRequest) {
   // Get initial data
-  const hosting_mode = isMultiOrgModeEnabled() ? 'multi' : 'single'
   const default_org = getDefaultOrg() as string
   const { pathname, search } = req.nextUrl
-  const fullhost = req.headers?.get('host') || ''
   const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value
 
   // Out of orgslug paths & rewrite
@@ -80,27 +64,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url))
   }
 
-  // Stripe callback URL
-  if (pathname.startsWith('/payments/stripe/connect/oauth')) {
-    const searchParams = req.nextUrl.searchParams
-    const orgslug = searchParams.get('state')?.split('_')[0] // Assuming state parameter contains orgslug_randomstring
-
-    // Construct the new URL with the required parameters
-    const redirectUrl = new URL('/payments/stripe/connect/oauth', req.url)
-
-    // Preserve all original search parameters
-    searchParams.forEach((value, key) => {
-      redirectUrl.searchParams.append(key, value)
-    })
-
-    // Add orgslug if available
-    if (orgslug) {
-      redirectUrl.searchParams.set('orgslug', orgslug)
-    }
-    return NextResponse.rewrite(redirectUrl)
-  }
-
-  // Health Check
+    // Health Check
   if (pathname.startsWith('/health')) {
     return NextResponse.rewrite(new URL('/api/health', req.url))
   }
@@ -121,18 +85,16 @@ export default async function middleware(req: NextRequest) {
 
   // Sitemap
   if (pathname.startsWith('/sitemap.xml')) {
-    const orgslug = extractOrgslug(fullhost, default_org, hosting_mode)
     const sitemapUrl = new URL('/api/sitemap', req.url)
     const response = NextResponse.rewrite(sitemapUrl)
-    response.headers.set('X-Sitemap-Orgslug', orgslug)
+    response.headers.set('X-Sitemap-Orgslug', default_org)
     return response
   }
 
   // Organization Mode Routing
-  const orgslug = extractOrgslug(fullhost, default_org, hosting_mode)
   const response = NextResponse.rewrite(
-    new URL(`/orgs/${orgslug}${pathname}`, req.url)
+    new URL(`/orgs/${default_org}${pathname}`, req.url)
   )
-  setOrgslugCookie(response, orgslug)
+  setOrgslugCookie(response, default_org)
   return response
 }
