@@ -66,7 +66,7 @@
 		"dompurify": "^3.2.6",
 		"emblor": "^1.4.8",
 		"formik": "^2.4.6",
-		"framer-motion": "^12.16.0",
+		"framer-motion": "^12.17.0",
 		"get-youtube-id": "^1.0.1",
 		"highlight.js": "^11.11.1",
 		"katex": "^0.16.22",
@@ -102,9 +102,9 @@
 	"devDependencies": {
 		"@eslint/eslintrc": "^3.3.1",
 		"@eslint/js": "^9.28.0",
-		"@tailwindcss/postcss": "4.1.8",
+		"@tailwindcss/postcss": "4.1.9",
 		"@types/node": "24.0.0",
-		"@types/react": "19.1.7",
+		"@types/react": "19.1.8",
 		"@types/react-dom": "19.1.6",
 		"@types/react-katex": "^3.0.4",
 		"@types/react-transition-group": "^4.4.12",
@@ -115,12 +115,12 @@
 		"eslint-plugin-unused-imports": "^4.1.4",
 		"postcss": "^8.5.4",
 		"prettier-plugin-tailwindcss": "^0.6.12",
-		"tailwindcss": "4.1.8",
+		"tailwindcss": "4.1.9",
 		"typescript": "5.8.3"
 	},
 	"pnpm": {
 		"overrides": {
-			"@types/react": "19.1.7",
+			"@types/react": "19.1.8",
 			"@types/react-dom": "19.1.6"
 		}
 	}
