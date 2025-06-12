@@ -38,33 +38,33 @@ def install(
 
     db_session = Session(engine)
 
-    if short:
-        # Install the default elements
-        print("Installing default elements...")
-        install_default_elements(db_session)
-        print("Default elements installed ✅")
+    # Install the default elements
+    print("Installing default elements...")
+    install_default_elements(db_session)
+    print("Default elements installed ✅")
 
+    if short:
         # Create the Organization
-        print("Creating default organization...")
+        print("Creating OpenU...")
         org = OrganizationCreate(
-            name="Default Organization",
-            description="Default Organization",
-            slug="default",
-            email="",
+            name="OpenU",
+            description="OpenU",
+            slug="openu",
+            email="meirbek.123@gmail.com",
             logo_image="",
             thumbnail_image="",
         )
         install_create_organization(org, db_session)
-        print("Default organization created ✅")
+        print("OpenU created ✅")
 
         # Create Organization User
-        print("Creating default organization user...")
-        # Generate random 6 digit password
-        email = "admin@school.dev"
+        print("Creating OpenU user...")
+        # Generate random 8 digit password
+        email = "meirbek.dev@gmail.com"
         password = generate_password(8)
-        user = UserCreate(username="admin", email=EmailStr(email), password=password)
-        install_create_organization_user(user, "default", db_session)
-        print("Default organization user created ✅")
+        user = UserCreate(username="Meirbek", email=EmailStr(email), password=password)
+        install_create_organization_user(user, "openu", db_session)
+        print("OpenU user created ✅")
 
         # Show the user how to login
         print("Installation completed ✅")
@@ -75,21 +75,13 @@ def install(
         print("⚠️ Remember to change the password after logging in ⚠️")
 
     else:
-        # Install the default elements
-        print("Installing default elements...")
-        install_default_elements(db_session)
-        print("Default elements installed ✅")
-
         # Create the Organization
         print("Creating your organization...")
         orgname = typer.prompt("What's shall we call your organization?")
-        slug = typer.prompt(
-            "What's the slug for your organization? (e.g. school, acme)"
-        )
         org = OrganizationCreate(
             name=orgname,
-            description="Default Organization",
-            slug=slug.lower(),
+            description="OpenU",
+            slug="openu",
             email="",
             logo_image="",
             thumbnail_image="",
@@ -103,12 +95,11 @@ def install(
         email = typer.prompt("What's the email for the user?")
         password = typer.prompt("What's the password for the user?", hide_input=True)
         user = UserCreate(username=username, email=EmailStr(email), password=password)
-        install_create_organization_user(user, slug, db_session)
+        install_create_organization_user(user, "openu", db_session)
         print(username + " user created ✅")
 
         # Show the user how to login
-        print("Installation completed ✅")
-        print("")
+        print("Installation completed ✅\n")
         print("Login with the following credentials:")
         print("email: " + email)
         print("password: The password you entered")

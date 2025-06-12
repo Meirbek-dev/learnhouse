@@ -213,7 +213,7 @@ async def get_courses_orgslug(
     org_slug: str,
     db_session: Session,
     page: int = 1,
-    limit: int = 10,
+    limit: int = 20,
 ) -> List[CourseRead]:
     offset = (page - 1) * limit
 

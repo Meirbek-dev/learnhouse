@@ -16,10 +16,10 @@ async def create_initial_data_for_tests(db_session: Session):
 
     # Initiate test Organization
     test_org = OrganizationCreate(
-        name="Wayne Enterprises",
+        name="OpenU",
         description=None,
-        slug="wayne",
-        email="hello@wayne.dev",
+        slug="openu",
+        email="meirbek.b2k@gmail.com",
         logo_image=None,
     )
 
@@ -28,18 +28,18 @@ async def create_initial_data_for_tests(db_session: Session):
 
     users = [
         UserCreate(
-            username="batman",
-            first_name="Bruce",
-            last_name="Wayne",
-            email="bruce@wayne.com",
-            password="imbatman",
+            username="studento",
+            first_name="Студент",
+            last_name="Студентов",
+            email="student@test.com",
+            password="imstudent",
         ),
         UserCreate(
-            username="robin",
-            first_name="Richard John",
-            last_name="Grayson",
-            email="robin@wayne.com",
-            password="secret",
+            username="testo",
+            first_name="Тест Тестович",
+            last_name="Тестов",
+            email="test@test.com",
+            password="test1234",
         ),
     ]
 

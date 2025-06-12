@@ -32,7 +32,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Stage 2: Production
 # Use a lean Python-only image for the final production image.
 # This reduces the final image size as uv is not needed at runtime.
-FROM python:3.13.3-alpine
+FROM python:3.13.4-alpine
 
 # Set the working directory
 WORKDIR /app

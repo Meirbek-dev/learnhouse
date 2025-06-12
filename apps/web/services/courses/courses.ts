@@ -17,7 +17,7 @@ export async function getOrgCourses(
   access_token?: any
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/10`,
+    `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/20`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)
@@ -28,7 +28,7 @@ export async function searchOrgCourses(
   org_slug: string,
   query: string,
   page = 1,
-  limit = 10,
+  limit = 20,
   next: any,
   access_token?: any
 ) {

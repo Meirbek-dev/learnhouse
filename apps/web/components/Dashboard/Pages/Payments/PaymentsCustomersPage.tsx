@@ -18,7 +18,7 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled'
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface PaymentUserData {
   payment_user_id: number
@@ -43,7 +43,7 @@ interface PaymentUserData {
 
 function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
   const t = useTranslations('Payments.CustomersPage')
-
+  const locale = useLocale()
   if (!data || data.length === 0) {
     return (
       <div className="py-8 text-center text-gray-500">{t('noCustomers')}</div>
@@ -121,7 +121,7 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
               </Badge>
             </TableCell>
             <TableCell>
-              {new Date(item.creation_date).toLocaleDateString()}
+              {new Date(item.creation_date).toLocaleDateString(locale)}
             </TableCell>
           </TableRow>
         ))}

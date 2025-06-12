@@ -26,7 +26,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             initial="hidden" // Set the initial state to variants.hidden
             animate="enter" // Animated state to variants.enter
             exit="exit" // Exit state (used later) to variants.exit
-            transition={{ type: 'linear' }} // Set the transition to linear
+            transition={{ type: 'tween', ease: 'linear', duration: 0.5 }} // Set the transition to linear
             className=""
           >
             {children}

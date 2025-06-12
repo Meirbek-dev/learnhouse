@@ -289,7 +289,7 @@ async def api_get_user_courses(
     current_user: PublicUser = Depends(get_current_user),
     user_id: int,
     page: int = 1,
-    limit: int = 10,
+    limit: int = 20,
 ) -> List[CourseRead]:
     """
     Get courses made or contributed by a user.
