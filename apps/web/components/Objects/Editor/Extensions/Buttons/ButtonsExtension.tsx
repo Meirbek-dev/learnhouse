@@ -1,7 +1,7 @@
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
 import type { FC, ChangeEvent } from 'react'
 import { useState, useRef, useEffect } from 'react'
-import Picker from '@emoji-mart/react'
+import EmojiPicker, { Theme } from 'emoji-picker-react'
 import {
   ArrowRight,
   ChevronDown,
@@ -59,10 +59,10 @@ const ButtonsExtension: FC = (props: any) => {
   }, [])
 
   const handleEmojiSelect = (emoji: any) => {
-    setEmoji(emoji.native)
+    setEmoji(emoji.emoji)
     setShowEmojiPicker(false)
     props.updateAttributes({
-      emoji: emoji.native,
+      emoji: emoji.emoji,
     })
   }
 
@@ -198,7 +198,16 @@ const ButtonsExtension: FC = (props: any) => {
       </div>
       {isEditable && showEmojiPicker && (
         <div ref={pickerRef}>
-          <Picker onEmojiSelect={handleEmojiSelect} />
+          <EmojiPicker
+            onEmojiClick={handleEmojiSelect}
+            height="30rem"
+            width="25rem"
+            theme={Theme.LIGHT}
+            previewConfig={{ showPreview: false }}
+            searchPlaceHolder={t('searchEmojis')}
+            autoFocusSearch={true}
+            skinTonesDisabled={true}
+          />
         </div>
       )}
       {isEditable && showLinkInput && (

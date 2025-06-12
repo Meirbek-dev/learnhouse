@@ -5,7 +5,17 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer'
 import type ArtplayerType from 'artplayer'
 import { useLocale } from 'next-intl'
-import getYouTubeID from 'get-youtube-id'
+
+// Function to extract YouTube video ID from various YouTube URL formats
+function getYouTubeID(url: string): string | null {
+  if (!url) return null
+
+  const regex =
+    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+  const match = url.match(regex)
+
+  return match ? match[1] : null
+}
 
 interface VideoDetails {
   startTime?: number

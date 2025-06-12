@@ -10,6 +10,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithoutOrg } from '@services/config/config'
 import Tooltip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { useTranslations } from 'next-intl'
+import { Badge } from '@components/ui/badge'
 
 export const HeaderProfileBox = () => {
   const session = useLHSession() as any
@@ -53,9 +54,9 @@ export const HeaderProfileBox = () => {
             <div className="flex items-center space-x-2">
               <p className="text-sm capitalize">{session.data.user.username}</p>
               {isUserAdmin.isAdmin && (
-                <div className="rounded-md bg-rose-300 px-2 py-1 text-[10px] font-bold shadow-inner">
+                <Badge className="px-2 py-1" variant="destructive">
                   {t('adminBadge')}
-                </div>
+                </Badge>
               )}
             </div>
             <div className="flex items-center space-x-2">

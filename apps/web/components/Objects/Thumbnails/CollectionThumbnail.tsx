@@ -27,8 +27,8 @@ function CollectionThumbnail(props: PropsType) {
   const org = useOrg() as any
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
-      <div className="flex h-full w-full items-center justify-between bg-indigo-600 p-4">
-        <div className="flex items-center space-x-4">
+      <div className="flex h-full w-full items-center justify-between bg-blue-500 p-4">
+        <div className="flex items-center space-x-2">
           <div className="flex -space-x-3">
             {props.collection.courses.slice(0, 3).map(
               (course: any, index: number) =>
@@ -52,7 +52,7 @@ function CollectionThumbnail(props: PropsType) {
                 props.orgslug,
                 `/collection/${removeCollectionPrefix(props.collection.collection_uuid)}`
               )}
-              className="text-xl font-bold text-white hover:underline"
+              className="text-lg font-bold text-white hover:underline"
             >
               {props.collection.name}
             </Link>
@@ -100,10 +100,10 @@ const CollectionAdminEditsArea = (props: any) => {
           })}
           dialogTrigger={
             <button
-              className="absolute right-2 top-2 rounded-full bg-red-500 p-2 text-white transition-colors duration-300 hover:bg-red-600"
+              className="absolute right-2 top-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
               rel="noopener noreferrer"
             >
-              <X size={18} />
+              <X size={14} />
             </button>
           }
           functionToExecute={() => deleteCollectionUI(props.collection_uuid)}

@@ -1535,7 +1535,7 @@ async def grade_assignment_submission(
 
     # return OK
     return {
-        "message": "Assignment User Submission graded with the grade of " + str(grade)
+        "message": "Задание оценено на " + str(grade) + " баллов"
     }
 
 
@@ -1671,7 +1671,7 @@ async def mark_activity_as_done_for_user(
     db_session.refresh(trailstep)
 
     # return OK
-    return {"message": "Activity marked as done for user"}
+    return {"message": "Активность отмечена как выполненная"}
 
 
 async def get_assignments_from_course(

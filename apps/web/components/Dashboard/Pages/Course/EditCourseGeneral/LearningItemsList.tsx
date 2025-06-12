@@ -1,8 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { Plus, X, Link as LinkIcon } from 'lucide-react'
-import Picker from '@emoji-mart/react'
-import data from '@emoji-mart/data'
+import EmojiPicker, { Theme } from 'emoji-picker-react'
 import { Input } from '@components/ui/input' // Assuming this path is correct
 import { useTranslations } from 'next-intl'
 
@@ -266,7 +265,7 @@ const LearningItemsList = ({
   }, [showLinkInput]) // Added showLinkInput as a dependency for the linkInputRef check logic.
 
   const handleEmojiSelect = (id: string, emojiData: any) => {
-    updateItemEmoji(id, emojiData.native)
+    updateItemEmoji(id, emojiData.emoji)
   }
 
   const handleInputFocus = (id: string) => {
@@ -279,7 +278,7 @@ const LearningItemsList = ({
         !(
           document.activeElement &&
           (document.activeElement.classList.contains('learning-item-input') ||
-            document.activeElement.closest('[data-emoji-mart="true"]'))
+            document.activeElement.closest('[data-emoji-picker="true"]'))
         ) // Check if focus moved to emoji picker)
       ) {
         // Only clear focusedItemId if focus is truly lost from the component's interactive elements
@@ -385,22 +384,23 @@ const LearningItemsList = ({
             </div>
 
             {showEmojiPicker === item.id && (
-              // Added data-emoji-mart attribute for blur check
+              // Added data-emoji-picker attribute for blur check
               <div
                 ref={pickerRef}
                 className="absolute left-0 z-10 mt-1"
-                data-emoji-mart="true"
+                data-emoji-picker="true"
               >
-                <Picker
-                  data={data}
-                  onEmojiSelect={(emoji: any) =>
+                <EmojiPicker
+                  height="25rem"
+                  width="25rem"
+                  onEmojiClick={(emoji: any) =>
                     handleEmojiSelect(item.id, emoji)
                   }
-                  theme="light"
-                  previewPosition="none"
-                  searchPosition="top"
-                  maxFrequentRows={0}
-                  autoFocus={true} // Autofocus the picker when it opens
+                  theme={Theme.LIGHT}
+                  previewConfig={{ showPreview: false }}
+                  searchPlaceHolder={t('searchEmojis')}
+                  autoFocusSearch={true}
+                  skinTonesDisabled={true}
                 />
               </div>
             )}

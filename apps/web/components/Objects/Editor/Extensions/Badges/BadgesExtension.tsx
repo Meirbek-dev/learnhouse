@@ -1,7 +1,7 @@
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
 import type { FC } from 'react'
 import { useState, useRef, useEffect } from 'react'
-import Picker from '@emoji-mart/react'
+import EmojiPicker, { Theme } from 'emoji-picker-react'
 import { ChevronDown, ChevronRight, Palette } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
@@ -39,10 +39,10 @@ const BadgesExtension: FC = (props: any) => {
   }, [])
 
   const handleEmojiSelect = (emoji: any) => {
-    setEmoji(emoji.native)
+    setEmoji(emoji.emoji)
     setShowEmojiPicker(false)
     props.updateAttributes({
-      emoji: emoji.native,
+      emoji: emoji.emoji,
     })
   }
 
@@ -235,13 +235,15 @@ const BadgesExtension: FC = (props: any) => {
 
       {isEditable && showEmojiPicker && (
         <div ref={pickerRef}>
-          <Picker
-            searchPosition="top"
-            theme="light"
-            previewPosition="none"
-            maxFrequentRows={0}
-            autoFocus={false}
-            onEmojiSelect={handleEmojiSelect}
+          <EmojiPicker
+            onEmojiClick={handleEmojiSelect}
+            height="30rem"
+            width="25rem"
+            theme={Theme.LIGHT}
+            previewConfig={{ showPreview: false }}
+            searchPlaceHolder={t('searchEmojis')}
+            autoFocusSearch={true}
+            skinTonesDisabled={true}
           />
         </div>
       )}
