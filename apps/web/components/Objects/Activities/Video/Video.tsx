@@ -86,6 +86,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                   muted: activity.details?.muted,
                   autoplay: activity.details?.autoplay,
                   lang: locale,
+                  pip: false,
                 }}
                 subtitle={{
                   url: `/subtitle.${locale}.srt`,

@@ -24,7 +24,9 @@ import { constructAcceptValue } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import styled from 'styled-components'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
+import ArtPlayer from '@components/Objects/Activities/Video/Artplayer'
+import type ArtplayerType from 'artplayer'
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4'])
 
@@ -36,21 +38,6 @@ const VIDEO_SIZES = {
 } as const
 
 type VideoSize = keyof typeof VIDEO_SIZES
-
-// Helper function to determine video size from width
-const getVideoSizeFromWidth = (
-  width: number | string | undefined
-): VideoSize => {
-  if (!width) return 'medium'
-  if (width === '100%') return 'full'
-
-  const numWidth = typeof width === 'string' ? Number.parseInt(width) : width
-
-  if (numWidth <= VIDEO_SIZES.small.width) return 'small'
-  if (numWidth <= VIDEO_SIZES.medium.width) return 'medium'
-  if (numWidth <= VIDEO_SIZES.large.width) return 'large'
-  return 'full'
-}
 
 const VideoWrapper = styled.div`
   transition: all 0.2s ease;
@@ -134,18 +121,6 @@ interface VideoBlockObject {
   size: VideoSize
 }
 
-interface VideoBlockAttrs {
-  blockObject: VideoBlockObject | null
-}
-
-interface VideoBlockExtension {
-  options: {
-    activity: {
-      activity_uuid: string
-    }
-  }
-}
-
 interface ExtendedNodeViewProps extends Omit<NodeViewProps, 'extension'> {
   extension: Node & {
     options: {
@@ -158,9 +133,17 @@ interface ExtendedNodeViewProps extends Omit<NodeViewProps, 'extension'> {
 
 function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const t = useTranslations('DashPage.Editor.VideoBlock')
+  const fullLocale = useLocale()
+  const locale = fullLocale.split('-')[0]
   const { node, extension, updateAttributes } = props
   const org = useOrg() as Organization | null
   const course = useCourse() as Course | null
+
+  const subtitleEntries = [
+    { html: 'Русский', url: '/subtitle.ru.srt' },
+    { html: 'English', url: '/subtitle.en.srt' },
+    { html: 'Қазақша', url: '/subtitle.kz.srt' },
+  ]
   const editorState = useEditorProvider() as EditorState
   const session = useLHSession() as Session
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -348,10 +331,29 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
             }}
           >
             <div className="relative">
-              <video
-                controls
-                className="aspect-video w-full rounded-lg object-contain shadow-sm"
-                src={videoUrl}
+              <ArtPlayer
+                option={{
+                  url: videoUrl,
+                  muted: false,
+                  autoplay: false,
+                  lang: locale,
+                  pip: true,
+                }}
+                subtitle={{
+                  url: `/subtitle.${locale}.srt`,
+                  type: 'srt',
+                  style: {
+                    color: '#ffffff',
+                    fontSize: '2rem',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    textAlign: 'center',
+                  },
+                  encoding: 'utf-8',
+                }}
+                locale={locale}
+                subtitleEntries={subtitleEntries}
+                className="aspect-video w-full rounded-lg shadow-sm"
+                onPlayerReady={(art: ArtplayerType) => {}}
               />
               <button
                 onClick={handleDownload}
@@ -527,13 +529,32 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                         <Loader2 className="h-8 w-8 animate-spin text-white" />
                       </div>
                     )}
-                    <video
-                      controls
+                    <ArtPlayer
+                      option={{
+                        url: videoUrl,
+                        muted: false,
+                        autoplay: false,
+                        lang: locale,
+                        pip: true,
+                      }}
+                      subtitle={{
+                        url: `/subtitle.${locale}.srt`,
+                        type: 'srt',
+                        style: {
+                          color: '#ffffff',
+                          fontSize: '2rem',
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                          textAlign: 'center',
+                        },
+                        encoding: 'utf-8',
+                      }}
+                      locale={locale}
+                      subtitleEntries={subtitleEntries}
                       className={cn(
-                        'aspect-video w-full bg-black/95 object-contain shadow-sm transition-all duration-200',
+                        'aspect-video w-full bg-black/95 shadow-sm transition-all duration-200',
                         isLoading && 'opacity-50 blur-sm'
                       )}
-                      src={videoUrl}
+                      onPlayerReady={(art: ArtplayerType) => {}}
                     />
                   </div>
                 </div>
