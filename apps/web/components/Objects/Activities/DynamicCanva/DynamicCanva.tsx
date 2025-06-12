@@ -147,7 +147,9 @@ function Canva(props: Editor) {
   return (
     <EditorOptionsProvider options={{ isEditable: false }}>
       <CanvaWrapper>
-        <AICanvaToolkit activity={props.activity} editor={editor} />
+        <AIToolkitWrapper>
+          <AICanvaToolkit activity={props.activity} editor={editor} />
+        </AIToolkitWrapper>
         <ContentWrapper>
           <TableOfContents editor={editor} />
           <EditorContent editor={editor} />
@@ -160,6 +162,22 @@ function Canva(props: Editor) {
 const CanvaWrapper = styled.div`
   width: 100%;
   margin: 0 auto;
+  position: relative;
+`
+
+const AIToolkitWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1000;
+
+  // Allow pointer events for the bubble menu content
+  * {
+    pointer-events: auto;
+  }
 `
 
 const ContentWrapper = styled.div`
@@ -167,33 +185,26 @@ const ContentWrapper = styled.div`
   width: 100%;
   height: 100%;
 
-  > div:first-child {
+  // Default: when TableOfContents has content, it takes 20% and editor takes 80%
+  > div:first-child:not(:empty) {
     width: 20%;
     padding-right: 1rem;
+    flex-shrink: 0;
   }
 
   > div:last-child {
-    width: 80%;
+    flex: 1;
   }
 
-  // Only apply flex layout when there are multiple children (table of contents present)
-  &:has(> div:first-child:not(:last-child)) {
-    > div:first-child {
-      width: 20%;
-      padding-right: 1rem;
-    }
-
-    > div:last-child {
-      width: 80%;
-    }
+  // When TableOfContents is empty, editor takes full width
+  > div:first-child:empty {
+    width: 0;
+    padding-right: 0;
+    overflow: hidden;
   }
 
-  // When there's only one child (no table of contents), make it full width
-  &:has(> div:first-child:last-child) {
-    > div:first-child {
-      width: 100%;
-      padding-right: 0;
-    }
+  > div:first-child:empty + div {
+    width: 100%;
   }
 
   .ProseMirror {

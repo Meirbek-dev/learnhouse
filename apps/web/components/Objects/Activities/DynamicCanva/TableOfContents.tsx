@@ -57,7 +57,7 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
     }
   }, [editor])
 
-  if (headings.length === 0) return null
+  if (headings.length === 0) return <div style={{ display: 'none' }} />
 
   return (
     <TOCCard>
