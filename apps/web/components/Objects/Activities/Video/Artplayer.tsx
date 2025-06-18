@@ -48,7 +48,7 @@ export default function ArtPlayer({
       container: artRef.current,
       volume: 1,
       isLive: false,
-      pip: option.pip || false,
+      pip: option.pip,
       autoOrientation: true,
       autoSize: true,
       autoMini: true,

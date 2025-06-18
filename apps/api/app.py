@@ -9,7 +9,6 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi.middleware.gzip import GZipMiddleware
-import multiprocessing
 
 
 # from src.services.mocks.initial import create_initial_data
@@ -80,7 +79,7 @@ if __name__ == "__main__":
 
         # Set number of workers for production-like environments
         # Uvicorn's 'workers' parameter is effective when reload=False
-        uvicorn_kwargs["workers"] = multiprocessing.cpu_count()
+        uvicorn_kwargs["workers"] = 4
     else:
         # In development mode (reload=True), Uvicorn typically uses 1 worker.
         # You might still want uvloop if it's stable with your reloader.

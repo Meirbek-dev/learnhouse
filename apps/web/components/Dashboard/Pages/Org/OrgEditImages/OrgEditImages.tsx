@@ -294,7 +294,7 @@ export default function OrgEditImages() {
   ): string | null => {
     if (type === 'youtube') {
       const regex =
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+        /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/
       const match = url.match(regex)
       return match ? match[1] : null
     }

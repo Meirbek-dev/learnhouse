@@ -77,7 +77,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                 className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
-                <>
+                
                   {aiEditorState.isFeedbackModalOpen && (
                     <UserFeedbackModal
                       activity={props.activity}
@@ -133,7 +133,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                       </div>
                     </div>
                   </div>
-                </>
+                
               </motion.div>
             )}
           </AnimatePresence>

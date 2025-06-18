@@ -67,7 +67,7 @@ const getYouTubeEmbedUrl = (url: string): string => {
 
     // Handle different YouTube URL formats with a more precise regex
     const youtubeRegex =
-      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
+      /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i
     const match = url.match(youtubeRegex)
 
     if (match?.[1]) {

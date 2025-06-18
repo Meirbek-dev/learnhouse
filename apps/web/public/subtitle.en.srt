@@ -1,26 +1,26 @@
 ﻿1
-00:00:00,000 --> 00:00:08,240
-Hello, dear listeners! My name is Aizhan Kumarkyzy Kairbayeva. I am a computer graphics instructor.
+00:00:05,000 --> 00:00:13,240
+Hello, dear listeners! My name is Aizhan Kumarqyzy Kairbayeva. I am a computer graphics instructor.
 
 2
-00:00:08,240 --> 00:00:13,630
+00:00:13,240 --> 00:00:18,630
 Welcome to the Blender software course!
 
 3
-00:00:34,000 --> 00:00:39,090
-The first video will be an introduction. Therefore, I will show you how to install the Blender software and introduce you to its interface.
+00:00:24,000 --> 00:00:34,090
+The first video will be an introduction. Therefore, I will tell you how to install Blender and introduce you to its interface.
 
 4
-00:00:41,200 --> 00:00:43,000
-I use Blender version 4.3.
+00:00:35,200 --> 00:00:43,000
+I'm using Blender version 4.3.
 
 5
-00:01:05,000 --> 00:01:06,000
+00:00:43,000 --> 00:00:45,000
 You can download the program from the official website blender.org.
 
 6
-00:01:06,850 --> 00:01:10,730
-The website interface may change, but the Download Blender button is always in a prominent place.
+00:00:45,850 --> 00:00:54,730
+The website interface may change, but the **Download Blender** button is always in a prominent place.
 
 7
 00:01:10,730 --> 00:01:13,210

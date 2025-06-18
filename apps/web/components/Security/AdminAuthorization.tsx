@@ -45,7 +45,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({
     if (typeof pattern !== 'string' || typeof pathname !== 'string')
       return false
     const regexPattern = new RegExp(
-      `^${pattern.replace(/[\/.+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`
+      `^${pattern.replace(/[/.+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`
     )
     return regexPattern.test(pathname)
   }, [])
@@ -105,7 +105,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({
   }
 
   // Always return a ReactNode
-  return isAuthorized ? <>{children}</> : null
+  return isAuthorized ? children : null
 }
 
 export default AdminAuthorization

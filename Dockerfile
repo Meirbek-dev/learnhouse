@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.13.3-slim-bookworm AS base
+FROM python:3.13.5-slim-bookworm AS base
 
 # Install Nginx, curl, and build-essential
 RUN apt update && apt install -y nginx curl build-essential libomp-dev \

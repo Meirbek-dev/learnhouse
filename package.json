@@ -9,8 +9,8 @@
 		"format": "prettier --write \"**/*.{js,ts,tsx,md}\""
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"eslint": "^9.28.0",
+		"@biomejs/biome": "2.0.0",
+		"eslint": "^9.29.0",
 		"prettier": "^3.5.3",
 		"prettier-plugin-tailwindcss": "^0.6.12",
 		"turbo": "^2.5.4"
