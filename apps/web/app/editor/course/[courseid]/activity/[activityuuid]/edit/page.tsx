@@ -25,7 +25,7 @@ export async function generateMetadata(
   const [course_meta] = await Promise.all([
     getCourseMetadata(
       params.courseid,
-      { revalidate: 0, tags: ['courses'] },
+      { revalidate: 60, tags: ['courses'] },
       access_token ?? null
     ),
   ])

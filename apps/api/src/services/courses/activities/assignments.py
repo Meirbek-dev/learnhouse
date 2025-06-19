@@ -1534,9 +1534,7 @@ async def grade_assignment_submission(
     db_session.refresh(assignment_user_submission)
 
     # return OK
-    return {
-        "message": "Задание оценено на " + str(grade) + " баллов"
-    }
+    return {"message": "Задание оценено на " + str(grade) + " баллов"}
 
 
 async def get_grade_assignment_submission(

@@ -8,7 +8,6 @@ import {
   ChevronRight,
   UserRoundPen,
   Edit2,
-  EllipsisVertical,
   Maximize2,
   Minimize2,
 } from 'lucide-react'
@@ -38,6 +37,8 @@ import AssignmentSubmissionProvider, {
 } from '@components/Contexts/Assignments/AssignmentSubmissionContext'
 import toast from 'react-hot-toast'
 import { mutate } from 'swr'
+import useSWR from 'swr'
+import { swrFetcher } from '@services/utils/ts/requests'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
@@ -50,9 +51,9 @@ import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs'
 import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators'
-import { revalidateTags } from '@services/utils/ts/requests'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { useLocale, useTranslations, useFormatter } from 'next-intl'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 // Lazy load heavy components
 const Canva = lazy(
@@ -141,6 +142,16 @@ function ActivityActions({
   showNavigation = true,
 }: ActivityActionsProps) {
   const t = useTranslations('ActivityPage')
+  const { contributorStatus } = useContributorStatus(course.course_uuid)
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+
+  // Add SWR for trail data
+  const { data: trailData } = useSWR(
+    `${getAPIUrl()}trail/org/${org?.id}/trail`,
+    (url) => swrFetcher(url, access_token)
+  )
 
   return (
     <div className="flex items-center space-x-2">
@@ -154,6 +165,7 @@ function ActivityActions({
                 activityid={activityid}
                 course={course}
                 orgslug={orgslug}
+                trailData={trailData}
                 t={t}
               />
             )}
@@ -209,7 +221,7 @@ function ActivityClient(props: ActivityClientProps) {
   const access_token = session?.data?.tokens?.access_token
   const [bgColor, setBgColor] = React.useState('bg-white')
   const [assignment, setAssignment] = React.useState(null) as any
-  const [_markStatusButtonActive, setMarkStatusButtonActive] =
+  const [markStatusButtonActive, setMarkStatusButtonActive] =
     React.useState(false)
   const [isFocusMode, setIsFocusMode] = React.useState(false)
   const isInitialRender = useRef(true)
@@ -224,6 +236,12 @@ function ActivityClient(props: ActivityClientProps) {
     const now = new Date()
     return format.relativeTime(date, now)
   }
+
+  // Add SWR for trail data
+  const { data: trailData, error } = useSWR(
+    `${getAPIUrl()}trail/org/${org?.id}/trail`,
+    (url) => swrFetcher(url, access_token)
+  )
 
   // Memoize activity position calculation
   const { allActivities, currentIndex } = useActivityPosition(
@@ -323,7 +341,7 @@ function ActivityClient(props: ActivityClientProps) {
       for (let j = 0; j < chapter.activities.length; j++) {
         const activity = chapter.activities[j]
         if (activity.id === activity_id) {
-          return chapter.name
+          return `${t('chapter')} ${i + 1} : ${chapter.name}`
         }
       }
     }
@@ -409,10 +427,10 @@ function ActivityClient(props: ActivityClientProps) {
                                   Math.PI *
                                   14 *
                                   (1 -
-                                    (course.trail?.runs
+                                    (trailData?.runs
                                       ?.find(
                                         (run: any) =>
-                                          run.course_id === course.id
+                                          run.course_uuid === course.course_uuid
                                       )
                                       ?.steps?.filter(
                                         (step: any) => step.complete
@@ -428,9 +446,10 @@ function ActivityClient(props: ActivityClientProps) {
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-xs font-bold text-gray-800">
                                 {Math.round(
-                                  ((course.trail?.runs
+                                  ((trailData?.runs
                                     ?.find(
-                                      (run: any) => run.course_id === course.id
+                                      (run: any) =>
+                                        run.course_uuid === course.course_uuid
                                     )
                                     ?.steps?.filter(
                                       (step: any) => step.complete
@@ -447,11 +466,14 @@ function ActivityClient(props: ActivityClientProps) {
                             </div>
                           </div>
                           <div className="text-xs text-gray-600">
-                            {course.trail?.runs
-                              ?.find((run: any) => run.course_id === course.id)
+                            {trailData?.runs
+                              ?.find(
+                                (run: any) =>
+                                  run.course_uuid === course.course_uuid
+                              )
                               ?.steps?.filter((step: any) => step.complete)
                               ?.length || 0}{' '}
-                            {/* of{' '} */}
+                            {t('of')}{' '}
                             {course.chapters?.reduce(
                               (acc: number, chapter: any) =>
                                 acc + chapter.activities.length,
@@ -522,6 +544,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 : activityid.replace('activity_', '')
                             }
                             orgslug={orgslug}
+                            trailData={trailData}
                           />
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -704,26 +727,6 @@ function ActivityClient(props: ActivityClientProps) {
                               </h1>
                             </div>
                           </div>
-                          {activity &&
-                            activity.published == true &&
-                            activity.content.paid_access != false && (
-                              <AuthenticatedClientElement checkMethod="authentication">
-                                {
-                                  <div className="flex space-x-2">
-                                    <PreviousActivityButton
-                                      course={course}
-                                      currentActivityId={activity.id}
-                                      orgslug={orgslug}
-                                    />
-                                    <NextActivityButton
-                                      course={course}
-                                      currentActivityId={activity.id}
-                                      orgslug={orgslug}
-                                    />
-                                  </div>
-                                }
-                              </AuthenticatedClientElement>
-                            )}
                         </div>
 
                         <ActivityIndicators
@@ -732,13 +735,13 @@ function ActivityClient(props: ActivityClientProps) {
                           orgslug={orgslug}
                           course={course}
                           enableNavigation={true}
+                          trailData={trailData}
                         />
 
                         <div className="flex w-full items-center justify-between">
                           <div className="flex-1/3 flex items-center space-x-3">
                             <div className="flex flex-col -space-y-1">
                               <p className="text-md font-bold text-gray-700">
-                                {t('chapter')}:{' '}
                                 {getChapterNameByActivityId(
                                   course,
                                   activity.id
@@ -922,6 +925,7 @@ function ActivityClient(props: ActivityClientProps) {
                                               )
                                         }
                                         orgslug={orgslug}
+                                        trailData={trailData}
                                       />
                                       {contributorStatus === 'ACTIVE' &&
                                         activity.activity_type ==
@@ -1041,11 +1045,14 @@ export function MarkStatus(props: {
   activityid: string
   course: any
   orgslug: string
+  trailData: any
   t: ReturnType<typeof useTranslations<'ActivityPage'>>
 }) {
   const t = props.t
   const router = useRouter()
   const session = useLHSession() as any
+  const org = useOrg() as any
+  const isMobile = useIsMobile()
   const [isLoading, setIsLoading] = React.useState(false)
   const [showMarkedTooltip, setShowMarkedTooltip] = React.useState(false)
   const [showUnmarkedTooltip, setShowUnmarkedTooltip] = React.useState(false)
@@ -1098,8 +1105,8 @@ export function MarkStatus(props: {
   )
 
   const areAllActivitiesCompleted = () => {
-    const run = props.course.trail.runs.find(
-      (run: any) => run.course_id == props.course.id
+    const run = props.trailData?.runs?.find(
+      (run: any) => run.course_uuid === props.course.course_uuid
     )
     if (!run) return false
 
@@ -1111,7 +1118,8 @@ export function MarkStatus(props: {
         totalActivities++
         const isCompleted = run.steps.find(
           (step: any) =>
-            step.activity_id === activity.id && step.complete === true
+            step.activity_uuid === activity.activity_uuid &&
+            step.complete === true
         )
         if (isCompleted) {
           completedActivities++
@@ -1126,25 +1134,21 @@ export function MarkStatus(props: {
     try {
       const willCompleteAll = areAllActivitiesCompleted()
       setIsLoading(true)
-      // refresh the page after marking the activity as complete
-      await revalidateTags(['courses'], props.orgslug)
+
       await markActivityAsComplete(
         props.orgslug,
         props.course.course_uuid,
         props.activity.activity_uuid,
         session.data?.tokens?.access_token
       )
-      router.refresh()
 
-      await mutate(`${getAPIUrl()}courses/${props.course.course_uuid}/meta`)
+      await mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`)
 
       if (willCompleteAll) {
         const cleanCourseUuid = props.course.course_uuid.replace('course_', '')
         router.push(
           `${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/end`
         )
-      } else {
-        router.refresh()
       }
     } catch (error) {
       console.error('Error marking activity as complete:', error)
@@ -1163,9 +1167,8 @@ export function MarkStatus(props: {
         props.activity.activity_uuid,
         session.data?.tokens?.access_token
       )
-      await revalidateTags(['courses'], props.orgslug)
-      await mutate(`${getAPIUrl()}courses/${props.course.course_uuid}/meta`)
-      router.refresh()
+
+      await mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`)
     } catch (error) {
       toast.error(t('unmarkCompleteError'))
     } finally {
@@ -1174,15 +1177,27 @@ export function MarkStatus(props: {
   }
 
   const isActivityCompleted = () => {
-    const run = props.course.trail.runs.find(
-      (run: any) => run.course_id == props.course.id
-    )
+    // Clean up course UUID by removing 'course_' prefix if it exists
+    const cleanCourseUuid = props.course.course_uuid?.replace('course_', '')
+
+    const run = props.trailData?.runs?.find((run: any) => {
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '')
+      return cleanRunCourseUuid === cleanCourseUuid
+    })
+
     if (run) {
+      // Find the step that matches the current activity
       return run.steps.find(
         (step: any) =>
-          step.activity_id == props.activity.id && step.complete == true
+          step.activity_id === props.activity.id && step.complete === true
       )
     }
+    return false
+  }
+
+  // Don't render until we have trail data
+  if (!props.trailData) {
+    return null
   }
 
   return (
@@ -1195,27 +1210,11 @@ export function MarkStatus(props: {
               confirmationMessage={t('unmarkConfirmation')}
               dialogTitle={t('unmarkDialogTitle')}
               dialogTrigger={
-                <div className="flex items-center space-x-1 rounded-full bg-teal-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
-                  {isLoading ? (
-                    <div className="animate-spin">
-                      <svg className="h-4 w-4" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                    </div>
-                  ) : (
+                <div className="nice-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
+                  <span className="mb-1 text-[10px] font-bold uppercase">
+                    {t('status')}
+                  </span>
+                  <div className="flex items-center space-x-2">
                     <svg
                       width="17"
                       height="17"
@@ -1229,10 +1228,10 @@ export function MarkStatus(props: {
                       <rect x="3" y="3" width="18" height="18" rx="2" />
                       <path d="M7 12l3 3 7-7" />
                     </svg>
-                  )}
-                  <span className="text-xs font-bold">
-                    {t('statusComplete')}
-                  </span>
+                    <span className="text-xs font-bold">
+                      {t('statusComplete')}
+                    </span>
+                  </div>
                 </div>
               }
               functionToExecute={unmarkActivityAsCompleteFront}
@@ -1254,45 +1253,46 @@ export function MarkStatus(props: {
         <div className="flex items-center space-x-2">
           <div className="relative">
             <div
-              className={`${isLoading ? 'cursor-not-allowed opacity-75' : ''} flex items-center space-x-1 rounded-full bg-gray-800 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer`}
+              className={`${isLoading ? 'opacity-90' : ''} nice-shadow flex flex-col rounded-md bg-gray-800 p-2.5 px-4 text-white transition-all duration-200 hover:cursor-pointer ${isLoading ? 'cursor-not-allowed' : 'hover:bg-gray-700'}`}
               onClick={!isLoading ? markActivityAsCompleteFront : undefined}
             >
-              {isLoading ? (
-                <div className="animate-spin">
-                  <svg className="h-4 w-4" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                </div>
-              ) : (
-                <svg
-                  width="17"
-                  height="17"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                </svg>
-              )}
-              <span className="text-xs font-bold">
-                {isLoading ? t('marking') : t('markAsComplete')}
+              <span className="mb-1 text-[10px] font-bold uppercase">
+                {t('status')}
               </span>
+              <div className="flex items-center space-x-2">
+                {isLoading ? (
+                  <div className="animate-spin">
+                    <svg
+                      width="17"
+                      height="17"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 12a9 9 0 11-6.219-8.56" />
+                    </svg>
+                  </div>
+                ) : (
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                  </svg>
+                )}
+                <span className="min-w-[90px] text-xs font-bold">
+                  {isLoading ? t('marking') : t('markAsComplete')}
+                </span>
+              </div>
             </div>
             {showUnmarkedTooltip && (
               <MiniInfoTooltip
@@ -1322,6 +1322,8 @@ function NextActivityButton({
 }) {
   const router = useRouter()
   const t = useTranslations('ActivityPage')
+  const isMobile = useIsMobile()
+
   const findNextActivity = () => {
     const allActivities: any[] = []
     let currentIndex = -1
@@ -1366,14 +1368,17 @@ function NextActivityButton({
   return (
     <div
       onClick={navigateToActivity}
-      className="nice-shadow flex items-center space-x-1 rounded-full bg-white p-2.5 px-5 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
+      className="flex flex-col rounded-md bg-gray-200 p-2.5 px-4 text-gray-600 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] transition delay-150 duration-300 ease-in-out hover:cursor-pointer hover:bg-gray-200"
     >
-      <span className="text-xs font-bold text-gray-500">{t('next')}</span>
-      <EllipsisVertical className="text-gray-400" size={13} />
-      <span className="max-w-[200px] truncate text-sm font-semibold">
-        {nextActivity.name}
+      <span className="mb-1 text-[10px] font-bold uppercase text-gray-500">
+        {t('next')}
       </span>
-      <ChevronRight size={17} />
+      <div className="flex items-center space-x-1">
+        <span className="max-w-[200px] truncate text-sm font-semibold">
+          {nextActivity.name}
+        </span>
+        <ChevronRight size={17} />
+      </div>
     </div>
   )
 }
@@ -1388,6 +1393,7 @@ function PreviousActivityButton({
   orgslug: string
 }) {
   const router = useRouter()
+  const isMobile = useIsMobile()
   const t = useTranslations('ActivityPage')
 
   const findPreviousActivity = () => {
@@ -1432,14 +1438,17 @@ function PreviousActivityButton({
   return (
     <div
       onClick={navigateToActivity}
-      className="nice-shadow flex items-center space-x-1 rounded-full bg-white p-2.5 px-5 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
+      className="nice-shadow flex flex-col rounded-md bg-white p-2.5 px-4 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
     >
-      <ChevronLeft size={17} />
-      <span className="text-xs font-bold text-gray-500">{t('previous')}</span>
-      <EllipsisVertical className="text-gray-400" size={13} />
-      <span className="max-w-[200px] truncate text-sm font-semibold">
-        {previousActivity.name}
+      <span className="mb-1 text-[10px] font-bold uppercase text-gray-500">
+        {t('previous')}
       </span>
+      <div className="flex items-center space-x-1">
+        <ChevronLeft size={17} />
+        <span className="max-w-[200px] truncate text-sm font-semibold">
+          {previousActivity.name}
+        </span>
+      </div>
     </div>
   )
 }
@@ -1534,11 +1543,16 @@ function AssignmentTools(props: {
         confirmationMessage={t('assignmentActions.submitConfirm')}
         dialogTitle={t('assignmentActions.submitYourAssingmentForGrading')}
         dialogTrigger={
-          <div className="flex items-center space-x-2 rounded-full bg-cyan-800 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
-            <BookOpenCheck size={17} />
-            <span className="text-xs font-bold">
-              {t('assignmentActions.submitForGrading')}
+          <div className="nice-shadow flex flex-col rounded-md bg-cyan-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
+            <span className="mb-1 text-[10px] font-bold uppercase">
+              {t('status')}
             </span>
+            <div className="flex items-center space-x-2">
+              <BookOpenCheck size={17} />
+              <span className="text-xs font-bold">
+                {t('assignmentActions.submitForGrading')}
+              </span>
+            </div>
           </div>
         }
         functionToExecute={submitForGradingUI}
@@ -1549,25 +1563,35 @@ function AssignmentTools(props: {
 
   if (submission[0].submission_status === 'SUBMITTED') {
     return (
-      <div className="flex items-center space-x-2 rounded-full bg-amber-800 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out">
-        <UserRoundPen size={17} />
-        <span className="text-xs font-bold">
-          {t('assignmentStatus.grading')}
+      <div className="nice-shadow flex flex-col rounded-md bg-amber-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
+        <span className="mb-1 text-[10px] font-bold uppercase">
+          {t('status')}
         </span>
+        <div className="flex items-center space-x-2">
+          <UserRoundPen size={17} />
+          <span className="text-xs font-bold">
+            {t('assignmentStatus.grading')}
+          </span>
+        </div>
       </div>
     )
   }
 
   if (submission[0].submission_status === 'GRADED') {
     return (
-      <div className="flex items-center space-x-2 rounded-full bg-teal-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out">
-        <CheckCircle size={17} />
-        <span className="flex items-center space-x-2 text-xs font-bold">
-          <span>{t('assignmentStatus.graded')}</span>{' '}
-          <span className="rounded-md bg-white px-1 py-0.5 text-teal-800">
-            {finalGrade}
-          </span>
+      <div className="nice-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
+        <span className="mb-1 text-[10px] font-bold uppercase">
+          {t('status')}
         </span>
+        <div className="flex items-center space-x-2">
+          <CheckCircle size={17} />
+          <span className="flex items-center space-x-2 text-xs font-bold">
+            <span>{t('assignmentStatus.graded')}</span>
+            <span className="rounded-md bg-white px-1 py-0.5 text-teal-800">
+              {finalGrade}
+            </span>
+          </span>
+        </div>
       </div>
     )
   }

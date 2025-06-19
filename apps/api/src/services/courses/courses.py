@@ -9,7 +9,6 @@ from src.security.features_utils.usage import (
     decrease_feature_usage,
     increase_feature_usage,
 )
-from src.services.trail.trail import get_user_trail_with_orgid
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
@@ -21,7 +20,7 @@ from src.db.courses.courses import (
     CourseCreate,
     CourseRead,
     CourseUpdate,
-    FullCourseReadWithTrail,
+    FullCourseRead,
     AuthorWithRole,
 )
 from src.security.rbac.rbac import (
@@ -32,7 +31,6 @@ from src.security.rbac.rbac import (
 from src.services.courses.thumbnails import upload_thumbnail
 from fastapi import HTTPException, Request, UploadFile
 from datetime import datetime
-import asyncio
 
 
 async def get_course(
@@ -129,7 +127,7 @@ async def get_course_meta(
     with_unpublished_activities: bool,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-) -> FullCourseReadWithTrail:
+) -> FullCourseRead:
     # Avoid circular import
     from src.services.courses.chapters import get_course_chapters
 
@@ -158,32 +156,12 @@ async def get_course_meta(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "read", db_session)
 
-    # Start async tasks concurrently
-    tasks = []
-
-    # Task 1: Get course chapters
-    async def get_chapters():
-        # Ensure course.id is not None
-        if course.id is None:
-            return []
-        return await get_course_chapters(
+    # Get course chapters
+    chapters = []
+    if course.id is not None:
+        chapters = await get_course_chapters(
             request, course.id, db_session, current_user, with_unpublished_activities
         )
-
-    # Task 2: Get user trail (only for authenticated users)
-    async def get_trail():
-        if isinstance(current_user, AnonymousUser):
-            return None
-        return await get_user_trail_with_orgid(
-            request, current_user, course.org_id, db_session
-        )
-
-    # Add tasks to the list
-    tasks.append(get_chapters())
-    tasks.append(get_trail())
-
-    # Run all tasks concurrently
-    chapters, trail = await asyncio.gather(*tasks)
 
     # Convert to AuthorWithRole objects
     authors = [
@@ -197,14 +175,12 @@ async def get_course_meta(
         for resource_author, user in author_results
     ]
 
-    # Create course read model
-    course_read = CourseRead(**course.model_dump(), authors=authors)
-
-    return FullCourseReadWithTrail(
-        **course_read.model_dump(),
-        chapters=chapters,
-        trail=trail,
+    # Create course read model with chapters
+    course_read = FullCourseRead(
+        **course.model_dump(), authors=authors, chapters=chapters
     )
+
+    return course_read
 
 
 async def get_courses_orgslug(

@@ -34,6 +34,7 @@ interface CourseRun {
 
 interface Course {
   id: string
+  course_uuid: string
   authors: Author[]
   trail?: {
     runs: CourseRun[]
@@ -54,6 +55,7 @@ interface CourseActionsMobileProps {
   course: Course & {
     org_id: number
   }
+  trailData?: any
 }
 
 // Component for displaying multiple authors
@@ -135,6 +137,7 @@ const CourseActionsMobile = ({
   courseuuid,
   orgslug,
   course,
+  trailData,
 }: CourseActionsMobileProps) => {
   const t = useTranslations('Courses.CourseActionsMobile')
   const router = useRouter()
@@ -145,11 +148,14 @@ const CourseActionsMobile = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [hasAccess, setHasAccess] = useState<boolean | null>(null)
 
+  // Clean up course UUID by removing 'course_' prefix if it exists
+  const cleanCourseUuid = course.course_uuid?.replace('course_', '')
+
   const isStarted =
-    course.trail?.runs?.some(
-      (run) =>
-        run.status === 'STATUS_IN_PROGRESS' && run.course_id === course.id
-    ) ?? false
+    trailData?.runs?.find((run: any) => {
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '')
+      return cleanRunCourseUuid === cleanCourseUuid
+    }) ?? false
 
   useEffect(() => {
     const fetchLinkedProducts = async () => {
@@ -160,7 +166,7 @@ const CourseActionsMobile = ({
           session.data?.tokens?.access_token
         )
         setLinkedProducts(response.data || [])
-      } catch (_error) {
+      } catch (error) {
         console.error('Failed to fetch linked products')
       } finally {
         setIsLoading(false)
@@ -180,7 +186,7 @@ const CourseActionsMobile = ({
           session.data?.tokens?.access_token
         )
         setHasAccess(response.has_access)
-      } catch (_error) {
+      } catch (error) {
         console.error('Failed to check course access')
         setHasAccess(false)
       }
@@ -262,7 +268,7 @@ const CourseActionsMobile = ({
     })
 
   return (
-    <div className="mx-2 my-6 overflow-hidden rounded-lg bg-white/90 p-4 shadow-md shadow-gray-300/25 outline-neutral-200/40 backdrop-blur-sm">
+    <div className="mx-2 my-6 overflow-hidden rounded-lg bg-white/90 p-4 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40 backdrop-blur-sm">
       <div className="flex flex-col space-y-4">
         <MultipleAuthors authors={sortedAuthors} />
 

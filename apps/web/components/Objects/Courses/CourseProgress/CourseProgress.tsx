@@ -19,6 +19,7 @@ interface CourseProgressProps {
   orgslug: string
   isOpen: boolean
   onClose: () => void
+  trailData: any
 }
 
 const CourseProgress: FC<CourseProgressProps> = ({
@@ -26,6 +27,7 @@ const CourseProgress: FC<CourseProgressProps> = ({
   orgslug,
   isOpen,
   onClose,
+  trailData,
 }) => {
   const [completedActivities, setCompletedActivities] = useState(0)
   const [totalActivities, setTotalActivities] = useState(0)
@@ -48,9 +50,11 @@ const CourseProgress: FC<CourseProgressProps> = ({
   }, [course])
 
   const isActivityDone = (activity: any) => {
-    const run = course?.trail?.runs?.find(
-      (run: any) => run.course_id === course.id
-    )
+    const cleanCourseUuid = course.course_uuid?.replace('course_', '')
+    const run = trailData?.runs?.find((run: any) => {
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '')
+      return cleanRunCourseUuid === cleanCourseUuid
+    })
     if (run) {
       return run.steps.find((step: any) => step.activity_id === activity.id)
     }
@@ -76,7 +80,7 @@ const CourseProgress: FC<CourseProgressProps> = ({
     totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0
   const radius = 40
   const circumference = 2 * Math.PI * radius
-  const _strokeDashoffset =
+  const strokeDashoffset =
     circumference - (progressPercentage / 100) * circumference
 
   const dialogContent = (
@@ -97,7 +101,10 @@ const CourseProgress: FC<CourseProgressProps> = ({
               return (
                 <Link
                   key={activity.activity_uuid}
-                  href={`${getUriWithOrg(orgslug, '')}/course/${courseId}/activity/${activityId}`}
+                  href={
+                    getUriWithOrg(orgslug, '') +
+                    `/course/${courseId}/activity/${activityId}`
+                  }
                 >
                   <div className="group flex items-center px-4 py-3 transition-colors hover:bg-gray-100">
                     <div className="flex flex-1 items-center space-x-3">

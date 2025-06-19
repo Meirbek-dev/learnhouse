@@ -151,14 +151,14 @@ const MultipleAuthors = ({
             <span>@{authors[0].user.username}</span>
           ) : (
             displayedNames.map((author, index) => (
-                <span key={author.user.user_uuid}>
-                  @{author.user.username}
-                  {index === 0 &&
-                    authors.length > 1 &&
-                    index < displayedNames.length - 1 &&
-                    t('and')}
-                </span>
-              ))
+              <span key={author.user.user_uuid}>
+                @{author.user.username}
+                {index === 0 &&
+                  authors.length > 1 &&
+                  index < displayedNames.length - 1 &&
+                  t('and')}
+              </span>
+            ))
           )}
         </div>
       </div>

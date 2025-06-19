@@ -77,63 +77,61 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                 className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
-                
-                  {aiEditorState.isFeedbackModalOpen && (
-                    <UserFeedbackModal
-                      activity={props.activity}
-                      editor={props.editor}
-                    />
-                  )}
-                  <div
-                    style={{
-                      pointerEvents: 'auto',
-                      background:
-                        'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
-                    }}
-                    className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
-                  >
-                    <div className="flex space-x-2">
-                      <div className="pr-1">
-                        <div className="flex w-full items-center space-x-2 font-bold text-white/80">
-                          <Image
-                            className="rounded-lg outline-neutral-200/20"
-                            width={24}
-                            src={openuAI_icon}
-                            alt={t('aiIconAlt')}
-                          />
-                          <div className="flex items-center">
-                            {t('aiEditorTitle')}{' '}
-                            <span className="ml-3 rounded-3xl bg-white/10 px-2 py-1 text-[10px] uppercase">
-                              PRE-ALPHA
-                            </span>
-                          </div>
-                          <MoreVertical className="text-white/50" size={12} />
-                        </div>
-                      </div>
-                      <div className="tools flex space-x-2">
-                        <AiEditorToolButton label="Writer" />
-                        <AiEditorToolButton label="ContinueWriting" />
-                        <AiEditorToolButton label="MakeLonger" />
-
-                        <AiEditorToolButton label="Translate" />
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <X
-                          onClick={() =>
-                            Promise.all([
-                              dispatchAIEditor({ type: 'setIsModalClose' }),
-                              dispatchAIEditor({
-                                type: 'setIsFeedbackModalClose',
-                              }),
-                            ])
-                          }
-                          size={20}
-                          className="items-center rounded-full bg-white/10 p-1 text-white/50 hover:cursor-pointer"
+                {aiEditorState.isFeedbackModalOpen && (
+                  <UserFeedbackModal
+                    activity={props.activity}
+                    editor={props.editor}
+                  />
+                )}
+                <div
+                  style={{
+                    pointerEvents: 'auto',
+                    background:
+                      'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
+                  }}
+                  className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
+                >
+                  <div className="flex space-x-2">
+                    <div className="pr-1">
+                      <div className="flex w-full items-center space-x-2 font-bold text-white/80">
+                        <Image
+                          className="rounded-lg outline-neutral-200/20"
+                          width={24}
+                          src={openuAI_icon}
+                          alt={t('aiIconAlt')}
                         />
+                        <div className="flex items-center">
+                          {t('aiEditorTitle')}{' '}
+                          <span className="ml-3 rounded-3xl bg-white/10 px-2 py-1 text-[10px] uppercase">
+                            PRE-ALPHA
+                          </span>
+                        </div>
+                        <MoreVertical className="text-white/50" size={12} />
                       </div>
                     </div>
+                    <div className="tools flex space-x-2">
+                      <AiEditorToolButton label="Writer" />
+                      <AiEditorToolButton label="ContinueWriting" />
+                      <AiEditorToolButton label="MakeLonger" />
+
+                      <AiEditorToolButton label="Translate" />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <X
+                        onClick={() =>
+                          Promise.all([
+                            dispatchAIEditor({ type: 'setIsModalClose' }),
+                            dispatchAIEditor({
+                              type: 'setIsFeedbackModalClose',
+                            }),
+                          ])
+                        }
+                        size={20}
+                        className="items-center rounded-full bg-white/10 p-1 text-white/50 hover:cursor-pointer"
+                      />
+                    </div>
                   </div>
-                
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

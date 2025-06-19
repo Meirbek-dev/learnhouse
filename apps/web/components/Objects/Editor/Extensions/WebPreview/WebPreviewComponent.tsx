@@ -2,7 +2,6 @@ import type React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { NodeViewWrapper } from '@tiptap/react'
 import {
-  Globe,
   Edit2,
   Save,
   X,
@@ -13,6 +12,11 @@ import {
 } from 'lucide-react'
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
 import { getUrlPreview } from '@services/courses/activities'
+import Modal from '@components/Objects/StyledElements/Modal/Modal'
+import { Input } from '@components/ui/input'
+import { Label } from '@components/ui/label'
+import { Checkbox } from '@components/ui/checkbox'
+import { Button } from '@components/ui/button'
 import { useTranslations } from 'next-intl'
 
 interface EditorContext {
@@ -64,6 +68,9 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
     node.attrs.buttonLabel || t('visitSite')
   )
   const [showButton, setShowButton] = useState(node.attrs.showButton !== false)
+  const [openInPopup, setOpenInPopup] = useState(node.attrs.openInPopup)
+  const [popupOpen, setPopupOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(!node.attrs.url)
 
   const fetchPreview = async (url: string) => {
     setLoading(true)
@@ -96,7 +103,15 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
   useEffect(() => {
     setButtonLabel(node.attrs.buttonLabel || t('visitSite'))
     setShowButton(!!node.attrs.showButton)
-  }, [node.attrs.buttonLabel, node.attrs.showButton])
+    setOpenInPopup(!!node.attrs.openInPopup)
+  }, [node.attrs.buttonLabel, node.attrs.showButton, node.attrs.openInPopup])
+
+  useEffect(() => {
+    if (!node.attrs.url) {
+      setEditing(true)
+      setModalOpen(true)
+    }
+  }, [node.attrs.url])
 
   const handleAlignmentChange = (value: string) => {
     updateAttributes({ alignment: value })
@@ -105,6 +120,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
   const handleEdit = () => {
     setEditing(true)
     setInputUrl(node.attrs.url || '')
+    setModalOpen(true)
   }
 
   const handleSaveEdit = () => {
@@ -112,14 +128,17 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
       fetchPreview(inputUrl)
     } else {
       setEditing(false)
+      setModalOpen(false)
     }
-    updateAttributes({ buttonLabel, showButton })
+    updateAttributes({ buttonLabel, showButton, openInPopup })
+    setModalOpen(false)
   }
 
   const handleCancelEdit = () => {
     setEditing(false)
     setInputUrl(node.attrs.url || '')
     setError(null)
+    setModalOpen(false)
   }
 
   const handleDelete = () => {
@@ -145,6 +164,23 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
 
   return (
     <NodeViewWrapper className="web-preview-block relative">
+      {/* Popup Modal for Embedded Website */}
+      <Modal
+        isDialogOpen={popupOpen}
+        onOpenChange={setPopupOpen}
+        dialogTitle={previewData.title || t('websitePreview')}
+        minWidth="xl"
+        minHeight="xl"
+        dialogContent={
+          <iframe
+            src={previewData.url}
+            title={t("embeddedWebsitePreview")}
+            className="h-full w-full border-0 bg-white"
+            style={{ display: 'block', borderRadius: 0 }}
+            allowFullScreen
+          />
+        }
+      />
       <div className={`flex w-full ${alignClass}`}>
         {/* CardWrapper */}
         <div className="nice-shadow relative my-2 min-w-[260px] max-w-[420px] rounded-xl bg-white px-6 pb-4 pt-6">
@@ -170,78 +206,123 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
               </button>
             </div>
           )}
-          {/* Only show edit bar when editing */}
-          {isEditable && editing && (
-            <>
-              <div className="mb-2 flex items-center gap-2">
-                {/* EditBar */}
-                <Globe size={18} style={{ opacity: 0.7, marginRight: 4 }} />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder={t('enterWebsiteUrl')}
-                  value={inputUrl}
-                  onChange={(e) => setInputUrl(e.target.value)}
-                  disabled={loading}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSaveEdit()
-                  }}
-                  className="flex-1 rounded-md border border-gray-200 px-2.5 py-1.5 font-sans text-sm focus:border-gray-400 focus:outline-none"
-                />
-                <button
-                  onClick={handleSaveEdit}
-                  disabled={loading || !inputUrl}
-                  title={t('save')}
-                  type="button"
-                  className="flex cursor-pointer items-center justify-center rounded-md border-none bg-gray-100 p-1 text-gray-700 transition-colors duration-150 hover:bg-gray-200 disabled:opacity-50 aria-pressed:bg-blue-600 aria-pressed:text-white"
-                  aria-pressed={false}
-                >
-                  <Save size={16} />
-                </button>
-                <button
-                  onClick={handleCancelEdit}
-                  title={t('cancel')}
-                  type="button"
-                  className="flex cursor-pointer items-center justify-center rounded-md border-none bg-gray-100 p-1 text-gray-700 transition-colors duration-150 hover:bg-gray-200"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              {/* Button toggle and label input */}
-              <div className="mb-2 flex items-center gap-2">
-                <label className="flex items-center gap-1 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={showButton}
-                    onChange={(e) => {
-                      setShowButton(e.target.checked)
-                      updateAttributes({ showButton: e.target.checked })
-                    }}
-                    className="accent-blue-600"
-                  />
-                  {t('showButton')}
-                </label>
-                {showButton && (
-                  <input
+          {/* Modal for editing */}
+          <Modal
+            isDialogOpen={modalOpen}
+            onOpenChange={(open) => {
+              setModalOpen(open)
+              if (!open) handleCancelEdit()
+            }}
+            dialogTitle={t('editWebPreviewCard')}
+            dialogDescription={t('editWebPreviewDescription')}
+            minWidth="md"
+            dialogContent={
+              <form
+                className="space-y-6"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleSaveEdit()
+                }}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="web-url-input">{t('websiteUrl')}</Label>
+                  <Input
+                    id="web-url-input"
+                    ref={inputRef}
                     type="text"
-                    value={buttonLabel}
-                    onChange={(e) => {
-                      setButtonLabel(e.target.value)
-                      updateAttributes({ buttonLabel: e.target.value })
-                    }}
-                    placeholder={t('buttonLabel')}
-                    className="rounded-md border border-gray-200 px-2 py-1 font-sans text-sm focus:border-gray-400 focus:outline-none"
-                    style={{ minWidth: 100 }}
+                    placeholder={t('enterWebsiteUrl')}
+                    value={inputUrl}
+                    onChange={(e) => setInputUrl(e.target.value)}
+                    disabled={loading}
+                    autoFocus
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('buttonOptions')}</Label>
+                  <div className="flex flex-col gap-3 pt-3">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="show-button"
+                        checked={showButton}
+                        onCheckedChange={(checked) => setShowButton(!!checked)}
+                      />
+                      <Label htmlFor="show-button" className="text-sm">
+                        {t('showButton')}
+                      </Label>
+                    </div>
+                    {showButton && (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="open-in-popup"
+                            checked={openInPopup}
+                            onCheckedChange={(checked) =>
+                              setOpenInPopup(!!checked)
+                            }
+                          />
+                          <Label htmlFor="open-in-popup" className="text-sm">
+                            {t('openInPopup')}
+                          </Label>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="button-label" className="text-sm">
+                            {t('buttonLabel')}
+                          </Label>
+                          <Input
+                            id="button-label"
+                            type="text"
+                            value={buttonLabel}
+                            onChange={(e) => setButtonLabel(e.target.value)}
+                            placeholder={t('buttonLabelPlaceholder')}
+                            className="w-36"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-">
+                  <Label>{t('alignment')}</Label>
+                  <div className="flex gap-2 pt-3">
+                    {ALIGNMENTS.map((opt) => (
+                      <Button
+                        key={opt.value}
+                        type="button"
+                        variant={
+                          alignment === opt.value ? 'default' : 'outline'
+                        }
+                        size="sm"
+                        aria-pressed={alignment === opt.value}
+                        onClick={() => handleAlignmentChange(opt.value)}
+                        className={`rounded-full px-2 py-1 ${alignment === opt.value ? 'bg-black text-white' : ''}`}
+                      >
+                        {opt.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                {error && (
+                  <div className="mt-2 text-xs text-red-600">{error}</div>
                 )}
-              </div>
-            </>
-          )}
-          {error && (
-            <div className="mt-2 text-xs text-red-600">
-              {t('errorFetchingPreview', { error })}
-            </div>
-          )}
+                <div className="mt-2 flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                  >
+                    <span className="flex items-center">
+                      <X size={16} className="mr-1" /> {t('cancel')}
+                    </span>
+                  </Button>
+                  <Button type="submit" disabled={loading || !inputUrl}>
+                    <span className="flex items-center">
+                      <Save size={16} className="mr-1" /> {t('save')}
+                    </span>
+                  </Button>
+                </div>
+              </form>
+            }
+          />
           {/* Only show preview card when not editing */}
           {hasPreview && !editing && (
             <>
@@ -288,40 +369,56 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                   {previewData.url}
                 </span>
               </div>
-              {showButton && previewData.url && (
-                <a
-                  href={previewData.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nice-shadow mt-4 block w-full rounded-xl bg-white px-4 py-2.5 text-center text-[16px] font-semibold text-purple-600 no-underline transition-all hover:bg-gray-50 hover:shadow-lg [&:hover]:text-black [&:not(:hover)]:text-black"
-                  style={{ textDecoration: 'none', color: 'black' }}
-                >
-                  {buttonLabel || t('visitSite')}
-                </a>
+              {showButton &&
+                previewData.url &&
+                (openInPopup ? (
+                  <button
+                    type="button"
+                    className="nice-shadow mt-4 block w-full rounded-xl bg-black px-4 py-2.5 text-center text-[16px] font-semibold text-white no-underline transition-all hover:bg-gray-900 hover:shadow-lg"
+                    style={{ textDecoration: 'none', color: 'white' }}
+                    onClick={() => setPopupOpen(true)}
+                  >
+                    {buttonLabel || t('visitSite')}
+                  </button>
+                ) : (
+                  <a
+                    href={previewData.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="nice-shadow mt-4 block w-full rounded-xl bg-black px-4 py-2.5 text-center text-[16px] font-semibold text-white no-underline transition-all hover:bg-gray-900 hover:shadow-lg"
+                    style={{ textDecoration: 'none', color: 'white' }}
+                  >
+                    {buttonLabel || t('visitSite')}
+                  </a>
+                ))}
+              {/* Alignment bar in view mode */}
+              {isEditable && (
+                <div className="mt-4 flex flex-col items-center">
+                  <div className="flex items-center gap-1">
+                    {/* AlignmentBar */}
+                    <span className="mr-1 text-xs text-gray-500">
+                      {t('align')}:
+                    </span>
+                    {ALIGNMENTS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        aria-pressed={alignment === opt.value}
+                        onClick={() => handleAlignmentChange(opt.value)}
+                        title={t('alignOption', { value: t(opt.value) })}
+                        type="button"
+                        className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+                          alignment === opt.value
+                            ? 'border-gray-600 bg-gray-600 text-white hover:bg-gray-700'
+                            : 'border-gray-200 bg-white hover:bg-gray-100'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </>
-          )}
-          {isEditable && !editing && (
-            <div className="mt-2 flex items-center gap-1">
-              {/* AlignmentBar */}
-              <span className="mr-1 text-xs text-gray-500">{t('align')}:</span>
-              {ALIGNMENTS.map((opt) => (
-                <button
-                  key={opt.value}
-                  aria-pressed={alignment === opt.value}
-                  onClick={() => handleAlignmentChange(opt.value)}
-                  title={t('alignOption', { value: t(opt.value) })}
-                  type="button"
-                  className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                    alignment === opt.value
-                      ? 'border-gray-600 bg-gray-600 text-white hover:bg-gray-700'
-                      : 'border-gray-200 bg-white hover:bg-gray-100'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
           )}
         </div>
       </div>

@@ -21,6 +21,7 @@ interface ActivityChapterDropdownProps {
   course: any
   currentActivityId: string
   orgslug: string
+  trailData?: any
 }
 
 export default function ActivityChapterDropdown(
@@ -30,6 +31,9 @@ export default function ActivityChapterDropdown(
   const dropdownRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
   const t = useTranslations('ActivityPage')
+
+  // Clean up course UUID by removing 'course_' prefix if it exists
+  const cleanCourseUuid = props.course.course_uuid?.replace('course_', '')
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -125,13 +129,22 @@ export default function ActivityChapterDropdown(
                       'activity_',
                       ''
                     )
-                    const cleanCourseUuid = props.course.course_uuid?.replace(
-                      'course_',
-                      ''
-                    )
                     const isCurrent =
                       cleanActivityUuid ===
                       props.currentActivityId.replace('activity_', '')
+
+                    // Find the correct run and check if activity is complete
+                    const run = props.trailData?.runs?.find((run: any) => {
+                      const cleanRunCourseUuid =
+                        run.course?.course_uuid?.replace('course_', '')
+                      return cleanRunCourseUuid === cleanCourseUuid
+                    })
+
+                    const isComplete = run?.steps?.find(
+                      (step: any) =>
+                        step.activity_id === activity.id &&
+                        step.complete === true
+                    )
 
                     return (
                       <Link
@@ -149,18 +162,7 @@ export default function ActivityChapterDropdown(
                         >
                           <div className="flex items-center space-x-2">
                             <div className="flex items-center">
-                              {props.course.trail?.runs
-                                ?.find(
-                                  (run: any) =>
-                                    run.course_id === props.course.id
-                                )
-                                ?.steps?.find(
-                                  (step: any) =>
-                                    (step.activity_id === activity.id ||
-                                      step.activity_id ===
-                                        activity.activity_uuid) &&
-                                    step.complete === true
-                                ) ? (
+                              {isComplete ? (
                                 <div className="relative cursor-pointer">
                                   <Check
                                     size={14}

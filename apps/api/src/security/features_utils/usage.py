@@ -1,9 +1,8 @@
 import redis
-from src.db.organization_config import OrganizationConfig
 from config.config import get_openu_config
 from typing import Literal, TypeAlias
 from fastapi import HTTPException
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 FeatureSet: TypeAlias = Literal[
     "ai",

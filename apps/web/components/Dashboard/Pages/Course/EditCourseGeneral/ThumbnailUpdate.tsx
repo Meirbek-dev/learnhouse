@@ -7,17 +7,18 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { ArrowBigUpDash, UploadCloud, Image as ImageIcon } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import type React from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { mutate } from 'swr'
 import UnsplashImagePicker from './UnsplashImagePicker'
 import { useTranslations } from 'next-intl'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_FILE_SIZE = 8_000_000 // 8MB
 const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const
 
 type ValidMimeType = (typeof VALID_MIME_TYPES)[number]
 
 function ThumbnailUpdate() {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const course = useCourse() as any
   const session = useLHSession() as any
   const org = useOrg() as any
@@ -27,6 +28,7 @@ function ThumbnailUpdate() {
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>('')
+  const [showError, setShowError] = useState(false)
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
   const t = useTranslations('CourseEdit.General.Thumbnail')
   const withUnpublishedActivities = course
@@ -44,23 +46,37 @@ function ThumbnailUpdate() {
 
   const validateFile = (file: File): boolean => {
     if (!VALID_MIME_TYPES.includes(file.type as ValidMimeType)) {
-      setError(t('errors.invalidMimeType'))
+      setError(t('errors.invalidMimeType', { fileType: file.type }))
+      setShowError(true)
       return false
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      setError(t('errors.fileTooLarge'))
+      setError(
+        t('errors.fileTooLarge', {
+          fileSize: (file.size / 1024 / 1024).toFixed(2),
+        })
+      )
+      setShowError(true)
       return false
     }
 
+    setShowError(false)
     return true
   }
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
+    setError('')
+    setShowError(false)
     const file = event.target.files?.[0]
-    if (!file) return
+
+    if (!file) {
+      setError(t('errors.pleaseSelectAFile'))
+      setShowError(true)
+      return
+    }
 
     if (!validateFile(file)) {
       event.target.value = ''
@@ -115,25 +131,27 @@ function ThumbnailUpdate() {
 
       if (res.success === false) {
         setError(res.HTTPmessage)
+        setShowError(true)
       } else {
         setError('')
+        setShowError(false)
       }
-    } catch (_err) {
+    } catch (err) {
       setError(t('errors.updateFailed'))
+      setShowError(true)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="light-shadow h-[250px] w-auto rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200">
+    <div className="light-shadow relative h-[250px] w-auto rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200">
+      {showError && error && (
+        <div className="absolute left-0 right-0 top-4 z-50 mx-auto w-[90%] rounded-lg border border-red-200 bg-red-50 p-3 text-red-800 shadow-lg transition-all">
+          <div className="text-center text-sm font-medium">{error}</div>
+        </div>
+      )}
       <div className="flex h-full flex-col items-center justify-center space-y-4 p-6">
-        {error && (
-          <div className="absolute top-4 flex items-center justify-center space-x-2 rounded-lg bg-red-50 p-3 text-red-800 transition-all">
-            <div className="text-sm font-medium">{error}</div>
-          </div>
-        )}
-
         <div className="flex flex-col items-center space-y-4">
           {localThumbnail ? (
             <img
@@ -162,15 +180,16 @@ function ThumbnailUpdate() {
           {!isLoading && (
             <div className="flex space-x-2">
               <input
+                ref={fileInputRef}
                 type="file"
-                id="fileInput"
                 className="hidden"
                 accept=".jpg,.jpeg,.png"
                 onChange={handleFileChange}
               />
               <button
+                type="button"
                 className="flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-100"
-                onClick={() => document.getElementById('fileInput')?.click()}
+                onClick={() => fileInputRef.current?.click()}
               >
                 <UploadCloud size={16} className="mr-2" />
                 {t('uploadImageButton')}

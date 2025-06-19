@@ -8,7 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
-import { useMemo, memo, useState } from 'react'
+import { useMemo, memo, useState, Fragment } from 'react'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { getUriWithOrg } from '@services/config/config'
 import Link from 'next/link'
@@ -21,6 +21,7 @@ interface Props {
   course_uuid: string
   current_activity?: string
   enableNavigation?: boolean
+  trailData?: any
 }
 
 // Helper functions
@@ -119,6 +120,40 @@ const ActivityTooltipContent = memo(
 
 ActivityTooltipContent.displayName = 'ActivityTooltipContent'
 
+// Add new memoized component for chapter tooltip
+const ChapterTooltipContent = memo(
+  ({
+    chapter,
+    chapterNumber,
+    totalActivities,
+    completedActivities,
+  }: {
+    chapter: any
+    chapterNumber: number
+    totalActivities: number
+    completedActivities: number
+  }) => {
+    const t = useTranslations('ActivityIndicators')
+    return (
+      <div className="nice-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-900">
+            {t('chapter')} {chapterNumber}
+          </span>
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+            {completedActivities}/{totalActivities} {t('completed')}
+          </span>
+        </div>
+        <div className="mt-1">
+          <span className="text-sm text-gray-700">{chapter.name}</span>
+        </div>
+      </div>
+    )
+  }
+)
+
+ChapterTooltipContent.displayName = 'ChapterTooltipContent'
+
 function ActivityIndicators(props: Props) {
   const t = useTranslations('ActivityIndicators')
   const course = props.course
@@ -132,8 +167,6 @@ function ActivityIndicators(props: Props) {
   const done_activity_style = 'bg-teal-600 hover:bg-teal-700'
   const black_activity_style = 'bg-zinc-300 hover:bg-zinc-400'
   const current_activity_style = 'bg-gray-600 animate-pulse hover:bg-gray-700'
-
-  const trail = props.course.trail
 
   // Flatten all activities for navigation and rendering
   const allActivities = useMemo(() => {
@@ -158,15 +191,26 @@ function ActivityIndicators(props: Props) {
   // Memoize activity status checks
   const isActivityDone = useMemo(
     () => (activity: any) => {
-      const run = props.course.trail?.runs.find(
-        (run: any) => run.course_id == props.course.id
-      )
+      // Clean up course UUID by removing 'course_' prefix if it exists
+      const cleanCourseUuid = course.course_uuid?.replace('course_', '')
+
+      const run = props.trailData?.runs?.find((run: any) => {
+        const cleanRunCourseUuid = run.course?.course_uuid?.replace(
+          'course_',
+          ''
+        )
+        return cleanRunCourseUuid === cleanCourseUuid
+      })
+
       if (run) {
-        return run.steps.find((step: any) => step.activity_id == activity.id)
+        return run.steps.find(
+          (step: any) =>
+            step.activity_id === activity.id && step.complete === true
+        )
       }
       return false
     },
-    [props.course]
+    [props.trailData, course.course_uuid]
   )
 
   const isActivityCurrent = useMemo(
@@ -194,6 +238,7 @@ function ActivityIndicators(props: Props) {
     [isActivityDone, isActivityCurrent]
   )
 
+  // Keep the allActivities array for navigation purposes only
   const navigateToPrevious = () => {
     if (currentActivityIndex > 0) {
       const prevActivity = allActivities[currentActivityIndex - 1]
@@ -214,6 +259,16 @@ function ActivityIndicators(props: Props) {
     }
   }
 
+  // Add function to count completed activities in a chapter
+  const getChapterProgress = useMemo(
+    () => (chapterActivities: any[]) => {
+      return chapterActivities.reduce((acc, activity) => {
+        return acc + (isActivityDone(activity) ? 1 : 0)
+      }, 0)
+    },
+    [isActivityDone]
+  )
+
   return (
     <div className="flex items-center gap-4">
       {enableNavigation && (
@@ -228,35 +283,98 @@ function ActivityIndicators(props: Props) {
       )}
 
       <div className="flex w-full items-center">
-        {allActivities.map((activity: any) => {
-          const isDone = isActivityDone(activity)
-          const isCurrent = isActivityCurrent(activity)
+        {course.chapters.map((chapter: any, chapterIndex: number) => {
+          const completedActivities = getChapterProgress(chapter.activities)
+          const isChapterComplete =
+            completedActivities === chapter.activities.length
+          const firstActivity = chapter.activities[0]
+          const firstActivityId = firstActivity?.activity_uuid?.replace(
+            'activity_',
+            ''
+          )
+          const chapterLinkHref = firstActivityId
+            ? getUriWithOrg(orgslug, '') +
+              `/course/${courseid}/activity/${firstActivityId}`
+            : undefined
+
           return (
-            <ToolTip
-              sideOffset={8}
-              unstyled
-              content={
-                <ActivityTooltipContent
-                  activity={activity}
-                  isDone={isDone}
-                  isCurrent={isCurrent}
-                />
-              }
-              key={activity.activity_uuid}
-            >
-              <Link
-                prefetch={false}
-                href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activity.activity_uuid.replace(
-                  'activity_',
-                  ''
-                )}`}
-                className={`${isCurrent ? 'flex-[2]' : 'flex-1'} mx-1`}
+            <Fragment key={chapter.id}>
+              <ToolTip
+                sideOffset={8}
+                unstyled
+                content={
+                  <ChapterTooltipContent
+                    chapter={chapter}
+                    chapterNumber={chapterIndex + 1}
+                    totalActivities={chapter.activities.length}
+                    completedActivities={completedActivities}
+                  />
+                }
               >
-                <div
-                  className={`h-[7px] ${getActivityClass(activity)} rounded-lg transition-all`}
-                />
-              </Link>
-            </ToolTip>
+                {chapterLinkHref ? (
+                  <Link
+                    href={chapterLinkHref}
+                    prefetch={false}
+                    className="mx-2 flex h-[20px] cursor-pointer items-center focus:outline-none"
+                  >
+                    <div
+                      className={`flex h-[20px] w-[20px] items-center justify-center rounded-full text-xs font-medium transition-colors ${
+                        isChapterComplete
+                          ? 'bg-teal-600 text-white'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {chapterIndex + 1}
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="mx-2 flex h-[20px] cursor-not-allowed items-center">
+                    <div
+                      className={`flex h-[20px] w-[20px] items-center justify-center rounded-full text-xs font-medium transition-colors ${
+                        isChapterComplete
+                          ? 'bg-teal-600 text-white'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {chapterIndex + 1}
+                    </div>
+                  </div>
+                )}
+              </ToolTip>
+              <div className="flex flex-1 items-center">
+                {chapter.activities.map((activity: any) => {
+                  const isDone = isActivityDone(activity)
+                  const isCurrent = isActivityCurrent(activity)
+                  return (
+                    <ToolTip
+                      sideOffset={8}
+                      unstyled
+                      content={
+                        <ActivityTooltipContent
+                          activity={activity}
+                          isDone={isDone}
+                          isCurrent={isCurrent}
+                        />
+                      }
+                      key={activity.activity_uuid}
+                    >
+                      <Link
+                        prefetch={false}
+                        href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activity.activity_uuid.replace(
+                          'activity_',
+                          ''
+                        )}`}
+                        className={`${isCurrent ? 'flex-[2]' : 'flex-1'} mx-1`}
+                      >
+                        <div
+                          className={`h-[7px] ${getActivityClass(activity)} rounded-lg transition-all`}
+                        />
+                      </Link>
+                    </ToolTip>
+                  )
+                })}
+              </div>
+            </Fragment>
           )
         })}
       </div>

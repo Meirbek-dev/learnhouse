@@ -5,7 +5,6 @@ import type { Metadata } from 'next'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { nextAuthOptions } from 'app/auth/options'
 import { getServerSession } from 'next-auth/next'
-import { getTranslations } from 'next-intl/server'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; courseuuid: string }>
@@ -18,21 +17,21 @@ export async function generateMetadata(
   const params = await props.params
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
-  const tGeneral = await getTranslations('General')
 
+  // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
   })
   const course_meta = await getCourseMetadata(
     params.courseuuid,
-    { revalidate: 0, tags: ['courses'] },
+    { revalidate: 60, tags: ['courses'] },
     access_token ? access_token : null
   )
 
   // SEO
   return {
-    title: `${course_meta.name} — ${tGeneral('course')} — ${org.name}`,
+    title: `${course_meta.name} — ${org.name}`,
     description: course_meta.description,
     keywords: course_meta.learnings,
     robots: {
@@ -71,18 +70,20 @@ const CoursePage = async (params: any) => {
   const session = await getServerSession(nextAuthOptions)
   const access_token = session?.tokens?.access_token
 
+  // Await params before using them
+  const { courseuuid, orgslug } = await params.params
+
   // Fetch course metadata once
-  const awaitedParams = await params.params
   const course_meta = await getCourseMetadata(
-    awaitedParams.courseuuid,
+    courseuuid,
     { revalidate: 0, tags: ['courses'] },
     access_token ? access_token : null
   )
 
   return (
     <CourseClient
-      courseuuid={awaitedParams.courseuuid}
-      orgslug={awaitedParams.orgslug}
+      courseuuid={courseuuid}
+      orgslug={orgslug}
       course={course_meta}
       access_token={access_token}
     />
