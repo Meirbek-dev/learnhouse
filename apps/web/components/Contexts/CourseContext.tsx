@@ -1,33 +1,29 @@
-'use client'
-import { getAPIUrl } from '@services/config/config'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { createContext, use, useEffect, useReducer } from 'react'
-import useSWR from 'swr'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import ErrorUI from '@components/Objects/StyledElements/Error/Error'
-import PageLoading from '@components/Objects/Loaders/PageLoading'
-import { useTranslations } from 'next-intl'
+'use client';
+import ErrorUI from '@components/Objects/StyledElements/Error/Error';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { createContext, use, useEffect, useReducer } from 'react';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
+import { useTranslations } from 'next-intl';
+import useSWR from 'swr';
 
-type CourseDispatch = React.Dispatch<any>
+type CourseDispatch = React.Dispatch<any>;
 type CourseState = {
-  courseStructure: any
-  courseOrder: any
-  isSaved: boolean
-  isLoading: boolean
-  withUnpublishedActivities: boolean
-}
+  courseStructure: any;
+  courseOrder: any;
+  isSaved: boolean;
+  isLoading: boolean;
+  withUnpublishedActivities: boolean;
+};
 
-export const CourseContext = createContext<CourseState | null>(null)
-export const CourseDispatchContext = createContext<CourseDispatch | null>(null)
+export const CourseContext = createContext<CourseState | null>(null);
+export const CourseDispatchContext = createContext<CourseDispatch | null>(null);
 
-export function CourseProvider({
-  children,
-  courseuuid,
-  withUnpublishedActivities = false,
-}: any) {
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('Contexts.Course')
+export function CourseProvider({ children, courseuuid, withUnpublishedActivities = false }: any) {
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('Contexts.Course');
 
   const {
     data: courseStructureData,
@@ -35,8 +31,8 @@ export function CourseProvider({
     isLoading: isSWRLoading,
   } = useSWR(
     `${getAPIUrl()}courses/${courseuuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-    (url) => swrFetcher(url, access_token)
-  )
+    (url) => swrFetcher(url, access_token),
+  );
 
   const initialState = {
     courseStructure: {
@@ -46,54 +42,52 @@ export function CourseProvider({
     isSaved: true,
     isLoading: true,
     withUnpublishedActivities: withUnpublishedActivities,
-  }
+  };
 
-  const [state, dispatch] = useReducer(courseReducer, initialState) as any
+  const [state, dispatch] = useReducer(courseReducer, initialState) as any;
 
   useEffect(() => {
     if (courseStructureData) {
-      dispatch({ type: 'setCourseStructure', payload: courseStructureData })
-      dispatch({ type: 'setIsLoaded' })
+      dispatch({ type: 'setCourseStructure', payload: courseStructureData });
+      dispatch({ type: 'setIsLoaded' });
     }
-  }, [courseStructureData])
+  }, [courseStructureData]);
 
-  const isLoading = isSWRLoading || state.isLoading
+  const isLoading = isSWRLoading || state.isLoading;
 
-  if (error) return <ErrorUI message={t('loadError')} />
-  if (isLoading) return <PageLoading />
+  if (error) return <ErrorUI message={t('loadError')} />;
+  if (isLoading) return <PageLoading />;
 
   if (courseStructureData) {
     return (
       <CourseContext.Provider value={state}>
-        <CourseDispatchContext.Provider value={dispatch}>
-          {children}
-        </CourseDispatchContext.Provider>
+        <CourseDispatchContext.Provider value={dispatch}>{children}</CourseDispatchContext.Provider>
       </CourseContext.Provider>
-    )
+    );
   }
 }
 
 export function useCourse() {
-  return use(CourseContext)
+  return use(CourseContext);
 }
 
 export function useCourseDispatch() {
-  return use(CourseDispatchContext)
+  return use(CourseDispatchContext);
 }
 
 function courseReducer(state: any, action: any) {
   switch (action.type) {
     case 'setCourseStructure':
-      return { ...state, courseStructure: action.payload }
+      return { ...state, courseStructure: action.payload };
     case 'setCourseOrder':
-      return { ...state, courseOrder: action.payload }
+      return { ...state, courseOrder: action.payload };
     case 'setIsSaved':
-      return { ...state, isSaved: true }
+      return { ...state, isSaved: true };
     case 'setIsNotSaved':
-      return { ...state, isSaved: false }
+      return { ...state, isSaved: false };
     case 'setIsLoaded':
-      return { ...state, isLoading: false }
+      return { ...state, isLoading: false };
     default:
-      throw new Error(`Unhandled action type: ${action.type}`)
+      throw new Error(`Unhandled action type: ${action.type}`);
   }
 }

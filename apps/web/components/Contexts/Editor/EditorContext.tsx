@@ -1,31 +1,26 @@
-'use client'
-import type { ReactNode } from 'react'
-import { createContext, use, useState } from 'react'
+'use client';
+import { createContext, use, useState } from 'react';
+import type { ReactNode } from 'react';
 
-export const EditorProviderContext = createContext(null) as any
+export const EditorProviderContext = createContext(null) as any;
 
 type EditorProviderProps = {
-  children: ReactNode
-  options: EditorProviderState
-}
+  children: ReactNode;
+  options: EditorProviderState;
+};
 
 type EditorProviderState = {
-  isEditable: boolean
-}
+  isEditable: boolean;
+};
 
 function EditorOptionsProvider({ children, options }: EditorProviderProps) {
-  const [editorOptions, _setEditorOptions] =
-    useState<EditorProviderState>(options)
+  const [editorOptions, _setEditorOptions] = useState<EditorProviderState>(options);
 
-  return (
-    <EditorProviderContext value={editorOptions}>
-      {children}
-    </EditorProviderContext>
-  )
+  return <EditorProviderContext value={editorOptions}>{children}</EditorProviderContext>;
 }
 
-export default EditorOptionsProvider
+export default EditorOptionsProvider;
 
 export function useEditorProvider() {
-  return use(EditorProviderContext)
+  return use(EditorProviderContext);
 }

@@ -1,58 +1,48 @@
-'use client'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { signOut } from 'next-auth/react'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import OpenUDashboardLogo from '@public/dashLogo.png'
-import {
-  Backpack,
-  BadgeDollarSign,
-  BookCopy,
-  Home,
-  LogOut,
-  Package2,
-  School,
-  Settings,
-  Users,
-} from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import UserAvatar from '../../Objects/UserAvatar'
-import AdminAuthorization from '@components/Security/AdminAuthorization'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config'
-import useFeatureFlag from '@components/Hooks/useFeatureFlag'
-import { useTranslations } from 'next-intl'
+'use client';
+import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, Package2, School, Settings, Users } from 'lucide-react';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import AdminAuthorization from '@components/Security/AdminAuthorization';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import useFeatureFlag from '@components/Hooks/useFeatureFlag';
+import { useOrg } from '@components/Contexts/OrgContext';
+import OpenUDashboardLogo from '@public/dashLogo.png';
+import UserAvatar from '../../Objects/UserAvatar';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { signOut } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 function DashLeftMenu() {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const [loading, setLoading] = useState(true)
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const [loading, setLoading] = useState(true);
   const isPaymentsEnabled = useFeatureFlag({
     path: ['features', 'payments', 'enabled'],
     defaultValue: false,
-  })
-  const t = useTranslations('DashboardMenu')
+  });
+  const t = useTranslations('DashboardMenu');
 
   function waitForEverythingToLoad() {
-    return org && session
+    return org && session;
   }
 
   async function logOutUI() {
     const res = await signOut({
       redirect: true,
       callbackUrl: getUriWithoutOrg(`/login?orgslug=${org.slug}`),
-    })
+    });
     if (res) {
-      getUriWithOrg(org.slug, '/')
+      getUriWithOrg(org.slug, '/');
     }
   }
 
   useEffect(() => {
     if (waitForEverythingToLoad()) {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [loading])
+  }, [loading]);
 
   return (
     <div
@@ -74,7 +64,11 @@ function DashLeftMenu() {
               sideOffset={8}
               side="right"
             >
-              <Image alt="OpenU лого" width={40} src={OpenUDashboardLogo} />
+              <Image
+                alt="OpenU лого"
+                width={40}
+                src={OpenUDashboardLogo}
+              />
             </ToolTip>
           </Link>
         </div>
@@ -174,7 +168,10 @@ function DashLeftMenu() {
               side="right"
             >
               <div className="mx-auto">
-                <UserAvatar border="border-4" width={35} />
+                <UserAvatar
+                  border="border-4"
+                  width={35}
+                />
               </div>
             </ToolTip>
             <div className="flex flex-col items-center space-y-3">
@@ -187,7 +184,10 @@ function DashLeftMenu() {
                   sideOffset={8}
                   side="right"
                 >
-                  <Link href={'/dash/user-account/owned'} className="py-1">
+                  <Link
+                    href={'/dash/user-account/owned'}
+                    className="py-1"
+                  >
                     <Package2
                       className="mx-auto cursor-pointer text-neutral-400"
                       size={18}
@@ -230,7 +230,7 @@ function DashLeftMenu() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default DashLeftMenu
+export default DashLeftMenu;

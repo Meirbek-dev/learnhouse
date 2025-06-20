@@ -1,7 +1,7 @@
-import { mergeAttributes, Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
-import PDFBlockComponent from './PDFBlockComponent'
+import PDFBlockComponent from './PDFBlockComponent';
 
 export default Node.create({
   name: 'blockPDF',
@@ -14,7 +14,7 @@ export default Node.create({
       blockObject: {
         default: null,
       },
-    }
+    };
   },
 
   parseHTML() {
@@ -22,14 +22,14 @@ export default Node.create({
       {
         tag: 'block-pdf',
       },
-    ]
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['block-pdf', mergeAttributes(HTMLAttributes), 0]
+    return ['block-pdf', mergeAttributes(HTMLAttributes), 0];
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(PDFBlockComponent)
+    return ReactNodeViewRenderer(PDFBlockComponent);
   },
-})
+});

@@ -1,6 +1,3 @@
-import type { FC, ChangeEvent } from 'react'
-import { useState, useEffect, useCallback } from 'react'
-import { createApi } from 'unsplash-js'
 import {
   Search,
   Cpu,
@@ -22,15 +19,18 @@ import {
   Coffee,
   Gamepad,
   Flower,
-} from 'lucide-react'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { useTranslations } from 'next-intl'
+} from 'lucide-react';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useState, useEffect, useCallback } from 'react';
+import type { FC, ChangeEvent } from 'react';
+import { useTranslations } from 'next-intl';
+import { createApi } from 'unsplash-js';
 
 const unsplash = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
-})
+});
 
-const IMAGES_PER_PAGE = 20
+const IMAGES_PER_PAGE = 20;
 
 const LABEL_KEYS_WITH_ICONS = [
   { key: 'nature', icon: Flower },
@@ -53,98 +53,89 @@ const LABEL_KEYS_WITH_ICONS = [
   { key: 'finance', icon: Coins },
   { key: 'lifestyle', icon: Coffee },
   { key: 'gaming', icon: Gamepad },
-] as const
+] as const;
 
 interface UnsplashImagePickerProps {
-  onSelect: (imageUrl: string) => void
-  onClose: () => void
-  isOpen?: boolean
+  onSelect: (imageUrl: string) => void;
+  onClose: () => void;
+  isOpen?: boolean;
 }
 
-const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({
-  onSelect,
-  onClose,
-  isOpen = true,
-}) => {
-  const [query, setQuery] = useState('')
-  const [images, setImages] = useState<any[]>([])
-  const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const t = useTranslations('CourseEdit.General.UnsplashPicker')
+const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, isOpen = true }) => {
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const t = useTranslations('CourseEdit.General.UnsplashPicker');
 
   // Generate predefined labels with translations
   const predefinedLabels = LABEL_KEYS_WITH_ICONS.map(({ key, icon }) => ({
     name: t(`Labels.${key}`),
     icon: icon,
     key: key,
-  }))
+  }));
 
-  const fetchImages = useCallback(
-    async (searchQuery: string, pageNum: number) => {
-      setLoading(true)
-      try {
-        const result = await unsplash.search.getPhotos({
-          query: searchQuery,
-          page: pageNum,
-          perPage: IMAGES_PER_PAGE,
-        })
-        if (result?.response) {
-          setImages((prevImages) =>
-            pageNum === 1
-              ? result.response.results
-              : [...prevImages, ...result.response.results]
-          )
-        }
-      } catch (error) {
-        console.error('Error fetching images:', error)
-      } finally {
-        setLoading(false)
+  const fetchImages = useCallback(async (searchQuery: string, pageNum: number) => {
+    setLoading(true);
+    try {
+      const result = await unsplash.search.getPhotos({
+        query: searchQuery,
+        page: pageNum,
+        perPage: IMAGES_PER_PAGE,
+      });
+      if (result?.response) {
+        setImages((prevImages) =>
+          pageNum === 1 ? result.response.results : [...prevImages, ...result.response.results],
+        );
       }
-    },
-    []
-  )
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const debouncedFetchImages = useCallback(
     debounce((searchQuery: string) => {
-      setPage(1)
-      fetchImages(searchQuery, 1)
+      setPage(1);
+      fetchImages(searchQuery, 1);
     }, 300),
-    [fetchImages]
-  )
+    [fetchImages],
+  );
 
   useEffect(() => {
     if (query) {
-      debouncedFetchImages(query)
+      debouncedFetchImages(query);
     } else if (images.length > 0 || page > 1) {
-      setImages([])
-      setPage(1)
+      setImages([]);
+      setPage(1);
     }
-  }, [query, debouncedFetchImages])
+  }, [query, debouncedFetchImages]);
 
   useEffect(() => {
     if (isOpen && images.length === 0 && !query && !loading) {
-      fetchImages('course', 1)
+      fetchImages('course', 1);
     }
-  }, [isOpen, images.length, query, loading, fetchImages])
+  }, [isOpen, images.length, query, loading, fetchImages]);
 
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value)
-  }
+    setQuery(e.target.value);
+  };
 
   const handleLabelClick = (labelKey: string) => {
-    setQuery(labelKey)
-  }
+    setQuery(labelKey);
+  };
 
   const handleLoadMore = () => {
-    const nextPage = page + 1
-    setPage(nextPage)
-    fetchImages(query, nextPage)
-  }
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchImages(query, nextPage);
+  };
 
   const handleImageSelect = (imageUrl: string) => {
-    onSelect(imageUrl)
-    onClose()
-  }
+    onSelect(imageUrl);
+    onClose();
+  };
 
   const modalContent = (
     <div className="flex h-full flex-col">
@@ -181,7 +172,10 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({
       <div className="flex-1 overflow-y-auto p-4 pt-0">
         <div className="grid grid-cols-3 gap-4">
           {images.map((image) => (
-            <div key={image.id} className="relative w-full pb-[56.25%]">
+            <div
+              key={image.id}
+              className="relative w-full pb-[56.25%]"
+            >
               <img
                 src={image.urls.small}
                 alt={image.alt_description || 'Unsplash image'}
@@ -200,12 +194,10 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({
             {t('loadMoreButton')}
           </button>
         )}
-        {!loading && images.length === 0 && query && (
-          <p className="mt-4 text-center">{t('noResults')}</p>
-        )}
+        {!loading && images.length === 0 && query && <p className="mt-4 text-center">{t('noResults')}</p>}
       </div>
     </div>
-  )
+  );
 
   return (
     <Modal
@@ -217,15 +209,15 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({
       minHeight="lg"
       customHeight="h-[80vh]"
     />
-  )
-}
+  );
+};
 
 const debounce = (func: Function, delay: number) => {
-  let timeoutId: NodeJS.Timeout
+  let timeoutId: NodeJS.Timeout;
   return (...args: any[]) => {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => func(...args), delay)
-  }
-}
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
-export default UnsplashImagePicker
+export default UnsplashImagePicker;

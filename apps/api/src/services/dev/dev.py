@@ -4,10 +4,7 @@ from config.config import get_openu_config
 
 def isDevModeEnabled():
     config = get_openu_config()
-    if config.general_config.development_mode:
-        return True
-    else:
-        return False
+    return config.general_config.development_mode
 
 
 def isDevModeEnabledOrRaise():

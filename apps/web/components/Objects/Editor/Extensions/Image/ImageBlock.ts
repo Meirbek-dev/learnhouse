@@ -1,7 +1,7 @@
-import { mergeAttributes, Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
-import ImageBlockComponent from './ImageBlockComponent'
+import ImageBlockComponent from './ImageBlockComponent';
 
 export default Node.create({
   name: 'blockImage',
@@ -20,7 +20,7 @@ export default Node.create({
       alignment: {
         default: 'center',
       },
-    }
+    };
   },
 
   parseHTML() {
@@ -28,14 +28,14 @@ export default Node.create({
       {
         tag: 'block-image',
       },
-    ]
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['block-image', mergeAttributes(HTMLAttributes), 0]
+    return ['block-image', mergeAttributes(HTMLAttributes), 0];
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(ImageBlockComponent)
+    return ReactNodeViewRenderer(ImageBlockComponent);
   },
-})
+});

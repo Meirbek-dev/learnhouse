@@ -1,21 +1,15 @@
-'use client'
-import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext'
-import { LayoutList } from 'lucide-react'
-import AssignmentTasks from '../_components/Tasks'
-import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext'
-import dynamic from 'next/dynamic'
-import { useTranslations } from 'next-intl'
+'use client';
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import AssignmentTasks from '../_components/Tasks';
+import { useTranslations } from 'next-intl';
+import { LayoutList } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
-const AssignmentTaskEditor = dynamic(
-  () => import('../_components/TaskEditor/TaskEditor')
-)
+const AssignmentTaskEditor = dynamic(() => import('../_components/TaskEditor/TaskEditor'));
 
-function AssignmentEditorSubPage({
-  assignmentuuid,
-}: {
-  assignmentuuid: string
-}) {
-  const t = useTranslations('DashPage.Assignments')
+function AssignmentEditorSubPage({ assignmentuuid }: { assignmentuuid: string }) {
+  const t = useTranslations('DashPage.Assignments');
 
   return (
     <AssignmentsTaskProvider>
@@ -32,7 +26,7 @@ function AssignmentEditorSubPage({
         </AssignmentProvider>
       </div>
     </AssignmentsTaskProvider>
-  )
+  );
 }
 
-export default AssignmentEditorSubPage
+export default AssignmentEditorSubPage;

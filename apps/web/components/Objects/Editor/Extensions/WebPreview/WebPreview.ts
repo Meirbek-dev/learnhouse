@@ -1,6 +1,6 @@
-import { mergeAttributes, Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
-import WebPreviewComponent from './WebPreviewComponent'
+import WebPreviewComponent from './WebPreviewComponent';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
 const WebPreview = Node.create({
   name: 'blockWebPreview',
@@ -20,20 +20,20 @@ const WebPreview = Node.create({
       buttonLabel: { default: 'Visit Site' },
       showButton: { default: false },
       openInPopup: { default: false },
-    }
+    };
   },
 
   parseHTML() {
-    return [{ tag: 'web-preview' }]
+    return [{ tag: 'web-preview' }];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['web-preview', mergeAttributes(HTMLAttributes), 0]
+    return ['web-preview', mergeAttributes(HTMLAttributes), 0];
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(WebPreviewComponent)
+    return ReactNodeViewRenderer(WebPreviewComponent);
   },
-})
+});
 
-export default WebPreview
+export default WebPreview;

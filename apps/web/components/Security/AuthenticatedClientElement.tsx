@@ -1,35 +1,23 @@
-'use client'
-import type { ReactNode } from 'react'
-import { useState, useEffect } from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
+'use client';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 interface AuthenticatedClientElementProps {
-  children: ReactNode
-  checkMethod: 'authentication' | 'roles'
-  orgId?: string
-  ressourceType?:
-    | 'collections'
-    | 'courses'
-    | 'activities'
-    | 'users'
-    | 'organizations'
-  action?: 'create' | 'update' | 'delete' | 'read'
+  children: ReactNode;
+  checkMethod: 'authentication' | 'roles';
+  orgId?: string;
+  ressourceType?: 'collections' | 'courses' | 'activities' | 'users' | 'organizations';
+  action?: 'create' | 'update' | 'delete' | 'read';
 }
 
-export const AuthenticatedClientElement = (
-  props: AuthenticatedClientElementProps
-) => {
-  const [isAllowed, setIsAllowed] = useState(false)
-  const session = useLHSession() as any
-  const org = useOrg() as any
+export const AuthenticatedClientElement = (props: AuthenticatedClientElementProps) => {
+  const [isAllowed, setIsAllowed] = useState(false);
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
 
-  function isUserAllowed(
-    roles: any[],
-    action: string,
-    resourceType: string,
-    org_uuid: string
-  ): boolean {
+  function isUserAllowed(roles: any[], action: string, resourceType: string, org_uuid: string): boolean {
     // Iterate over the user's roles
     for (const role of roles) {
       // Check if the role is for the right organization
@@ -37,51 +25,44 @@ export const AuthenticatedClientElement = (
         // Check if the user has the role for the resource type
         if (role.role.rights?.[resourceType]) {
           // Check if the user is allowed to execute the action
-          const actionKey = `action_${action}`
+          const actionKey = `action_${action}`;
           if (role.role.rights[resourceType][actionKey] === true) {
-            return true
+            return true;
           }
         }
       }
     }
 
     // If no role matches the organization, resource type, and action, return false
-    return false
+    return false;
   }
 
   function check() {
     if (session.status == 'unauthenticated') {
-      setIsAllowed(false)
-      return
+      setIsAllowed(false);
+      return;
     }
     if (props.checkMethod === 'authentication') {
-      setIsAllowed(session.status == 'authenticated')
+      setIsAllowed(session.status == 'authenticated');
     } else if (props.checkMethod === 'roles') {
       if (props.action && props.ressourceType) {
-        return setIsAllowed(
-          isUserAllowed(
-            session?.data?.roles,
-            props.action,
-            props.ressourceType,
-            org?.org_uuid
-          )
-        )
+        return setIsAllowed(isUserAllowed(session?.data?.roles, props.action, props.ressourceType, org?.org_uuid));
       }
-      setIsAllowed(false)
+      setIsAllowed(false);
     } else {
-      setIsAllowed(false)
+      setIsAllowed(false);
     }
   }
 
   useEffect(() => {
     if (session.status == 'loading') {
-      return
+      return;
     }
 
-    check()
-  }, [session.data, org])
+    check();
+  }, [session.data, org]);
 
-  return <>{isAllowed && props.children}</>
-}
+  return <>{isAllowed && props.children}</>;
+};
 
-export default AuthenticatedClientElement
+export default AuthenticatedClientElement;

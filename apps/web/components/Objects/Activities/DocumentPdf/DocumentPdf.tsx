@@ -1,17 +1,11 @@
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getActivityMediaDirectory } from '@services/media/media'
-import { useEffect } from 'react'
+import { getActivityMediaDirectory } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useEffect } from 'react';
 
-function DocumentPdfActivity({
-  activity,
-  course,
-}: {
-  activity: any
-  course: any
-}) {
-  const org = useOrg() as any
+function DocumentPdfActivity({ activity, course }: { activity: any; course: any }) {
+  const org = useOrg() as any;
 
-  useEffect(() => {}, [activity, org])
+  useEffect(() => {}, [activity, org]);
 
   return (
     <div className="m-8 mt-14 rounded-md bg-zinc-900">
@@ -23,11 +17,11 @@ function DocumentPdfActivity({
           course?.course_uuid,
           activity.activity_uuid,
           activity.content.filename,
-          'documentpdf'
+          'documentpdf',
         )}
       />
     </div>
-  )
+  );
 }
 
-export default DocumentPdfActivity
+export default DocumentPdfActivity;

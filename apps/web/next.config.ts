@@ -1,5 +1,5 @@
-import type { NextConfig } from 'next'
-import createNextIntlPlugin from 'next-intl/plugin'
+import createNextIntlPlugin from 'next-intl/plugin';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   async rewrites() {
@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
         source: '/umami/api/send',
         destination: 'https://eu.umami.is/api/send',
       },
-    ]
+    ];
   },
   experimental: {
     reactCompiler: false,
@@ -23,8 +23,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   devIndicators: false,
   output: 'standalone',
-}
+};
 
-const withNextIntl = createNextIntlPlugin()
+const withNextIntl = createNextIntlPlugin();
 
-export default withNextIntl(nextConfig)
+export default withNextIntl(nextConfig);

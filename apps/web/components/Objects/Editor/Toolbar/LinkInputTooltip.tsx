@@ -1,36 +1,29 @@
-import type React from 'react'
-import { useState, useEffect } from 'react'
-import styled from 'styled-components'
-import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons'
+import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import type React from 'react';
 
 interface LinkInputTooltipProps {
-  onSave: (url: string) => void
-  onCancel: () => void
-  currentUrl?: string
+  onSave: (url: string) => void;
+  onCancel: () => void;
+  currentUrl?: string;
 }
 
-const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({
-  onSave,
-  onCancel,
-  currentUrl,
-}) => {
-  const [url, setUrl] = useState(currentUrl || '')
+const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, currentUrl }) => {
+  const [url, setUrl] = useState(currentUrl || '');
 
   useEffect(() => {
-    setUrl(currentUrl || '')
-  }, [currentUrl])
+    setUrl(currentUrl || '');
+  }, [currentUrl]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (url) {
       // Ensure the URL has a protocol
-      const formattedUrl =
-        url.startsWith('http://') || url.startsWith('https://')
-          ? url
-          : `https://${url}`
-      onSave(formattedUrl)
+      const formattedUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+      onSave(formattedUrl);
     }
-  }
+  };
 
   return (
     <TooltipContainer>
@@ -43,17 +36,23 @@ const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({
           autoFocus
         />
         <ButtonGroup>
-          <SaveButton type="submit" disabled={!url}>
+          <SaveButton
+            type="submit"
+            disabled={!url}
+          >
             <CheckIcon />
           </SaveButton>
-          <CancelButton type="button" onClick={onCancel}>
+          <CancelButton
+            type="button"
+            onClick={onCancel}
+          >
             <Cross2Icon />
           </CancelButton>
         </ButtonGroup>
       </Form>
     </TooltipContainer>
-  )
-}
+  );
+};
 
 const TooltipContainer = styled.div`
   position: absolute;
@@ -66,13 +65,13 @@ const TooltipContainer = styled.div`
   z-index: 1000;
   padding: 8px;
   margin-top: 4px;
-`
+`;
 
 const Form = styled.form`
   display: flex;
   align-items: center;
   gap: 4px;
-`
+`;
 
 const Input = styled.input`
   padding: 4px 8px;
@@ -82,15 +81,15 @@ const Input = styled.input`
   width: 200px;
 
   &:focus {
-    outline: none;
     border-color: rgba(217, 217, 217, 0.8);
+    outline: none;
   }
-`
+`;
 
 const ButtonGroup = styled.div`
   display: flex;
   gap: 2px;
-`
+`;
 
 const Button = styled.button`
   display: flex;
@@ -108,17 +107,17 @@ const Button = styled.button`
   }
 
   &:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
+    opacity: 0.5;
   }
-`
+`;
 
 const SaveButton = styled(Button)`
   color: #4caf50;
-`
+`;
 
 const CancelButton = styled(Button)`
   color: #f44336;
-`
+`;
 
-export default LinkInputTooltip
+export default LinkInputTooltip;

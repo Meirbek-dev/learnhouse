@@ -1,29 +1,29 @@
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { FileUp, ListTodo, PanelLeftOpen, Plus } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import NewTaskModal from './Modals/NewTaskModal'
 import {
   useAssignmentsTask,
   useAssignmentsTaskDispatch,
-} from '@components/Contexts/Assignments/AssignmentsTaskContext'
-import { useTranslations } from 'next-intl'
+} from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { FileUp, ListTodo, PanelLeftOpen, Plus } from 'lucide-react';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import NewTaskModal from './Modals/NewTaskModal';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
 
 function AssignmentTasks({ assignment_uuid }: any) {
-  const t = useTranslations('DashPage.Assignments.Tasks')
-  const assignments = useAssignments() as any
-  const assignmentTask = useAssignmentsTask() as any
-  const assignmentTaskHook = useAssignmentsTaskDispatch() as any
-  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false)
+  const t = useTranslations('DashPage.Assignments.Tasks');
+  const assignments = useAssignments() as any;
+  const assignmentTask = useAssignmentsTask() as any;
+  const assignmentTaskHook = useAssignmentsTaskDispatch() as any;
+  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
 
   async function setSelectTask(task_uuid: string) {
     assignmentTaskHook({
       type: 'setSelectedAssignmentTaskUUID',
       payload: task_uuid,
-    })
+    });
   }
 
-  useEffect(() => {}, [assignments])
+  useEffect(() => {}, [assignments]);
 
   return (
     <div className="flex w-full">
@@ -61,9 +61,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
                 <div className="flex items-center space-x-3">
                   <div className="text-gray-500">
                     {task.assignment_type === 'QUIZ' && <ListTodo size={15} />}
-                    {task.assignment_type === 'FILE_SUBMISSION' && (
-                      <FileUp size={15} />
-                    )}
+                    {task.assignment_type === 'FILE_SUBMISSION' && <FileUp size={15} />}
                   </div>
                   <div className="text-sm font-semibold">{task.title}</div>
                 </div>
@@ -74,11 +72,11 @@ function AssignmentTasks({ assignment_uuid }: any) {
                 </button>
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
-export default AssignmentTasks
+export default AssignmentTasks;

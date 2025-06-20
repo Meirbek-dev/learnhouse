@@ -1,40 +1,36 @@
-'use client'
-import Image from 'next/image'
-import { useState } from 'react'
-import openuIcon from 'public/openu_icon.png'
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { getOrgLogoMediaDirectory } from '@services/media/media'
-import { AlertTriangle, Info } from 'lucide-react'
-import Link from 'next/link'
-import { getUriWithOrg } from '@services/config/config'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useFormik } from 'formik'
-import { sendResetLink } from '@services/auth/auth'
-import { useTranslations } from 'next-intl'
+'use client';
+import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
+import { getOrgLogoMediaDirectory } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { sendResetLink } from '@services/auth/auth';
+import { AlertTriangle, Info } from 'lucide-react';
+import openuIcon from 'public/openu_icon.png';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { useFormik } from 'formik';
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 function ForgotPasswordClient() {
-  const t = useTranslations('Auth.Forgot')
-  const org = useOrg() as any
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
+  const t = useTranslations('Auth.Forgot');
+  const org = useOrg() as any;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const validate = (values: any) => {
-    const errors: any = {}
+    const errors: any = {};
 
     if (!values.email) {
-      errors.email = t('required')
+      errors.email = t('required');
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = t('invalidEmail')
+      errors.email = t('invalidEmail');
     }
 
-    return errors
-  }
+    return errors;
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -43,27 +39,29 @@ function ForgotPasswordClient() {
     validate,
     validateOnBlur: true,
     onSubmit: async (values) => {
-      setIsSubmitting(true)
-      const res = await sendResetLink(values.email, org?.id)
+      setIsSubmitting(true);
+      const res = await sendResetLink(values.email, org?.id);
       if (res.status == 200) {
-        setMessage(t('checkEmail'))
+        setMessage(t('checkEmail'));
       } else {
-        setError(res.data.detail)
+        setError(res.data.detail);
       }
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     },
-  })
+  });
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
       <div
         className="right-login-part"
         style={{
-          background:
-            'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
+          background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
         }}
       >
         <div className="login-topbar m-10">
-          <Link prefetch href={getUriWithOrg(org?.slug, '/')}>
+          <Link
+            prefetch
+            href={getUriWithOrg(org?.slug, '/')}
+          >
             <Image
               quality={100}
               width={30}
@@ -78,10 +76,7 @@ function ForgotPasswordClient() {
             <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
               {org?.logo_image ? (
                 <img
-                  src={`${getOrgLogoMediaDirectory(
-                    org?.org_uuid,
-                    org?.logo_image
-                  )}`}
+                  src={`${getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)}`}
                   alt={org?.name}
                   style={{ width: 'auto', height: 70 }}
                   className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
@@ -144,7 +139,7 @@ function ForgotPasswordClient() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ForgotPasswordClient
+export default ForgotPasswordClient;

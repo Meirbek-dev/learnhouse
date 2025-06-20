@@ -1,35 +1,35 @@
-'use client'
-import type { ReactNode } from 'react'
-import { use } from 'react'
-import { motion } from 'framer-motion'
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
-import Link from 'next/link'
-import { getUriWithOrg } from '@services/config/config'
-import { Settings, Users, Gem } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage'
-import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage'
-import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage'
-import useFeatureFlag from '@components/Hooks/useFeatureFlag'
-import { useTranslations } from 'next-intl'
+'use client';
+import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage';
+import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage';
+import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import useFeatureFlag from '@components/Hooks/useFeatureFlag';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { Settings, Users, Gem } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { use } from 'react';
 
 export type PaymentsParams = {
-  subpage: string
-  orgslug: string
-}
+  subpage: string;
+  orgslug: string;
+};
 
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
-  const params = use(props.params)
-  const t = useTranslations('DashPage.Payments')
-  const _session = useLHSession() as any
-  const _org = useOrg() as any
-  const subpage = params.subpage || 'customers'
+  const params = use(props.params);
+  const t = useTranslations('DashPage.Payments');
+  const _session = useLHSession() as any;
+  const _org = useOrg() as any;
+  const subpage = params.subpage || 'customers';
 
   const isPaymentsEnabled = useFeatureFlag({
     path: ['features', 'payments', 'enabled'],
     defaultValue: false,
-  })
+  });
 
   const getPageTitle = () => {
     switch (subpage) {
@@ -37,24 +37,24 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
         return {
           h1: t('customers'),
           h2: t('customerInfo'),
-        }
+        };
       case 'paid-products':
         return {
           h1: t('paidProducts'),
           h2: t('paidProductsInfo'),
-        }
+        };
       case 'configuration':
         return {
           h1: t('configuration'),
           h2: t('configurationInfo'),
-        }
+        };
       default:
         return {
           h1: t('title'),
           h2: t('overview'),
-        }
+        };
     }
-  }
+  };
 
   if (!isPaymentsEnabled) {
     return (
@@ -65,10 +65,10 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
           <p className="mt-2 text-gray-600">{t('contactAdmin')}</p>
         </div>
       </div>
-    )
+    );
   }
 
-  const { h1, h2 } = getPageTitle()
+  const { h1, h2 } = getPageTitle();
 
   return (
     <div className="flex h-screen w-full flex-col bg-[#f8f8f8]">
@@ -76,9 +76,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
         <BreadCrumbs type="payments" />
         <div className="my-2 py-2">
           <div className="w-100 flex flex-col space-y-1">
-            <div className="flex pt-3 text-4xl font-bold tracking-tighter">
-              {h1}
-            </div>
+            <div className="flex pt-3 text-4xl font-bold tracking-tighter">{h1}</div>
             <div className="text-md flex font-medium text-gray-400">{h2}</div>
           </div>
         </div>
@@ -116,7 +114,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
         {subpage === 'customers' && <PaymentsCustomersPage />}
       </motion.div>
     </div>
-  )
+  );
 }
 
 const TabLink = ({
@@ -125,10 +123,10 @@ const TabLink = ({
   label,
   isActive,
 }: {
-  href: string
-  icon: ReactNode
-  label: string
-  isActive: boolean
+  href: string;
+  icon: ReactNode;
+  label: string;
+  isActive: boolean;
 }) => (
   <Link href={href}>
     <div
@@ -140,6 +138,6 @@ const TabLink = ({
       </div>
     </div>
   </Link>
-)
+);
 
-export default PaymentsPage
+export default PaymentsPage;

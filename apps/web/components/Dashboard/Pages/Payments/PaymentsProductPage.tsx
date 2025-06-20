@@ -1,150 +1,116 @@
-'use client'
-import { useMemo, useState, useEffect } from 'react'
-import currencyCodes from 'currency-codes'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import useSWR, { mutate } from 'swr'
-import {
-  getProducts,
-  updateProduct,
-  archiveProduct,
-} from '@services/payments/products'
-import {
-  Plus,
-  Pencil,
-  Info,
-  RefreshCcw,
-  SquareCheck,
-  ChevronDown,
-  ChevronUp,
-  Archive,
-} from 'lucide-react'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import toast from 'react-hot-toast'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select'
-import { Button } from '@components/ui/button'
-import { Input } from '@components/ui/input'
-import { Textarea } from '@components/ui/textarea'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
-import * as Yup from 'yup'
-import { Label } from '@components/ui/label'
-import { Badge } from '@components/ui/badge'
-import { getPaymentConfigs } from '@services/payments/payments'
-import ProductLinkedCourses from './SubComponents/ProductLinkedCourses'
-import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled'
-import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer'
-import CreateProductForm from './SubComponents/CreateProductForm'
-import { useTranslations } from 'next-intl'
+'use client';
+import { Plus, Pencil, Info, RefreshCcw, SquareCheck, ChevronDown, ChevronUp, Archive } from 'lucide-react';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { getProducts, updateProduct, archiveProduct } from '@services/payments/products';
+import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import CreateProductForm from './SubComponents/CreateProductForm';
+import { getPaymentConfigs } from '@services/payments/payments';
+import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useMemo, useState, useEffect } from 'react';
+import { Textarea } from '@components/ui/textarea';
+import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
+import { Badge } from '@components/ui/badge';
+import { useTranslations } from 'next-intl';
+import currencyCodes from 'currency-codes';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import * as Yup from 'yup';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   Yup.object().shape({
     name: Yup.string().required(
       t('Components.Form.requiredField', {
         fieldName: t('DashPage.Payments.ProductPage.editForm.nameLabel'),
-      })
+      }),
     ),
     description: Yup.string().required(
       t('Components.Form.requiredField', {
         fieldName: t('DashPage.Payments.ProductPage.editForm.descriptionLabel'),
-      })
+      }),
     ),
     amount: Yup.number()
       .min(0, t('Components.Form.positiveNumber'))
       .required(
         t('Components.Form.requiredField', {
           fieldName: t('DashPage.Payments.ProductPage.editForm.priceLabel'),
-        })
+        }),
       ),
     benefits: Yup.string(),
     currency: Yup.string().required(
       t('Components.Form.requiredField', {
         fieldName: t('DashPage.Payments.ProductPage.editForm.currencyLabel'),
-      })
+      }),
     ),
-  })
+  });
 
 function PaymentsProductPage() {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [editingProductId, setEditingProductId] = useState<string | null>(null)
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [expandedProducts, setExpandedProducts] = useState<{
-    [key: string]: boolean
-  }>({})
-  const [isStripeEnabled, setIsStripeEnabled] = useState(false)
-  const { isEnabled, isLoading } = usePaymentsEnabled()
-  const t = useTranslations('DashPage.Payments.ProductPage')
+    [key: string]: boolean;
+  }>({});
+  const [isStripeEnabled, setIsStripeEnabled] = useState(false);
+  const { isEnabled, isLoading } = usePaymentsEnabled();
+  const t = useTranslations('DashPage.Payments.ProductPage');
 
   const { data: products, error } = useSWR(
-    () =>
-      org && session
-        ? [`/payments/${org.id}/products`, session.data?.tokens?.access_token]
-        : null,
-    ([_url, token]) => getProducts(org.id, token)
-  )
+    () => (org && session ? [`/payments/${org.id}/products`, session.data?.tokens?.access_token] : null),
+    ([_url, token]) => getProducts(org.id, token),
+  );
 
   const { data: paymentConfigs, error: paymentConfigError } = useSWR(
-    () =>
-      org && session
-        ? [`/payments/${org.id}/config`, session.data?.tokens?.access_token]
-        : null,
-    ([_url, token]) => getPaymentConfigs(org.id, token)
-  )
+    () => (org && session ? [`/payments/${org.id}/config`, session.data?.tokens?.access_token] : null),
+    ([_url, token]) => getPaymentConfigs(org.id, token),
+  );
 
   useEffect(() => {
     if (paymentConfigs) {
-      const stripeConfig = paymentConfigs.find(
-        (config: any) => config.provider === 'stripe'
-      )
-      setIsStripeEnabled(!!stripeConfig)
+      const stripeConfig = paymentConfigs.find((config: any) => config.provider === 'stripe');
+      setIsStripeEnabled(!!stripeConfig);
     }
-  }, [paymentConfigs])
+  }, [paymentConfigs]);
 
   const handleArchiveProduct = async (productId: string) => {
     try {
-      const res = await archiveProduct(
-        org.id,
-        productId,
-        session.data?.tokens?.access_token
-      )
-      mutate([
-        `/payments/${org.id}/products`,
-        session.data?.tokens?.access_token,
-      ])
+      const res = await archiveProduct(org.id, productId, session.data?.tokens?.access_token);
+      mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
       if (res.status === 200) {
-        toast.success(t('productArchivedSuccess'))
+        toast.success(t('productArchivedSuccess'));
       } else {
         toast.error(
           t('errors.archiveProductFailed', {
             error: res.data?.detail || '',
-          })
-        )
+          }),
+        );
       }
     } catch (_error) {
-      toast.error(t('errors.archiveProductFailed', { error: '' }))
+      toast.error(t('errors.archiveProductFailed', { error: '' }));
     }
-  }
+  };
 
   const toggleProductExpansion = (productId: string) => {
     setExpandedProducts((prev) => ({
       ...prev,
       [productId]: !prev[productId],
-    }))
-  }
+    }));
+  };
 
   if (!(isEnabled || isLoading)) {
-    return <UnconfiguredPaymentsDisclaimer />
+    return <UnconfiguredPaymentsDisclaimer />;
   }
 
-  if (error) return <div>{t('loadError')}</div>
-  if (!products) return <div>{t('loading')}</div>
+  if (error) return <div>{t('loadError')}</div>;
+  if (!products) return <div>{t('loading')}</div>;
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
@@ -154,9 +120,7 @@ function PaymentsProductPage() {
           onOpenChange={setIsCreateModalOpen}
           dialogTitle={t('createModalTitle')}
           dialogDescription={t('createModalDescription')}
-          dialogContent={
-            <CreateProductForm onSuccess={() => setIsCreateModalOpen(false)} />
-          }
+          dialogContent={<CreateProductForm onSuccess={() => setIsCreateModalOpen(false)} />}
         />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -179,15 +143,9 @@ function PaymentsProductPage() {
                         className="flex w-fit items-center space-x-2"
                         variant="outline"
                       >
-                        {product.product_type === 'subscription' ? (
-                          <RefreshCcw size={12} />
-                        ) : (
-                          <SquareCheck size={12} />
-                        )}
+                        {product.product_type === 'subscription' ? <RefreshCcw size={12} /> : <SquareCheck size={12} />}
                         <span className="text-sm">
-                          {product.product_type === 'subscription'
-                            ? t('subscriptionType')
-                            : t('oneTimeType')}
+                          {product.product_type === 'subscription' ? t('subscriptionType') : t('oneTimeType')}
                         </span>
                       </Badge>
                       <h3 className="text-lg font-bold">{product.name}</h3>
@@ -215,9 +173,7 @@ function PaymentsProductPage() {
                             <Archive size={16} />
                           </button>
                         }
-                        functionToExecute={() =>
-                          handleArchiveProduct(product.id)
-                        }
+                        functionToExecute={() => handleArchiveProduct(product.id)}
                         status="warning"
                       />
                     </div>
@@ -229,12 +185,8 @@ function PaymentsProductPage() {
                       <p className="text-gray-600">{product.description}</p>
                       {product.benefits && (
                         <div className="mt-2">
-                          <h4 className="text-sm font-semibold">
-                            {t('benefitsLabel')}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {product.benefits}
-                          </p>
+                          <h4 className="text-sm font-semibold">{t('benefitsLabel')}</h4>
+                          <p className="text-sm text-gray-600">{product.benefits}</p>
                         </div>
                       )}
                     </div>
@@ -259,9 +211,7 @@ function PaymentsProductPage() {
                   </div>
                   <ProductLinkedCourses productId={product.id} />
                   <div className="mt-2 flex items-center justify-between rounded-md bg-gray-100 p-2">
-                    <span className="text-sm text-gray-600">
-                      {t('priceLabel')}
-                    </span>
+                    <span className="text-sm text-gray-600">{t('priceLabel')}</span>
                     <span className="text-lg font-semibold">
                       {new Intl.NumberFormat(navigator.language, {
                         style: 'currency',
@@ -285,21 +235,17 @@ function PaymentsProductPage() {
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className={`nice-shadow bg-linear-to-bl mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
-              isStripeEnabled
-                ? 'hover:from-gray-600 hover:to-gray-800'
-                : 'cursor-not-allowed opacity-50'
+              isStripeEnabled ? 'hover:from-gray-600 hover:to-gray-800' : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}
           >
             <Plus size={18} />
-            <span className="text-sm font-bold">
-              {t('createProductButton')}
-            </span>
+            <span className="text-sm font-bold">{t('createProductButton')}</span>
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 const EditProductForm = ({
@@ -307,25 +253,23 @@ const EditProductForm = ({
   onSuccess,
   onCancel,
 }: {
-  product: any
-  onSuccess: () => void
-  onCancel: () => void
+  product: any;
+  onSuccess: () => void;
+  onCancel: () => void;
 }) => {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const [currencies, setCurrencies] = useState<
-    { code: string; name: string }[]
-  >([])
-  const t = useTranslations('DashPage.Payments.ProductPage.editForm')
-  const validationSchema = useMemo(() => createValidationSchema(t), [t])
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
+  const t = useTranslations('DashPage.Payments.ProductPage.editForm');
+  const validationSchema = useMemo(() => createValidationSchema(t), [t]);
 
   useEffect(() => {
     const allCurrencies = currencyCodes.data.map((currency) => ({
       code: currency.code,
       name: `${currency.code} - ${currency.currency}`,
-    }))
-    setCurrencies(allCurrencies)
-  }, [])
+    }));
+    setCurrencies(allCurrencies);
+  }, []);
 
   const initialValues = {
     name: product.name,
@@ -334,31 +278,23 @@ const EditProductForm = ({
     benefits: product.benefits || '',
     currency: product.currency || '',
     product_type: product.product_type,
-  }
+  };
 
   const handleSubmit = async (
     values: typeof initialValues,
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     try {
-      await updateProduct(
-        org.id,
-        product.id,
-        values,
-        session.data?.tokens?.access_token
-      )
-      mutate([
-        `/payments/${org.id}/products`,
-        session.data?.tokens?.access_token,
-      ])
-      onSuccess()
-      toast.success(t('productUpdatedSuccess'))
+      await updateProduct(org.id, product.id, values, session.data?.tokens?.access_token);
+      mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
+      onSuccess();
+      toast.success(t('productUpdatedSuccess'));
     } catch (_error) {
-      toast.error(t('updateProductFailed'))
+      toast.error(t('updateProductFailed'));
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Formik
@@ -423,7 +359,10 @@ const EditProductForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     {currencies.map((currency) => (
-                      <SelectItem key={currency.code} value={currency.code}>
+                      <SelectItem
+                        key={currency.code}
+                        value={currency.code}
+                      >
                         {currency.name}
                       </SelectItem>
                     ))}
@@ -453,17 +392,24 @@ const EditProductForm = ({
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
               {t('cancelButton')}
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? t('savingButton') : t('saveButton')}
             </Button>
           </div>
         </Form>
       )}
     </Formik>
-  )
-}
+  );
+};
 
-export default PaymentsProductPage
+export default PaymentsProductPage;

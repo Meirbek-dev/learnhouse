@@ -1,49 +1,45 @@
-'use client'
-import openuIcon from 'public/openu_icon.png'
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-} from '@components/Objects/StyledElements/Form/Form'
-import Image from 'next/image'
-import * as Form from '@radix-ui/react-form'
-import { useFormik } from 'formik'
-import { getOrgLogoMediaDirectory } from '@services/media/media'
-import { useState } from 'react'
-import { AlertTriangle, UserRoundPlus } from 'lucide-react'
-import Link from 'next/link'
-import { signIn } from 'next-auth/react'
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config'
-import { useTranslations } from 'next-intl'
+'use client';
+import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getOrgLogoMediaDirectory } from '@services/media/media';
+import { AlertTriangle, UserRoundPlus } from 'lucide-react';
+import openuIcon from 'public/openu_icon.png';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { signIn } from 'next-auth/react';
+import { useFormik } from 'formik';
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface LoginClientProps {
-  org: any
+  org: any;
 }
 
 const LoginClient = (props: LoginClientProps) => {
-  const validationT = useTranslations('Validation')
-  const t = useTranslations('Auth.Login')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const validationT = useTranslations('Validation');
+  const t = useTranslations('Auth.Login');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = (values: any) => {
-    const errors: any = {}
+    const errors: any = {};
 
     if (!values.email) {
-      errors.email = validationT('required')
+      errors.email = validationT('required');
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = validationT('invalidEmail')
+      errors.email = validationT('invalidEmail');
     }
 
     if (!values.password) {
-      errors.password = validationT('required')
+      errors.password = validationT('required');
     } else if (values.password.length < 8) {
-      errors.password = validationT('passwordMinLength', { length: 8 })
+      errors.password = validationT('passwordMinLength', { length: 8 });
     }
 
-    return errors
-  }
+    return errors;
+  };
 
-  const [error, setError] = useState('')
+  const [error, setError] = useState('');
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -53,12 +49,12 @@ const LoginClient = (props: LoginClientProps) => {
     validateOnBlur: true,
     validateOnChange: true,
     onSubmit: async (values, { validateForm, setErrors, setSubmitting }) => {
-      setIsSubmitting(true)
-      const errors = await validateForm(values)
+      setIsSubmitting(true);
+      const errors = await validateForm(values);
       if (Object.keys(errors).length > 0) {
-        setErrors(errors)
-        setSubmitting(false)
-        return
+        setErrors(errors);
+        setSubmitting(false);
+        return;
       }
 
       const res = await signIn('credentials', {
@@ -66,31 +62,33 @@ const LoginClient = (props: LoginClientProps) => {
         email: values.email,
         password: values.password,
         callbackUrl: '/redirect_from_auth',
-      })
+      });
       if (res?.error) {
-        setError(t('wrongCredentials'))
-        setIsSubmitting(false)
+        setError(t('wrongCredentials'));
+        setIsSubmitting(false);
       } else {
         await signIn('credentials', {
           email: values.email,
           password: values.password,
           callbackUrl: '/redirect_from_auth',
-        })
+        });
       }
     },
-  })
+  });
 
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
       <div
         className="right-login-part"
         style={{
-          background:
-            'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
+          background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
         }}
       >
         <div className="login-topbar m-10">
-          <Link prefetch href={getUriWithOrg(props.org.slug, '/')}>
+          <Link
+            prefetch
+            href={getUriWithOrg(props.org.slug, '/')}
+          >
             <Image
               quality={100}
               width={30}
@@ -106,10 +104,7 @@ const LoginClient = (props: LoginClientProps) => {
             <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
               {props.org?.logo_image ? (
                 <img
-                  src={`${getOrgLogoMediaDirectory(
-                    props.org.org_uuid,
-                    props.org?.logo_image
-                  )}`}
+                  src={`${getOrgLogoMediaDirectory(props.org.org_uuid, props.org?.logo_image)}`}
                   alt={props.org?.name}
                   style={{ width: 'auto', height: 70 }}
                   className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
@@ -201,9 +196,7 @@ const LoginClient = (props: LoginClientProps) => {
               <span>{t('signup')}</span>
             </Link>
             <button
-              onClick={() =>
-                signIn('google', { callbackUrl: '/redirect_from_auth' })
-              }
+              onClick={() => signIn('google', { callbackUrl: '/redirect_from_auth' })}
               className="text-md flex w-full justify-center space-x-3 rounded-md bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm hover:cursor-pointer"
             >
               <Image
@@ -218,7 +211,7 @@ const LoginClient = (props: LoginClientProps) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginClient
+export default LoginClient;

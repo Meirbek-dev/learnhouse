@@ -1,78 +1,77 @@
-import { useState, useEffect } from 'react'
-import YouTube from 'react-youtube'
-import { getActivityMediaDirectory } from '@services/media/media'
-import { useOrg } from '@components/Contexts/OrgContext'
-import ArtPlayer from '@components/Objects/Activities/Video/Artplayer'
-import type ArtplayerType from 'artplayer'
-import { useLocale } from 'next-intl'
+import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
+import { getActivityMediaDirectory } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useState, useEffect } from 'react';
+import type ArtplayerType from 'artplayer';
+import { useLocale } from 'next-intl';
+import YouTube from 'react-youtube';
 
 // Function to extract YouTube video ID from various YouTube URL formats
 function getYouTubeID(url: string): string | null {
-  if (!url) return null
+  if (!url) return null;
 
-  const regex =
-    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/
-  const match = url.match(regex)
+  const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
+  const match = url.match(regex);
 
-  return match ? match[1] : null
+  return match ? match[1] : null;
 }
 
 interface VideoDetails {
-  startTime?: number
-  endTime?: number | null
-  autoplay?: boolean
-  muted?: boolean
+  startTime?: number;
+  endTime?: number | null;
+  autoplay?: boolean;
+  muted?: boolean;
 }
 
 interface SubtitleEntry {
-  html: string
-  url: string
+  html: string;
+  url: string;
 }
 
 interface VideoActivityProps {
   activity: {
-    activity_sub_type: string
-    activity_uuid: string
+    activity_sub_type: string;
+    activity_uuid: string;
     content: {
-      filename?: string
-      uri?: string
-    }
-    details?: VideoDetails
-  }
+      filename?: string;
+      uri?: string;
+    };
+    details?: VideoDetails;
+  };
   course: {
-    course_uuid: string
-  }
+    course_uuid: string;
+  };
 }
 
 function VideoActivity({ activity, course }: VideoActivityProps) {
-  const org = useOrg() as any
-  const [videoId, setVideoId] = useState('')
-  const fullLocale = useLocale()
-  const locale = fullLocale.split('-')[0]
+  const org = useOrg() as any;
+  const [videoId, setVideoId] = useState('');
+  const fullLocale = useLocale();
+  const locale = fullLocale.split('-')[0];
 
   const subtitleEntries: SubtitleEntry[] = [
     { html: 'Русский', url: '/subtitle.ru.srt' },
     { html: 'English', url: '/subtitle.en.srt' },
     { html: 'Қазақша', url: '/subtitle.kz.srt' },
-  ]
+  ];
 
   useEffect(() => {
     if (activity?.content?.uri) {
-      const id = getYouTubeID(activity.content.uri)
-      setVideoId(id || '')
+      const id = getYouTubeID(activity.content.uri);
+      setVideoId(id || '');
     }
-  }, [activity, org])
+  }, [activity, org]);
 
   const getVideoSrc = () => {
-    if (!activity.content?.filename) return ''
+    if (!activity.content?.filename) return '';
     return getActivityMediaDirectory(
       org?.org_uuid,
       course?.course_uuid,
       activity.activity_uuid,
       activity.content.filename,
-      'video'
-    )
-  }
+      'video',
+    );
+  };
 
   return (
     <div className="w-full max-w-full px-2 sm:px-4">
@@ -126,7 +125,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
                 videoId={videoId}
                 onReady={(event) => {
                   if (activity.details?.startTime) {
-                    event.target.seekTo(activity.details.startTime, true)
+                    event.target.seekTo(activity.details.startTime, true);
                   }
                 }}
               />
@@ -135,7 +134,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default VideoActivity
+export default VideoActivity;

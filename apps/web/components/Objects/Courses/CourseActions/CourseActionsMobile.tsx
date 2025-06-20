@@ -1,72 +1,72 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getUriWithoutOrg, getUriWithOrg } from '@services/config/config'
-import { getProductsByCourse } from '@services/payments/products'
-import { LogIn, LogOut, ShoppingCart, AlertCircle } from 'lucide-react'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import CoursePaidOptions from './CoursePaidOptions'
-import { checkPaidAccess } from '@services/payments/payments'
-import { removeCourse, startCourse } from '@services/courses/activity'
-import { revalidateTags } from '@services/utils/ts/requests'
-import UserAvatar from '../../UserAvatar'
-import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { useTranslations } from 'next-intl'
+import { getUriWithoutOrg, getUriWithOrg } from '@services/config/config';
+import { LogIn, LogOut, ShoppingCart, AlertCircle } from 'lucide-react';
+import { removeCourse, startCourse } from '@services/courses/activity';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getProductsByCourse } from '@services/payments/products';
+import { checkPaidAccess } from '@services/payments/payments';
+import { revalidateTags } from '@services/utils/ts/requests';
+import CoursePaidOptions from './CoursePaidOptions';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import UserAvatar from '../../UserAvatar';
 
 interface Author {
   user: {
-    user_uuid: string
-    avatar_image: string
-    first_name: string
-    last_name: string
-    username: string
-  }
-  authorship: 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER'
-  authorship_status: 'ACTIVE' | 'INACTIVE' | 'PENDING'
+    user_uuid: string;
+    avatar_image: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+  };
+  authorship: 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER';
+  authorship_status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
 }
 
 interface CourseRun {
-  status: string
-  course_id: string
+  status: string;
+  course_id: string;
 }
 
 interface Course {
-  id: string
-  course_uuid: string
-  authors: Author[]
+  id: string;
+  course_uuid: string;
+  authors: Author[];
   trail?: {
-    runs: CourseRun[]
-  }
+    runs: CourseRun[];
+  };
   chapters?: Array<{
-    name: string
+    name: string;
     activities: Array<{
-      activity_uuid: string
-      name: string
-      activity_type: string
-    }>
-  }>
+      activity_uuid: string;
+      name: string;
+      activity_type: string;
+    }>;
+  }>;
 }
 
 interface CourseActionsMobileProps {
-  courseuuid: string
-  orgslug: string
+  courseuuid: string;
+  orgslug: string;
   course: Course & {
-    org_id: number
-  }
-  trailData?: any
+    org_id: number;
+  };
+  trailData?: any;
 }
 
 // Component for displaying multiple authors
 const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
-  const t = useTranslations('Courses.CourseActionsMobile')
-  const displayedAvatars = authors.slice(0, 3)
-  const remainingCount = Math.max(0, authors.length - 3)
+  const t = useTranslations('Courses.CourseActionsMobile');
+  const displayedAvatars = authors.slice(0, 3);
+  const remainingCount = Math.max(0, authors.length - 3);
 
   // Avatar size for mobile
-  const avatarSize = 36
-  const borderSize = 'border-2'
+  const avatarSize = 36;
+  const borderSize = 'border-2';
 
   return (
     <div className="flex items-center gap-3">
@@ -82,10 +82,7 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
               rounded="rounded-full"
               avatar_url={
                 author.user.avatar_image
-                  ? getUserAvatarMediaDirectory(
-                      author.user.user_uuid,
-                      author.user.avatar_image
-                    )
+                  ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image)
                   : ''
               }
               predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
@@ -94,7 +91,10 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
           </div>
         ))}
         {remainingCount > 0 && (
-          <div className="relative" style={{ zIndex: 0 }}>
+          <div
+            className="relative"
+            style={{ zIndex: 0 }}
+          >
             <div
               className="flex items-center justify-center rounded-full border-2 border-white bg-neutral-100 font-medium text-neutral-600 shadow-sm"
               style={{
@@ -110,9 +110,7 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
       </div>
 
       <div className="flex flex-col">
-        <span className="text-xs font-medium text-neutral-400">
-          {authors.length > 1 ? t('authors') : t('author')}
-        </span>
+        <span className="text-xs font-medium text-neutral-400">{authors.length > 1 ? t('authors') : t('author')}</span>
         {authors.length === 1 ? (
           <span className="text-sm font-semibold text-neutral-800">
             {authors[0].user.first_name && authors[0].user.last_name
@@ -124,134 +122,109 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
             {authors[0].user.first_name && authors[0].user.last_name
               ? `${authors[0].user.first_name} ${authors[0].user.last_name}`
               : `@${authors[0].user.username}`}
-            {authors.length > 1 &&
-              ` ${t('moreAuthors', { count: authors.length - 1 })}`}
+            {authors.length > 1 && ` ${t('moreAuthors', { count: authors.length - 1 })}`}
           </span>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-const CourseActionsMobile = ({
-  courseuuid,
-  orgslug,
-  course,
-  trailData,
-}: CourseActionsMobileProps) => {
-  const t = useTranslations('Courses.CourseActionsMobile')
-  const router = useRouter()
-  const session = useLHSession() as any
-  const [linkedProducts, setLinkedProducts] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isActionLoading, setIsActionLoading] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null)
+const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseActionsMobileProps) => {
+  const t = useTranslations('Courses.CourseActionsMobile');
+  const router = useRouter();
+  const session = useLHSession() as any;
+  const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
   // Clean up course UUID by removing 'course_' prefix if it exists
-  const cleanCourseUuid = course.course_uuid?.replace('course_', '')
+  const cleanCourseUuid = course.course_uuid?.replace('course_', '');
 
   const isStarted =
     trailData?.runs?.find((run: any) => {
-      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '')
-      return cleanRunCourseUuid === cleanCourseUuid
-    }) ?? false
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+      return cleanRunCourseUuid === cleanCourseUuid;
+    }) ?? false;
 
   useEffect(() => {
     const fetchLinkedProducts = async () => {
       try {
-        const response = await getProductsByCourse(
-          course.org_id,
-          course.id,
-          session.data?.tokens?.access_token
-        )
-        setLinkedProducts(response.data || [])
+        const response = await getProductsByCourse(course.org_id, course.id, session.data?.tokens?.access_token);
+        setLinkedProducts(response.data || []);
       } catch (error) {
-        console.error('Failed to fetch linked products')
+        console.error('Failed to fetch linked products');
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchLinkedProducts()
-  }, [course.id, course.org_id, session.data?.tokens?.access_token])
+    fetchLinkedProducts();
+  }, [course.id, course.org_id, session.data?.tokens?.access_token]);
 
   useEffect(() => {
     const checkAccess = async () => {
-      if (!session.data?.user) return
+      if (!session.data?.user) return;
       try {
         const response = await checkPaidAccess(
           Number.parseInt(course.id),
           course.org_id,
-          session.data?.tokens?.access_token
-        )
-        setHasAccess(response.has_access)
+          session.data?.tokens?.access_token,
+        );
+        setHasAccess(response.has_access);
       } catch (error) {
-        console.error('Failed to check course access')
-        setHasAccess(false)
+        console.error('Failed to check course access');
+        setHasAccess(false);
       }
-    }
+    };
 
     if (linkedProducts.length > 0) {
-      checkAccess()
+      checkAccess();
     }
-  }, [
-    course.id,
-    course.org_id,
-    session.data?.tokens?.access_token,
-    linkedProducts,
-  ])
+  }, [course.id, course.org_id, session.data?.tokens?.access_token, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))
-      return
+      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
+      return;
     }
 
-    setIsActionLoading(true)
+    setIsActionLoading(true);
     try {
       if (isStarted) {
-        await removeCourse(
-          `course_${courseuuid}`,
-          orgslug,
-          session.data?.tokens?.access_token
-        )
-        await revalidateTags(['courses'], orgslug)
-        router.refresh()
+        await removeCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
+        await revalidateTags(['courses'], orgslug);
+        router.refresh();
       } else {
-        await startCourse(
-          `course_${courseuuid}`,
-          orgslug,
-          session.data?.tokens?.access_token
-        )
-        await revalidateTags(['courses'], orgslug)
+        await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
+        await revalidateTags(['courses'], orgslug);
 
         // Get the first activity from the first chapter
-        const firstChapter = course.chapters?.[0]
-        const firstActivity = firstChapter?.activities?.[0]
+        const firstChapter = course.chapters?.[0];
+        const firstActivity = firstChapter?.activities?.[0];
 
         if (firstActivity) {
           // Redirect to the first activity
-          await revalidateTags(['activities'], orgslug)
+          await revalidateTags(['activities'], orgslug);
           router.push(
-            `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
-          )
+            `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
+          );
         } else {
-          router.refresh()
+          router.refresh();
         }
       }
     } catch (error) {
-      console.error('Failed to perform course action:', error)
+      console.error('Failed to perform course action:', error);
     } finally {
-      setIsActionLoading(false)
-      await revalidateTags(['courses'], orgslug)
+      setIsActionLoading(false);
+      await revalidateTags(['courses'], orgslug);
     }
-  }
+  };
 
   if (isLoading) {
-    return (
-      <div className="mb-8 mt-4 h-16 animate-pulse rounded-lg bg-gray-100" />
-    )
+    return <div className="mb-8 mt-4 h-16 animate-pulse rounded-lg bg-gray-100" />;
   }
 
   // Filter active authors and sort by role priority
@@ -263,9 +236,9 @@ const CourseActionsMobile = ({
         MAINTAINER: 1,
         CONTRIBUTOR: 2,
         REPORTER: 3,
-      }
-      return rolePriority[a.authorship] - rolePriority[b.authorship]
-    })
+      };
+      return rolePriority[a.authorship] - rolePriority[b.authorship];
+    });
 
   return (
     <div className="mx-2 my-6 overflow-hidden rounded-lg bg-white/90 p-4 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40 backdrop-blur-sm">
@@ -278,18 +251,14 @@ const CourseActionsMobile = ({
               <div className="rounded-lg border border-green-200 bg-green-50 p-3">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                  <span className="text-sm font-semibold text-green-800">
-                    {t('ownCourse')}
-                  </span>
+                  <span className="text-sm font-semibold text-green-800">{t('ownCourse')}</span>
                 </div>
               </div>
             ) : (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-amber-800" />
-                  <span className="text-sm font-semibold text-amber-800">
-                    {t('paidCourse')}
-                  </span>
+                  <span className="text-sm font-semibold text-amber-800">{t('paidCourse')}</span>
                 </div>
               </div>
             )}
@@ -377,7 +346,7 @@ const CourseActionsMobile = ({
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CourseActionsMobile
+export default CourseActionsMobile;

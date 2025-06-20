@@ -1,30 +1,30 @@
-'use client'
-import { useOrg } from '@components/Contexts/OrgContext'
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { getUriWithOrg } from '@services/config/config'
-import { deleteCollection } from '@services/courses/collections'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { revalidateTags } from '@services/utils/ts/requests'
-import { X } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+'use client';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { deleteCollection } from '@services/courses/collections';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { X } from 'lucide-react';
+import Link from 'next/link';
 
 type PropsType = {
-  collection: any
-  orgslug: string
-  org_id: string
-}
+  collection: any;
+  orgslug: string;
+  org_id: string;
+};
 
 const removeCollectionPrefix = (collectionid: string) => {
-  return collectionid.replace('collection_', '')
-}
+  return collectionid.replace('collection_', '');
+};
 
 function CollectionThumbnail(props: PropsType) {
-  const t = useTranslations('Components.CollectionThumbnail')
-  const org = useOrg() as any
+  const t = useTranslations('Components.CollectionThumbnail');
+  const org = useOrg() as any;
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
       <div className="flex h-full w-full items-center justify-between bg-blue-500 p-4">
@@ -43,14 +43,14 @@ function CollectionThumbnail(props: PropsType) {
                       zIndex: 3 - index,
                     }}
                   />
-                )
+                ),
             )}
           </div>
           <div className="flex flex-col">
             <Link
               href={getUriWithOrg(
                 props.orgslug,
-                `/collection/${removeCollectionPrefix(props.collection.collection_uuid)}`
+                `/collection/${removeCollectionPrefix(props.collection.collection_uuid)}`,
               )}
               className="text-lg font-bold text-white hover:underline"
             >
@@ -69,20 +69,20 @@ function CollectionThumbnail(props: PropsType) {
         />
       </div>
     </div>
-  )
+  );
 }
 
 const CollectionAdminEditsArea = (props: any) => {
-  const t = useTranslations('Components.CollectionThumbnail')
-  const router = useRouter()
-  const session = useLHSession() as any
+  const t = useTranslations('Components.CollectionThumbnail');
+  const router = useRouter();
+  const session = useLHSession() as any;
 
   const deleteCollectionUI = async (collectionId: number) => {
-    await deleteCollection(collectionId, session.data?.tokens?.access_token)
-    await revalidateTags(['collections'], props.orgslug)
+    await deleteCollection(collectionId, session.data?.tokens?.access_token);
+    await revalidateTags(['collections'], props.orgslug);
     // reload the page
-    router.refresh()
-  }
+    router.refresh();
+  };
 
   return (
     <AuthenticatedClientElement
@@ -111,7 +111,7 @@ const CollectionAdminEditsArea = (props: any) => {
         />
       </div>
     </AuthenticatedClientElement>
-  )
-}
+  );
+};
 
-export default CollectionThumbnail
+export default CollectionThumbnail;

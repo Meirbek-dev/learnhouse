@@ -1,23 +1,18 @@
-'use client'
-import type { FC } from 'react'
-import { useState, useEffect } from 'react'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { SiStripe } from '@icons-pack/react-simple-icons'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
+'use client';
 import {
   getPaymentConfigs,
   initializePaymentConfig,
   deletePaymentConfig,
   updateStripeAccountID,
   getStripeOnboardingLink,
-} from '@services/payments/payments'
+} from '@services/payments/payments';
 import FormLayout, {
   ButtonBlack,
   Input,
   FormField,
   FormLabelAndMessage,
   Flex,
-} from '@components/Objects/StyledElements/Form/Form'
+} from '@components/Objects/StyledElements/Form/Form';
 import {
   BarChart2,
   Coins,
@@ -28,106 +23,103 @@ import {
   RefreshCcw,
   Trash2,
   UnplugIcon,
-} from 'lucide-react'
-import toast from 'react-hot-toast'
-import useSWR, { mutate } from 'swr'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { Button } from '@components/ui/button'
-import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert'
-import { useRouter } from 'next/navigation'
-import { getUriWithoutOrg } from '@services/config/config'
-import { useTranslations } from 'next-intl'
+} from 'lucide-react';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getUriWithoutOrg } from '@services/config/config';
+import { SiStripe } from '@icons-pack/react-simple-icons';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import type { FC } from 'react';
 
 const PaymentsConfigurationPage: FC = () => {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const _router = useRouter()
-  const access_token = session?.data?.tokens?.access_token
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const _router = useRouter();
+  const access_token = session?.data?.tokens?.access_token;
   const {
     data: paymentConfigs,
     error,
     isLoading,
   } = useSWR(
-    () =>
-      org && access_token ? [`/payments/${org.id}/config`, access_token] : null,
-    ([_url, token]) => getPaymentConfigs(org.id, token)
-  )
+    () => (org && access_token ? [`/payments/${org.id}/config`, access_token] : null),
+    ([_url, token]) => getPaymentConfigs(org.id, token),
+  );
 
-  const stripeConfig = paymentConfigs?.find(
-    (config: any) => config.provider === 'stripe'
-  )
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isOnboarding, setIsOnboarding] = useState(false)
-  const [isOnboardingLoading, setIsOnboardingLoading] = useState(false)
-  const t = useTranslations('Payments.Configuration')
+  const stripeConfig = paymentConfigs?.find((config: any) => config.provider === 'stripe');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOnboarding, setIsOnboarding] = useState(false);
+  const [isOnboardingLoading, setIsOnboardingLoading] = useState(false);
+  const t = useTranslations('Payments.Configuration');
 
   const enableStripe = async () => {
-    const loadingToast = toast.loading(t('enablingStripe'))
+    const loadingToast = toast.loading(t('enablingStripe'));
     try {
-      setIsOnboarding(true)
-      const newConfig = { provider: 'stripe', enabled: true }
-      const _config = await initializePaymentConfig(
-        org.id,
-        newConfig,
-        'stripe',
-        access_token
-      )
-      toast.success(t('stripeEnabledSuccess'), { id: loadingToast })
-      mutate([`/payments/${org.id}/config`, access_token])
+      setIsOnboarding(true);
+      const newConfig = { provider: 'stripe', enabled: true };
+      const _config = await initializePaymentConfig(org.id, newConfig, 'stripe', access_token);
+      toast.success(t('stripeEnabledSuccess'), { id: loadingToast });
+      mutate([`/payments/${org.id}/config`, access_token]);
     } catch (error) {
-      console.error('Error enabling Stripe:', error)
-      toast.error(t('errors.enableStripeFailed'), { id: loadingToast })
+      console.error('Error enabling Stripe:', error);
+      toast.error(t('errors.enableStripeFailed'), { id: loadingToast });
     } finally {
-      setIsOnboarding(false)
+      setIsOnboarding(false);
     }
-  }
+  };
 
   const _editConfig = async () => {
-    setIsModalOpen(true)
-  }
+    setIsModalOpen(true);
+  };
 
   const deleteConfig = async () => {
-    const loadingToast = toast.loading(t('deletingStripeConfig'))
+    const loadingToast = toast.loading(t('deletingStripeConfig'));
     try {
-      await deletePaymentConfig(org.id, stripeConfig.id, access_token)
-      toast.success(t('stripeConfigDeletedSuccess'), { id: loadingToast })
-      mutate([`/payments/${org.id}/config`, access_token])
+      await deletePaymentConfig(org.id, stripeConfig.id, access_token);
+      toast.success(t('stripeConfigDeletedSuccess'), { id: loadingToast });
+      mutate([`/payments/${org.id}/config`, access_token]);
     } catch (error) {
-      console.error('Error deleting Stripe configuration:', error)
+      console.error('Error deleting Stripe configuration:', error);
       toast.error(t('errors.deleteStripeConfigFailed'), {
         id: loadingToast,
-      })
+      });
     }
-  }
+  };
 
   const handleStripeOnboarding = async () => {
-    const loadingToast = toast.loading(t('startingStripeOnboarding'))
+    const loadingToast = toast.loading(t('startingStripeOnboarding'));
     try {
-      setIsOnboardingLoading(true)
+      setIsOnboardingLoading(true);
       const { connect_url } = await getStripeOnboardingLink(
         org.id,
         access_token,
-        getUriWithoutOrg('/payments/stripe/connect/oauth')
-      )
-      window.open(connect_url, '_blank')
-      toast.dismiss(loadingToast)
+        getUriWithoutOrg('/payments/stripe/connect/oauth'),
+      );
+      window.open(connect_url, '_blank');
+      toast.dismiss(loadingToast);
     } catch (error) {
-      console.error('Error getting onboarding link:', error)
+      console.error('Error getting onboarding link:', error);
       toast.error(t('errors.startStripeOnboardingFailed'), {
         id: loadingToast,
-      })
+      });
     } finally {
-      setIsOnboardingLoading(false)
+      setIsOnboardingLoading(false);
     }
-  }
+  };
 
   if (isLoading) {
-    return <div>{t('loading')}</div>
+    return <div>{t('loading')}</div>;
   }
 
   if (error) {
-    return <div>{t('errorLoading')}</div>
+    return <div>{t('errorLoading')}</div>;
   }
 
   return (
@@ -180,26 +172,22 @@ const PaymentsConfigurationPage: FC = () => {
           {stripeConfig ? (
             <div className="bg-linear-to-r flex items-center justify-between rounded-lg from-indigo-500 to-purple-600 p-6 shadow-md">
               <div className="flex items-center space-x-3">
-                <SiStripe className="text-white" size={32} />
+                <SiStripe
+                  className="text-white"
+                  size={32}
+                />
                 <div className="flex flex-col">
                   <div className="flex items-center space-x-2">
-                    <span className="text-xl font-semibold text-white">
-                      Stripe
-                    </span>
-                    {stripeConfig.provider_specific_id &&
-                    stripeConfig.active ? (
+                    <span className="text-xl font-semibold text-white">Stripe</span>
+                    {stripeConfig.provider_specific_id && stripeConfig.active ? (
                       <div className="flex items-center space-x-1 rounded-full bg-green-500/20 px-2 py-0.5">
                         <div className="h-2 w-2 rounded-full bg-green-500" />
-                        <span className="text-xs text-green-100">
-                          {t('connectedStatus')}
-                        </span>
+                        <span className="text-xs text-green-100">{t('connectedStatus')}</span>
                       </div>
                     ) : (
                       <div className="flex items-center space-x-1 rounded-full bg-red-500/20 px-2 py-0.5">
                         <div className="h-2 w-2 rounded-full bg-red-500" />
-                        <span className="text-xs text-red-100">
-                          {t('notConnectedStatus')}
-                        </span>
+                        <span className="text-xs text-red-100">{t('notConnectedStatus')}</span>
                       </div>
                     )}
                   </div>
@@ -211,9 +199,7 @@ const PaymentsConfigurationPage: FC = () => {
                 </div>
               </div>
               <div className="flex space-x-2">
-                {!(
-                  stripeConfig.provider_specific_id && stripeConfig.active
-                ) && (
+                {!(stripeConfig.provider_specific_id && stripeConfig.active) && (
                   <Button
                     onClick={handleStripeOnboarding}
                     className="flex items-center space-x-2 rounded-full border-2 border-green-400 bg-green-500 px-4 py-2 text-sm text-white shadow-md transition duration-300 hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
@@ -250,17 +236,16 @@ const PaymentsConfigurationPage: FC = () => {
             >
               {isOnboarding ? (
                 <>
-                  <Loader2 className="animate-spin" size={24} />
-                  <span className="text-lg font-semibold">
-                    {t('connectingButton')}
-                  </span>
+                  <Loader2
+                    className="animate-spin"
+                    size={24}
+                  />
+                  <span className="text-lg font-semibold">{t('connectingButton')}</span>
                 </>
               ) : (
                 <>
                   <SiStripe size={24} />
-                  <span className="text-lg font-semibold">
-                    {t('enableButton')}
-                  </span>
+                  <span className="text-lg font-semibold">{t('enableButton')}</span>
                 </>
               )}
             </Button>
@@ -277,61 +262,55 @@ const PaymentsConfigurationPage: FC = () => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
 interface EditStripeConfigModalProps {
-  orgId: number
-  configId: string
-  accessToken: string
-  isOpen: boolean
-  onClose: () => void
+  orgId: number;
+  configId: string;
+  accessToken: string;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({
-  orgId,
-  configId,
-  accessToken,
-  isOpen,
-  onClose,
-}) => {
-  const [stripeAccountId, setStripeAccountId] = useState('')
-  const t = useTranslations('Payments.Configuration')
+const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId, accessToken, isOpen, onClose }) => {
+  const [stripeAccountId, setStripeAccountId] = useState('');
+  const t = useTranslations('Payments.Configuration');
 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const config = await getPaymentConfigs(orgId, accessToken)
-        const stripeConfig = config.find((c: any) => c.id === configId)
+        const config = await getPaymentConfigs(orgId, accessToken);
+        const stripeConfig = config.find((c: any) => c.id === configId);
         if (stripeConfig?.provider_specific_id) {
-          setStripeAccountId(stripeConfig.provider_specific_id || '')
+          setStripeAccountId(stripeConfig.provider_specific_id || '');
         }
       } catch (error) {
-        console.error('Error fetching Stripe configuration:', error)
-        toast.error(t('errors.loadStripeConfigFailed'))
+        console.error('Error fetching Stripe configuration:', error);
+        toast.error(t('errors.loadStripeConfigFailed'));
       }
-    }
+    };
 
     if (isOpen) {
-      fetchConfig()
+      fetchConfig();
     }
-  }, [isOpen, orgId, configId, accessToken])
+  }, [isOpen, orgId, configId, accessToken]);
 
   const handleSubmit = async () => {
-    const loadingToast = toast.loading(t('updatingConfig'))
+    const loadingToast = toast.loading(t('updatingConfig'));
     try {
       const stripe_config = {
         stripe_account_id: stripeAccountId,
-      }
-      await updateStripeAccountID(orgId, stripe_config, accessToken)
-      toast.success(t('configUpdatedSuccess'), { id: loadingToast })
-      mutate([`/payments/${orgId}/config`, accessToken])
-      onClose()
+      };
+      await updateStripeAccountID(orgId, stripe_config, accessToken);
+      toast.success(t('configUpdatedSuccess'), { id: loadingToast });
+      mutate([`/payments/${orgId}/config`, accessToken]);
+      onClose();
     } catch (error) {
-      console.error('Error updating config:', error)
-      toast.error(t('errors.updateConfigFailed'), { id: loadingToast })
+      console.error('Error updating config:', error);
+      toast.error(t('errors.updateConfigFailed'), { id: loadingToast });
     }
-  }
+  };
 
   return (
     <Modal
@@ -361,7 +340,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({
         </FormLayout>
       }
     />
-  )
-}
+  );
+};
 
-export default PaymentsConfigurationPage
+export default PaymentsConfigurationPage;

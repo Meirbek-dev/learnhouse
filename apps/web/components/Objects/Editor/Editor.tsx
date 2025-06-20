@@ -1,97 +1,93 @@
-'use client'
-import { useState, useEffect } from 'react'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import openuIcon from 'public/openu_icon.png'
-import { ToolbarButtons } from './Toolbar/ToolbarButtons'
-import { motion } from 'framer-motion'
-import Image from 'next/image'
-import styled from 'styled-components'
-import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons'
-import openuAI_icon from 'public/openu_ai_simple.png'
-import {
-  type AIEditorStateTypes,
-  useAIEditor,
-  useAIEditorDispatch,
-} from '@components/Contexts/AI/AIEditorContext'
+'use client';
+import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
+import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons';
+import { ToolbarButtons } from './Toolbar/ToolbarButtons';
+import { useEditor, EditorContent } from '@tiptap/react';
+import openuAI_icon from 'public/openu_ai_simple.png';
+import openuIcon from 'public/openu_icon.png';
+import StarterKit from '@tiptap/starter-kit';
+import { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 // Extensions
-import InfoCallout from './Extensions/Callout/Info/InfoCallout'
-import WarningCallout from './Extensions/Callout/Warning/WarningCallout'
-import ImageBlock from './Extensions/Image/ImageBlock'
-import Youtube from '@tiptap/extension-youtube'
-import VideoBlock from './Extensions/Video/VideoBlock'
-import { Eye, Monitor } from 'lucide-react'
-import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock'
-import PDFBlock from './Extensions/PDF/PDFBlock'
-import QuizBlock from './Extensions/Quiz/QuizBlock'
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import Link from 'next/link'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { useTranslations } from 'next-intl'
-import { getLinkExtension } from './EditorConf'
-import WebPreview from './Extensions/WebPreview/WebPreview'
+import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import InfoCallout from './Extensions/Callout/Info/InfoCallout';
+import WebPreview from './Extensions/WebPreview/WebPreview';
+import TableHeader from '@tiptap/extension-table-header';
+import VideoBlock from './Extensions/Video/VideoBlock';
+import ImageBlock from './Extensions/Image/ImageBlock';
+import TableCell from '@tiptap/extension-table-cell';
+import QuizBlock from './Extensions/Quiz/QuizBlock';
+import TableRow from '@tiptap/extension-table-row';
+import PDFBlock from './Extensions/PDF/PDFBlock';
+import Youtube from '@tiptap/extension-youtube';
+import { getLinkExtension } from './EditorConf';
+import Table from '@tiptap/extension-table';
+import { Eye, Monitor } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 // Lowlight
-import { common, createLowlight } from 'lowlight'
-const lowlight = createLowlight(common)
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import css from 'highlight.js/lib/languages/css'
-import js from 'highlight.js/lib/languages/javascript'
-import ts from 'highlight.js/lib/languages/typescript'
-import html from 'highlight.js/lib/languages/xml'
-import python from 'highlight.js/lib/languages/python'
-import java from 'highlight.js/lib/languages/java'
-import { CourseProvider } from '@components/Contexts/CourseContext'
-import AIEditorToolkit from './AI/AIEditorToolkit'
-import useGetAIFeatures from '@components/Hooks/useGetAIFeatures'
-import { getUriWithOrg } from '@services/config/config'
-import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects'
-import Badges from './Extensions/Badges/Badges'
-import Buttons from './Extensions/Buttons/Buttons'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import UserAvatar from '../UserAvatar'
-import UserBlock from './Extensions/Users/UserBlock'
+import { common, createLowlight } from 'lowlight';
+const lowlight = createLowlight(common);
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
+import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
+import { getUriWithOrg } from '@services/config/config';
+import ts from 'highlight.js/lib/languages/typescript';
+import js from 'highlight.js/lib/languages/javascript';
+import python from 'highlight.js/lib/languages/python';
+import UserBlock from './Extensions/Users/UserBlock';
+import java from 'highlight.js/lib/languages/java';
+import Buttons from './Extensions/Buttons/Buttons';
+import AIEditorToolkit from './AI/AIEditorToolkit';
+import html from 'highlight.js/lib/languages/xml';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import css from 'highlight.js/lib/languages/css';
+import Badges from './Extensions/Badges/Badges';
+import UserAvatar from '../UserAvatar';
 
 interface EditorProps {
-  content: string
-  activity: any
-  course: any
-  org: any
-  session: any
-  setContent: (content: any) => void
+  content: string;
+  activity: any;
+  course: any;
+  org: any;
+  session: any;
+  setContent: (content: any) => void;
 }
 
 function Editor(props: EditorProps) {
-  const t = useTranslations('DashPage.Editor.Editor')
-  const dispatchAIEditor = useAIEditorDispatch() as any
-  const aiEditorState = useAIEditor() as AIEditorStateTypes
-  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' })
-  const [isButtonAvailable, setIsButtonAvailable] = useState(false)
+  const t = useTranslations('DashPage.Editor.Editor');
+  const dispatchAIEditor = useAIEditorDispatch() as any;
+  const aiEditorState = useAIEditor() as AIEditorStateTypes;
+  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
+  const [isButtonAvailable, setIsButtonAvailable] = useState(false);
 
   useEffect(() => {
     if (is_ai_feature_enabled) {
-      setIsButtonAvailable(true)
+      setIsButtonAvailable(true);
     }
-  }, [is_ai_feature_enabled])
+  }, [is_ai_feature_enabled]);
 
   // remove course_ from course_uuid
-  const course_uuid = props.course.course_uuid.substring(7)
+  const course_uuid = props.course.course_uuid.substring(7);
 
   // remove activity_ from activity_uuid
-  const activity_uuid = props.activity.activity_uuid.substring(9)
+  const activity_uuid = props.activity.activity_uuid.substring(9);
 
   // Code Block Languages for Lowlight
-  lowlight.register('html', html)
-  lowlight.register('css', css)
-  lowlight.register('js', js)
-  lowlight.register('ts', ts)
-  lowlight.register('python', python)
-  lowlight.register('java', java)
+  lowlight.register('html', html);
+  lowlight.register('css', css);
+  lowlight.register('js', js);
+  lowlight.register('ts', ts);
+  lowlight.register('python', python);
+  lowlight.register('java', java);
 
   const editor: any = useEditor({
     editable: true,
@@ -172,21 +168,24 @@ function Editor(props: EditorProps) {
     ],
     content: props.content,
     immediatelyRender: false,
-  })
+  });
 
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
   if (isMobile) {
     // TODO: Work on a better editor mobile experience
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8] p-4">
         <div className="rounded-lg bg-white p-6 text-center shadow-md">
           <h2 className="mb-4 text-xl font-bold">{t('mobileTitle')}</h2>
-          <Monitor className="mx-auto my-5" size={60} />
+          <Monitor
+            className="mx-auto my-5"
+            size={60}
+          />
           <p>{t('mobileMessage1')}</p>
           <p>{t('mobileMessage2')}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -215,14 +214,17 @@ function Editor(props: EditorProps) {
                     alt="OpenU Logo"
                   />
                 </Link>
-                <Link target="_blank" href={`/course/${course_uuid}`}>
+                <Link
+                  target="_blank"
+                  href={`/course/${course_uuid}`}
+                >
                   <EditorInfoThumbnail
                     src={`${
                       props.course.thumbnail_image
                         ? getCourseThumbnailMediaDirectory(
                             props.org?.org_uuid,
                             props.course.course_uuid,
-                            props.course.thumbnail_image
+                            props.course.thumbnail_image,
                           )
                         : getUriWithOrg(props.org?.slug, '/empty_thumbnail.png')
                     }`}
@@ -231,8 +233,7 @@ function Editor(props: EditorProps) {
                 </Link>
                 <EditorInfoDocName>
                   {' '}
-                  <b>{props.course.name}</b> <SlashIcon />{' '}
-                  {props.activity.name}{' '}
+                  <b>{props.course.name}</b> <SlashIcon /> {props.activity.name}{' '}
                 </EditorInfoDocName>
               </EditorInfoWrapper>
               <EditorButtonsWrapper>
@@ -246,9 +247,7 @@ function Editor(props: EditorProps) {
                     <div
                       onClick={() =>
                         dispatchAIEditor({
-                          type: aiEditorState.isModalOpen
-                            ? 'setIsModalClose'
-                            : 'setIsModalOpen',
+                          type: aiEditorState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen',
                         })
                       }
                       style={{
@@ -267,9 +266,7 @@ function Editor(props: EditorProps) {
                           alt="AI Editor Icon"
                         />
                       </i>{' '}
-                      <i className="text-xs font-bold not-italic">
-                        {t('aiEditor')}
-                      </i>
+                      <i className="text-xs font-bold not-italic">{t('aiEditor')}</i>
                     </div>
                   )}
                 </div>
@@ -296,7 +293,10 @@ function Editor(props: EditorProps) {
                     href={`/course/${course_uuid}/activity/${activity_uuid}`}
                   >
                     <div className="flex h-9 items-center justify-center rounded-lg bg-neutral-600 px-3 py-2 text-sm font-black text-neutral-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-neutral-700">
-                      <Eye className="mx-auto items-center" size={15} />
+                      <Eye
+                        className="mx-auto items-center"
+                        size={15}
+                      />
                     </div>
                   </Link>
                 </ToolTip>
@@ -332,13 +332,16 @@ function Editor(props: EditorProps) {
           exit={{ opacity: 0 }}
         >
           <EditorContentWrapper>
-            <AIEditorToolkit activity={props.activity} editor={editor} />
+            <AIEditorToolkit
+              activity={props.activity}
+              editor={editor}
+            />
             <EditorContent editor={editor} />
           </EditorContentWrapper>
         </motion.div>
       </CourseProvider>
     </Page>
-  )
+  );
 }
 
 const Page = styled.div`
@@ -347,16 +350,14 @@ const Page = styled.div`
   padding-top: 30px;
 
   // dots background
-  background-image:
-    radial-gradient(#4744446b 1px, transparent 1px),
-    radial-gradient(#4744446b 1px, transparent 1px);
+  background-image: radial-gradient(#4744446b 1px, transparent 1px), radial-gradient(#4744446b 1px, transparent 1px);
   background-position:
     0 0,
     25px 25px;
   background-size: 50px 50px;
   background-attachment: fixed;
   background-repeat: repeat;
-`
+`;
 
 const EditorTop = styled.div`
   border-radius: 15px;
@@ -371,34 +372,34 @@ const EditorTop = styled.div`
   z-index: 303;
   width: -webkit-fill-available;
   width: -moz-available;
-`
+`;
 
 // Inside EditorTop
 const EditorDocSection = styled.div`
   display: flex;
   flex-direction: column;
-`
+`;
 const EditorUsersSection = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-`
+`;
 
 const EditorLeftOptionsSection = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-`
+`;
 
 // Inside EditorDocSection
 const EditorInfoWrapper = styled.div`
   display: flex;
   flex-direction: row;
   margin-bottom: 5px;
-`
-const EditorButtonsWrapper = styled.div``
+`;
+const EditorButtonsWrapper = styled.div``;
 
 // Inside EditorUsersSection
 const EditorUserProfileWrapper = styled.div`
@@ -406,14 +407,14 @@ const EditorUserProfileWrapper = styled.div`
   svg {
     border-radius: 7px;
   }
-`
+`;
 
 // Inside EditorInfoWrapper
 //..todo
 const EditorInfoOpenULogo = styled(Image)`
   border-radius: 6px;
   margin-right: 0px;
-`
+`;
 const EditorInfoDocName = styled.div`
   font-size: 16px;
   justify-content: center;
@@ -423,12 +424,12 @@ const EditorInfoDocName = styled.div`
   color: #494949;
 
   svg {
-    margin-left: 4px;
     margin-right: 4px;
+    margin-left: 4px;
     padding: 3px;
     color: #353535;
   }
-`
+`;
 
 const EditorInfoThumbnail = styled.img`
   height: 25px;
@@ -441,7 +442,7 @@ const EditorInfoThumbnail = styled.img`
   &:hover {
     cursor: pointer;
   }
-`
+`;
 
 export const EditorContentWrapper = styled.div`
   margin: 40px;
@@ -455,38 +456,38 @@ export const EditorContentWrapper = styled.div`
 
   .ProseMirror {
     h1 {
-      font-size: 30px;
-      font-weight: 600;
       margin-top: 10px;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 30px;
     }
 
     h2 {
-      font-size: 25px;
-      font-weight: 600;
       margin-top: 10px;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 25px;
     }
 
     h3 {
-      font-size: 20px;
-      font-weight: 600;
       margin-top: 10px;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 20px;
     }
 
     h4 {
-      font-size: 18px;
-      font-weight: 600;
       margin-top: 10px;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 18px;
     }
 
     h5 {
-      font-size: 16px;
-      font-weight: 600;
       margin-top: 10px;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 16px;
     }
 
     // Link styling
@@ -501,11 +502,11 @@ export const EditorContentWrapper = styled.div`
         text-decoration: none;
       }
     }
-
-    padding-left: 20px;
+    padding-top: 20px;
     padding-right: 20px;
     padding-bottom: 20px;
-    padding-top: 20px;
+
+    padding-left: 20px;
 
     &:focus {
       outline: none !important;
@@ -515,17 +516,17 @@ export const EditorContentWrapper = styled.div`
 
     // Code Block
     pre {
-      background: #0d0d0d;
-      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
       color: #fff;
       font-family: 'JetBrainsMono', monospace;
-      padding: 0.75rem 1rem;
+      background: #0d0d0d;
+      border-radius: 0.5rem;
 
       code {
-        background: none;
+        padding: 0;
         color: inherit;
         font-size: 0.8rem;
-        padding: 0;
+        background: none;
       }
 
       .hljs-comment,
@@ -593,13 +594,13 @@ export const EditorContentWrapper = styled.div`
   }
 
   iframe {
-    border-radius: 6px;
-    border: none;
-    min-width: 200px;
+    display: block;
     width: 100%;
+    min-width: 200px;
     height: 440px;
     min-height: 200px;
-    display: block;
+    border: none;
+    border-radius: 6px;
     outline: 0px solid transparent;
   }
 
@@ -618,20 +619,20 @@ export const EditorContentWrapper = styled.div`
   }
 
   table {
-    border-collapse: collapse;
+    width: 100%;
     margin: 0;
     overflow: hidden;
     table-layout: fixed;
-    width: 100%;
+    border-collapse: collapse;
 
     td,
     th {
-      border: 1px solid rgba(139, 139, 139, 0.4);
+      position: relative;
       box-sizing: border-box;
       min-width: 1em;
       padding: 6px 8px;
-      position: relative;
       vertical-align: top;
+      border: 1px solid rgba(139, 139, 139, 0.4);
 
       > * {
         margin-bottom: 0;
@@ -639,33 +640,33 @@ export const EditorContentWrapper = styled.div`
     }
 
     th {
-      background-color: rgba(217, 217, 217, 0.4);
       font-weight: bold;
       text-align: left;
+      background-color: rgba(217, 217, 217, 0.4);
     }
 
     .selectedCell:after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
       background: rgba(139, 139, 139, 0.2);
       content: '';
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
       pointer-events: none;
-      position: absolute;
-      z-index: 2;
     }
 
     .column-resize-handle {
-      background-color: #8d78eb;
-      bottom: -2px;
-      pointer-events: none;
       position: absolute;
-      right: -2px;
       top: 0;
+      right: -2px;
+      bottom: -2px;
       width: 4px;
+      background-color: #8d78eb;
+      pointer-events: none;
     }
   }
-`
+`;
 
-export default Editor
+export default Editor;

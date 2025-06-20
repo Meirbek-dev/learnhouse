@@ -1,9 +1,5 @@
-'use client'
+'use client';
 
-import type { FC } from 'react'
-import { useState, useEffect } from 'react'
-import UserAvatar from '@components/Objects/UserAvatar'
-import Image from 'next/image'
 import {
   Briefcase,
   Building2,
@@ -18,42 +14,46 @@ import {
   Calendar,
   Lightbulb,
   X,
-} from 'lucide-react'
-import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { getCoursesByUser } from '@services/users/users'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding'
-import { useTranslations } from 'next-intl'
+} from 'lucide-react';
+import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { getCoursesByUser } from '@services/users/users';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import type { FC } from 'react';
+import Image from 'next/image';
 
 interface UserProfileClientProps {
-  userData: any
-  profile: any
+  userData: any;
+  profile: any;
 }
 
 const ICON_MAP = {
-  briefcase: Briefcase,
+  'briefcase': Briefcase,
   'graduation-cap': GraduationCap,
   'map-pin': MapPin,
   'building-2': Building2,
-  speciality: Lightbulb,
-  globe: Globe,
+  'speciality': Lightbulb,
+  'globe': Globe,
   'laptop-2': Laptop2,
-  award: Award,
+  'award': Award,
   'book-open': BookOpen,
-  link: LinkIcon,
-  users: Users,
-  calendar: Calendar,
-} as const
+  'link': LinkIcon,
+  'users': Users,
+  'calendar': Calendar,
+} as const;
 
 const IconComponent = ({ iconName }: { iconName: string }) => {
-  const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
-  if (!IconElement) return null
-  return <IconElement className="h-4 w-4 text-gray-600" />
-}
+  const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP];
+  if (!IconElement) return null;
+  return <IconElement className="h-4 w-4 text-gray-600" />;
+};
 
 const ImageModal: FC<{
-  image: { url: string; caption?: string }
-  onClose: () => void
+  image: { url: string; caption?: string };
+  onClose: () => void;
 }> = ({ image, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
@@ -71,46 +71,44 @@ const ImageModal: FC<{
           height={600}
           className="h-auto w-full rounded-lg"
         />
-        {image.caption && (
-          <p className="mt-4 text-center text-lg text-white">{image.caption}</p>
-        )}
+        {image.caption && <p className="mt-4 text-center text-lg text-white">{image.caption}</p>}
       </div>
     </div>
-  )
-}
+  );
+};
 
 function UserProfileClient({ userData, profile }: UserProfileClientProps) {
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('UserProfilePage')
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('UserProfilePage');
   const [selectedImage, setSelectedImage] = useState<{
-    url: string
-    caption?: string
-  } | null>(null)
-  const [userCourses, setUserCourses] = useState<any[]>([])
-  const [isLoadingCourses, setIsLoadingCourses] = useState(false)
-  const [error, setError] = useState(false)
+    url: string;
+    caption?: string;
+  } | null>(null);
+  const [userCourses, setUserCourses] = useState<any[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchUserCourses = async () => {
       if (userData.id && access_token) {
         try {
-          setIsLoadingCourses(true)
-          const coursesData = await getCoursesByUser(userData.id, access_token)
+          setIsLoadingCourses(true);
+          const coursesData = await getCoursesByUser(userData.id, access_token);
           if (coursesData.data) {
-            setUserCourses(coursesData.data)
+            setUserCourses(coursesData.data);
           }
         } catch (error) {
-          console.error(t('fetchError'), error)
-          setError(true)
+          console.error(t('fetchError'), error);
+          setError(true);
         } finally {
-          setIsLoadingCourses(false)
+          setIsLoadingCourses(false);
         }
       }
-    }
+    };
 
-    fetchUserCourses()
-  }, [userData.id, access_token])
+    fetchUserCourses();
+  }, [userData.id, access_token]);
 
   return (
     <div className="container mx-auto py-8">
@@ -127,12 +125,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
             <UserAvatar
               width={150}
               avatar_url={
-                userData.avatar_image
-                  ? getUserAvatarMediaDirectory(
-                      userData.user_uuid,
-                      userData.avatar_image
-                    )
-                  : ''
+                userData.avatar_image ? getUserAvatarMediaDirectory(userData.user_uuid, userData.avatar_image) : ''
               }
               predefined_avatar={userData.avatar_image ? undefined : 'empty'}
               userId={userData.id}
@@ -163,8 +156,8 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                         title={affiliation.name}
                       />
                     </div>
-                  )
-              )
+                  ),
+              ),
           )}
         </div>
 
@@ -182,13 +175,14 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
               <div className="flex flex-col space-y-3">
                 {userData.details &&
                   Object.values(userData.details).map((detail: any) => (
-                    <div key={detail.id} className="flex items-center gap-4">
+                    <div
+                      key={detail.id}
+                      className="flex items-center gap-4"
+                    >
                       <div className="flex-shrink-0">
                         <IconComponent iconName={detail.icon} />
                       </div>
-                      <span className="text-[15px] font-medium text-gray-700">
-                        {detail.text}
-                      </span>
+                      <span className="text-[15px] font-medium text-gray-700">{detail.text}</span>
                     </div>
                   ))}
               </div>
@@ -197,9 +191,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
             {/* Right column with about and related content */}
             <div className="w-full md:w-4/6">
               <div className="mb-8">
-                <h2 className="mb-4 text-xl font-semibold">
-                  {t('aboutTitle')}
-                </h2>
+                <h2 className="mb-4 text-xl font-semibold">{t('aboutTitle')}</h2>
                 {userData.bio ? (
                   <p className="text-gray-700">{userData.bio}</p>
                 ) : (
@@ -211,46 +203,39 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
               {profile.sections && profile.sections.length > 0 && (
                 <div>
                   {profile.sections.map((section: any, index: number) => (
-                    <div key={index} className="mb-8">
-                      <h2 className="mb-4 text-xl font-semibold">
-                        {section.title}
-                      </h2>
+                    <div
+                      key={index}
+                      className="mb-8"
+                    >
+                      <h2 className="mb-4 text-xl font-semibold">{section.title}</h2>
 
                       {/* Add Image Gallery section */}
                       {section.type === 'image-gallery' && (
                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                          {section.images.map(
-                            (image: any, imageIndex: number) => (
-                              <div
-                                key={imageIndex}
-                                className="group relative cursor-pointer"
-                                onClick={() => setSelectedImage(image)}
-                              >
-                                <Image
-                                  src={image.url}
-                                  alt={image.caption || ''}
-                                  width={300}
-                                  height={192}
-                                  className="h-48 w-full rounded-lg object-cover"
-                                />
-                                {image.caption && (
-                                  <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                                    <p className="text-center text-sm text-white">
-                                      {image.caption}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          )}
+                          {section.images.map((image: any, imageIndex: number) => (
+                            <div
+                              key={imageIndex}
+                              className="group relative cursor-pointer"
+                              onClick={() => setSelectedImage(image)}
+                            >
+                              <Image
+                                src={image.url}
+                                alt={image.caption || ''}
+                                width={300}
+                                height={192}
+                                className="h-48 w-full rounded-lg object-cover"
+                              />
+                              {image.caption && (
+                                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                  <p className="text-center text-sm text-white">{image.caption}</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       )}
 
-                      {section.type === 'text' && (
-                        <div className="prose max-w-none">
-                          {section.content}
-                        </div>
-                      )}
+                      {section.type === 'text' && <div className="prose max-w-none">{section.content}</div>}
 
                       {section.type === 'links' && (
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -271,108 +256,82 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
 
                       {section.type === 'skills' && (
                         <div className="flex flex-wrap gap-2">
-                          {section.skills.map(
-                            (skill: any, skillIndex: number) => (
-                              <span
-                                key={skillIndex}
-                                className="rounded-full bg-gray-100 px-3 py-1 text-sm"
-                              >
-                                {skill.name}
-                                {skill.level && ` • ${skill.level}`}
-                              </span>
-                            )
-                          )}
+                          {section.skills.map((skill: any, skillIndex: number) => (
+                            <span
+                              key={skillIndex}
+                              className="rounded-full bg-gray-100 px-3 py-1 text-sm"
+                            >
+                              {skill.name}
+                              {skill.level && ` • ${skill.level}`}
+                            </span>
+                          ))}
                         </div>
                       )}
 
                       {section.type === 'experience' && (
                         <div className="space-y-4">
-                          {section.experiences.map(
-                            (exp: any, expIndex: number) => (
-                              <div
-                                key={expIndex}
-                                className="border-l-2 border-gray-200 pl-4"
-                              >
-                                <h3 className="font-medium">{exp.title}</h3>
-                                <p className="text-gray-600">
-                                  {exp.organization}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  {exp.startDate} -{' '}
-                                  {exp.current ? 'Present' : exp.endDate}
-                                </p>
-                                {exp.description && (
-                                  <p className="mt-2 text-gray-700">
-                                    {exp.description}
-                                  </p>
-                                )}
-                              </div>
-                            )
-                          )}
+                          {section.experiences.map((exp: any, expIndex: number) => (
+                            <div
+                              key={expIndex}
+                              className="border-l-2 border-gray-200 pl-4"
+                            >
+                              <h3 className="font-medium">{exp.title}</h3>
+                              <p className="text-gray-600">{exp.organization}</p>
+                              <p className="text-sm text-gray-500">
+                                {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
+                              </p>
+                              {exp.description && <p className="mt-2 text-gray-700">{exp.description}</p>}
+                            </div>
+                          ))}
                         </div>
                       )}
 
                       {section.type === 'education' && (
                         <div className="space-y-4">
-                          {section.education.map(
-                            (edu: any, eduIndex: number) => (
-                              <div
-                                key={eduIndex}
-                                className="border-l-2 border-gray-200 pl-4"
-                              >
-                                <h3 className="font-medium">
-                                  {edu.institution}
-                                </h3>
-                                <p className="text-gray-600">
-                                  {edu.degree} {t('in')} {edu.field}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  {edu.startDate} -{' '}
-                                  {edu.current ? 'Present' : edu.endDate}
-                                </p>
-                                {edu.description && (
-                                  <p className="mt-2 text-gray-700">
-                                    {edu.description}
-                                  </p>
-                                )}
-                              </div>
-                            )
-                          )}
+                          {section.education.map((edu: any, eduIndex: number) => (
+                            <div
+                              key={eduIndex}
+                              className="border-l-2 border-gray-200 pl-4"
+                            >
+                              <h3 className="font-medium">{edu.institution}</h3>
+                              <p className="text-gray-600">
+                                {edu.degree} {t('in')} {edu.field}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {edu.startDate} - {edu.current ? 'Present' : edu.endDate}
+                              </p>
+                              {edu.description && <p className="mt-2 text-gray-700">{edu.description}</p>}
+                            </div>
+                          ))}
                         </div>
                       )}
 
                       {section.type === 'affiliation' && (
                         <div className="space-y-4">
-                          {section.affiliations.map(
-                            (affiliation: any, affIndex: number) => (
-                              <div
-                                key={affIndex}
-                                className="border-l-2 border-gray-200 pl-4"
-                              >
-                                <div className="flex items-start gap-4">
-                                  {affiliation.logoUrl && (
-                                    <Image
-                                      src={affiliation.logoUrl}
-                                      alt={affiliation.name}
-                                      width={48}
-                                      height={48}
-                                      className="h-12 w-12 object-contain"
-                                    />
+                          {section.affiliations.map((affiliation: any, affIndex: number) => (
+                            <div
+                              key={affIndex}
+                              className="border-l-2 border-gray-200 pl-4"
+                            >
+                              <div className="flex items-start gap-4">
+                                {affiliation.logoUrl && (
+                                  <Image
+                                    src={affiliation.logoUrl}
+                                    alt={affiliation.name}
+                                    width={48}
+                                    height={48}
+                                    className="h-12 w-12 object-contain"
+                                  />
+                                )}
+                                <div>
+                                  <h3 className="font-medium">{affiliation.name}</h3>
+                                  {affiliation.description && (
+                                    <p className="mt-2 text-gray-700">{affiliation.description}</p>
                                   )}
-                                  <div>
-                                    <h3 className="font-medium">
-                                      {affiliation.name}
-                                    </h3>
-                                    {affiliation.description && (
-                                      <p className="mt-2 text-gray-700">
-                                        {affiliation.description}
-                                      </p>
-                                    )}
-                                  </div>
                                 </div>
                               </div>
-                            )
-                          )}
+                            </div>
+                          ))}
                         </div>
                       )}
 
@@ -385,20 +344,19 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                           ) : userCourses.length > 0 ? (
                             <div className="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                               {userCourses.map((course) => (
-                                <div key={course.id} className="flex">
+                                <div
+                                  key={course.id}
+                                  className="flex"
+                                >
                                   <CourseThumbnailLanding
                                     course={course}
-                                    orgslug={
-                                      userData.org_slug || course.org_slug
-                                    }
+                                    orgslug={userData.org_slug || course.org_slug}
                                   />
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="py-8 text-center text-gray-500">
-                              {t('courseSection.noCoursesFound')}
-                            </div>
+                            <div className="py-8 text-center text-gray-500">{t('courseSection.noCoursesFound')}</div>
                           )}
                         </div>
                       )}
@@ -407,15 +365,9 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                 </div>
               )}
               {isLoadingCourses && (
-                <div className="py-8 text-center text-gray-500">
-                  {t('courseSection.loadingCourses')}
-                </div>
+                <div className="py-8 text-center text-gray-500">{t('courseSection.loadingCourses')}</div>
               )}
-              {error && (
-                <div className="text-red-500">
-                  {t('courseSection.errorLoadingCourses')}
-                </div>
-              )}
+              {error && <div className="text-red-500">{t('courseSection.errorLoadingCourses')}</div>}
             </div>
           </div>
         </div>
@@ -429,7 +381,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
         />
       )}
     </div>
-  )
+  );
 }
 
-export default UserProfileClient
+export default UserProfileClient;

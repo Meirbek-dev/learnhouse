@@ -1,37 +1,34 @@
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import { getUriWithOrg } from '@services/config/config'
-import { getCollectionById } from '@services/courses/collections'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import { nextAuthOptions } from 'app/auth/options'
-import type { Metadata } from 'next'
-import { getServerSession } from 'next-auth/next'
-import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getCollectionById } from '@services/courses/collections';
+import { getUriWithOrg } from '@services/config/config';
+import { getTranslations } from 'next-intl/server';
+import { nextAuthOptions } from 'app/auth/options';
+import { getServerSession } from 'next-auth/next';
+import type { Metadata } from 'next';
+import Link from 'next/link';
 
 type MetadataProps = {
-  params: Promise<{ orgslug: string; courseid: string; collectionid: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
+  params: Promise<{ orgslug: string; courseid: string; collectionid: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export async function generateMetadata(
-  props: MetadataProps
-): Promise<Metadata> {
-  const params = await props.params
-  const session = await getServerSession(nextAuthOptions)
-  const access_token = session?.tokens?.access_token
-  const t = await getTranslations('General')
+export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  const params = await props.params;
+  const session = await getServerSession(nextAuthOptions);
+  const access_token = session?.tokens?.access_token;
+  const t = await getTranslations('General');
 
   // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
-  })
-  const col = await getCollectionById(
-    params.collectionid,
-    access_token ? access_token : null,
-    { revalidate: 0, tags: ['collections'] }
-  )
+  });
+  const col = await getCollectionById(params.collectionid, access_token ? access_token : null, {
+    revalidate: 0,
+    tags: ['collections'],
+  });
 
   // SEO
   return {
@@ -42,8 +39,8 @@ export async function generateMetadata(
       follow: true,
       nocache: true,
       googleBot: {
-        index: true,
-        follow: true,
+        'index': true,
+        'follow': true,
         'max-image-preview': 'large',
       },
     },
@@ -52,27 +49,26 @@ export async function generateMetadata(
       description: `${col.description}`,
       type: 'website',
     },
-  }
+  };
 }
 
 const CollectionPage = async (params: any) => {
-  const t = await getTranslations('General')
-  const session = await getServerSession(nextAuthOptions)
-  const access_token = session?.tokens?.access_token
+  const t = await getTranslations('General');
+  const session = await getServerSession(nextAuthOptions);
+  const access_token = session?.tokens?.access_token;
   const org = await getOrganizationContextInfo((await params.params).orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
-  })
-  const orgslug = (await params.params).orgslug
-  const col = await getCollectionById(
-    (await params.params).collectionid,
-    access_token ? access_token : null,
-    { revalidate: 0, tags: ['collections'] }
-  )
+  });
+  const orgslug = (await params.params).orgslug;
+  const col = await getCollectionById((await params.params).collectionid, access_token ? access_token : null, {
+    revalidate: 0,
+    tags: ['collections'],
+  });
 
   const removeCoursePrefix = (courseid: string) => {
-    return courseid.replace('course_', '')
-  }
+    return courseid.replace('course_', '');
+  };
 
   return (
     <GeneralWrapperStyled>
@@ -81,13 +77,11 @@ const CollectionPage = async (params: any) => {
       <br />
       <div className="home_courses flex flex-wrap">
         {col.courses.map((course: any) => (
-          <div className="pr-8" key={course.course_uuid}>
-            <Link
-              href={getUriWithOrg(
-                orgslug,
-                `/course/${removeCoursePrefix(course.course_uuid)}`
-              )}
-            >
+          <div
+            className="pr-8"
+            key={course.course_uuid}
+          >
+            <Link href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
               <div
                 className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
                 style={{
@@ -95,7 +89,7 @@ const CollectionPage = async (params: any) => {
                     ? `url(${getCourseThumbnailMediaDirectory(
                         org.org_uuid,
                         course.course_uuid,
-                        course.thumbnail_image
+                        course.thumbnail_image,
                       )})`
                     : `url('/empty_thumbnail.png')`,
                 }}
@@ -106,7 +100,7 @@ const CollectionPage = async (params: any) => {
         ))}
       </div>
     </GeneralWrapperStyled>
-  )
-}
+  );
+};
 
-export default CollectionPage
+export default CollectionPage;

@@ -1,11 +1,11 @@
-export const dynamic = 'force-dynamic' // defaults to auto
-export const revalidate = 0
+export const dynamic = 'force-dynamic'; // defaults to auto
+export const revalidate = 0;
 
-import { NextResponse } from 'next/server'
-import { checkHealth } from '@services/utils/health'
+import { checkHealth } from '@services/utils/health';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const health = await checkHealth()
+  const health = await checkHealth();
   if (health.success === true) {
     return NextResponse.json(
       {
@@ -18,8 +18,8 @@ export async function GET() {
         headers: {
           'Content-Type': 'application/json',
         },
-      }
-    )
+      },
+    );
   }
   return NextResponse.json(
     {
@@ -33,6 +33,6 @@ export async function GET() {
       headers: {
         'Content-Type': 'application/json',
       },
-    }
-  )
+    },
+  );
 }

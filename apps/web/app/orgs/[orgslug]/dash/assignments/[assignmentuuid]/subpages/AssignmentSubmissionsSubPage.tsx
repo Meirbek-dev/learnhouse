@@ -1,36 +1,32 @@
-'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import UserAvatar from '@components/Objects/UserAvatar'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { getAPIUrl } from '@services/config/config'
-import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { SendHorizonal, UserCheck, X } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import useSWR from 'swr'
-import EvaluateAssignment from './Modals/EvaluateAssignment'
-import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext'
-import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext'
-import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext'
-import { useTranslations, useLocale } from 'next-intl' // Import useLocale
+'use client';
+import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import EvaluateAssignment from './Modals/EvaluateAssignment';
+import { SendHorizonal, UserCheck, X } from 'lucide-react';
+import { swrFetcher } from '@services/utils/ts/requests';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { useTranslations, useLocale } from 'next-intl'; // Import useLocale
+import { getAPIUrl } from '@services/config/config';
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 
-function AssignmentSubmissionsSubPage({
-  assignment_uuid,
-}: {
-  assignment_uuid: string
-}) {
-  const t = useTranslations('DashPage.Assignments')
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: string }) {
+  const t = useTranslations('DashPage.Assignments');
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
 
   const { data: assignmentSubmission, error: assignmentError } = useSWR(
     `${getAPIUrl()}assignments/assignment_${assignment_uuid}/submissions`,
-    (url) => swrFetcher(url, access_token)
-  )
+    (url) => swrFetcher(url, access_token),
+  );
 
   useEffect(() => {
-    console.log(assignmentSubmission)
-  }, [session, assignmentSubmission])
+    console.log(assignmentSubmission);
+  }, [session, assignmentSubmission]);
 
   const renderSubmissions = (status: string) => {
     return assignmentSubmission
@@ -42,8 +38,8 @@ function AssignmentSubmissionsSubPage({
           assignment_uuid={assignment_uuid}
           user_id={submission.user_id}
         />
-      ))
-  }
+      ));
+  };
 
   return (
     <div className="mr-10 flex w-full flex-col pl-10 pt-3">
@@ -60,46 +56,39 @@ function AssignmentSubmissionsSubPage({
             <SendHorizonal size={18} />
             <h3>{t('submitted')}</h3>
           </div>
-          <div className="flex flex-col gap-4">
-            {renderSubmissions('SUBMITTED')}
-          </div>
+          <div className="flex flex-col gap-4">{renderSubmissions('SUBMITTED')}</div>
         </div>
         <div className="flex-1">
           <div className="mx-auto my-5 flex w-fit items-center space-x-2 rounded-full bg-emerald-600/80 px-3.5 py-1 text-sm font-bold text-white">
             <UserCheck size={18} />
             <h3>{t('graded')}</h3>
           </div>
-          <div className="flex flex-col gap-4">
-            {renderSubmissions('GRADED')}
-          </div>
+          <div className="flex flex-col gap-4">{renderSubmissions('GRADED')}</div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
-  const t = useTranslations('DashPage.Assignments')
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+  const t = useTranslations('DashPage.Assignments');
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
   const [gradeSudmissionModal, setGradeSubmissionModal] = useState({
     open: false,
     submission_id: '',
-  })
-  const locale = useLocale()
+  });
+  const locale = useLocale();
 
-  const { data: user, error: userError } = useSWR(
-    `${getAPIUrl()}users/id/${user_id}`,
-    (url) => swrFetcher(url, access_token)
-  )
+  const { data: user, error: userError } = useSWR(`${getAPIUrl()}users/id/${user_id}`, (url) =>
+    swrFetcher(url, access_token),
+  );
 
   return (
     <div className="nice-shadow mx-auto flex w-[350px] flex-row rounded-lg bg-white p-4 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
       <div className="flex w-full flex-col space-y-2">
         <div className="flex w-full justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-tight text-slate-400">
-            {t('submission')}
-          </h2>
+          <h2 className="text-xs font-semibold uppercase tracking-tight text-slate-400">{t('submission')}</h2>
           <p className="text-xs font-semibold uppercase tracking-tight">
             {new Date(submission.creation_date).toLocaleDateString(locale, {
               year: 'numeric',
@@ -112,10 +101,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
           <div className="flex space-x-2">
             <UserAvatar
               border="border-4"
-              avatar_url={getUserAvatarMediaDirectory(
-                user?.user_uuid,
-                user?.avatar_image
-              )}
+              avatar_url={getUserAvatarMediaDirectory(user?.user_uuid, user?.avatar_image)}
               predefined_avatar={user?.avatar_image ? undefined : 'empty'}
               width={40}
             />
@@ -133,9 +119,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
           <div className="flex flex-col">
             <Modal
               isDialogOpen={
-                gradeSudmissionModal.open &&
-                gradeSudmissionModal.submission_id ===
-                  submission.submission_uuid
+                gradeSudmissionModal.open && gradeSudmissionModal.submission_id === submission.submission_uuid
               }
               onOpenChange={(open: boolean) =>
                 setGradeSubmissionModal({
@@ -146,13 +130,9 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
               minHeight="lg"
               minWidth="lg"
               dialogContent={
-                <AssignmentProvider
-                  assignment_uuid={`assignment_${assignment_uuid}`}
-                >
+                <AssignmentProvider assignment_uuid={`assignment_${assignment_uuid}`}>
                   <AssignmentsTaskProvider>
-                    <AssignmentSubmissionProvider
-                      assignment_uuid={`assignment_${assignment_uuid}`}
-                    >
+                    <AssignmentSubmissionProvider assignment_uuid={`assignment_${assignment_uuid}`}>
                       <EvaluateAssignment user_id={user_id} />
                     </AssignmentSubmissionProvider>
                   </AssignmentsTaskProvider>
@@ -170,7 +150,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default AssignmentSubmissionsSubPage
+export default AssignmentSubmissionsSubPage;

@@ -1,58 +1,58 @@
-'use client'
-import { useFormik } from 'formik'
-import { useState, useEffect } from 'react'
+'use client';
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { AlertTriangle, Check, User } from 'lucide-react'
-import Link from 'next/link'
-import { signup } from '@services/auth/auth'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { signIn } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import Image from 'next/image'
+} from '@components/Objects/StyledElements/Form/Form';
+import { AlertTriangle, Check, User } from 'lucide-react';
+import { useOrg } from '@components/Contexts/OrgContext';
+import * as Form from '@radix-ui/react-form';
+import { signup } from '@services/auth/auth';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { signIn } from 'next-auth/react';
+import { useFormik } from 'formik';
+import Image from 'next/image';
+import Link from 'next/link';
 
 function OpenSignUpComponent() {
-  const validationT = useTranslations('Validation')
-  const t = useTranslations('Auth.Signup')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const org = useOrg() as any
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
+  const validationT = useTranslations('Validation');
+  const t = useTranslations('Auth.Signup');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const org = useOrg() as any;
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const validate = (values: any) => {
-    const errors: any = {}
+    const errors: any = {};
 
     if (!values.email) {
-      errors.email = validationT('required')
+      errors.email = validationT('required');
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = validationT('invalidEmail')
+      errors.email = validationT('invalidEmail');
     }
 
     if (!values.password) {
-      errors.password = validationT('required')
+      errors.password = validationT('required');
     } else if (values.password.length < 8) {
-      errors.password = validationT('passwordMinLength', { length: 8 })
+      errors.password = validationT('passwordMinLength', { length: 8 });
     }
 
     if (values.username.length < 4) {
-      errors.username = validationT('usernameMinLength', { length: 4 })
+      errors.username = validationT('usernameMinLength', { length: 4 });
     }
 
     if (!values.username) {
-      errors.username = validationT('required')
+      errors.username = validationT('required');
     }
 
     if (!values.bio) {
-      errors.bio = validationT('required')
+      errors.bio = validationT('required');
     }
 
-    return errors
-  }
+    return errors;
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -68,30 +68,25 @@ function OpenSignUpComponent() {
     validate,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      setError('')
-      setMessage('')
-      setIsSubmitting(true)
-      const res = await signup(values)
-      const responseMessage = await res.json()
+      setError('');
+      setMessage('');
+      setIsSubmitting(true);
+      const res = await signup(values);
+      const responseMessage = await res.json();
       if (res.status == 200) {
         //router.push(`/login`);
-        setMessage(t('accountCreated'))
-        setIsSubmitting(false)
-      } else if (
-        res.status == 401 ||
-        res.status == 400 ||
-        res.status == 404 ||
-        res.status == 409
-      ) {
-        setError(responseMessage.detail)
+        setMessage(t('accountCreated'));
+        setIsSubmitting(false);
+      } else if (res.status == 401 || res.status == 400 || res.status == 404 || res.status == 409) {
+        setError(responseMessage.detail);
       } else {
-        setError(t('errorSomethingWentWrong'))
+        setError(t('errorSomethingWentWrong'));
       }
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     },
-  })
+  });
 
-  useEffect(() => {}, [org])
+  useEffect(() => {}, [org]);
 
   return (
     <div className="login-form m-auto w-72">
@@ -169,7 +164,10 @@ function OpenSignUpComponent() {
 
         {/* for bio  */}
         <FormField name="bio">
-          <FormLabelAndMessage label={t('bio')} message={formik.errors.bio} />
+          <FormLabelAndMessage
+            label={t('bio')}
+            message={formik.errors.bio}
+          />
 
           <Form.Control asChild>
             <Textarea
@@ -205,7 +203,7 @@ function OpenSignUpComponent() {
         </button>
       </div>
     </div>
-  )
+  );
 }
 
-export default OpenSignUpComponent
+export default OpenSignUpComponent;

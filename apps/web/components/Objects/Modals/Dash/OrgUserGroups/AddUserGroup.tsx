@@ -1,38 +1,34 @@
-'use client'
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useState } from 'react'
-import { createUserGroup } from '@services/usergroups/usergroups'
-import { mutate } from 'swr'
-import { getAPIUrl } from '@services/config/config'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useFormik } from 'formik'
-import toast from 'react-hot-toast'
-import { useTranslations } from 'next-intl'
+'use client';
+import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { createUserGroup } from '@services/usergroups/usergroups';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl } from '@services/config/config';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
+import { useFormik } from 'formik';
+import { useState } from 'react';
+import { mutate } from 'swr';
 
 type AddUserGroupProps = {
-  setCreateUserGroupModal: any
-}
+  setCreateUserGroupModal: any;
+};
 
 function AddUserGroup(props: AddUserGroupProps) {
-  const t = useTranslations('Components.AddUserGroup')
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const t = useTranslations('Components.AddUserGroup');
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = (values: any) => {
-    const errors: any = {}
+    const errors: any = {};
     if (!values.name) {
-      errors.name = t('nameRequiredError')
+      errors.name = t('nameRequiredError');
     }
-    return errors
-  }
+    return errors;
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -42,20 +38,20 @@ function AddUserGroup(props: AddUserGroupProps) {
     },
     validate,
     onSubmit: async (values) => {
-      const toastID = toast.loading(t('toastLoading'))
-      setIsSubmitting(true)
-      const res = await createUserGroup(values, access_token)
+      const toastID = toast.loading(t('toastLoading'));
+      setIsSubmitting(true);
+      const res = await createUserGroup(values, access_token);
       if (res.status == 200) {
-        setIsSubmitting(false)
-        mutate(`${getAPIUrl()}usergroups/org/${org.id}`)
-        props.setCreateUserGroupModal(false)
-        toast.success(t('toastSuccess'), { id: toastID })
+        setIsSubmitting(false);
+        mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
+        props.setCreateUserGroupModal(false);
+        toast.success(t('toastSuccess'), { id: toastID });
       } else {
-        setIsSubmitting(false)
-        toast.error(t('toastError'), { id: toastID })
+        setIsSubmitting(false);
+        toast.error(t('toastError'), { id: toastID });
       }
     },
-  })
+  });
 
   return (
     <FormLayout onSubmit={formik.handleSubmit}>
@@ -76,10 +72,7 @@ function AddUserGroup(props: AddUserGroupProps) {
       <FormField name="description">
         <FormLabelAndMessage
           label={t('descriptionLabel')}
-          message={
-            (formik.touched.description && formik.errors.description) ||
-            undefined
-          }
+          message={(formik.touched.description && formik.errors.description) || undefined}
         />
         <Form.Control asChild>
           <Input
@@ -97,7 +90,7 @@ function AddUserGroup(props: AddUserGroupProps) {
         </Form.Submit>
       </div>
     </FormLayout>
-  )
+  );
 }
 
-export default AddUserGroup
+export default AddUserGroup;

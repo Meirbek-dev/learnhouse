@@ -1,66 +1,55 @@
-'use client'
-import {
-  useCourse,
-  useCourseDispatch,
-} from '@components/Contexts/CourseContext'
-import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { getAPIUrl } from '@services/config/config'
-import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { Globe, SquareUserRound, Users, X } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
-import useSWR, { mutate } from 'swr'
-import { useTranslations } from 'next-intl'
+'use client';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Globe, SquareUserRound, Users, X } from 'lucide-react';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
 
 type EditCourseAccessProps = {
-  orgslug: string
-  course_uuid?: string
-}
+  orgslug: string;
+  course_uuid?: string;
+};
 
 function EditCourseAccess(_props: EditCourseAccessProps) {
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const course = useCourse() as any
-  const { isLoading, courseStructure } = course as any
-  const dispatchCourse = useCourseDispatch() as any
-  const t = useTranslations('DashPage.Courses.Access')
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const course = useCourse() as any;
+  const { isLoading, courseStructure } = course as any;
+  const dispatchCourse = useCourseDispatch() as any;
+  const t = useTranslations('DashPage.Courses.Access');
 
   const { data: usergroups } = useSWR(
-    courseStructure
-      ? `${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}`
-      : null,
-    (url) => swrFetcher(url, access_token)
-  )
-  const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(
-    undefined
-  )
+    courseStructure ? `${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}` : null,
+    (url) => swrFetcher(url, access_token),
+  );
+  const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     if (!isLoading && courseStructure?.public !== undefined) {
-      setIsClientPublic(courseStructure.public)
+      setIsClientPublic(courseStructure.public);
     }
-  }, [isLoading, courseStructure])
+  }, [isLoading, courseStructure]);
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      courseStructure?.public !== undefined &&
-      isClientPublic !== undefined
-    ) {
+    if (!isLoading && courseStructure?.public !== undefined && isClientPublic !== undefined) {
       if (isClientPublic !== courseStructure.public) {
-        dispatchCourse({ type: 'setIsNotSaved' })
+        dispatchCourse({ type: 'setIsNotSaved' });
         const updatedCourse = {
           ...courseStructure,
           public: isClientPublic,
-        }
-        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse })
+        };
+        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
       }
     }
-  }, [isLoading, isClientPublic, courseStructure, dispatchCourse])
+  }, [isLoading, isClientPublic, courseStructure, dispatchCourse]);
 
   return (
     <div>
@@ -69,12 +58,8 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
           <div className="h-6" />
           <div className="shadow-xs mx-4 rounded-xl bg-white px-4 py-4 sm:mx-10">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
-              <h1 className="text-lg font-bold text-gray-800 sm:text-xl">
-                {t('accessToTheCourse')}
-              </h1>
-              <h2 className="text-xs text-gray-500 sm:text-sm">
-                {t('accessDescription')}
-              </h2>
+              <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('accessToTheCourse')}</h1>
+              <h2 className="text-xs text-gray-500 sm:text-sm">{t('accessDescription')}</h2>
             </div>
             <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
               <ConfirmationModal
@@ -89,10 +74,11 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
                       </div>
                     )}
                     <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
-                      <Globe className="text-slate-400" size={32} />
-                      <div className="text-xl font-bold text-slate-700 sm:text-2xl">
-                        {t('publicLabel')}
-                      </div>
+                      <Globe
+                        className="text-slate-400"
+                        size={32}
+                      />
+                      <div className="text-xl font-bold text-slate-700 sm:text-2xl">{t('publicLabel')}</div>
                       <div className="sm:text-md w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px]">
                         {t('publicDescription')}
                       </div>
@@ -114,10 +100,11 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
                       </div>
                     )}
                     <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
-                      <Users className="text-slate-400" size={32} />
-                      <div className="text-xl font-bold text-slate-700 sm:text-2xl">
-                        {t('usersOnlyLabel')}
-                      </div>
+                      <Users
+                        className="text-slate-400"
+                        size={32}
+                      />
+                      <div className="text-xl font-bold text-slate-700 sm:text-2xl">{t('usersOnlyLabel')}</div>
                       <div className="sm:text-md w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px]">
                         {t('usersOnlyDescription')}
                       </div>
@@ -133,15 +120,15 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
-  const course = useCourse() as any
-  const [userGroupModal, setUserGroupModal] = useState(false)
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('DashPage.Courses.Access')
+  const course = useCourse() as any;
+  const [userGroupModal, setUserGroupModal] = useState(false);
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('DashPage.Courses.Access');
 
   // "unlinkUserGroupErrorDetailed": "Failed to unlink user group: {error}",
   // "unlinkUserGroupErrorGeneric": "Failed to unlink user group",
@@ -149,32 +136,22 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
 
   const removeUserGroupLink = async (usergroup_id: number) => {
     try {
-      const res = await unLinkResourcesToUserGroup(
-        usergroup_id,
-        course.courseStructure.course_uuid,
-        access_token
-      )
+      const res = await unLinkResourcesToUserGroup(usergroup_id, course.courseStructure.course_uuid, access_token);
       if (res.status === 200) {
-        toast.success(t('unlinkUserGroupSuccess'))
-        mutate(
-          `${getAPIUrl()}usergroups/resource/${course.courseStructure.course_uuid}`
-        )
+        toast.success(t('unlinkUserGroupSuccess'));
+        mutate(`${getAPIUrl()}usergroups/resource/${course.courseStructure.course_uuid}`);
       } else {
-        toast.error(
-          t('unlinkUserGroupErrorDetailed', { error: res.data.detail })
-        )
+        toast.error(t('unlinkUserGroupErrorDetailed', { error: res.data.detail }));
       }
     } catch (_error) {
-      toast.error(t('unlinkUserGroupErrorGeneric'))
+      toast.error(t('unlinkUserGroupErrorGeneric'));
     }
-  }
+  };
 
   return (
     <>
       <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
-        <h1 className="text-lg font-bold text-gray-800 sm:text-xl">
-          {t('title')}
-        </h1>
+        <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('title')}</h1>
         <h2 className="text-xs text-gray-500 sm:text-sm">{t('description')}</h2>
       </div>
       <div className="overflow-x-auto">
@@ -218,9 +195,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
           onOpenChange={() => setUserGroupModal(!userGroupModal)}
           minHeight="no-min"
           minWidth="md"
-          dialogContent={
-            <LinkToUserGroup setUserGroupModal={setUserGroupModal} />
-          }
+          dialogContent={<LinkToUserGroup setUserGroupModal={setUserGroupModal} />}
           dialogTitle={t('linkModalTitle')}
           dialogDescription={t('linkModalDescription')}
           dialogTrigger={
@@ -232,7 +207,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
         />
       </div>
     </>
-  )
+  );
 }
 
-export default EditCourseAccess
+export default EditCourseAccess;

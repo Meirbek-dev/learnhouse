@@ -1,42 +1,35 @@
-'use client'
+'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import {
-  sendActivityAIChatMessage,
-  startActivityAIChatSession,
-} from '@services/ai/ai'
-import { AlertTriangle, BadgeInfo, NotebookTabs } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FlaskConical, MessageCircle, X } from 'lucide-react'
-import Image from 'next/image'
-import openuAI_icon from 'public/openu_ai_simple.png'
-import openuAI_logo_black from 'public/openu_ai_black_logo.png'
-import type { KeyboardEvent, ChangeEvent } from 'react'
-import { useState, useEffect, useRef } from 'react'
-import {
-  type AIChatBotStateTypes,
-  useAIChatBot,
-  useAIChatBotDispatch,
-} from '@components/Contexts/AI/AIChatBotContext'
-import useGetAIFeatures from '../../../Hooks/useGetAIFeatures'
-import UserAvatar from '@components/Objects/UserAvatar'
-import { useTranslations } from 'next-intl'
+import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
+import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import { AlertTriangle, BadgeInfo, NotebookTabs } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import openuAI_logo_black from 'public/openu_ai_black_logo.png';
+import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
+import { FlaskConical, MessageCircle, X } from 'lucide-react';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { KeyboardEvent, ChangeEvent } from 'react';
+import openuAI_icon from 'public/openu_ai_simple.png';
+import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 type AIActivityAskProps = {
-  activity: any
-}
+  activity: any;
+};
 
 function AIActivityAsk(props: AIActivityAskProps) {
-  const t = useTranslations('Activities.AIActivityAsk')
-  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' })
-  const [isButtonAvailable, setIsButtonAvailable] = useState(false)
-  const dispatchAIChatBot = useAIChatBotDispatch() as any
+  const t = useTranslations('Activities.AIActivityAsk');
+  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
+  const [isButtonAvailable, setIsButtonAvailable] = useState(false);
+  const dispatchAIChatBot = useAIChatBotDispatch() as any;
 
   useEffect(() => {
     if (is_ai_feature_enabled) {
-      setIsButtonAvailable(true)
+      setIsButtonAvailable(true);
     }
-  }, [is_ai_feature_enabled])
+  }, [is_ai_feature_enabled]);
 
   return (
     <>
@@ -65,43 +58,43 @@ function AIActivityAsk(props: AIActivityAskProps) {
         </div>
       )}
     </>
-  )
+  );
 }
 
 export type AIMessage = {
-  sender: string
-  message: any
-  type: 'ai' | 'user'
-}
+  sender: string;
+  message: any;
+  type: 'ai' | 'user';
+};
 
 type ActivityChatMessageBoxProps = {
-  activity: any
-}
+  activity: any;
+};
 
 function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
-  const t = useTranslations('Activities.AIActivityAsk')
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
-  const dispatchAIChatBot = useAIChatBotDispatch() as any
+  const t = useTranslations('Activities.AIActivityAsk');
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes;
+  const dispatchAIChatBot = useAIChatBotDispatch() as any;
 
   // TODO : come up with a better way to handle this
   const inputClass = aiChatBotState.isWaitingForResponse
     ? 'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30 opacity-30 '
-    : 'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30'
+    : 'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30';
 
   useEffect(() => {
     if (aiChatBotState.isModalOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset';
     }
-  }, [aiChatBotState.isModalOpen])
+  }, [aiChatBotState.isModalOpen]);
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Enter') {
       // Perform the sending action here
-      sendMessage(event.currentTarget.value)
+      sendMessage(event.currentTarget.value);
     }
   }
 
@@ -109,25 +102,25 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
     await dispatchAIChatBot({
       type: 'setChatInputValue',
       payload: event.currentTarget.value,
-    })
-  }
+    });
+  };
 
   const sendMessage = async (message: string) => {
     if (aiChatBotState.aichat_uuid) {
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'user', message: message, type: 'user' },
-      })
-      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' })
+      });
+      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
       const response = await sendActivityAIChatMessage(
         message,
         aiChatBotState.aichat_uuid,
         props.activity.activity_uuid,
-        access_token
-      )
+        access_token,
+      );
       if (response.success == false) {
-        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
+        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
         await dispatchAIChatBot({
           type: 'setError',
           payload: {
@@ -135,29 +128,25 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
             status: response.status,
             error_message: response.data.detail,
           },
-        })
-        return
+        });
+        return;
       }
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
+      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      })
+      });
     } else {
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'user', message: message, type: 'user' },
-      })
-      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' })
-      const response = await startActivityAIChatSession(
-        message,
-        access_token,
-        props.activity.activity_uuid
-      )
+      });
+      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
+      const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
       if (response.success == false) {
-        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
+        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
         await dispatchAIChatBot({
           type: 'setError',
           payload: {
@@ -165,33 +154,33 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
             status: response.status,
             error_message: response.data.detail,
           },
-        })
-        return
+        });
+        return;
       }
       await dispatchAIChatBot({
         type: 'setAichat_uuid',
         payload: response.data.aichat_uuid,
-      })
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
+      });
+      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      })
+      });
     }
-  }
+  };
 
   function closeModal() {
-    dispatchAIChatBot({ type: 'setIsModalClose' })
+    dispatchAIChatBot({ type: 'setIsModalClose' });
   }
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [aiChatBotState.messages, session])
+  }, [aiChatBotState.messages, session]);
 
   return (
     <AnimatePresence>
@@ -239,16 +228,11 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                   src={openuAI_icon}
                   alt={t('askAI')}
                 />
-                <span className="text-sm font-semibold text-white/70">
-                  {' '}
-                  {t('AI')}
-                </span>
+                <span className="text-sm font-semibold text-white/70"> {t('AI')}</span>
               </div>
               <div className="flex items-center space-x-1 rounded-full bg-white/5 px-3 py-0.5 text-white/40">
                 <FlaskConical size={14} />
-                <span className="text-xs font-semibold antialiased">
-                  {t('experimental')}
-                </span>
+                <span className="text-xs font-semibold antialiased">{t('experimental')}</span>
               </div>
             </div>
             <div
@@ -256,20 +240,17 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                 aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
               }`}
             />
-            {aiChatBotState.messages.length > 0 &&
-            !aiChatBotState.error.isError ? (
+            {aiChatBotState.messages.length > 0 && !aiChatBotState.error.isError ? (
               <div className="scrollbar-w-2 scrollbar scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full h-[237px] w-full flex-col space-y-4 overflow-scroll">
-                {aiChatBotState.messages.map(
-                  (message: AIMessage, index: number) => {
-                    return (
-                      <AIMessage
-                        key={index}
-                        message={message}
-                        animated={message.sender == 'ai'}
-                      />
-                    )
-                  }
-                )}
+                {aiChatBotState.messages.map((message: AIMessage, index: number) => {
+                  return (
+                    <AIMessage
+                      key={index}
+                      message={message}
+                      animated={message.sender == 'ai'}
+                    />
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
             ) : (
@@ -281,21 +262,24 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
             {aiChatBotState.error.isError && (
               <div className="flex h-[237px] items-center">
                 <div className="mx-auto flex w-[600px] flex-col space-y-2 rounded-lg bg-red-500/20 p-5 outline-red-500">
-                  <AlertTriangle size={20} className="text-red-500" />
+                  <AlertTriangle
+                    size={20}
+                    className="text-red-500"
+                  />
                   <div className="flex flex-col">
-                    <h3 className="font-semibold text-red-200">
-                      {t('errorTitle')}
-                    </h3>
-                    <span className="text-sm text-red-100">
-                      {aiChatBotState.error.error_message}
-                    </span>
+                    <h3 className="font-semibold text-red-200">{t('errorTitle')}</h3>
+                    <span className="text-sm text-red-100">{aiChatBotState.error.error_message}</span>
                   </div>
                 </div>
               </div>
             )}
             <div className="flex items-center space-x-2">
               <div className="">
-                <UserAvatar rounded="rounded-lg" border="border-2" width={35} />
+                <UserAvatar
+                  rounded="rounded-lg"
+                  border="border-2"
+                  width={35}
+                />
               </div>
               <div className="w-full">
                 <input
@@ -322,18 +306,18 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }
 
 type AIMessageProps = {
-  message: AIMessage
-  animated: boolean
-}
+  message: AIMessage;
+  animated: boolean;
+};
 
 function AIMessage(props: AIMessageProps) {
-  const _session = useLHSession() as any
+  const _session = useLHSession() as any;
 
-  const words = props.message.message.split(' ')
+  const words = props.message.message.split(' ');
 
   return (
     <div className="flex w-full space-x-2 font-medium antialiased">
@@ -346,7 +330,11 @@ function AIMessage(props: AIMessageProps) {
             width={35}
           />
         ) : (
-          <UserAvatar rounded="rounded-lg" border="border-2" width={35} />
+          <UserAvatar
+            rounded="rounded-lg"
+            border="border-2"
+            width={35}
+          />
         )}
       </div>
       <div className="w-full">
@@ -358,13 +346,9 @@ function AIMessage(props: AIMessageProps) {
             {words.map((word: string, i: number) => (
               <motion.span
                 key={i}
-                initial={
-                  props.animated ? { opacity: 0, y: -10 } : { opacity: 1, y: 0 }
-                }
+                initial={props.animated ? { opacity: 0, y: -10 } : { opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={
-                  props.animated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }
-                }
+                exit={props.animated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
                 transition={props.animated ? { delay: i * 0.1 } : {}}
               >
                 {`${word} `}
@@ -374,17 +358,14 @@ function AIMessage(props: AIMessageProps) {
         </p>
       </div>
     </div>
-  )
+  );
 }
 
-const AIMessagePlaceHolder = (props: {
-  activity_uuid: string
-  sendMessage: any
-}) => {
-  const t = useTranslations('Activities.AIActivityAsk')
-  const session = useLHSession() as any
-  const [_feedbackModal, _setFeedbackModal] = useState(false)
-  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
+const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }) => {
+  const t = useTranslations('Activities.AIActivityAsk');
+  const session = useLHSession() as any;
+  const [_feedbackModal, _setFeedbackModal] = useState(false);
+  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes;
 
   if (!aiChatBotState.error.isError) {
     return (
@@ -412,7 +393,11 @@ const AIMessagePlaceHolder = (props: {
             <p className="flex items-center justify-center space-x-2 pt-3 text-2xl font-semibold text-white/70">
               <span className="items-center">{t('hello')}</span>
               <span className="flex items-center space-x-2 capitalize">
-                <UserAvatar rounded="rounded-lg" border="border-2" width={35} />
+                <UserAvatar
+                  rounded="rounded-lg"
+                  border="border-2"
+                  width={35}
+                />
                 <span>{session.data.user.username},</span>
               </span>
               <span>{t('howCanWeHelp')}</span>
@@ -447,27 +432,24 @@ const AIMessagePlaceHolder = (props: {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
-}
+};
 
-const AIChatPredefinedQuestion = (props: {
-  sendMessage: any
-  label: string
-}) => {
-  const t = useTranslations('Activities.AIActivityAsk')
+const AIChatPredefinedQuestion = (props: { sendMessage: any; label: string }) => {
+  const t = useTranslations('Activities.AIActivityAsk');
 
   function getQuestion(label: string) {
     if (label === 'about') {
-      return t('questionAbout')
+      return t('questionAbout');
     }
     if (label === 'flashcards') {
-      return t('questionFlashcards')
+      return t('questionFlashcards');
     }
     if (label === 'examples') {
-      return t('questionExamples')
+      return t('questionExamples');
     }
-    return ''
+    return '';
   }
 
   return (
@@ -477,12 +459,10 @@ const AIChatPredefinedQuestion = (props: {
     >
       {props.label === 'about' && <BadgeInfo size={15} />}
       {props.label === 'flashcards' && <NotebookTabs size={15} />}
-      {props.label === 'examples' && (
-        <div className="text-white/50">{t('examplesAbbr')}</div>
-      )}
+      {props.label === 'examples' && <div className="text-white/50">{t('examplesAbbr')}</div>}
       <span>{getQuestion(props.label)}</span>
     </div>
-  )
-}
+  );
+};
 
-export default AIActivityAsk
+export default AIActivityAsk;

@@ -25,6 +25,6 @@ export const initialData = {
   },
 
   chapterOrder: ['chapter-1', 'chapter-2', 'chapter-3'],
-}
+};
 
-export const initialData2 = {}
+export const initialData2 = {};

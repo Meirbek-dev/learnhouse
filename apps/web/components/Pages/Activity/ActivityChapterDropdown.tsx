@@ -1,93 +1,81 @@
-'use client'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import {
-  Check,
-  FileText,
-  Folder,
-  ListTree,
-  Video,
-  X,
-  StickyNote,
-  Backpack,
-  ArrowRight,
-} from 'lucide-react'
-import { getUriWithOrg } from '@services/config/config'
-import Link from 'next/link'
-import type { ReactNode } from 'react'
-import { useState, useRef, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
+'use client';
+import { Check, FileText, Folder, ListTree, Video, X, StickyNote, Backpack, ArrowRight } from 'lucide-react';
+import { getUriWithOrg } from '@services/config/config';
+import { useState, useRef, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
+import Link from 'next/link';
 
 interface ActivityChapterDropdownProps {
-  course: any
-  currentActivityId: string
-  orgslug: string
-  trailData?: any
+  course: any;
+  currentActivityId: string;
+  orgslug: string;
+  trailData?: any;
 }
 
-export default function ActivityChapterDropdown(
-  props: ActivityChapterDropdownProps
-): ReactNode {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const isMobile = useIsMobile()
-  const t = useTranslations('ActivityPage')
+export default function ActivityChapterDropdown(props: ActivityChapterDropdownProps): ReactNode {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const t = useTranslations('ActivityPage');
 
   // Clean up course UUID by removing 'course_' prefix if it exists
-  const cleanCourseUuid = props.course.course_uuid?.replace('course_', '')
+  const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false)
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleDropdown = () => {
-    setIsOpen(!isOpen)
-  }
+    setIsOpen(!isOpen);
+  };
 
   // Function to get the appropriate icon for activity type
   const getActivityTypeIcon = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return <Video size={10} />
+        return <Video size={10} />;
       case 'TYPE_DOCUMENT':
-        return <FileText size={10} />
+        return <FileText size={10} />;
       case 'TYPE_DYNAMIC':
-        return <StickyNote size={10} />
+        return <StickyNote size={10} />;
       case 'TYPE_ASSIGNMENT':
-        return <Backpack size={10} />
+        return <Backpack size={10} />;
       default:
-        return <FileText size={10} />
+        return <FileText size={10} />;
     }
-  }
+  };
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return t('activityTypes.video')
+        return t('activityTypes.video');
       case 'TYPE_DOCUMENT':
-        return t('activityTypes.document')
+        return t('activityTypes.document');
       case 'TYPE_DYNAMIC':
-        return t('activityTypes.dynamic')
+        return t('activityTypes.dynamic');
       case 'TYPE_ASSIGNMENT':
-        return t('activityTypes.assignment')
+        return t('activityTypes.assignment');
       default:
-        return t('activityTypes.learningMaterial')
+        return t('activityTypes.learningMaterial');
     }
-  }
+  };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div
+      className="relative"
+      ref={dropdownRef}
+    >
       <button
         onClick={toggleDropdown}
         className="nice-shadow flex items-center space-x-2 rounded-full bg-white p-2.5 px-5 text-gray-700 transition delay-150 duration-300 ease-in-out hover:bg-gray-50"
@@ -103,9 +91,7 @@ export default function ActivityChapterDropdown(
           className={`absolute z-50 mt-2 ${isMobile ? 'right-0 w-[90vw] sm:w-72' : 'right-0 w-72'} animate-in fade-in max-h-[70vh] cursor-pointer overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-xl duration-200`}
         >
           <div className="flex items-center justify-between border-b border-gray-100 px-3 py-1.5">
-            <h3 className="text-sm font-semibold text-gray-800">
-              {t('courseContent')}
-            </h3>
+            <h3 className="text-sm font-semibold text-gray-800">{t('courseContent')}</h3>
             <button
               onClick={() => setIsOpen(false)}
               className="cursor-pointer rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
@@ -116,35 +102,33 @@ export default function ActivityChapterDropdown(
 
           <div className="py-0.5">
             {props.course.chapters.map((chapter: any) => (
-              <div key={chapter.id} className="mb-1">
+              <div
+                key={chapter.id}
+                className="mb-1"
+              >
                 <div className="flex items-center border-y border-gray-100 bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-600">
                   <div className="flex items-center space-x-1.5">
-                    <Folder size={14} className="text-gray-400" />
+                    <Folder
+                      size={14}
+                      className="text-gray-400"
+                    />
                     <span>{chapter.name}</span>
                   </div>
                 </div>
                 <div className="py-0.5">
                   {chapter.activities.map((activity: any) => {
-                    const cleanActivityUuid = activity.activity_uuid?.replace(
-                      'activity_',
-                      ''
-                    )
-                    const isCurrent =
-                      cleanActivityUuid ===
-                      props.currentActivityId.replace('activity_', '')
+                    const cleanActivityUuid = activity.activity_uuid?.replace('activity_', '');
+                    const isCurrent = cleanActivityUuid === props.currentActivityId.replace('activity_', '');
 
                     // Find the correct run and check if activity is complete
                     const run = props.trailData?.runs?.find((run: any) => {
-                      const cleanRunCourseUuid =
-                        run.course?.course_uuid?.replace('course_', '')
-                      return cleanRunCourseUuid === cleanCourseUuid
-                    })
+                      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+                      return cleanRunCourseUuid === cleanCourseUuid;
+                    });
 
                     const isComplete = run?.steps?.find(
-                      (step: any) =>
-                        step.activity_id === activity.id &&
-                        step.complete === true
-                    )
+                      (step: any) => step.activity_id === activity.id && step.complete === true,
+                    );
 
                     return (
                       <Link
@@ -155,9 +139,7 @@ export default function ActivityChapterDropdown(
                       >
                         <div
                           className={`group px-3 py-2 transition-colors hover:bg-neutral-50 ${
-                            isCurrent
-                              ? 'border-l-2 border-neutral-300 bg-neutral-50 pl-2.5 font-medium'
-                              : ''
+                            isCurrent ? 'border-l-2 border-neutral-300 bg-neutral-50 pl-2.5 font-medium' : ''
                           }`}
                         >
                           <div className="flex items-center space-x-2">
@@ -171,7 +153,10 @@ export default function ActivityChapterDropdown(
                                 </div>
                               ) : (
                                 <div className="cursor-pointer text-neutral-300">
-                                  <Check size={14} className="stroke-[2]" />
+                                  <Check
+                                    size={14}
+                                    className="stroke-[2]"
+                                  />
                                 </div>
                               )}
                             </div>
@@ -199,7 +184,7 @@ export default function ActivityChapterDropdown(
                           </div>
                         </div>
                       </Link>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -208,5 +193,5 @@ export default function ActivityChapterDropdown(
         </div>
       )}
     </div>
-  )
+  );
 }

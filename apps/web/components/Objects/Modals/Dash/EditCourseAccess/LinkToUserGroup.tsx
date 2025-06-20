@@ -1,58 +1,51 @@
-'use client'
-import { useCourse } from '@components/Contexts/CourseContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { linkResourcesToUserGroup } from '@services/usergroups/usergroups'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { Info } from 'lucide-react'
-import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import toast from 'react-hot-toast'
-import useSWR, { mutate } from 'swr'
-import { useTranslations } from 'next-intl'
+'use client';
+import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import { Info } from 'lucide-react';
+import Link from 'next/link';
 
 type LinkToUserGroupProps = {
   // React function, todo: fix types
-  setUserGroupModal: any
-}
+  setUserGroupModal: any;
+};
 
 function LinkToUserGroup(props: LinkToUserGroupProps) {
-  const t = useTranslations('Components.LinkToUserGroup')
-  const course = useCourse() as any
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const courseStructure = course.courseStructure
+  const t = useTranslations('Components.LinkToUserGroup');
+  const course = useCourse() as any;
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const courseStructure = course.courseStructure;
 
-  const { data: usergroups } = useSWR(
-    courseStructure && org ? `${getAPIUrl()}usergroups/org/${org.id}` : null,
-    (url) => swrFetcher(url, access_token)
-  )
-  const [selectedUserGroup, setSelectedUserGroup] = useState(null) as any
+  const { data: usergroups } = useSWR(courseStructure && org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) =>
+    swrFetcher(url, access_token),
+  );
+  const [selectedUserGroup, setSelectedUserGroup] = useState(null) as any;
 
   const handleLink = async () => {
-    const res = await linkResourcesToUserGroup(
-      selectedUserGroup,
-      courseStructure.course_uuid,
-      access_token
-    )
+    const res = await linkResourcesToUserGroup(selectedUserGroup, courseStructure.course_uuid, access_token);
     if (res.status === 200) {
-      props.setUserGroupModal(false)
-      toast.success(t('linkSuccess'))
-      mutate(`${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}`)
+      props.setUserGroupModal(false);
+      toast.success(t('linkSuccess'));
+      mutate(`${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}`);
     } else {
-      toast.error(
-        t('linkError', { error: res.data?.detail || t('unknownError') })
-      )
+      toast.error(t('linkError', { error: res.data?.detail || t('unknownError') }));
     }
-  }
+  };
 
   useEffect(() => {
     if (usergroups && usergroups.length > 0) {
-      setSelectedUserGroup(usergroups[0].id)
+      setSelectedUserGroup(usergroups[0].id);
     }
-  }, [usergroups])
+  }, [usergroups]);
 
   return (
     <div className="flex flex-col space-y-1">
@@ -72,7 +65,10 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
               defaultValue={selectedUserGroup}
             >
               {usergroups?.map((group: any) => (
-                <option key={group.id} value={group.id}>
+                <option
+                  key={group.id}
+                  value={group.id}
+                >
                   {group.name}
                 </option>
               ))}
@@ -81,9 +77,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
         )}
         {usergroups?.length == 0 && (
           <div className="flex items-center space-x-3">
-            <span className="mx-3 rounded-full px-3 py-1 font-bold text-yellow-700">
-              {t('noUserGroupsAvailable')}
-            </span>
+            <span className="mx-3 rounded-full px-3 py-1 font-bold text-yellow-700">{t('noUserGroupsAvailable')}</span>
             <Link
               className="mx-1 rounded-full bg-blue-100 px-3 py-1 font-bold text-blue-700"
               target="_blank"
@@ -96,7 +90,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
         <div className="py-3">
           <button
             onClick={() => {
-              handleLink()
+              handleLink();
             }}
             className="rounded-md bg-green-700 px-4 py-2 font-bold text-white shadow-sm"
           >
@@ -105,7 +99,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default LinkToUserGroup
+export default LinkToUserGroup;

@@ -1,53 +1,44 @@
-'use client'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import useSWR from 'swr'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@components/ui/table'
-import { getOrgCustomers } from '@services/payments/payments'
-import { Badge } from '@components/ui/badge'
-import PageLoading from '@components/Objects/Loaders/PageLoading'
-import { RefreshCcw, SquareCheck } from 'lucide-react'
-import { getUserAvatarMediaDirectory } from '@services/media/media'
-import UserAvatar from '@components/Objects/UserAvatar'
-import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled'
-import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer'
-import { useLocale, useTranslations } from 'next-intl'
+'use client';
+import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
+import { getOrgCustomers } from '@services/payments/payments';
+import { useOrg } from '@components/Contexts/OrgContext';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { RefreshCcw, SquareCheck } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { Badge } from '@components/ui/badge';
+import useSWR from 'swr';
 
 interface PaymentUserData {
-  payment_user_id: number
+  payment_user_id: number;
   user: {
-    username: string
-    first_name: string
-    last_name: string
-    email: string
-    avatar_image: string
-    user_uuid: string
-  }
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    avatar_image: string;
+    user_uuid: string;
+  };
   product: {
-    name: string
-    description: string
-    product_type: string
-    amount: number
-    currency: string
-  }
-  status: string
-  creation_date: string
+    name: string;
+    description: string;
+    product_type: string;
+    amount: number;
+    currency: string;
+  };
+  status: string;
+  creation_date: string;
 }
 
 function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
-  const t = useTranslations('Payments.CustomersPage')
-  const locale = useLocale()
+  const t = useTranslations('Payments.CustomersPage');
+  const locale = useLocale();
   if (!data || data.length === 0) {
-    return (
-      <div className="py-8 text-center text-gray-500">{t('noCustomers')}</div>
-    )
+    return <div className="py-8 text-center text-gray-500">{t('noCustomers')}</div>;
   }
 
   return (
@@ -70,18 +61,11 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
                 <UserAvatar
                   border="border-2"
                   rounded="rounded-md"
-                  avatar_url={getUserAvatarMediaDirectory(
-                    item.user.user_uuid,
-                    item.user.avatar_image
-                  )}
+                  avatar_url={getUserAvatarMediaDirectory(item.user.user_uuid, item.user.avatar_image)}
                 />
                 <div className="flex flex-col">
-                  <span className="font-medium">
-                    {item.user.first_name || item.user.username}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {item.user.email}
-                  </span>
+                  <span className="font-medium">{item.user.first_name || item.user.username}</span>
+                  <span className="text-sm text-gray-500">{item.user.email}</span>
                 </div>
               </div>
             </TableCell>
@@ -89,12 +73,18 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
             <TableCell>
               <div className="flex items-center space-x-2">
                 {item.product.product_type === 'subscription' ? (
-                  <Badge variant="outline" className="flex items-center gap-1">
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  >
                     <RefreshCcw size={12} />
                     <span>{t('subscriptionType')}</span>
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="flex items-center gap-1">
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  >
                     <SquareCheck size={12} />
                     <span>{t('oneTimeType')}</span>
                   </Badge>
@@ -109,50 +99,41 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
             </TableCell>
             <TableCell>
               <Badge
-                variant={
-                  item.status === 'active'
-                    ? 'default'
-                    : item.status === 'completed'
-                      ? 'default'
-                      : 'secondary'
-                }
+                variant={item.status === 'active' ? 'default' : item.status === 'completed' ? 'default' : 'secondary'}
               >
                 {item.status}
               </Badge>
             </TableCell>
-            <TableCell>
-              {new Date(item.creation_date).toLocaleDateString(locale)}
-            </TableCell>
+            <TableCell>{new Date(item.creation_date).toLocaleDateString(locale)}</TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }
 
 function PaymentsCustomersPage() {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const { isEnabled, isLoading } = usePaymentsEnabled()
-  const t = useTranslations('Payments.CustomersPage')
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const { isEnabled, isLoading } = usePaymentsEnabled();
+  const t = useTranslations('Payments.CustomersPage');
 
   const {
     data: customers,
     error,
     isLoading: customersLoading,
-  } = useSWR(
-    org ? [`/payments/${org.id}/customers`, access_token] : null,
-    ([_url, token]) => getOrgCustomers(org.id, token)
-  )
+  } = useSWR(org ? [`/payments/${org.id}/customers`, access_token] : null, ([_url, token]) =>
+    getOrgCustomers(org.id, token),
+  );
 
   if (!(isEnabled || isLoading)) {
-    return <UnconfiguredPaymentsDisclaimer />
+    return <UnconfiguredPaymentsDisclaimer />;
   }
 
-  if (isLoading || customersLoading) return <PageLoading />
-  if (error) return <div>{t('errors.loadCustomersFailed')}</div>
-  if (!customers) return <div>{t('noCustomerData')}</div>
+  if (isLoading || customersLoading) return <PageLoading />;
+  if (error) return <div>{t('errors.loadCustomersFailed')}</div>;
+  if (!customers) return <div>{t('noCustomerData')}</div>;
 
   return (
     <div className="nice-shadow mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
@@ -163,7 +144,7 @@ function PaymentsCustomersPage() {
 
       <PaymentsUsersTable data={customers} />
     </div>
-  )
+  );
 }
 
-export default PaymentsCustomersPage
+export default PaymentsCustomersPage;

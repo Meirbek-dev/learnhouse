@@ -1,77 +1,55 @@
-import { useState } from 'react'
-import Link from 'next/link'
-import { Draggable } from '@hello-pangea/dnd'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import {
-  Video,
-  Sparkles,
-  X,
-  Pencil,
-  MoreVertical,
-  Eye,
-  Save,
-  File,
-} from 'lucide-react'
-import { mutate } from 'swr'
-import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { deleteActivity, updateActivity } from '@services/courses/activities'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useTranslations } from 'next-intl'
-import { useCourse } from '@components/Contexts/CourseContext'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { Video, Sparkles, X, Pencil, MoreVertical, Eye, Save, File } from 'lucide-react';
+import { deleteActivity, updateActivity } from '@services/courses/activities';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { Draggable } from '@hello-pangea/dnd';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import Link from 'next/link';
+import { mutate } from 'swr';
 
 interface ModifiedActivityInterface {
-  activityId: string
-  activityName: string
+  activityId: string;
+  activityName: string;
 }
 
 function Activity(props: any) {
-  const router = useRouter()
-  const session = useLHSession() as any
-  const [modifiedActivity, setModifiedActivity] = useState<
-    ModifiedActivityInterface | undefined
-  >(undefined)
-  const [selectedActivity, setSelectedActivity] = useState<string | undefined>(
-    undefined
-  )
-  const t = useTranslations('CourseEdit')
-  const course = useCourse() as any
-  const withUnpublishedActivities = course
-    ? course.withUnpublishedActivities
-    : false
+  const router = useRouter();
+  const session = useLHSession() as any;
+  const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>(undefined);
+  const [selectedActivity, setSelectedActivity] = useState<string | undefined>(undefined);
+  const t = useTranslations('CourseEdit');
+  const course = useCourse() as any;
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
   async function removeActivity() {
-    await deleteActivity(props.activity.id, session.data?.tokens?.access_token)
+    await deleteActivity(props.activity.id, session.data?.tokens?.access_token);
     mutate(
-      `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`
-    )
-    await revalidateTags(['courses'], props.orgslug)
-    router.refresh()
+      `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`,
+    );
+    await revalidateTags(['courses'], props.orgslug);
+    router.refresh();
   }
 
   async function updateActivityName(activityId: string) {
-    if (
-      modifiedActivity?.activityId === activityId &&
-      selectedActivity !== undefined
-    ) {
+    if (modifiedActivity?.activityId === activityId && selectedActivity !== undefined) {
       const modifiedActivityCopy = {
         ...props.activity,
         name: modifiedActivity.activityName,
-      }
+      };
 
-      await updateActivity(
-        modifiedActivityCopy,
-        activityId,
-        session.data?.tokens?.access_token
-      )
+      await updateActivity(modifiedActivityCopy, activityId, session.data?.tokens?.access_token);
       await mutate(
-        `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`
-      )
-      await revalidateTags(['courses'], props.orgslug)
-      router.refresh()
+        `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`,
+      );
+      await revalidateTags(['courses'], props.orgslug);
+      router.refresh();
     }
-    setSelectedActivity(undefined)
+    setSelectedActivity(undefined);
   }
 
   return (
@@ -124,11 +102,7 @@ function Activity(props: any) {
                   type="text"
                   className="outline-hidden bg-transparent text-xs text-gray-500"
                   placeholder={t('activityNamePlaceholder')}
-                  value={
-                    modifiedActivity
-                      ? modifiedActivity?.activityName
-                      : props.activity.name
-                  }
+                  value={modifiedActivity ? modifiedActivity?.activityName : props.activity.name}
                   onChange={(e) =>
                     setModifiedActivity({
                       activityId: props.activity.id,
@@ -161,16 +135,11 @@ function Activity(props: any) {
               <Link
                 href={`${getUriWithOrg(props.orgslug, '')}/course/${
                   props.courseid
-                }/activity/${props.activity.uuid.replace(
-                  'activity_',
-                  ''
-                )}/edit`}
+                }/activity/${props.activity.uuid.replace('activity_', '')}/edit`}
                 className="items-center rounded-md bg-sky-700 p-1 px-3 hover:cursor-pointer"
                 rel="noopener noreferrer"
               >
-                <div className="text-xs font-bold text-sky-100">
-                  {t('editButton')}{' '}
-                </div>
+                <div className="text-xs font-bold text-sky-100">{t('editButton')} </div>
               </Link>
             )}
             <Link
@@ -180,11 +149,18 @@ function Activity(props: any) {
               className="rounded-md bg-gray-200 p-1 px-3 hover:cursor-pointer"
               rel="noopener noreferrer"
             >
-              <Eye strokeWidth={2} size={15} className="text-gray-600" />
+              <Eye
+                strokeWidth={2}
+                size={15}
+                className="text-gray-600"
+              />
             </Link>
           </div>
           <div className="flex flex-row items-center space-x-1 pr-3">
-            <MoreVertical size={15} className="text-gray-300" />
+            <MoreVertical
+              size={15}
+              className="text-gray-300"
+            />
             <ConfirmationModal
               confirmationMessage={t('deleteActivityConfirmation')}
               confirmationButtonText={t('deleteActivityButton')}
@@ -196,7 +172,10 @@ function Activity(props: any) {
                   className="rounded-md bg-red-600 p-1 px-5 hover:cursor-pointer"
                   rel="noopener noreferrer"
                 >
-                  <X size={15} className="font-bold text-rose-200" />
+                  <X
+                    size={15}
+                    className="font-bold text-rose-200"
+                  />
                 </div>
               }
               functionToExecute={() => removeActivity()}
@@ -206,7 +185,7 @@ function Activity(props: any) {
         </div>
       )}
     </Draggable>
-  )
+  );
 }
 
-export default Activity
+export default Activity;

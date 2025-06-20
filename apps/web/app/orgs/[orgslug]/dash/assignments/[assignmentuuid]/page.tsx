@@ -1,47 +1,31 @@
-'use client'
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
-import {
-  BookOpen,
-  BookX,
-  EllipsisVertical,
-  Eye,
-  Layers2,
-  Monitor,
-  Pencil,
-  UserRoundPen,
-} from 'lucide-react'
-import { useState, useEffect } from 'react'
-import {
-  AssignmentProvider,
-  useAssignments,
-} from '@components/Contexts/Assignments/AssignmentContext'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import { updateAssignment } from '@services/courses/assignments'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { mutate } from 'swr'
-import { getAPIUrl } from '@services/config/config'
-import toast from 'react-hot-toast'
-import Link from 'next/link'
-import { useParams, useSearchParams } from 'next/navigation'
-import { updateActivity } from '@services/courses/activities'
+'use client';
+import { BookOpen, BookX, EllipsisVertical, Eye, Layers2, Monitor, Pencil, UserRoundPen } from 'lucide-react';
+import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal';
+import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import { updateAssignment } from '@services/courses/assignments';
+import { updateActivity } from '@services/courses/activities';
+import { useParams, useSearchParams } from 'next/navigation';
+import { getAPIUrl } from '@services/config/config';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 // Lazy Loading
-import dynamic from 'next/dynamic'
-import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal'
-import { useTranslations } from 'next-intl'
-const AssignmentSubmissionsSubPage = dynamic(
-  () => import('./subpages/AssignmentSubmissionsSubPage')
-)
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { mutate } from 'swr';
+const AssignmentSubmissionsSubPage = dynamic(() => import('./subpages/AssignmentSubmissionsSubPage'));
 
 function AssignmentEdit() {
-  const t = useTranslations('DashPage.Assignments.AssignmentPage')
-  const params = useParams<{ assignmentuuid: string }>()
-  const searchParams = useSearchParams()
-  const [selectedSubPage, setSelectedSubPage] = useState(
-    searchParams.get('subpage') || 'editor'
-  )
-  const isMobile = useIsMobile()
+  const t = useTranslations('DashPage.Assignments.AssignmentPage');
+  const params = useParams<{ assignmentuuid: string }>();
+  const searchParams = useSearchParams();
+  const [selectedSubPage, setSelectedSubPage] = useState(searchParams.get('subpage') || 'editor');
+  const isMobile = useIsMobile();
 
   if (isMobile) {
     // TODO: Work on a better mobile experience
@@ -49,28 +33,27 @@ function AssignmentEdit() {
       <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8] p-4">
         <div className="rounded-lg bg-white p-6 text-center shadow-md">
           <h2 className="mb-4 text-xl font-bold">{t('desktopOnlyTitle')}</h2>
-          <Monitor className="mx-auto my-5" size={60} />
+          <Monitor
+            className="mx-auto my-5"
+            size={60}
+          />
           <p>{t('desktopOnlyMessage1')}</p>
           <p>{t('desktopOnlyMessage2')}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="flex w-full flex-col">
-      <AssignmentProvider
-        assignment_uuid={`assignment_${params.assignmentuuid}`}
-      >
+      <AssignmentProvider assignment_uuid={`assignment_${params.assignmentuuid}`}>
         <div className="nice-shadow z-50 flex flex-col bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
           <div className="mr-10 flex h-full justify-between">
             <div className="mr-10 pl-10 tracking-tighter">
               <BrdCmpx />
               <div className="w-100 flex justify-between">
                 <div className="flex text-2xl font-bold">
-                  <div className="flex items-center gap-2">
-                    {t('assignmentTools')}
-                  </div>
+                  <div className="flex items-center gap-2">{t('assignmentTools')}</div>
                 </div>
               </div>
             </div>
@@ -104,64 +87,60 @@ function AssignmentEdit() {
           </div>
         </div>
         <div className="flex h-full w-full">
-          {selectedSubPage === 'editor' && (
-            <AssignmentEditorSubPage assignmentuuid={params.assignmentuuid} />
-          )}
+          {selectedSubPage === 'editor' && <AssignmentEditorSubPage assignmentuuid={params.assignmentuuid} />}
           {selectedSubPage === 'submissions' && (
-            <AssignmentSubmissionsSubPage
-              assignment_uuid={params.assignmentuuid}
-            />
+            <AssignmentSubmissionsSubPage assignment_uuid={params.assignmentuuid} />
           )}
         </div>
       </AssignmentProvider>
     </div>
-  )
+  );
 }
 
-export default AssignmentEdit
+export default AssignmentEdit;
 
 function BrdCmpx() {
-  const assignment = useAssignments() as any
+  const assignment = useAssignments() as any;
 
-  useEffect(() => {}, [assignment])
+  useEffect(() => {}, [assignment]);
 
   return (
     <BreadCrumbs
       type="assignments"
       last_breadcrumb={assignment?.assignment_object?.title}
     />
-  )
+  );
 }
 
 function PublishingState() {
-  const t = useTranslations('DashPage.Assignments.AssignmentPage')
-  const assignment = useAssignments() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const t = useTranslations('DashPage.Assignments.AssignmentPage');
+  const assignment = useAssignments() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   async function updateAssignmentPublishState(assignmentUUID: string) {
     const res = await updateAssignment(
       { published: !assignment?.assignment_object?.published },
       assignmentUUID,
-      access_token
-    )
+      access_token,
+    );
     const res2 = await updateActivity(
       { published: !assignment?.assignment_object?.published },
       assignment?.activity_object?.activity_uuid,
-      access_token
-    )
-    const toast_loading = toast.loading(t('updateLoading'))
+      access_token,
+    );
+    const toast_loading = toast.loading(t('updateLoading'));
     if (res.success && res2) {
-      mutate(`${getAPIUrl()}assignments/${assignmentUUID}`)
-      toast.success(t('updateSuccess'))
-      toast.dismiss(toast_loading)
+      mutate(`${getAPIUrl()}assignments/${assignmentUUID}`);
+      toast.success(t('updateSuccess'));
+      toast.dismiss(toast_loading);
     } else {
-      toast.error(t('updateError'))
+      toast.error(t('updateError'));
     }
   }
 
-  useEffect(() => {}, [assignment])
+  useEffect(() => {}, [assignment]);
 
   return (
     <>
@@ -169,12 +148,13 @@ function PublishingState() {
         <div
           className={`mx-auto flex rounded-full px-3.5 py-2 text-xs font-bold outline-1 ${!assignment?.assignment_object?.published ? 'bg-gray-200/60 outline-gray-300' : 'bg-green-200/60 outline-green-300'}`}
         >
-          {assignment?.assignment_object?.published
-            ? t('published')
-            : t('unpublished')}
+          {assignment?.assignment_object?.published ? t('published') : t('unpublished')}
         </div>
         <div>
-          <EllipsisVertical className="text-gray-500" size={13} />
+          <EllipsisVertical
+            className="text-gray-500"
+            size={13}
+          />
         </div>
 
         <ToolTip
@@ -215,11 +195,7 @@ function PublishingState() {
             content={t('unpublishTooltip')}
           >
             <div
-              onClick={() =>
-                updateAssignmentPublishState(
-                  assignment?.assignment_object?.assignment_uuid
-                )
-              }
+              onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
               className="bg-linear-to-bl flex cursor-pointer items-center space-x-2 rounded-md border border-gray-600/10 from-gray-400/50 to-gray-200/80 px-3 py-2 font-medium text-gray-800 shadow-lg shadow-gray-900/10"
             >
               <BookX size={18} />
@@ -235,11 +211,7 @@ function PublishingState() {
             content={t('publishTooltip')}
           >
             <div
-              onClick={() =>
-                updateAssignmentPublishState(
-                  assignment?.assignment_object?.assignment_uuid
-                )
-              }
+              onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
               className="bg-linear-to-bl flex cursor-pointer items-center space-x-2 rounded-md border border-green-600/10 from-green-400/50 to-lime-200/80 px-3 py-2 font-medium text-green-800 shadow-lg shadow-green-900/10"
             >
               <BookOpen size={18} />
@@ -257,5 +229,5 @@ function PublishingState() {
         />
       )}
     </>
-  )
+  );
 }

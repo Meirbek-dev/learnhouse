@@ -1,7 +1,7 @@
-import { mergeAttributes, Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
-import MathEquationBlockComponent from './MathEquationBlockComponent'
+import MathEquationBlockComponent from './MathEquationBlockComponent';
 
 export default Node.create({
   name: 'blockMathEquation',
@@ -14,7 +14,7 @@ export default Node.create({
       math_equation: {
         default: '',
       },
-    }
+    };
   },
 
   parseHTML() {
@@ -22,14 +22,14 @@ export default Node.create({
       {
         tag: 'block-math-equation',
       },
-    ]
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['block-math-equation', mergeAttributes(HTMLAttributes), 0]
+    return ['block-math-equation', mergeAttributes(HTMLAttributes), 0];
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(MathEquationBlockComponent)
+    return ReactNodeViewRenderer(MathEquationBlockComponent);
   },
-})
+});

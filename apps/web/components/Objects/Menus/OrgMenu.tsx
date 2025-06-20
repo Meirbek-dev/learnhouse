@@ -1,78 +1,72 @@
-'use client'
-import { useEffect, useState } from 'react'
-import * as React from 'react'
-import Link from 'next/link'
-import { getUriWithOrg } from '@services/config/config'
-import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
-import MenuLinks from './OrgMenuLinks'
-import { getOrgLogoMediaDirectory } from '@services/media/media'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { SearchBar } from '@components/Objects/Search/SearchBar'
-import { usePathname } from 'next/navigation'
-import { OpenULogo100 } from '@components/svg/OpenU'
-import { Menu, X } from 'lucide-react'
+'use client';
+import { HeaderProfileBox } from '@components/Security/HeaderProfileBox';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { SearchBar } from '@components/Objects/Search/SearchBar';
+import { getOrgLogoMediaDirectory } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { OpenULogo100 } from '@components/svg/OpenU';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import MenuLinks from './OrgMenuLinks';
+import { Menu, X } from 'lucide-react';
+import * as React from 'react';
+import Link from 'next/link';
 
 export const OrgMenu = (props: any) => {
-  const orgslug = props.orgslug
-  const session = useLHSession() as any
-  const _access_token = session?.data?.tokens?.access_token
-  const [_feedbackModal, setFeedbackModal] = React.useState(false)
-  const org = useOrg() as any
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-  const [isFocusMode, setIsFocusMode] = useState(false)
-  const pathname = usePathname()
+  const orgslug = props.orgslug;
+  const session = useLHSession() as any;
+  const _access_token = session?.data?.tokens?.access_token;
+  const [_feedbackModal, setFeedbackModal] = React.useState(false);
+  const org = useOrg() as any;
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     // Only check focus mode if we're in an activity page
     if (typeof window !== 'undefined' && pathname?.includes('/activity/')) {
-      const saved = localStorage.getItem('globalFocusMode')
-      setIsFocusMode(saved === 'true')
+      const saved = localStorage.getItem('globalFocusMode');
+      setIsFocusMode(saved === 'true');
     } else {
-      setIsFocusMode(false)
+      setIsFocusMode(false);
     }
 
     // Add storage event listener for cross-window changes
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'globalFocusMode' && pathname?.includes('/activity/')) {
-        setIsFocusMode(e.newValue === 'true')
+        setIsFocusMode(e.newValue === 'true');
       }
-    }
+    };
 
     // Add custom event listener for same-window changes
     const handleFocusModeChange = (e: CustomEvent) => {
       if (pathname?.includes('/activity/')) {
-        setIsFocusMode(e.detail.isFocusMode)
+        setIsFocusMode(e.detail.isFocusMode);
       }
-    }
+    };
 
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener(
-      'focusModeChange',
-      handleFocusModeChange as EventListener
-    )
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focusModeChange', handleFocusModeChange as EventListener);
 
     // Cleanup
     return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener(
-        'focusModeChange',
-        handleFocusModeChange as EventListener
-      )
-    }
-  }, [pathname])
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
+    };
+  }, [pathname]);
 
   function closeFeedbackModal() {
-    setFeedbackModal(false)
+    setFeedbackModal(false);
   }
 
   function toggleMenu() {
-    setIsMenuOpen(!isMenuOpen)
+    setIsMenuOpen(!isMenuOpen);
   }
 
   // Only hide menu if we're in an activity page and focus mode is enabled
   if (pathname?.includes('/activity/') && isFocusMode) {
-    return null
+    return null;
   }
 
   return (
@@ -104,7 +98,10 @@ export const OrgMenu = (props: any) => {
 
           {/* Search Section */}
           <div className="hidden max-w-lg flex-1 justify-center px-4 md:flex">
-            <SearchBar orgslug={orgslug} className="w-full" />
+            <SearchBar
+              orgslug={orgslug}
+              className="w-full"
+            />
           </div>
 
           <div className="flex items-center space-x-4">
@@ -128,7 +125,10 @@ export const OrgMenu = (props: any) => {
         <div className="flex flex-col items-center justify-center space-y-4 px-4 py-3">
           {/* Mobile Search */}
           <div className="w-full px-2">
-            <SearchBar orgslug={orgslug} isMobile={true} />
+            <SearchBar
+              orgslug={orgslug}
+              isMobile={true}
+            />
           </div>
           <div className="py-4">
             <MenuLinks orgslug={orgslug} />
@@ -139,5 +139,5 @@ export const OrgMenu = (props: any) => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};

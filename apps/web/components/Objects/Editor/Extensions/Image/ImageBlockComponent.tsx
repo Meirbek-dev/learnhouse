@@ -1,75 +1,56 @@
-import { NodeViewWrapper } from '@tiptap/react'
-import { useEffect, useState } from 'react'
-import { Resizable } from 're-resizable'
-import {
-  AlertTriangle,
-  Image,
-  Download,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-} from 'lucide-react'
-import { uploadNewImageFile } from '../../../../../services/blocks/Image/images'
-import { getActivityBlockMediaDirectory } from '@services/media/media'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useCourse } from '@components/Contexts/CourseContext'
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import {
-  FileUploadBlock,
-  FileUploadBlockButton,
-  FileUploadBlockInput,
-} from '../../FileUploadBlock'
-import { constructAcceptValue } from '@/lib/constants'
+import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
+import { AlertTriangle, Image, Download, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { uploadNewImageFile } from '../../../../../services/blocks/Image/images';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { getActivityBlockMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { constructAcceptValue } from '@/lib/constants';
+import { NodeViewWrapper } from '@tiptap/react';
+import { useEffect, useState } from 'react';
+import { Resizable } from 're-resizable';
 
-const SUPPORTED_FILES = constructAcceptValue(['image'])
+const SUPPORTED_FILES = constructAcceptValue(['image']);
 
 function ImageBlockComponent(props: any) {
-  const org = useOrg() as any
-  const course = useCourse() as any
-  const editorState = useEditorProvider() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+  const org = useOrg() as any;
+  const course = useCourse() as any;
+  const editorState = useEditorProvider() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
 
-  const isEditable = editorState.isEditable
-  const [image, setImage] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [blockObject, setblockObject] = useState(props.node.attrs.blockObject)
+  const isEditable = editorState.isEditable;
+  const [image, setImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
   const [imageSize, setImageSize] = useState({
     width: props.node.attrs.size ? props.node.attrs.size.width : 300,
-  })
-  const [alignment, setAlignment] = useState(
-    props.node.attrs.alignment || 'center'
-  )
+  });
+  const [alignment, setAlignment] = useState(props.node.attrs.alignment || 'center');
 
-  const fileId = blockObject
-    ? `${blockObject.content.file_id}.${blockObject.content.file_format}`
-    : null
+  const fileId = blockObject ? `${blockObject.content.file_id}.${blockObject.content.file_format}` : null;
 
   const handleImageChange = (event: React.ChangeEvent<any>) => {
-    setImage(event.target.files[0])
-  }
+    setImage(event.target.files[0]);
+  };
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault()
-    if (!image) return
-    setIsLoading(true)
-    const object = await uploadNewImageFile(
-      image,
-      props.extension.options.activity.activity_uuid,
-      access_token
-    )
-    setIsLoading(false)
-    setblockObject(object)
+    e.preventDefault();
+    if (!image) return;
+    setIsLoading(true);
+    const object = await uploadNewImageFile(image, props.extension.options.activity.activity_uuid, access_token);
+    setIsLoading(false);
+    setblockObject(object);
     props.updateAttributes({
       blockObject: object,
       size: imageSize,
       alignment: alignment,
-    })
-  }
+    });
+  };
 
   const handleDownload = () => {
-    if (!fileId) return
+    if (!fileId) return;
 
     const imageUrl = getActivityBlockMediaDirectory(
       org?.org_uuid,
@@ -77,39 +58,39 @@ function ImageBlockComponent(props: any) {
       props.extension.options.activity.activity_uuid,
       blockObject.block_uuid,
       fileId,
-      'imageBlock'
-    )
+      'imageBlock',
+    );
 
-    const link = document.createElement('a')
-    link.href = imageUrl || ''
-    link.download = `image-${blockObject?.block_uuid || 'download'}.${blockObject?.content.file_format || 'jpg'}`
-    link.setAttribute('download', '')
-    link.setAttribute('target', '_blank')
-    link.setAttribute('rel', 'noopener noreferrer')
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const link = document.createElement('a');
+    link.href = imageUrl || '';
+    link.download = `image-${blockObject?.block_uuid || 'download'}.${blockObject?.content.file_format || 'jpg'}`;
+    link.setAttribute('download', '');
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleAlignmentChange = (newAlignment: string) => {
-    setAlignment(newAlignment)
+    setAlignment(newAlignment);
     props.updateAttributes({
       alignment: newAlignment,
-    })
-  }
+    });
+  };
 
-  useEffect(() => {}, [course, org])
+  useEffect(() => {}, [course, org]);
 
   const getAlignmentClass = () => {
     switch (alignment) {
       case 'left':
-        return 'justify-start'
+        return 'justify-start';
       case 'right':
-        return 'justify-end'
+        return 'justify-end';
       default:
-        return 'justify-center'
+        return 'justify-center';
     }
-  }
+  };
 
   return (
     <NodeViewWrapper className="block-image w-full">
@@ -123,7 +104,10 @@ function ImageBlockComponent(props: any) {
           onChange={handleImageChange}
           accept={SUPPORTED_FILES}
         />
-        <FileUploadBlockButton onClick={handleSubmit} disabled={!image} />
+        <FileUploadBlockButton
+          onClick={handleSubmit}
+          disabled={!image}
+        />
       </FileUploadBlock>
 
       {blockObject && isEditable && (
@@ -154,18 +138,15 @@ function ImageBlockComponent(props: any) {
             minWidth={200}
             enable={{ right: true }}
             onResizeStop={(_e, _direction, ref, d) => {
-              const newWidth = Math.min(
-                imageSize.width + d.width,
-                ref.parentElement?.clientWidth || 1000
-              )
+              const newWidth = Math.min(imageSize.width + d.width, ref.parentElement?.clientWidth || 1000);
               props.updateAttributes({
                 size: {
                   width: newWidth,
                 },
-              })
+              });
               setImageSize({
                 width: newWidth,
-              })
+              });
             }}
           >
             <div className="relative">
@@ -176,7 +157,7 @@ function ImageBlockComponent(props: any) {
                   props.extension.options.activity.activity_uuid,
                   blockObject.block_uuid,
                   fileId || '',
-                  'imageBlock'
+                  'imageBlock',
                 )}`}
                 alt=""
                 className="h-auto max-w-full rounded-lg shadow-sm"
@@ -220,7 +201,7 @@ function ImageBlockComponent(props: any) {
                 props.extension.options.activity.activity_uuid,
                 blockObject.block_uuid,
                 fileId || '',
-                'imageBlock'
+                'imageBlock',
               )}`}
               alt=""
               className="h-auto max-w-full rounded-lg shadow-sm"
@@ -239,11 +220,14 @@ function ImageBlockComponent(props: any) {
 
       {isLoading && (
         <div>
-          <AlertTriangle color="#e1e0e0" size={50} />
+          <AlertTriangle
+            color="#e1e0e0"
+            size={50}
+          />
         </div>
       )}
     </NodeViewWrapper>
-  )
+  );
 }
 
-export default ImageBlockComponent
+export default ImageBlockComponent;

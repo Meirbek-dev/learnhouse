@@ -1,13 +1,13 @@
-import { AlertCircle } from 'lucide-react'
-import CoursePaidOptions from './CoursePaidOptions'
-import { useTranslations } from 'next-intl'
+import CoursePaidOptions from './CoursePaidOptions';
+import { useTranslations } from 'next-intl';
+import { AlertCircle } from 'lucide-react';
 
 interface PaidCourseActivityProps {
-  course: any
+  course: any;
 }
 
 function PaidCourseActivityDisclaimer({ course }: PaidCourseActivityProps) {
-  const t = useTranslations('Components.CourseParidActivityDisclaimer')
+  const t = useTranslations('Components.CourseParidActivityDisclaimer');
   return (
     <div className="mx-auto max-w-lg space-y-4">
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -19,7 +19,7 @@ function PaidCourseActivityDisclaimer({ course }: PaidCourseActivityProps) {
       </div>
       <CoursePaidOptions course={course} />
     </div>
-  )
+  );
 }
 
-export default PaidCourseActivityDisclaimer
+export default PaidCourseActivityDisclaimer;

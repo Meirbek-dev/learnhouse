@@ -1,92 +1,80 @@
-import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
-import type { FC } from 'react'
-import { useState, useRef, useEffect } from 'react'
-import EmojiPicker, { Theme } from 'emoji-picker-react'
-import { ChevronDown, ChevronRight, Palette } from 'lucide-react'
-import { twMerge } from 'tailwind-merge'
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useTranslations } from 'next-intl'
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { ChevronDown, ChevronRight, Palette } from 'lucide-react';
+import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
+import EmojiPicker, { Theme } from 'emoji-picker-react';
+import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { twMerge } from 'tailwind-merge';
+import type { FC } from 'react';
 
 const BadgesExtension: FC = (props: any) => {
-  const t = useTranslations('DashPage.Editor.BadgesExtension')
-  const [color, setColor] = useState(props.node.attrs.color)
-  const [emoji, setEmoji] = useState(props.node.attrs.emoji)
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-  const [showColorPicker, setShowColorPicker] = useState(false)
-  const [showPredefinedCallouts, setShowPredefinedCallouts] = useState(false)
-  const pickerRef = useRef<HTMLDivElement>(null)
-  const colorPickerRef = useRef<HTMLDivElement>(null)
-  const editorState = useEditorProvider() as any
-  const isEditable = editorState.isEditable
+  const t = useTranslations('DashPage.Editor.BadgesExtension');
+  const [color, setColor] = useState(props.node.attrs.color);
+  const [emoji, setEmoji] = useState(props.node.attrs.emoji);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showPredefinedCallouts, setShowPredefinedCallouts] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+  const editorState = useEditorProvider() as any;
+  const isEditable = editorState.isEditable;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        (pickerRef.current &&
-          !pickerRef.current.contains(event.target as Node)) ||
-        (colorPickerRef.current &&
-          !colorPickerRef.current.contains(event.target as Node))
+        (pickerRef.current && !pickerRef.current.contains(event.target as Node)) ||
+        (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node))
       ) {
-        setShowEmojiPicker(false)
-        setShowColorPicker(false)
+        setShowEmojiPicker(false);
+        setShowColorPicker(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleEmojiSelect = (emoji: any) => {
-    setEmoji(emoji.emoji)
-    setShowEmojiPicker(false)
+    setEmoji(emoji.emoji);
+    setShowEmojiPicker(false);
     props.updateAttributes({
       emoji: emoji.emoji,
-    })
-  }
+    });
+  };
 
   const handleColorSelect = (selectedColor: string) => {
-    setColor(selectedColor)
-    setShowColorPicker(false)
+    setColor(selectedColor);
+    setShowColorPicker(false);
     props.updateAttributes({
       color: selectedColor,
-    })
-  }
+    });
+  };
 
   const handlePredefinedBadgeSelect = (badge: (typeof predefinedBadges)[0]) => {
-    setEmoji(badge.emoji)
-    setColor(badge.color)
+    setEmoji(badge.emoji);
+    setColor(badge.color);
 
     props.updateAttributes({
       emoji: badge.emoji,
       color: badge.color,
-    })
+    });
 
     // Insert the predefined content
-    const { editor } = props
+    const { editor } = props;
     if (editor) {
       editor.commands.setTextSelection({
         from: props.getPos() + 1,
         to: props.getPos() + props.node.nodeSize - 1,
-      })
-      editor.commands.insertContent(badge.content)
+      });
+      editor.commands.insertContent(badge.content);
     }
 
-    setShowPredefinedCallouts(false)
-  }
+    setShowPredefinedCallouts(false);
+  };
 
-  const colors = [
-    'sky',
-    'green',
-    'yellow',
-    'red',
-    'purple',
-    'teal',
-    'amber',
-    'indigo',
-    'neutral',
-  ]
+  const colors = ['sky', 'green', 'yellow', 'red', 'purple', 'teal', 'amber', 'indigo', 'neutral'];
   const predefinedBadges = [
     {
       emoji: '📝',
@@ -133,34 +121,34 @@ const BadgesExtension: FC = (props: any) => {
       color: 'neutral',
       content: t('discussionTopic'),
     },
-  ]
+  ];
 
   const getBadgeColor = (color: string) => {
     switch (color) {
       case 'sky':
-        return 'bg-sky-400 text-sky-50'
+        return 'bg-sky-400 text-sky-50';
       case 'green':
-        return 'bg-green-400 text-green-50'
+        return 'bg-green-400 text-green-50';
       case 'yellow':
-        return 'bg-yellow-400 text-black'
+        return 'bg-yellow-400 text-black';
       case 'red':
-        return 'bg-red-500 text-red-50'
+        return 'bg-red-500 text-red-50';
       case 'purple':
-        return 'bg-purple-400 text-purple-50'
+        return 'bg-purple-400 text-purple-50';
       case 'pink':
-        return 'bg-pink-400 text-pink-50'
+        return 'bg-pink-400 text-pink-50';
       case 'teal':
-        return 'bg-teal-400 text-teal-900'
+        return 'bg-teal-400 text-teal-900';
       case 'amber':
-        return 'bg-amber-600 text-amber-100'
+        return 'bg-amber-600 text-amber-100';
       case 'indigo':
-        return 'bg-indigo-400 text-indigo-50'
+        return 'bg-indigo-400 text-indigo-50';
       case 'neutral':
-        return 'bg-neutral-800 text-white'
+        return 'bg-neutral-800 text-white';
       default:
-        return 'bg-sky-400 text-white'
+        return 'bg-sky-400 text-white';
     }
-  }
+  };
 
   return (
     <NodeViewWrapper>
@@ -168,7 +156,7 @@ const BadgesExtension: FC = (props: any) => {
         <div
           className={twMerge(
             'nice-shadow my-2 flex w-fit items-center space-x-1 rounded-full px-3.5 py-1.5 text-sm font-semibold outline-2 outline-white/20',
-            getBadgeColor(color)
+            getBadgeColor(color),
           )}
         >
           <div className="flex items-center justify-center space-x-1">
@@ -179,9 +167,7 @@ const BadgesExtension: FC = (props: any) => {
               </button>
             )}
           </div>
-          <NodeViewContent
-            className="content text capitalize tracking-wide"
-          />
+          <NodeViewContent className="content text capitalize tracking-wide" />
           {isEditable && (
             <div className="relative flex items-center justify-center space-x-2">
               <button onClick={() => setShowColorPicker(!showColorPicker)}>
@@ -247,7 +233,7 @@ const BadgesExtension: FC = (props: any) => {
         </div>
       )}
     </NodeViewWrapper>
-  )
-}
+  );
+};
 
-export default BadgesExtension
+export default BadgesExtension;

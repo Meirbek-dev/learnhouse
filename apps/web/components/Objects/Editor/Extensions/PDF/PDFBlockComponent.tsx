@@ -1,59 +1,49 @@
-import { NodeViewWrapper } from '@tiptap/react'
-import type { ChangeEvent } from 'react'
-import { useState, useEffect } from 'react'
-import styled from 'styled-components'
-import { AlertTriangle, FileText, Download } from 'lucide-react'
-import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf'
-import { getActivityBlockMediaDirectory } from '@services/media/media'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useCourse } from '@components/Contexts/CourseContext'
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import {
-  FileUploadBlock,
-  FileUploadBlockButton,
-  FileUploadBlockInput,
-} from '../../FileUploadBlock'
-import { constructAcceptValue } from '@/lib/constants'
+import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf';
+import { getActivityBlockMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { AlertTriangle, FileText, Download } from 'lucide-react';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { constructAcceptValue } from '@/lib/constants';
+import { NodeViewWrapper } from '@tiptap/react';
+import { useState, useEffect } from 'react';
+import type { ChangeEvent } from 'react';
+import styled from 'styled-components';
 
-const SUPPORTED_FILES = constructAcceptValue(['pdf'])
+const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
 function PDFBlockComponent(props: any) {
-  const org = useOrg() as any
-  const course = useCourse() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [pdf, setPDF] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [blockObject, setblockObject] = useState(props.node.attrs.blockObject)
-  const fileId = blockObject
-    ? `${blockObject.content.file_id}.${blockObject.content.file_format}`
-    : null
-  const editorState = useEditorProvider() as any
-  const isEditable = editorState.isEditable
+  const org = useOrg() as any;
+  const course = useCourse() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [pdf, setPDF] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
+  const fileId = blockObject ? `${blockObject.content.file_id}.${blockObject.content.file_format}` : null;
+  const editorState = useEditorProvider() as any;
+  const isEditable = editorState.isEditable;
 
   const handlePDFChange = (event: ChangeEvent<any>) => {
-    setPDF(event.target.files[0])
-  }
+    setPDF(event.target.files[0]);
+  };
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault()
-    if (!pdf) return // Guard: only proceed if pdf is not null
-    setIsLoading(true)
-    const object = await uploadNewPDFFile(
-      pdf,
-      props.extension.options.activity.activity_uuid,
-      access_token
-    )
-    setIsLoading(false)
-    setblockObject(object)
+    e.preventDefault();
+    if (!pdf) return; // Guard: only proceed if pdf is not null
+    setIsLoading(true);
+    const object = await uploadNewPDFFile(pdf, props.extension.options.activity.activity_uuid, access_token);
+    setIsLoading(false);
+    setblockObject(object);
     props.updateAttributes({
       blockObject: object,
-    })
-  }
+    });
+  };
 
   const handleDownload = () => {
-    if (!fileId) return
+    if (!fileId) return;
 
     const pdfUrl = getActivityBlockMediaDirectory(
       org?.org_uuid,
@@ -61,21 +51,21 @@ function PDFBlockComponent(props: any) {
       props.extension.options.activity.activity_uuid,
       blockObject.block_uuid,
       fileId,
-      'pdfBlock'
-    )
+      'pdfBlock',
+    );
 
-    const link = document.createElement('a')
-    link.href = pdfUrl || ''
-    link.download = `document-${blockObject?.block_uuid || 'download'}.${blockObject?.content.file_format || 'pdf'}`
-    link.setAttribute('download', '')
-    link.setAttribute('target', '_blank')
-    link.setAttribute('rel', 'noopener noreferrer')
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const link = document.createElement('a');
+    link.href = pdfUrl || '';
+    link.download = `document-${blockObject?.block_uuid || 'download'}.${blockObject?.content.file_format || 'pdf'}`;
+    link.setAttribute('download', '');
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-  useEffect(() => {}, [course, org])
+  useEffect(() => {}, [course, org]);
 
   return (
     <NodeViewWrapper className="block-pdf">
@@ -89,7 +79,10 @@ function PDFBlockComponent(props: any) {
           onChange={handlePDFChange}
           accept={SUPPORTED_FILES}
         />
-        <FileUploadBlockButton onClick={handleSubmit} disabled={!pdf} />
+        <FileUploadBlockButton
+          onClick={handleSubmit}
+          disabled={!pdf}
+        />
       </FileUploadBlock>
 
       {blockObject && (
@@ -106,7 +99,7 @@ function PDFBlockComponent(props: any) {
                       props.extension.options.activity.activity_uuid || '',
                       blockObject.block_uuid || '',
                       fileId,
-                      'pdfBlock'
+                      'pdfBlock',
                     )
                   : ''
               }
@@ -125,24 +118,27 @@ function PDFBlockComponent(props: any) {
       )}
       {isLoading && (
         <div>
-          <AlertTriangle color="#e1e0e0" size={50} />
+          <AlertTriangle
+            color="#e1e0e0"
+            size={50}
+          />
         </div>
       )}
     </NodeViewWrapper>
-  )
+  );
 }
 
-export default PDFBlockComponent
+export default PDFBlockComponent;
 
 const BlockPDF = styled.div`
   display: flex;
   flex-direction: column;
   img {
     width: 100%;
-    border-radius: 6px;
     height: 300px;
     // cover
     object-fit: cover;
+    border-radius: 6px;
   }
-`
-const _PDFNotFound = styled.div``
+`;
+const _PDFNotFound = styled.div``;

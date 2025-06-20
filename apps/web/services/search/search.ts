@@ -1,6 +1,6 @@
-import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests'
-import { getAPIUrl } from '@services/config/config'
-import { getResponseMetadata } from '@services/utils/ts/requests'
+import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { getResponseMetadata } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 export async function searchOrgContent(
   org_slug: string,
@@ -8,12 +8,12 @@ export async function searchOrgContent(
   page = 1,
   limit = 10,
   next: any,
-  access_token?: any
+  access_token?: any,
 ) {
   const result: any = await fetch(
     `${getAPIUrl()}search/org_slug/${org_slug}?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token)
-  )
-  const res = await getResponseMetadata(result)
-  return res
+    RequestBodyWithAuthHeader('GET', null, next, access_token),
+  );
+  const res = await getResponseMetadata(result);
+  return res;
 }

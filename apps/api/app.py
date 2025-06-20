@@ -71,21 +71,8 @@ if __name__ == "__main__":
         "host": "0.0.0.0",
         "port": openu_config.hosting_config.port,
         "reload": is_dev_mode,
-        "access_log": False,  # Disable access logs for slight performance gain/less noise
+        "access_log": is_dev_mode,
     }
-
-    if not is_dev_mode:
-        uvicorn_kwargs["loop"] = "asyncio"  # Explicitly asyncio, or 'auto'
-
-        # Set number of workers for production-like environments
-        # Uvicorn's 'workers' parameter is effective when reload=False
-        uvicorn_kwargs["workers"] = 4
-    else:
-        # In development mode (reload=True), Uvicorn typically uses 1 worker.
-        # You might still want uvloop if it's stable with your reloader.
-        # For now, we'll keep it simpler and only enable uvloop for non-dev mode.
-        uvicorn_kwargs["loop"] = "asyncio"  # Or 'auto'
-
     uvicorn.run("app:app", **uvicorn_kwargs)
 
 

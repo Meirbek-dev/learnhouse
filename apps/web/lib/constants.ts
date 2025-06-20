@@ -11,16 +11,14 @@ export const ACCEPTED_FILE_FORMATS = {
   pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   zip: 'application/zip,application/x-zip-compressed',
-} as const
+} as const;
 
 /**
  * Constructs the 'accept' attribute value for an input element.
  */
-export function constructAcceptValue(
-  types: (keyof typeof ACCEPTED_FILE_FORMATS)[]
-): string {
+export function constructAcceptValue(types: (keyof typeof ACCEPTED_FILE_FORMATS)[]): string {
   return types
     .map((type) => ACCEPTED_FILE_FORMATS[type])
     .filter(Boolean)
-    .join(',')
+    .join(',');
 }

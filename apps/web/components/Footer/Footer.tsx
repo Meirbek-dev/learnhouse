@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import type React from 'react'
-import OrgScripts from '@/components/OrgScripts/OrgScripts'
-import { usePathname } from 'next/navigation'
+import OrgScripts from '@/components/OrgScripts/OrgScripts';
+import { usePathname } from 'next/navigation';
+import type React from 'react';
 
 const Footer: React.FC = () => {
-  const pathname = usePathname()
-  const isDashboard = pathname?.startsWith('/dashboard')
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith('/dashboard');
 
   // Don't run scripts in dashboard pages
   if (isDashboard) {
-    return null
+    return null;
   }
 
-  return <OrgScripts />
-}
+  return <OrgScripts />;
+};
 
-export default Footer
+export default Footer;

@@ -1,7 +1,7 @@
-import { mergeAttributes, Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
-import UserBlockComponent from './UserBlockComponent'
+import UserBlockComponent from './UserBlockComponent';
 
 export default Node.create({
   name: 'blockUser',
@@ -14,7 +14,7 @@ export default Node.create({
       user_id: {
         default: '',
       },
-    }
+    };
   },
 
   parseHTML() {
@@ -22,14 +22,14 @@ export default Node.create({
       {
         tag: 'block-user',
       },
-    ]
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['block-user', mergeAttributes(HTMLAttributes), 0]
+    return ['block-user', mergeAttributes(HTMLAttributes), 0];
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(UserBlockComponent)
+    return ReactNodeViewRenderer(UserBlockComponent);
   },
-})
+});

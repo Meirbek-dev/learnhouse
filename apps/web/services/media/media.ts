@@ -1,30 +1,20 @@
-import { getBackendUrl } from '@services/config/config'
-const OPENU_MEDIA_URL = process.env.NEXT_PUBLIC_OPENU_MEDIA_URL
+import { getBackendUrl } from '@services/config/config';
+const OPENU_MEDIA_URL = process.env.NEXT_PUBLIC_OPENU_MEDIA_URL;
 
 function getMediaUrl(): string {
-  return OPENU_MEDIA_URL || getBackendUrl()
+  return OPENU_MEDIA_URL || getBackendUrl();
 }
 
-export function getCourseThumbnailMediaDirectory(
-  orgUUID: string,
-  courseUUID: string,
-  fileId: string
-): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/thumbnails/${fileId}`
+export function getCourseThumbnailMediaDirectory(orgUUID: string, courseUUID: string, fileId: string): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/thumbnails/${fileId}`;
 }
 
-export function getOrgLandingMediaDirectory(
-  orgUUID: string,
-  fileId: string
-): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/landing/${fileId}`
+export function getOrgLandingMediaDirectory(orgUUID: string, fileId: string): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/landing/${fileId}`;
 }
 
-export function getUserAvatarMediaDirectory(
-  userUUID: string,
-  fileId: string
-): string {
-  return `${getMediaUrl()}content/users/${userUUID}/avatars/${fileId}`
+export function getUserAvatarMediaDirectory(userUUID: string, fileId: string): string {
+  return `${getMediaUrl()}content/users/${userUUID}/avatars/${fileId}`;
 }
 
 export function getActivityBlockMediaDirectory(
@@ -33,9 +23,9 @@ export function getActivityBlockMediaDirectory(
   activityId: string,
   blockId: string,
   fileId: string,
-  type: string
+  type: string,
 ): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/${type}/${blockId}/${fileId}`
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseId}/activities/${activityId}/dynamic/blocks/${type}/${blockId}/${fileId}`;
 }
 
 export function getTaskRefFileDir(
@@ -44,9 +34,9 @@ export function getTaskRefFileDir(
   activityUUID: string,
   assignmentUUID: string,
   assignmentTaskUUID: string,
-  fileID: string
+  fileID: string,
 ): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/${fileID}`
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/${fileID}`;
 }
 
 export function getTaskFileSubmissionDir(
@@ -55,9 +45,9 @@ export function getTaskFileSubmissionDir(
   activityUUID: string,
   assignmentUUID: string,
   assignmentTaskUUID: string,
-  fileSubID: string
+  fileSubID: string,
 ): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/subs/${fileSubID}`
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/subs/${fileSubID}`;
 }
 
 export function getActivityMediaDirectory(
@@ -65,43 +55,34 @@ export function getActivityMediaDirectory(
   courseUUID: string,
   activityUUID: string,
   fileId: string,
-  activityType: string
+  activityType: string,
 ): string | undefined {
   if (activityType === 'video') {
-    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/${fileId}`
+    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/${fileId}`;
   }
   if (activityType === 'documentpdf') {
-    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/documentpdf/${fileId}`
+    return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/documentpdf/${fileId}`;
   }
-  return undefined
+  return undefined;
 }
 
 export function getVideoSubtitlesDirectory(
   orgUUID: string,
   courseUUID: string,
   activityUUID: string,
-  fileId: string
+  fileId: string,
 ): string | undefined {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/subtitles`
+  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/subtitles`;
 }
 
-export function getOrgLogoMediaDirectory(
-  orgUUID: string,
-  fileId: string
-): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/logos/${fileId}`
+export function getOrgLogoMediaDirectory(orgUUID: string, fileId: string): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/logos/${fileId}`;
 }
 
-export function getOrgThumbnailMediaDirectory(
-  orgUUID: string,
-  fileId: string
-): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/thumbnails/${fileId}`
+export function getOrgThumbnailMediaDirectory(orgUUID: string, fileId: string): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/thumbnails/${fileId}`;
 }
 
-export function getOrgPreviewMediaDirectory(
-  orgUUID: string,
-  fileId: string
-): string {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/previews/${fileId}`
+export function getOrgPreviewMediaDirectory(orgUUID: string, fileId: string): string {
+  return `${getMediaUrl()}content/orgs/${orgUUID}/previews/${fileId}`;
 }

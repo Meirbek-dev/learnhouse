@@ -1,74 +1,67 @@
-'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import PageLoading from '@components/Objects/Loaders/PageLoading'
-import Toast from '@components/Objects/StyledElements/Toast/Toast'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import { getAPIUrl } from '@services/config/config'
-import { inviteBatchUsers } from '@services/organizations/invites'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { Info, UserPlus } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import toast from 'react-hot-toast'
-import useSWR, { mutate } from 'swr'
-import { useTranslations } from 'next-intl'
+'use client';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Toast from '@components/Objects/StyledElements/Toast/Toast';
+import { inviteBatchUsers } from '@services/organizations/invites';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
+import { Info, UserPlus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
 
 function OrgUsersAdd() {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('DashPage.UserSettings.addSection')
-  const [invitedUsers, setInvitedUsers] = useState('')
-  const [selectedInviteCode, setSelectedInviteCode] = useState<
-    string | undefined
-  >(undefined)
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('DashPage.UserSettings.addSection');
+  const [invitedUsers, setInvitedUsers] = useState('');
+  const [selectedInviteCode, setSelectedInviteCode] = useState<string | undefined>(undefined);
 
   async function sendInvites() {
     if (!selectedInviteCode) {
-      toast.error(t('selectInviteCode'))
-      return
+      toast.error(t('selectInviteCode'));
+      return;
     }
     if (!invitedUsers.trim()) {
-      toast.error(t('enterEmailAddress'))
-      return
+      toast.error(t('enterEmailAddress'));
+      return;
     }
 
-    const toastId = toast.loading(t('sendingInvite'))
+    const toastId = toast.loading(t('sendingInvite'));
     try {
-      const res = await inviteBatchUsers(
-        org.id,
-        invitedUsers,
-        selectedInviteCode,
-        access_token
-      )
+      const res = await inviteBatchUsers(org.id, invitedUsers, selectedInviteCode, access_token);
       if (res.status == 200) {
-        mutate(`${getAPIUrl()}orgs/${org?.id}/invites/users`)
-        toast.success(t('inviteSentSuccess'), { id: toastId })
-        setInvitedUsers('')
+        mutate(`${getAPIUrl()}orgs/${org?.id}/invites/users`);
+        toast.success(t('inviteSentSuccess'), { id: toastId });
+        setInvitedUsers('');
       } else {
-        toast.error(t('errors.sendInviteFailed'), { id: toastId })
+        toast.error(t('errors.sendInviteFailed'), { id: toastId });
       }
     } catch (_error) {
-      toast.error(t('errors.sendInviteFailed'), { id: toastId })
+      toast.error(t('errors.sendInviteFailed'), { id: toastId });
     }
   }
 
   const { data: invites, isLoading: invitesLoading } = useSWR(
     org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null,
-    (url) => swrFetcher(url, access_token)
-  )
+    (url) => swrFetcher(url, access_token),
+  );
   const { data: invited_users, isLoading: invitedUsersLoading } = useSWR(
     org ? `${getAPIUrl()}orgs/${org?.id}/invites/users` : null,
-    (url) => swrFetcher(url, access_token)
-  )
+    (url) => swrFetcher(url, access_token),
+  );
 
   useEffect(() => {
     if (invites && invites.length > 0 && selectedInviteCode === undefined) {
-      setSelectedInviteCode(invites[0]?.invite_code_uuid)
+      setSelectedInviteCode(invites[0]?.invite_code_uuid);
     }
-  }, [invites, selectedInviteCode])
+  }, [invites, selectedInviteCode]);
 
-  const isLoading = invitesLoading || invitedUsersLoading
+  const isLoading = invitesLoading || invitedUsersLoading;
 
   return (
     <>
@@ -95,7 +88,10 @@ function OrgUsersAdd() {
             </div>
             <div className="mx-auto my-5 ml-2 flex items-center justify-between space-x-4">
               <div className="flex items-center space-x-2">
-                <label htmlFor="inviteCodeSelect" className="flex items-center">
+                <label
+                  htmlFor="inviteCodeSelect"
+                  className="flex items-center"
+                >
                   {t('inviteCodeLabel')}
                 </label>
                 <select
@@ -105,9 +101,7 @@ function OrgUsersAdd() {
                   className="rounded-md border px-3 py-1 text-gray-400"
                   disabled={!invites || invites.length === 0}
                 >
-                  {invites?.length === 0 && (
-                    <option value="">{t('noInviteCodesAvailable')}</option>
-                  )}
+                  {invites?.length === 0 && <option value="">{t('noInviteCodesAvailable')}</option>}
                   {invites?.map((invite: any) => (
                     <option
                       key={invite.invite_code_uuid}
@@ -122,7 +116,10 @@ function OrgUsersAdd() {
                   sideOffset={8}
                   side="right"
                 >
-                  <Info className="text-gray-400" size={14} />
+                  <Info
+                    className="text-gray-400"
+                    size={14}
+                  />
                 </ToolTip>
               </div>
               <div className="flex flex-row-reverse">
@@ -138,12 +135,8 @@ function OrgUsersAdd() {
             </div>
 
             <div className="mb-3 mt-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-              <h1 className="text-xl font-bold text-gray-800">
-                {t('invitedUsersTitle')}
-              </h1>
-              <h2 className="text-md text-gray-500">
-                {t('invitedUsersDescription')}
-              </h2>
+              <h1 className="text-xl font-bold text-gray-800">{t('invitedUsersTitle')}</h1>
+              <h2 className="text-md text-gray-500">{t('invitedUsersDescription')}</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
@@ -178,9 +171,7 @@ function OrgUsersAdd() {
                             {t('emailSentYes')}
                           </div>
                         ) : (
-                          <div className="py1 w-fit rounded-md bg-red-400 px-2 text-red-100">
-                            {t('emailSentNo')}
-                          </div>
+                          <div className="py1 w-fit rounded-md bg-red-400 px-2 text-red-100">{t('emailSentNo')}</div>
                         )}
                       </td>
                     </tr>
@@ -202,7 +193,7 @@ function OrgUsersAdd() {
         </>
       )}
     </>
-  )
+  );
 }
 
-export default OrgUsersAdd
+export default OrgUsersAdd;

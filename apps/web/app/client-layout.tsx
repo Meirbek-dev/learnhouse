@@ -1,20 +1,20 @@
-'use client'
-import StyledComponentsRegistry from '../components/Utils/libs/styled-registry'
-import { motion } from 'framer-motion'
-import LHSessionProvider from '@components/Contexts/LHSessionContext'
-import { SessionProvider } from 'next-auth/react'
+'use client';
+import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
+import LHSessionProvider from '@components/Contexts/LHSessionContext';
+import { SessionProvider } from 'next-auth/react';
+import { motion } from 'framer-motion';
 
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 
 interface ClientLayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 const variants = {
   hidden: { opacity: 0, x: 0, y: 0 },
   enter: { opacity: 1, x: 0, y: 0 },
   exit: { opacity: 0, x: 0, y: 0 },
-}
+};
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
@@ -34,5 +34,5 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         </StyledComponentsRegistry>
       </LHSessionProvider>
     </SessionProvider>
-  )
+  );
 }

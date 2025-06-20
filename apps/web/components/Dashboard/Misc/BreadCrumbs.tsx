@@ -1,30 +1,15 @@
-'use client'
-import {
-  Backpack,
-  Book,
-  ChevronRight,
-  CreditCard,
-  School,
-  User,
-  Users,
-} from 'lucide-react'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+'use client';
+import { Backpack, Book, ChevronRight, CreditCard, School, User, Users } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 type BreadCrumbsProps = {
-  type:
-    | 'courses'
-    | 'user'
-    | 'users'
-    | 'org'
-    | 'orgusers'
-    | 'assignments'
-    | 'payments'
-  last_breadcrumb?: string
-}
+  type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments';
+  last_breadcrumb?: string;
+};
 
 function BreadCrumbs(props: BreadCrumbsProps) {
-  const t = useTranslations('DashPage')
+  const t = useTranslations('DashPage');
 
   return (
     <div>
@@ -34,7 +19,10 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'courses' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <Book className="text-gray" size={14} />
+              <Book
+                className="text-gray"
+                size={14}
+              />
               <Link href="/dash/courses">{t('Courses.title')}</Link>
             </div>
           ) : (
@@ -43,7 +31,10 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'assignments' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <Backpack className="text-gray" size={14} />
+              <Backpack
+                className="text-gray"
+                size={14}
+              />
               <Link href="/dash/assignments">{t('Assignments.title')}</Link>
             </div>
           ) : (
@@ -52,10 +43,11 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'user' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <User className="text-gray" size={14} />
-              <Link href="/dash/user-account/settings/general">
-                {t('UserAccountSettings.title')}
-              </Link>
+              <User
+                className="text-gray"
+                size={14}
+              />
+              <Link href="/dash/user-account/settings/general">{t('UserAccountSettings.title')}</Link>
             </div>
           ) : (
             ''
@@ -63,10 +55,11 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'orgusers' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <Users className="text-gray" size={14} />
-              <Link href="/dash/users/settings/users">
-                {t('Card.Users.title')}
-              </Link>
+              <Users
+                className="text-gray"
+                size={14}
+              />
+              <Link href="/dash/users/settings/users">{t('Card.Users.title')}</Link>
             </div>
           ) : (
             ''
@@ -75,7 +68,10 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'org' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <School className="text-gray" size={14} />
+              <School
+                className="text-gray"
+                size={14}
+              />
               <Link href="/dash/users">{t('Card.Organization.title')}</Link>
             </div>
           ) : (
@@ -84,7 +80,10 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           {props.type == 'payments' ? (
             <div className="flex items-center space-x-2">
               {' '}
-              <CreditCard className="text-gray" size={14} />
+              <CreditCard
+                className="text-gray"
+                size={14}
+              />
               <Link href="/dash/payments">{t('Payments.title')}</Link>
             </div>
           ) : (
@@ -92,15 +91,12 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           )}
           <div className="flex items-center space-x-1 first-letter:uppercase">
             {props.last_breadcrumb ? <ChevronRight size={17} /> : ''}
-            <div className="first-letter:uppercase">
-              {' '}
-              {props.last_breadcrumb}
-            </div>
+            <div className="first-letter:uppercase"> {props.last_breadcrumb}</div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default BreadCrumbs
+export default BreadCrumbs;

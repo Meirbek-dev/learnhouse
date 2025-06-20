@@ -1,6 +1,5 @@
-'use client'
+'use client';
 
-import styled from 'styled-components'
 import {
   FontBoldIcon,
   FontItalicIcon,
@@ -15,7 +14,7 @@ import {
   SectionIcon,
   ContainerIcon,
   ChevronDownIcon,
-} from '@radix-ui/react-icons'
+} from '@radix-ui/react-icons';
 import {
   AlertCircle,
   AlertTriangle,
@@ -33,34 +32,30 @@ import {
   List,
   ListOrdered,
   Globe,
-} from 'lucide-react'
-import { SiYoutube } from '@icons-pack/react-simple-icons'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import { useRef, useState } from 'react'
-import LinkInputTooltip from './LinkInputTooltip'
-import { useTranslations } from 'next-intl'
+} from 'lucide-react';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { SiYoutube } from '@icons-pack/react-simple-icons';
+import LinkInputTooltip from './LinkInputTooltip';
+import { useTranslations } from 'next-intl';
+import { useRef, useState } from 'react';
+import styled from 'styled-components';
 
 export const ToolbarButtons = ({ editor, props }: any) => {
-  const t = useTranslations('DashPage.Editor.Toolbar')
-  const [showTableMenu, setShowTableMenu] = useState(false)
-  const [showListMenu, setShowListMenu] = useState(false)
-  const [showLinkInput, setShowLinkInput] = useState(false)
-  const linkButtonRef = useRef<HTMLDivElement>(null)
+  const t = useTranslations('DashPage.Editor.Toolbar');
+  const [showTableMenu, setShowTableMenu] = useState(false);
+  const [showListMenu, setShowListMenu] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const linkButtonRef = useRef<HTMLDivElement>(null);
 
   if (!editor) {
-    return null
+    return null;
   }
 
   const tableOptions = [
     {
       label: t('insertTable'),
       icon: <TableIcon />,
-      action: () =>
-        editor
-          .chain()
-          .focus()
-          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-          .run(),
+      action: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
     },
     {
       label: t('addRowBelow'),
@@ -82,7 +77,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       icon: <ContainerIcon />,
       action: () => editor.chain().focus().deleteColumn().run(),
     },
-  ]
+  ];
 
   const listOptions = [
     {
@@ -90,10 +85,10 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       icon: <List size={15} />,
       action: () => {
         if (editor.isActive('bulletList')) {
-          editor.chain().focus().toggleBulletList().run()
+          editor.chain().focus().toggleBulletList().run();
         } else {
-          editor.chain().focus().toggleOrderedList().run()
-          editor.chain().focus().toggleBulletList().run()
+          editor.chain().focus().toggleOrderedList().run();
+          editor.chain().focus().toggleBulletList().run();
         }
       },
     },
@@ -102,38 +97,38 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       icon: <ListOrdered size={15} />,
       action: () => {
         if (editor.isActive('orderedList')) {
-          editor.chain().focus().toggleOrderedList().run()
+          editor.chain().focus().toggleOrderedList().run();
         } else {
-          editor.chain().focus().toggleBulletList().run()
-          editor.chain().focus().toggleOrderedList().run()
+          editor.chain().focus().toggleBulletList().run();
+          editor.chain().focus().toggleOrderedList().run();
         }
       },
     },
-  ]
+  ];
 
   const handleLinkClick = () => {
     // Store the current selection
-    const { from, to } = editor.state.selection
+    const { from, to } = editor.state.selection;
 
     if (editor.isActive('link')) {
-      const _currentLink = editor.getAttributes('link')
-      setShowLinkInput(true)
+      const _currentLink = editor.getAttributes('link');
+      setShowLinkInput(true);
     } else {
-      setShowLinkInput(true)
+      setShowLinkInput(true);
     }
 
     // Restore the selection after a small delay to ensure the tooltip is rendered
     setTimeout(() => {
-      editor.commands.setTextSelection({ from, to })
-    }, 0)
-  }
+      editor.commands.setTextSelection({ from, to });
+    }, 0);
+  };
 
   const getCurrentLinkUrl = () => {
     if (editor.isActive('link')) {
-      return editor.getAttributes('link').href
+      return editor.getAttributes('link').href;
     }
-    return ''
-  }
+    return '';
+  };
 
   const handleLinkSave = (url: string) => {
     editor
@@ -144,13 +139,13 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         target: '_blank',
         rel: 'noopener noreferrer',
       })
-      .run()
-    setShowLinkInput(false)
-  }
+      .run();
+    setShowLinkInput(false);
+  };
 
   const handleLinkCancel = () => {
-    setShowLinkInput(false)
-  }
+    setShowLinkInput(false);
+  };
 
   return (
     <ToolButtonsWrapper>
@@ -181,13 +176,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       <ListMenuWrapper>
         <ToolBtn
           onClick={() => setShowListMenu(!showListMenu)}
-          className={
-            showListMenu ||
-            editor.isActive('bulletList') ||
-            editor.isActive('orderedList')
-              ? 'is-active'
-              : ''
-          }
+          className={showListMenu || editor.isActive('bulletList') || editor.isActive('orderedList') ? 'is-active' : ''}
         >
           <ListBulletIcon />
           <ChevronDownIcon />
@@ -198,17 +187,11 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               <ListMenuItem
                 key={index}
                 onClick={() => {
-                  option.action()
-                  setShowListMenu(false)
+                  option.action();
+                  setShowListMenu(false);
                 }}
                 className={
-                  editor.isActive(
-                    option.label === 'Bullet List'
-                      ? 'bulletList'
-                      : 'orderedList'
-                  )
-                    ? 'is-active'
-                    : ''
+                  editor.isActive(option.label === 'Bullet List' ? 'bulletList' : 'orderedList') ? 'is-active' : ''
                 }
               >
                 <span className="icon">{option.icon}</span>
@@ -235,15 +218,15 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                       : '0'
         }
         onChange={(e) => {
-          const value = e.target.value
+          const value = e.target.value;
           if (value === '0') {
-            editor.chain().focus().setParagraph().run()
+            editor.chain().focus().setParagraph().run();
           } else {
             editor
               .chain()
               .focus()
               .toggleHeading({ level: Number.parseInt(value) })
-              .run()
+              .run();
           }
         }}
         aria-label={t('heading')}
@@ -272,8 +255,8 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               <TableMenuItem
                 key={index}
                 onClick={() => {
-                  option.action()
-                  setShowTableMenu(false)
+                  option.action();
+                  setShowTableMenu(false);
                 }}
               >
                 <span className="icon">{option.icon}</span>
@@ -283,22 +266,14 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           </TableDropdown>
         )}
       </TableMenuWrapper>
-      <DividerVerticalIcon
-        style={{ marginTop: 'auto', marginBottom: 'auto', color: 'grey' }}
-      />
+      <DividerVerticalIcon style={{ marginTop: 'auto', marginBottom: 'auto', color: 'grey' }} />
       <ToolTip content={t('infoCallout')}>
-        <ToolBtn
-          onClick={() => editor.chain().focus().toggleNode('calloutInfo').run()}
-        >
+        <ToolBtn onClick={() => editor.chain().focus().toggleNode('calloutInfo').run()}>
           <AlertCircle size={15} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('warningCallout')}>
-        <ToolBtn
-          onClick={() =>
-            editor.chain().focus().toggleNode('calloutWarning').run()
-          }
-        >
+        <ToolBtn onClick={() => editor.chain().focus().toggleNode('calloutWarning').run()}>
           <AlertTriangle size={15} />
         </ToolBtn>
       </ToolTip>
@@ -351,11 +326,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('youtubeVideo')}>
-        <ToolBtn
-          onClick={() =>
-            editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()
-          }
-        >
+        <ToolBtn onClick={() => editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()}>
           <SiYoutube size={15} />
         </ToolBtn>
       </ToolTip>
@@ -413,11 +384,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('externalObject')}>
-        <ToolBtn
-          onClick={() =>
-            editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()
-          }
-        >
+        <ToolBtn onClick={() => editor.chain().focus().insertContent({ type: 'blockEmbed' }).run()}>
           <Cuboid size={15} />
         </ToolBtn>
       </ToolTip>
@@ -464,11 +431,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('user')}>
-        <ToolBtn
-          onClick={() =>
-            editor.chain().focus().insertContent({ type: 'blockUser' }).run()
-          }
-        >
+        <ToolBtn onClick={() => editor.chain().focus().insertContent({ type: 'blockUser' }).run()}>
           <User size={15} />
         </ToolBtn>
       </ToolTip>
@@ -488,15 +451,15 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         </ToolBtn>
       </ToolTip>
     </ToolButtonsWrapper>
-  )
-}
+  );
+};
 
 const ToolButtonsWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: left;
   justify-content: left;
-`
+`;
 
 const ToolBtn = styled.div`
   display: flex;
@@ -525,7 +488,7 @@ const ToolBtn = styled.div`
     background: rgba(217, 217, 217, 0.48);
     cursor: pointer;
   }
-`
+`;
 
 const ToolSelect = styled.select`
   display: flex;
@@ -556,12 +519,12 @@ const ToolSelect = styled.select`
     outline: none;
     box-shadow: 0 0 0 2px rgba(217, 217, 217, 0.5);
   }
-`
+`;
 
 const TableMenuWrapper = styled.div`
   position: relative;
   display: inline-block;
-`
+`;
 
 const TableDropdown = styled.div`
   position: absolute;
@@ -574,7 +537,7 @@ const TableDropdown = styled.div`
   z-index: 1000;
   min-width: 180px;
   margin-top: 4px;
-`
+`;
 
 const TableMenuItem = styled.div`
   display: flex;
@@ -588,21 +551,21 @@ const TableMenuItem = styled.div`
   }
 
   .icon {
-    margin-right: 8px;
     display: flex;
     align-items: center;
+    margin-right: 8px;
   }
 
   .label {
     font-size: 12px;
     font-family: 'DM Sans';
   }
-`
+`;
 
 const ListMenuWrapper = styled.div`
   position: relative;
   display: inline-block;
-`
+`;
 
 const ListDropdown = styled.div`
   position: absolute;
@@ -615,7 +578,7 @@ const ListDropdown = styled.div`
   z-index: 1000;
   min-width: 180px;
   margin-top: 4px;
-`
+`;
 
 const ListMenuItem = styled.div`
   display: flex;
@@ -633,13 +596,13 @@ const ListMenuItem = styled.div`
   }
 
   .icon {
-    margin-right: 8px;
     display: flex;
     align-items: center;
+    margin-right: 8px;
   }
 
   .label {
     font-size: 12px;
     font-family: 'DM Sans';
   }
-`
+`;

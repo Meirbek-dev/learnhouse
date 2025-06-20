@@ -50,9 +50,12 @@ logfire.instrument_sqlalchemy(engine=engine)
 
 
 async def connect_to_db(app: FastAPI):
-    app.db_engine = engine  # type: ignore
-    logging.info("OpenU database has been started.")
-    SQLModel.metadata.create_all(engine)
+    try:
+        app.db_engine = engine  # type: ignore
+        logging.info("OpenU database has been started.")
+        SQLModel.metadata.create_all(engine)
+    except Exception as e:
+        logging.error("Make sure you have a database running and accessible. " + str(e))
 
 
 def get_db_session():

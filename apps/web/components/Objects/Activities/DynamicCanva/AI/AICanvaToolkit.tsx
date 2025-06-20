@@ -1,38 +1,31 @@
-import { useState, useEffect } from 'react'
-import type { Editor } from '@tiptap/core'
-import openuAI_icon from 'public/openu_ai_simple.png'
-import Image from 'next/image'
-import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react'
-import { BubbleMenu } from '@tiptap/react'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import {
-  type AIChatBotStateTypes,
-  useAIChatBot,
-  useAIChatBotDispatch,
-} from '@components/Contexts/AI/AIChatBotContext'
-import {
-  sendActivityAIChatMessage,
-  startActivityAIChatSession,
-} from '@services/ai/ai'
-import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useTranslations } from 'next-intl'
+import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
+import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures';
+import openuAI_icon from 'public/openu_ai_simple.png';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { BubbleMenu } from '@tiptap/react';
+import type { Editor } from '@tiptap/core';
+import Image from 'next/image';
 
 type AICanvaToolkitProps = {
-  editor: Editor
-  activity: any
-}
+  editor: Editor;
+  activity: any;
+};
 
 function AICanvaToolkit(props: AICanvaToolkitProps) {
-  const t = useTranslations('Activities.AICanvaToolkit')
-  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' })
-  const [isBubbleMenuAvailable, setIsButtonAvailable] = useState(false)
+  const t = useTranslations('Activities.AICanvaToolkit');
+  const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
+  const [isBubbleMenuAvailable, setIsButtonAvailable] = useState(false);
 
   useEffect(() => {
     if (is_ai_feature_enabled) {
-      setIsButtonAvailable(true)
+      setIsButtonAvailable(true);
     }
-  }, [is_ai_feature_enabled])
+  }, [is_ai_feature_enabled]);
 
   return (
     <>
@@ -59,7 +52,10 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
               <div>{t('aiTitle')}</div>
             </div>
             <div>
-              <MoreVertical className="text-white/50" size={12} />
+              <MoreVertical
+                className="text-white/50"
+                size={12}
+              />
             </div>
             <div className="flex space-x-2">
               <AIActionButton
@@ -87,66 +83,62 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
         </BubbleMenu>
       )}
     </>
-  )
+  );
 }
 
-function AIActionButton(props: {
-  editor: Editor
-  label: string
-  activity: any
-}) {
-  const t = useTranslations('Activities.AICanvaToolkit')
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const dispatchAIChatBot = useAIChatBotDispatch() as any
-  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes
+function AIActionButton(props: { editor: Editor; label: string; activity: any }) {
+  const t = useTranslations('Activities.AICanvaToolkit');
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const dispatchAIChatBot = useAIChatBotDispatch() as any;
+  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes;
 
   async function handleAction(label: string) {
-    const selection = getTipTapEditorSelectedText()
-    const prompt = getPrompt(label, selection)
-    dispatchAIChatBot({ type: 'setIsModalOpen' })
-    await sendMessage(prompt)
+    const selection = getTipTapEditorSelectedText();
+    const prompt = getPrompt(label, selection);
+    dispatchAIChatBot({ type: 'setIsModalOpen' });
+    await sendMessage(prompt);
   }
 
   const getTipTapEditorSelectedText = () => {
-    const selection = props.editor.state.selection
-    const from = selection.from
-    const to = selection.to
-    const text = props.editor.state.doc.textBetween(from, to)
-    return text
-  }
+    const selection = props.editor.state.selection;
+    const from = selection.from;
+    const to = selection.to;
+    const text = props.editor.state.doc.textBetween(from, to);
+    return text;
+  };
 
   const getPrompt = (label: string, selection: string) => {
     switch (label) {
       case 'Explain':
-        return t('explainPrompt', { selection })
+        return t('explainPrompt', { selection });
       case 'Summarize':
-        return t('summarizePrompt', { selection })
+        return t('summarizePrompt', { selection });
       case 'Translate':
-        return t('translatePrompt', { selection })
+        return t('translatePrompt', { selection });
       case 'Examples':
-        return t('examplesPrompt', { selection })
+        return t('examplesPrompt', { selection });
       default:
-        return ''
+        return '';
     }
-  }
+  };
 
   const sendMessage = async (message: string) => {
     if (aiChatBotState.aichat_uuid) {
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'user', message: message, type: 'user' },
-      })
-      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' })
+      });
+      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
       const response = await sendActivityAIChatMessage(
         message,
         aiChatBotState.aichat_uuid,
         props.activity.activity_uuid,
-        access_token
-      )
+        access_token,
+      );
       if (response.success == false) {
-        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
+        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
         await dispatchAIChatBot({
           type: 'setError',
           payload: {
@@ -154,29 +146,25 @@ function AIActionButton(props: {
             status: response.status,
             error_message: response.data.detail,
           },
-        })
-        return
+        });
+        return;
       }
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
+      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      })
+      });
     } else {
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'user', message: message, type: 'user' },
-      })
-      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' })
-      const response = await startActivityAIChatSession(
-        message,
-        access_token,
-        props.activity.activity_uuid
-      )
+      });
+      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
+      const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
       if (response.success == false) {
-        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
+        await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+        await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
         await dispatchAIChatBot({
           type: 'setError',
           payload: {
@@ -184,51 +172,51 @@ function AIActionButton(props: {
             status: response.status,
             error_message: response.data.detail,
           },
-        })
-        return
+        });
+        return;
       }
       await dispatchAIChatBot({
         type: 'setAichat_uuid',
         payload: response.data.aichat_uuid,
-      })
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' })
-      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' })
+      });
+      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+      await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'ai', message: response.data.message, type: 'ai' },
-      })
+      });
     }
-  }
+  };
 
   const getTooltipLabel = (label: string) => {
     switch (label) {
       case 'Explain':
-        return t('explainTooltip')
+        return t('explainTooltip');
       case 'Summarize':
-        return t('summarizeTooltip')
+        return t('summarizeTooltip');
       case 'Translate':
-        return t('translateTooltip')
+        return t('translateTooltip');
       case 'Examples':
-        return t('examplesTooltip')
+        return t('examplesTooltip');
       default:
-        return ''
+        return '';
     }
-  }
+  };
 
   const getButtonLabel = (label: string) => {
     switch (label) {
       case 'Explain':
-        return t('explainLabel')
+        return t('explainLabel');
       case 'Summarize':
-        return t('summarizeLabel')
+        return t('summarizeLabel');
       case 'Translate':
-        return t('translateLabel')
+        return t('translateLabel');
       case 'Examples':
-        return t('examplesLabel')
+        return t('examplesLabel');
       default:
-        return label
+        return label;
     }
-  }
+  };
 
   return (
     <div className="flex space-x-2">
@@ -244,14 +232,12 @@ function AIActionButton(props: {
           {props.label === 'Explain' && <BookOpen size={16} />}
           {props.label === 'Summarize' && <FormInput size={16} />}
           {props.label === 'Translate' && <Languages size={16} />}
-          {props.label === 'Examples' && (
-            <div className="text-white/50">{t('examplesAbbr')}</div>
-          )}
+          {props.label === 'Examples' && <div className="text-white/50">{t('examplesAbbr')}</div>}
           <div>{getButtonLabel(props.label)}</div>
         </button>
       </ToolTip>
     </div>
-  )
+  );
 }
 
-export default AICanvaToolkit
+export default AICanvaToolkit;

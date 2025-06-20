@@ -1,85 +1,85 @@
-'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup'
-import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup'
-import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { getAPIUrl } from '@services/config/config'
-import { deleteUserGroup } from '@services/usergroups/usergroups'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { Loader, Pencil, SquareUserRound, Users, X } from 'lucide-react'
-import { useState } from 'react'
-import toast from 'react-hot-toast'
-import useSWR, { mutate } from 'swr'
-import { useTranslations } from 'next-intl'
+'use client';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
+import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
+import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
+import { Loader, Pencil, SquareUserRound, Users, X } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { deleteUserGroup } from '@services/usergroups/usergroups';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
+import { useTranslations } from 'next-intl';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 function OrgUserGroups() {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('DashPage.UserSettings.usergroupsSection')
-  const [userGroupManagementModal, setUserGroupManagementModal] =
-    useState(false)
-  const [createUserGroupModal, setCreateUserGroupModal] = useState(false)
-  const [editUserGroupModal, setEditUserGroupModal] = useState(false)
-  const [selectedUserGroup, setSelectedUserGroup] = useState<any | null>(null)
-  const [selectedUserGroupIdForEdit, setSelectedUserGroupIdForEdit] = useState<
-    string | null
-  >(null)
-  const [selectedUserGroupIdForManage, setSelectedUserGroupIdForManage] =
-    useState<string | null>(null)
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('DashPage.UserSettings.usergroupsSection');
+  const [userGroupManagementModal, setUserGroupManagementModal] = useState(false);
+  const [createUserGroupModal, setCreateUserGroupModal] = useState(false);
+  const [editUserGroupModal, setEditUserGroupModal] = useState(false);
+  const [selectedUserGroup, setSelectedUserGroup] = useState<any | null>(null);
+  const [selectedUserGroupIdForEdit, setSelectedUserGroupIdForEdit] = useState<string | null>(null);
+  const [selectedUserGroupIdForManage, setSelectedUserGroupIdForManage] = useState<string | null>(null);
 
   const {
     data: usergroups,
     error,
     isLoading,
-  } = useSWR(org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) =>
-    swrFetcher(url, access_token)
-  )
+  } = useSWR(org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) => swrFetcher(url, access_token));
 
   const deleteUserGroupUI = async (usergroup_id: any) => {
-    const toastId = toast.loading(t('deletingUserGroup'))
+    const toastId = toast.loading(t('deletingUserGroup'));
     try {
-      const res = await deleteUserGroup(usergroup_id, access_token)
+      const res = await deleteUserGroup(usergroup_id, access_token);
       if (res.status == 200) {
-        mutate(`${getAPIUrl()}usergroups/org/${org.id}`)
-        toast.success(t('userGroupDeletedSuccess'), { id: toastId })
+        mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
+        toast.success(t('userGroupDeletedSuccess'), { id: toastId });
       } else {
-        toast.error(t('errors.deleteUserGroupFailed'), { id: toastId })
+        toast.error(t('errors.deleteUserGroupFailed'), { id: toastId });
       }
     } catch (_error) {
-      toast.error(t('errors.deleteUserGroupFailed'), { id: toastId })
+      toast.error(t('errors.deleteUserGroupFailed'), { id: toastId });
     }
-  }
+  };
 
   const handleOpenModal = (modalType: 'manage' | 'edit', userGroup: any) => {
-    setSelectedUserGroup(userGroup)
+    setSelectedUserGroup(userGroup);
     if (modalType === 'manage') {
-      setSelectedUserGroupIdForManage(userGroup.id)
-      setUserGroupManagementModal(true)
+      setSelectedUserGroupIdForManage(userGroup.id);
+      setUserGroupManagementModal(true);
     } else if (modalType === 'edit') {
-      setSelectedUserGroupIdForEdit(userGroup.id)
-      setEditUserGroupModal(true)
+      setSelectedUserGroupIdForEdit(userGroup.id);
+      setEditUserGroupModal(true);
     }
-  }
+  };
 
   const handleCloseModal = (modalType: 'manage' | 'edit' | 'create') => {
-    setSelectedUserGroup(null)
+    setSelectedUserGroup(null);
     if (modalType === 'manage') {
-      setSelectedUserGroupIdForManage(null)
-      setUserGroupManagementModal(false)
+      setSelectedUserGroupIdForManage(null);
+      setUserGroupManagementModal(false);
     } else if (modalType === 'edit') {
-      setSelectedUserGroupIdForEdit(null)
-      setEditUserGroupModal(false)
+      setSelectedUserGroupIdForEdit(null);
+      setEditUserGroupModal(false);
     } else if (modalType === 'create') {
-      setCreateUserGroupModal(false)
+      setCreateUserGroupModal(false);
     }
-  }
+  };
 
-  if (isLoading) return <Loader size={16} className="mr-2 animate-spin" />
-  if (error) return <div>{t('errorLoadingUserGroups')}</div>
+  if (isLoading)
+    return (
+      <Loader
+        size={16}
+        className="mr-2 animate-spin"
+      />
+    );
+  if (error) return <div>{t('errorLoadingUserGroups')}</div>;
 
   return (
     <>
@@ -109,20 +109,13 @@ function OrgUserGroups() {
                   <td className="px-4 py-3">{usergroup.description}</td>
                   <td className="px-4 py-3">
                     <Modal
-                      isDialogOpen={
-                        userGroupManagementModal &&
-                        selectedUserGroupIdForManage === usergroup.id
-                      }
+                      isDialogOpen={userGroupManagementModal && selectedUserGroupIdForManage === usergroup.id}
                       onOpenChange={(isOpen) => {
-                        if (!isOpen) handleCloseModal('manage')
+                        if (!isOpen) handleCloseModal('manage');
                       }}
                       minHeight="lg"
                       minWidth="lg"
-                      dialogContent={
-                        selectedUserGroup && (
-                          <ManageUsers usergroup_id={selectedUserGroup.id} />
-                        )
-                      }
+                      dialogContent={selectedUserGroup && <ManageUsers usergroup_id={selectedUserGroup.id} />}
                       dialogTitle={t('manageUsersModalTitle')}
                       dialogDescription={t('manageUsersModalDescription')}
                       dialogTrigger={
@@ -139,12 +132,9 @@ function OrgUserGroups() {
                   </td>
                   <td className="flex space-x-2 px-4 py-3">
                     <Modal
-                      isDialogOpen={
-                        editUserGroupModal &&
-                        selectedUserGroupIdForEdit === usergroup.id
-                      }
+                      isDialogOpen={editUserGroupModal && selectedUserGroupIdForEdit === usergroup.id}
                       onOpenChange={(isOpen) => {
-                        if (!isOpen) handleCloseModal('edit')
+                        if (!isOpen) handleCloseModal('edit');
                       }}
                       dialogTrigger={
                         <button
@@ -158,11 +148,7 @@ function OrgUserGroups() {
                       }
                       minHeight="sm"
                       minWidth="sm"
-                      dialogContent={
-                        selectedUserGroup && (
-                          <EditUserGroup usergroup={selectedUserGroup} />
-                        )
-                      }
+                      dialogContent={selectedUserGroup && <EditUserGroup usergroup={selectedUserGroup} />}
                     />
                     <ConfirmationModal
                       confirmationButtonText={t('deleteModalConfirmButton')}
@@ -175,7 +161,7 @@ function OrgUserGroups() {
                         </button>
                       }
                       functionToExecute={() => {
-                        deleteUserGroupUI(usergroup.id)
+                        deleteUserGroupUI(usergroup.id);
                       }}
                       status="warning"
                     />
@@ -184,7 +170,10 @@ function OrgUserGroups() {
               ))}
               {(!usergroups || usergroups.length === 0) && (
                 <tr>
-                  <td colSpan={4} className="py-4 text-center text-gray-500">
+                  <td
+                    colSpan={4}
+                    className="py-4 text-center text-gray-500"
+                  >
                     {t('noUserGroupsFound')}
                   </td>
                 </tr>
@@ -196,13 +185,11 @@ function OrgUserGroups() {
           <Modal
             isDialogOpen={createUserGroupModal}
             onOpenChange={(isOpen) => {
-              if (!isOpen) handleCloseModal('create')
-              else setCreateUserGroupModal(true)
+              if (!isOpen) handleCloseModal('create');
+              else setCreateUserGroupModal(true);
             }}
             minHeight="no-min"
-            dialogContent={
-              <AddUserGroup setCreateUserGroupModal={setCreateUserGroupModal} />
-            }
+            dialogContent={<AddUserGroup setCreateUserGroupModal={setCreateUserGroupModal} />}
             dialogTitle={t('createUserGroupModalTitle')}
             dialogDescription={t('createUserGroupModalDescription')}
             dialogTrigger={
@@ -215,7 +202,7 @@ function OrgUserGroups() {
         </div>
       </div>
     </>
-  )
+  );
 }
 
-export default OrgUserGroups
+export default OrgUserGroups;

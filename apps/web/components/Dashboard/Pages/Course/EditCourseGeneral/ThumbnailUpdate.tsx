@@ -1,148 +1,144 @@
-'use client'
-import { useCourse } from '@components/Contexts/CourseContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getAPIUrl } from '@services/config/config'
-import { updateCourseThumbnail } from '@services/courses/courses'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { ArrowBigUpDash, UploadCloud, Image as ImageIcon } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import type React from 'react'
-import { useState, useEffect, useRef } from 'react'
-import { mutate } from 'swr'
-import UnsplashImagePicker from './UnsplashImagePicker'
-import { useTranslations } from 'next-intl'
+'use client';
+import { ArrowBigUpDash, UploadCloud, Image as ImageIcon } from 'lucide-react';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { updateCourseThumbnail } from '@services/courses/courses';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import UnsplashImagePicker from './UnsplashImagePicker';
+import { getAPIUrl } from '@services/config/config';
+import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
+import type React from 'react';
+import { mutate } from 'swr';
 
-const MAX_FILE_SIZE = 8_000_000 // 8MB
-const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const
+const MAX_FILE_SIZE = 8_000_000; // 8MB
+const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
 
-type ValidMimeType = (typeof VALID_MIME_TYPES)[number]
+type ValidMimeType = (typeof VALID_MIME_TYPES)[number];
 
 function ThumbnailUpdate() {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const course = useCourse() as any
-  const session = useLHSession() as any
-  const org = useOrg() as any
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const course = useCourse() as any;
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
   const [localThumbnail, setLocalThumbnail] = useState<{
-    file: File
-    url: string
-  } | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string>('')
-  const [showError, setShowError] = useState(false)
-  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
-  const t = useTranslations('CourseEdit.General.Thumbnail')
-  const withUnpublishedActivities = course
-    ? course.withUnpublishedActivities
-    : false
+    file: File;
+    url: string;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [showError, setShowError] = useState(false);
+  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
+  const t = useTranslations('CourseEdit.General.Thumbnail');
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
   // Cleanup blob URLs when component unmounts or when thumbnail changes
   useEffect(() => {
     return () => {
       if (localThumbnail?.url) {
-        URL.revokeObjectURL(localThumbnail.url)
+        URL.revokeObjectURL(localThumbnail.url);
       }
-    }
-  }, [localThumbnail])
+    };
+  }, [localThumbnail]);
 
   const validateFile = (file: File): boolean => {
     if (!VALID_MIME_TYPES.includes(file.type as ValidMimeType)) {
-      setError(t('errors.invalidMimeType', { fileType: file.type }))
-      setShowError(true)
-      return false
+      setError(t('errors.invalidMimeType', { fileType: file.type }));
+      setShowError(true);
+      return false;
     }
 
     if (file.size > MAX_FILE_SIZE) {
       setError(
         t('errors.fileTooLarge', {
           fileSize: (file.size / 1024 / 1024).toFixed(2),
-        })
-      )
-      setShowError(true)
-      return false
+        }),
+      );
+      setShowError(true);
+      return false;
     }
 
-    setShowError(false)
-    return true
-  }
+    setShowError(false);
+    return true;
+  };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setError('')
-    setShowError(false)
-    const file = event.target.files?.[0]
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setError('');
+    setShowError(false);
+    const file = event.target.files?.[0];
 
     if (!file) {
-      setError(t('errors.pleaseSelectAFile'))
-      setShowError(true)
-      return
+      setError(t('errors.pleaseSelectAFile'));
+      setShowError(true);
+      return;
     }
 
     if (!validateFile(file)) {
-      event.target.value = ''
-      return
+      event.target.value = '';
+      return;
     }
 
-    const blobUrl = URL.createObjectURL(file)
-    setLocalThumbnail({ file, url: blobUrl })
-    await updateThumbnail(file)
-  }
+    const blobUrl = URL.createObjectURL(file);
+    setLocalThumbnail({ file, url: blobUrl });
+    await updateThumbnail(file);
+  };
 
   const handleUnsplashSelect = async (imageUrl: string) => {
     try {
-      setIsLoading(true)
-      const response = await fetch(imageUrl)
-      const blob = await response.blob()
+      setIsLoading(true);
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
 
       if (!VALID_MIME_TYPES.includes(blob.type as ValidMimeType)) {
-        throw new Error(t('errors.unsplashInvalidFormat'))
+        throw new Error(t('errors.unsplashInvalidFormat'));
       }
 
       const file = new File([blob], `unsplash_${Date.now()}.jpg`, {
         type: blob.type,
-      })
+      });
 
       if (!validateFile(file)) {
-        return
+        return;
       }
 
-      const blobUrl = URL.createObjectURL(file)
-      setLocalThumbnail({ file, url: blobUrl })
-      await updateThumbnail(file)
+      const blobUrl = URL.createObjectURL(file);
+      setLocalThumbnail({ file, url: blobUrl });
+      await updateThumbnail(file);
     } catch (_err) {
-      setError(t('errors.unsplashProcessFailed'))
-      setIsLoading(false)
+      setError(t('errors.unsplashProcessFailed'));
+      setIsLoading(false);
     }
-  }
+  };
 
   const updateThumbnail = async (file: File) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const res = await updateCourseThumbnail(
         course.courseStructure.course_uuid,
         file,
-        session.data?.tokens?.access_token
-      )
+        session.data?.tokens?.access_token,
+      );
 
       await mutate(
-        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
-      )
-      await new Promise((r) => setTimeout(r, 1500))
+        `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+      );
+      await new Promise((r) => setTimeout(r, 1500));
 
       if (res.success === false) {
-        setError(res.HTTPmessage)
-        setShowError(true)
+        setError(res.HTTPmessage);
+        setShowError(true);
       } else {
-        setError('')
-        setShowError(false)
+        setError('');
+        setShowError(false);
       }
     } catch (err) {
-      setError(t('errors.updateFailed'))
-      setShowError(true)
+      setError(t('errors.updateFailed'));
+      setShowError(true);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="light-shadow relative h-[250px] w-auto rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200">
@@ -168,7 +164,7 @@ function ThumbnailUpdate() {
                   ? getCourseThumbnailMediaDirectory(
                       org?.org_uuid,
                       course.courseStructure.course_uuid,
-                      course.courseStructure.thumbnail_image
+                      course.courseStructure.thumbnail_image,
                     )
                   : '/empty_thumbnail.png'
               }`}
@@ -191,14 +187,20 @@ function ThumbnailUpdate() {
                 className="flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-100"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <UploadCloud size={16} className="mr-2" />
+                <UploadCloud
+                  size={16}
+                  className="mr-2"
+                />
                 {t('uploadImageButton')}
               </button>
               <button
                 className="flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-100"
                 onClick={() => setShowUnsplashPicker(true)}
               >
-                <ImageIcon size={16} className="mr-2" />
+                <ImageIcon
+                  size={16}
+                  className="mr-2"
+                />
                 {t('gallery')}
               </button>
             </div>
@@ -208,7 +210,10 @@ function ThumbnailUpdate() {
         {isLoading && (
           <div className="flex items-center justify-center">
             <div className="flex items-center rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-800">
-              <ArrowBigUpDash size={16} className="mr-2 animate-bounce" />
+              <ArrowBigUpDash
+                size={16}
+                className="mr-2 animate-bounce"
+              />
               {t('uploading')}
             </div>
           </div>
@@ -224,7 +229,7 @@ function ThumbnailUpdate() {
         />
       )}
     </div>
-  )
+  );
 }
 
-export default ThumbnailUpdate
+export default ThumbnailUpdate;

@@ -1,28 +1,28 @@
-import { Button } from '@components/ui/button'
-import { Input } from '@components/ui/input'
-import { Label } from '@components/ui/label'
-import React, { useState } from 'react'
-import * as Form from '@radix-ui/react-form'
-import BarLoader from 'react-spinners/BarLoader'
-import { Youtube, Upload } from 'lucide-react'
-import { constructAcceptValue } from '@/lib/constants'
-import { useTranslations } from 'next-intl'
+import { constructAcceptValue } from '@/lib/constants';
+import BarLoader from 'react-spinners/BarLoader';
+import { Button } from '@components/ui/button';
+import { Youtube, Upload } from 'lucide-react';
+import * as Form from '@radix-ui/react-form';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
+import { useTranslations } from 'next-intl';
+import React, { useState } from 'react';
 
-const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm'])
+const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 
 interface VideoDetails {
-  startTime: number
-  endTime: number | null
-  autoplay: boolean
-  muted: boolean
+  startTime: number;
+  endTime: number | null;
+  autoplay: boolean;
+  muted: boolean;
 }
 
 interface ExternalVideoObject {
-  name: string
-  type: string
-  uri: string
-  chapter_id: string
-  details: VideoDetails
+  name: string;
+  type: string;
+  uri: string;
+  chapter_id: string;
+  details: VideoDetails;
 }
 
 const VideoSettingsForm = ({
@@ -30,30 +30,26 @@ const VideoSettingsForm = ({
   setVideoDetails,
   t,
 }: {
-  videoDetails: VideoDetails
-  setVideoDetails: (details: VideoDetails) => void
-  t: any
+  videoDetails: VideoDetails;
+  setVideoDetails: (details: VideoDetails) => void;
+  t: any;
 }) => {
   const convertToSeconds = (minutes: number, seconds: number) => {
-    return minutes * 60 + seconds
-  }
+    return minutes * 60 + seconds;
+  };
 
   const convertFromSeconds = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = totalSeconds % 60
-    return { minutes, seconds }
-  }
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return { minutes, seconds };
+  };
 
-  const startTimeParts = convertFromSeconds(videoDetails.startTime)
-  const endTimeParts = videoDetails.endTime
-    ? convertFromSeconds(videoDetails.endTime)
-    : { minutes: 0, seconds: 0 }
+  const startTimeParts = convertFromSeconds(videoDetails.startTime);
+  const endTimeParts = videoDetails.endTime ? convertFromSeconds(videoDetails.endTime) : { minutes: 0, seconds: 0 };
 
   return (
     <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4">
-      <h3 className="mb-3 font-medium text-gray-900">
-        {t('videoSettingsHeading')}
-      </h3>
+      <h3 className="mb-3 font-medium text-gray-900">{t('videoSettingsHeading')}</h3>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>{t('startTimeLabel')}</Label>
@@ -64,22 +60,17 @@ const VideoSettingsForm = ({
                 min="0"
                 value={startTimeParts.minutes}
                 onChange={(e) => {
-                  const minutes = Math.max(
-                    0,
-                    Number.parseInt(e.target.value) || 0
-                  )
-                  const seconds = startTimeParts.seconds
+                  const minutes = Math.max(0, Number.parseInt(e.target.value) || 0);
+                  const seconds = startTimeParts.seconds;
                   setVideoDetails({
                     ...videoDetails,
                     startTime: convertToSeconds(minutes, seconds),
-                  })
+                  });
                 }}
                 placeholder={t('minutesPlaceholder')}
                 className="w-full"
               />
-              <span className="mt-1 block text-xs text-gray-500">
-                {t('minutes')}
-              </span>
+              <span className="mt-1 block text-xs text-gray-500">{t('minutes')}</span>
             </div>
             <div className="flex-1">
               <Input
@@ -88,22 +79,17 @@ const VideoSettingsForm = ({
                 max="59"
                 value={startTimeParts.seconds}
                 onChange={(e) => {
-                  const minutes = startTimeParts.minutes
-                  const seconds = Math.max(
-                    0,
-                    Math.min(59, Number.parseInt(e.target.value) || 0)
-                  )
+                  const minutes = startTimeParts.minutes;
+                  const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value) || 0));
                   setVideoDetails({
                     ...videoDetails,
                     startTime: convertToSeconds(minutes, seconds),
-                  })
+                  });
                 }}
                 placeholder={t('secondsPlaceholder')}
                 className="w-full"
               />
-              <span className="mt-1 block text-xs text-gray-500">
-                {t('seconds')}
-              </span>
+              <span className="mt-1 block text-xs text-gray-500">{t('seconds')}</span>
             </div>
           </div>
         </div>
@@ -117,25 +103,20 @@ const VideoSettingsForm = ({
                 min="0"
                 value={endTimeParts.minutes}
                 onChange={(e) => {
-                  const minutes = Math.max(
-                    0,
-                    Number.parseInt(e.target.value) || 0
-                  )
-                  const seconds = endTimeParts.seconds
-                  const totalSeconds = convertToSeconds(minutes, seconds)
+                  const minutes = Math.max(0, Number.parseInt(e.target.value) || 0);
+                  const seconds = endTimeParts.seconds;
+                  const totalSeconds = convertToSeconds(minutes, seconds);
                   if (totalSeconds > videoDetails.startTime) {
                     setVideoDetails({
                       ...videoDetails,
                       endTime: totalSeconds,
-                    })
+                    });
                   }
                 }}
                 placeholder={t('secondsPlaceholder')}
                 className="w-full"
               />
-              <span className="mt-1 block text-xs text-gray-500">
-                {t('minutes')}
-              </span>
+              <span className="mt-1 block text-xs text-gray-500">{t('minutes')}</span>
             </div>
             <div className="flex-1">
               <Input
@@ -144,25 +125,20 @@ const VideoSettingsForm = ({
                 max="59"
                 value={endTimeParts.seconds}
                 onChange={(e) => {
-                  const minutes = endTimeParts.minutes
-                  const seconds = Math.max(
-                    0,
-                    Math.min(59, Number.parseInt(e.target.value) || 0)
-                  )
-                  const totalSeconds = convertToSeconds(minutes, seconds)
+                  const minutes = endTimeParts.minutes;
+                  const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value) || 0));
+                  const totalSeconds = convertToSeconds(minutes, seconds);
                   if (totalSeconds > videoDetails.startTime) {
                     setVideoDetails({
                       ...videoDetails,
                       endTime: totalSeconds,
-                    })
+                    });
                   }
                 }}
                 placeholder={t('secondsPlaceholder')}
                 className="w-full"
               />
-              <span className="mt-1 block text-xs text-gray-500">
-                {t('seconds')}
-              </span>
+              <span className="mt-1 block text-xs text-gray-500">{t('seconds')}</span>
             </div>
           </div>
         </div>
@@ -200,42 +176,33 @@ const VideoSettingsForm = ({
         </label>
       </div>
     </div>
-  )
-}
+  );
+};
 
-function VideoModal({
-  submitFileActivity,
-  submitExternalVideo,
-  chapterId,
-  course,
-}: any) {
-  const t = useTranslations('Components.VideoModal')
-  const [video, setVideo] = React.useState<File | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [name, setName] = React.useState('')
-  const [youtubeUrl, setYoutubeUrl] = React.useState('')
-  const [selectedView, setSelectedView] = React.useState<'file' | 'youtube'>(
-    'file'
-  )
+function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course }: any) {
+  const t = useTranslations('Components.VideoModal');
+  const [video, setVideo] = React.useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = React.useState('');
+  const [youtubeUrl, setYoutubeUrl] = React.useState('');
+  const [selectedView, setSelectedView] = React.useState<'file' | 'youtube'>('file');
   const [videoDetails, setVideoDetails] = React.useState<VideoDetails>({
     startTime: 0,
     endTime: null,
     autoplay: false,
     muted: false,
-  })
-  const [accordionOpen, setAccordionOpen] = useState<string | undefined>(
-    'additional-settings'
-  )
+  });
+  const [accordionOpen, setAccordionOpen] = useState<string | undefined>('additional-settings');
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.[0]) {
-      setVideo(event.target.files[0])
+      setVideo(event.target.files[0]);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       if (selectedView === 'file' && video) {
@@ -252,8 +219,8 @@ function VideoModal({
             course_id: course.id,
             details: videoDetails,
           },
-          chapterId
-        )
+          chapterId,
+        );
       }
 
       if (selectedView === 'youtube') {
@@ -263,14 +230,14 @@ function VideoModal({
           uri: youtubeUrl,
           chapter_id: chapterId,
           details: videoDetails,
-        }
+        };
 
-        await submitExternalVideo(external_video_object, 'activity', chapterId)
+        await submitExternalVideo(external_video_object, 'activity', chapterId);
       }
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Form.Root onSubmit={handleSubmit}>
@@ -391,7 +358,7 @@ function VideoModal({
         </Button>
       </div>
     </Form.Root>
-  )
+  );
 }
 
-export default VideoModal
+export default VideoModal;

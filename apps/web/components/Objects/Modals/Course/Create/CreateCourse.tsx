@@ -1,52 +1,41 @@
-'use client'
-import { Input } from '@components/ui/input'
-import { Textarea } from '@components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select'
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { createNewCourse } from '@services/courses/courses'
-import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs'
-import type { ChangeEvent } from 'react'
-import { useState, useEffect } from 'react'
-import { BarLoader } from 'react-spinners'
-import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import toast from 'react-hot-toast'
-import { useFormik } from 'formik'
-import * as Yup from 'yup'
-import { UploadCloud, Image as ImageIcon } from 'lucide-react'
-import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker'
-import FormTagInput from '@components/Objects/StyledElements/Form/TagInput'
-import { useTranslations } from 'next-intl'
+'use client';
+import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker';
+import FormLayout, { FormField, FormLabelAndMessage } from '@components/Objects/StyledElements/Form/Form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
+import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { UploadCloud, Image as ImageIcon } from 'lucide-react';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { createNewCourse } from '@services/courses/courses';
+import { Textarea } from '@components/ui/textarea';
+import * as Form from '@radix-ui/react-form';
+import { Input } from '@components/ui/input';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { BarLoader } from 'react-spinners';
+import type { ChangeEvent } from 'react';
+import toast from 'react-hot-toast';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {
-  const t = useTranslations('Components.CreateCourseModal')
-  const router = useRouter()
-  const session = useLHSession() as any
-  const [orgId, setOrgId] = useState(null) as any
-  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
+  const t = useTranslations('Components.CreateCourseModal');
+  const router = useRouter();
+  const session = useLHSession() as any;
+  const [orgId, setOrgId] = useState(null) as any;
+  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .required(t('schemaNameRequired'))
-      .max(100, t('schemaNameMax')),
+    name: Yup.string().required(t('schemaNameRequired')).max(100, t('schemaNameMax')),
     description: Yup.string().max(1000, t('schemaDescriptionMax')),
     learnings: Yup.string(),
     tags: Yup.string(),
     visibility: Yup.boolean(),
     thumbnail: Yup.mixed().nullable(),
-  })
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -59,7 +48,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      const toast_loading = toast.loading(t('toastLoading'))
+      const toast_loading = toast.loading(t('toastLoading'));
 
       try {
         const res = await createNewCourse(
@@ -72,66 +61,66 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             visibility: values.visibility,
           },
           values.thumbnail,
-          session.data?.tokens?.access_token
-        )
+          session.data?.tokens?.access_token,
+        );
 
         if (res.success) {
-          await revalidateTags(['courses'], orgslug)
-          toast.dismiss(toast_loading)
-          toast.success(t('toastSuccess'))
+          await revalidateTags(['courses'], orgslug);
+          toast.dismiss(toast_loading);
+          toast.success(t('toastSuccess'));
 
           if (res.data.org_id === orgId) {
-            closeModal()
-            router.refresh()
-            await revalidateTags(['courses'], orgslug)
+            closeModal();
+            router.refresh();
+            await revalidateTags(['courses'], orgslug);
           }
         } else {
-          toast.error(res.data.detail || t('toastError'))
+          toast.error(res.data.detail || t('toastError'));
         }
       } catch (_error) {
-        toast.error(t('toastError'))
+        toast.error(t('toastError'));
       } finally {
-        setSubmitting(false)
+        setSubmitting(false);
       }
     },
-  })
+  });
 
   const getOrgMetadata = async () => {
     const org = await getOrganizationContextInfoWithoutCredentials(orgslug, {
       revalidate: 360,
       tags: ['organizations'],
-    })
-    setOrgId(org.id)
-  }
+    });
+    setOrgId(org.id);
+  };
 
   useEffect(() => {
     if (orgslug) {
-      getOrgMetadata()
+      getOrgMetadata();
     }
-  }, [orgslug])
+  }, [orgslug]);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
-      formik.setFieldValue('thumbnail', file)
+      formik.setFieldValue('thumbnail', file);
     }
-  }
+  };
 
   const handleUnsplashSelect = async (imageUrl: string) => {
-    setIsUploading(true)
+    setIsUploading(true);
     try {
-      const response = await fetch(imageUrl)
-      const blob = await response.blob()
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
       const file = new File([blob], 'unsplash_image.jpg', {
         type: 'image/jpeg',
-      })
-      formik.setFieldValue('thumbnail', file)
+      });
+      formik.setFieldValue('thumbnail', file);
     } catch (_error) {
-      toast.error(t('toastErrorUnsplash'))
+      toast.error(t('toastErrorUnsplash'));
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   return (
     <FormLayout onSubmit={formik.handleSubmit}>
@@ -153,10 +142,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       <FormField name="description">
         <FormLabelAndMessage
           label={t('labelDescription')}
-          message={
-            (formik.touched.description && formik.errors.description) ||
-            undefined
-          }
+          message={(formik.touched.description && formik.errors.description) || undefined}
         />
         <Form.Control asChild>
           <Textarea
@@ -170,8 +156,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         <FormLabelAndMessage
           label={t('labelThumbnail')}
           message={
-            formik.touched.thumbnail &&
-            typeof formik.errors.thumbnail === 'string'
+            formik.touched.thumbnail && typeof formik.errors.thumbnail === 'string'
               ? formik.errors.thumbnail
               : undefined
           }
@@ -205,7 +190,10 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
                   className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
                   onClick={() => document.getElementById('fileInput')?.click()}
                 >
-                  <UploadCloud size={16} className="mr-2" />
+                  <UploadCloud
+                    size={16}
+                    className="mr-2"
+                  />
                   <span>{t('thumbnailUpload')}</span>
                 </button>
                 <button
@@ -213,7 +201,10 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
                   className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
                   onClick={() => setShowUnsplashPicker(true)}
                 >
-                  <ImageIcon size={16} className="mr-2" />
+                  <ImageIcon
+                    size={16}
+                    className="mr-2"
+                  />
                   <span>{t('thumbnailChoose')}</span>
                 </button>
               </div>
@@ -226,8 +217,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         <FormLabelAndMessage
           label={t('labelLearnings')}
           message={
-            formik.touched.learnings &&
-            typeof formik.errors.learnings === 'string'
+            formik.touched.learnings && typeof formik.errors.learnings === 'string'
               ? formik.errors.learnings
               : undefined
           }
@@ -237,8 +227,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
           value={formik.values.learnings}
           onChange={(value) => formik.setFieldValue('learnings', value)}
           error={
-            formik.touched.learnings &&
-            typeof formik.errors.learnings === 'string'
+            formik.touched.learnings && typeof formik.errors.learnings === 'string'
               ? formik.errors.learnings
               : undefined
           }
@@ -248,21 +237,13 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       <FormField name="tags">
         <FormLabelAndMessage
           label={t('labelTags')}
-          message={
-            formik.touched.tags && typeof formik.errors.tags === 'string'
-              ? formik.errors.tags
-              : undefined
-          }
+          message={formik.touched.tags && typeof formik.errors.tags === 'string' ? formik.errors.tags : undefined}
         />
         <FormTagInput
           placeholder={t('placeholderTags')}
           value={formik.values.tags}
           onChange={(value) => formik.setFieldValue('tags', value)}
-          error={
-            formik.touched.tags && typeof formik.errors.tags === 'string'
-              ? formik.errors.tags
-              : undefined
-          }
+          error={formik.touched.tags && typeof formik.errors.tags === 'string' ? formik.errors.tags : undefined}
         />
       </FormField>
 
@@ -270,17 +251,14 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         <FormLabelAndMessage
           label={t('labelVisibility')}
           message={
-            formik.touched.visibility &&
-            typeof formik.errors.visibility === 'string'
+            formik.touched.visibility && typeof formik.errors.visibility === 'string'
               ? formik.errors.visibility
               : undefined
           }
         />
         <Select
           value={formik.values.visibility.toString()}
-          onValueChange={(value) =>
-            formik.setFieldValue('visibility', value === 'true')
-          }
+          onValueChange={(value) => formik.setFieldValue('visibility', value === 'true')}
         >
           <SelectTrigger>
             <SelectValue placeholder={t('placeholderVisibility')} />
@@ -317,7 +295,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         />
       )}
     </FormLayout>
-  )
-}
+  );
+};
 
-export default CreateCourseModal
+export default CreateCourseModal;

@@ -1,91 +1,73 @@
-'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import FormLayout, {
-  ButtonBlack,
-  Flex,
-  FormField,
-  FormLabel,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { FormMessage } from '@radix-ui/react-form'
-import { getAPIUrl } from '@services/config/config'
-import { updateUserRole } from '@services/organizations/orgs'
-import type { ChangeEvent, FormEvent } from 'react'
-import { useState, useEffect } from 'react'
-import toast from 'react-hot-toast'
-import { BarLoader } from 'react-spinners'
-import { mutate } from 'swr'
-import { useTranslations } from 'next-intl'
+'use client';
+import FormLayout, { ButtonBlack, Flex, FormField, FormLabel } from '@components/Objects/StyledElements/Form/Form';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { updateUserRole } from '@services/organizations/orgs';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl } from '@services/config/config';
+import type { ChangeEvent, FormEvent } from 'react';
+import { FormMessage } from '@radix-ui/react-form';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { BarLoader } from 'react-spinners';
+import toast from 'react-hot-toast';
+import { mutate } from 'swr';
 
 interface Props {
-  user: any
-  setRolesModal: any
-  alreadyAssignedRole: any
+  user: any;
+  setRolesModal: any;
+  alreadyAssignedRole: any;
 }
 
 function RolesUpdate(props: Props) {
-  const t = useTranslations('Components.RolesUpdate')
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [assignedRole, setAssignedRole] = useState(props.alreadyAssignedRole)
-  const [error, setError] = useState<string | null>(null) as any
+  const t = useTranslations('Components.RolesUpdate');
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assignedRole, setAssignedRole] = useState(props.alreadyAssignedRole);
+  const [error, setError] = useState<string | null>(null) as any;
 
   const handleAssignedRole = (event: ChangeEvent<HTMLSelectElement>) => {
-    setError(null)
-    setAssignedRole(event.target.value)
-  }
+    setError(null);
+    setAssignedRole(event.target.value);
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
-    const toastId = toast.loading(t('toastLoading'))
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    const toastId = toast.loading(t('toastLoading'));
     try {
-      const res = await updateUserRole(
-        org.id,
-        props.user.user.id,
-        assignedRole,
-        access_token
-      )
+      const res = await updateUserRole(org.id, props.user.user.id, assignedRole, access_token);
       if (res.status === 200) {
-        await mutate(`${getAPIUrl()}orgs/${org.id}/users`)
-        props.setRolesModal(false)
-        toast.success(t('toastSuccess'), { id: toastId })
+        await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
+        props.setRolesModal(false);
+        toast.success(t('toastSuccess'), { id: toastId });
       } else {
-        const errorDetail = res.data?.detail || 'Unknown error'
-        setError(t('updateErrorDetail', { error: errorDetail }))
-        toast.error(t('toastError'), { id: toastId })
+        const errorDetail = res.data?.detail || 'Unknown error';
+        setError(t('updateErrorDetail', { error: errorDetail }));
+        toast.error(t('toastError'), { id: toastId });
       }
     } catch (error: any) {
-      const errorMessage = error?.message || 'An unexpected error occurred'
-      setError(t('updateErrorDetail', { error: errorMessage }))
-      toast.error(t('toastError'), { id: toastId })
+      const errorMessage = error?.message || 'An unexpected error occurred';
+      setError(t('updateErrorDetail', { error: errorMessage }));
+      toast.error(t('toastError'), { id: toastId });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  useEffect(() => {}, [assignedRole])
+  useEffect(() => {}, [assignedRole]);
 
   return (
     <div>
       <FormLayout onSubmit={handleSubmit}>
         <FormField name="role-select">
-          {error && (
-            <div className="mb-2 rounded-md bg-red-100 px-3 py-2 text-xs font-bold text-red-500">
-              {error}
-            </div>
-          )}
-          <Flex
-            css={{ alignItems: 'baseline', justifyContent: 'space-between' }}
-          >
+          {error && <div className="mb-2 rounded-md bg-red-100 px-3 py-2 text-xs font-bold text-red-500">{error}</div>}
+          <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
             <FormLabel>{t('rolesLabel')}</FormLabel>
-            <FormMessage match="valueMissing">
-              {t('selectRolePlaceholder')}
-            </FormMessage>
+            <FormMessage match="valueMissing">{t('selectRolePlaceholder')}</FormMessage>
           </Flex>
           <Form.Control asChild>
             <select
@@ -95,9 +77,7 @@ function RolesUpdate(props: Props) {
               required
             >
               <option value="role_global_admin">{t('adminRole')}</option>
-              <option value="role_global_maintainer">
-                {t('maintainerRole')}
-              </option>
+              <option value="role_global_maintainer">{t('maintainerRole')}</option>
               <option value="role_global_user">{t('userRole')}</option>
             </select>
           </Form.Control>
@@ -123,7 +103,7 @@ function RolesUpdate(props: Props) {
         </Flex>
       </FormLayout>
     </div>
-  )
+  );
 }
 
-export default RolesUpdate
+export default RolesUpdate;

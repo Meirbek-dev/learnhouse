@@ -13,34 +13,37 @@ services:
       redis:
         condition: service_healthy
   db:
-    image: postgres:17.5-alpine
-    restart: always
+    image: postgres:18beta1-alpine
+    restart: unless-stopped
     ports:
       - '5432:5432'
     environment:
       - POSTGRES_USER=openu
       - POSTGRES_PASSWORD=openu
       - POSTGRES_DB=openu
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U openu"]
-      interval: 5s
-      timeout: 4s
+      interval: 10s
+      timeout: 5s
       retries: 5
+      start_period: 30s
   redis:
     image: redis:8.0.2-alpine
-    restart: always
+    restart: unless-stopped
     ports:
       - '6379:6379'
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
-      interval: 5s
-      timeout: 4s
+      interval: 10s
+      timeout: 3s
       retries: 5
+      start_period: 30s
   chromadb:
     image: chromadb/chroma:latest
-    restart: always
+    restart: unless-stopped
     ports:
       - '8000:8000'
 

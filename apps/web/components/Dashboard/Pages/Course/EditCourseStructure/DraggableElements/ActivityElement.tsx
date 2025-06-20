@@ -1,141 +1,109 @@
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { deleteActivity, updateActivity } from '@services/courses/activities'
-import { revalidateTags } from '@services/utils/ts/requests'
-import {
-  Backpack,
-  Eye,
-  File,
-  FilePenLine,
-  Globe,
-  Loader2,
-  Lock,
-  Pencil,
-  Save,
-  Sparkles,
-  Video,
-  X,
-} from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import * as React from 'react'
-import { Draggable } from '@hello-pangea/dnd'
-import { mutate } from 'swr'
-import {
-  deleteAssignmentUsingActivityUUID,
-  getAssignmentFromActivityUUID,
-} from '@services/courses/assignments'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useCourse } from '@components/Contexts/CourseContext'
-import toast from 'react-hot-toast'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
-import { useTranslations } from 'next-intl'
+import { Backpack, Eye, File, FilePenLine, Globe, Loader2, Lock, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
+import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { deleteActivity, updateActivity } from '@services/courses/activities';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { Draggable } from '@hello-pangea/dnd';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import * as React from 'react';
+import Link from 'next/link';
+import { mutate } from 'swr';
 
 type ActivitiyElementProps = {
-  orgslug: string
-  activity: any
-  activityIndex: any
-  course_uuid: string
-}
+  orgslug: string;
+  activity: any;
+  activityIndex: any;
+  course_uuid: string;
+};
 
 interface ModifiedActivityInterface {
-  activityId: string
-  activityName: string
+  activityId: string;
+  activityName: string;
 }
 
 function ActivityElement(props: ActivitiyElementProps) {
-  const router = useRouter()
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [modifiedActivity, setModifiedActivity] = React.useState<
-    ModifiedActivityInterface | undefined
-  >(undefined)
-  const [selectedActivity, setSelectedActivity] = React.useState<
-    string | undefined
-  >(undefined)
-  const [isUpdatingName, setIsUpdatingName] = React.useState<boolean>(false)
-  const activityUUID = props.activity.activity_uuid
-  const isMobile = useIsMobile()
-  const t = useTranslations('CourseEdit.ActivityElement')
-  const course = useCourse() as any
-  const withUnpublishedActivities = course
-    ? course.withUnpublishedActivities
-    : false
+  const router = useRouter();
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [modifiedActivity, setModifiedActivity] = React.useState<ModifiedActivityInterface | undefined>(undefined);
+  const [selectedActivity, setSelectedActivity] = React.useState<string | undefined>(undefined);
+  const [isUpdatingName, setIsUpdatingName] = React.useState<boolean>(false);
+  const activityUUID = props.activity.activity_uuid;
+  const isMobile = useIsMobile();
+  const t = useTranslations('CourseEdit.ActivityElement');
+  const course = useCourse() as any;
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
   async function deleteActivityUI() {
-    const toast_loading = toast.loading(t('deletingActivity'))
+    const toast_loading = toast.loading(t('deletingActivity'));
     // Assignments
     if (props.activity.activity_type === 'TYPE_ASSIGNMENT') {
-      await deleteAssignmentUsingActivityUUID(
-        props.activity.activity_uuid,
-        access_token
-      )
+      await deleteAssignmentUsingActivityUUID(props.activity.activity_uuid, access_token);
     }
 
-    await deleteActivity(props.activity.activity_uuid, access_token)
-    mutate(
-      `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
-    )
-    await revalidateTags(['courses'], props.orgslug)
-    toast.dismiss(toast_loading)
-    toast.success(t('activityDeletedSuccess'))
-    router.refresh()
+    await deleteActivity(props.activity.activity_uuid, access_token);
+    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
+    await revalidateTags(['courses'], props.orgslug);
+    toast.dismiss(toast_loading);
+    toast.success(t('activityDeletedSuccess'));
+    router.refresh();
   }
 
   async function changePublicStatus() {
-    const toast_loading = toast.loading(t('updating'))
+    const toast_loading = toast.loading(t('updating'));
     await updateActivity(
       {
         ...props.activity,
         published: !props.activity.published,
       },
       props.activity.activity_uuid,
-      access_token
-    )
-    mutate(
-      `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
-    )
-    toast.dismiss(toast_loading)
-    toast.success(t('activityUpdateSuccess'))
-    await revalidateTags(['courses'], props.orgslug)
-    router.refresh()
+      access_token,
+    );
+    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
+    toast.dismiss(toast_loading);
+    toast.success(t('activityUpdateSuccess'));
+    await revalidateTags(['courses'], props.orgslug);
+    router.refresh();
   }
 
   async function updateActivityName(activityId: string) {
-    if (
-      modifiedActivity?.activityId === activityId &&
-      selectedActivity !== undefined
-    ) {
-      setIsUpdatingName(true)
+    if (modifiedActivity?.activityId === activityId && selectedActivity !== undefined) {
+      setIsUpdatingName(true);
 
       const modifiedActivityCopy = {
         ...props.activity,
         name: modifiedActivity.activityName,
-      }
+      };
 
       try {
-        await updateActivity(modifiedActivityCopy, activityUUID, access_token)
+        await updateActivity(modifiedActivityCopy, activityUUID, access_token);
         mutate(
-          `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
-        )
-        await revalidateTags(['courses'], props.orgslug)
-        toast.success(t('activityNameUpdatedSuccess'))
-        router.refresh()
+          `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+        );
+        await revalidateTags(['courses'], props.orgslug);
+        toast.success(t('activityNameUpdatedSuccess'));
+        router.refresh();
       } catch (error) {
-        toast.error(t('failedToUpdateActivityName'))
-        console.error('Error updating activity name:', error)
+        toast.error(t('failedToUpdateActivityName'));
+        console.error('Error updating activity name:', error);
       } finally {
-        setIsUpdatingName(false)
-        setSelectedActivity(undefined)
+        setIsUpdatingName(false);
+        setSelectedActivity(undefined);
       }
     } else {
-      setSelectedActivity(undefined)
+      setSelectedActivity(undefined);
     }
   }
-  useEffect(() => {}, [props.activity])
+  useEffect(() => {}, [props.activity]);
 
   return (
     <Draggable
@@ -173,11 +141,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                   type="text"
                   className="outline-hidden bg-transparent text-xs text-gray-500"
                   placeholder={t('activityNamePlaceholder')}
-                  value={
-                    modifiedActivity
-                      ? modifiedActivity?.activityName
-                      : props.activity.name
-                  }
+                  value={modifiedActivity ? modifiedActivity?.activityName : props.activity.name}
                   onChange={(e) =>
                     setModifiedActivity({
                       activityId: props.activity.id,
@@ -192,21 +156,20 @@ function ActivityElement(props: ActivitiyElementProps) {
                   disabled={isUpdatingName}
                 >
                   {isUpdatingName ? (
-                    <Loader2 size={12} className="animate-spin" />
+                    <Loader2
+                      size={12}
+                      className="animate-spin"
+                    />
                   ) : (
                     <Save size={12} />
                   )}
                 </button>
               </div>
             ) : (
-              <p className="text-center first-letter:uppercase sm:text-left">
-                {props.activity.name}
-              </p>
+              <p className="text-center first-letter:uppercase sm:text-left">{props.activity.name}</p>
             )}
             <Pencil
-              onClick={() =>
-                !isUpdatingName && setSelectedActivity(props.activity.id)
-              }
+              onClick={() => !isUpdatingName && setSelectedActivity(props.activity.id)}
               className={`size-3 min-w-3 text-neutral-400 hover:cursor-pointer ${isUpdatingName ? 'cursor-not-allowed opacity-50' : ''}`}
             />
           </div>
@@ -226,42 +189,44 @@ function ActivityElement(props: ActivitiyElementProps) {
                   : 'bg-linear-to-bl border-gray-600/10 from-gray-400/50 to-gray-200/80 text-gray-800 hover:from-gray-500/50 hover:to-gray-300/80'
               }`}
               onClick={() => changePublicStatus()}
-              aria-label={
-                !props.activity.published
-                  ? t('publishButton')
-                  : t('unpublishButton')
-              }
-              title={
-                !props.activity.published
-                  ? t('publishButton')
-                  : t('unpublishButton')
-              }
+              aria-label={!props.activity.published ? t('publishButton') : t('unpublishButton')}
+              title={!props.activity.published ? t('publishButton') : t('unpublishButton')}
             >
               {!props.activity.published ? (
-                <Globe strokeWidth={2} size={12} className="text-green-600" />
+                <Globe
+                  strokeWidth={2}
+                  size={12}
+                  className="text-green-600"
+                />
               ) : (
-                <Lock strokeWidth={2} size={12} className="text-gray-600" />
+                <Lock
+                  strokeWidth={2}
+                  size={12}
+                  className="text-gray-600"
+                />
               )}
-              <span>
-                {!props.activity.published ? t('publish') : t('unpublish')}
-              </span>
+              <span>{!props.activity.published ? t('publish') : t('unpublish')}</span>
             </button>
             <div className="mx-1 hidden h-3 w-px self-center rounded-full bg-gray-300 sm:block" />
-            <ToolTip content={t('previewTooltip')} sideOffset={8}>
+            <ToolTip
+              content={t('previewTooltip')}
+              sideOffset={8}
+            >
               <Link
                 href={`${getUriWithOrg(props.orgslug, '')}/course/${props.course_uuid.replace(
                   'course_',
-                  ''
-                )}/activity/${props.activity.activity_uuid.replace(
-                  'activity_',
-                  ''
-                )}`}
+                  '',
+                )}/activity/${props.activity.activity_uuid.replace('activity_', '')}`}
                 className="bg-linear-to-bl flex items-center space-x-1 rounded-md border border-cyan-600/10 from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-bold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
                 rel="noopener noreferrer"
                 aria-label={t('previewTooltip')}
                 title={t('previewTooltip')}
               >
-                <Eye strokeWidth={2} size={14} className="text-sky-600" />
+                <Eye
+                  strokeWidth={2}
+                  size={14}
+                  className="text-sky-600"
+                />
               </Link>
             </ToolTip>
             {/*   Delete Button  */}
@@ -276,7 +241,10 @@ function ActivityElement(props: ActivitiyElementProps) {
                   aria-label={t('deleteButton')}
                   title={t('deleteButton')}
                 >
-                  <X size={15} className="font-bold text-rose-200" />
+                  <X
+                    size={15}
+                    className="font-bold text-rose-200"
+                  />
                 </button>
               }
               functionToExecute={() => deleteActivityUI()}
@@ -286,7 +254,7 @@ function ActivityElement(props: ActivitiyElementProps) {
         </div>
       )}
     </Draggable>
-  )
+  );
 }
 
 const ACTIVITIES = {
@@ -302,35 +270,32 @@ const ACTIVITIES = {
   TYPE_DYNAMIC: {
     Icon: Sparkles,
   },
-} as const
+} as const;
 
 const ACTIVITY_TYPE_TRANSLATION_KEYS = {
   TYPE_VIDEO: 'video',
   TYPE_DOCUMENT: 'document',
   TYPE_ASSIGNMENT: 'assignment',
   TYPE_DYNAMIC: 'dynamic',
-} as const
+} as const;
 
 const ActivityTypeIndicator = ({
   activityType,
   isMobile,
   t,
 }: {
-  activityType: keyof typeof ACTIVITIES
-  isMobile: boolean
-  t: ReturnType<typeof useTranslations>
+  activityType: keyof typeof ACTIVITIES;
+  isMobile: boolean;
+  t: ReturnType<typeof useTranslations>;
 }) => {
-  const { Icon } = ACTIVITIES[activityType]
+  const { Icon } = ACTIVITIES[activityType];
 
   // Map internal type to translation key
-  const translationKey =
-    ACTIVITY_TYPE_TRANSLATION_KEYS[activityType] || 'dynamic'
-  const translatedTypeName = t(`ActivityTypes.${translationKey}`)
+  const translationKey = ACTIVITY_TYPE_TRANSLATION_KEYS[activityType] || 'dynamic';
+  const translatedTypeName = t(`ActivityTypes.${translationKey}`);
 
   return (
-    <div
-      className={`flex w-28 space-x-1 text-gray-300 ${isMobile ? 'flex-col' : ''}`}
-    >
+    <div className={`flex w-28 space-x-1 text-gray-300 ${isMobile ? 'flex-col' : ''}`}>
       <div className="flex items-center space-x-2">
         <Icon className="size-4" />
         <div className="mx-auto justify-center rounded-full bg-gray-200 px-2 py-1 align-middle text-xs font-bold text-gray-400">
@@ -338,50 +303,42 @@ const ActivityTypeIndicator = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const ActivityElementOptions = ({
   activity,
   isMobile,
   t,
 }: {
-  activity: any
-  isMobile: boolean
-  t: ReturnType<typeof useTranslations>
+  activity: any;
+  isMobile: boolean;
+  t: ReturnType<typeof useTranslations>;
 }) => {
-  const [assignmentUUID, setAssignmentUUID] = useState('')
-  const org = useOrg() as any
-  const course = useCourse() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+  const [assignmentUUID, setAssignmentUUID] = useState('');
+  const org = useOrg() as any;
+  const course = useCourse() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
 
-  async function getAssignmentUUIDFromActivityUUID(
-    activityUUID: string
-  ): Promise<string | undefined> {
-    const assignment = await getAssignmentFromActivityUUID(
-      activityUUID,
-      access_token
-    )
+  async function getAssignmentUUIDFromActivityUUID(activityUUID: string): Promise<string | undefined> {
+    const assignment = await getAssignmentFromActivityUUID(activityUUID, access_token);
     if (assignment?.data) {
-      return assignment.data.assignment_uuid
+      return assignment.data.assignment_uuid;
     }
-    return undefined
+    return undefined;
   }
 
   const fetchAssignmentUUID = async () => {
     if (activity.activity_type === 'TYPE_ASSIGNMENT') {
-      const assignment_uuid = await getAssignmentUUIDFromActivityUUID(
-        activity.activity_uuid
-      )
-      if (assignment_uuid)
-        setAssignmentUUID(assignment_uuid.replace('assignment_', ''))
+      const assignment_uuid = await getAssignmentUUIDFromActivityUUID(activity.activity_uuid);
+      if (assignment_uuid) setAssignmentUUID(assignment_uuid.replace('assignment_', ''));
     }
-  }
+  };
 
   useEffect(() => {
-    fetchAssignmentUUID()
-  }, [activity, course])
+    fetchAssignmentUUID();
+  }, [activity, course]);
 
   return (
     <>
@@ -389,7 +346,7 @@ const ActivityElementOptions = ({
         <Link
           href={`${getUriWithOrg(org.slug, '')}/course/${course?.courseStructure.course_uuid.replace(
             'course_',
-            ''
+            '',
           )}/activity/${activity.activity_uuid.replace('activity_', '')}/edit`}
           className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-sky-700`}
           target="_blank"
@@ -406,13 +363,12 @@ const ActivityElementOptions = ({
           className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-teal-700`}
         >
           <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
-            <FilePenLine size={12} />{' '}
-            {!isMobile && <span>{t('editAssignmentButton')}</span>}
+            <FilePenLine size={12} /> {!isMobile && <span>{t('editAssignmentButton')}</span>}
           </div>
         </Link>
       )}
     </>
-  )
-}
+  );
+};
 
-export default ActivityElement
+export default ActivityElement;

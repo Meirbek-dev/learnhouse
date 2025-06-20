@@ -1,13 +1,13 @@
-import Image from 'next/image'
-import type { ReactNode } from 'react'
-import openuTextlogo from '../../../../public/openu_logo.png'
-import { BookCopy, School, Settings, University, Users } from 'lucide-react'
-import Link from 'next/link'
-import AdminAuthorization from '@components/Security/AdminAuthorization'
-import { getTranslations } from 'next-intl/server'
+import { BookCopy, School, Settings, University, Users } from 'lucide-react';
+import AdminAuthorization from '@components/Security/AdminAuthorization';
+import openuTextlogo from '../../../../public/openu_logo.png';
+import { getTranslations } from 'next-intl/server';
+import type { ReactNode } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 async function DashboardHome() {
-  const t = await getTranslations('DashPage.Card')
+  const t = await getTranslations('DashPage.Card');
 
   return (
     <div className="mx-auto mb-16 flex min-h-screen flex-col items-center justify-center p-4 sm:mb-0">
@@ -24,19 +24,34 @@ async function DashboardHome() {
           {/* Card components */}
           <DashboardCard
             href="/dash/courses"
-            icon={<BookCopy className="mx-auto text-gray-500/100" size={50} />}
+            icon={
+              <BookCopy
+                className="mx-auto text-gray-500/100"
+                size={50}
+              />
+            }
             title={t('Courses.title')}
             description={t('Courses.description')}
           />
           <DashboardCard
             href="/dash/org/settings/general"
-            icon={<School className="mx-auto text-gray-500/100" size={50} />}
+            icon={
+              <School
+                className="mx-auto text-gray-500/100"
+                size={50}
+              />
+            }
             title={t('Organization.title')}
             description={t('Organization.description')}
           />
           <DashboardCard
             href="/dash/users/settings/users"
-            icon={<Users className="mx-auto text-gray-500/100" size={50} />}
+            icon={
+              <Users
+                className="mx-auto text-gray-500/100"
+                size={50}
+              />
+            }
             title={t('Users.title')}
             description={t('Users.description')}
           />
@@ -51,10 +66,11 @@ async function DashboardHome() {
               target="_blank"
               className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-black px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
             >
-              <University className="text-gray-100/100" size={20} />
-              <div className="text-sm font-bold text-gray-100/100">
-                {t('touUniversity')}
-              </div>
+              <University
+                className="text-gray-100/100"
+                size={20}
+              />
+              <div className="text-sm font-bold text-gray-100/100">{t('touUniversity')}</div>
             </Link>
           </div>
           <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-neutral-200/100 sm:mt-[40px]" />
@@ -65,20 +81,19 @@ async function DashboardHome() {
           className="mx-auto flex max-w-md cursor-pointer items-center rounded-lg bg-white p-4 shadow-lg transition-all ease-linear hover:scale-105"
         >
           <div className="mx-auto flex flex-col items-center gap-2 text-center sm:flex-row sm:gap-3 sm:text-left">
-            <Settings className="text-gray-500/100" size={20} />
+            <Settings
+              className="text-gray-500/100"
+              size={20}
+            />
             <div>
-              <div className="font-bold text-gray-500/100">
-                {t('AccountSettings.title')}
-              </div>
-              <p className="text-sm text-gray-400/100">
-                {t('AccountSettings.description')}
-              </p>
+              <div className="font-bold text-gray-500/100">{t('AccountSettings.title')}</div>
+              <p className="text-sm text-gray-400/100">{t('AccountSettings.description')}</p>
             </div>
           </div>
         </Link>
       </div>
     </div>
-  )
+  );
 }
 
 function DashboardCard({
@@ -87,10 +102,10 @@ function DashboardCard({
   title,
   description,
 }: {
-  href: string
-  icon: ReactNode
-  title: string
-  description: string
+  href: string;
+  icon: ReactNode;
+  title: string;
+  description: string;
 }) {
   return (
     <Link
@@ -103,7 +118,7 @@ function DashboardCard({
         <p className="text-center text-sm text-gray-400/100">{description}</p>
       </div>
     </Link>
-  )
+  );
 }
 
-export default DashboardHome
+export default DashboardHome;

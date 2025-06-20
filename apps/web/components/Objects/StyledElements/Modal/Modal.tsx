@@ -1,6 +1,5 @@
-'use client'
+'use client';
 
-import type { ReactNode } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -9,65 +8,67 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from '@components/ui/dialog'
-import { ButtonBlack } from '../Form/Form'
-import { cn } from '@/lib/utils'
-import { useTranslations } from 'next-intl'
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
+} from '@components/ui/dialog';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import { useTranslations } from 'next-intl';
+import { ButtonBlack } from '../Form/Form';
+import type { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 type ModalParams = {
-  dialogTitle?: string
-  dialogDescription?: string
-  dialogContent: ReactNode
-  dialogClose?: ReactNode | null
-  dialogTrigger?: ReactNode
-  addDefCloseButton?: boolean
-  onOpenChange: (open: boolean) => void
-  isDialogOpen?: boolean
-  minHeight?: 'sm' | 'md' | 'lg' | 'xl' | 'no-min'
-  minWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'no-min'
-  customHeight?: string
-  customWidth?: string
-}
+  dialogTitle?: string;
+  dialogDescription?: string;
+  dialogContent: ReactNode;
+  dialogClose?: ReactNode | null;
+  dialogTrigger?: ReactNode;
+  addDefCloseButton?: boolean;
+  onOpenChange: (open: boolean) => void;
+  isDialogOpen?: boolean;
+  minHeight?: 'sm' | 'md' | 'lg' | 'xl' | 'no-min';
+  minWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'no-min';
+  customHeight?: string;
+  customWidth?: string;
+};
 
 const Modal = (params: ModalParams) => {
-  const t = useTranslations('Components.Modal')
+  const t = useTranslations('Components.Modal');
 
   const getMinHeight = () => {
     switch (params.minHeight) {
       case 'sm':
-        return 'md:min-h-[300px]'
+        return 'md:min-h-[300px]';
       case 'md':
-        return 'md:min-h-[500px]'
+        return 'md:min-h-[500px]';
       case 'lg':
-        return 'md:min-h-[700px]'
+        return 'md:min-h-[700px]';
       case 'xl':
-        return 'md:min-h-[900px]'
+        return 'md:min-h-[900px]';
       default:
-        return ''
+        return '';
     }
-  }
+  };
 
   const getMinWidth = () => {
     switch (params.minWidth) {
       case 'sm':
-        return 'md:min-w-[600px]'
+        return 'md:min-w-[600px]';
       case 'md':
-        return 'md:min-w-[800px]'
+        return 'md:min-w-[800px]';
       case 'lg':
-        return 'md:min-w-[1000px]'
+        return 'md:min-w-[1000px]';
       case 'xl':
-        return 'md:min-w-[1200px]'
+        return 'md:min-w-[1200px]';
       default:
-        return ''
+        return '';
     }
-  }
+  };
 
   return (
-    <Dialog open={params.isDialogOpen} onOpenChange={params.onOpenChange}>
-      {params.dialogTrigger && (
-        <DialogTrigger asChild>{params.dialogTrigger}</DialogTrigger>
-      )}
+    <Dialog
+      open={params.isDialogOpen}
+      onOpenChange={params.onOpenChange}
+    >
+      {params.dialogTrigger && <DialogTrigger asChild>{params.dialogTrigger}</DialogTrigger>}
       <DialogContent
         className={cn(
           'overflow-auto',
@@ -79,7 +80,7 @@ const Modal = (params: ModalParams) => {
           getMinHeight(),
           getMinWidth(),
           params.customHeight,
-          params.customWidth
+          params.customWidth,
         )}
       >
         <DialogHeader className="flex w-full flex-col space-y-0.5 text-center">
@@ -90,22 +91,18 @@ const Modal = (params: ModalParams) => {
               <DialogTitle>{t('dialog')}</DialogTitle>
             </VisuallyHidden.Root>
           )}
-          {params.dialogDescription && (
-            <DialogDescription>{params.dialogDescription}</DialogDescription>
-          )}
+          {params.dialogDescription && <DialogDescription>{params.dialogDescription}</DialogDescription>}
         </DialogHeader>
         <div className="overflow-auto">{params.dialogContent}</div>
         {(params.dialogClose || params.addDefCloseButton) && (
           <DialogFooter>
             {params.dialogClose}
-            {params.addDefCloseButton && (
-              <ButtonBlack type="submit">{t('closeButtonDefault')}</ButtonBlack>
-            )}
+            {params.addDefCloseButton && <ButtonBlack type="submit">{t('closeButtonDefault')}</ButtonBlack>}
           </DialogFooter>
         )}
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default Modal
+export default Modal;

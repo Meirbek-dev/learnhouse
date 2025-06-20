@@ -3,23 +3,23 @@ import {
   getUserSession,
   loginAndGetToken,
   loginWithOAuthToken,
-} from '@services/auth/auth'
-import { OPENU_TOP_DOMAIN, getUriWithOrg } from '@services/config/config'
-import { getResponseMetadata } from '@services/utils/ts/requests'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import GoogleProvider from 'next-auth/providers/google'
+} from '@services/auth/auth';
+import { OPENU_TOP_DOMAIN, getUriWithOrg } from '@services/config/config';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { getResponseMetadata } from '@services/utils/ts/requests';
+import GoogleProvider from 'next-auth/providers/google';
 
 // Add type declarations at the top of the file
 declare global {
   var sessionCache: {
     [key: string]: {
-      data: any
-      timestamp: number
-    }
-  }
+      data: any;
+      timestamp: number;
+    };
+  };
 }
 
-export const isDevEnv = OPENU_TOP_DOMAIN == 'localhost'
+export const isDevEnv = OPENU_TOP_DOMAIN == 'localhost';
 
 export const nextAuthOptions = {
   debug: true,
@@ -37,16 +37,13 @@ export const nextAuthOptions = {
       },
       async authorize(credentials, _req) {
         // logic to verify if user exists
-        const unsanitized_req = await loginAndGetToken(
-          credentials?.email,
-          credentials?.password
-        )
-        const res = await getResponseMetadata(unsanitized_req)
+        const unsanitized_req = await loginAndGetToken(credentials?.email, credentials?.password);
+        const res = await getResponseMetadata(unsanitized_req);
         if (res.success) {
           // If login failed, then this is the place you could do a registration
-          return res.data
+          return res.data;
         }
-        return null
+        return null;
       },
     }),
     GoogleProvider({
@@ -76,29 +73,23 @@ export const nextAuthOptions = {
     async jwt({ token, user, account }: any) {
       // First sign in with Credentials provider
       if (account?.provider == 'credentials' && user) {
-        token.user = user
+        token.user = user;
       }
 
       // Sign up with Google
       if (account?.provider == 'google' && user) {
-        const unsanitized_req = await loginWithOAuthToken(
-          user.email,
-          'google',
-          account.access_token
-        )
-        const userFromOAuth = await getResponseMetadata(unsanitized_req)
-        token.user = userFromOAuth.data
+        const unsanitized_req = await loginWithOAuthToken(user.email, 'google', account.access_token);
+        const userFromOAuth = await getResponseMetadata(unsanitized_req);
+        token.user = userFromOAuth.data;
       }
 
       // Refresh token only if it's close to expiring (5 minutes before expiry)
       if (token?.user?.tokens) {
-        const tokenExpiry = token.user.tokens.expiry || 0
-        const fiveMinutes = 5 * 60 * 1000
+        const tokenExpiry = token.user.tokens.expiry || 0;
+        const fiveMinutes = 5 * 60 * 1000;
 
         if (Date.now() + fiveMinutes >= tokenExpiry) {
-          const RefreshedToken = await getNewAccessTokenUsingRefreshTokenServer(
-            token?.user?.tokens?.refresh_token
-          )
+          const RefreshedToken = await getNewAccessTokenUsingRefreshTokenServer(token?.user?.tokens?.refresh_token);
           token = {
             ...token,
             user: {
@@ -109,40 +100,37 @@ export const nextAuthOptions = {
                 expiry: Date.now() + 60 * 60 * 1000, // 1 hour from now
               },
             },
-          }
+          };
         }
       }
-      return token
+      return token;
     },
     async session({ session, token }: any) {
       // Include user information in the session
       if (token.user) {
         // Cache the session for 5 minutes to avoid frequent API calls
-        const cacheKey = `user_session_${token.user.tokens.access_token}`
-        const cachedSession = global.sessionCache?.[cacheKey]
+        const cacheKey = `user_session_${token.user.tokens.access_token}`;
+        const cachedSession = global.sessionCache?.[cacheKey];
 
-        if (
-          cachedSession &&
-          Date.now() - cachedSession.timestamp < 5 * 60 * 1000
-        ) {
-          return cachedSession.data
+        if (cachedSession && Date.now() - cachedSession.timestamp < 5 * 60 * 1000) {
+          return cachedSession.data;
         }
 
-        const api_SESSION = await getUserSession(token.user.tokens.access_token)
-        session.user = api_SESSION.user
-        session.roles = api_SESSION.roles
-        session.tokens = token.user.tokens
+        const api_SESSION = await getUserSession(token.user.tokens.access_token);
+        session.user = api_SESSION.user;
+        session.roles = api_SESSION.roles;
+        session.tokens = token.user.tokens;
 
         // Cache the session
         if (!global.sessionCache) {
-          global.sessionCache = {}
+          global.sessionCache = {};
         }
         global.sessionCache[cacheKey] = {
           data: session,
           timestamp: Date.now(),
-        }
+        };
       }
-      return session
+      return session;
     },
   },
-}
+};

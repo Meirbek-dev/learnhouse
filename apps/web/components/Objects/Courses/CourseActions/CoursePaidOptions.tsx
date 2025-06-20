@@ -1,89 +1,81 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import useSWR from 'swr'
-import {
-  getProductsByCourse,
-  getStripeProductCheckoutSession,
-} from '@services/payments/products'
-import { RefreshCcw, SquareCheck, ChevronDown, ChevronUp } from 'lucide-react'
-import { Badge } from '@components/ui/badge'
-import { Button } from '@components/ui/button'
-import toast from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
-import { getUriWithOrg } from '@services/config/config'
-import { useTranslations } from 'next-intl'
+import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
+import { RefreshCcw, SquareCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { Button } from '@components/ui/button';
+import { Badge } from '@components/ui/badge';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
+import useSWR from 'swr';
 
 interface CoursePaidOptionsProps {
   course: {
-    id: string
-    org_id: number
-  }
+    id: string;
+    org_id: number;
+  };
 }
 
 function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
-  const t = useTranslations('Courses.CoursePaidOptions')
-  const org = useOrg() as any
-  const session = useLHSession() as any
+  const t = useTranslations('Courses.CoursePaidOptions');
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
   const [expandedProducts, setExpandedProducts] = useState<{
-    [key: string]: boolean
-  }>({})
-  const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>(
-    {}
-  )
-  const router = useRouter()
+    [key: string]: boolean;
+  }>({});
+  const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
+  const router = useRouter();
 
   const { data: linkedProducts, error } = useSWR(
     () =>
       org && session
-        ? [
-            `/payments/${course.org_id}/courses/${course.id}/products`,
-            session.data?.tokens?.access_token,
-          ]
+        ? [`/payments/${course.org_id}/courses/${course.id}/products`, session.data?.tokens?.access_token]
         : null,
-    ([_url, token]) => getProductsByCourse(course.org_id, course.id, token)
-  )
+    ([_url, token]) => getProductsByCourse(course.org_id, course.id, token),
+  );
 
   const handleCheckout = async (productId: number) => {
     if (!session.data?.user) {
       // Redirect to login if user is not authenticated
-      router.push(`/signup?orgslug=${org.slug}`)
-      return
+      router.push(`/signup?orgslug=${org.slug}`);
+      return;
     }
 
     try {
-      setIsProcessing((prev) => ({ ...prev, [productId]: true }))
-      const redirect_uri = getUriWithOrg(org.slug, '/courses')
+      setIsProcessing((prev) => ({ ...prev, [productId]: true }));
+      const redirect_uri = getUriWithOrg(org.slug, '/courses');
       const response = await getStripeProductCheckoutSession(
         course.org_id,
         productId,
         redirect_uri,
-        session.data?.tokens?.access_token
-      )
+        session.data?.tokens?.access_token,
+      );
 
       if (response.success) {
-        router.push(response.data.checkout_url)
+        router.push(response.data.checkout_url);
       } else {
-        toast.error(t('checkoutError'))
+        toast.error(t('checkoutError'));
       }
     } catch (_error) {
-      toast.error(t('requestError'))
+      toast.error(t('requestError'));
     } finally {
-      setIsProcessing((prev) => ({ ...prev, [productId]: false }))
+      setIsProcessing((prev) => ({ ...prev, [productId]: false }));
     }
-  }
+  };
 
   const toggleProductExpansion = (productId: string) => {
     setExpandedProducts((prev) => ({
       ...prev,
       [productId]: !prev[productId],
-    }))
-  }
+    }));
+  };
 
-  if (error) return <div>{t('failedToLoad')}</div>
-  if (!linkedProducts) return <div>{t('loading')}</div>
+  if (error) return <div>{t('failedToLoad')}</div>;
+  if (!linkedProducts) return <div>{t('loading')}</div>;
 
   return (
     <div className="space-y-4 p-1">
@@ -98,17 +90,10 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
                 className="flex w-fit items-center space-x-2 bg-gray-100/50"
                 variant="outline"
               >
-                {product.product_type === 'subscription' ? (
-                  <RefreshCcw size={12} />
-                ) : (
-                  <SquareCheck size={12} />
-                )}
+                {product.product_type === 'subscription' ? <RefreshCcw size={12} /> : <SquareCheck size={12} />}
                 <span className="text-sm">
-                  {product.product_type === 'subscription'
-                    ? t('subscription')
-                    : t('oneTimePayment')}
-                  {product.product_type === 'subscription' &&
-                    ` ${t('perMonth')}`}
+                  {product.product_type === 'subscription' ? t('subscription') : t('oneTimePayment')}
+                  {product.product_type === 'subscription' && ` ${t('perMonth')}`}
                 </span>
               </Badge>
               <h3 className="text-lg font-bold">{product.name}</h3>
@@ -152,9 +137,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
 
           <div className="mt-2 flex items-center justify-between rounded-md bg-gray-100 p-2">
             <span className="text-sm text-gray-600">
-              {product.price_type === 'customer_choice'
-                ? t('minimumPrice')
-                : t('price')}
+              {product.price_type === 'customer_choice' ? t('minimumPrice') : t('price')}
             </span>
             <div className="flex flex-col items-end">
               <span className="text-lg font-semibold">
@@ -163,15 +146,11 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
                   currency: product.currency,
                 }).format(product.amount)}
                 {product.product_type === 'subscription' && (
-                  <span className="ml-1 text-sm text-gray-500">
-                    {t('perMonthSuffix')}
-                  </span>
+                  <span className="ml-1 text-sm text-gray-500">{t('perMonthSuffix')}</span>
                 )}
               </span>
               {product.price_type === 'customer_choice' && (
-                <span className="text-sm text-gray-500">
-                  {t('choosePrice')}
-                </span>
+                <span className="text-sm text-gray-500">{t('choosePrice')}</span>
               )}
             </div>
           </div>
@@ -191,7 +170,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
-export default CoursePaidOptions
+export default CoursePaidOptions;

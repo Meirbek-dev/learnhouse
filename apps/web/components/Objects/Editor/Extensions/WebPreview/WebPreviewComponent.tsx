@@ -1,55 +1,43 @@
-import type React from 'react'
-import { useState, useEffect, useRef } from 'react'
-import { NodeViewWrapper } from '@tiptap/react'
-import {
-  Edit2,
-  Save,
-  X,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Trash,
-} from 'lucide-react'
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { getUrlPreview } from '@services/courses/activities'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { Input } from '@components/ui/input'
-import { Label } from '@components/ui/label'
-import { Checkbox } from '@components/ui/checkbox'
-import { Button } from '@components/ui/button'
-import { useTranslations } from 'next-intl'
+import { Edit2, Save, X, AlignLeft, AlignCenter, AlignRight, Trash } from 'lucide-react';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getUrlPreview } from '@services/courses/activities';
+import { useState, useEffect, useRef } from 'react';
+import { Checkbox } from '@components/ui/checkbox';
+import { NodeViewWrapper } from '@tiptap/react';
+import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
+import { useTranslations } from 'next-intl';
+import type React from 'react';
 
 interface EditorContext {
-  isEditable: boolean
-  [key: string]: any
+  isEditable: boolean;
+  [key: string]: any;
 }
 
 interface WebPreviewProps {
-  node: any
-  updateAttributes: (attrs: any) => void
-  extension: any
-  deleteNode?: () => void
+  node: any;
+  updateAttributes: (attrs: any) => void;
+  extension: any;
+  deleteNode?: () => void;
 }
 
 const ALIGNMENTS = [
   { value: 'left', label: <AlignLeft size={16} /> },
   { value: 'center', label: <AlignCenter size={16} /> },
   { value: 'right', label: <AlignRight size={16} /> },
-]
+];
 
-const WebPreviewComponent: React.FC<WebPreviewProps> = ({
-  node,
-  updateAttributes,
-  deleteNode,
-}) => {
-  const t = useTranslations('Components.WebPreview')
-  const [inputUrl, setInputUrl] = useState(node.attrs.url || '')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [editing, setEditing] = useState(!node.attrs.url)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const editorContext = useEditorProvider() as EditorContext
-  const isEditable = editorContext?.isEditable ?? true
+const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes, deleteNode }) => {
+  const t = useTranslations('Components.WebPreview');
+  const [inputUrl, setInputUrl] = useState(node.attrs.url || '');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(!node.attrs.url);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const editorContext = useEditorProvider() as EditorContext;
+  const isEditable = editorContext?.isEditable ?? true;
 
   const previewData = {
     title: node.attrs.title,
@@ -59,91 +47,89 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
     og_type: node.attrs.og_type,
     og_url: node.attrs.og_url,
     url: node.attrs.url,
-  }
+  };
 
-  const alignment = node.attrs.alignment || 'left'
-  const hasPreview = !!previewData.title
+  const alignment = node.attrs.alignment || 'left';
+  const hasPreview = !!previewData.title;
 
-  const [buttonLabel, setButtonLabel] = useState(
-    node.attrs.buttonLabel || t('visitSite')
-  )
-  const [showButton, setShowButton] = useState(node.attrs.showButton !== false)
-  const [openInPopup, setOpenInPopup] = useState(node.attrs.openInPopup)
-  const [popupOpen, setPopupOpen] = useState(false)
-  const [modalOpen, setModalOpen] = useState(!node.attrs.url)
+  const [buttonLabel, setButtonLabel] = useState(node.attrs.buttonLabel || t('visitSite'));
+  const [showButton, setShowButton] = useState(node.attrs.showButton !== false);
+  const [openInPopup, setOpenInPopup] = useState(node.attrs.openInPopup);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(!node.attrs.url);
 
   const fetchPreview = async (url: string) => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const res = await getUrlPreview(url)
-      if (!res) throw new Error(t('errorFetchingPreview'))
-      const data = res
-      updateAttributes({ ...data, url })
-      setEditing(false)
+      const res = await getUrlPreview(url);
+      if (!res) throw new Error(t('errorFetchingPreview'));
+      const data = res;
+      updateAttributes({ ...data, url });
+      setEditing(false);
     } catch (err: any) {
-      setError(err.message || t('errorFetchingPreview'))
+      setError(err.message || t('errorFetchingPreview'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (node.attrs.url && !hasPreview) {
-      fetchPreview(node.attrs.url)
+      fetchPreview(node.attrs.url);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (editing && inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [editing])
+  }, [editing]);
 
   useEffect(() => {
-    setButtonLabel(node.attrs.buttonLabel || t('visitSite'))
-    setShowButton(!!node.attrs.showButton)
-    setOpenInPopup(!!node.attrs.openInPopup)
-  }, [node.attrs.buttonLabel, node.attrs.showButton, node.attrs.openInPopup])
+    setButtonLabel(node.attrs.buttonLabel || t('visitSite'));
+    setShowButton(!!node.attrs.showButton);
+    setOpenInPopup(!!node.attrs.openInPopup);
+  }, [node.attrs.buttonLabel, node.attrs.showButton, node.attrs.openInPopup]);
 
   useEffect(() => {
     if (!node.attrs.url) {
-      setEditing(true)
-      setModalOpen(true)
+      setEditing(true);
+      setModalOpen(true);
     }
-  }, [node.attrs.url])
+  }, [node.attrs.url]);
 
   const handleAlignmentChange = (value: string) => {
-    updateAttributes({ alignment: value })
-  }
+    updateAttributes({ alignment: value });
+  };
 
   const handleEdit = () => {
-    setEditing(true)
-    setInputUrl(node.attrs.url || '')
-    setModalOpen(true)
-  }
+    setEditing(true);
+    setInputUrl(node.attrs.url || '');
+    setModalOpen(true);
+  };
 
   const handleSaveEdit = () => {
     if (inputUrl && inputUrl !== node.attrs.url) {
-      fetchPreview(inputUrl)
+      fetchPreview(inputUrl);
     } else {
-      setEditing(false)
-      setModalOpen(false)
+      setEditing(false);
+      setModalOpen(false);
     }
-    updateAttributes({ buttonLabel, showButton, openInPopup })
-    setModalOpen(false)
-  }
+    updateAttributes({ buttonLabel, showButton, openInPopup });
+    setModalOpen(false);
+  };
 
   const handleCancelEdit = () => {
-    setEditing(false)
-    setInputUrl(node.attrs.url || '')
-    setError(null)
-    setModalOpen(false)
-  }
+    setEditing(false);
+    setInputUrl(node.attrs.url || '');
+    setError(null);
+    setModalOpen(false);
+  };
 
   const handleDelete = () => {
     if (typeof deleteNode === 'function') {
-      deleteNode()
+      deleteNode();
     } else {
       updateAttributes({
         url: null,
@@ -153,14 +139,14 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
         favicon: null,
         og_type: null,
         og_url: null,
-      })
+      });
     }
-  }
+  };
 
   // Compute alignment class for CardWrapper
-  let alignClass = 'justify-start'
-  if (alignment === 'center') alignClass = 'justify-center'
-  else if (alignment === 'right') alignClass = 'justify-end'
+  let alignClass = 'justify-start';
+  if (alignment === 'center') alignClass = 'justify-center';
+  else if (alignment === 'right') alignClass = 'justify-end';
 
   return (
     <NodeViewWrapper className="web-preview-block relative">
@@ -210,8 +196,8 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
           <Modal
             isDialogOpen={modalOpen}
             onOpenChange={(open) => {
-              setModalOpen(open)
-              if (!open) handleCancelEdit()
+              setModalOpen(open);
+              if (!open) handleCancelEdit();
             }}
             dialogTitle={t('editWebPreviewCard')}
             dialogDescription={t('editWebPreviewDescription')}
@@ -220,8 +206,8 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
               <form
                 className="space-y-6"
                 onSubmit={(e) => {
-                  e.preventDefault()
-                  handleSaveEdit()
+                  e.preventDefault();
+                  handleSaveEdit();
                 }}
               >
                 <div className="space-y-2">
@@ -246,7 +232,10 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                         checked={showButton}
                         onCheckedChange={(checked) => setShowButton(!!checked)}
                       />
-                      <Label htmlFor="show-button" className="text-sm">
+                      <Label
+                        htmlFor="show-button"
+                        className="text-sm"
+                      >
                         {t('showButton')}
                       </Label>
                     </div>
@@ -256,16 +245,20 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                           <Checkbox
                             id="open-in-popup"
                             checked={openInPopup}
-                            onCheckedChange={(checked) =>
-                              setOpenInPopup(!!checked)
-                            }
+                            onCheckedChange={(checked) => setOpenInPopup(!!checked)}
                           />
-                          <Label htmlFor="open-in-popup" className="text-sm">
+                          <Label
+                            htmlFor="open-in-popup"
+                            className="text-sm"
+                          >
                             {t('openInPopup')}
                           </Label>
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="button-label" className="text-sm">
+                          <Label
+                            htmlFor="button-label"
+                            className="text-sm"
+                          >
                             {t('buttonLabel')}
                           </Label>
                           <Input
@@ -288,9 +281,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                       <Button
                         key={opt.value}
                         type="button"
-                        variant={
-                          alignment === opt.value ? 'default' : 'outline'
-                        }
+                        variant={alignment === opt.value ? 'default' : 'outline'}
                         size="sm"
                         aria-pressed={alignment === opt.value}
                         onClick={() => handleAlignmentChange(opt.value)}
@@ -301,9 +292,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                     ))}
                   </div>
                 </div>
-                {error && (
-                  <div className="mt-2 text-xs text-red-600">{error}</div>
-                )}
+                {error && <div className="mt-2 text-xs text-red-600">{error}</div>}
                 <div className="mt-2 flex justify-end gap-2">
                   <Button
                     type="button"
@@ -311,12 +300,23 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                     onClick={handleCancelEdit}
                   >
                     <span className="flex items-center">
-                      <X size={16} className="mr-1" /> {t('cancel')}
+                      <X
+                        size={16}
+                        className="mr-1"
+                      />{' '}
+                      {t('cancel')}
                     </span>
                   </Button>
-                  <Button type="submit" disabled={loading || !inputUrl}>
+                  <Button
+                    type="submit"
+                    disabled={loading || !inputUrl}
+                  >
                     <span className="flex items-center">
-                      <Save size={16} className="mr-1" /> {t('save')}
+                      <Save
+                        size={16}
+                        className="mr-1"
+                      />{' '}
+                      {t('save')}
                     </span>
                   </Button>
                 </div>
@@ -365,9 +365,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                     className="mr-2 h-[18px] w-[18px] rounded bg-gray-100"
                   />
                 )}
-                <span className="truncate text-xs text-gray-500">
-                  {previewData.url}
-                </span>
+                <span className="truncate text-xs text-gray-500">{previewData.url}</span>
               </div>
               {showButton &&
                 previewData.url &&
@@ -396,9 +394,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
                 <div className="mt-4 flex flex-col items-center">
                   <div className="flex items-center gap-1">
                     {/* AlignmentBar */}
-                    <span className="mr-1 text-xs text-gray-500">
-                      {t('align')}:
-                    </span>
+                    <span className="mr-1 text-xs text-gray-500">{t('align')}:</span>
                     {ALIGNMENTS.map((opt) => (
                       <button
                         key={opt.value}
@@ -423,7 +419,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
         </div>
       </div>
     </NodeViewWrapper>
-  )
-}
+  );
+};
 
-export default WebPreviewComponent
+export default WebPreviewComponent;

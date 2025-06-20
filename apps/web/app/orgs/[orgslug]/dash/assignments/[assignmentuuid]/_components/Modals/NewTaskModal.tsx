@@ -1,17 +1,17 @@
-import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getAPIUrl } from '@services/config/config'
-import { createAssignmentTask } from '@services/courses/assignments'
-import { AArrowUp, FileUp, ListTodo } from 'lucide-react'
-import toast from 'react-hot-toast'
-import { mutate } from 'swr'
-import { useTranslations } from 'next-intl'
+import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { createAssignmentTask } from '@services/courses/assignments';
+import { AArrowUp, FileUp, ListTodo } from 'lucide-react';
+import { getAPIUrl } from '@services/config/config';
+import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
+import { mutate } from 'swr';
 
 function NewTaskModal({ closeModal, assignment_uuid }: any) {
-  const t = useTranslations('DashPage.Assignments.NewTaskModal')
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any
+  const t = useTranslations('DashPage.Assignments.NewTaskModal');
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
 
   function showReminderToast() {
     // Check if the reminder has already been shown using sessionStorage
@@ -21,10 +21,10 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
           icon: '✋',
           duration: 10000,
           style: { minWidth: 600 },
-        })
+        });
         // Mark the reminder as shown in sessionStorage
-        sessionStorage.setItem('TasksReminderShown', 'true')
-      }, 3000)
+        sessionStorage.setItem('TasksReminderShown', 'true');
+      }, 3000);
     }
   }
 
@@ -37,20 +37,16 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
       assignment_type: type,
       contents: {},
       max_grade_value: 100,
-    }
-    const res = await createAssignmentTask(
-      task_object,
-      assignment_uuid,
-      access_token
-    )
-    toast.success(t('createSuccess'))
-    showReminderToast()
-    mutate(`${getAPIUrl()}assignments/${assignment_uuid}/tasks`)
+    };
+    const res = await createAssignmentTask(task_object, assignment_uuid, access_token);
+    toast.success(t('createSuccess'));
+    showReminderToast();
+    mutate(`${getAPIUrl()}assignments/${assignment_uuid}/tasks`);
     assignmentTaskStateHook({
       type: 'setSelectedAssignmentTaskUUID',
       payload: res.data.assignment_task_uuid,
-    })
-    closeModal(false)
+    });
+    closeModal(false);
   }
 
   return (
@@ -72,12 +68,8 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
         <div className="nice-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <FileUp size={30} />
         </div>
-        <p className="text-xl font-semibold text-gray-700">
-          {t('fileSubmissionTitle')}
-        </p>
-        <p className="w-40 text-sm text-gray-500">
-          {t('fileSubmissionDescription')}
-        </p>
+        <p className="text-xl font-semibold text-gray-700">{t('fileSubmissionTitle')}</p>
+        <p className="w-40 text-sm text-gray-500">{t('fileSubmissionDescription')}</p>
       </div>
       <div
         onClick={() => toast.error(t('formNotSupported'))}
@@ -90,7 +82,7 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
         <p className="w-40 text-sm text-gray-500">{t('formDescription')}</p>
       </div>
     </div>
-  )
+  );
 }
 
-export default NewTaskModal
+export default NewTaskModal;

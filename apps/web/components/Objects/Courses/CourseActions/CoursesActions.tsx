@@ -1,226 +1,187 @@
-import { useState, useEffect } from 'react'
-import { removeCourse, startCourse } from '@services/courses/activity'
-import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import {
-  getAPIUrl,
-  getUriWithOrg,
-  getUriWithoutOrg,
-} from '@services/config/config'
-import { getProductsByCourse } from '@services/payments/products'
-import {
-  ShoppingCart,
-  AlertCircle,
-  UserPen,
-  ClockIcon,
-  ArrowRight,
-  BookOpen,
-} from 'lucide-react'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import CoursePaidOptions from './CoursePaidOptions'
-import { checkPaidAccess } from '@services/payments/payments'
-import { applyForContributor } from '@services/courses/courses'
-import toast from 'react-hot-toast'
-import { useContributorStatus } from '../../../../hooks/useContributorStatus'
-import CourseProgress from '../CourseProgress/CourseProgress'
-import UserAvatar from '@components/Objects/UserAvatar'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { mutate } from 'swr'
-import { useTranslations } from 'next-intl'
+import { ShoppingCart, AlertCircle, UserPen, ClockIcon, ArrowRight, BookOpen } from 'lucide-react';
+import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { useContributorStatus } from '../../../../hooks/useContributorStatus';
+import { removeCourse, startCourse } from '@services/courses/activity';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getProductsByCourse } from '@services/payments/products';
+import { applyForContributor } from '@services/courses/courses';
+import CourseProgress from '../CourseProgress/CourseProgress';
+import { checkPaidAccess } from '@services/payments/payments';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { useOrg } from '@components/Contexts/OrgContext';
+import UserAvatar from '@components/Objects/UserAvatar';
+import CoursePaidOptions from './CoursePaidOptions';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { mutate } from 'swr';
 
 interface CourseRun {
-  status: string
-  course_id: string
+  status: string;
+  course_id: string;
   steps: Array<{
-    activity_id: string
-    complete: boolean
-  }>
+    activity_id: string;
+    complete: boolean;
+  }>;
 }
 
 interface Course {
-  id: string
-  course_uuid: string
+  id: string;
+  course_uuid: string;
   trail?: {
-    runs: CourseRun[]
-  }
+    runs: CourseRun[];
+  };
   chapters?: Array<{
-    name: string
+    name: string;
     activities: Array<{
-      activity_uuid: string
-      name: string
-      activity_type: string
-    }>
-  }>
-  open_to_contributors?: boolean
+      activity_uuid: string;
+      name: string;
+      activity_type: string;
+    }>;
+  }>;
+  open_to_contributors?: boolean;
 }
 
 interface CourseActionsProps {
-  courseuuid: string
-  orgslug: string
+  courseuuid: string;
+  orgslug: string;
   course: Course & {
-    org_id: number
-  }
-  trailData?: any
+    org_id: number;
+  };
+  trailData?: any;
 }
 
-function CoursesActions({
-  courseuuid,
-  orgslug,
-  course,
-  trailData,
-}: CourseActionsProps) {
-  const router = useRouter()
-  const session = useLHSession() as any
-  const [linkedProducts, setLinkedProducts] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isActionLoading, setIsActionLoading] = useState(false)
-  const [isContributeLoading, setIsContributeLoading] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null)
-  const { contributorStatus, refetch } = useContributorStatus(courseuuid)
-  const [isProgressOpen, setIsProgressOpen] = useState(false)
-  const org = useOrg() as any
-  const t = useTranslations('Courses.CoursesActions')
+function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseActionsProps) {
+  const router = useRouter();
+  const session = useLHSession() as any;
+  const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isContributeLoading, setIsContributeLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const { contributorStatus, refetch } = useContributorStatus(courseuuid);
+  const [isProgressOpen, setIsProgressOpen] = useState(false);
+  const org = useOrg() as any;
+  const t = useTranslations('Courses.CoursesActions');
 
   // Clean up course UUID by removing 'course_' prefix if it exists
-  const cleanCourseUuid = course.course_uuid?.replace('course_', '')
+  const cleanCourseUuid = course.course_uuid?.replace('course_', '');
 
   const isStarted =
     trailData?.runs?.find((run: any) => {
-      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '')
-      return cleanRunCourseUuid === cleanCourseUuid
-    }) ?? false
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+      return cleanRunCourseUuid === cleanCourseUuid;
+    }) ?? false;
 
   useEffect(() => {
     const fetchLinkedProducts = async () => {
       try {
-        const response = await getProductsByCourse(
-          course.org_id,
-          course.id,
-          session.data?.tokens?.access_token
-        )
-        setLinkedProducts(response.data || [])
+        const response = await getProductsByCourse(course.org_id, course.id, session.data?.tokens?.access_token);
+        setLinkedProducts(response.data || []);
       } catch (error) {
-        console.error('Failed to fetch linked products')
+        console.error('Failed to fetch linked products');
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchLinkedProducts()
-  }, [course.id, course.org_id, session.data?.tokens?.access_token])
+    fetchLinkedProducts();
+  }, [course.id, course.org_id, session.data?.tokens?.access_token]);
 
   useEffect(() => {
     const checkAccess = async () => {
-      if (!session.data?.user) return
+      if (!session.data?.user) return;
       try {
         const response = await checkPaidAccess(
           Number.parseInt(course.id),
           course.org_id,
-          session.data?.tokens?.access_token
-        )
-        setHasAccess(response.has_access)
+          session.data?.tokens?.access_token,
+        );
+        setHasAccess(response.has_access);
       } catch (error) {
-        console.error('Failed to check course access')
-        toast.error('Failed to check course access. Please try again later.')
-        setHasAccess(false)
+        console.error('Failed to check course access');
+        toast.error('Failed to check course access. Please try again later.');
+        setHasAccess(false);
       }
-    }
+    };
 
     if (linkedProducts.length > 0) {
-      checkAccess()
+      checkAccess();
     }
-  }, [
-    course.id,
-    course.org_id,
-    session.data?.tokens?.access_token,
-    linkedProducts,
-  ])
+  }, [course.id, course.org_id, session.data?.tokens?.access_token, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))
-      return
+      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
+      return;
     }
 
-    setIsActionLoading(true)
-    const loadingToast = toast.loading(
-      isStarted ? t('leavingCourse') : t('startingCourse')
-    )
+    setIsActionLoading(true);
+    const loadingToast = toast.loading(isStarted ? t('leavingCourse') : t('startingCourse'));
 
     try {
       if (isStarted) {
-        await removeCourse(
-          `course_${courseuuid}`,
-          orgslug,
-          session.data?.tokens?.access_token
-        )
-        mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`)
-        toast.success(t('leftCourseSuccess'), { id: loadingToast })
-        router.refresh()
+        await removeCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
+        mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
+        toast.success(t('leftCourseSuccess'), { id: loadingToast });
+        router.refresh();
       } else {
-        await startCourse(
-          `course_${courseuuid}`,
-          orgslug,
-          session.data?.tokens?.access_token
-        )
-        mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`)
-        toast.success(t('startedCourseSuccess'), { id: loadingToast })
+        await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
+        mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
+        toast.success(t('startedCourseSuccess'), { id: loadingToast });
 
         // Get the first activity from the first chapter
-        const firstChapter = course.chapters?.[0]
-        const firstActivity = firstChapter?.activities?.[0]
+        const firstChapter = course.chapters?.[0];
+        const firstActivity = firstChapter?.activities?.[0];
 
         if (firstActivity) {
           // Redirect to the first activity
           router.push(
-            `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`
-          )
+            `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
+          );
         } else {
-          mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`)
-          router.refresh()
+          mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
+          router.refresh();
         }
       }
     } catch (error) {
-      console.error('Failed to perform course action:', error)
+      console.error('Failed to perform course action:', error);
       toast.error(isStarted ? t('leaveCourseError') : t('startCourseError'), {
         id: loadingToast,
-      })
+      });
     } finally {
-      setIsActionLoading(false)
+      setIsActionLoading(false);
     }
-  }
+  };
 
   const handleApplyToContribute = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))
-      return
+      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
+      return;
     }
 
-    setIsContributeLoading(true)
-    const loadingToast = toast.loading(t('submittingContributorApplication'))
+    setIsContributeLoading(true);
+    const loadingToast = toast.loading(t('submittingContributorApplication'));
 
     try {
       const data = {
         message: t('contributorApplicationMessage'),
-      }
+      };
 
-      await applyForContributor(
-        `course_${courseuuid}`,
-        data,
-        session.data?.tokens?.access_token
-      )
-      await revalidateTags(['courses'], orgslug)
-      await refetch()
-      toast.success(t('contributorApplicationSuccess'), { id: loadingToast })
+      await applyForContributor(`course_${courseuuid}`, data, session.data?.tokens?.access_token);
+      await revalidateTags(['courses'], orgslug);
+      await refetch();
+      toast.success(t('contributorApplicationSuccess'), { id: loadingToast });
     } catch (error) {
-      console.error('Failed to apply as contributor:', error)
-      toast.error(t('contributorApplicationError'), { id: loadingToast })
+      console.error('Failed to apply as contributor:', error);
+      toast.error(t('contributorApplicationError'), { id: loadingToast });
     } finally {
-      setIsContributeLoading(false)
+      setIsContributeLoading(false);
     }
-  }
+  };
 
   const renderActionButton = (action: 'start' | 'leave') => {
     if (!session.data?.user) {
@@ -233,12 +194,10 @@ function CoursesActions({
             border="border-2"
             borderColor="border-white"
           />
-          <span>
-            {action === 'start' ? t('startCourse') : t('leaveCourse')}
-          </span>
+          <span>{action === 'start' ? t('startCourse') : t('leaveCourse')}</span>
           <ArrowRight className="h-5 w-5" />
         </>
-      )
+      );
     }
 
     return (
@@ -253,29 +212,24 @@ function CoursesActions({
         <span>{action === 'start' ? t('startCourse') : t('leaveCourse')}</span>
         <ArrowRight className="h-5 w-5" />
       </>
-    )
-  }
+    );
+  };
 
   const renderContributorButton = () => {
-    if (
-      contributorStatus === 'INACTIVE' ||
-      course.open_to_contributors !== true
-    ) {
-      return null
+    if (contributorStatus === 'INACTIVE' || course.open_to_contributors !== true) {
+      return null;
     }
 
     if (!session.data?.user) {
       return (
         <button
-          onClick={() =>
-            router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))
-          }
+          onClick={() => router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))}
           className="nice-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
         >
           <UserPen className="h-5 w-5" />
           {t('authenticateToContribute')}
         </button>
-      )
+      );
     }
 
     if (contributorStatus === 'ACTIVE') {
@@ -284,7 +238,7 @@ function CoursesActions({
           <UserPen className="h-5 w-5" />
           {t('youAreAContributor')}
         </div>
-      )
+      );
     }
 
     if (contributorStatus === 'PENDING') {
@@ -293,7 +247,7 @@ function CoursesActions({
           <ClockIcon className="h-5 w-5" />
           {t('contributorApplicationPending')}
         </div>
-      )
+      );
     }
 
     return (
@@ -311,29 +265,22 @@ function CoursesActions({
           </>
         )}
       </button>
-    )
-  }
+    );
+  };
 
   const renderProgressSection = () => {
     const totalActivities =
-      course.chapters?.reduce(
-        (acc: number, chapter: any) => acc + chapter.activities.length,
-        0
-      ) || 0
+      course.chapters?.reduce((acc: number, chapter: any) => acc + chapter.activities.length, 0) || 0;
 
     // Find the correct run using the cleaned UUID
     const run = trailData?.runs?.find((run: any) => {
-      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '')
-      return cleanRunCourseUuid === cleanCourseUuid
-    })
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+      return cleanRunCourseUuid === cleanCourseUuid;
+    });
 
-    const completedActivities =
-      run?.steps?.filter((step: any) => step.complete)?.length || 0
+    const completedActivities = run?.steps?.filter((step: any) => step.complete)?.length || 0;
 
-    const progressPercentage =
-      totalActivities === 0
-        ? 0
-        : Math.round((completedActivities / totalActivities) * 100)
+    const progressPercentage = totalActivities === 0 ? 0 : Math.round((completedActivities / totalActivities) * 100);
 
     if (!isStarted) {
       return (
@@ -341,8 +288,7 @@ function CoursesActions({
           <div
             className="absolute inset-0 opacity-[0.05]"
             style={{
-              backgroundImage:
-                'radial-gradient(circle at center, #101010 1px, transparent 1px)',
+              backgroundImage: 'radial-gradient(circle at center, #101010 1px, transparent 1px)',
               backgroundSize: '12px 12px',
             }}
           />
@@ -366,13 +312,9 @@ function CoursesActions({
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">
-                      {t('readyToBegin')}
-                    </div>
+                    <div className="text-sm font-medium text-gray-900">{t('readyToBegin')}</div>
                     {totalActivities > 0 && (
-                      <div className="text-sm text-gray-500">
-                        {t('startLearningJourney', { totalActivities })}
-                      </div>
+                      <div className="text-sm text-gray-500">{t('startLearningJourney', { totalActivities })}</div>
                     )}
                   </div>
                 </div>
@@ -380,7 +322,7 @@ function CoursesActions({
             </div>
           </div>
         </div>
-      )
+      );
     }
 
     return (
@@ -388,8 +330,7 @@ function CoursesActions({
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
-            backgroundImage:
-              'radial-gradient(circle at center, #000 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle at center, #000 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }}
         />
@@ -417,29 +358,20 @@ function CoursesActions({
                       strokeLinecap="round"
                       strokeDasharray={2 * Math.PI * 28}
                       strokeDashoffset={
-                        totalActivities === 0
-                          ? 0
-                          : 2 *
-                            Math.PI *
-                            28 *
-                            (1 - completedActivities / totalActivities)
+                        totalActivities === 0 ? 0 : 2 * Math.PI * 28 * (1 - completedActivities / totalActivities)
                       }
                       className="transition-all duration-500 ease-out"
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-lg font-bold text-gray-800">
-                      {progressPercentage}%
-                    </span>
+                    <span className="text-lg font-bold text-gray-800">{progressPercentage}%</span>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsProgressOpen(true)}
                   className="flex-1 rounded-lg p-2 text-left transition-colors hover:bg-neutral-50/50"
                 >
-                  <div className="text-sm font-medium text-gray-900">
-                    {t('courseProgress')}
-                  </div>
+                  <div className="text-sm font-medium text-gray-900">{t('courseProgress')}</div>
                   <div className="text-sm text-gray-500">
                     {t('completedActivities', {
                       completedActivities,
@@ -452,13 +384,11 @@ function CoursesActions({
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   if (isLoading) {
-    return (
-      <div className="nice-shadow h-20 animate-pulse rounded-lg bg-gray-100" />
-    )
+    return <div className="nice-shadow h-20 animate-pulse rounded-lg bg-gray-100" />;
   }
 
   if (linkedProducts.length > 0) {
@@ -470,13 +400,9 @@ function CoursesActions({
               <div className="nice-shadow rounded-lg border border-green-200 bg-green-50 p-4">
                 <div className="flex items-center gap-3">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                  <h3 className="font-semibold text-green-800">
-                    {t('youOwnThisCourse')}
-                  </h3>
+                  <h3 className="font-semibold text-green-800">{t('youOwnThisCourse')}</h3>
                 </div>
-                <p className="mt-1 text-sm text-green-700">
-                  {t('youHavePurchasedThisCourse')}
-                </p>
+                <p className="mt-1 text-sm text-green-700">{t('youHavePurchasedThisCourse')}</p>
               </div>
               <button
                 onClick={handleCourseAction}
@@ -500,13 +426,9 @@ function CoursesActions({
               <div className="nice-shadow rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="h-5 w-5 text-amber-800" />
-                  <h3 className="font-semibold text-amber-800">
-                    {t('paidCourse')}
-                  </h3>
+                  <h3 className="font-semibold text-amber-800">{t('paidCourse')}</h3>
                 </div>
-                <p className="mt-1 text-sm text-amber-700">
-                  {t('courseRequiresPurchase')}
-                </p>
+                <p className="mt-1 text-sm text-amber-700">{t('courseRequiresPurchase')}</p>
               </div>
               <Modal
                 isDialogOpen={isModalOpen}
@@ -528,7 +450,7 @@ function CoursesActions({
           )}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -567,7 +489,7 @@ function CoursesActions({
         />
       </div>
     </div>
-  )
+  );
 }
 
-export default CoursesActions
+export default CoursesActions;

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -7,29 +7,29 @@ import FormLayout, {
   FormMessage,
   Input,
   Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import { useState } from 'react'
-import * as Form from '@radix-ui/react-form'
-import BarLoader from 'react-spinners/BarLoader'
-import { useTranslations } from 'next-intl'
+} from '@components/Objects/StyledElements/Form/Form';
+import BarLoader from 'react-spinners/BarLoader';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
-  const t = useTranslations('Components.DynamicCanvaModal')
-  const [activityName, setActivityName] = useState('')
-  const [_activityDescription, setActivityDescription] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const t = useTranslations('Components.DynamicCanvaModal');
+  const [activityName, setActivityName] = useState('');
+  const [_activityDescription, setActivityDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleActivityNameChange = (e: any) => {
-    setActivityName(e.target.value)
-  }
+    setActivityName(e.target.value);
+  };
 
   const handleActivityDescriptionChange = (e: any) => {
-    setActivityDescription(e.target.value)
-  }
+    setActivityDescription(e.target.value);
+  };
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
     await submitActivity({
       name: activityName,
       chapter_id: chapterId,
@@ -38,28 +38,28 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
       published_version: 1,
       version: 1,
       course_id: course.id,
-    })
-    setIsSubmitting(false)
-  }
+    });
+    setIsSubmitting(false);
+  };
   return (
     <FormLayout onSubmit={handleSubmit}>
       <FormField name="dynamic-activity-name">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
           <FormLabel>{t('activityName')}</FormLabel>
-          <FormMessage match="valueMissing">
-            {t('valueMissingName')}
-          </FormMessage>
+          <FormMessage match="valueMissing">{t('valueMissingName')}</FormMessage>
         </Flex>
         <Form.Control asChild>
-          <Input onChange={handleActivityNameChange} type="text" required />
+          <Input
+            onChange={handleActivityNameChange}
+            type="text"
+            required
+          />
         </Form.Control>
       </FormField>
       <FormField name="dynamic-activity-desc">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
           <FormLabel>{t('activityDescription')}</FormLabel>
-          <FormMessage match="valueMissing">
-            {t('valueMissingDescription')}
-          </FormMessage>
+          <FormMessage match="valueMissing">{t('valueMissingDescription')}</FormMessage>
         </Flex>
         <Form.Control asChild>
           <Textarea onChange={handleActivityDescriptionChange} />
@@ -68,7 +68,10 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
 
       <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
         <Form.Submit asChild>
-          <ButtonBlack type="submit" css={{ marginTop: 10 }}>
+          <ButtonBlack
+            type="submit"
+            css={{ marginTop: 10 }}
+          >
             {isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
@@ -82,7 +85,7 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
         </Form.Submit>
       </Flex>
     </FormLayout>
-  )
+  );
 }
 
-export default DynamicCanvaModal
+export default DynamicCanvaModal;

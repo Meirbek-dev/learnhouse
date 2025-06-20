@@ -1,63 +1,55 @@
-'use client'
+'use client';
 
-import { PencilLine, Rss, TentTree } from 'lucide-react'
-import { useState, useLayoutEffect, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { useFormik } from 'formik'
-import * as Form from '@radix-ui/react-form'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import { useCourse } from '@components/Contexts/CourseContext'
-import useSWR, { mutate } from 'swr'
-import { getAPIUrl } from '@services/config/config'
-import { swrFetcher } from '@services/utils/ts/requests'
-import useAdminStatus from '@components/Hooks/useAdminStatus'
-import { useOrg } from '@components/Contexts/OrgContext'
-import {
-  createCourseUpdate,
-  deleteCourseUpdate,
-} from '@services/courses/updates'
-import toast from 'react-hot-toast'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useTranslations } from 'next-intl'
+} from '@components/Objects/StyledElements/Form/Form';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useCourse } from '@components/Contexts/CourseContext';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useState, useLayoutEffect, useEffect } from 'react';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { PencilLine, Rss, TentTree } from 'lucide-react';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { getAPIUrl } from '@services/config/config';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import { useFormik } from 'formik';
+import dayjs from 'dayjs';
 
-dayjs.extend(relativeTime)
+dayjs.extend(relativeTime);
 
 function CourseUpdates() {
-  const course = useCourse() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const { data: updates } = useSWR(
-    `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`,
-    (url) => swrFetcher(url, access_token)
-  )
-  const [isModelOpen, setIsModelOpen] = useState(false)
-  const t = useTranslations('Courses.CourseUpdates')
+  const course = useCourse() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`, (url) =>
+    swrFetcher(url, access_token),
+  );
+  const [isModelOpen, setIsModelOpen] = useState(false);
+  const t = useTranslations('Courses.CourseUpdates');
 
   function handleModelOpen() {
-    setIsModelOpen(!isModelOpen)
+    setIsModelOpen(!isModelOpen);
   }
 
   // if user clicks outside the model, close the model
   useLayoutEffect(() => {
     function handleClickOutside(event: any) {
-      if (
-        event.target.closest('.bg-white') ||
-        event.target.id === 'delete-update-button'
-      )
-        return
-      setIsModelOpen(false)
+      if (event.target.closest('.bg-white') || event.target.id === 'delete-update-button') return;
+      setIsModelOpen(false);
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div
@@ -95,13 +87,13 @@ function CourseUpdates() {
         </motion.div>
       )}
     </div>
-  )
+  );
 }
 
 const UpdatesSection = () => {
-  const [selectedView, setSelectedView] = useState('list')
-  const adminStatus = useAdminStatus()
-  const t = useTranslations('Courses.CourseUpdates')
+  const [selectedView, setSelectedView] = useState('list');
+  const adminStatus = useAdminStatus();
+  const t = useTranslations('Courses.CourseUpdates');
   return (
     <div className="nice-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
       <div className="flex justify-between rounded-lg bg-gray-50/70 outline-1 outline-neutral-200/40">
@@ -121,32 +113,30 @@ const UpdatesSection = () => {
       </div>
       <div className="">
         {selectedView === 'list' && <UpdatesListView />}
-        {selectedView === 'new' && (
-          <NewUpdateForm setSelectedView={setSelectedView} />
-        )}
+        {selectedView === 'new' && <NewUpdateForm setSelectedView={setSelectedView} />}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const NewUpdateForm = ({ setSelectedView }: any) => {
-  const org = useOrg() as any
-  const course = useCourse() as any
-  const session = useLHSession() as any
-  const t = useTranslations('Courses.CourseUpdates')
+  const org = useOrg() as any;
+  const course = useCourse() as any;
+  const session = useLHSession() as any;
+  const t = useTranslations('Courses.CourseUpdates');
 
   const validate = (values: any) => {
-    const errors: any = {}
+    const errors: any = {};
 
     if (!values.title) {
-      errors.title = t('titleRequired')
+      errors.title = t('titleRequired');
     }
     if (!values.content) {
-      errors.content = t('contentRequired')
+      errors.content = t('contentRequired');
     }
 
-    return errors
-  }
+    return errors;
+  };
   const formik = useFormik({
     initialValues: {
       title: '',
@@ -159,35 +149,26 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
         content: values.content,
         course_uuid: course.courseStructure.course_uuid,
         org_id: org.id,
-      }
-      const res = await createCourseUpdate(
-        body,
-        session.data?.tokens?.access_token
-      )
+      };
+      const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
       if (res.status === 200) {
-        toast.success(t('updateAddedSuccess'))
-        setSelectedView('list')
-        mutate(
-          `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`
-        )
+        toast.success(t('updateAddedSuccess'));
+        setSelectedView('list');
+        mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
       } else {
-        toast.error(t('updateAddFailed'))
+        toast.error(t('updateAddFailed'));
       }
     },
     enableReinitialize: true,
-  })
+  });
 
-  useEffect(() => {}, [course, org])
+  useEffect(() => {}, [course, org]);
 
   return (
     <div className="nice-shadow flex w-[700px] flex-col -space-y-2 overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
       <div className="flex flex-col -space-y-2 px-4 pt-4">
-        <div className="rounded-full px-3 py-0.5 text-xs font-semibold text-gray-500">
-          {t('testCourse')}
-        </div>
-        <div className="rounded-full px-3 py-0.5 text-lg font-bold text-black">
-          {t('addNewCourseUpdate')}
-        </div>
+        <div className="rounded-full px-3 py-0.5 text-xs font-semibold text-gray-500">{t('testCourse')}</div>
+        <div className="rounded-full px-3 py-0.5 text-lg font-bold text-black">{t('addNewCourseUpdate')}</div>
       </div>
       <div className="-py-2 px-5">
         <FormLayout onSubmit={formik.handleSubmit}>
@@ -234,19 +215,18 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
         </FormLayout>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const UpdatesListView = () => {
-  const course = useCourse() as any
-  const adminStatus = useAdminStatus()
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const { data: updates } = useSWR(
-    `${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`,
-    (url) => swrFetcher(url, access_token)
-  )
-  const t = useTranslations('Courses.CourseUpdates')
+  const course = useCourse() as any;
+  const adminStatus = useAdminStatus();
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`, (url) =>
+    swrFetcher(url, access_token),
+  );
+  const t = useTranslations('Courses.CourseUpdates');
 
   return (
     <div
@@ -264,55 +244,51 @@ const UpdatesListView = () => {
               <div className="flex items-center space-x-2">
                 <span> {update.title}</span>
                 <span
-                  title={
-                    t('createdAtTooltipPrefix') +
-                    dayjs(update.creation_date).format('MMMM D, YYYY')
-                  }
+                  title={t('createdAtTooltipPrefix') + dayjs(update.creation_date).format('MMMM D, YYYY')}
                   className="text-xs font-semibold text-gray-300"
                 >
                   {dayjs(update.creation_date).fromNow()}
                 </span>
               </div>
-              {adminStatus.isAdmin && !adminStatus.loading && (
-                <DeleteUpdateButton update={update} />
-              )}
+              {adminStatus.isAdmin && !adminStatus.loading && <DeleteUpdateButton update={update} />}
             </div>
             <div className="text-gray-600">{update.content}</div>
           </div>
         ))}
       {(!updates || updates.length === 0) && (
         <div className="my-10 flex flex-col space-y-2 py-2 text-center text-gray-500">
-          <TentTree className="mx-auto" size={40} />
+          <TentTree
+            className="mx-auto"
+            size={40}
+          />
           <p>{t('noUpdatesYet')}</p>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 const DeleteUpdateButton = ({ update }: any) => {
-  const session = useLHSession() as any
-  const course = useCourse() as any
-  const _org = useOrg() as any
-  const t = useTranslations('Courses.CourseUpdates')
+  const session = useLHSession() as any;
+  const course = useCourse() as any;
+  const _org = useOrg() as any;
+  const t = useTranslations('Courses.CourseUpdates');
 
   const handleDelete = async () => {
     const res = await deleteCourseUpdate(
       course.courseStructure.course_uuid,
       update.courseupdate_uuid,
-      session.data?.tokens?.access_token
-    )
-    const toast_loading = toast.loading(t('deletingUpdate'))
+      session.data?.tokens?.access_token,
+    );
+    const toast_loading = toast.loading(t('deletingUpdate'));
     if (res.status === 200) {
-      toast.dismiss(toast_loading)
-      toast.success(t('successfullDelete'))
-      mutate(
-        `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`
-      )
+      toast.dismiss(toast_loading);
+      toast.success(t('successfullDelete'));
+      mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
     } else {
-      toast.error(t('failedDelete'))
+      toast.error(t('failedDelete'));
     }
-  }
+  };
 
   return (
     <ConfirmationModal
@@ -329,11 +305,11 @@ const DeleteUpdateButton = ({ update }: any) => {
         </div>
       }
       functionToExecute={() => {
-        handleDelete()
+        handleDelete();
       }}
       status="warning"
     />
-  )
-}
+  );
+};
 
-export default CourseUpdates
+export default CourseUpdates;

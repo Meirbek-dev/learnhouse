@@ -1,4 +1,4 @@
-import { Link as LinkExtension } from '@tiptap/extension-link'
+import { Link as LinkExtension } from '@tiptap/extension-link';
 
 export const getLinkExtension = () => {
   return LinkExtension.configure({
@@ -13,56 +13,47 @@ export const getLinkExtension = () => {
     isAllowedUri: (url: string, ctx: any) => {
       try {
         // construct URL
-        const parsedUrl = url.includes(':')
-          ? new URL(url)
-          : new URL(`${ctx.defaultProtocol}://${url}`)
+        const parsedUrl = url.includes(':') ? new URL(url) : new URL(`${ctx.defaultProtocol}://${url}`);
 
         // use default validation
         if (!ctx.defaultValidate(parsedUrl.href)) {
-          return false
+          return false;
         }
 
         // disallowed protocols
-        const disallowedProtocols = ['ftp', 'file', 'mailto']
-        const protocol = parsedUrl.protocol.replace(':', '')
+        const disallowedProtocols = ['ftp', 'file', 'mailto'];
+        const protocol = parsedUrl.protocol.replace(':', '');
 
         if (disallowedProtocols.includes(protocol)) {
-          return false
+          return false;
         }
 
         // only allow protocols specified in ctx.protocols
-        const allowedProtocols = ctx.protocols.map((p: any) =>
-          typeof p === 'string' ? p : p.scheme
-        )
+        const allowedProtocols = ctx.protocols.map((p: any) => (typeof p === 'string' ? p : p.scheme));
 
         if (!allowedProtocols.includes(protocol)) {
-          return false
+          return false;
         }
 
         // all checks have passed
-        return true
+        return true;
       } catch {
-        return false
+        return false;
       }
     },
     shouldAutoLink: (url: string) => {
       try {
         // construct URL
-        const parsedUrl = url.includes(':')
-          ? new URL(url)
-          : new URL(`https://${url}`)
+        const parsedUrl = url.includes(':') ? new URL(url) : new URL(`https://${url}`);
 
         // only auto-link if the domain is not in the disallowed list
-        const disallowedDomains = [
-          'example-no-autolink.com',
-          'another-no-autolink.com',
-        ]
-        const domain = parsedUrl.hostname
+        const disallowedDomains = ['example-no-autolink.com', 'another-no-autolink.com'];
+        const domain = parsedUrl.hostname;
 
-        return !disallowedDomains.includes(domain)
+        return !disallowedDomains.includes(domain);
       } catch {
-        return false
+        return false;
       }
     },
-  })
-}
+  });
+};

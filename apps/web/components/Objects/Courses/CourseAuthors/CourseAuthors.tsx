@@ -1,74 +1,63 @@
-import { useState } from 'react'
-import UserAvatar from '../../UserAvatar'
-import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import { Rss, PencilLine, TentTree } from 'lucide-react'
-import { useCourse } from '@components/Contexts/CourseContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import useSWR, { mutate } from 'swr'
-import { getAPIUrl } from '@services/config/config'
-import { swrFetcher } from '@services/utils/ts/requests'
-import useAdminStatus from '@components/Hooks/useAdminStatus'
-import { useOrg } from '@components/Contexts/OrgContext'
-import {
-  createCourseUpdate,
-  deleteCourseUpdate,
-} from '@services/courses/updates'
-import toast from 'react-hot-toast'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import * as Form from '@radix-ui/react-form'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import { useFormik } from 'formik'
-import { motion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+} from '@components/Objects/StyledElements/Form/Form';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { useCourse } from '@components/Contexts/CourseContext';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { Rss, PencilLine, TentTree } from 'lucide-react';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { getAPIUrl } from '@services/config/config';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import UserAvatar from '../../UserAvatar';
+import { motion } from 'framer-motion';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import { useFormik } from 'formik';
+import { useState } from 'react';
+import dayjs from 'dayjs';
 
-dayjs.extend(relativeTime)
+dayjs.extend(relativeTime);
 
 interface Author {
   user: {
-    id: string
-    user_uuid: string
-    avatar_image: string
-    first_name: string
-    last_name: string
-    username: string
-  }
-  authorship: 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER'
-  authorship_status: 'ACTIVE' | 'INACTIVE' | 'PENDING'
+    id: string;
+    user_uuid: string;
+    avatar_image: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+  };
+  authorship: 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER';
+  authorship_status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
 }
 
 interface CourseAuthorsProps {
-  authors: Author[]
+  authors: Author[];
 }
 
-const MultipleAuthors = ({
-  authors,
-  isMobile,
-}: {
-  authors: Author[]
-  isMobile: boolean
-}) => {
-  const t = useTranslations('Courses.CourseAuthors')
-  const displayedAvatars = authors.slice(0, 3)
-  const displayedNames = authors.slice(0, 2)
-  const remainingCount = Math.max(0, authors.length - 3)
+const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: boolean }) => {
+  const t = useTranslations('Courses.CourseAuthors');
+  const displayedAvatars = authors.slice(0, 3);
+  const displayedNames = authors.slice(0, 2);
+  const remainingCount = Math.max(0, authors.length - 3);
 
   // Consistent sizes for both avatars and badge
-  const avatarSize = isMobile ? 72 : 86
-  const borderSize = 'border-4'
+  const avatarSize = isMobile ? 72 : 86;
+  const borderSize = 'border-4';
 
   return (
     <div className="flex flex-col items-center space-y-4 px-2 py-2">
-      <div className="self-start text-[12px] font-semibold text-neutral-400">
-        {t('authorsAndUpdates')}
-      </div>
+      <div className="self-start text-[12px] font-semibold text-neutral-400">{t('authorsAndUpdates')}</div>
 
       {/* Avatars row */}
       <div className="relative flex justify-center -space-x-6">
@@ -84,15 +73,10 @@ const MultipleAuthors = ({
                 rounded="rounded-full"
                 avatar_url={
                   author.user.avatar_image
-                    ? getUserAvatarMediaDirectory(
-                        author.user.user_uuid,
-                        author.user.avatar_image
-                      )
+                    ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image)
                     : ''
                 }
-                predefined_avatar={
-                  author.user.avatar_image ? undefined : 'empty'
-                }
+                predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
                 width={avatarSize}
                 showProfilePopup={true}
                 userId={author.user.id}
@@ -101,7 +85,10 @@ const MultipleAuthors = ({
           </div>
         ))}
         {remainingCount > 0 && (
-          <div className="relative" style={{ zIndex: 0 }}>
+          <div
+            className="relative"
+            style={{ zIndex: 0 }}
+          >
             <div
               className="flex items-center justify-center rounded-full border-4 border-white bg-neutral-100 font-medium text-neutral-600 shadow-sm"
               style={{
@@ -132,16 +119,11 @@ const MultipleAuthors = ({
                   {author.user.first_name && author.user.last_name
                     ? `${author.user.first_name} ${author.user.last_name}`
                     : `@${author.user.username}`}
-                  {index === 0 &&
-                    authors.length > 1 &&
-                    index < displayedNames.length - 1 &&
-                    ' & '}
+                  {index === 0 && authors.length > 1 && index < displayedNames.length - 1 && ' & '}
                 </span>
               ))}
               {authors.length > 2 && (
-                <span className="ml-1 text-neutral-500">
-                  {t('andMoreAuthors', { count: authors.length - 2 })}
-                </span>
+                <span className="ml-1 text-neutral-500">{t('andMoreAuthors', { count: authors.length - 2 })}</span>
               )}
             </>
           )}
@@ -153,53 +135,47 @@ const MultipleAuthors = ({
             displayedNames.map((author, index) => (
               <span key={author.user.user_uuid}>
                 @{author.user.username}
-                {index === 0 &&
-                  authors.length > 1 &&
-                  index < displayedNames.length - 1 &&
-                  t('and')}
+                {index === 0 && authors.length > 1 && index < displayedNames.length - 1 && t('and')}
               </span>
             ))
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const UpdatesSection = () => {
-  const [selectedView, setSelectedView] = useState('list')
-  const adminStatus = useAdminStatus()
-  const course = useCourse() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const { data: updates } = useSWR(
-    `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`,
-    (url) => swrFetcher(url, access_token)
-  )
-  const t = useTranslations('Courses.CourseAuthors')
+  const [selectedView, setSelectedView] = useState('list');
+  const adminStatus = useAdminStatus();
+  const course = useCourse() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`, (url) =>
+    swrFetcher(url, access_token),
+  );
+  const t = useTranslations('Courses.CourseAuthors');
 
   return (
     <div className="mt-2 pt-2">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <Rss size={14} className="text-neutral-400" />
-            <span className="text-sm font-semibold text-neutral-600">
-              {t('courseUpdates')}
-            </span>
+            <Rss
+              size={14}
+              className="text-neutral-400"
+            />
+            <span className="text-sm font-semibold text-neutral-600">{t('courseUpdates')}</span>
           </div>
           {updates && updates.length > 0 && (
             <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
-              {updates.length}{' '}
-              {updates.length === 1 ? t('update') : t('updates')}
+              {updates.length} {updates.length === 1 ? t('update') : t('updates')}
             </span>
           )}
         </div>
         {adminStatus.isAdmin && (
           <button
-            onClick={() =>
-              setSelectedView(selectedView === 'new' ? 'list' : 'new')
-            }
+            onClick={() => setSelectedView(selectedView === 'new' ? 'list' : 'new')}
             className={`inline-flex items-center space-x-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
               selectedView === 'new'
                 ? 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
@@ -219,26 +195,18 @@ const UpdatesSection = () => {
         className="relative"
       >
         <div className="-mr-1 max-h-[300px] overflow-y-auto pr-1">
-          {selectedView === 'list' ? (
-            <UpdatesListView />
-          ) : (
-            <NewUpdateForm setSelectedView={setSelectedView} />
-          )}
+          {selectedView === 'list' ? <UpdatesListView /> : <NewUpdateForm setSelectedView={setSelectedView} />}
         </div>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-const NewUpdateForm = ({
-  setSelectedView,
-}: {
-  setSelectedView: (view: string) => void
-}) => {
-  const org = useOrg() as any
-  const course = useCourse() as any
-  const session = useLHSession() as any
-  const t = useTranslations('Courses.CourseAuthors')
+const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
+  const org = useOrg() as any;
+  const course = useCourse() as any;
+  const session = useLHSession() as any;
+  const t = useTranslations('Courses.CourseAuthors');
 
   const formik = useFormik({
     initialValues: {
@@ -246,10 +214,10 @@ const NewUpdateForm = ({
       content: '',
     },
     validate: (values) => {
-      const errors: any = {}
-      if (!values.title) errors.title = t('titleRequired')
-      if (!values.content) errors.content = t('contentRequired')
-      return errors
+      const errors: any = {};
+      if (!values.title) errors.title = t('titleRequired');
+      if (!values.content) errors.content = t('contentRequired');
+      return errors;
     },
     onSubmit: async (values) => {
       const body = {
@@ -257,26 +225,24 @@ const NewUpdateForm = ({
         content: values.content,
         course_uuid: course.courseStructure.course_uuid,
         org_id: org.id,
-      }
-      const res = await createCourseUpdate(
-        body,
-        session.data?.tokens?.access_token
-      )
+      };
+      const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
       if (res.status === 200) {
-        toast.success(t('updateAddedSuccess'))
-        setSelectedView('list')
-        mutate(
-          `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`
-        )
+        toast.success(t('updateAddedSuccess'));
+        setSelectedView('list');
+        mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
       } else {
-        toast.error(t('updateAddFailed'))
+        toast.error(t('updateAddFailed'));
       }
     },
-  })
+  });
 
   return (
     <div className="space-y-4">
-      <FormLayout onSubmit={formik.handleSubmit} className="space-y-4">
+      <FormLayout
+        onSubmit={formik.handleSubmit}
+        className="space-y-4"
+      >
         <FormField name="title">
           <FormLabelAndMessage
             label={t('updateTitle')}
@@ -318,32 +284,30 @@ const NewUpdateForm = ({
         </div>
       </FormLayout>
     </div>
-  )
-}
+  );
+};
 
 const UpdatesListView = () => {
-  const course = useCourse() as any
-  const adminStatus = useAdminStatus()
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const { data: updates } = useSWR(
-    `${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`,
-    (url) => swrFetcher(url, access_token)
-  )
-  const t = useTranslations('Courses.CourseAuthors')
+  const course = useCourse() as any;
+  const adminStatus = useAdminStatus();
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`, (url) =>
+    swrFetcher(url, access_token),
+  );
+  const t = useTranslations('Courses.CourseAuthors');
 
   if (!updates || updates.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 px-4 py-8 text-center">
-        <TentTree size={28} className="mb-2 text-neutral-400" />
-        <p className="text-sm font-medium text-neutral-600">
-          {t('noUpdatesYet')}
-        </p>
-        <p className="mt-1 text-xs text-neutral-400">
-          {t('updatesAppearHere')}
-        </p>
+        <TentTree
+          size={28}
+          className="mb-2 text-neutral-400"
+        />
+        <p className="text-sm font-medium text-neutral-600">{t('noUpdatesYet')}</p>
+        <p className="mt-1 text-xs text-neutral-400">{t('updatesAppearHere')}</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -359,9 +323,7 @@ const UpdatesListView = () => {
           <div className="flex items-start justify-between">
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex items-baseline space-x-2">
-                <h4 className="truncate text-sm font-medium text-neutral-800">
-                  {update.title}
-                </h4>
+                <h4 className="truncate text-sm font-medium text-neutral-800">{update.title}</h4>
                 <span
                   title={dayjs(update.creation_date).format('MMMM D, YYYY')}
                   className="whitespace-nowrap text-[11px] font-medium text-neutral-400"
@@ -369,9 +331,7 @@ const UpdatesListView = () => {
                   {dayjs(update.creation_date).fromNow()}
                 </span>
               </div>
-              <p className="line-clamp-3 text-sm text-neutral-600">
-                {update.content}
-              </p>
+              <p className="line-clamp-3 text-sm text-neutral-600">{update.content}</p>
             </div>
             {adminStatus.isAdmin && !adminStatus.loading && (
               <div className="ml-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -382,32 +342,30 @@ const UpdatesListView = () => {
         </motion.div>
       ))}
     </div>
-  )
-}
+  );
+};
 
 const DeleteUpdateButton = ({ update }: any) => {
-  const session = useLHSession() as any
-  const course = useCourse() as any
-  const t = useTranslations('Courses.CourseAuthors')
+  const session = useLHSession() as any;
+  const course = useCourse() as any;
+  const t = useTranslations('Courses.CourseAuthors');
 
   const handleDelete = async () => {
-    const toast_loading = toast.loading(t('deletingUpdate'))
+    const toast_loading = toast.loading(t('deletingUpdate'));
     const res = await deleteCourseUpdate(
       course.courseStructure.course_uuid,
       update.courseupdate_uuid,
-      session.data?.tokens?.access_token
-    )
+      session.data?.tokens?.access_token,
+    );
 
     if (res.status === 200) {
-      toast.dismiss(toast_loading)
-      toast.success(t('updateDeletedSuccess'))
-      mutate(
-        `${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`
-      )
+      toast.dismiss(toast_loading);
+      toast.success(t('updateDeletedSuccess'));
+      mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
     } else {
-      toast.error(t('updateDeleteFailed'))
+      toast.error(t('updateDeleteFailed'));
     }
-  }
+  };
 
   return (
     <ConfirmationModal
@@ -438,11 +396,11 @@ const DeleteUpdateButton = ({ update }: any) => {
       functionToExecute={handleDelete}
       status="warning"
     />
-  )
-}
+  );
+};
 
 const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
 
   // Filter active authors and sort by role priority
   const sortedAuthors = [...authors]
@@ -453,16 +411,19 @@ const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
         MAINTAINER: 1,
         CONTRIBUTOR: 2,
         REPORTER: 3,
-      }
-      return rolePriority[a.authorship] - rolePriority[b.authorship]
-    })
+      };
+      return rolePriority[a.authorship] - rolePriority[b.authorship];
+    });
 
   return (
     <div className="antialiased">
-      <MultipleAuthors authors={sortedAuthors} isMobile={isMobile} />
+      <MultipleAuthors
+        authors={sortedAuthors}
+        isMobile={isMobile}
+      />
       <UpdatesSection />
     </div>
-  )
-}
+  );
+};
 
-export default CourseAuthors
+export default CourseAuthors;

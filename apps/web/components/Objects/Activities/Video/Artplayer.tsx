@@ -1,30 +1,30 @@
-import { useEffect, useRef } from 'react'
-import Artplayer from 'artplayer'
-import type ArtplayerType from 'artplayer'
+import type ArtplayerType from 'artplayer';
+import { useEffect, useRef } from 'react';
+import Artplayer from 'artplayer';
 
 interface SubtitleEntry {
-  html: string
-  url: string
+  html: string;
+  url: string;
 }
 
 interface PlayerProps {
-  option: any
-  getInstance?: (art: Artplayer) => void
-  subtitle?: any
-  subtitleEntries?: SubtitleEntry[]
-  startTime?: number
-  endTime?: number | null
-  onPlayerReady?: (art: Artplayer) => void
-  [key: string]: any
+  option: any;
+  getInstance?: (art: Artplayer) => void;
+  subtitle?: any;
+  subtitleEntries?: SubtitleEntry[];
+  startTime?: number;
+  endTime?: number | null;
+  onPlayerReady?: (art: Artplayer) => void;
+  [key: string]: any;
 }
-const captionsSVGString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-captions-icon lucide-captions"><rect width="18" height="14" x="3" y="5" rx="2" ry="2" /><path d="M7 15h4M15 15h2M7 11h2M13 11h4" /></svg>`
+const captionsSVGString = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-captions-icon lucide-captions"><rect width="18" height="14" x="3" y="5" rx="2" ry="2" /><path d="M7 15h4M15 15h2M7 11h2M13 11h4" /></svg>`;
 
 function getArtplayerLocale(locale: string) {
   // Only import the required language object
   try {
-    return require('@/messages/Artplayer')[locale] || undefined
+    return require('@/messages/Artplayer')[locale] || undefined;
   } catch {
-    return undefined
+    return undefined;
   }
 }
 
@@ -39,10 +39,10 @@ export default function ArtPlayer({
   onPlayerReady,
   ...rest
 }: PlayerProps) {
-  const artRef = useRef<HTMLDivElement>(null)
+  const artRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const i18nLocale = getArtplayerLocale(locale)
+    const i18nLocale = getArtplayerLocale(locale);
     const art: ArtplayerType = new Artplayer({
       ...option,
       container: artRef.current,
@@ -78,8 +78,8 @@ export default function ArtPlayer({
               html: 'Включить',
               switch: true,
               onSwitch: (item) => {
-                art.subtitle.show = !item.switch
-                return !item.switch
+                art.subtitle.show = !item.switch;
+                return !item.switch;
               },
             },
             ...subtitleEntries,
@@ -87,8 +87,8 @@ export default function ArtPlayer({
           onSelect: (item) => {
             art.subtitle.switch(item.url, {
               name: item.html,
-            })
-            return item.html
+            });
+            return item.html;
           },
         },
       ],
@@ -103,37 +103,42 @@ export default function ArtPlayer({
         },
         encoding: 'utf-8',
       },
-    })
+    });
 
     if (getInstance && typeof getInstance === 'function') {
-      getInstance(art)
+      getInstance(art);
     }
 
     art.on('ready', () => {
       if (startTime && art.duration >= startTime) {
-        art.seek = startTime
+        art.seek = startTime;
       }
       if (onPlayerReady) {
-        onPlayerReady(art)
+        onPlayerReady(art);
       }
-    })
+    });
 
     if (endTime) {
       const handleTimeUpdate = () => {
         if (art.currentTime >= endTime) {
-          art.pause()
-          art.off('timeupdate' as any, handleTimeUpdate)
+          art.pause();
+          art.off('timeupdate' as any, handleTimeUpdate);
         }
-      }
-      art.on('timeupdate' as any, handleTimeUpdate)
+      };
+      art.on('timeupdate' as any, handleTimeUpdate);
     }
 
     return () => {
       if (art?.destroy) {
-        art.destroy(false)
+        art.destroy(false);
       }
-    }
-  }, [])
+    };
+  }, []);
 
-  return <div ref={artRef} {...rest} />
+  return (
+    <div
+      ref={artRef}
+      {...rest}
+    />
+  );
 }

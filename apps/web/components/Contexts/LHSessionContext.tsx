@@ -1,24 +1,24 @@
-'use client'
-import PageLoading from '@components/Objects/Loaders/PageLoading'
-import { useSession } from 'next-auth/react'
-import type { ReactNode } from 'react'
-import { use, createContext } from 'react'
+'use client';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useSession } from 'next-auth/react';
+import { use, createContext } from 'react';
+import type { ReactNode } from 'react';
 
-export const SessionContext = createContext({}) as any
+export const SessionContext = createContext({}) as any;
 
 function LHSessionProvider({ children }: { children: ReactNode }) {
-  const session = useSession()
+  const session = useSession();
 
   if (session && session.status == 'loading') {
-    return <PageLoading />
+    return <PageLoading />;
   }
   if (session) {
-    return <SessionContext value={session}>{children}</SessionContext>
+    return <SessionContext value={session}>{children}</SessionContext>;
   }
 }
 
 export function useLHSession() {
-  return use(SessionContext)
+  return use(SessionContext);
 }
 
-export default LHSessionProvider
+export default LHSessionProvider;

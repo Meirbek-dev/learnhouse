@@ -1,11 +1,11 @@
-import { Settings, ChevronRight, CreditCard } from 'lucide-react'
-import { Alert, AlertTitle, AlertDescription } from '@components/ui/alert'
-import { AlertTriangle, ShoppingCart, Users } from 'lucide-react'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { Alert, AlertTitle, AlertDescription } from '@components/ui/alert';
+import { Settings, ChevronRight, CreditCard } from 'lucide-react';
+import { AlertTriangle, ShoppingCart, Users } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 function UnconfiguredPaymentsDisclaimer() {
-  const t = useTranslations('DashPage.Payments')
+  const t = useTranslations('DashPage.Payments');
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
@@ -44,7 +44,7 @@ function UnconfiguredPaymentsDisclaimer() {
         </Alert>
       </div>
     </div>
-  )
+  );
 }
 
-export default UnconfiguredPaymentsDisclaimer
+export default UnconfiguredPaymentsDisclaimer;

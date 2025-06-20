@@ -1,6 +1,6 @@
-import { ReactNodeViewRenderer } from '@tiptap/react'
-import { mergeAttributes, Node } from '@tiptap/core'
-import BadgesExtension from '@/components/Objects/Editor/Extensions/Badges/BadgesExtension'
+import BadgesExtension from '@/components/Objects/Editor/Extensions/Badges/BadgesExtension';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
 export default Node.create({
   name: 'badge',
@@ -18,7 +18,7 @@ export default Node.create({
       emoji: {
         default: '💡',
       },
-    }
+    };
   },
 
   parseHTML() {
@@ -26,14 +26,14 @@ export default Node.create({
       {
         tag: 'badge',
       },
-    ]
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['badge', mergeAttributes(HTMLAttributes), 0]
+    return ['badge', mergeAttributes(HTMLAttributes), 0];
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(BadgesExtension)
+    return ReactNodeViewRenderer(BadgesExtension);
   },
-})
+});

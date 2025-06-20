@@ -1,19 +1,16 @@
-'use client'
-import { use } from 'react'
-import { OrgProvider } from '@components/Contexts/OrgContext'
-import NextTopLoader from 'nextjs-toploader'
-import Toast from '@components/Objects/StyledElements/Toast/Toast'
-import '@styles/globals.css'
-import Onboarding from '@components/Objects/Onboarding/Onboarding'
-import Footer from '@components/Footer/Footer'
+'use client';
+import Toast from '@components/Objects/StyledElements/Toast/Toast';
+import Onboarding from '@components/Objects/Onboarding/Onboarding';
+import { OrgProvider } from '@components/Contexts/OrgContext';
+import Footer from '@components/Footer/Footer';
+import NextTopLoader from 'nextjs-toploader';
+import '@styles/globals.css';
+import { use } from 'react';
 
-export default function RootLayout(props: {
-  children: React.ReactNode
-  params: Promise<any>
-}) {
-  const params = use(props.params)
+export default function RootLayout(props: { children: React.ReactNode; params: Promise<any> }) {
+  const params = use(props.params);
 
-  const { children } = props
+  const { children } = props;
 
   return (
     <div>
@@ -32,5 +29,5 @@ export default function RootLayout(props: {
         <Footer />
       </OrgProvider>
     </div>
-  )
+  );
 }

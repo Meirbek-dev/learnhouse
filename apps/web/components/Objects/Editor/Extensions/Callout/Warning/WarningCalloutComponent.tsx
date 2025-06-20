@@ -1,13 +1,13 @@
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
-import { AlertTriangle, X } from 'lucide-react'
-import { useState } from 'react'
-import styled from 'styled-components'
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
+import { AlertTriangle, X } from 'lucide-react';
+import styled from 'styled-components';
+import { useState } from 'react';
 
 interface CalloutOptions {
-  dismissible?: boolean
-  variant?: 'default' | 'filled' | 'outlined'
-  size?: 'sm' | 'md' | 'lg'
+  dismissible?: boolean;
+  variant?: 'default' | 'filled' | 'outlined';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const IconWrapper = styled.div<{ size?: string }>`
@@ -20,22 +20,22 @@ const IconWrapper = styled.div<{ size?: string }>`
 
   svg {
     width: 20px;
-    height: 20px;
     min-width: 20px;
+    height: 20px;
   }
 
   @media (max-width: 640px) {
-    margin-right: 0.25rem;
-    padding-left: 0.375rem;
-    padding-top: ${(props) => (props.size === 'sm' ? '0' : '0.5rem')};
     align-self: ${(props) => (props.size === 'sm' ? 'center' : 'flex-start')};
+    margin-right: 0.25rem;
+    padding-top: ${(props) => (props.size === 'sm' ? '0' : '0.5rem')};
+    padding-left: 0.375rem;
   }
-`
+`;
 
 const ContentWrapper = styled.div`
   width: 100%;
   overflow-wrap: break-word;
-`
+`;
 
 const DismissButton = styled.button`
   background: transparent;
@@ -51,7 +51,7 @@ const DismissButton = styled.button`
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }
-`
+`;
 
 const CalloutWrapper = styled.div.withConfig({
   shouldForwardProp: (prop) => !['isEditable'].includes(prop),
@@ -73,53 +73,52 @@ const CalloutWrapper = styled.div.withConfig({
   .content {
     margin: 5px;
     padding: 0.5rem;
-    border: ${(props) =>
-      props.isEditable ? '2px dashed #713f1117' : 'none'};
+    border: ${(props) => (props.isEditable ? '2px dashed #713f1117' : 'none')};
     border-radius: 0.5rem;
 
     @media (max-width: 640px) {
+      width: 100%;
       margin: ${(props) => (props.size === 'sm' ? '3px' : '5px 0')};
       padding: ${(props) => (props.size === 'sm' ? '0.25rem' : '0.5rem')};
-      width: 100%;
     }
   }
-`
+`;
 
 function WarningCalloutComponent(props: any) {
-  const editorState = useEditorProvider() as any
-  const isEditable = editorState.isEditable
-  const [dismissed, setDismissed] = useState(false)
+  const editorState = useEditorProvider() as any;
+  const isEditable = editorState.isEditable;
+  const [dismissed, setDismissed] = useState(false);
 
   // Extract options from props or use defaults
   const options: CalloutOptions = {
     dismissible: props.node?.attrs?.dismissible,
     variant: props.node?.attrs?.variant || 'default',
     size: props.node?.attrs?.size || 'md',
-  }
+  };
 
-  if (dismissed) return null
+  if (dismissed) return null;
 
   const getVariantClasses = () => {
     switch (options.variant) {
       case 'filled':
-        return 'bg-yellow-500 text-white'
+        return 'bg-yellow-500 text-white';
       case 'outlined':
-        return 'bg-transparent border-2 border-yellow-500 text-yellow-700'
+        return 'bg-transparent border-2 border-yellow-500 text-yellow-700';
       default:
-        return 'bg-yellow-200 text-yellow-900'
+        return 'bg-yellow-200 text-yellow-900';
     }
-  }
+  };
 
   const getSizeClasses = () => {
     switch (options.size) {
       case 'sm':
-        return 'py-1 px-2 text-sm'
+        return 'py-1 px-2 text-sm';
       case 'lg':
-        return 'py-3 px-4 text-lg'
+        return 'py-3 px-4 text-lg';
       default:
-        return 'py-2 px-3'
+        return 'py-2 px-3';
     }
-  }
+  };
 
   return (
     <NodeViewWrapper>
@@ -141,7 +140,7 @@ function WarningCalloutComponent(props: any) {
         )}
       </CalloutWrapper>
     </NodeViewWrapper>
-  )
+  );
 }
 
-export default WarningCalloutComponent
+export default WarningCalloutComponent;

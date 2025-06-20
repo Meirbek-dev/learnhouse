@@ -1,45 +1,45 @@
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import styled from 'styled-components'
-import Youtube from '@tiptap/extension-youtube'
+import MathEquationBlock from '@components/Objects/Editor/Extensions/MathEquation/MathEquationBlock';
+import WarningCallout from '@components/Objects/Editor/Extensions/Callout/Warning/WarningCallout';
 // Custom Extensions
-import InfoCallout from '@components/Objects/Editor/Extensions/Callout/Info/InfoCallout'
-import WarningCallout from '@components/Objects/Editor/Extensions/Callout/Warning/WarningCallout'
-import ImageBlock from '@components/Objects/Editor/Extensions/Image/ImageBlock'
-import VideoBlock from '@components/Objects/Editor/Extensions/Video/VideoBlock'
-import MathEquationBlock from '@components/Objects/Editor/Extensions/MathEquation/MathEquationBlock'
-import PDFBlock from '@components/Objects/Editor/Extensions/PDF/PDFBlock'
-import QuizBlock from '@components/Objects/Editor/Extensions/Quiz/QuizBlock'
+import InfoCallout from '@components/Objects/Editor/Extensions/Callout/Info/InfoCallout';
+import VideoBlock from '@components/Objects/Editor/Extensions/Video/VideoBlock';
+import ImageBlock from '@components/Objects/Editor/Extensions/Image/ImageBlock';
+import QuizBlock from '@components/Objects/Editor/Extensions/Quiz/QuizBlock';
+import PDFBlock from '@components/Objects/Editor/Extensions/PDF/PDFBlock';
+import { useEditor, EditorContent } from '@tiptap/react';
+import Youtube from '@tiptap/extension-youtube';
+import StarterKit from '@tiptap/starter-kit';
+import styled from 'styled-components';
 
 // Lowlight
-import { common, createLowlight } from 'lowlight'
-const lowlight = createLowlight(common)
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import css from 'highlight.js/lib/languages/css'
-import js from 'highlight.js/lib/languages/javascript'
-import ts from 'highlight.js/lib/languages/typescript'
-import html from 'highlight.js/lib/languages/xml'
-import python from 'highlight.js/lib/languages/python'
-import java from 'highlight.js/lib/languages/java'
-import { NoTextInput } from '@components/Objects/Editor/Extensions/NoTextInput/NoTextInput'
-import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext'
-import AICanvaToolkit from './AI/AICanvaToolkit'
-import EmbedObjects from '@components/Objects/Editor/Extensions/EmbedObjects/EmbedObjects'
-import Badges from '@components/Objects/Editor/Extensions/Badges/Badges'
-import Buttons from '@components/Objects/Editor/Extensions/Buttons/Buttons'
-import Table from '@tiptap/extension-table'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
-import TableCell from '@tiptap/extension-table-cell'
-import UserBlock from '@components/Objects/Editor/Extensions/Users/UserBlock'
-import { getLinkExtension } from '@components/Objects/Editor/EditorConf'
-import TableOfContents from './TableOfContents'
-import { CustomHeading } from './CustomHeadingExtenstion'
-import WebPreview from '@components/Objects/Editor/Extensions/WebPreview/WebPreview'
+import { common, createLowlight } from 'lowlight';
+const lowlight = createLowlight(common);
+import { NoTextInput } from '@components/Objects/Editor/Extensions/NoTextInput/NoTextInput';
+import EmbedObjects from '@components/Objects/Editor/Extensions/EmbedObjects/EmbedObjects';
+import WebPreview from '@components/Objects/Editor/Extensions/WebPreview/WebPreview';
+import UserBlock from '@components/Objects/Editor/Extensions/Users/UserBlock';
+import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
+import Buttons from '@components/Objects/Editor/Extensions/Buttons/Buttons';
+import Badges from '@components/Objects/Editor/Extensions/Badges/Badges';
+import { getLinkExtension } from '@components/Objects/Editor/EditorConf';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { CustomHeading } from './CustomHeadingExtenstion';
+import TableHeader from '@tiptap/extension-table-header';
+import ts from 'highlight.js/lib/languages/typescript';
+import js from 'highlight.js/lib/languages/javascript';
+import python from 'highlight.js/lib/languages/python';
+import TableCell from '@tiptap/extension-table-cell';
+import java from 'highlight.js/lib/languages/java';
+import TableRow from '@tiptap/extension-table-row';
+import html from 'highlight.js/lib/languages/xml';
+import css from 'highlight.js/lib/languages/css';
+import AICanvaToolkit from './AI/AICanvaToolkit';
+import TableOfContents from './TableOfContents';
+import Table from '@tiptap/extension-table';
 
 interface Editor {
-  content: string
-  activity: any
+  content: string;
+  activity: any;
 }
 
 function Canva(props: Editor) {
@@ -48,15 +48,15 @@ function Canva(props: Editor) {
    * Another workaround is implemented below to disable the editor from being edited by the user by setting the caret-color to transparent and using a custom extension to filter out transactions that add/edit/remove text.
    * To let the various Custom Extensions know that the editor is not editable, React context (EditorOptionsProvider) will be used instead of props.extension.options.editable.
    */
-  const isEditable = true
+  const isEditable = true;
 
   // Code Block Languages for Lowlight
-  lowlight.register('html', html)
-  lowlight.register('css', css)
-  lowlight.register('js', js)
-  lowlight.register('ts', ts)
-  lowlight.register('python', python)
-  lowlight.register('java', java)
+  lowlight.register('html', html);
+  lowlight.register('css', css);
+  lowlight.register('js', js);
+  lowlight.register('ts', ts);
+  lowlight.register('python', python);
+  lowlight.register('java', java);
 
   const editor: any = useEditor({
     editable: isEditable,
@@ -142,13 +142,16 @@ function Canva(props: Editor) {
     ],
 
     content: props.content,
-  })
+  });
 
   return (
     <EditorOptionsProvider options={{ isEditable: false }}>
       <CanvaWrapper>
         <AIToolkitWrapper>
-          <AICanvaToolkit activity={props.activity} editor={editor} />
+          <AICanvaToolkit
+            activity={props.activity}
+            editor={editor}
+          />
         </AIToolkitWrapper>
         <ContentWrapper>
           <TableOfContents editor={editor} />
@@ -156,14 +159,14 @@ function Canva(props: Editor) {
         </ContentWrapper>
       </CanvaWrapper>
     </EditorOptionsProvider>
-  )
+  );
 }
 
 const CanvaWrapper = styled.div`
   width: 100%;
   margin: 0 auto;
   position: relative;
-`
+`;
 
 const AIToolkitWrapper = styled.div`
   position: absolute;
@@ -178,7 +181,7 @@ const AIToolkitWrapper = styled.div`
   * {
     pointer-events: auto;
   }
-`
+`;
 
 const ContentWrapper = styled.div`
   display: flex;
@@ -187,9 +190,9 @@ const ContentWrapper = styled.div`
 
   // Default: when TableOfContents has content, it takes 20% and editor takes 80%
   > div:first-child:not(:empty) {
+    flex-shrink: 0;
     width: 20%;
     padding-right: 1rem;
-    flex-shrink: 0;
   }
 
   > div:last-child {
@@ -214,35 +217,35 @@ const ContentWrapper = styled.div`
     caret-color: transparent;
 
     h1 {
-      font-size: 30px;
-      font-weight: 600;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 30px;
     }
 
     h2 {
-      font-size: 25px;
-      font-weight: 600;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 25px;
     }
 
     h3 {
-      font-size: 20px;
-      font-weight: 600;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 20px;
     }
 
     h4 {
-      font-size: 18px;
-      font-weight: 600;
       margin-top: 10px;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 18px;
     }
 
     h5 {
-      font-size: 16px;
-      font-weight: 600;
       margin-top: 10px;
       margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 16px;
     }
 
     // Link styling
@@ -273,20 +276,20 @@ const ContentWrapper = styled.div`
     }
 
     table {
-      border-collapse: collapse;
+      width: 100%;
       margin: 0;
       overflow: hidden;
       table-layout: fixed;
-      width: 100%;
+      border-collapse: collapse;
 
       td,
       th {
-        border: 1px solid rgba(139, 139, 139, 0.4);
+        position: relative;
         box-sizing: border-box;
         min-width: 1em;
         padding: 6px 8px;
-        position: relative;
         vertical-align: top;
+        border: 1px solid rgba(139, 139, 139, 0.4);
 
         > * {
           margin-bottom: 0;
@@ -294,31 +297,31 @@ const ContentWrapper = styled.div`
       }
 
       th {
-        background-color: rgba(217, 217, 217, 0.4);
         font-weight: bold;
         text-align: left;
+        background-color: rgba(217, 217, 217, 0.4);
       }
 
       .selectedCell:after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 2;
         background: rgba(139, 139, 139, 0.2);
         content: '';
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
         pointer-events: none;
-        position: absolute;
-        z-index: 2;
       }
 
       .column-resize-handle {
-        background-color: #8d78eb;
-        bottom: -2px;
-        pointer-events: none;
         position: absolute;
-        right: -2px;
         top: 0;
+        right: -2px;
+        bottom: -2px;
         width: 4px;
+        background-color: #8d78eb;
+        pointer-events: none;
       }
     }
 
@@ -330,17 +333,17 @@ const ContentWrapper = styled.div`
 
     // Code Block
     pre {
-      background: #0d0d0d;
-      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
       color: #fff;
       font-family: 'JetBrainsMono', monospace;
-      padding: 0.75rem 1rem;
+      background: #0d0d0d;
+      border-radius: 0.5rem;
 
       code {
-        background: none;
+        padding: 0;
         color: inherit;
         font-size: 0.8rem;
-        padding: 0;
+        background: none;
       }
 
       .hljs-comment,
@@ -396,6 +399,6 @@ const ContentWrapper = styled.div`
       }
     }
   }
-`
+`;
 
-export default Canva
+export default Canva;

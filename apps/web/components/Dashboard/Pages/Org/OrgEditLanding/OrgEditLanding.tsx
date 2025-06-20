@@ -1,6 +1,4 @@
-'use client'
-import type { FC, ChangeEvent } from 'react'
-import { useState, useEffect, createElement } from 'react'
+'use client';
 import type {
   LandingObject,
   LandingSection,
@@ -12,7 +10,7 @@ import type {
   LandingButton,
   LandingImage,
   LandingFeaturedCourses,
-} from './landing_types'
+} from './landing_types';
 import {
   Plus,
   Trash2,
@@ -27,35 +25,28 @@ import {
   Save,
   BookOpen,
   TextIcon,
-} from 'lucide-react'
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { Input } from '@components/ui/input'
-import { Textarea } from '@components/ui/textarea'
-import { Label } from '@components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select'
-import { Button } from '@components/ui/button'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import {
-  updateOrgLanding,
-  uploadLandingContent,
-} from '@services/organizations/orgs'
-import { getOrgLandingMediaDirectory } from '@services/media/media'
-import { getOrgCourses } from '@services/courses/courses'
-import toast from 'react-hot-toast'
-import useSWR from 'swr'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui/tabs'
-import { useTranslations } from 'next-intl'
-import { ButtonIcon } from '@radix-ui/react-icons'
+} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui/tabs';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getOrgLandingMediaDirectory } from '@services/media/media';
+import { useState, useEffect, createElement } from 'react';
+import { getOrgCourses } from '@services/courses/courses';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Textarea } from '@components/ui/textarea';
+import { ButtonIcon } from '@radix-ui/react-icons';
+import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
+import type { FC, ChangeEvent } from 'react';
+import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
+import useSWR from 'swr';
 
 const SECTION_TYPES = {
-  hero: {
+  'hero': {
     icon: LayoutTemplate,
     label: 'Hero',
     description: 'Add a hero section with heading and call-to-action',
@@ -65,12 +56,12 @@ const SECTION_TYPES = {
     label: 'Text & Image',
     description: 'Add a section with text and an image',
   },
-  logos: {
+  'logos': {
     icon: Award,
     label: 'Logos',
     description: 'Add a section to showcase logos',
   },
-  people: {
+  'people': {
     icon: Users,
     label: 'People',
     description: 'Add a section to highlight team members',
@@ -80,10 +71,10 @@ const SECTION_TYPES = {
     label: 'Courses',
     description: 'Add a section to showcase selected courses',
   },
-} as const
+} as const;
 
 const PREDEFINED_GRADIENTS = {
-  sunrise: {
+  'sunrise': {
     colors: ['#fef9f3', '#ffecd2'] as Array<string>,
     direction: '45deg',
   },
@@ -127,7 +118,7 @@ const PREDEFINED_GRADIENTS = {
     colors: ['#1e3a8a', '#3b82f6'] as Array<string>,
     direction: '225deg',
   },
-  volcanic: {
+  'volcanic': {
     colors: ['#991b1b', '#f97316'] as Array<string>,
     direction: '315deg',
   },
@@ -143,7 +134,7 @@ const PREDEFINED_GRADIENTS = {
     colors: ['#0c4a6e', '#0ea5e9'] as Array<string>,
     direction: '45deg',
   },
-} as const
+} as const;
 
 const _GRADIENT_DIRECTIONS = {
   '45deg': '↗️ Top Right',
@@ -154,20 +145,20 @@ const _GRADIENT_DIRECTIONS = {
   '270deg': '⬇️ Bottom',
   '315deg': '↘️ Bottom Right',
   '0deg': '➡️ Right',
-} as const
+} as const;
 
 // Map section type keys to translation keys
 const SECTION_TYPE_KEYS: { [key in LandingSection['type']]: string } = {
-  hero: 'hero',
+  'hero': 'hero',
   'text-and-image': 'textAndImage',
-  logos: 'logos',
-  people: 'people',
+  'logos': 'logos',
+  'people': 'people',
   'featured-courses': 'featuredCourses',
-}
+};
 
 // Function to get translated section types
 const getSectionTypes = (t: Function) => ({
-  hero: {
+  'hero': {
     icon: LayoutTemplate,
     label: t('SectionTypes.hero.label'),
     description: t('SectionTypes.hero.description'),
@@ -177,12 +168,12 @@ const getSectionTypes = (t: Function) => ({
     label: t('SectionTypes.textAndImage.label'),
     description: t('SectionTypes.textAndImage.description'),
   },
-  logos: {
+  'logos': {
     icon: Award,
     label: t('SectionTypes.logos.label'),
     description: t('SectionTypes.logos.description'),
   },
-  people: {
+  'people': {
     icon: Users,
     label: t('SectionTypes.people.label'),
     description: t('SectionTypes.people.description'),
@@ -192,7 +183,7 @@ const getSectionTypes = (t: Function) => ({
     label: t('SectionTypes.featuredCourses.label'),
     description: t('SectionTypes.featuredCourses.description'),
   },
-})
+});
 
 // Map gradient direction keys to translation keys
 const GRADIENT_DIRECTION_KEYS: { [key: string]: string } = {
@@ -204,72 +195,66 @@ const GRADIENT_DIRECTION_KEYS: { [key: string]: string } = {
   '270deg': 'bottom',
   '315deg': 'bottomRight',
   '0deg': 'right',
-}
+};
 
 // Function to get translated gradient directions
 const getGradientDirections = (t: Function) => {
   return Object.entries(GRADIENT_DIRECTION_KEYS).reduce(
     (acc, [key, tKey]) => {
-      acc[key] = t(`GradientDirections.${tKey}`)
-      return acc
+      acc[key] = t(`GradientDirections.${tKey}`);
+      return acc;
     },
-    {} as { [key: string]: string }
-  )
-}
+    {} as { [key: string]: string },
+  );
+};
 
 // Function to get translated gradient preset names
 const getGradientPresetName = (t: Function, name: string) => {
   // Assumes keys like GradientPresets.sunrise, GradientPresets.mintBreeze etc.
-  return t(`GradientPresets.${name.replace('-', '_')}`)
-}
+  return t(`GradientPresets.${name.replace('-', '_')}`);
+};
 
 // Function to get translated section display name
 const getSectionDisplayName = (t: Function, section: LandingSection) => {
-  const sectionTypeKey = SECTION_TYPE_KEYS[section.type]
-  return t(`SectionTypes.${sectionTypeKey}.label`)
-}
+  const sectionTypeKey = SECTION_TYPE_KEYS[section.type];
+  return t(`SectionTypes.${sectionTypeKey}.label`);
+};
 
 const OrgEditLanding = () => {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [isLandingEnabled, setIsLandingEnabled] = useState(false)
-  const tNotify = useTranslations('DashPage.Notifications')
-  const t = useTranslations('DashPage.OrgSettings.Landing')
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [isLandingEnabled, setIsLandingEnabled] = useState(false);
+  const tNotify = useTranslations('DashPage.Notifications');
+  const t = useTranslations('DashPage.OrgSettings.Landing');
   const [landingData, setLandingData] = useState<LandingObject>({
     sections: [],
     enabled: false,
-  })
-  const [selectedSection, setSelectedSection] = useState<number | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
+  });
+  const [selectedSection, setSelectedSection] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Initialize landing data from org config
   useEffect(() => {
     if (org?.config?.config?.landing) {
-      const landingConfig = org.config.config.landing
+      const landingConfig = org.config.config.landing;
       setLandingData({
         sections: landingConfig.sections || [],
         enabled: landingConfig.enabled,
-      })
-      setIsLandingEnabled(landingConfig.enabled)
+      });
+      setIsLandingEnabled(landingConfig.enabled);
     }
-  }, [org])
+  }, [org]);
 
   const addSection = (type: string) => {
-    const newSection: LandingSection = createEmptySection(
-      t,
-      type as keyof typeof SECTION_TYPE_KEYS
-    )
+    const newSection: LandingSection = createEmptySection(t, type as keyof typeof SECTION_TYPE_KEYS);
     setLandingData((prev: LandingObject) => ({
       ...prev,
       sections: [...prev.sections, newSection],
-    }))
-  }
+    }));
+  };
 
-  const createEmptySection = (
-    t: Function,
-    type: keyof typeof SECTION_TYPE_KEYS
-  ): LandingSection => {
+  const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): LandingSection => {
     switch (type) {
       case 'hero':
         return {
@@ -292,7 +277,7 @@ const OrgEditLanding = () => {
           buttons: [],
           illustration: undefined,
           contentAlign: 'center',
-        }
+        };
       case 'text-and-image':
         return {
           type: 'text-and-image',
@@ -304,71 +289,69 @@ const OrgEditLanding = () => {
             alt: '',
           },
           buttons: [],
-        }
+        };
       case 'logos':
         return {
           type: 'logos',
           title: t('EmptySections.logos.title'),
           logos: [],
-        }
+        };
       case 'people':
         return {
           type: 'people',
           title: t('EmptySections.people.title'),
           people: [],
-        }
+        };
       case 'featured-courses':
         return {
           type: 'featured-courses',
           title: t('EmptySections.featuredCourses.title'),
           courses: [],
-        }
+        };
       default:
-        throw new Error(t('Errors.invalidSectionType'))
+        throw new Error(t('Errors.invalidSectionType'));
     }
-  }
+  };
 
   const updateSection = (index: number, updatedSection: LandingSection) => {
-    const newSections = [...landingData.sections]
-    newSections[index] = updatedSection
+    const newSections = [...landingData.sections];
+    newSections[index] = updatedSection;
     setLandingData((prev: LandingObject) => ({
       ...prev,
       sections: newSections,
-    }))
-  }
+    }));
+  };
 
   const deleteSection = (index: number) => {
     setLandingData((prev: LandingObject) => ({
       ...prev,
-      sections: prev.sections.filter(
-        (_: LandingSection, i: number) => i !== index
-      ),
-    }))
-    setSelectedSection(null)
-  }
+      sections: prev.sections.filter((_: LandingSection, i: number) => i !== index),
+    }));
+    setSelectedSection(null);
+  };
 
   const onDragEnd = (result: any) => {
-    if (!result.destination) return
+    if (!result.destination) return;
 
-    const items = Array.from(landingData.sections)
-    const [reorderedItem] = items.splice(result.source.index, 1)
-    items.splice(result.destination.index, 0, reorderedItem)
+    const items = Array.from(landingData.sections);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
 
     setLandingData((prev: LandingObject) => ({
       ...prev,
       sections: items,
-    }))
-    setSelectedSection(result.destination.index)
-  }
+    }));
+    setSelectedSection(result.destination.index);
+  };
 
   const handleSave = async () => {
     if (!org?.id) {
-      toast.error(tNotify('orgIdNotFound'))
-      return
+      toast.error(tNotify('orgIdNotFound'));
+      return;
     }
 
-    setIsSaving(true)
-    const loadingToast = toast.loading(tNotify('savingLandingPage'))
+    setIsSaving(true);
+    const loadingToast = toast.loading(tNotify('savingLandingPage'));
     try {
       const res = await updateOrgLanding(
         org.id,
@@ -376,21 +359,21 @@ const OrgEditLanding = () => {
           sections: landingData.sections,
           enabled: isLandingEnabled,
         },
-        access_token
-      )
+        access_token,
+      );
 
       if (res.status === 200) {
-        toast.success(tNotify('landingPageSavedSuccess'), { id: loadingToast })
+        toast.success(tNotify('landingPageSavedSuccess'), { id: loadingToast });
       } else {
-        toast.error(tNotify('landingPageSaveError'), { id: loadingToast })
+        toast.error(tNotify('landingPageSaveError'), { id: loadingToast });
       }
     } catch (error) {
-      toast.error(tNotify('landingPageSaveError'), { id: loadingToast })
-      console.error('Error saving landing page:', error)
+      toast.error(tNotify('landingPageSaveError'), { id: loadingToast });
+      console.error('Error saving landing page:', error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
@@ -400,9 +383,7 @@ const OrgEditLanding = () => {
           <div>
             <h2 className="flex items-center text-xl font-semibold">
               {t('title')}{' '}
-              <div className="ml-2 rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">
-                {t('betaBadge')}
-              </div>
+              <div className="ml-2 rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">{t('betaBadge')}</div>
             </h2>
             <p className="text-gray-600">{t('description')}</p>
           </div>
@@ -443,92 +424,83 @@ const OrgEditLanding = () => {
                         ref={provided.innerRef}
                         className="space-y-2"
                       >
-                        {landingData.sections.map(
-                          (section: LandingSection, index: number) => (
-                            <Draggable
-                              key={`section-${index}`}
-                              draggableId={`section-${index}`}
-                              index={index}
-                            >
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  onClick={() => setSelectedSection(index)}
-                                  className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
-                                    selectedSection === index
-                                      ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
-                                      : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
-                                  } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
-                                >
-                                  <div className="group flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                      <div
-                                        {...provided.dragHandleProps}
-                                        className={`rounded-md p-1.5 transition-colors duration-200 ${
-                                          selectedSection === index
-                                            ? 'bg-blue-100/50 text-blue-500'
-                                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-                                        }`}
-                                      >
-                                        <GripVertical size={16} />
-                                      </div>
-                                      <div
-                                        className={`rounded-md p-1.5 ${
-                                          selectedSection === index
-                                            ? 'bg-blue-100/50 text-blue-600'
-                                            : 'bg-gray-100/50 text-gray-600'
-                                        }`}
-                                      >
-                                        {createElement(
-                                          SECTION_TYPES[
-                                            section.type as keyof typeof SECTION_TYPES
-                                          ].icon,
-                                          {
-                                            size: 16,
-                                          }
-                                        )}
-                                      </div>
-                                      <span
-                                        className={`truncate text-sm font-medium capitalize ${
-                                          selectedSection === index
-                                            ? 'text-blue-700'
-                                            : 'text-gray-700'
-                                        }`}
-                                      >
-                                        {getSectionDisplayName(t, section)}
-                                      </span>
+                        {landingData.sections.map((section: LandingSection, index: number) => (
+                          <Draggable
+                            key={`section-${index}`}
+                            draggableId={`section-${index}`}
+                            index={index}
+                          >
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                onClick={() => setSelectedSection(index)}
+                                className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
+                                  selectedSection === index
+                                    ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
+                                    : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
+                                } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
+                              >
+                                <div className="group flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div
+                                      {...provided.dragHandleProps}
+                                      className={`rounded-md p-1.5 transition-colors duration-200 ${
+                                        selectedSection === index
+                                          ? 'bg-blue-100/50 text-blue-500'
+                                          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                                      }`}
+                                    >
+                                      <GripVertical size={16} />
                                     </div>
-                                    <div className="flex space-x-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          setSelectedSection(index)
-                                        }}
-                                        className={`rounded-md p-1.5 transition-colors duration-200 ${
-                                          selectedSection === index
-                                            ? 'text-blue-500 hover:bg-blue-100'
-                                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-                                        }`}
-                                      >
-                                        <Edit size={14} />
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          deleteSection(index)
-                                        }}
-                                        className="rounded-md p-1.5 text-red-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
+                                    <div
+                                      className={`rounded-md p-1.5 ${
+                                        selectedSection === index
+                                          ? 'bg-blue-100/50 text-blue-600'
+                                          : 'bg-gray-100/50 text-gray-600'
+                                      }`}
+                                    >
+                                      {createElement(SECTION_TYPES[section.type as keyof typeof SECTION_TYPES].icon, {
+                                        size: 16,
+                                      })}
                                     </div>
+                                    <span
+                                      className={`truncate text-sm font-medium capitalize ${
+                                        selectedSection === index ? 'text-blue-700' : 'text-gray-700'
+                                      }`}
+                                    >
+                                      {getSectionDisplayName(t, section)}
+                                    </span>
+                                  </div>
+                                  <div className="flex space-x-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedSection(index);
+                                      }}
+                                      className={`rounded-md p-1.5 transition-colors duration-200 ${
+                                        selectedSection === index
+                                          ? 'text-blue-500 hover:bg-blue-100'
+                                          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                                      }`}
+                                    >
+                                      <Edit size={14} />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteSection(index);
+                                      }}
+                                      className="rounded-md p-1.5 text-red-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-500"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
                                   </div>
                                 </div>
-                              )}
-                            </Draggable>
-                          )
-                        )}
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
                         {provided.placeholder}
                       </div>
                     )}
@@ -539,36 +511,39 @@ const OrgEditLanding = () => {
                   <Select
                     onValueChange={(value: string) => {
                       if (value) {
-                        addSection(value)
+                        addSection(value);
                       }
                     }}
                   >
                     <SelectTrigger className="w-full border-0 bg-black p-0">
                       <div className="hover:bg-primary/90 inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-black text-sm font-medium text-white outline-none transition-all">
-                        <Plus size="8" color="white" />
+                        <Plus
+                          size="8"
+                          color="white"
+                        />
                         {t('SectionsPanel.addSectionButton')}
                       </div>
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(getSectionTypes(t)).map(
-                        ([type, { icon: Icon, label, description }]) => (
-                          <SelectItem key={type} value={type}>
-                            <div className="flex items-center space-x-3 py-1">
-                              <div className="rounded-md bg-gray-50 p-1.5">
-                                <Icon size={16} className="text-gray-600" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="text-sm font-medium text-gray-700">
-                                  {label}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  {description}
-                                </div>
-                              </div>
+                      {Object.entries(getSectionTypes(t)).map(([type, { icon: Icon, label, description }]) => (
+                        <SelectItem
+                          key={type}
+                          value={type}
+                        >
+                          <div className="flex items-center space-x-3 py-1">
+                            <div className="rounded-md bg-gray-50 p-1.5">
+                              <Icon
+                                size={16}
+                                className="text-gray-600"
+                              />
                             </div>
-                          </SelectItem>
-                        )
-                      )}
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-700">{label}</div>
+                              <div className="text-xs text-gray-500">{description}</div>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -580,9 +555,7 @@ const OrgEditLanding = () => {
                   <SectionEditor
                     t={t}
                     section={landingData.sections[selectedSection]}
-                    onChange={(updatedSection) =>
-                      updateSection(selectedSection, updatedSection)
-                    }
+                    onChange={(updatedSection) => updateSection(selectedSection, updatedSection)}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-gray-500">
@@ -595,19 +568,25 @@ const OrgEditLanding = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface SectionEditorProps {
-  t: Function
-  section: LandingSection
-  onChange: (section: LandingSection) => void
+  t: Function;
+  section: LandingSection;
+  onChange: (section: LandingSection) => void;
 }
 
 const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
   switch (section.type) {
     case 'hero':
-      return <HeroSectionEditor t={t} section={section} onChange={onChange} />
+      return (
+        <HeroSectionEditor
+          t={t}
+          section={section}
+          onChange={onChange}
+        />
+      );
     case 'text-and-image':
       return (
         <TextAndImageSectionEditor
@@ -615,29 +594,45 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           section={section}
           onChange={onChange}
         />
-      )
+      );
     case 'logos':
-      return <LogosSectionEditor t={t} section={section} onChange={onChange} />
+      return (
+        <LogosSectionEditor
+          t={t}
+          section={section}
+          onChange={onChange}
+        />
+      );
     case 'people':
-      return <PeopleSectionEditor t={t} section={section} onChange={onChange} />
+      return (
+        <PeopleSectionEditor
+          t={t}
+          section={section}
+          onChange={onChange}
+        />
+      );
     case 'featured-courses':
       return (
-        <FeaturedCoursesEditor t={t} section={section} onChange={onChange} />
-      )
+        <FeaturedCoursesEditor
+          t={t}
+          section={section}
+          onChange={onChange}
+        />
+      );
     default:
-      return <div>{t('Errors.unknownSectionType')}</div>
+      return <div>{t('Errors.unknownSectionType')}</div>;
   }
-}
+};
 
 const HeroSectionEditor: FC<{
-  t: Function
-  section: LandingHeroSection
-  onChange: (section: LandingHeroSection) => void
+  t: Function;
+  section: LandingHeroSection;
+  onChange: (section: LandingHeroSection) => void;
 }> = ({ t, section, onChange }) => {
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
         onChange({
           ...section,
@@ -645,11 +640,11 @@ const HeroSectionEditor: FC<{
             type: 'image',
             image: reader.result as string,
           },
-        })
-      }
-      reader.readAsDataURL(file)
+        });
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
@@ -672,7 +667,10 @@ const HeroSectionEditor: FC<{
           />
         </div>
 
-        <Tabs defaultValue="content" className="w-full">
+        <Tabs
+          defaultValue="content"
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-4 rounded-lg bg-gray-100 p-1">
             <TabsTrigger
               value="content"
@@ -681,7 +679,10 @@ const HeroSectionEditor: FC<{
               <TextIcon className="h-4 w-4" />
               <span>{t('HeroEditor.Tabs.content')}</span>
             </TabsTrigger>
-            <TabsTrigger value="background" className="flex items-center">
+            <TabsTrigger
+              value="background"
+              className="flex items-center"
+            >
               <LayoutTemplate className="h-4 w-4" />
               <span>{t('HeroEditor.Tabs.background')}</span>
             </TabsTrigger>
@@ -701,13 +702,14 @@ const HeroSectionEditor: FC<{
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="content" className="mt-4 space-y-4">
+          <TabsContent
+            value="content"
+            className="mt-4 space-y-4"
+          >
             {/* Heading */}
             <div className="space-y-4">
               <div>
-                <Label htmlFor="heading">
-                  {t('HeroEditor.Content.headingLabel')}
-                </Label>
+                <Label htmlFor="heading">{t('HeroEditor.Content.headingLabel')}</Label>
                 <Input
                   id="heading"
                   value={section.heading.text}
@@ -721,9 +723,7 @@ const HeroSectionEditor: FC<{
                 />
               </div>
               <div>
-                <Label htmlFor="headingColor">
-                  {t('HeroEditor.Content.headingColorLabel')}
-                </Label>
+                <Label htmlFor="headingColor">{t('HeroEditor.Content.headingColorLabel')}</Label>
                 <div className="flex items-center space-x-1">
                   <Input
                     id="headingColor"
@@ -755,9 +755,7 @@ const HeroSectionEditor: FC<{
             {/* Subheading */}
             <div className="space-y-4">
               <div>
-                <Label htmlFor="subheading">
-                  {t('HeroEditor.Content.subheadingLabel')}
-                </Label>
+                <Label htmlFor="subheading">{t('HeroEditor.Content.subheadingLabel')}</Label>
                 <Input
                   id="subheading"
                   value={section.subheading.text}
@@ -774,9 +772,7 @@ const HeroSectionEditor: FC<{
                 />
               </div>
               <div>
-                <Label htmlFor="subheadingColor">
-                  {t('HeroEditor.Content.subheadingColorLabel')}
-                </Label>
+                <Label htmlFor="subheadingColor">{t('HeroEditor.Content.subheadingColorLabel')}</Label>
                 <div className="flex items-center space-x-1">
                   <Input
                     id="subheadingColor"
@@ -812,11 +808,12 @@ const HeroSectionEditor: FC<{
             </div>
           </TabsContent>
 
-          <TabsContent value="background" className="mt-4 space-y-4">
+          <TabsContent
+            value="background"
+            className="mt-4 space-y-4"
+          >
             <div>
-              <Label htmlFor="background">
-                {t('HeroEditor.Background.typeLabel')}
-              </Label>
+              <Label htmlFor="background">{t('HeroEditor.Background.typeLabel')}</Label>
               <Select
                 value={section.background.type}
                 onValueChange={(value) => {
@@ -825,39 +822,26 @@ const HeroSectionEditor: FC<{
                     background: {
                       type: value as LandingBackground['type'],
                       color: value === 'solid' ? '#ffffff' : undefined,
-                      colors:
-                        value === 'gradient'
-                          ? PREDEFINED_GRADIENTS.sunrise.colors
-                          : undefined,
+                      colors: value === 'gradient' ? PREDEFINED_GRADIENTS.sunrise.colors : undefined,
                       image: value === 'image' ? '' : undefined,
                     },
-                  })
+                  });
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={t('HeroEditor.Background.typePlaceholder')}
-                  />
+                  <SelectValue placeholder={t('HeroEditor.Background.typePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="solid">
-                    {t('HeroEditor.Background.solid')}
-                  </SelectItem>
-                  <SelectItem value="gradient">
-                    {t('HeroEditor.Background.gradient')}
-                  </SelectItem>
-                  <SelectItem value="image">
-                    {t('HeroEditor.Background.image')}
-                  </SelectItem>
+                  <SelectItem value="solid">{t('HeroEditor.Background.solid')}</SelectItem>
+                  <SelectItem value="gradient">{t('HeroEditor.Background.gradient')}</SelectItem>
+                  <SelectItem value="image">{t('HeroEditor.Background.image')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {section.background.type === 'solid' && (
               <div>
-                <Label htmlFor="backgroundColor">
-                  {t('HeroEditor.Background.colorLabel')}
-                </Label>
+                <Label htmlFor="backgroundColor">{t('HeroEditor.Background.colorLabel')}</Label>
                 <div className="flex items-center space-x-1">
                   <Input
                     id="backgroundColor"
@@ -901,7 +885,7 @@ const HeroSectionEditor: FC<{
                       Object.values(PREDEFINED_GRADIENTS).some(
                         (preset) =>
                           preset.colors[0] === section.background.colors?.[0] &&
-                          preset.colors[1] === section.background.colors?.[1]
+                          preset.colors[1] === section.background.colors?.[1],
                       )
                         ? 'preset'
                         : 'custom'
@@ -915,7 +899,7 @@ const HeroSectionEditor: FC<{
                             colors: ['#ffffff', '#f0f0f0'],
                             direction: section.background.direction || '45deg',
                           },
-                        })
+                        });
                       } else {
                         onChange({
                           ...section,
@@ -924,24 +908,16 @@ const HeroSectionEditor: FC<{
                             colors: PREDEFINED_GRADIENTS.sunrise.colors,
                             direction: PREDEFINED_GRADIENTS.sunrise.direction,
                           },
-                        })
+                        });
                       }
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={t(
-                          'HeroEditor.Background.gradientTypePlaceholder'
-                        )}
-                      />
+                      <SelectValue placeholder={t('HeroEditor.Background.gradientTypePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="preset">
-                        {t('HeroEditor.Background.presetGradients')}
-                      </SelectItem>
-                      <SelectItem value="custom">
-                        {t('HeroEditor.Background.customGradient')}
-                      </SelectItem>
+                      <SelectItem value="preset">{t('HeroEditor.Background.presetGradients')}</SelectItem>
+                      <SelectItem value="custom">{t('HeroEditor.Background.customGradient')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -949,13 +925,11 @@ const HeroSectionEditor: FC<{
                 {!Object.values(PREDEFINED_GRADIENTS).some(
                   (preset) =>
                     preset.colors[0] === section.background.colors?.[0] &&
-                    preset.colors[1] === section.background.colors?.[1]
+                    preset.colors[1] === section.background.colors?.[1],
                 ) ? (
                   <div className="space-y-4">
                     <div>
-                      <Label>
-                        {t('HeroEditor.Background.startColorLabel')}
-                      </Label>
+                      <Label>{t('HeroEditor.Background.startColorLabel')}</Label>
                       <div className="flex items-center space-x-1">
                         <Input
                           type="color"
@@ -965,10 +939,7 @@ const HeroSectionEditor: FC<{
                               ...section,
                               background: {
                                 ...section.background,
-                                colors: [
-                                  e.target.value,
-                                  section.background.colors?.[1] || '#f0f0f0',
-                                ],
+                                colors: [e.target.value, section.background.colors?.[1] || '#f0f0f0'],
                               },
                             })
                           }
@@ -981,10 +952,7 @@ const HeroSectionEditor: FC<{
                               ...section,
                               background: {
                                 ...section.background,
-                                colors: [
-                                  e.target.value,
-                                  section.background.colors?.[1] || '#f0f0f0',
-                                ],
+                                colors: [e.target.value, section.background.colors?.[1] || '#f0f0f0'],
                               },
                             })
                           }
@@ -1005,10 +973,7 @@ const HeroSectionEditor: FC<{
                               ...section,
                               background: {
                                 ...section.background,
-                                colors: [
-                                  section.background.colors?.[0] || '#ffffff',
-                                  e.target.value,
-                                ],
+                                colors: [section.background.colors?.[0] || '#ffffff', e.target.value],
                               },
                             })
                           }
@@ -1021,10 +986,7 @@ const HeroSectionEditor: FC<{
                               ...section,
                               background: {
                                 ...section.background,
-                                colors: [
-                                  section.background.colors?.[0] || '#ffffff',
-                                  e.target.value,
-                                ],
+                                colors: [section.background.colors?.[0] || '#ffffff', e.target.value],
                               },
                             })
                           }
@@ -1036,17 +998,13 @@ const HeroSectionEditor: FC<{
                   </div>
                 ) : (
                   <div>
-                    <Label>
-                      {t('HeroEditor.Background.gradientPresetLabel')}
-                    </Label>
+                    <Label>{t('HeroEditor.Background.gradientPresetLabel')}</Label>
                     <Select
                       value={
                         Object.entries(PREDEFINED_GRADIENTS).find(
                           ([_, gradient]) =>
-                            gradient.colors[0] ===
-                              section.background.colors?.[0] &&
-                            gradient.colors[1] ===
-                              section.background.colors?.[1]
+                            gradient.colors[0] === section.background.colors?.[0] &&
+                            gradient.colors[1] === section.background.colors?.[1],
                         )?.[0] || 'sunrise'
                       }
                       onValueChange={(value) =>
@@ -1054,28 +1012,21 @@ const HeroSectionEditor: FC<{
                           ...section,
                           background: {
                             ...section.background,
-                            colors:
-                              PREDEFINED_GRADIENTS[
-                                value as keyof typeof PREDEFINED_GRADIENTS
-                              ].colors,
-                            direction:
-                              PREDEFINED_GRADIENTS[
-                                value as keyof typeof PREDEFINED_GRADIENTS
-                              ].direction,
+                            colors: PREDEFINED_GRADIENTS[value as keyof typeof PREDEFINED_GRADIENTS].colors,
+                            direction: PREDEFINED_GRADIENTS[value as keyof typeof PREDEFINED_GRADIENTS].direction,
                           },
                         })
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue
-                          placeholder={t(
-                            'HeroEditor.Background.gradientPresetPlaceholder'
-                          )}
-                        />
+                        <SelectValue placeholder={t('HeroEditor.Background.gradientPresetPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(PREDEFINED_GRADIENTS).map(([name]) => (
-                          <SelectItem key={name} value={name}>
+                          <SelectItem
+                            key={name}
+                            value={name}
+                          >
                             <div className="flex items-center space-x-1">
                               <div
                                 className="h-8 w-8 rounded-md"
@@ -1083,9 +1034,7 @@ const HeroSectionEditor: FC<{
                                   background: `linear-gradient(${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].direction}, ${PREDEFINED_GRADIENTS[name as keyof typeof PREDEFINED_GRADIENTS].colors.join(', ')})`,
                                 }}
                               />
-                              <span className="capitalize">
-                                {getGradientPresetName(t, name)}
-                              </span>
+                              <span className="capitalize">{getGradientPresetName(t, name)}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -1095,9 +1044,7 @@ const HeroSectionEditor: FC<{
                 )}
 
                 <div>
-                  <Label>
-                    {t('HeroEditor.Background.gradientDirectionLabel')}
-                  </Label>
+                  <Label>{t('HeroEditor.Background.gradientDirectionLabel')}</Label>
                   <Select
                     value={section.background.direction || '45deg'}
                     onValueChange={(value) =>
@@ -1108,20 +1055,17 @@ const HeroSectionEditor: FC<{
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={t(
-                          'HeroEditor.Background.gradientDirectionPlaceholder'
-                        )}
-                      />
+                      <SelectValue placeholder={t('HeroEditor.Background.gradientDirectionPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(getGradientDirections(t)).map(
-                        ([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        )
-                      )}
+                      {Object.entries(getGradientDirections(t)).map(([value, label]) => (
+                        <SelectItem
+                          key={value}
+                          value={value}
+                        >
+                          {label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1144,9 +1088,7 @@ const HeroSectionEditor: FC<{
                   <div className="mt-2 flex items-center space-x-4">
                     <Button
                       variant="outline"
-                      onClick={() =>
-                        document.getElementById('imageUpload')?.click()
-                      }
+                      onClick={() => document.getElementById('imageUpload')?.click()}
                       className="w-full"
                     >
                       <Upload className="mr-2 h-4 w-4" />
@@ -1174,7 +1116,10 @@ const HeroSectionEditor: FC<{
             )}
           </TabsContent>
 
-          <TabsContent value="buttons" className="mt-4 space-y-4">
+          <TabsContent
+            value="buttons"
+            className="mt-4 space-y-4"
+          >
             <div className="space-y-3">
               {section.buttons.map((button: LandingButton, index: number) => (
                 <div
@@ -1186,45 +1131,41 @@ const HeroSectionEditor: FC<{
                     <Input
                       value={button.text}
                       onChange={(e) => {
-                        const newButtons = [...section.buttons]
-                        newButtons[index] = { ...button, text: e.target.value }
-                        onChange({ ...section, buttons: newButtons })
+                        const newButtons = [...section.buttons];
+                        newButtons[index] = { ...button, text: e.target.value };
+                        onChange({ ...section, buttons: newButtons });
                       }}
                       placeholder={t('HeroEditor.Buttons.textPlaceholder')}
                     />
                     <div className="flex items-center space-x-1">
                       <div className="space-y-1">
-                        <Label className="text-xs">
-                          {t('HeroEditor.Buttons.textColorLabel')}
-                        </Label>
+                        <Label className="text-xs">{t('HeroEditor.Buttons.textColorLabel')}</Label>
                         <Input
                           type="color"
                           value={button.color}
                           onChange={(e) => {
-                            const newButtons = [...section.buttons]
+                            const newButtons = [...section.buttons];
                             newButtons[index] = {
                               ...button,
                               color: e.target.value,
-                            }
-                            onChange({ ...section, buttons: newButtons })
+                            };
+                            onChange({ ...section, buttons: newButtons });
                           }}
                           className="h-8 w-full p-1"
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">
-                          {t('HeroEditor.Buttons.bgColorLabel')}
-                        </Label>
+                        <Label className="text-xs">{t('HeroEditor.Buttons.bgColorLabel')}</Label>
                         <Input
                           type="color"
                           value={button.background}
                           onChange={(e) => {
-                            const newButtons = [...section.buttons]
+                            const newButtons = [...section.buttons];
                             newButtons[index] = {
                               ...button,
                               background: e.target.value,
-                            }
-                            onChange({ ...section, buttons: newButtons })
+                            };
+                            onChange({ ...section, buttons: newButtons });
                           }}
                           className="h-8 w-full p-1"
                         />
@@ -1238,12 +1179,12 @@ const HeroSectionEditor: FC<{
                       <Input
                         value={button.link}
                         onChange={(e) => {
-                          const newButtons = [...section.buttons]
+                          const newButtons = [...section.buttons];
                           newButtons[index] = {
                             ...button,
                             link: e.target.value,
-                          }
-                          onChange({ ...section, buttons: newButtons })
+                          };
+                          onChange({ ...section, buttons: newButtons });
                         }}
                         placeholder={t('HeroEditor.Buttons.linkPlaceholder')}
                       />
@@ -1253,11 +1194,9 @@ const HeroSectionEditor: FC<{
                     variant="ghost"
                     size="icon"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      const newButtons = section.buttons.filter(
-                        (_: LandingButton, i: number) => i !== index
-                      )
-                      onChange({ ...section, buttons: newButtons })
+                      e.stopPropagation();
+                      const newButtons = section.buttons.filter((_: LandingButton, i: number) => i !== index);
+                      onChange({ ...section, buttons: newButtons });
                     }}
                     className="mt-8 self-start text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
@@ -1274,11 +1213,11 @@ const HeroSectionEditor: FC<{
                       link: '#',
                       color: '#ffffff',
                       background: '#000000',
-                    }
+                    };
                     onChange({
                       ...section,
                       buttons: [...section.buttons, newButton],
-                    })
+                    });
                   }}
                   className="w-full"
                 >
@@ -1289,7 +1228,10 @@ const HeroSectionEditor: FC<{
             </div>
           </TabsContent>
 
-          <TabsContent value="illustration" className="mt-4 space-y-4">
+          <TabsContent
+            value="illustration"
+            className="mt-4 space-y-4"
+          >
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>{t('HeroEditor.Illustration.imageLabel')}</Label>
@@ -1308,7 +1250,7 @@ const HeroSectionEditor: FC<{
                           verticalAlign: 'center',
                           size: 'medium',
                         },
-                      })
+                      });
                     }
                   }}
                   placeholder={t('HeroEditor.Illustration.imageUrlPlaceholder')}
@@ -1326,7 +1268,7 @@ const HeroSectionEditor: FC<{
                             alt: e.target.value,
                           },
                         },
-                      })
+                      });
                     }
                   }}
                   placeholder={t('HeroEditor.Illustration.imageAltPlaceholder')}
@@ -1375,26 +1317,17 @@ const HeroSectionEditor: FC<{
                             alt: '',
                           },
                           size: section.illustration?.size || 'medium',
-                          verticalAlign:
-                            section.illustration?.verticalAlign || 'center',
+                          verticalAlign: section.illustration?.verticalAlign || 'center',
                         },
                       })
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={t(
-                          'HeroEditor.Illustration.positionPlaceholder'
-                        )}
-                      />
+                      <SelectValue placeholder={t('HeroEditor.Illustration.positionPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="left">
-                        {t('HeroEditor.Illustration.positionLeft')}
-                      </SelectItem>
-                      <SelectItem value="right">
-                        {t('HeroEditor.Illustration.positionRight')}
-                      </SelectItem>
+                      <SelectItem value="left">{t('HeroEditor.Illustration.positionLeft')}</SelectItem>
+                      <SelectItem value="right">{t('HeroEditor.Illustration.positionRight')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1413,31 +1346,19 @@ const HeroSectionEditor: FC<{
                             url: '',
                             alt: '',
                           },
-                          position: (section.illustration?.position ||
-                            'left') as 'left' | 'right',
-                          verticalAlign:
-                            section.illustration?.verticalAlign || 'center',
+                          position: (section.illustration?.position || 'left') as 'left' | 'right',
+                          verticalAlign: section.illustration?.verticalAlign || 'center',
                         },
                       })
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={t(
-                          'HeroEditor.Illustration.sizePlaceholder'
-                        )}
-                      />
+                      <SelectValue placeholder={t('HeroEditor.Illustration.sizePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="small">
-                        {t('HeroEditor.Illustration.sizeSmall')}
-                      </SelectItem>
-                      <SelectItem value="medium">
-                        {t('HeroEditor.Illustration.sizeMedium')}
-                      </SelectItem>
-                      <SelectItem value="large">
-                        {t('HeroEditor.Illustration.sizeLarge')}
-                      </SelectItem>
+                      <SelectItem value="small">{t('HeroEditor.Illustration.sizeSmall')}</SelectItem>
+                      <SelectItem value="medium">{t('HeroEditor.Illustration.sizeMedium')}</SelectItem>
+                      <SelectItem value="large">{t('HeroEditor.Illustration.sizeLarge')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1462,56 +1383,47 @@ const HeroSectionEditor: FC<{
         </Tabs>
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface ImageUploaderProps {
-  t: Function
-  onImageUploaded: (imageUrl: string) => void
-  className?: string
-  buttonText?: string
-  id: string
+  t: Function;
+  onImageUploaded: (imageUrl: string) => void;
+  className?: string;
+  buttonText?: string;
+  id: string;
 }
 
-const ImageUploader: FC<ImageUploaderProps> = ({
-  t,
-  onImageUploaded,
-  className,
-  buttonText,
-  id,
-}) => {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [isUploading, setIsUploading] = useState(false)
-  const tNotify = useTranslations('DashPage.Notifications')
-  const inputId = `imageUpload-${id}`
+const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, buttonText, id }) => {
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [isUploading, setIsUploading] = useState(false);
+  const tNotify = useTranslations('DashPage.Notifications');
+  const inputId = `imageUpload-${id}`;
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setIsUploading(true)
-    const loadingToast = toast.loading(tNotify('uploadingImage'))
+    setIsUploading(true);
+    const loadingToast = toast.loading(tNotify('uploadingImage'));
     try {
-      const response = await uploadLandingContent(org.id, file, access_token)
+      const response = await uploadLandingContent(org.id, file, access_token);
       if (response.status === 200) {
-        const imageUrl = getOrgLandingMediaDirectory(
-          org.org_uuid,
-          response.data.filename
-        )
-        onImageUploaded(imageUrl)
-        toast.success(tNotify('imageUploadSuccess'), { id: loadingToast })
+        const imageUrl = getOrgLandingMediaDirectory(org.org_uuid, response.data.filename);
+        onImageUploaded(imageUrl);
+        toast.success(tNotify('imageUploadSuccess'), { id: loadingToast });
       } else {
-        toast.error(tNotify('imageUploadFailed'), { id: loadingToast })
+        toast.error(tNotify('imageUploadFailed'), { id: loadingToast });
       }
     } catch (error) {
-      console.error('Error uploading image:', error)
-      toast.error(tNotify('imageUploadFailed'), { id: loadingToast })
+      console.error('Error uploading image:', error);
+      toast.error(tNotify('imageUploadFailed'), { id: loadingToast });
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   return (
     <div className={className}>
@@ -1532,13 +1444,13 @@ const ImageUploader: FC<ImageUploaderProps> = ({
         className="hidden"
       />
     </div>
-  )
-}
+  );
+};
 
 const TextAndImageSectionEditor: FC<{
-  t: Function
-  section: LandingTextAndImageSection
-  onChange: (section: LandingTextAndImageSection) => void
+  t: Function;
+  section: LandingTextAndImageSection;
+  onChange: (section: LandingTextAndImageSection) => void;
 }> = ({ t, section, onChange }) => {
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
@@ -1563,9 +1475,7 @@ const TextAndImageSectionEditor: FC<{
 
         {/* Text */}
         <div>
-          <Label htmlFor="content">
-            {t('TextAndImageEditor.contentLabel')}
-          </Label>
+          <Label htmlFor="content">{t('TextAndImageEditor.contentLabel')}</Label>
           <Textarea
             id="content"
             value={section.text}
@@ -1577,27 +1487,17 @@ const TextAndImageSectionEditor: FC<{
 
         {/* Flow */}
         <div>
-          <Label htmlFor="flow">
-            {t('TextAndImageEditor.imagePositionLabel')}
-          </Label>
+          <Label htmlFor="flow">{t('TextAndImageEditor.imagePositionLabel')}</Label>
           <Select
             value={section.flow}
-            onValueChange={(value) =>
-              onChange({ ...section, flow: value as 'left' | 'right' })
-            }
+            onValueChange={(value) => onChange({ ...section, flow: value as 'left' | 'right' })}
           >
             <SelectTrigger>
-              <SelectValue
-                placeholder={t('TextAndImageEditor.imagePositionPlaceholder')}
-              />
+              <SelectValue placeholder={t('TextAndImageEditor.imagePositionPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="left">
-                {t('TextAndImageEditor.positionLeft')}
-              </SelectItem>
-              <SelectItem value="right">
-                {t('TextAndImageEditor.positionRight')}
-              </SelectItem>
+              <SelectItem value="left">{t('TextAndImageEditor.positionLeft')}</SelectItem>
+              <SelectItem value="right">{t('TextAndImageEditor.positionRight')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -1654,13 +1554,13 @@ const TextAndImageSectionEditor: FC<{
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const LogosSectionEditor: FC<{
-  t: Function
-  section: LandingLogos
-  onChange: (section: LandingLogos) => void
+  t: Function;
+  section: LandingLogos;
+  onChange: (section: LandingLogos) => void;
 }> = ({ t, section, onChange }) => {
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
@@ -1686,23 +1586,26 @@ const LogosSectionEditor: FC<{
           </div>
 
           {section.logos.map((logo: LandingImage, index: number) => (
-            <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+            <div
+              key={index}
+              className="grid grid-cols-[1fr_1fr_auto] gap-2"
+            >
               <div className="space-y-2">
                 <Input
                   value={logo.url}
                   onChange={(e) => {
-                    const newLogos = [...section.logos]
-                    newLogos[index] = { ...logo, url: e.target.value }
-                    onChange({ ...section, logos: newLogos })
+                    const newLogos = [...section.logos];
+                    newLogos[index] = { ...logo, url: e.target.value };
+                    onChange({ ...section, logos: newLogos });
                   }}
                   placeholder={t('LogosEditor.logoUrlPlaceholder')}
                 />
                 <ImageUploader
                   id={`logo-${index}`}
                   onImageUploaded={(url) => {
-                    const newLogos = [...section.logos]
-                    newLogos[index] = { ...section.logos[index], url }
-                    onChange({ ...section, logos: newLogos })
+                    const newLogos = [...section.logos];
+                    newLogos[index] = { ...section.logos[index], url };
+                    onChange({ ...section, logos: newLogos });
                   }}
                   buttonText={t('LogosEditor.uploadButton')}
                   t={t}
@@ -1712,9 +1615,9 @@ const LogosSectionEditor: FC<{
                 <Input
                   value={logo.alt}
                   onChange={(e) => {
-                    const newLogos = [...section.logos]
-                    newLogos[index] = { ...logo, alt: e.target.value }
-                    onChange({ ...section, logos: newLogos })
+                    const newLogos = [...section.logos];
+                    newLogos[index] = { ...logo, alt: e.target.value };
+                    onChange({ ...section, logos: newLogos });
                   }}
                   placeholder={t('LogosEditor.logoAltPlaceholder')}
                 />
@@ -1730,11 +1633,9 @@ const LogosSectionEditor: FC<{
                 variant="ghost"
                 size="icon"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  const newLogos = section.logos.filter(
-                    (_: LandingImage, i: number) => i !== index
-                  )
-                  onChange({ ...section, logos: newLogos })
+                  e.stopPropagation();
+                  const newLogos = section.logos.filter((_: LandingImage, i: number) => i !== index);
+                  onChange({ ...section, logos: newLogos });
                 }}
                 className="text-red-500 hover:bg-red-50 hover:text-red-600"
               >
@@ -1748,11 +1649,11 @@ const LogosSectionEditor: FC<{
               const newLogo: LandingImage = {
                 url: '',
                 alt: '',
-              }
+              };
               onChange({
                 ...section,
                 logos: [...section.logos, newLogo],
-              })
+              });
             }}
             className="w-full"
           >
@@ -1762,13 +1663,13 @@ const LogosSectionEditor: FC<{
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const PeopleSectionEditor: FC<{
-  t: Function
-  section: LandingPeople
-  onChange: (section: LandingPeople) => void
+  t: Function;
+  section: LandingPeople;
+  onChange: (section: LandingPeople) => void;
 }> = ({ t, section, onChange }) => {
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
@@ -1805,9 +1706,9 @@ const PeopleSectionEditor: FC<{
                   <Input
                     value={person.name}
                     onChange={(e) => {
-                      const newPeople = [...section.people]
-                      newPeople[index] = { ...person, name: e.target.value }
-                      onChange({ ...section, people: newPeople })
+                      const newPeople = [...section.people];
+                      newPeople[index] = { ...person, name: e.target.value };
+                      onChange({ ...section, people: newPeople });
                     }}
                     placeholder={t('PeopleEditor.namePlaceholder')}
                   />
@@ -1818,12 +1719,12 @@ const PeopleSectionEditor: FC<{
                   <Input
                     value={person.username || ''}
                     onChange={(e) => {
-                      const newPeople = [...section.people]
+                      const newPeople = [...section.people];
                       newPeople[index] = {
                         ...person,
                         username: e.target.value,
-                      }
-                      onChange({ ...section, people: newPeople })
+                      };
+                      onChange({ ...section, people: newPeople });
                     }}
                     placeholder={t('PeopleEditor.usernamePlaceholder')}
                   />
@@ -1835,24 +1736,24 @@ const PeopleSectionEditor: FC<{
                     <Input
                       value={person.image_url}
                       onChange={(e) => {
-                        const newPeople = [...section.people]
+                        const newPeople = [...section.people];
                         newPeople[index] = {
                           ...person,
                           image_url: e.target.value,
-                        }
-                        onChange({ ...section, people: newPeople })
+                        };
+                        onChange({ ...section, people: newPeople });
                       }}
                       placeholder={t('PeopleEditor.imageUrlPlaceholder')}
                     />
                     <ImageUploader
                       id={`person-${index}`}
                       onImageUploaded={(url) => {
-                        const newPeople = [...section.people]
+                        const newPeople = [...section.people];
                         newPeople[index] = {
                           ...section.people[index],
                           image_url: url,
-                        }
-                        onChange({ ...section, people: newPeople })
+                        };
+                        onChange({ ...section, people: newPeople });
                       }}
                       buttonText={t('PeopleEditor.uploadAvatarButton')}
                       t={t}
@@ -1872,12 +1773,12 @@ const PeopleSectionEditor: FC<{
                   <Input
                     value={person.description}
                     onChange={(e) => {
-                      const newPeople = [...section.people]
+                      const newPeople = [...section.people];
                       newPeople[index] = {
                         ...person,
                         description: e.target.value,
-                      }
-                      onChange({ ...section, people: newPeople })
+                      };
+                      onChange({ ...section, people: newPeople });
                     }}
                     placeholder={t('PeopleEditor.descriptionPlaceholder')}
                   />
@@ -1888,11 +1789,9 @@ const PeopleSectionEditor: FC<{
                     variant="ghost"
                     size="icon"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      const newPeople = section.people.filter(
-                        (_: any, i: number) => i !== index
-                      )
-                      onChange({ ...section, people: newPeople })
+                      e.stopPropagation();
+                      const newPeople = section.people.filter((_: any, i: number) => i !== index);
+                      onChange({ ...section, people: newPeople });
                     }}
                     className="text-red-500 hover:bg-red-50 hover:text-red-600"
                   >
@@ -1910,11 +1809,11 @@ const PeopleSectionEditor: FC<{
                   description: '',
                   image_url: '',
                   username: '',
-                }
+                };
                 onChange({
                   ...section,
                   people: [...section.people, newPerson],
-                })
+                });
               }}
               className="w-full"
             >
@@ -1925,22 +1824,21 @@ const PeopleSectionEditor: FC<{
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const FeaturedCoursesEditor: FC<{
-  t: Function
-  section: LandingFeaturedCourses
-  onChange: (section: LandingFeaturedCourses) => void
+  t: Function;
+  section: LandingFeaturedCourses;
+  onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
 
-  const { data: courses } = useSWR(
-    org?.slug ? [org.slug, access_token] : null,
-    ([orgSlug, token]) => getOrgCourses(orgSlug, null, token)
-  )
+  const { data: courses } = useSWR(org?.slug ? [org.slug, access_token] : null, ([orgSlug, token]) =>
+    getOrgCourses(orgSlug, null, token),
+  );
 
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
@@ -1986,32 +1884,18 @@ const FeaturedCoursesEditor: FC<{
                       </div>
                       <div>
                         <h4 className="font-medium">{course.name}</h4>
-                        <p className="text-sm text-gray-500">
-                          {course.description}
-                        </p>
+                        <p className="text-sm text-gray-500">{course.description}</p>
                       </div>
                     </div>
                     <Button
-                      variant={
-                        section.courses.includes(course.course_uuid)
-                          ? 'default'
-                          : 'outline'
-                      }
+                      variant={section.courses.includes(course.course_uuid) ? 'default' : 'outline'}
                       onClick={() => {
-                        const newCourses = section.courses.includes(
-                          course.course_uuid
-                        )
-                          ? section.courses.filter(
-                              (id) => id !== course.course_uuid
-                            )
-                          : [...section.courses, course.course_uuid]
-                        onChange({ ...section, courses: newCourses })
+                        const newCourses = section.courses.includes(course.course_uuid)
+                          ? section.courses.filter((id) => id !== course.course_uuid)
+                          : [...section.courses, course.course_uuid];
+                        onChange({ ...section, courses: newCourses });
                       }}
-                      className={
-                        section.courses.includes(course.course_uuid)
-                          ? 'bg-black hover:bg-black/90'
-                          : ''
-                      }
+                      className={section.courses.includes(course.course_uuid) ? 'bg-black hover:bg-black/90' : ''}
                     >
                       {section.courses.includes(course.course_uuid)
                         ? t('FeaturedCoursesEditor.selectedButton')
@@ -2021,15 +1905,13 @@ const FeaturedCoursesEditor: FC<{
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center text-gray-500">
-                {t('FeaturedCoursesEditor.loadingCourses')}
-              </div>
+              <div className="py-8 text-center text-gray-500">{t('FeaturedCoursesEditor.loadingCourses')}</div>
             )}
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default OrgEditLanding
+export default OrgEditLanding;

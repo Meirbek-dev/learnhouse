@@ -1,34 +1,32 @@
-'use client'
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
-import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse'
-import CourseThumbnail, {
-  removeCoursePrefix,
-} from '@components/Objects/Thumbnails/CourseThumbnail'
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
-import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
-import useAdminStatus from '@components/Hooks/useAdminStatus'
-import { useTranslations } from 'next-intl'
+'use client';
+import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
+import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 type CourseProps = {
-  orgslug: string
-  courses: any
-  org_id: string
-}
+  orgslug: string;
+  courses: any;
+  org_id: string;
+};
 
 function CoursesHome(params: CourseProps) {
-  const searchParams = useSearchParams()
-  const isCreatingCourse = !!searchParams.get('new')
-  const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse)
-  const orgslug = params.orgslug
-  const courses = params.courses
-  const isUserAdmin = useAdminStatus() as any
-  const t = useTranslations('DashPage.Courses.HomePageClient')
+  const searchParams = useSearchParams();
+  const isCreatingCourse = !!searchParams.get('new');
+  const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
+  const orgslug = params.orgslug;
+  const courses = params.courses;
+  const isUserAdmin = useAdminStatus() as any;
+  const t = useTranslations('DashPage.Courses.HomePageClient');
 
   async function closeNewCourseModal() {
-    setNewCourseModal(false)
+    setNewCourseModal(false);
   }
 
   return (
@@ -74,12 +72,8 @@ function CoursesHome(params: CourseProps) {
         {courses.length === 0 && (
           <div className="col-span-full flex items-center justify-center py-8">
             <div className="text-center">
-              <h2 className="mb-2 text-2xl font-bold text-gray-600">
-                {t('noCourses')}
-              </h2>
-              <p className="text-lg text-gray-400">
-                {isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}
-              </p>
+              <h2 className="mb-2 text-2xl font-bold text-gray-600">{t('noCourses')}</h2>
+              <p className="text-lg text-gray-400">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
               {isUserAdmin && (
                 <div className="mt-6 flex justify-center">
                   <AuthenticatedClientElement
@@ -110,7 +104,7 @@ function CoursesHome(params: CourseProps) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default CoursesHome
+export default CoursesHome;

@@ -1,32 +1,26 @@
-'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import UserAvatar from '@components/Objects/UserAvatar'
-import {
-  getAPIUrl,
-  getUriWithOrg,
-  getUriWithoutOrg,
-} from '@services/config/config'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { ArrowRightCircle, Info } from 'lucide-react'
-import { signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import Image from 'next/image'
-import Link from 'next/link'
-import openuIcon from 'public/openu_icon.png'
-import { useEffect } from 'react'
-import useSWR from 'swr'
+'use client';
+import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { ArrowRightCircle, Info } from 'lucide-react';
+import openuIcon from 'public/openu_icon.png';
+import { useTranslations } from 'next-intl';
+import { signOut } from 'next-auth/react';
+import { useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import useSWR from 'swr';
 
 function HomeClient() {
-  const t = useTranslations('HomeClient')
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const { data: orgs } = useSWR(
-    `${getAPIUrl()}orgs/user/page/1/limit/10`,
-    (url) => swrFetcher(url, access_token),
-    { revalidateOnFocus: false }
-  )
+  const t = useTranslations('HomeClient');
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const { data: orgs } = useSWR(`${getAPIUrl()}orgs/user/page/1/limit/10`, (url) => swrFetcher(url, access_token), {
+    revalidateOnFocus: false,
+  });
 
-  useEffect(() => {}, [session, orgs])
+  useEffect(() => {}, [session, orgs]);
   return (
     <div className="flex flex-col">
       <div className="mx-auto flex items-center space-x-4 rounded-b-2xl bg-black pt-16 text-3xl font-semibold">
@@ -67,16 +61,10 @@ function HomeClient() {
         ))}
       </div>
       <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">
-        <span
-          onClick={() =>
-            signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })
-          }
-        >
-          {t('signOut')}
-        </span>
+        <span onClick={() => signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })}>{t('signOut')}</span>
       </div>
     </div>
-  )
+  );
 }
 
-export default HomeClient
+export default HomeClient;

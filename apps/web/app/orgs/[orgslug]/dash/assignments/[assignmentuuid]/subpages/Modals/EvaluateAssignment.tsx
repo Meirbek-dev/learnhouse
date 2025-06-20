@@ -1,37 +1,22 @@
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext'
-import {
-  BookOpenCheck,
-  Check,
-  Download,
-  Info,
-  MoveRight,
-  X,
-} from 'lucide-react'
-import Link from 'next/link'
-import TaskQuizObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskQuizObject'
-import TaskFileObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFileObject'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getTaskRefFileDir } from '@services/media/media'
-import {
-  deleteUserSubmission,
-  markActivityAsDoneForUser,
-  putFinalGrade,
-} from '@services/courses/assignments'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import toast from 'react-hot-toast'
-import { useTranslations } from 'next-intl'
+import { deleteUserSubmission, markActivityAsDoneForUser, putFinalGrade } from '@services/courses/assignments';
+import TaskQuizObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
+import TaskFileObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { BookOpenCheck, Check, Download, Info, MoveRight, X } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getTaskRefFileDir } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useTranslations } from 'next-intl';
+import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 function EvaluateAssignment({ user_id }: any) {
-  const t = useTranslations('DashPage.Assignments.EvaluateModal')
-  const assignments = useAssignments() as any
-  const session = useLHSession() as any
-  const org = useOrg() as any
+  const t = useTranslations('DashPage.Assignments.EvaluateModal');
+  const assignments = useAssignments() as any;
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
 
   // Guard clause for missing assignment data
   if (!assignments?.assignment_object) {
@@ -41,64 +26,46 @@ function EvaluateAssignment({ user_id }: any) {
           defaultValue: 'Assignment data is unavailable.',
         })}
       </div>
-    )
+    );
   }
 
   async function gradeAssignment() {
-    if (
-      !(
-        assignments?.assignment_object?.assignment_uuid &&
-        session?.data?.tokens?.access_token
-      )
-    )
-      return
+    if (!(assignments?.assignment_object?.assignment_uuid && session?.data?.tokens?.access_token)) return;
     const res = await putFinalGrade(
       user_id,
       assignments.assignment_object.assignment_uuid,
-      session.data.tokens.access_token
-    )
+      session.data.tokens.access_token,
+    );
     if (res.success) {
-      toast.success(t('gradeFinalSuccess', { message: res.data.message }))
+      toast.success(t('gradeFinalSuccess', { message: res.data.message }));
     } else {
-      toast.error(t('gradeFinalError', { message: res.data.message }))
+      toast.error(t('gradeFinalError', { message: res.data.message }));
     }
   }
 
   async function markActivityAsDone() {
-    if (
-      !(
-        assignments?.assignment_object?.assignment_uuid &&
-        session?.data?.tokens?.access_token
-      )
-    )
-      return
+    if (!(assignments?.assignment_object?.assignment_uuid && session?.data?.tokens?.access_token)) return;
     const res = await markActivityAsDoneForUser(
       user_id,
       assignments.assignment_object.assignment_uuid,
-      session.data.tokens.access_token
-    )
+      session.data.tokens.access_token,
+    );
     if (res.success) {
-      toast.success(t('markDoneSuccess', { message: res.data.message }))
+      toast.success(t('markDoneSuccess', { message: res.data.message }));
     } else {
-      toast.error(t('markDoneError', { message: res.data.message }))
+      toast.error(t('markDoneError', { message: res.data.message }));
     }
   }
 
   async function rejectAssignment() {
-    if (
-      !(
-        assignments?.assignment_object?.assignment_uuid &&
-        session?.data?.tokens?.access_token
-      )
-    )
-      return
+    if (!(assignments?.assignment_object?.assignment_uuid && session?.data?.tokens?.access_token)) return;
     const _res = await deleteUserSubmission(
       user_id,
       assignments.assignment_object.assignment_uuid,
-      session.data.tokens.access_token
-    )
-    toast.success(t('rejectSuccess'))
-    window.location.reload()
+      session.data.tokens.access_token,
+    );
+    toast.success(t('rejectSuccess'));
+    window.location.reload();
   }
 
   return (
@@ -123,9 +90,7 @@ function EvaluateAssignment({ user_id }: any) {
                         <Info size={13} />
                         <p className="text-xs font-semibold">{t('hint')}</p>
                       </PopoverTrigger>
-                      <PopoverContent className="max-h-[200px] overflow-y-auto">
-                        {task.hint}
-                      </PopoverContent>
+                      <PopoverContent className="max-h-[200px] overflow-y-auto">{task.hint}</PopoverContent>
                     </Popover>
                   )}
                   <Link
@@ -135,7 +100,7 @@ function EvaluateAssignment({ user_id }: any) {
                       assignments?.activity_object.activity_uuid,
                       assignments?.assignment_object.assignment_uuid,
                       task.assignment_task_uuid,
-                      task.reference_file
+                      task.reference_file,
                     )}
                     target="_blank"
                     download={true}
@@ -172,7 +137,7 @@ function EvaluateAssignment({ user_id }: any) {
                 )}
               </div>
             </div>
-          )
+          );
         })}
       <div className="flex items-center justify-between space-x-4 font-semibold">
         <button
@@ -190,7 +155,10 @@ function EvaluateAssignment({ user_id }: any) {
             <BookOpenCheck size={18} />
             <span>{t('setFinalGrade')}</span>
           </button>
-          <MoveRight className="text-gray-400" size={18} />
+          <MoveRight
+            className="text-gray-400"
+            size={18}
+          />
           <button
             onClick={markActivityAsDone}
             className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-lg bg-teal-600/80 px-4 py-2 text-sm text-white"
@@ -201,7 +169,7 @@ function EvaluateAssignment({ user_id }: any) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default EvaluateAssignment
+export default EvaluateAssignment;

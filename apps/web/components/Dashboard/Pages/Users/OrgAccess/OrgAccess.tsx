@@ -1,90 +1,80 @@
-'use client'
+'use client';
 
-import { useOrg } from '@components/Contexts/OrgContext'
-import PageLoading from '@components/Objects/Loaders/PageLoading'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { getAPIUrl, getUriWithoutOrg } from '@services/config/config'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { Globe, Ticket, UserSquare, Users, X } from 'lucide-react'
-import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import useSWR, { mutate } from 'swr'
-import dayjs from 'dayjs'
-import {
-  changeSignupMechanism,
-  deleteInviteCode,
-} from '@services/organizations/invites'
-import toast from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import OrgInviteCodeGenerate from '@components/Objects/Modals/Dash/OrgAccess/OrgInviteCodeGenerate'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useTranslations } from 'next-intl'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import OrgInviteCodeGenerate from '@components/Objects/Modals/Dash/OrgAccess/OrgInviteCodeGenerate';
+import { changeSignupMechanism, deleteInviteCode } from '@services/organizations/invites';
+import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Globe, Ticket, UserSquare, Users, X } from 'lucide-react';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import Link from 'next/link';
+import dayjs from 'dayjs';
 
 function OrgAccess() {
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('DashPage.UserSettings.signupsSection')
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('DashPage.UserSettings.signupsSection');
 
-  const { data: invites } = useSWR(
-    org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null,
-    (url) => swrFetcher(url, access_token)
-  )
-  const [isLoading, setIsLoading] = useState(true)
-  const [joinMethod, setJoinMethod] = useState<null | 'open' | 'inviteOnly'>(
-    null
-  )
-  const [invitesModal, setInvitesModal] = useState(false)
-  const router = useRouter()
+  const { data: invites } = useSWR(org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null, (url) =>
+    swrFetcher(url, access_token),
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [joinMethod, setJoinMethod] = useState<null | 'open' | 'inviteOnly'>(null);
+  const [invitesModal, setInvitesModal] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (org) {
-      setJoinMethod(org.config.config.features.members.signup_mode)
+      setJoinMethod(org.config.config.features.members.signup_mode);
     }
-  }, [org])
+  }, [org]);
 
   useEffect(() => {
     if (invites !== undefined && joinMethod !== null) {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [invites, joinMethod])
+  }, [invites, joinMethod]);
 
   async function deleteInvite(invite: any) {
-    const toastId = toast.loading(t('deletingInvite'))
+    const toastId = toast.loading(t('deletingInvite'));
     try {
-      const res = await deleteInviteCode(
-        org.id,
-        invite.invite_code_uuid,
-        access_token
-      )
+      const res = await deleteInviteCode(org.id, invite.invite_code_uuid, access_token);
       if (res.status == 200) {
-        mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
-        toast.success(t('inviteDeletedSuccess'), { id: toastId })
+        mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
+        toast.success(t('inviteDeletedSuccess'), { id: toastId });
       } else {
-        toast.error(t('deleteInviteFailed'), { id: toastId })
+        toast.error(t('deleteInviteFailed'), { id: toastId });
       }
     } catch (_error) {
-      toast.error(t('deleteInviteFailed'), { id: toastId })
+      toast.error(t('deleteInviteFailed'), { id: toastId });
     }
   }
 
   async function changeJoinMethod(method: 'open' | 'inviteOnly') {
-    const toastId = toast.loading(t('changingJoinMethod'))
+    const toastId = toast.loading(t('changingJoinMethod'));
     try {
-      const res = await changeSignupMechanism(org.id, method, access_token)
+      const res = await changeSignupMechanism(org.id, method, access_token);
       if (res.status == 200) {
-        router.refresh()
-        mutate(`${getAPIUrl()}orgs/slug/${org?.slug}`)
+        router.refresh();
+        mutate(`${getAPIUrl()}orgs/slug/${org?.slug}`);
         toast.success(t('joinMethodChangedSuccess', { method }), {
           id: toastId,
-        })
-        setJoinMethod(method)
+        });
+        setJoinMethod(method);
       } else {
-        toast.error(t('changeJoinMethodFailed'), { id: toastId })
+        toast.error(t('changeJoinMethodFailed'), { id: toastId });
       }
     } catch (_error) {
-      toast.error(t('changeJoinMethodFailed'), { id: toastId })
+      toast.error(t('changeJoinMethodFailed'), { id: toastId });
     }
   }
 
@@ -97,9 +87,7 @@ function OrgAccess() {
           <div className="h-6" />
           <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-              <h1 className="text-xl font-bold text-gray-800">
-                {t('joinMethodTitle')}
-              </h1>
+              <h1 className="text-xl font-bold text-gray-800">{t('joinMethodTitle')}</h1>
               <h2 className="text-md text-gray-500">{t('description')}</h2>
             </div>
             <div className="mx-auto flex space-x-2">
@@ -115,18 +103,17 @@ function OrgAccess() {
                       </div>
                     )}
                     <div className="flex h-full flex-col items-center justify-center space-y-1">
-                      <Globe className="text-slate-400" size={40} />
-                      <div className="text-2xl font-bold text-slate-700">
-                        {t('openTitle')}
-                      </div>
-                      <div className="px-2 text-center text-gray-400">
-                        {t('openDescription')}
-                      </div>
+                      <Globe
+                        className="text-slate-400"
+                        size={40}
+                      />
+                      <div className="text-2xl font-bold text-slate-700">{t('openTitle')}</div>
+                      <div className="px-2 text-center text-gray-400">{t('openDescription')}</div>
                     </div>
                   </div>
                 }
                 functionToExecute={() => {
-                  changeJoinMethod('open')
+                  changeJoinMethod('open');
                 }}
                 status="info"
               />
@@ -142,36 +129,25 @@ function OrgAccess() {
                       </div>
                     )}
                     <div className="flex h-full flex-col items-center justify-center space-y-1">
-                      <Ticket className="text-slate-400" size={40} />
-                      <div className="text-2xl font-bold text-slate-700">
-                        {t('closedTitle')}
-                      </div>
-                      <div className="px-2 text-center text-gray-400">
-                        {t('closedDescription')}
-                      </div>
+                      <Ticket
+                        className="text-slate-400"
+                        size={40}
+                      />
+                      <div className="text-2xl font-bold text-slate-700">{t('closedTitle')}</div>
+                      <div className="px-2 text-center text-gray-400">{t('closedDescription')}</div>
                     </div>
                   </div>
                 }
                 functionToExecute={() => {
-                  changeJoinMethod('inviteOnly')
+                  changeJoinMethod('inviteOnly');
                 }}
                 status="info"
               />
             </div>
-            <div
-              className={
-                joinMethod !== 'inviteOnly'
-                  ? 'pointer-events-none opacity-50'
-                  : ''
-              }
-            >
+            <div className={joinMethod !== 'inviteOnly' ? 'pointer-events-none opacity-50' : ''}>
               <div className="mb-3 mt-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-                <h1 className="text-xl font-bold text-gray-800">
-                  {t('inviteCodesTitle')}
-                </h1>
-                <h2 className="text-md text-gray-500">
-                  {t('inviteCodesDescription')}
-                </h2>
+                <h1 className="text-xl font-bold text-gray-800">{t('inviteCodesTitle')}</h1>
+                <h2 className="text-md text-gray-500">{t('inviteCodesDescription')}</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
@@ -195,13 +171,9 @@ function OrgAccess() {
                           <Link
                             className="rounded-md bg-gray-50 px-2 py-1 text-gray-600 outline-dashed outline-1 outline-gray-300 transition-colors hover:bg-gray-100"
                             target="_blank"
-                            href={getUriWithoutOrg(
-                              `/signup?inviteCode=${invite.invite_code}&orgslug=${org.slug}`
-                            )}
+                            href={getUriWithoutOrg(`/signup?inviteCode=${invite.invite_code}&orgslug=${org.slug}`)}
                           >
-                            {getUriWithoutOrg(
-                              `/signup?inviteCode=${invite.invite_code}&orgslug=${org.slug}`
-                            )}
+                            {getUriWithoutOrg(`/signup?inviteCode=${invite.invite_code}&orgslug=${org.slug}`)}
                           </Link>
                         </td>
                         <td className="px-4 py-3">
@@ -218,9 +190,7 @@ function OrgAccess() {
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          {dayjs(invite.expiration_date)
-                            .add(1, 'year')
-                            .format('DD/MM/YYYY')}{' '}
+                          {dayjs(invite.expiration_date).add(1, 'year').format('DD/MM/YYYY')}{' '}
                         </td>
                         <td className="px-4 py-3">
                           <ConfirmationModal
@@ -234,7 +204,7 @@ function OrgAccess() {
                               </button>
                             }
                             functionToExecute={() => {
-                              deleteInvite(invite)
+                              deleteInvite(invite);
                             }}
                             status="warning"
                           />
@@ -260,9 +230,7 @@ function OrgAccess() {
                   onOpenChange={() => setInvitesModal(!invitesModal)}
                   minHeight="no-min"
                   minWidth="lg"
-                  dialogContent={
-                    <OrgInviteCodeGenerate setInvitesModal={setInvitesModal} />
-                  }
+                  dialogContent={<OrgInviteCodeGenerate setInvitesModal={setInvitesModal} />}
                   dialogTitle={t('generateCodeModalTitle')}
                   dialogDescription={t('generateCodeModalDescription')}
                   dialogTrigger={
@@ -278,7 +246,7 @@ function OrgAccess() {
         </>
       )}
     </>
-  )
+  );
 }
 
-export default OrgAccess
+export default OrgAccess;

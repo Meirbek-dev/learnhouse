@@ -1,7 +1,7 @@
-import { mergeAttributes, Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
-import WarningCalloutComponent from './WarningCalloutComponent'
+import WarningCalloutComponent from './WarningCalloutComponent';
 
 export default Node.create({
   name: 'calloutWarning',
@@ -16,14 +16,14 @@ export default Node.create({
       {
         tag: 'callout-warning',
       },
-    ]
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['callout-info', mergeAttributes(HTMLAttributes), 0]
+    return ['callout-info', mergeAttributes(HTMLAttributes), 0];
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(WarningCalloutComponent)
+    return ReactNodeViewRenderer(WarningCalloutComponent);
   },
-})
+});

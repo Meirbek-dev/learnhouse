@@ -1,18 +1,4 @@
-'use client'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import Image, { type StaticImageData } from 'next/image'
-import type { ReactNode, FC } from 'react'
-import { useEffect, useState } from 'react'
-import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png'
-import OnBoardCourses from '@public/onboarding/OnBoardCourses.png'
-import OnBoardActivities from '@public/onboarding/OnBoardActivities.png'
-import OnBoardEditor from '@public/onboarding/OnBoardEditor.png'
-import OnBoardAI from '@public/onboarding/OnBoardAI.png'
-import OnBoardUGs from '@public/onboarding/OnBoardUGs.png'
-import OnBoardAccess from '@public/onboarding/OnBoardAccess.png'
-import OnBoardMore from '@public/onboarding/OnBoardMore.png'
-import OnBoardAssignments from '@public/onboarding/OnBoardAssignments.png'
-import OnBoardPayments from '@public/onboarding/OnBoardPayments.png'
+'use client';
 import {
   ArrowRight,
   Book,
@@ -24,39 +10,53 @@ import {
   Sprout,
   SquareUser,
   CreditCard,
-} from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { getUriWithOrg } from '@services/config/config'
-import { useOrg } from '@components/Contexts/OrgContext'
-import useAdminStatus from '@components/Hooks/useAdminStatus'
-import { useTranslations } from 'next-intl'
-import { useIsMobile } from '@/hooks/useIsMobile'
+} from 'lucide-react';
+import OnBoardAssignments from '@public/onboarding/OnBoardAssignments.png';
+import OnBoardActivities from '@public/onboarding/OnBoardActivities.png';
+import OnBoardPayments from '@public/onboarding/OnBoardPayments.png';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
+import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
+import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';
+import OnBoardAccess from '@public/onboarding/OnBoardAccess.png';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import OnBoardMore from '@public/onboarding/OnBoardMore.png';
+import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
+import OnBoardAI from '@public/onboarding/OnBoardAI.png';
+import { useOrg } from '@components/Contexts/OrgContext';
+import Image, { type StaticImageData } from 'next/image';
+import { getUriWithOrg } from '@services/config/config';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import type { ReactNode, FC } from 'react';
 
 interface OnboardingStep {
-  imageSrc: StaticImageData
-  title: string
-  description: string
+  imageSrc: StaticImageData;
+  title: string;
+  description: string;
   buttons?: {
-    label: string
-    action: () => void
-    icon?: ReactNode
-  }[]
+    label: string;
+    action: () => void;
+    icon?: ReactNode;
+  }[];
 }
 
 const Onboarding: FC = () => {
-  const t = useTranslations('Components.Onboarding')
+  const t = useTranslations('Components.Onboarding');
   const [currentStep, setCurrentStep] = useState(() => {
     // Initialize with saved step or 0
-    const savedStep = localStorage.getItem('onboardingLastStep')
-    return savedStep ? Number.parseInt(savedStep) : 0
-  })
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState(true)
-  const [_isTemporarilyClosed, setIsTemporarilyClosed] = useState(false)
-  const isMobile = useIsMobile()
-  const router = useRouter()
-  const org = useOrg() as any
-  const isUserAdmin = useAdminStatus() as any
+    const savedStep = localStorage.getItem('onboardingLastStep');
+    return savedStep ? Number.parseInt(savedStep) : 0;
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState(true);
+  const [_isTemporarilyClosed, setIsTemporarilyClosed] = useState(false);
+  const isMobile = useIsMobile();
+  const router = useRouter();
+  const org = useOrg() as any;
+  const isUserAdmin = useAdminStatus() as any;
 
   const onboardingData: OnboardingStep[] = [
     {
@@ -71,8 +71,7 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step2Button'),
-          action: () =>
-            router.push(getUriWithOrg(org?.slug, '/courses?new=true')),
+          action: () => router.push(getUriWithOrg(org?.slug, '/courses?new=true')),
           icon: <Book size={16} />,
         },
       ],
@@ -108,11 +107,7 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step5Button'),
-          action: () =>
-            window.open(
-              'https://docs.learnhouse.app/features/ai/students',
-              '_blank'
-            ),
+          action: () => window.open('https://docs.learnhouse.app/features/ai/students', '_blank'),
           icon: <Sparkle size={16} />,
         },
       ],
@@ -124,10 +119,7 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step6Button'),
-          action: () =>
-            router.push(
-              getUriWithOrg(org?.slug, '/dash/users/settings/usergroups')
-            ),
+          action: () => router.push(getUriWithOrg(org?.slug, '/dash/users/settings/usergroups')),
           icon: <SquareUser size={16} />,
         },
       ],
@@ -145,8 +137,7 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step8Button'),
-          action: () =>
-            router.push(getUriWithOrg(org?.slug, '/dash/assignments?new=true')),
+          action: () => router.push(getUriWithOrg(org?.slug, '/dash/assignments?new=true')),
           icon: <Book size={16} />,
         },
       ],
@@ -158,8 +149,7 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step9Button'),
-          action: () =>
-            router.push(getUriWithOrg(org?.slug, '/dash/payments/customers')),
+          action: () => router.push(getUriWithOrg(org?.slug, '/dash/payments/customers')),
           icon: <CreditCard size={16} />,
         },
       ],
@@ -176,130 +166,127 @@ const Onboarding: FC = () => {
         },
       ],
     },
-  ]
+  ];
 
   useEffect(() => {
     // Check both completion and temporary closure status
-    const isOnboardingCompleted = localStorage.getItem('isOnboardingCompleted')
-    const temporarilyClosed = localStorage.getItem(
-      'onboardingTemporarilyClosed'
-    )
-    const lastClosedTime = localStorage.getItem('onboardingLastClosedTime')
+    const isOnboardingCompleted = localStorage.getItem('isOnboardingCompleted');
+    const temporarilyClosed = localStorage.getItem('onboardingTemporarilyClosed');
+    const lastClosedTime = localStorage.getItem('onboardingLastClosedTime');
 
-    setIsOnboardingComplete(isOnboardingCompleted === 'true')
-    setIsTemporarilyClosed(temporarilyClosed === 'true')
+    setIsOnboardingComplete(isOnboardingCompleted === 'true');
+    setIsTemporarilyClosed(temporarilyClosed === 'true');
 
     // If temporarily closed, check if 24 hours have passed
     if (temporarilyClosed === 'true' && lastClosedTime) {
-      const hoursSinceClosed =
-        (Date.now() - Number.parseInt(lastClosedTime)) / (1000 * 60 * 60)
+      const hoursSinceClosed = (Date.now() - Number.parseInt(lastClosedTime)) / (1000 * 60 * 60);
       if (hoursSinceClosed >= 24) {
         // Reset temporary closure after 24 hours
-        localStorage.removeItem('onboardingTemporarilyClosed')
-        localStorage.removeItem('onboardingLastClosedTime')
-        setIsTemporarilyClosed(false)
+        localStorage.removeItem('onboardingTemporarilyClosed');
+        localStorage.removeItem('onboardingLastClosedTime');
+        setIsTemporarilyClosed(false);
       }
     }
 
     // Show modal if onboarding is not completed and not temporarily closed
-    setIsModalOpen(!(isOnboardingCompleted || temporarilyClosed))
-  }, [])
+    setIsModalOpen(!(isOnboardingCompleted || temporarilyClosed));
+  }, []);
 
   // Update stored step whenever currentStep changes
   useEffect(() => {
-    localStorage.setItem('onboardingLastStep', currentStep.toString())
-  }, [currentStep])
+    localStorage.setItem('onboardingLastStep', currentStep.toString());
+  }, [currentStep]);
 
   const handleModalClose = () => {
     // Store temporary closure status and timestamp
-    localStorage.setItem('onboardingTemporarilyClosed', 'true')
-    localStorage.setItem('onboardingLastClosedTime', Date.now().toString())
+    localStorage.setItem('onboardingTemporarilyClosed', 'true');
+    localStorage.setItem('onboardingLastClosedTime', Date.now().toString());
     // Current step is already saved via the useEffect above
-    setIsTemporarilyClosed(true)
-    setIsModalOpen(false)
-  }
+    setIsTemporarilyClosed(true);
+    setIsModalOpen(false);
+  };
 
   const nextStep = () => {
     if (currentStep < onboardingData.length - 1) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     } else {
       // Mark onboarding as completed in local storage
-      localStorage.setItem('isOnboardingCompleted', 'true')
-      localStorage.removeItem('onboardingLastStep') // Clean up stored step
-      setIsModalOpen(false)
-      setIsOnboardingComplete(true)
-      console.log('Onboarding completed')
+      localStorage.setItem('isOnboardingCompleted', 'true');
+      localStorage.removeItem('onboardingLastStep'); // Clean up stored step
+      setIsModalOpen(false);
+      setIsOnboardingComplete(true);
+      console.log('Onboarding completed');
     }
-  }
+  };
 
   const skipOnboarding = () => {
-    localStorage.setItem('isOnboardingCompleted', 'true')
-    localStorage.removeItem('onboardingLastStep') // Clean up stored step
-    setIsModalOpen(false)
-    setIsOnboardingComplete(true)
-    console.log('Onboarding skipped')
-  }
+    localStorage.setItem('isOnboardingCompleted', 'true');
+    localStorage.removeItem('onboardingLastStep'); // Clean up stored step
+    setIsModalOpen(false);
+    setIsOnboardingComplete(true);
+    console.log('Onboarding skipped');
+  };
 
   const goToStep = (index: number) => {
     if (index >= 0 && index < onboardingData.length) {
-      setCurrentStep(index)
+      setCurrentStep(index);
     }
-  }
+  };
 
   return (
     <div>
-      {isUserAdmin.isAdmin &&
-        !isUserAdmin.loading &&
-        !isOnboardingComplete &&
-        !isMobile && (
-          <Modal
-            isDialogOpen={isModalOpen}
-            onOpenChange={setIsModalOpen}
-            minHeight="sm"
-            minWidth="md"
-            dialogContent={
-              <OnboardingScreen
-                step={onboardingData[currentStep]}
-                onboardingData={onboardingData}
-                currentStep={currentStep}
-                nextStep={nextStep}
-                skipOnboarding={skipOnboarding}
-                setIsModalOpen={handleModalClose}
-                goToStep={goToStep}
-              />
-            }
-            dialogTrigger={
-              <div className="bg-linear-to-t from-1% fixed bottom-0 w-full from-gray-950/25 to-transparent pb-10">
-                <div className="mx-auto flex w-fit cursor-pointer items-center space-x-2 rounded-full bg-gray-950 px-5 py-2 font-bold text-gray-200 shadow-md hover:bg-gray-900">
-                  <Sprout size={20} />
-                  <p>{t('onboarding')}</p>
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                  <div
-                    className="ml-2 cursor-pointer border-l border-gray-700 pl-2"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      skipOnboarding()
-                    }}
-                  >
-                    <Check size={16} className="hover:text-green-500" />
-                  </div>
+      {isUserAdmin.isAdmin && !isUserAdmin.loading && !isOnboardingComplete && !isMobile && (
+        <Modal
+          isDialogOpen={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          minHeight="sm"
+          minWidth="md"
+          dialogContent={
+            <OnboardingScreen
+              step={onboardingData[currentStep]}
+              onboardingData={onboardingData}
+              currentStep={currentStep}
+              nextStep={nextStep}
+              skipOnboarding={skipOnboarding}
+              setIsModalOpen={handleModalClose}
+              goToStep={goToStep}
+            />
+          }
+          dialogTrigger={
+            <div className="bg-linear-to-t from-1% fixed bottom-0 w-full from-gray-950/25 to-transparent pb-10">
+              <div className="mx-auto flex w-fit cursor-pointer items-center space-x-2 rounded-full bg-gray-950 px-5 py-2 font-bold text-gray-200 shadow-md hover:bg-gray-900">
+                <Sprout size={20} />
+                <p>{t('onboarding')}</p>
+                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                <div
+                  className="ml-2 cursor-pointer border-l border-gray-700 pl-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    skipOnboarding();
+                  }}
+                >
+                  <Check
+                    size={16}
+                    className="hover:text-green-500"
+                  />
                 </div>
               </div>
-            }
-          />
-        )}
+            </div>
+          }
+        />
+      )}
     </div>
-  )
-}
+  );
+};
 
 interface OnboardingScreenProps {
-  step: OnboardingStep
-  currentStep: number
-  nextStep: () => void
-  skipOnboarding: () => void
-  goToStep: (index: number) => void
-  setIsModalOpen: (value: boolean) => void
-  onboardingData: OnboardingStep[]
+  step: OnboardingStep;
+  currentStep: number;
+  nextStep: () => void;
+  skipOnboarding: () => void;
+  goToStep: (index: number) => void;
+  setIsModalOpen: (value: boolean) => void;
+  onboardingData: OnboardingStep[];
 }
 
 const OnboardingScreen: FC<OnboardingScreenProps> = ({
@@ -311,9 +298,9 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
   onboardingData,
   setIsModalOpen,
 }) => {
-  const t = useTranslations('Components.Onboarding')
+  const t = useTranslations('Components.Onboarding');
 
-  const isLastStep = currentStep === onboardingData.length - 1
+  const isLastStep = currentStep === onboardingData.length - 1;
 
   return (
     <div className="flex flex-col">
@@ -391,7 +378,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Onboarding
+export default Onboarding;

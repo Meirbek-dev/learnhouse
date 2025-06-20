@@ -1,26 +1,20 @@
-'use client'
-import type { FC } from 'react'
-import { Form, Formik } from 'formik'
-import * as Yup from 'yup'
-import { updateOrganization } from '@services/settings/org'
-import { revalidateTags } from '@services/utils/ts/requests'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { toast } from 'react-hot-toast'
-import { Input } from '@components/ui/input'
-import { Textarea } from '@components/ui/textarea'
-import { Button } from '@components/ui/button'
-import { Label } from '@components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select'
-import { mutate } from 'swr'
-import { getAPIUrl } from '@services/config/config'
-import { useTranslations } from 'next-intl'
+'use client';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { updateOrganization } from '@services/settings/org';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl } from '@services/config/config';
+import { Textarea } from '@components/ui/textarea';
+import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
+import { useTranslations } from 'next-intl';
+import { toast } from 'react-hot-toast';
+import { Form, Formik } from 'formik';
+import type { FC } from 'react';
+import { mutate } from 'swr';
+import * as Yup from 'yup';
 
 const ORG_LABELS = [
   { value: 'languages', label: '🌐 Languages' },
@@ -52,33 +46,33 @@ const ORG_LABELS = [
   { value: 'test_prep', label: '✍️ Test Prep' },
   { value: 'vocational', label: '🔧 Vocational Training' },
   { value: 'early_education', label: '🎯 Early Education' },
-] as const
+] as const;
 
 const getOrgLabels = (t: Function) =>
   ORG_LABELS.map((item) => {
     try {
       // Try to get the translated version
-      const translatedLabel = t(`OrgLabels.${item.value}` as any)
+      const translatedLabel = t(`OrgLabels.${item.value}` as any);
       // If translation exists and is not the key itself, use it
       if (translatedLabel && !translatedLabel.startsWith('OrgLabels.')) {
         return {
           value: item.value,
           label: translatedLabel,
-        }
+        };
       }
       // Fallback to hardcoded label
       return {
         value: item.value,
         label: item.label,
-      }
+      };
     } catch (error) {
       // If translation fails, use hardcoded label
       return {
         value: item.value,
         label: item.label,
-      }
+      };
     }
-  })
+  });
 
 const validationSchema = Yup.object().shape({
   name: Yup.string()
@@ -87,28 +81,24 @@ const validationSchema = Yup.object().shape({
   description: Yup.string()
     .required('DashPage.OrgSettings.General.Form.descriptionRequired')
     .max(100, 'DashPage.OrgSettings.General.Form.descriptionMax'),
-  about: Yup.string()
-    .optional()
-    .max(400, 'DashPage.OrgSettings.General.Form.aboutMax'),
-  label: Yup.string().required(
-    'DashPage.OrgSettings.General.Form.labelRequired'
-  ),
+  about: Yup.string().optional().max(400, 'DashPage.OrgSettings.General.Form.aboutMax'),
+  label: Yup.string().required('DashPage.OrgSettings.General.Form.labelRequired'),
   explore: Yup.boolean(),
-})
+});
 
 interface OrganizationValues {
-  name: string
-  description: string
-  about: string
-  label: string
-  explore: boolean
+  name: string;
+  description: string;
+  about: string;
+  label: string;
+  explore: boolean;
 }
 
 const OrgEditGeneral: FC = () => {
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const org = useOrg() as any
-  const t = useTranslations('DashPage.OrgSettings.General')
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const org = useOrg() as any;
+  const t = useTranslations('DashPage.OrgSettings.General');
 
   const initialValues: OrganizationValues = {
     name: org?.name,
@@ -116,19 +106,19 @@ const OrgEditGeneral: FC = () => {
     about: org?.about || '',
     label: org?.label || '',
     explore: org?.explore ?? false,
-  }
+  };
 
   const updateOrg = async (values: OrganizationValues) => {
-    const loadingToast = toast.loading(t('updatingOrg'))
+    const loadingToast = toast.loading(t('updatingOrg'));
     try {
-      await updateOrganization(org.id, values, access_token)
-      await revalidateTags(['organizations'], org.slug)
-      mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
-      toast.success(t('orgUpdatedSuccess'), { id: loadingToast })
+      await updateOrganization(org.id, values, access_token);
+      await revalidateTags(['organizations'], org.slug);
+      mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
+      toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
     } catch (_err) {
-      toast.error(t('orgUpdateFailed'), { id: loadingToast })
+      toast.error(t('orgUpdateFailed'), { id: loadingToast });
     }
-  }
+  };
 
   return (
     <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
@@ -138,25 +128,16 @@ const OrgEditGeneral: FC = () => {
         validationSchema={validationSchema}
         onSubmit={(values, { setSubmitting }) => {
           setTimeout(() => {
-            setSubmitting(false)
-            updateOrg(values)
-          }, 400)
+            setSubmitting(false);
+            updateOrg(values);
+          }, 400);
         }}
       >
-        {({
-          isSubmitting,
-          values,
-          handleChange,
-          errors,
-          touched,
-          setFieldValue,
-        }) => (
+        {({ isSubmitting, values, handleChange, errors, touched, setFieldValue }) => (
           <Form>
             <div className="flex flex-col gap-0">
               <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-                <h1 className="text-xl font-bold text-gray-800">
-                  {t('title')}
-                </h1>
+                <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
                 <h2 className="text-md text-gray-500">{t('description')}</h2>
               </div>
 
@@ -167,8 +148,7 @@ const OrgEditGeneral: FC = () => {
                       <Label htmlFor="name">
                         {t('Form.nameLabel')}
                         <span className="text-sm text-gray-500">
-                          ({60 - (values.name?.length || 0)}{' '}
-                          {t('Form.charsLeft')}
+                          ({60 - (values.name?.length || 0)} {t('Form.charsLeft')}
                         </span>
                       </Label>
                       <Input
@@ -179,19 +159,14 @@ const OrgEditGeneral: FC = () => {
                         placeholder={t('Form.namePlaceholder')}
                         maxLength={60}
                       />
-                      {touched.name && errors.name && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.name}
-                        </p>
-                      )}
+                      {touched.name && errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                     </div>
 
                     <div>
                       <Label htmlFor="description">
                         {t('Form.descriptionLabel')}
                         <span className="text-sm text-gray-500">
-                          ({100 - (values.description?.length || 0)}{' '}
-                          {t('Form.charsLeft')}
+                          ({100 - (values.description?.length || 0)} {t('Form.charsLeft')}
                         </span>
                       </Label>
                       <Input
@@ -203,9 +178,7 @@ const OrgEditGeneral: FC = () => {
                         maxLength={100}
                       />
                       {touched.description && errors.description && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.description}
-                        </p>
+                        <p className="mt-1 text-sm text-red-500">{errors.description}</p>
                       )}
                     </div>
 
@@ -216,31 +189,27 @@ const OrgEditGeneral: FC = () => {
                         onValueChange={(value) => setFieldValue('label', value)}
                       >
                         <SelectTrigger>
-                          <SelectValue
-                            placeholder={t('Form.labelPlaceholder')}
-                          />
+                          <SelectValue placeholder={t('Form.labelPlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
                           {getOrgLabels(t).map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
+                            <SelectItem
+                              key={type.value}
+                              value={type.value}
+                            >
                               {type.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      {touched.label && errors.label && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.label}
-                        </p>
-                      )}
+                      {touched.label && errors.label && <p className="mt-1 text-sm text-red-500">{errors.label}</p>}
                     </div>
 
                     <div>
                       <Label htmlFor="about">
                         {t('Form.aboutLabel')}
                         <span className="text-sm text-gray-500">
-                          ({400 - (values.about?.length || 0)}{' '}
-                          {t('Form.charsLeft')}
+                          ({400 - (values.about?.length || 0)} {t('Form.charsLeft')}
                         </span>
                       </Label>
                       <Textarea
@@ -252,11 +221,7 @@ const OrgEditGeneral: FC = () => {
                         className="min-h-[250px]"
                         maxLength={400}
                       />
-                      {touched.about && errors.about && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.about}
-                        </p>
-                      )}
+                      {touched.about && errors.about && <p className="mt-1 text-sm text-red-500">{errors.about}</p>}
                     </div>
                   </div>
                 </div>
@@ -275,7 +240,7 @@ const OrgEditGeneral: FC = () => {
         )}
       </Formik>
     </div>
-  )
-}
+  );
+};
 
-export default OrgEditGeneral
+export default OrgEditGeneral;

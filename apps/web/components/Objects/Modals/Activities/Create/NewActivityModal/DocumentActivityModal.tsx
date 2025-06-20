@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -6,33 +6,33 @@ import FormLayout, {
   FormLabel,
   FormMessage,
   Input,
-} from '@components/Objects/StyledElements/Form/Form'
-import { useState } from 'react'
-import * as React from 'react'
-import * as Form from '@radix-ui/react-form'
-import BarLoader from 'react-spinners/BarLoader'
-import { constructAcceptValue } from '@/lib/constants'
-import { useTranslations } from 'next-intl'
+} from '@components/Objects/StyledElements/Form/Form';
+import { constructAcceptValue } from '@/lib/constants';
+import BarLoader from 'react-spinners/BarLoader';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import * as React from 'react';
 
-const SUPPORTED_FILES = constructAcceptValue(['pdf'])
+const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
 function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
-  const t = useTranslations('Components.DocumentPdfModal')
-  const [documentpdf, setDocumentPdf] = React.useState(null) as any
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [name, setName] = React.useState('')
+  const t = useTranslations('Components.DocumentPdfModal');
+  const [documentpdf, setDocumentPdf] = React.useState(null) as any;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = React.useState('');
 
   const handleDocumentPdfChange = (event: React.ChangeEvent<any>) => {
-    setDocumentPdf(event.target.files[0])
-  }
+    setDocumentPdf(event.target.files[0]);
+  };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value)
-  }
+    setName(event.target.value);
+  };
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
     const _status = await submitFileActivity(
       documentpdf,
       'documentpdf',
@@ -45,30 +45,30 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
         version: 1,
         course_id: course.id,
       },
-      chapterId
-    )
-    setIsSubmitting(false)
-  }
+      chapterId,
+    );
+    setIsSubmitting(false);
+  };
 
   return (
     <FormLayout onSubmit={handleSubmit}>
       <FormField name="documentpdf-activity-name">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
           <FormLabel>{t('pdfDocumentName')}</FormLabel>
-          <FormMessage match="valueMissing">
-            {t('valueMissingName')}
-          </FormMessage>
+          <FormMessage match="valueMissing">{t('valueMissingName')}</FormMessage>
         </Flex>
         <Form.Control asChild>
-          <Input onChange={handleNameChange} type="text" required />
+          <Input
+            onChange={handleNameChange}
+            type="text"
+            required
+          />
         </Form.Control>
       </FormField>
       <FormField name="documentpdf-activity-file">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
           <FormLabel>{t('pdfDocumentFile')}</FormLabel>
-          <FormMessage match="valueMissing">
-            {t('valueMissingFile')}
-          </FormMessage>
+          <FormMessage match="valueMissing">{t('valueMissingFile')}</FormMessage>
         </Flex>
         <Form.Control asChild>
           <input
@@ -82,7 +82,10 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
 
       <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
         <Form.Submit asChild>
-          <ButtonBlack type="submit" css={{ marginTop: 10 }}>
+          <ButtonBlack
+            type="submit"
+            css={{ marginTop: 10 }}
+          >
             {isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
@@ -96,7 +99,7 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
         </Form.Submit>
       </Flex>
     </FormLayout>
-  )
+  );
 }
 
-export default DocumentPdfModal
+export default DocumentPdfModal;

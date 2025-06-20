@@ -1,90 +1,82 @@
-'use client'
+'use client';
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import { useFormik } from 'formik'
-import { AlertTriangle } from 'lucide-react'
-import * as Form from '@radix-ui/react-form'
-import { useEffect, useState, useCallback } from 'react'
-import ThumbnailUpdate from './ThumbnailUpdate'
-import {
-  useCourse,
-  useCourseDispatch,
-} from '@components/Contexts/CourseContext'
-import FormTagInput from '@components/Objects/StyledElements/Form/TagInput'
-import LearningItemsList from './LearningItemsList'
-import { useTranslations } from 'next-intl'
+} from '@components/Objects/StyledElements/Form/Form';
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
+import { useEffect, useState, useCallback } from 'react';
+import LearningItemsList from './LearningItemsList';
+import ThumbnailUpdate from './ThumbnailUpdate';
+import * as Form from '@radix-ui/react-form';
+import { AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useFormik } from 'formik';
 
 type EditCourseStructureProps = {
-  orgslug: string
-  course_uuid?: string
-}
+  orgslug: string;
+  course_uuid?: string;
+};
 
 interface MyCourseFormValues {
-  name: string
-  description: string
-  about: string
-  learnings: string
-  tags: string
-  public: boolean
+  name: string;
+  description: string;
+  about: string;
+  learnings: string;
+  tags: string;
+  public: boolean;
 }
 
-const validate = (
-  values: MyCourseFormValues,
-  t: (key: string, values?: any) => string
-) => {
-  const errors: Partial<Record<keyof MyCourseFormValues, string>> = {}
+const validate = (values: MyCourseFormValues, t: (key: string, values?: any) => string) => {
+  const errors: Partial<Record<keyof MyCourseFormValues, string>> = {};
 
   if (!values.name) {
-    errors.name = t('errors.required', { fieldName: t('name.label') })
+    errors.name = t('errors.required', { fieldName: t('name.label') });
   } else if (values.name.length > 100) {
-    errors.name = t('errors.maxLength', { count: 100 })
+    errors.name = t('errors.maxLength', { count: 100 });
   }
 
   if (!values.description) {
     errors.description = t('errors.required', {
       fieldName: t('description.label'),
-    })
+    });
   } else if (values.description.length > 1000) {
-    errors.description = t('errors.maxLength', { count: 1000 })
+    errors.description = t('errors.maxLength', { count: 1000 });
   }
 
   if (!values.learnings) {
     errors.learnings = t('errors.required', {
       fieldName: t('learnings.label'),
-    })
+    });
   } else {
     try {
-      const learningItems = JSON.parse(values.learnings)
+      const learningItems = JSON.parse(values.learnings);
       if (!Array.isArray(learningItems)) {
-        errors.learnings = t('errors.invalidFormat')
+        errors.learnings = t('errors.invalidFormat');
       } else if (learningItems.length === 0) {
-        errors.learnings = t('errors.atLeastOneLearningItem')
+        errors.learnings = t('errors.atLeastOneLearningItem');
       } else {
-        const hasEmptyText = learningItems.some(
-          (item: any) => !item.text || item.text.trim() === ''
-        )
+        const hasEmptyText = learningItems.some((item: any) => !item.text || item.text.trim() === '');
         if (hasEmptyText) {
-          errors.learnings = t('errors.allLearningItemsMustHaveText')
+          errors.learnings = t('errors.allLearningItemsMustHaveText');
         }
       }
     } catch {
-      errors.learnings = t('errors.invalidJsonFormat')
+      errors.learnings = t('errors.invalidJsonFormat');
     }
   }
 
-  return errors
-}
+  return errors;
+};
 
 const initializeLearnings = (learningsInput: any): string => {
   if (typeof learningsInput === 'string') {
     try {
-      const parsed = JSON.parse(learningsInput)
+      const parsed = JSON.parse(learningsInput);
       if (Array.isArray(parsed)) {
-        return learningsInput
+        return learningsInput;
       }
     } catch {
       if (learningsInput.trim() !== '') {
@@ -95,21 +87,21 @@ const initializeLearnings = (learningsInput: any): string => {
             text: learningsInput,
             emoji: '📝',
           },
-        ])
+        ]);
       }
     }
   }
   // Use a stable placeholder ID for the default new learning item
-  return JSON.stringify([{ id: 'init-new-learn-item', text: '', emoji: '📝' }])
-}
+  return JSON.stringify([{ id: 'init-new-learn-item', text: '', emoji: '📝' }]);
+};
 
 function EditCourseGeneral(_props: EditCourseStructureProps) {
-  const [error, setError] = useState('')
-  const course = useCourse()
-  const dispatchCourse = useCourseDispatch()
-  if (!(course && dispatchCourse)) throw new Error('Course context not found')
-  const { isLoading, courseStructure } = course
-  const t = useTranslations('CourseEdit.General')
+  const [error, setError] = useState('');
+  const course = useCourse();
+  const dispatchCourse = useCourseDispatch();
+  if (!(course && dispatchCourse)) throw new Error('Course context not found');
+  const { isLoading, courseStructure } = course;
+  const t = useTranslations('CourseEdit.General');
 
   const formik = useFormik<MyCourseFormValues>({
     initialValues: {
@@ -123,47 +115,45 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
     validate: (values) => validate(values, t),
     onSubmit: async () => {
       try {
-        dispatchCourse?.({ type: 'setIsSaved' })
+        dispatchCourse?.({ type: 'setIsSaved' });
       } catch {
-        setError(t('errors.saveFailed'))
+        setError(t('errors.saveFailed'));
       }
     },
     enableReinitialize: true,
-  })
+  });
 
   const handleLearningsChange = useCallback(
     (newLearningsValue: string) => {
-      formik.setFieldValue('learnings', newLearningsValue)
+      formik.setFieldValue('learnings', newLearningsValue);
     },
-    [formik]
-  )
+    [formik],
+  );
 
   useEffect(() => {
     if (!isLoading && courseStructure && dispatchCourse) {
-      const { values, initialValues } = formik
-      const learningsChanged = values.learnings !== initialValues.learnings
-      const otherChanged = (
-        Object.keys(values) as Array<keyof MyCourseFormValues>
-      )
+      const { values, initialValues } = formik;
+      const learningsChanged = values.learnings !== initialValues.learnings;
+      const otherChanged = (Object.keys(values) as Array<keyof MyCourseFormValues>)
         .filter((k) => k !== 'learnings' && k !== 'public')
-        .some((key) => values[key] !== initialValues[key])
+        .some((key) => values[key] !== initialValues[key]);
 
       if (learningsChanged || otherChanged) {
-        dispatchCourse({ type: 'setIsNotSaved' })
+        dispatchCourse({ type: 'setIsNotSaved' });
         dispatchCourse({
           type: 'setCourseStructure',
           payload: {
             ...courseStructure,
             ...values,
           },
-        })
+        });
       }
     }
-  }, [formik.values, isLoading, courseStructure, dispatchCourse])
+  }, [formik.values, isLoading, courseStructure, dispatchCourse]);
 
   // Early return after all hooks have been called
   if (!dispatchCourse) {
-    return <div>{t('loading')}</div>
+    return <div>{t('loading')}</div>;
   }
 
   return (
@@ -200,11 +190,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
               <FormField name="description">
                 <FormLabelAndMessage
                   label={t('description.label')}
-                  message={
-                    formik.touched.description
-                      ? formik.errors.description
-                      : undefined
-                  }
+                  message={formik.touched.description ? formik.errors.description : undefined}
                 />
                 <Form.Control asChild>
                   <Input
@@ -222,9 +208,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
               <FormField name="about">
                 <FormLabelAndMessage
                   label={t('about.label')}
-                  message={
-                    formik.touched.about ? formik.errors.about : undefined
-                  }
+                  message={formik.touched.about ? formik.errors.about : undefined}
                 />
                 <Form.Control asChild>
                   <Textarea
@@ -244,11 +228,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
               <FormField name="learnings">
                 <FormLabelAndMessage
                   label={t('learnings.label')}
-                  message={
-                    formik.touched.learnings
-                      ? formik.errors.learnings
-                      : undefined
-                  }
+                  message={formik.touched.learnings ? formik.errors.learnings : undefined}
                 />
                 <LearningItemsList
                   value={formik.values.learnings}
@@ -278,7 +258,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default EditCourseGeneral
+export default EditCourseGeneral;

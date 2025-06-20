@@ -1,58 +1,46 @@
-'use client'
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext'
-import {
-  useAssignmentsTask,
-  useAssignmentsTaskDispatch,
-} from '@components/Contexts/Assignments/AssignmentsTaskContext'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
+'use client';
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { getActivityByID } from '@services/courses/activities'
+} from '@components/Objects/StyledElements/Form/Form';
 import {
-  updateAssignmentTask,
-  updateReferenceFile,
-} from '@services/courses/assignments'
-import { getTaskRefFileDir } from '@services/media/media'
-import { useFormik } from 'formik'
-import { Cloud, File, Info, Loader, UploadCloud } from 'lucide-react'
-import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import toast from 'react-hot-toast'
-import { constructAcceptValue } from '@/lib/constants'
-import { useTranslations } from 'next-intl'
+  useAssignmentsTask,
+  useAssignmentsTaskDispatch,
+} from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { Cloud, File, Info, Loader, UploadCloud } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getActivityByID } from '@services/courses/activities';
+import { getTaskRefFileDir } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { constructAcceptValue } from '@/lib/constants';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { useFormik } from 'formik';
+import Link from 'next/link';
 
-const SUPPORTED_FILES = constructAcceptValue([
-  'pdf',
-  'docx',
-  'mp4',
-  'mkv',
-  'jpg',
-  'png',
-  'pptx',
-  'zip',
-])
+const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);
 
 export function AssignmentTaskGeneralEdit() {
-  const t = useTranslations('DashPage.Assignments.TaskGeneralEdit')
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const assignmentTaskState = useAssignmentsTask() as any
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any
-  const assignment = useAssignments() as any
+  const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const assignmentTaskState = useAssignmentsTask() as any;
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
+  const assignment = useAssignments() as any;
 
   const validate = (values: any) => {
-    const errors: any = {}
+    const errors: any = {};
     if (values.max_grade_value < 20 || values.max_grade_value > 100) {
-      errors.max_grade_value = t('gradeValidationError')
+      errors.max_grade_value = t('gradeValidationError');
     }
-    return errors
-  }
+    return errors;
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -67,22 +55,25 @@ export function AssignmentTaskGeneralEdit() {
         values,
         assignmentTaskState.assignmentTask.assignment_task_uuid,
         assignment.assignment_object.assignment_uuid,
-        access_token
-      )
+        access_token,
+      );
       if (res) {
-        assignmentTaskStateHook({ type: 'reload' })
-        toast.success(t('updateSuccess'))
+        assignmentTaskStateHook({ type: 'reload' });
+        toast.success(t('updateSuccess'));
       } else {
-        toast.error(t('updateError'))
+        toast.error(t('updateError'));
       }
     },
     enableReinitialize: true,
-  }) as any
+  }) as any;
 
   return (
     <FormLayout onSubmit={formik.handleSubmit}>
       <FormField name="title">
-        <FormLabelAndMessage label={t('title')} message={formik.errors.title} />
+        <FormLabelAndMessage
+          label={t('title')}
+          message={formik.errors.title}
+        />
         <Form.Control asChild>
           <Input
             onChange={formik.handleChange}
@@ -107,9 +98,15 @@ export function AssignmentTaskGeneralEdit() {
       </FormField>
 
       <FormField name="hint">
-        <FormLabelAndMessage label={t('hint')} message={formik.errors.hint} />
+        <FormLabelAndMessage
+          label={t('hint')}
+          message={formik.errors.hint}
+        />
         <Form.Control asChild>
-          <Textarea onChange={formik.handleChange} value={formik.values.hint} />
+          <Textarea
+            onChange={formik.handleChange}
+            value={formik.values.hint}
+          />
         </Form.Control>
       </FormField>
 
@@ -148,44 +145,44 @@ export function AssignmentTaskGeneralEdit() {
         {t('save')}
       </Form.Submit>
     </FormLayout>
-  )
+  );
 }
 
 function UpdateTaskRef() {
-  const t = useTranslations('DashPage.Assignments.TaskGeneralEdit')
-  const session = useLHSession() as any
-  const org = useOrg() as any
-  const access_token = session?.data?.tokens?.access_token
-  const assignmentTaskState = useAssignmentsTask() as any
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any
-  const assignment = useAssignments() as any
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('') as any
-  const [_localRefFile, setLocalRefFile] = useState(null) as any
-  const [_activity, setActivity] = useState('') as any
+  const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const assignmentTaskState = useAssignmentsTask() as any;
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
+  const assignment = useAssignments() as any;
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('') as any;
+  const [_localRefFile, setLocalRefFile] = useState(null) as any;
+  const [_activity, setActivity] = useState('') as any;
 
   const handleFileChange = async (event: any) => {
-    const file = event.target.files[0]
-    setLocalRefFile(file)
-    setIsLoading(true)
+    const file = event.target.files[0];
+    setLocalRefFile(file);
+    setIsLoading(true);
     const res = await updateReferenceFile(
       file,
       assignmentTaskState.assignmentTask.assignment_task_uuid,
       assignment.assignment_object.assignment_uuid,
-      access_token
-    )
-    assignmentTaskStateHook({ type: 'reload' })
+      access_token,
+    );
+    assignmentTaskStateHook({ type: 'reload' });
     // wait for 1.5 second to show loading animation
-    await new Promise((r) => setTimeout(r, 1500))
+    await new Promise((r) => setTimeout(r, 1500));
     if (res.success === false) {
-      setError(res.data.detail)
-      setIsLoading(false)
+      setError(res.data.detail);
+      setIsLoading(false);
     } else {
-      toast.success(t('refFileUpdateSuccess'))
-      setIsLoading(false)
-      setError('')
+      toast.success(t('refFileUpdateSuccess'));
+      setIsLoading(false);
+      setError('');
     }
-  }
+  };
 
   const getTaskRefDirUI = () => {
     return getTaskRefFileDir(
@@ -194,42 +191,38 @@ function UpdateTaskRef() {
       assignment.activity_object.activity_uuid,
       assignment.assignment_object.assignment_uuid,
       assignmentTaskState.assignmentTask.assignment_task_uuid,
-      assignmentTaskState.assignmentTask.reference_file
-    )
-  }
+      assignmentTaskState.assignmentTask.reference_file,
+    );
+  };
 
   const _deleteReferenceFile = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     const res = await updateReferenceFile(
       '',
       assignmentTaskState.assignmentTask.assignment_task_uuid,
       assignment.assignment_object.assignment_uuid,
-      access_token
-    )
-    assignmentTaskStateHook({ type: 'reload' })
+      access_token,
+    );
+    assignmentTaskStateHook({ type: 'reload' });
     // wait for 1.5 second to show loading animation
-    await new Promise((r) => setTimeout(r, 1500))
+    await new Promise((r) => setTimeout(r, 1500));
     if (res.success === false) {
-      setError(res.data.detail)
-      setIsLoading(false)
+      setError(res.data.detail);
+      setIsLoading(false);
     } else {
-      setIsLoading(false)
-      setError('')
+      setIsLoading(false);
+      setError('');
     }
-  }
+  };
 
   async function getActivityUI() {
-    const res = await getActivityByID(
-      assignment.assignment_object.activity_id,
-      null,
-      access_token
-    )
-    setActivity(res.data)
+    const res = await getActivityByID(assignment.assignment_object.activity_id, null, access_token);
+    setActivity(res.data);
   }
 
   useEffect(() => {
-    getActivityUI()
-  }, [assignmentTaskState, org])
+    getActivityUI();
+  }, [assignmentTaskState, org]);
 
   return (
     <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-gray-200">
@@ -247,11 +240,12 @@ function UpdateTaskRef() {
               <div className="absolute right-0 top-0 flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
                 <Cloud size={15} />
               </div>
-              <File size={20} className="" />
+              <File
+                size={20}
+                className=""
+              />
               <div className="text-sm font-semibold uppercase">
-                {assignmentTaskState.assignmentTask.reference_file
-                  .split('.')
-                  .pop()}
+                {assignmentTaskState.assignmentTask.reference_file.split('.').pop()}
               </div>
               <div className="mt-2 flex space-x-2">
                 <Link
@@ -278,7 +272,10 @@ function UpdateTaskRef() {
                 onChange={handleFileChange}
               />
               <div className="text-gray mt-4 flex animate-pulse items-center rounded-md bg-slate-200 px-4 py-2 text-sm font-bold antialiased">
-                <Loader size={16} className="mr-2 animate-spin" />
+                <Loader
+                  size={16}
+                  className="mr-2 animate-spin"
+                />
                 <span>{t('loading')}</span>
               </div>
             </div>
@@ -295,7 +292,10 @@ function UpdateTaskRef() {
                 className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
                 onClick={() => document.getElementById('fileInput')?.click()}
               >
-                <UploadCloud size={16} className="mr-2" />
+                <UploadCloud
+                  size={16}
+                  className="mr-2"
+                />
                 <span>{t('changeRefFile')}</span>
               </button>
             </div>
@@ -303,5 +303,5 @@ function UpdateTaskRef() {
         </div>
       </div>
     </div>
-  )
+  );
 }

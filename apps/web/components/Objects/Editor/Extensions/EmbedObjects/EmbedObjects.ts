@@ -1,6 +1,6 @@
-import { mergeAttributes, Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
-import EmbedObjectsComponent from './EmbedObjectsComponent'
+import EmbedObjectsComponent from './EmbedObjectsComponent';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
 export default Node.create({
   name: 'blockEmbed',
@@ -26,7 +26,7 @@ export default Node.create({
       alignment: {
         default: 'left',
       },
-    }
+    };
   },
 
   parseHTML() {
@@ -34,14 +34,14 @@ export default Node.create({
       {
         tag: 'block-embed',
       },
-    ]
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['block-embed', mergeAttributes(HTMLAttributes), 0]
+    return ['block-embed', mergeAttributes(HTMLAttributes), 0];
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(EmbedObjectsComponent)
+    return ReactNodeViewRenderer(EmbedObjectsComponent);
   },
-})
+});

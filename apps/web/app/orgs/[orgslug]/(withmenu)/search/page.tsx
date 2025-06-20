@@ -1,82 +1,79 @@
-'use client'
+'use client';
 
-import type { FormEvent } from 'react'
-import { useState, useEffect } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { searchOrgContent } from '@services/search/search'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { Book, GraduationCap, Users, Search } from 'lucide-react'
-import Link from 'next/link'
-import {
-  getCourseThumbnailMediaDirectory,
-  getUserAvatarMediaDirectory,
-} from '@services/media/media'
-import { getUriWithOrg } from '@services/config/config'
-import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail'
-import UserAvatar from '@components/Objects/UserAvatar'
-import { useTranslations } from 'next-intl'
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { Book, GraduationCap, Users, Search } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { searchOrgContent } from '@services/search/search';
+import { useOrg } from '@components/Contexts/OrgContext';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { getUriWithOrg } from '@services/config/config';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
+import Link from 'next/link';
 
 // Types from SearchBar component
 interface User {
-  username: string
-  first_name: string
-  last_name: string
-  email: string
-  avatar_image: string
-  bio: string
-  details: Record<string, any>
-  profile: Record<string, any>
-  id: number
-  user_uuid: string
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar_image: string;
+  bio: string;
+  details: Record<string, any>;
+  profile: Record<string, any>;
+  id: number;
+  user_uuid: string;
 }
 
 interface Author {
-  user: User
-  authorship: string
-  authorship_status: string
-  creation_date: string
-  update_date: string
+  user: User;
+  authorship: string;
+  authorship_status: string;
+  creation_date: string;
+  update_date: string;
 }
 
 interface Course {
-  name: string
-  description: string
-  about: string
-  learnings: string
-  tags: string
-  thumbnail_image: string
-  public: boolean
-  open_to_contributors: boolean
-  id: number
-  org_id: number
-  authors: Author[]
-  course_uuid: string
-  creation_date: string
-  update_date: string
+  name: string;
+  description: string;
+  about: string;
+  learnings: string;
+  tags: string;
+  thumbnail_image: string;
+  public: boolean;
+  open_to_contributors: boolean;
+  id: number;
+  org_id: number;
+  authors: Author[];
+  course_uuid: string;
+  creation_date: string;
+  update_date: string;
 }
 
 interface Collection {
-  name: string
-  public: boolean
-  description: string
-  id: number
-  courses: string[]
-  collection_uuid: string
-  creation_date: string
-  update_date: string
+  name: string;
+  public: boolean;
+  description: string;
+  id: number;
+  courses: string[];
+  collection_uuid: string;
+  creation_date: string;
+  update_date: string;
 }
 
 interface SearchResults {
-  courses: Course[]
-  collections: Collection[]
-  users: User[]
-  total_courses: number
-  total_collections: number
-  total_users: number
+  courses: Course[];
+  collections: Collection[];
+  users: User[];
+  total_courses: number;
+  total_collections: number;
+  total_users: number;
 }
 
-type ContentType = 'all' | 'courses' | 'collections' | 'users'
+type ContentType = 'all' | 'courses' | 'collections' | 'users';
 
 const FilterButton = ({
   type,
@@ -86,37 +83,35 @@ const FilterButton = ({
   onTypeChange,
   t,
 }: {
-  type: ContentType
-  count: number
-  icon: any
-  selectedType: ContentType
-  onTypeChange: (type: ContentType) => void
-  t: (key: string) => string
+  type: ContentType;
+  count: number;
+  icon: any;
+  selectedType: ContentType;
+  onTypeChange: (type: ContentType) => void;
+  t: (key: string) => string;
 }) => (
   <button
     onClick={() => onTypeChange(type)}
     className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${
-      selectedType === type
-        ? 'bg-black/10 font-medium text-black/80'
-        : 'text-black/60 hover:bg-black/5'
+      selectedType === type ? 'bg-black/10 font-medium text-black/80' : 'text-black/60 hover:bg-black/5'
     }`}
   >
     <Icon size={16} />
     <span>{t(`filter${type.charAt(0).toUpperCase() + type.slice(1)}`)}</span>
     <span className="text-black/40">({count})</span>
   </button>
-)
+);
 
 const Pagination = ({
   totalPages,
   currentPage,
   onPageChange,
 }: {
-  totalPages: number
-  currentPage: number
-  onPageChange: (page: number) => void
+  totalPages: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }) => {
-  if (totalPages <= 1) return null
+  if (totalPages <= 1) return null;
 
   return (
     <div className="mt-8 flex justify-center gap-2">
@@ -125,17 +120,15 @@ const Pagination = ({
           key={pageNum}
           onClick={() => onPageChange(pageNum)}
           className={`h-8 w-8 rounded-lg text-sm transition-colors ${
-            currentPage === pageNum
-              ? 'bg-black/10 font-medium text-black/80'
-              : 'text-black/60 hover:bg-black/5'
+            currentPage === pageNum ? 'bg-black/10 font-medium text-black/80' : 'text-black/60 hover:bg-black/5'
           }`}
         >
           {pageNum}
         </button>
       ))}
     </div>
-  )
-}
+  );
+};
 
 const LoadingState = () => (
   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -152,34 +145,24 @@ const LoadingState = () => (
       </div>
     ))}
   </div>
-)
+);
 
-const EmptyState = ({
-  query,
-  t,
-}: {
-  query: string
-  t: (key: string, params?: any) => string
-}) => (
+const EmptyState = ({ query, t }: { query: string; t: (key: string, params?: any) => string }) => (
   <div className="flex flex-col items-center justify-center py-16 text-center">
     <div className="mb-4 rounded-full bg-black/5 p-4">
       <Search className="h-8 w-8 text-black/40" />
     </div>
-    <h3 className="mb-2 text-lg font-medium text-black/80">
-      {t('noResultsTitle')}
-    </h3>
-    <p className="max-w-md text-sm text-black/50">
-      {t('noResultsMessage', { query: query })}
-    </p>
+    <h3 className="mb-2 text-lg font-medium text-black/80">{t('noResultsTitle')}</h3>
+    <p className="max-w-md text-sm text-black/50">{t('noResultsMessage', { query: query })}</p>
   </div>
-)
+);
 
 function SearchPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const session = useLHSession() as any
-  const org = useOrg() as any
-  const t = useTranslations('SearchPage')
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
+  const t = useTranslations('SearchPage');
 
   // Search state
   const [searchResults, setSearchResults] = useState<SearchResults>({
@@ -189,41 +172,41 @@ function SearchPage() {
     total_courses: 0,
     total_collections: 0,
     total_users: 0,
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   // URL parameters
-  const query = searchParams.get('q') || ''
-  const page = Number.parseInt(searchParams.get('page') || '1')
-  const type = (searchParams.get('type') as ContentType) || 'all'
-  const perPage = 9
+  const query = searchParams.get('q') || '';
+  const page = Number.parseInt(searchParams.get('page') || '1');
+  const type = (searchParams.get('type') as ContentType) || 'all';
+  const perPage = 9;
 
   // Filter state
-  const [selectedType, setSelectedType] = useState<ContentType>(type)
+  const [selectedType, setSelectedType] = useState<ContentType>(type);
 
   const updateSearchParams = (updates: Record<string, string>) => {
-    const current = new URLSearchParams(Array.from(searchParams.entries()))
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
     Object.entries(updates).forEach(([key, value]) => {
       if (value) {
-        current.set(key, value)
+        current.set(key, value);
       } else {
-        current.delete(key)
+        current.delete(key);
       }
-    })
-    router.push(`?${current.toString()}`)
-  }
+    });
+    router.push(`?${current.toString()}`);
+  };
 
   const handleSearch = (e: FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      updateSearchParams({ q: searchQuery, page: '1' })
+      updateSearchParams({ q: searchQuery, page: '1' });
     }
-  }
+  };
 
   useEffect(() => {
-    setSearchQuery(query)
-  }, [query])
+    setSearchQuery(query);
+  }, [query]);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -235,11 +218,11 @@ function SearchPage() {
           total_courses: 0,
           total_collections: 0,
           total_users: 0,
-        })
-        return
+        });
+        return;
       }
 
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         const response = await searchOrgContent(
           org?.slug,
@@ -247,14 +230,14 @@ function SearchPage() {
           page,
           perPage,
           selectedType === 'all' ? null : selectedType,
-          session?.data?.tokens?.access_token
-        )
+          session?.data?.tokens?.access_token,
+        );
 
         // Log the response to see what we're getting
-        console.log('Search API Response:', response)
+        console.log('Search API Response:', response);
 
         // The response data is directly what we need
-        const results = response.data
+        const results = response.data;
 
         setSearchResults({
           courses: results.courses || [],
@@ -263,9 +246,9 @@ function SearchPage() {
           total_courses: results.courses?.length || 0,
           total_collections: results.collections?.length || 0,
           total_users: results.users?.length || 0,
-        })
+        });
       } catch (error) {
-        console.error('Error searching content:', error)
+        console.error('Error searching content:', error);
         setSearchResults({
           courses: [],
           collections: [],
@@ -273,25 +256,16 @@ function SearchPage() {
           total_courses: 0,
           total_collections: 0,
           total_users: 0,
-        })
+        });
       }
-      setIsLoading(false)
-    }
+      setIsLoading(false);
+    };
 
-    fetchResults()
-  }, [
-    query,
-    page,
-    selectedType,
-    org?.slug,
-    session?.data?.tokens?.access_token,
-  ])
+    fetchResults();
+  }, [query, page, selectedType, org?.slug, session?.data?.tokens?.access_token]);
 
-  const totalResults =
-    searchResults.total_courses +
-    searchResults.total_collections +
-    searchResults.total_users
-  const totalPages = Math.ceil(totalResults / perPage)
+  const totalResults = searchResults.total_courses + searchResults.total_collections + searchResults.total_users;
+  const totalPages = Math.ceil(totalResults / perPage);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -299,12 +273,13 @@ function SearchPage() {
       <div className="border-b border-black/5 bg-white">
         <div className="container mx-auto px-4 py-6">
           <div className="mx-auto max-w-2xl">
-            <h1 className="mb-6 text-2xl font-semibold text-black/80">
-              {t('searchTitle')}
-            </h1>
+            <h1 className="mb-6 text-2xl font-semibold text-black/80">{t('searchTitle')}</h1>
 
             {/* Search Input */}
-            <form onSubmit={handleSearch} className="group relative mb-6">
+            <form
+              onSubmit={handleSearch}
+              className="group relative mb-6"
+            >
               <input
                 type="text"
                 value={searchQuery}
@@ -334,11 +309,11 @@ function SearchPage() {
                 icon={Search}
                 selectedType={selectedType}
                 onTypeChange={(type) => {
-                  setSelectedType(type)
+                  setSelectedType(type);
                   updateSearchParams({
                     type: type === 'all' ? '' : type,
                     page: '1',
-                  })
+                  });
                 }}
                 t={t}
               />
@@ -348,11 +323,11 @@ function SearchPage() {
                 icon={GraduationCap}
                 selectedType={selectedType}
                 onTypeChange={(type) => {
-                  setSelectedType(type)
+                  setSelectedType(type);
                   updateSearchParams({
                     type: type === 'all' ? '' : type,
                     page: '1',
-                  })
+                  });
                 }}
                 t={t}
               />
@@ -362,11 +337,11 @@ function SearchPage() {
                 icon={Book}
                 selectedType={selectedType}
                 onTypeChange={(type) => {
-                  setSelectedType(type)
+                  setSelectedType(type);
                   updateSearchParams({
                     type: type === 'all' ? '' : type,
                     page: '1',
-                  })
+                  });
                 }}
                 t={t}
               />
@@ -376,11 +351,11 @@ function SearchPage() {
                 icon={Users}
                 selectedType={selectedType}
                 onTypeChange={(type) => {
-                  setSelectedType(type)
+                  setSelectedType(type);
                   updateSearchParams({
                     type: type === 'all' ? '' : type,
                     page: '1',
-                  })
+                  });
                 }}
                 t={t}
               />
@@ -393,200 +368,178 @@ function SearchPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-7xl">
           {query && (
-            <div className="mb-6 text-sm text-black/60">
-              {t('resultsFound', { count: totalResults, query: query })}
-            </div>
+            <div className="mb-6 text-sm text-black/60">{t('resultsFound', { count: totalResults, query: query })}</div>
           )}
 
           {isLoading ? (
             <LoadingState />
           ) : totalResults === 0 && query ? (
-            <EmptyState query={query} t={t} />
+            <EmptyState
+              query={query}
+              t={t}
+            />
           ) : (
             <div className="space-y-12">
               {/* Courses Grid */}
-              {(selectedType === 'all' || selectedType === 'courses') &&
-                searchResults.courses.length > 0 && (
-                  <div>
-                    <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
-                      <GraduationCap size={20} className="text-black/60" />
-                      {t('courses')} ({searchResults.courses.length})
-                    </h2>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {searchResults.courses.map((course) => (
-                        <Link
-                          key={course.course_uuid}
-                          href={getUriWithOrg(
-                            org?.slug,
-                            `/course/${removeCoursePrefix(course.course_uuid)}`
-                          )}
-                          className="nice-shadow group overflow-hidden rounded-xl bg-white transition-all hover:shadow-md"
-                        >
-                          <div className="relative h-48">
-                            {course.thumbnail_image ? (
-                              <img
-                                src={getCourseThumbnailMediaDirectory(
-                                  org?.org_uuid,
-                                  course.course_uuid,
-                                  course.thumbnail_image
-                                )}
-                                alt={course.name}
-                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              {(selectedType === 'all' || selectedType === 'courses') && searchResults.courses.length > 0 && (
+                <div>
+                  <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
+                    <GraduationCap
+                      size={20}
+                      className="text-black/60"
+                    />
+                    {t('courses')} ({searchResults.courses.length})
+                  </h2>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {searchResults.courses.map((course) => (
+                      <Link
+                        key={course.course_uuid}
+                        href={getUriWithOrg(org?.slug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+                        className="nice-shadow group overflow-hidden rounded-xl bg-white transition-all hover:shadow-md"
+                      >
+                        <div className="relative h-48">
+                          {course.thumbnail_image ? (
+                            <img
+                              src={getCourseThumbnailMediaDirectory(
+                                org?.org_uuid,
+                                course.course_uuid,
+                                course.thumbnail_image,
+                              )}
+                              alt={course.name}
+                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-black/5">
+                              <GraduationCap
+                                size={32}
+                                className="text-black/40"
                               />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-black/5">
-                                <GraduationCap
-                                  size={32}
-                                  className="text-black/40"
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-4">
-                            <h3 className="mb-1 text-sm font-medium text-black/80">
-                              {course.name}
-                            </h3>
-                            <p className="line-clamp-2 text-xs text-black/50">
-                              {course.description}
-                            </p>
-                            {course.authors && course.authors.length > 0 && (
-                              <div className="mt-3 flex items-center gap-2">
-                                <UserAvatar
-                                  width={20}
-                                  avatar_url={
-                                    course.authors[0].user.avatar_image
-                                      ? getUserAvatarMediaDirectory(
-                                          course.authors[0].user.user_uuid,
-                                          course.authors[0].user.avatar_image
-                                        )
-                                      : ''
-                                  }
-                                  predefined_avatar={
-                                    course.authors[0].user.avatar_image
-                                      ? undefined
-                                      : 'empty'
-                                  }
-                                  userId={course.authors[0].user.id.toString()}
-                                  showProfilePopup={false}
-                                  rounded="rounded-full"
-                                  backgroundColor="bg-gray-100"
-                                />
-                                <span className="text-xs text-black/40">
-                                  {course.authors[0].user.first_name}{' '}
-                                  {course.authors[0].user.last_name}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <h3 className="mb-1 text-sm font-medium text-black/80">{course.name}</h3>
+                          <p className="line-clamp-2 text-xs text-black/50">{course.description}</p>
+                          {course.authors && course.authors.length > 0 && (
+                            <div className="mt-3 flex items-center gap-2">
+                              <UserAvatar
+                                width={20}
+                                avatar_url={
+                                  course.authors[0].user.avatar_image
+                                    ? getUserAvatarMediaDirectory(
+                                        course.authors[0].user.user_uuid,
+                                        course.authors[0].user.avatar_image,
+                                      )
+                                    : ''
+                                }
+                                predefined_avatar={course.authors[0].user.avatar_image ? undefined : 'empty'}
+                                userId={course.authors[0].user.id.toString()}
+                                showProfilePopup={false}
+                                rounded="rounded-full"
+                                backgroundColor="bg-gray-100"
+                              />
+                              <span className="text-xs text-black/40">
+                                {course.authors[0].user.first_name} {course.authors[0].user.last_name}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
 
               {/* Collections Grid */}
-              {(selectedType === 'all' || selectedType === 'collections') &&
-                searchResults.collections.length > 0 && (
-                  <div>
-                    <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
-                      <Book size={20} className="text-black/60" />
-                      {t('collections')} ({searchResults.collections.length})
-                    </h2>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {searchResults.collections.map((collection) => (
-                        <Link
-                          key={collection.collection_uuid}
-                          href={getUriWithOrg(
-                            org?.slug,
-                            `/collection/${collection.collection_uuid.replace('collection_', '')}`
-                          )}
-                          className="nice-shadow flex items-start gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
-                        >
-                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-black/5">
-                            <Book size={24} className="text-black/40" />
-                          </div>
-                          <div>
-                            <h3 className="mb-1 text-sm font-medium text-black/80">
-                              {collection.name}
-                            </h3>
-                            <p className="line-clamp-2 text-xs text-black/50">
-                              {collection.description}
-                            </p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+              {(selectedType === 'all' || selectedType === 'collections') && searchResults.collections.length > 0 && (
+                <div>
+                  <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
+                    <Book
+                      size={20}
+                      className="text-black/60"
+                    />
+                    {t('collections')} ({searchResults.collections.length})
+                  </h2>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {searchResults.collections.map((collection) => (
+                      <Link
+                        key={collection.collection_uuid}
+                        href={getUriWithOrg(
+                          org?.slug,
+                          `/collection/${collection.collection_uuid.replace('collection_', '')}`,
+                        )}
+                        className="nice-shadow flex items-start gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
+                      >
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-black/5">
+                          <Book
+                            size={24}
+                            className="text-black/40"
+                          />
+                        </div>
+                        <div>
+                          <h3 className="mb-1 text-sm font-medium text-black/80">{collection.name}</h3>
+                          <p className="line-clamp-2 text-xs text-black/50">{collection.description}</p>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
 
               {/* Users Grid */}
-              {(selectedType === 'all' || selectedType === 'users') &&
-                searchResults.users.length > 0 && (
-                  <div>
-                    <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
-                      <Users size={20} className="text-black/60" />
-                      {t('users')} ({searchResults.users.length})
-                    </h2>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {searchResults.users.map((user) => (
-                        <Link
-                          key={user.user_uuid}
-                          href={getUriWithOrg(
-                            org?.slug,
-                            `/user/${user.username}`
+              {(selectedType === 'all' || selectedType === 'users') && searchResults.users.length > 0 && (
+                <div>
+                  <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-black/80">
+                    <Users
+                      size={20}
+                      className="text-black/60"
+                    />
+                    {t('users')} ({searchResults.users.length})
+                  </h2>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {searchResults.users.map((user) => (
+                      <Link
+                        key={user.user_uuid}
+                        href={getUriWithOrg(org?.slug, `/user/${user.username}`)}
+                        className="nice-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
+                      >
+                        <UserAvatar
+                          width={48}
+                          avatar_url={
+                            user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : ''
+                          }
+                          predefined_avatar={user.avatar_image ? undefined : 'empty'}
+                          userId={user.id.toString()}
+                          showProfilePopup
+                          rounded="rounded-full"
+                          backgroundColor="bg-gray-100"
+                        />
+                        <div>
+                          <h3 className="text-sm font-medium text-black/80">
+                            {user.first_name} {user.last_name}
+                          </h3>
+                          <p className="text-xs text-black/50">@{user.username}</p>
+                          {user.details?.title?.text && (
+                            <p className="mt-1 text-xs text-black/40">{user.details.title.text}</p>
                           )}
-                          className="nice-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
-                        >
-                          <UserAvatar
-                            width={48}
-                            avatar_url={
-                              user.avatar_image
-                                ? getUserAvatarMediaDirectory(
-                                    user.user_uuid,
-                                    user.avatar_image
-                                  )
-                                : ''
-                            }
-                            predefined_avatar={
-                              user.avatar_image ? undefined : 'empty'
-                            }
-                            userId={user.id.toString()}
-                            showProfilePopup
-                            rounded="rounded-full"
-                            backgroundColor="bg-gray-100"
-                          />
-                          <div>
-                            <h3 className="text-sm font-medium text-black/80">
-                              {user.first_name} {user.last_name}
-                            </h3>
-                            <p className="text-xs text-black/50">
-                              @{user.username}
-                            </p>
-                            {user.details?.title?.text && (
-                              <p className="mt-1 text-xs text-black/40">
-                                {user.details.title.text}
-                              </p>
-                            )}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
             </div>
           )}
 
           <Pagination
             totalPages={totalPages}
             currentPage={page}
-            onPageChange={(pageNum) =>
-              updateSearchParams({ page: pageNum.toString() })
-            }
+            onPageChange={(pageNum) => updateSearchParams({ page: pageNum.toString() })}
           />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default SearchPage
+export default SearchPage;

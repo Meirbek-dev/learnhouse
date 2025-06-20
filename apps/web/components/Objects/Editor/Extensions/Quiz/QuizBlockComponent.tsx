@@ -1,118 +1,100 @@
-'use client'
+'use client';
 
-import { NodeViewWrapper } from '@tiptap/react'
-import { v4 as uuidv4 } from 'uuid'
-import { twMerge } from 'tailwind-merge'
-import { useState } from 'react'
-import { BadgeHelp, Check, Minus, Plus, RefreshCcw } from 'lucide-react'
-import ReactConfetti from 'react-confetti'
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useTranslations } from 'next-intl'
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { BadgeHelp, Check, Minus, Plus, RefreshCcw } from 'lucide-react';
+import { NodeViewWrapper } from '@tiptap/react';
+import { useTranslations } from 'next-intl';
+import ReactConfetti from 'react-confetti';
+import { twMerge } from 'tailwind-merge';
+import { v4 as uuidv4 } from 'uuid';
+import { useState } from 'react';
 
 interface Answer {
-  answer_id: string
-  answer: string
-  correct: boolean
+  answer_id: string;
+  answer: string;
+  correct: boolean;
 }
 interface Question {
-  question_id: string
-  question: string
-  type: 'multiple_choice' | 'custom_answer'
-  answers: Answer[]
+  question_id: string;
+  question: string;
+  type: 'multiple_choice' | 'custom_answer';
+  answers: Answer[];
 }
 
 function QuizBlockComponent(props: any) {
-  const t = useTranslations('DashPage.Editor.QuizBlock')
-  const [questions, setQuestions] = useState(props.node.attrs.questions) as [
-    Question[],
-    any,
-  ]
-  const [userAnswers, setUserAnswers] = useState([]) as [any[], any]
-  const [submitted, setSubmitted] = useState(false) as [boolean, any]
-  const [submissionMessage, setSubmissionMessage] = useState('') as [
-    string,
-    any,
-  ]
-  const editorState = useEditorProvider() as any
-  const isEditable = editorState.isEditable
+  const t = useTranslations('DashPage.Editor.QuizBlock');
+  const [questions, setQuestions] = useState(props.node.attrs.questions) as [Question[], any];
+  const [userAnswers, setUserAnswers] = useState([]) as [any[], any];
+  const [submitted, setSubmitted] = useState(false) as [boolean, any];
+  const [submissionMessage, setSubmissionMessage] = useState('') as [string, any];
+  const editorState = useEditorProvider() as any;
+  const isEditable = editorState.isEditable;
 
   const handleAnswerClick = (question_id: string, answer_id: string) => {
-    if (submitted) return
+    if (submitted) return;
 
     const existingAnswerIndex = userAnswers.findIndex(
-      (answer: any) =>
-        answer.question_id === question_id && answer.answer_id === answer_id
-    )
+      (answer: any) => answer.question_id === question_id && answer.answer_id === answer_id,
+    );
 
     if (existingAnswerIndex !== -1) {
       // Remove the answer if it's already selected
-      setUserAnswers(
-        userAnswers.filter((_, index) => index !== existingAnswerIndex)
-      )
+      setUserAnswers(userAnswers.filter((_, index) => index !== existingAnswerIndex));
     } else {
       // Add the answer
-      setUserAnswers([...userAnswers, { question_id, answer_id }])
+      setUserAnswers([...userAnswers, { question_id, answer_id }]);
     }
-  }
+  };
 
   const refreshUserSubmission = () => {
-    setUserAnswers([])
-    setSubmitted(false)
-    setSubmissionMessage('')
-  }
+    setUserAnswers([]);
+    setSubmitted(false);
+    setSubmissionMessage('');
+  };
 
   const handleUserSubmission = () => {
-    setSubmitted(true)
+    setSubmitted(true);
 
     const correctAnswers = questions.every((question: Question) => {
-      const correctAnswers = question.answers.filter(
-        (answer: Answer) => answer.correct
-      )
+      const correctAnswers = question.answers.filter((answer: Answer) => answer.correct);
       const userAnswersForQuestion = userAnswers.filter(
-        (userAnswer: any) => userAnswer.question_id === question.question_id
-      )
+        (userAnswer: any) => userAnswer.question_id === question.question_id,
+      );
 
       // If no correct answers are set and user didn't select any, it's correct
       if (correctAnswers.length === 0 && userAnswersForQuestion.length === 0) {
-        return true
+        return true;
       }
 
       // Check if user selected all correct answers and no incorrect ones
       return (
         correctAnswers.length === userAnswersForQuestion.length &&
         correctAnswers.every((correctAnswer: Answer) =>
-          userAnswersForQuestion.some(
-            (userAnswer: any) =>
-              userAnswer.answer_id === correctAnswer.answer_id
-          )
+          userAnswersForQuestion.some((userAnswer: any) => userAnswer.answer_id === correctAnswer.answer_id),
         )
-      )
-    })
+      );
+    });
 
-    setSubmissionMessage(correctAnswers ? t('allCorrect') : t('someIncorrect'))
-  }
+    setSubmissionMessage(correctAnswers ? t('allCorrect') : t('someIncorrect'));
+  };
 
   const getAnswerID = (answerIndex: number, questionId: string) => {
-    const alphabet = Array.from({ length: 26 }, (_, i) =>
-      String.fromCharCode('A'.charCodeAt(0) + i)
-    )
-    const alphabetID = alphabet[answerIndex]
+    const alphabet = Array.from({ length: 26 }, (_, i) => String.fromCharCode('A'.charCodeAt(0) + i));
+    const alphabetID = alphabet[answerIndex];
 
     // Get question index
-    const questionIndex = questions.findIndex(
-      (question: Question) => question.question_id === questionId
-    )
-    const _questionID = questionIndex + 1
+    const questionIndex = questions.findIndex((question: Question) => question.question_id === questionId);
+    const _questionID = questionIndex + 1;
 
-    return `${alphabetID}`
-  }
+    return `${alphabetID}`;
+  };
 
   const saveQuestions = (questions: any) => {
     props.updateAttributes({
       questions: questions,
-    })
-    setQuestions(questions)
-  }
+    });
+    setQuestions(questions);
+  };
   const addSampleQuestion = () => {
     const newQuestion = {
       question_id: uuidv4(),
@@ -125,96 +107,85 @@ function QuizBlockComponent(props: any) {
           correct: false,
         },
       ],
-    }
-    setQuestions([...questions, newQuestion])
-  }
+    };
+    setQuestions([...questions, newQuestion]);
+  };
 
   const addAnswer = (question_id: string) => {
     const newAnswer = {
       answer_id: uuidv4(),
       answer: '',
       correct: false,
-    }
+    };
 
     // check if there is already more than 5 answers
-    const question: any = questions.find(
-      (question: Question) => question.question_id === question_id
-    )
+    const question: any = questions.find((question: Question) => question.question_id === question_id);
     if (question.answers.length >= 5) {
-      return
+      return;
     }
 
     const newQuestions = questions.map((question: Question) => {
       if (question.question_id === question_id) {
-        question.answers.push(newAnswer)
+        question.answers.push(newAnswer);
       }
-      return question
-    })
+      return question;
+    });
 
-    saveQuestions(newQuestions)
-  }
+    saveQuestions(newQuestions);
+  };
 
-  const changeAnswerValue = (
-    question_id: string,
-    answer_id: string,
-    value: string
-  ) => {
+  const changeAnswerValue = (question_id: string, answer_id: string, value: string) => {
     const newQuestions = questions.map((question: Question) => {
       if (question.question_id === question_id) {
         question.answers.map((answer: Answer) => {
           if (answer.answer_id === answer_id) {
-            answer.answer = value
+            answer.answer = value;
           }
-          return answer
-        })
+          return answer;
+        });
       }
-      return question
-    })
-    saveQuestions(newQuestions)
-  }
+      return question;
+    });
+    saveQuestions(newQuestions);
+  };
 
   const changeQuestionValue = (question_id: string, value: string) => {
     const newQuestions = questions.map((question: Question) => {
       if (question.question_id === question_id) {
-        question.question = value
+        question.question = value;
       }
-      return question
-    })
-    saveQuestions(newQuestions)
-  }
+      return question;
+    });
+    saveQuestions(newQuestions);
+  };
 
   const deleteQuestion = (question_id: string) => {
-    const newQuestions = questions.filter(
-      (question: Question) => question.question_id !== question_id
-    )
-    saveQuestions(newQuestions)
-  }
+    const newQuestions = questions.filter((question: Question) => question.question_id !== question_id);
+    saveQuestions(newQuestions);
+  };
 
   const deleteAnswer = (question_id: string, answer_id: string) => {
     const newQuestions = questions.map((question: Question) => {
       if (question.question_id === question_id) {
-        question.answers = question.answers.filter(
-          (answer: Answer) => answer.answer_id !== answer_id
-        )
+        question.answers = question.answers.filter((answer: Answer) => answer.answer_id !== answer_id);
       }
-      return question
-    })
-    saveQuestions(newQuestions)
-  }
+      return question;
+    });
+    saveQuestions(newQuestions);
+  };
 
   const markAnswerCorrect = (question_id: string, answer_id: string) => {
     const newQuestions = questions.map((question: Question) => {
       if (question.question_id === question_id) {
         question.answers = question.answers.map((answer: Answer) => ({
           ...answer,
-          correct:
-            answer.answer_id === answer_id ? !answer.correct : answer.correct,
-        }))
+          correct: answer.answer_id === answer_id ? !answer.correct : answer.correct,
+        }));
       }
-      return question
-    })
-    saveQuestions(newQuestions)
-  }
+      return question;
+    });
+    saveQuestions(newQuestions);
+  };
 
   return (
     <NodeViewWrapper className="block-quiz">
@@ -229,19 +200,18 @@ function QuizBlockComponent(props: any) {
             />
           )}
           <div className="flex items-center space-x-2 text-sm">
-            <BadgeHelp className="text-slate-400" size={15} />
-            <p className="py-1 text-xs font-bold uppercase tracking-widest text-slate-400">
-              {t('title')}
-            </p>
+            <BadgeHelp
+              className="text-slate-400"
+              size={15}
+            />
+            <p className="py-1 text-xs font-bold uppercase tracking-widest text-slate-400">{t('title')}</p>
           </div>
 
           {/* Submission message */}
           {submitted && (
             <div
               className={`rounded-md px-2 py-1 text-xs font-medium ${
-                submissionMessage === t('allCorrect')
-                  ? 'bg-lime-100 text-lime-700'
-                  : 'bg-red-100 text-red-700'
+                submissionMessage === t('allCorrect') ? 'bg-lime-100 text-lime-700' : 'bg-red-100 text-red-700'
               }`}
             >
               {submissionMessage}
@@ -267,7 +237,10 @@ function QuizBlockComponent(props: any) {
                 className="cursor-pointer rounded-md p-1.5 hover:bg-slate-200"
                 title={t('resetAnswers')}
               >
-                <RefreshCcw className="text-slate-500" size={15} />
+                <RefreshCcw
+                  className="text-slate-500"
+                  size={15}
+                />
               </div>
               <button
                 onClick={() => handleUserSubmission()}
@@ -281,7 +254,10 @@ function QuizBlockComponent(props: any) {
 
         {/* Questions section */}
         {questions.map((question: Question) => (
-          <div key={question.question_id} className="space-y-2 pt-3">
+          <div
+            key={question.question_id}
+            className="space-y-2 pt-3"
+          >
             <div className="question">
               <div className="flex items-center space-x-2">
                 <div className="grow">
@@ -289,12 +265,7 @@ function QuizBlockComponent(props: any) {
                     <input
                       value={question.question}
                       placeholder={t('questionPlaceholder')}
-                      onChange={(e) =>
-                        changeQuestionValue(
-                          question.question_id,
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => changeQuestionValue(question.question_id, e.target.value)}
                       className="text-md w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] p-2 font-bold text-slate-800"
                     />
                   ) : (
@@ -309,7 +280,10 @@ function QuizBlockComponent(props: any) {
                     className="flex h-[24px] w-[24px] flex-none cursor-pointer items-center rounded-lg bg-slate-200 text-sm transition-all ease-linear hover:bg-slate-300"
                     title={t('deleteQuestion')}
                   >
-                    <Minus className="mx-auto text-slate-500" size={14} />
+                    <Minus
+                      className="mx-auto text-slate-500"
+                      size={14}
+                    />
                   </div>
                 )}
               </div>
@@ -321,81 +295,62 @@ function QuizBlockComponent(props: any) {
                     key={answer.answer_id}
                     className={twMerge(
                       'flex min-h-[36px] w-full cursor-pointer items-stretch space-x-2 rounded-lg bg-white bg-opacity-50 pr-2 text-sm shadow-sm outline-2 duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md',
-                      answer.correct && isEditable
-                        ? 'outline-lime-300'
-                        : 'outline-white',
+                      answer.correct && isEditable ? 'outline-lime-300' : 'outline-white',
                       userAnswers.some(
                         (userAnswer: any) =>
                           userAnswer.question_id === question.question_id &&
                           userAnswer.answer_id === answer.answer_id &&
                           !isEditable &&
-                          !submitted
+                          !submitted,
                       )
                         ? 'outline-blue-400'
                         : '',
-                      submitted && answer.correct
-                        ? 'text-lime outline-lime-300'
-                        : '',
+                      submitted && answer.correct ? 'text-lime outline-lime-300' : '',
                       submitted &&
                         !answer.correct &&
                         userAnswers.some(
                           (userAnswer: any) =>
                             userAnswer.question_id === question.question_id &&
-                            userAnswer.answer_id === answer.answer_id
+                            userAnswer.answer_id === answer.answer_id,
                         )
                         ? 'outline-red-400'
-                        : ''
+                        : '',
                     )}
-                    onClick={() =>
-                      handleAnswerClick(question.question_id, answer.answer_id)
-                    }
+                    onClick={() => handleAnswerClick(question.question_id, answer.answer_id)}
                   >
                     <div
                       className={twMerge(
                         'flex w-[40px] items-center justify-center self-stretch rounded-l-md bg-white text-base font-bold text-slate-800',
-                        answer.correct && isEditable
-                          ? 'outline-hidden bg-lime-300 text-lime-800'
-                          : 'bg-white',
+                        answer.correct && isEditable ? 'outline-hidden bg-lime-300 text-lime-800' : 'bg-white',
                         userAnswers.some(
                           (userAnswer: any) =>
                             userAnswer.question_id === question.question_id &&
                             userAnswer.answer_id === answer.answer_id &&
                             !isEditable &&
-                            !submitted
+                            !submitted,
                         )
                           ? 'outline-hidden bg-blue-400 text-white'
                           : '',
-                        submitted && answer.correct
-                          ? 'outline-hidden bg-lime-300 text-lime-800'
-                          : '',
+                        submitted && answer.correct ? 'outline-hidden bg-lime-300 text-lime-800' : '',
                         submitted &&
                           !answer.correct &&
                           userAnswers.some(
                             (userAnswer: any) =>
                               userAnswer.question_id === question.question_id &&
-                              userAnswer.answer_id === answer.answer_id
+                              userAnswer.answer_id === answer.answer_id,
                           )
                           ? 'outline-hidden bg-red-400 text-red-800'
-                          : ''
+                          : '',
                       )}
                     >
                       <p className="text-sm font-bold">
-                        {getAnswerID(
-                          question.answers.indexOf(answer),
-                          question.question_id
-                        )}
+                        {getAnswerID(question.answers.indexOf(answer), question.question_id)}
                       </p>
                     </div>
                     {isEditable ? (
                       <input
                         value={answer.answer}
-                        onChange={(e) =>
-                          changeAnswerValue(
-                            question.question_id,
-                            answer.answer_id,
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => changeAnswerValue(question.question_id, answer.answer_id, e.target.value)}
                         placeholder={t('answerPlaceholder')}
                         className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold text-neutral-600"
                       />
@@ -408,30 +363,29 @@ function QuizBlockComponent(props: any) {
                       <div className="flex items-center space-x-1">
                         <div
                           onClick={(e) => {
-                            e.stopPropagation()
-                            markAnswerCorrect(
-                              question.question_id,
-                              answer.answer_id
-                            )
+                            e.stopPropagation();
+                            markAnswerCorrect(question.question_id, answer.answer_id);
                           }}
                           className="flex h-[24px] w-[24px] flex-none cursor-pointer items-center rounded-lg bg-lime-300 text-sm transition-all ease-linear hover:bg-lime-400"
-                          title={
-                            answer.correct
-                              ? t('markIncorrect')
-                              : t('markCorrect')
-                          }
+                          title={answer.correct ? t('markIncorrect') : t('markCorrect')}
                         >
-                          <Check className="mx-auto text-lime-800" size={14} />
+                          <Check
+                            className="mx-auto text-lime-800"
+                            size={14}
+                          />
                         </div>
                         <div
                           onClick={(e) => {
-                            e.stopPropagation()
-                            deleteAnswer(question.question_id, answer.answer_id)
+                            e.stopPropagation();
+                            deleteAnswer(question.question_id, answer.answer_id);
                           }}
                           className="flex h-[24px] w-[24px] flex-none cursor-pointer items-center rounded-lg bg-slate-200 text-sm transition-all ease-linear hover:bg-slate-300"
                           title={t('deleteAnswer')}
                         >
-                          <Minus className="mx-auto text-slate-500" size={14} />
+                          <Minus
+                            className="mx-auto text-slate-500"
+                            size={14}
+                          />
                         </div>
                       </div>
                     )}
@@ -442,10 +396,11 @@ function QuizBlockComponent(props: any) {
                     onClick={() => addAnswer(question.question_id)}
                     className="flex h-[36px] w-full flex-none cursor-pointer items-center justify-center rounded-lg bg-white text-sm outline-2 outline-white duration-150 ease-linear hover:scale-[1.01] hover:bg-opacity-100 hover:shadow-md active:scale-[1.02]"
                   >
-                    <Plus className="mr-1 text-slate-800" size={15} />
-                    <span className="text-sm text-slate-800">
-                      {t('addAnswer')}
-                    </span>
+                    <Plus
+                      className="mr-1 text-slate-800"
+                      size={15}
+                    />
+                    <span className="text-sm text-slate-800">{t('addAnswer')}</span>
                   </div>
                 )}
               </div>
@@ -454,7 +409,7 @@ function QuizBlockComponent(props: any) {
         ))}
       </div>
     </NodeViewWrapper>
-  )
+  );
 }
 
-export default QuizBlockComponent
+export default QuizBlockComponent;

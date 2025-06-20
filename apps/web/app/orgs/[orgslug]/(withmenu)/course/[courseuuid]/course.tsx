@@ -1,70 +1,60 @@
-'use client'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { getUriWithOrg, getAPIUrl } from '@services/config/config'
-import PageLoading from '@components/Objects/Loaders/PageLoading'
-import { swrFetcher } from '@services/utils/ts/requests'
-import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators'
-import { useRouter } from 'next/navigation'
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import {
-  ArrowRight,
-  Backpack,
-  Check,
-  File,
-  StickyNote,
-  Video,
-  Square,
-  ChevronUp,
-} from 'lucide-react'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { CourseProvider } from '@components/Contexts/CourseContext'
-import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions'
-import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
-import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors'
-import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useTranslations } from 'next-intl'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import useSWR from 'swr'
+'use client';
+import { ArrowRight, Backpack, Check, File, StickyNote, Video, Square, ChevronUp } from 'lucide-react';
+import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions';
+import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
+import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import { getUriWithOrg, getAPIUrl } from '@services/config/config';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import useSWR from 'swr';
 
 const CourseClient = (props: any) => {
-  const t = useTranslations('CoursePage')
-  const [learnings, setLearnings] = useState<any>([])
+  const t = useTranslations('CoursePage');
+  const [learnings, setLearnings] = useState<any>([]);
   const [expandedChapters, setExpandedChapters] = useState<{
-    [key: string]: boolean
-  }>({})
-  const courseuuid = props.courseuuid
-  const orgslug = props.orgslug
-  const course = props.course
-  const org = useOrg() as any
-  const router = useRouter()
-  const isMobile = useIsMobile()
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
+    [key: string]: boolean;
+  }>({});
+  const courseuuid = props.courseuuid;
+  const orgslug = props.orgslug;
+  const course = props.course;
+  const org = useOrg() as any;
+  const router = useRouter();
+  const isMobile = useIsMobile();
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
 
   // Add SWR for trail data
-  const { data: trailData } = useSWR(
-    `${getAPIUrl()}trail/org/${org?.id}/trail`,
-    (url) => swrFetcher(url, access_token)
-  )
+  const { data: trailData } = useSWR(`${getAPIUrl()}trail/org/${org?.id}/trail`, (url) =>
+    swrFetcher(url, access_token),
+  );
 
-  console.log(course)
+  console.log(course);
 
   function getLearningTags() {
     if (!course?.learnings) {
-      setLearnings([])
-      return
+      setLearnings([]);
+      return;
     }
 
     try {
       // Try to parse as JSON (new format)
-      const parsedLearnings = JSON.parse(course.learnings)
+      const parsedLearnings = JSON.parse(course.learnings);
       if (Array.isArray(parsedLearnings)) {
         // New format: array of learning items with text and emoji
-        setLearnings(parsedLearnings)
-        return
+        setLearnings(parsedLearnings);
+        return;
       }
     } catch (e) {
       // Not valid JSON, continue to legacy format handling
@@ -75,74 +65,74 @@ const CourseClient = (props: any) => {
       id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
       text: text.trim(), // Trim whitespace that might be present after commas
       emoji: '📝', // Default emoji for legacy items
-    }))
+    }));
 
-    setLearnings(learningItems)
+    setLearnings(learningItems);
   }
 
   useEffect(() => {
-    getLearningTags()
+    getLearningTags();
 
     // Collapse chapters by default if more than 5 activities in total
     if (course?.chapters) {
       const totalActivities = course.chapters.reduce(
         (sum: number, chapter: any) => sum + (chapter.activities?.length || 0),
-        0
-      )
-      const defaultExpanded: { [key: string]: boolean } = {}
+        0,
+      );
+      const defaultExpanded: { [key: string]: boolean } = {};
       course.chapters.forEach((chapter: any) => {
-        defaultExpanded[chapter.chapter_uuid] = totalActivities <= 5
-      })
-      setExpandedChapters(defaultExpanded)
+        defaultExpanded[chapter.chapter_uuid] = totalActivities <= 5;
+      });
+      setExpandedChapters(defaultExpanded);
     }
-  }, [org, course])
+  }, [org, course]);
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return 'Video'
+        return 'Video';
       case 'TYPE_DOCUMENT':
-        return 'Document'
+        return 'Document';
       case 'TYPE_DYNAMIC':
-        return 'Page'
+        return 'Page';
       case 'TYPE_ASSIGNMENT':
-        return 'Assignment'
+        return 'Assignment';
       default:
-        return 'Learning Material'
+        return 'Learning Material';
     }
-  }
+  };
 
   const getActivityTypeBadgeColor = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-500';
       case 'TYPE_DOCUMENT':
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-500';
       case 'TYPE_DYNAMIC':
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-500';
       case 'TYPE_ASSIGNMENT':
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-500';
       default:
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-500';
     }
-  }
+  };
 
   const isActivityDone = (activity: any) => {
-    const cleanCourseUuid = course.course_uuid?.replace('course_', '')
+    const cleanCourseUuid = course.course_uuid?.replace('course_', '');
     const run = trailData?.runs?.find((run: any) => {
-      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '')
-      return cleanRunCourseUuid === cleanCourseUuid
-    })
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+      return cleanRunCourseUuid === cleanCourseUuid;
+    });
     if (run) {
-      return run.steps.find((step: any) => step.activity_id == activity.id)
+      return run.steps.find((step: any) => step.activity_id == activity.id);
     }
-    return false
-  }
+    return false;
+  };
 
   const isActivityCurrent = (activity: any) => {
-    const activity_uuid = activity.activity_uuid.replace('activity_', '')
-    return props.current_activity && props.current_activity == activity_uuid
-  }
+    const activity_uuid = activity.activity_uuid.replace('activity_', '');
+    return props.current_activity && props.current_activity == activity_uuid;
+  };
 
   return (
     <>
@@ -151,12 +141,13 @@ const CourseClient = (props: any) => {
       ) : (
         <>
           <GeneralWrapperStyled>
-            <CourseBreadcrumbs course={course} orgslug={orgslug} />
+            <CourseBreadcrumbs
+              course={course}
+              orgslug={orgslug}
+            />
             <div className="flex flex-col items-start justify-between pb-2 pt-3 md:flex-row md:items-center">
               <div>
-                <h1 className="text-3xl font-bold md:text-3xl">
-                  {course.name}
-                </h1>
+                <h1 className="text-3xl font-bold md:text-3xl">{course.name}</h1>
               </div>
             </div>
 
@@ -169,7 +160,7 @@ const CourseClient = (props: any) => {
                       backgroundImage: `url(${getCourseThumbnailMediaDirectory(
                         org?.org_uuid,
                         course?.course_uuid,
-                        course?.thumbnail_image
+                        course?.thumbnail_image,
                       )})`,
                     }}
                   />
@@ -184,18 +175,12 @@ const CourseClient = (props: any) => {
                 )}
 
                 {(() => {
-                  const cleanCourseUuid = course.course_uuid?.replace(
-                    'course_',
-                    ''
-                  )
+                  const cleanCourseUuid = course.course_uuid?.replace('course_', '');
                   const run = trailData?.runs?.find((run: any) => {
-                    const cleanRunCourseUuid = run.course?.course_uuid?.replace(
-                      'course_',
-                      ''
-                    )
-                    return cleanRunCourseUuid === cleanCourseUuid
-                  })
-                  return run
+                    const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+                    return cleanRunCourseUuid === cleanCourseUuid;
+                  });
+                  return run;
                 })() && (
                   <ActivityIndicators
                     course_uuid={props.course.course_uuid}
@@ -233,22 +218,15 @@ const CourseClient = (props: any) => {
 
             {learnings.length > 0 && learnings[0]?.text !== 'null' && (
               <div className="w-full">
-                <h2 className="py-5 text-xl font-bold md:text-2xl">
-                  {t('whatYouWillLearn')}
-                </h2>
+                <h2 className="py-5 text-xl font-bold md:text-2xl">{t('whatYouWillLearn')}</h2>
                 <div className="space-y-2 overflow-hidden rounded-lg bg-white px-5 py-5 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
                   {learnings.map((learning: any) => {
                     // Handle both new format (object with text and emoji) and legacy format (string)
-                    const learningText =
-                      typeof learning === 'string' ? learning : learning.text
-                    const learningEmoji =
-                      typeof learning === 'string' ? null : learning.emoji
-                    const learningId =
-                      typeof learning === 'string'
-                        ? learning
-                        : learning.id || learning.text
+                    const learningText = typeof learning === 'string' ? learning : learning.text;
+                    const learningEmoji = typeof learning === 'string' ? null : learning.emoji;
+                    const learningId = typeof learning === 'string' ? learning : learning.id || learning.text;
 
-                    if (!learningText) return null
+                    if (!learningText) return null;
 
                     return (
                       <div
@@ -259,7 +237,10 @@ const CourseClient = (props: any) => {
                           {learningEmoji ? (
                             <span>{learningEmoji}</span>
                           ) : (
-                            <Check className="text-gray-400" size={15} />
+                            <Check
+                              className="text-gray-400"
+                              size={15}
+                            />
                           )}
                         </div>
                         <p>{learningText}</p>
@@ -279,20 +260,17 @@ const CourseClient = (props: any) => {
                           </a>
                         )}
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
             )}
 
             <div className="my-5 mb-10 w-full">
-              <h2 className="py-5 text-xl font-bold md:text-2xl">
-                {t('courseLessons')}
-              </h2>
+              <h2 className="py-5 text-xl font-bold md:text-2xl">{t('courseLessons')}</h2>
               <div className="overflow-hidden rounded-lg bg-white shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
                 {course.chapters.map((chapter: any) => {
-                  const isExpanded =
-                    expandedChapters[chapter.chapter_uuid] ?? true // Default to expanded
+                  const isExpanded = expandedChapters[chapter.chapter_uuid] ?? true; // Default to expanded
                   return (
                     <div
                       key={chapter.chapter_uuid || `chapter-${chapter.name}`}
@@ -307,9 +285,7 @@ const CourseClient = (props: any) => {
                           }))
                         }
                       >
-                        <h3 className="mr-3 grow break-words">
-                          {chapter.name}
-                        </h3>
+                        <h3 className="mr-3 grow break-words">{chapter.name}</h3>
                         <div className="flex items-center space-x-3">
                           <p className="shrink-0 whitespace-nowrap rounded-full px-3 py-[2px] text-sm font-normal text-neutral-400 outline-1 outline-neutral-200">
                             {t('activities', {
@@ -319,9 +295,7 @@ const CourseClient = (props: any) => {
                           <ChevronUp size={16} />
                         </div>
                       </div>
-                      <div
-                        className={`transition-all duration-200 ${isExpanded ? 'block' : 'hidden'}`}
-                      >
+                      <div className={`transition-all duration-200 ${isExpanded ? 'block' : 'hidden'}`}>
                         <div className="">
                           {chapter.activities.map((activity: any) => {
                             return (
@@ -366,22 +340,12 @@ const CourseClient = (props: any) => {
                                       )}
                                     </div>
                                     <div className="mt-0.5 flex items-center space-x-1.5 text-neutral-400">
-                                      {activity.activity_type ===
-                                        'TYPE_DYNAMIC' && (
-                                        <StickyNote size={10} />
-                                      )}
-                                      {activity.activity_type ===
-                                        'TYPE_VIDEO' && <Video size={10} />}
-                                      {activity.activity_type ===
-                                        'TYPE_DOCUMENT' && <File size={10} />}
-                                      {activity.activity_type ===
-                                        'TYPE_ASSIGNMENT' && (
-                                        <Backpack size={10} />
-                                      )}
+                                      {activity.activity_type === 'TYPE_DYNAMIC' && <StickyNote size={10} />}
+                                      {activity.activity_type === 'TYPE_VIDEO' && <Video size={10} />}
+                                      {activity.activity_type === 'TYPE_DOCUMENT' && <File size={10} />}
+                                      {activity.activity_type === 'TYPE_ASSIGNMENT' && <Backpack size={10} />}
                                       <span className="text-xs font-medium">
-                                        {getActivityTypeLabel(
-                                          activity.activity_type
-                                        )}
+                                        {getActivityTypeLabel(activity.activity_type)}
                                       </span>
                                     </div>
                                   </div>
@@ -390,12 +354,12 @@ const CourseClient = (props: any) => {
                                   </div>
                                 </div>
                               </Link>
-                            )
+                            );
                           })}
                         </div>
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -413,7 +377,7 @@ const CourseClient = (props: any) => {
         </>
       )}
     </>
-  )
-}
+  );
+};
 
-export default CourseClient
+export default CourseClient;

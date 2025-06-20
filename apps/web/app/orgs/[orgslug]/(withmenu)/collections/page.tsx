@@ -1,33 +1,31 @@
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
-import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle'
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import { getUriWithOrg } from '@services/config/config'
-import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail'
-import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton'
-import { nextAuthOptions } from 'app/auth/options'
-import { getServerSession } from 'next-auth/next'
-import { getOrgCollections } from '@services/courses/collections'
-import { getOrgThumbnailMediaDirectory } from '@services/media/media'
-import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder'
-import { getTranslations } from 'next-intl/server'
+import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
+import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
+import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import { getOrgCollections } from '@services/courses/collections';
+import { getUriWithOrg } from '@services/config/config';
+import { getTranslations } from 'next-intl/server';
+import { nextAuthOptions } from 'app/auth/options';
+import { getServerSession } from 'next-auth/next';
+import type { Metadata } from 'next';
+import Link from 'next/link';
 
 type MetadataProps = {
-  params: Promise<{ orgslug: string; courseid: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
+  params: Promise<{ orgslug: string; courseid: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export async function generateMetadata(
-  props: MetadataProps
-): Promise<Metadata> {
-  const params = await props.params
-  const t = await getTranslations('HomePage.Collections')
+export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  const params = await props.params;
+  const t = await getTranslations('HomePage.Collections');
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 0,
     tags: ['organizations'],
-  })
+  });
 
   // SEO
   return {
@@ -38,8 +36,8 @@ export async function generateMetadata(
       follow: true,
       nocache: true,
       googleBot: {
-        index: true,
-        follow: true,
+        'index': true,
+        'follow': true,
         'max-image-preview': 'large',
       },
     },
@@ -49,40 +47,39 @@ export async function generateMetadata(
       type: 'website',
       images: [
         {
-          url: getOrgThumbnailMediaDirectory(
-            org?.org_uuid,
-            org?.thumbnail_image
-          ),
+          url: getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
           width: 800,
           height: 600,
           alt: org.name,
         },
       ],
     },
-  }
+  };
 }
 
 const CollectionsPage = async (params: any) => {
-  const t = await getTranslations('HomePage.Collections')
-  const session = await getServerSession(nextAuthOptions)
-  const access_token = session?.tokens?.access_token
-  const orgslug = (await params.params).orgslug
+  const t = await getTranslations('HomePage.Collections');
+  const session = await getServerSession(nextAuthOptions);
+  const access_token = session?.tokens?.access_token;
+  const orgslug = (await params.params).orgslug;
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
-  })
-  const org_id = org.id
-  const collections = await getOrgCollections(
-    org_id,
-    access_token ? access_token : null,
-    { revalidate: 0, tags: ['collections'] }
-  )
+  });
+  const org_id = org.id;
+  const collections = await getOrgCollections(org_id, access_token ? access_token : null, {
+    revalidate: 0,
+    tags: ['collections'],
+  });
 
   return (
     <GeneralWrapperStyled>
       <div className="mb-8 flex flex-col space-y-4">
         <div className="flex items-center justify-between">
-          <TypeOfContentTitle title={t('title')} type="col" />
+          <TypeOfContentTitle
+            title={t('title')}
+            type="col"
+          />
           <AuthenticatedClientElement
             ressourceType="collections"
             action="create"
@@ -96,7 +93,10 @@ const CollectionsPage = async (params: any) => {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {collections.map((collection: any) => (
-            <div key={collection.collection_uuid} className="p-3">
+            <div
+              key={collection.collection_uuid}
+              className="p-3"
+            >
               <CollectionThumbnail
                 collection={collection}
                 orgslug={orgslug}
@@ -107,13 +107,9 @@ const CollectionsPage = async (params: any) => {
           {collections.length === 0 && (
             <div className="col-span-full flex items-center justify-center py-8">
               <div className="text-center">
-                <h1 className="mb-2 text-xl font-bold text-gray-600">
-                  {t('noContent')}
-                </h1>
+                <h1 className="mb-2 text-xl font-bold text-gray-600">{t('noContent')}</h1>
                 <p className="text-md text-gray-400">
-                  <ContentPlaceHolderIfUserIsNotAdmin
-                    text={t('noContentUserAdmin')}
-                  />
+                  <ContentPlaceHolderIfUserIsNotAdmin text={t('noContentUserAdmin')} />
                 </p>
                 <div className="mt-4 flex justify-center">
                   <AuthenticatedClientElement
@@ -133,7 +129,7 @@ const CollectionsPage = async (params: any) => {
         </div>
       </div>
     </GeneralWrapperStyled>
-  )
-}
+  );
+};
 
-export default CollectionsPage
+export default CollectionsPage;

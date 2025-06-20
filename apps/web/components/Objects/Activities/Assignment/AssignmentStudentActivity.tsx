@@ -1,37 +1,34 @@
-'use client'
+'use client';
 
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext'
-import { useCourse } from '@components/Contexts/CourseContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getTaskRefFileDir } from '@services/media/media'
-import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject'
-import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject'
-import {
-  Backpack,
-  Calendar,
-  Download,
-  EllipsisVertical,
-  Info,
-} from 'lucide-react'
-import Link from 'next/link'
-import { useEffect } from 'react'
-import { useTranslations } from 'next-intl'
-import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
+import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
+import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { Backpack, Calendar, Download, EllipsisVertical, Info } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { getTaskRefFileDir } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useTranslations } from 'next-intl';
+import { useEffect } from 'react';
+import Link from 'next/link';
 
 function AssignmentStudentActivity() {
-  const t = useTranslations('Activities.AssignmentStudentActivity')
-  const assignments = useAssignments() as any
-  const _course = useCourse() as any
-  const org = useOrg() as any
+  const t = useTranslations('Activities.AssignmentStudentActivity');
+  const assignments = useAssignments() as any;
+  const _course = useCourse() as any;
+  const org = useOrg() as any;
 
-  useEffect(() => {}, [assignments, org])
+  useEffect(() => {}, [assignments, org]);
 
   return (
     <div className="flex flex-col space-y-4 md:space-y-6">
       <div className="flex flex-col items-center justify-center space-y-3 md:flex-row md:space-x-3 md:space-y-0">
         <div className="flex h-fit items-center space-x-3 text-xs">
           <div className="nice-shadow flex h-fit items-center gap-2 rounded-full bg-slate-100/5 px-4 py-2 text-sm text-slate-700 md:px-5">
-            <Backpack size={14} className="md:size-[14px]" />
+            <Backpack
+              size={14}
+              className="md:size-[14px]"
+            />
             <p className="font-semibold">{t('assignment')}</p>
           </div>
         </div>
@@ -45,9 +42,7 @@ function AssignmentStudentActivity() {
               <div className="flex items-center gap-1 text-xs text-slate-400 md:space-x-2">
                 <Calendar size={14} />
                 <p className="font-semibold">{t('dueDate')}</p>
-                <p className="font-semibold">
-                  {assignments?.assignment_object?.due_date}
-                </p>
+                <p className="font-semibold">{assignments?.assignment_object?.due_date}</p>
               </div>
             </div>
           </div>
@@ -58,13 +53,14 @@ function AssignmentStudentActivity() {
         <div className="nice-shadow flex flex-col space-y-2 rounded-md bg-slate-100/30 p-4 md:p-6">
           <div className="flex flex-col space-y-3">
             <div className="flex items-center gap-2 text-slate-700">
-              <Info size={16} className="text-slate-500" />
+              <Info
+                size={16}
+                className="text-slate-500"
+              />
               <h3 className="text-sm font-semibold">{t('descriptionTitle')}</h3>
             </div>
             <div className="pl-6">
-              <p className="text-sm leading-relaxed text-slate-600">
-                {assignments.assignment_object.description}
-              </p>
+              <p className="text-sm leading-relaxed text-slate-600">{assignments.assignment_object.description}</p>
             </div>
           </div>
         </div>
@@ -81,9 +77,7 @@ function AssignmentStudentActivity() {
               <div className="flex flex-col space-y-2 py-2 md:flex-row md:justify-between md:space-y-0">
                 <div className="flex flex-wrap space-x-2 font-semibold text-slate-800">
                   <p>{t('task', { index: index + 1 })} : </p>
-                  <p className="break-words text-slate-500">
-                    {task.description}
-                  </p>
+                  <p className="break-words text-slate-500">{task.description}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {task.hint && (
@@ -92,9 +86,7 @@ function AssignmentStudentActivity() {
                         <Info size={13} />
                         <p className="text-xs font-semibold">{t('hint')}</p>
                       </PopoverTrigger>
-                      <PopoverContent className="max-h-[200px] overflow-y-auto">
-                        {task.hint}
-                      </PopoverContent>
+                      <PopoverContent className="max-h-[200px] overflow-y-auto">{task.hint}</PopoverContent>
                     </Popover>
                   )}
                   <Link
@@ -104,7 +96,7 @@ function AssignmentStudentActivity() {
                       assignments?.activity_object.activity_uuid,
                       assignments?.assignment_object.assignment_uuid,
                       task.assignment_task_uuid,
-                      task.reference_file
+                      task.reference_file,
                     )}
                     target="_blank"
                     download={true}
@@ -117,9 +109,7 @@ function AssignmentStudentActivity() {
                           <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
                         </span>
                       )}
-                      <p className="text-xs font-semibold">
-                        {t('referenceDocument')}
-                      </p>
+                      <p className="text-xs font-semibold">{t('referenceDocument')}</p>
                     </div>
                   </Link>
                 </div>
@@ -141,10 +131,10 @@ function AssignmentStudentActivity() {
                 )}
               </div>
             </div>
-          )
+          );
         })}
     </div>
-  )
+  );
 }
 
-export default AssignmentStudentActivity
+export default AssignmentStudentActivity;

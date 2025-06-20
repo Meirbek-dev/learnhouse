@@ -1,6 +1,6 @@
-'use client'
-import { Loader2 } from 'lucide-react'
-import { motion } from 'framer-motion'
+'use client';
+import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 function PageLoading() {
   return (
@@ -36,7 +36,7 @@ function PageLoading() {
         <Loader2 className="h-10 w-10 animate-spin text-gray-400" />
       </motion.div>
     </div>
-  )
+  );
 }
 
-export default PageLoading
+export default PageLoading;

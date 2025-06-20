@@ -1,40 +1,29 @@
-import { getAPIUrl } from '@services/config/config'
 import {
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
   getResponseMetadata,
-} from '@services/utils/ts/requests'
+} from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
-export async function createActivity(
-  data: any,
-  chapter_id: any,
-  org_id: any,
-  access_token: string
-) {
-  data.content = {}
+export async function createActivity(data: any, chapter_id: any, org_id: any, access_token: string) {
+  data.content = {};
   // remove chapter_id from data
-  data.chapterId = undefined
+  data.chapterId = undefined;
   const result = await fetch(
     `${getAPIUrl()}activities/?coursechapter_id=${chapter_id}&org_id=${org_id}`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token)
-  )
-  return result.json()
+    RequestBodyWithAuthHeader('POST', data, null, access_token),
+  );
+  return result.json();
 }
 
-export async function createFileActivity(
-  file: File,
-  type: string,
-  data: any,
-  chapter_id: any,
-  access_token: string
-) {
+export async function createFileActivity(file: File, type: string, data: any, chapter_id: any, access_token: string) {
   // Send file thumbnail as form data
-  const formData = new FormData()
-  formData.append('chapter_id', chapter_id)
-  let endpoint = ''
+  const formData = new FormData();
+  formData.append('chapter_id', chapter_id);
+  let endpoint = '';
   if (type === 'video') {
-    formData.append('name', data.name)
-    formData.append('video_file', file)
+    formData.append('name', data.name);
+    formData.append('video_file', file);
     // Add video details
     if (data.details) {
       formData.append(
@@ -44,31 +33,23 @@ export async function createFileActivity(
           endTime: data.details.endTime || null,
           autoplay: data.details.autoplay,
           muted: data.details.muted,
-        })
-      )
+        }),
+      );
     }
-    endpoint = `${getAPIUrl()}activities/video`
+    endpoint = `${getAPIUrl()}activities/video`;
   } else if (type === 'documentpdf') {
-    formData.append('pdf_file', file)
-    formData.append('name', data.name)
-    endpoint = `${getAPIUrl()}activities/documentpdf`
+    formData.append('pdf_file', file);
+    formData.append('name', data.name);
+    endpoint = `${getAPIUrl()}activities/documentpdf`;
   }
-  const result = await fetch(
-    endpoint,
-    RequestBodyFormWithAuthHeader('POST', formData, null, access_token)
-  )
-  return result.json()
+  const result = await fetch(endpoint, RequestBodyFormWithAuthHeader('POST', formData, null, access_token));
+  return result.json();
 }
 
-export async function createExternalVideoActivity(
-  data: any,
-  activity: any,
-  chapter_id: any,
-  access_token: string
-) {
+export async function createExternalVideoActivity(data: any, activity: any, chapter_id: any, access_token: string) {
   // add coursechapter_id to data
-  data.chapter_id = chapter_id
-  data.activity_id = activity.id
+  data.chapter_id = chapter_id;
+  data.activity_id = activity.id;
 
   // Add video details with null checking
   const defaultDetails = {
@@ -76,7 +57,7 @@ export async function createExternalVideoActivity(
     endTime: null,
     autoplay: false,
     muted: false,
-  }
+  };
   const videoDetails = data.details
     ? {
         startTime: data.details.startTime ?? defaultDetails.startTime,
@@ -84,76 +65,64 @@ export async function createExternalVideoActivity(
         autoplay: data.details.autoplay ?? defaultDetails.autoplay,
         muted: data.details.muted ?? defaultDetails.muted,
       }
-    : defaultDetails
-  data.details = JSON.stringify(videoDetails)
+    : defaultDetails;
+  data.details = JSON.stringify(videoDetails);
   const result = await fetch(
     `${getAPIUrl()}activities/external_video`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token)
-  )
-  return result.json()
+    RequestBodyWithAuthHeader('POST', data, null, access_token),
+  );
+  return result.json();
 }
 
-export async function getActivity(
-  activity_uuid: any,
-  next: any,
-  access_token: string
-) {
+export async function getActivity(activity_uuid: any, next: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token)
-  )
-  return result.json()
+    RequestBodyWithAuthHeader('GET', null, next, access_token),
+  );
+  return result.json();
 }
 
-export async function getActivityByID(
-  activity_id: any,
-  next: any,
-  access_token: string
-) {
+export async function getActivityByID(activity_id: any, next: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/id/${activity_id}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token)
-  )
-  return result.json()
+    RequestBodyWithAuthHeader('GET', null, next, access_token),
+  );
+  return result.json();
 }
 
 export async function deleteActivity(activity_uuid: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
-  )
-  return result.json()
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
+  );
+  return result.json();
 }
 
 export async function getActivityWithAuthHeader(
   activity_uuid: any,
   next: any,
-  access_token: string | null | undefined
+  access_token: string | null | undefined,
 ) {
   const result = await fetch(
     `${getAPIUrl()}activities/activity_${activity_uuid}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token || undefined)
-  )
-  return result.json()
+    RequestBodyWithAuthHeader('GET', null, next, access_token || undefined),
+  );
+  return result.json();
 }
 
-export async function updateActivity(
-  data: any,
-  activity_uuid: string,
-  access_token: string
-) {
+export async function updateActivity(data: any, activity_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token)
-  )
-  return getResponseMetadata(result)
+    RequestBodyWithAuthHeader('PUT', data, null, access_token),
+  );
+  return getResponseMetadata(result);
 }
 
 export async function getUrlPreview(url: string) {
   const result = await fetch(
     `${getAPIUrl()}utils/link-preview?url=${url}`,
-    RequestBodyWithAuthHeader('GET', null, null, undefined)
-  )
-  const res = await result.json()
-  return res
+    RequestBodyWithAuthHeader('GET', null, null, undefined),
+  );
+  const res = await result.json();
+  return res;
 }

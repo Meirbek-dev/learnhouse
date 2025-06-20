@@ -1,13 +1,13 @@
-'use client'
-import { useTranslations } from 'next-intl'
-import type React from 'react'
+'use client';
+import { useTranslations } from 'next-intl';
+import type React from 'react';
 
 interface NewCourseButtonProps {
-  onClick?: () => void
+  onClick?: () => void;
 }
 
 const NewCourseButton: React.FC<NewCourseButtonProps> = ({ onClick }) => {
-  const t = useTranslations('Components.Button')
+  const t = useTranslations('Components.Button');
   return (
     <button
       type="button"
@@ -17,7 +17,7 @@ const NewCourseButton: React.FC<NewCourseButtonProps> = ({ onClick }) => {
       <div>{t('newCourse')}</div>
       <div className="text-md rounded-full bg-neutral-800 px-1">+</div>
     </button>
-  )
-}
+  );
+};
 
-export default NewCourseButton
+export default NewCourseButton;

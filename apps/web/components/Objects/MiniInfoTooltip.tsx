@@ -1,14 +1,14 @@
-import type React from 'react'
-import { motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { motion } from 'framer-motion';
+import { X } from 'lucide-react';
+import type React from 'react';
 
 interface MiniInfoTooltipProps {
-  icon?: React.ReactNode
-  message: string
-  onClose: () => void
-  iconColor?: string
-  iconSize?: number
-  width?: string
+  icon?: React.ReactNode;
+  message: string;
+  onClose: () => void;
+  iconColor?: string;
+  iconSize?: number;
+  width?: string;
 }
 
 export default function MiniInfoTooltip({
@@ -45,5 +45,5 @@ export default function MiniInfoTooltip({
         <X size={14} />
       </button>
     </motion.div>
-  )
+  );
 }

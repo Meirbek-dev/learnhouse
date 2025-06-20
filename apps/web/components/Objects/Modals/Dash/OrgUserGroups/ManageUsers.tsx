@@ -1,73 +1,56 @@
-'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getAPIUrl } from '@services/config/config'
-import {
-  linkUserToUserGroup,
-  unLinkUserToUserGroup,
-} from '@services/usergroups/usergroups'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { Check, Plus, X } from 'lucide-react'
-import toast from 'react-hot-toast'
-import useSWR, { mutate } from 'swr'
-import { useTranslations } from 'next-intl'
+'use client';
+import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
+import { Check, Plus, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
 
 type ManageUsersProps = {
-  usergroup_id: any
-}
+  usergroup_id: any;
+};
 
 function ManageUsers(props: ManageUsersProps) {
-  const t = useTranslations('Components.ManageUsers')
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const { data: OrgUsers } = useSWR(
-    org ? `${getAPIUrl()}orgs/${org.id}/users` : null,
-    (url) => swrFetcher(url, access_token)
-  )
-  const { data: UGusers } = useSWR(
-    org ? `${getAPIUrl()}usergroups/${props.usergroup_id}/users` : null,
-    (url) => swrFetcher(url, access_token)
-  )
+  const t = useTranslations('Components.ManageUsers');
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const { data: OrgUsers } = useSWR(org ? `${getAPIUrl()}orgs/${org.id}/users` : null, (url) =>
+    swrFetcher(url, access_token),
+  );
+  const { data: UGusers } = useSWR(org ? `${getAPIUrl()}usergroups/${props.usergroup_id}/users` : null, (url) =>
+    swrFetcher(url, access_token),
+  );
 
   const isUserPartOfGroup = (user_id: any) => {
     if (UGusers) {
-      return UGusers.some((user: any) => user.id === user_id)
+      return UGusers.some((user: any) => user.id === user_id);
     }
-    return false
-  }
+    return false;
+  };
 
   const handleLinkUser = async (user_id: any) => {
-    const res = await linkUserToUserGroup(
-      props.usergroup_id,
-      user_id,
-      access_token
-    )
+    const res = await linkUserToUserGroup(props.usergroup_id, user_id, access_token);
     if (res.status === 200) {
-      toast.success(t('linkSuccess'))
-      mutate(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`)
+      toast.success(t('linkSuccess'));
+      mutate(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`);
     } else {
-      toast.error(
-        t('linkError', { error: res.data?.detail || t('unknownError') })
-      )
+      toast.error(t('linkError', { error: res.data?.detail || t('unknownError') }));
     }
-  }
+  };
 
   const handleUnlinkUser = async (user_id: any) => {
-    const res = await unLinkUserToUserGroup(
-      props.usergroup_id,
-      user_id,
-      access_token
-    )
+    const res = await unLinkUserToUserGroup(props.usergroup_id, user_id, access_token);
     if (res.status === 200) {
-      toast.success(t('unlinkSuccess'))
-      mutate(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`)
+      toast.success(t('unlinkSuccess'));
+      mutate(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`);
     } else {
-      toast.error(
-        t('unlinkError', { error: res.data?.detail || t('unknownError') })
-      )
+      toast.error(t('unlinkError', { error: res.data?.detail || t('unknownError') }));
     }
-  }
+  };
 
   return (
     <div className="py-3">
@@ -125,7 +108,7 @@ function ManageUsers(props: ManageUsersProps) {
         </tbody>
       </table>
     </div>
-  )
+  );
 }
 
-export default ManageUsers
+export default ManageUsers;

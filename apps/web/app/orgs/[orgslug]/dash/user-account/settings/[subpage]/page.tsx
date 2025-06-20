@@ -1,59 +1,56 @@
-'use client'
-import type { ComponentType } from 'react'
-import { useEffect, use } from 'react'
-import { motion } from 'framer-motion'
-import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral'
-import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword'
-import Link from 'next/link'
-import { getUriWithOrg } from '@services/config/config'
-import { Info, Lock, type LucideIcon, User as UserIcon } from 'lucide-react'
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile'
-import { useTranslations } from 'next-intl'
+'use client';
+import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
+import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral';
+import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile';
+import { Info, Lock, type LucideIcon, User as UserIcon } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import { getUriWithOrg } from '@services/config/config';
+import { useTranslations } from 'next-intl';
+import type { ComponentType } from 'react';
+import { motion } from 'framer-motion';
+import { useEffect, use } from 'react';
+import Link from 'next/link';
 
 interface User {
-  username: string
+  username: string;
   // Add other user properties as needed
 }
 
 interface Session {
-  user?: User
+  user?: User;
   // Add other session properties as needed
 }
 
 export type SettingsParams = {
-  subpage: string
-  orgslug: string
-}
+  subpage: string;
+  orgslug: string;
+};
 
 type NavigationItem = {
-  id: string
-  label: string
-  icon: LucideIcon
-  component: ComponentType
-}
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  component: ComponentType;
+};
 
 const SettingsNavigation = ({
   items,
   currentPage,
   orgslug,
 }: {
-  items: NavigationItem[]
-  currentPage: string
-  orgslug: string
+  items: NavigationItem[];
+  currentPage: string;
+  orgslug: string;
 }) => {
-  const t = useTranslations('DashPage.UserAccountSettings')
+  const t = useTranslations('DashPage.UserAccountSettings');
 
   return (
     <div className="flex space-x-5 text-sm font-black">
       {items.map((item) => (
         <Link
           key={item.id}
-          href={getUriWithOrg(
-            orgslug,
-            `/dash/user-account/settings/${item.id}`
-          )}
+          href={getUriWithOrg(orgslug, `/dash/user-account/settings/${item.id}`)}
         >
           <div
             className={`w-fit border-black py-2 text-center transition-all ease-linear ${
@@ -68,15 +65,15 @@ const SettingsNavigation = ({
         </Link>
       ))}
     </div>
-  )
-}
+  );
+};
 
 function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
-  const t = useTranslations('DashPage.UserAccountSettings')
-  const { subpage, orgslug } = use(params)
-  const session = useLHSession() as Session
+  const t = useTranslations('DashPage.UserAccountSettings');
+  const { subpage, orgslug } = use(params);
+  const session = useLHSession() as Session;
 
-  useEffect(() => {}, [session])
+  useEffect(() => {}, [session]);
 
   const navigationItems: NavigationItem[] = [
     {
@@ -97,16 +94,17 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
       icon: Lock,
       component: UserEditPassword,
     },
-  ]
+  ];
 
-  const CurrentComponent = navigationItems.find(
-    (item) => item.id === subpage
-  )?.component
+  const CurrentComponent = navigationItems.find((item) => item.id === subpage)?.component;
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
       <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
-        <BreadCrumbs type="user" last_breadcrumb={session?.user?.username} />
+        <BreadCrumbs
+          type="user"
+          last_breadcrumb={session?.user?.username}
+        />
         <div className="my-2 tracking-tighter">
           <div className="w-100 flex justify-between">
             <div className="flex pt-3 text-4xl font-bold">{t('title')}</div>
@@ -129,7 +127,7 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
         {CurrentComponent && <CurrentComponent />}
       </motion.div>
     </div>
-  )
+  );
 }
 
-export default SettingsPage
+export default SettingsPage;

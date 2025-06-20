@@ -1,85 +1,70 @@
-'use client'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import {
-  createInviteCode,
-  createInviteCodeWithUserGroup,
-} from '@services/organizations/invites'
-import { swrFetcher } from '@services/utils/ts/requests'
-import { Ticket } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useState, useEffect } from 'react'
-import toast from 'react-hot-toast'
-import useSWR, { mutate } from 'swr'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+'use client';
+import { createInviteCode, createInviteCodeWithUserGroup } from '@services/organizations/invites';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { Ticket } from 'lucide-react';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 type OrgInviteCodeGenerateProps = {
-  setInvitesModal: any
-}
+  setInvitesModal: any;
+};
 
 function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
-  const t = useTranslations('Components.OrgInviteCodeGenerate')
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [usergroup_id, setUsergroup_id] = useState(0)
+  const t = useTranslations('Components.OrgInviteCodeGenerate');
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [usergroup_id, setUsergroup_id] = useState(0);
 
-  const { data: usergroups } = useSWR(
-    org ? `${getAPIUrl()}usergroups/org/${org.id}` : null,
-    (url) => swrFetcher(url, access_token)
-  )
+  const { data: usergroups } = useSWR(org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) =>
+    swrFetcher(url, access_token),
+  );
 
   async function createInviteWithUserGroup() {
-    const res = await createInviteCodeWithUserGroup(
-      org.id,
-      usergroup_id,
-      session.data?.tokens?.access_token
-    )
+    const res = await createInviteCodeWithUserGroup(org.id, usergroup_id, session.data?.tokens?.access_token);
     if (res.status == 200) {
-      mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
-      props.setInvitesModal(false)
+      mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
+      props.setInvitesModal(false);
     } else {
       toast.error(
         t('createInviteError', {
           error: res.data?.detail || t('unknownError'),
-        })
-      )
+        }),
+      );
     }
   }
 
   async function createInvite() {
-    const res = await createInviteCode(
-      org.id,
-      session.data?.tokens?.access_token
-    )
+    const res = await createInviteCode(org.id, session.data?.tokens?.access_token);
     if (res.status == 200) {
-      mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
-      props.setInvitesModal(false)
+      mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
+      props.setInvitesModal(false);
     } else {
       toast.error(
         t('createInviteError', {
           error: res.data?.detail || t('unknownError'),
-        })
-      )
+        }),
+      );
     }
   }
 
   useEffect(() => {
     if (usergroups && usergroups.length > 0) {
-      setUsergroup_id(usergroups[0].id)
+      setUsergroup_id(usergroups[0].id);
     }
-  }, [usergroups])
+  }, [usergroups]);
   return (
     <div className="flex space-x-2 pt-2">
       <div className="flex h-[140px] w-full rounded-lg bg-slate-100">
         <div className="mx-auto flex flex-col">
-          <h1 className="mx-auto pt-4 font-medium text-gray-600">
-            {t('linkedTitle')}
-          </h1>
-          <h2 className="mx-auto text-xs font-medium text-gray-600">
-            {t('linkedDescription')}
-          </h2>
+          <h1 className="mx-auto pt-4 font-medium text-gray-600">{t('linkedTitle')}</h1>
+          <h2 className="mx-auto text-xs font-medium text-gray-600">{t('linkedDescription')}</h2>
           <div className="mx-auto flex items-center space-x-4 pt-3">
             {usergroups?.length >= 1 && (
               <div className="flex items-center space-x-4">
@@ -88,7 +73,10 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
                   className="flex w-fit rounded-md border-2 border-slate-300 bg-gray-100 p-2 text-sm"
                 >
                   {usergroups?.map((usergroup: any) => (
-                    <option key={usergroup.id} value={usergroup.id}>
+                    <option
+                      key={usergroup.id}
+                      value={usergroup.id}
+                    >
                       {usergroup.name}
                     </option>
                   ))}
@@ -113,10 +101,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
                 <Link
                   className="mx-1 rounded-full bg-blue-100 px-3 py-1 font-bold text-blue-700"
                   target="_blank"
-                  href={getUriWithOrg(
-                    org.slug,
-                    '/dash/users/settings/usergroups'
-                  )}
+                  href={getUriWithOrg(org.slug, '/dash/users/settings/usergroups')}
                 >
                   {t('createUserGroupLink')}
                 </Link>
@@ -127,12 +112,8 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
       </div>
       <div className="flex h-[140px] w-full rounded-lg bg-slate-100">
         <div className="mx-auto flex flex-col">
-          <h1 className="mx-auto pt-4 font-medium text-gray-600">
-            {t('normalTitle')}
-          </h1>
-          <h2 className="mx-auto text-xs font-medium text-gray-600">
-            {t('normalDescription')}
-          </h2>
+          <h1 className="mx-auto pt-4 font-medium text-gray-600">{t('normalTitle')}</h1>
+          <h2 className="mx-auto text-xs font-medium text-gray-600">{t('normalDescription')}</h2>
           <div className="mx-auto pt-4">
             <button
               onClick={createInvite}
@@ -145,7 +126,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default OrgInviteCodeGenerate
+export default OrgInviteCodeGenerate;

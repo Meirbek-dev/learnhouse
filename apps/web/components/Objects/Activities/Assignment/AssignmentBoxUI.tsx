@@ -1,33 +1,24 @@
-'use client'
+'use client';
 
-import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext'
-import {
-  BookPlus,
-  BookUser,
-  EllipsisVertical,
-  FileUp,
-  Forward,
-  InfoIcon,
-  ListTodo,
-  Save,
-} from 'lucide-react'
-import type { ReactNode } from 'react'
-import { useState, useEffect } from 'react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useTranslations } from 'next-intl'
+import { BookPlus, BookUser, EllipsisVertical, FileUp, Forward, InfoIcon, ListTodo, Save } from 'lucide-react';
+import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 type AssignmentBoxProps = {
-  type: 'quiz' | 'file'
-  view?: 'teacher' | 'student' | 'grading' | 'custom-grading'
-  maxPoints?: number
-  currentPoints?: number
-  saveFC?: () => void
-  submitFC?: () => void
-  gradeFC?: () => void
-  gradeCustomFC?: (grade: number) => void
-  showSavingDisclaimer?: boolean
-  children: ReactNode
-}
+  type: 'quiz' | 'file';
+  view?: 'teacher' | 'student' | 'grading' | 'custom-grading';
+  maxPoints?: number;
+  currentPoints?: number;
+  saveFC?: () => void;
+  submitFC?: () => void;
+  gradeFC?: () => void;
+  gradeCustomFC?: (grade: number) => void;
+  showSavingDisclaimer?: boolean;
+  children: ReactNode;
+};
 
 function AssignmentBoxUI({
   type,
@@ -41,17 +32,17 @@ function AssignmentBoxUI({
   showSavingDisclaimer,
   children,
 }: AssignmentBoxProps) {
-  const t = useTranslations('Activities.AssignmentBoxUI')
-  const [customGrade, setCustomGrade] = useState<number>(0)
-  const submission = useAssignmentSubmission() as any
-  const session = useLHSession() as any
+  const t = useTranslations('Activities.AssignmentBoxUI');
+  const [customGrade, setCustomGrade] = useState<number>(0);
+  const submission = useAssignmentSubmission() as any;
+  const session = useLHSession() as any;
 
   useEffect(() => {
-    console.log(submission)
-  }, [submission])
+    console.log(submission);
+  }, [submission]);
 
   // Check if user is authenticated
-  const isAuthenticated = session?.status === 'authenticated'
+  const isAuthenticated = session?.status === 'authenticated';
 
   return (
     <div className="nice-shadow flex flex-col rounded-md bg-slate-100/30 px-3 py-4 sm:px-6">
@@ -111,18 +102,15 @@ function AssignmentBoxUI({
           )}
 
           {/* Student button - only show if authenticated */}
-          {view === 'student' &&
-            isAuthenticated &&
-            submission &&
-            submission.length <= 0 && (
-              <div
-                onClick={() => submitFC?.()}
-                className="linear bg-linear-to-bl mx-auto flex w-full cursor-pointer items-center justify-center space-x-2 rounded-md bg-emerald-300/20 px-2 py-1 text-emerald-700 outline-dashed outline-offset-2 outline-emerald-500/60 transition-all hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1 sm:w-auto"
-              >
-                <Forward size={14} />
-                <p className="text-xs font-semibold">{t('saveProgress')}</p>
-              </div>
-            )}
+          {view === 'student' && isAuthenticated && submission && submission.length <= 0 && (
+            <div
+              onClick={() => submitFC?.()}
+              className="linear bg-linear-to-bl mx-auto flex w-full cursor-pointer items-center justify-center space-x-2 rounded-md bg-emerald-300/20 px-2 py-1 text-emerald-700 outline-dashed outline-offset-2 outline-emerald-500/60 transition-all hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1 sm:w-auto"
+            >
+              <Forward size={14} />
+              <p className="text-xs font-semibold">{t('saveProgress')}</p>
+            </div>
+          )}
 
           {/* Grading button */}
           {view === 'grading' && (
@@ -148,9 +136,7 @@ function AssignmentBoxUI({
               </p>
               <div className="flex w-full items-center gap-2 sm:w-auto">
                 <input
-                  onChange={(e) =>
-                    setCustomGrade(Number.parseInt(e.target.value))
-                  }
+                  onChange={(e) => setCustomGrade(Number.parseInt(e.target.value))}
                   placeholder={maxPoints.toString()}
                   className="light-shadow w-full rounded-lg px-2 py-0.5 text-sm outline outline-gray-200 sm:w-[100px]"
                   type="number"
@@ -169,7 +155,7 @@ function AssignmentBoxUI({
       </div>
       {children}
     </div>
-  )
+  );
 }
 
-export default AssignmentBoxUI
+export default AssignmentBoxUI;

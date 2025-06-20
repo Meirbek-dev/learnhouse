@@ -1,77 +1,62 @@
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import {
-  Hexagon,
-  MoreHorizontal,
-  MoreVertical,
-  Pencil,
-  Save,
-  Trash2,
-} from 'lucide-react'
-import { useState } from 'react'
-import { Draggable, Droppable } from '@hello-pangea/dnd'
-import ActivityElement from './ActivityElement'
-import NewActivityButton from '../Buttons/NewActivityButton'
-import { deleteChapter, updateChapter } from '@services/courses/chapters'
-import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
-import { getAPIUrl } from '@services/config/config'
-import { mutate } from 'swr'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useTranslations } from 'next-intl'
-import { useCourse } from '@components/Contexts/CourseContext'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { Hexagon, MoreHorizontal, MoreVertical, Pencil, Save, Trash2 } from 'lucide-react';
+import { deleteChapter, updateChapter } from '@services/courses/chapters';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useCourse } from '@components/Contexts/CourseContext';
+import NewActivityButton from '../Buttons/NewActivityButton';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
+import { getAPIUrl } from '@services/config/config';
+import ActivityElement from './ActivityElement';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { mutate } from 'swr';
 
 type ChapterElementProps = {
-  chapter: any
-  chapterIndex: number
-  orgslug: string
-  course_uuid: string
-}
+  chapter: any;
+  chapterIndex: number;
+  orgslug: string;
+  course_uuid: string;
+};
 
 interface ModifiedChapterInterface {
-  chapterId: string
-  chapterName: string
+  chapterId: string;
+  chapterName: string;
 }
 
 function ChapterElement(props: ChapterElementProps) {
-  const activities = props.chapter.activities || []
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [modifiedChapter, setModifiedChapter] = useState<
-    ModifiedChapterInterface | undefined
-  >(undefined)
-  const [selectedChapter, setSelectedChapter] = useState<string | undefined>(
-    undefined
-  )
-  const t = useTranslations('CourseEdit')
-  const course = useCourse() as any
-  const withUnpublishedActivities = course
-    ? course.withUnpublishedActivities
-    : false
+  const activities = props.chapter.activities || [];
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>(undefined);
+  const [selectedChapter, setSelectedChapter] = useState<string | undefined>(undefined);
+  const t = useTranslations('CourseEdit');
+  const course = useCourse() as any;
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  const router = useRouter()
+  const router = useRouter();
 
   const deleteChapterUI = async () => {
-    await deleteChapter(props.chapter.id, access_token)
-    mutate(
-      `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
-    )
-    await revalidateTags(['courses'], props.orgslug)
-    router.refresh()
-  }
+    await deleteChapter(props.chapter.id, access_token);
+    mutate(`${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
+    await revalidateTags(['courses'], props.orgslug);
+    router.refresh();
+  };
 
   async function updateChapterName(chapterId: string) {
     if (modifiedChapter?.chapterId === chapterId) {
       const modifiedChapterCopy = {
         name: modifiedChapter.chapterName,
-      }
-      await updateChapter(chapterId, modifiedChapterCopy, access_token)
+      };
+      await updateChapter(chapterId, modifiedChapterCopy, access_token);
       mutate(
-        `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`
-      )
-      await revalidateTags(['courses'], props.orgslug)
-      router.refresh()
+        `${getAPIUrl()}courses/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+      );
+      await revalidateTags(['courses'], props.orgslug);
+      router.refresh();
     }
-    setSelectedChapter(undefined)
+    setSelectedChapter(undefined);
   }
 
   return (
@@ -83,9 +68,7 @@ function ChapterElement(props: ChapterElementProps) {
       {(provided, snapshot) => (
         <div
           className={`nice-shadow mx-2 rounded-xl bg-white px-3 pt-4 sm:mx-4 sm:px-4 sm:pt-6 md:mx-6 md:px-6 lg:mx-10 ${
-            snapshot.isDragging
-              ? 'rotate-1 shadow-xl ring-2 ring-blue-500/20'
-              : ''
+            snapshot.isDragging ? 'rotate-1 shadow-xl ring-2 ring-blue-500/20' : ''
           }`}
           key={props.chapter.chapter_uuid}
           {...provided.draggableProps}
@@ -108,11 +91,7 @@ function ChapterElement(props: ChapterElementProps) {
                       type="text"
                       className="outline-hidden w-full max-w-[150px] bg-transparent text-sm text-neutral-700 sm:max-w-none"
                       placeholder={t('chapterNamePlaceholder')}
-                      value={
-                        modifiedChapter
-                          ? modifiedChapter?.chapterName
-                          : props.chapter.name
-                      }
+                      value={modifiedChapter ? modifiedChapter?.chapterName : props.chapter.name}
                       onChange={(e) =>
                         setModifiedChapter({
                           chapterId: props.chapter.id,
@@ -128,9 +107,7 @@ function ChapterElement(props: ChapterElementProps) {
                     </button>
                   </div>
                 ) : (
-                  <p className="text-sm text-neutral-700 first-letter:uppercase sm:text-base">
-                    {props.chapter.name}
-                  </p>
+                  <p className="text-sm text-neutral-700 first-letter:uppercase sm:text-base">{props.chapter.name}</p>
                 )}
                 <Pencil
                   size={15}
@@ -140,7 +117,10 @@ function ChapterElement(props: ChapterElementProps) {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <MoreVertical size={15} className="text-gray-300" />
+              <MoreVertical
+                size={15}
+                className="text-gray-300"
+              />
               <ConfirmationModal
                 confirmationButtonText={t('deleteChapterButton')}
                 confirmationMessage={t('deleteChapterConfirmation')}
@@ -152,7 +132,10 @@ function ChapterElement(props: ChapterElementProps) {
                     className="flex items-center rounded-md bg-red-600 p-1 px-2 text-sm text-rose-100 shadow-sm hover:cursor-pointer sm:px-3"
                     rel="noopener noreferrer"
                   >
-                    <Trash2 size={15} className="text-rose-200" />
+                    <Trash2
+                      size={15}
+                      className="text-rose-200"
+                    />
                   </button>
                 }
                 functionToExecute={() => deleteChapterUI()}
@@ -192,13 +175,16 @@ function ChapterElement(props: ChapterElementProps) {
           />
           <div className="h-6">
             <div className="flex items-center">
-              <MoreHorizontal size={19} className="mx-auto text-gray-300" />
+              <MoreHorizontal
+                size={19}
+                className="mx-auto text-gray-300"
+              />
             </div>
           </div>
         </div>
       )}
     </Draggable>
-  )
+  );
 }
 
-export default ChapterElement
+export default ChapterElement;

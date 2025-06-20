@@ -1,5 +1,4 @@
-'use client'
-import { useState } from 'react'
+'use client';
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -7,68 +6,65 @@ import FormLayout, {
   FormLabel,
   FormMessage,
   Input,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { BarLoader } from 'react-spinners'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getAPIUrl } from '@services/config/config'
-import { mutate } from 'swr'
-import { createAssignment } from '@services/courses/assignments'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { createActivity, deleteActivity } from '@services/courses/activities'
-import toast from 'react-hot-toast'
-import { useTranslations } from 'next-intl'
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
-import { CalendarIcon } from 'lucide-react'
+} from '@components/Objects/StyledElements/Form/Form';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { createActivity, deleteActivity } from '@services/courses/activities';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { createAssignment } from '@services/courses/assignments';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Calendar } from '@/components/ui/calendar';
+import { getAPIUrl } from '@services/config/config';
+import * as Form from '@radix-ui/react-form';
+import { CalendarIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { BarLoader } from 'react-spinners';
+import toast from 'react-hot-toast';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import { mutate } from 'swr';
 
 function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
-  const t = useTranslations('Components.NewAssignmentModal')
-  const org = useOrg() as any
-  const session = useLHSession() as any
-  const [activityName, setActivityName] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [activityDescription, setActivityDescription] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [gradingType, setGradingType] = useState('PERCENTAGE')
+  const t = useTranslations('Components.NewAssignmentModal');
+  const org = useOrg() as any;
+  const session = useLHSession() as any;
+  const [activityName, setActivityName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activityDescription, setActivityDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [gradingType, setGradingType] = useState('PERCENTAGE');
 
   const handleNameChange = (e: any) => {
-    setActivityName(e.target.value)
-  }
+    setActivityName(e.target.value);
+  };
 
   const handleDescriptionChange = (e: any) => {
-    setActivityDescription(e.target.value)
-  }
+    setActivityDescription(e.target.value);
+  };
 
   const handleDueDateChange = (date: any) => {
     if (date) {
       // Format date as YYYY-MM-DD without timezone conversion
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const day = String(date.getDate()).padStart(2, '0')
-      const isoDate = `${year}-${month}-${day}`
-      setDueDate(isoDate)
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const isoDate = `${year}-${month}-${day}`;
+      setDueDate(isoDate);
     } else {
-      setDueDate('')
+      setDueDate('');
     }
-  }
+  };
 
   const handleGradingTypeChange = (e: any) => {
-    setGradingType(e.target.value)
-  }
+    setGradingType(e.target.value);
+  };
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    const toast_loading = toast.loading(t('creatingAssignment'))
+    e.preventDefault();
+    setIsSubmitting(true);
+    const toast_loading = toast.loading(t('creatingAssignment'));
 
-    let activity_res: any
+    let activity_res: any;
     try {
       activity_res = await createActivity(
         {
@@ -81,8 +77,8 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
         },
         chapterId,
         org?.id,
-        session.data?.tokens?.access_token
-      )
+        session.data?.tokens?.access_token,
+      );
 
       const res = await createAssignment(
         {
@@ -95,59 +91,51 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
           chapter_id: chapterId,
           activity_id: activity_res?.id,
         },
-        session.data?.tokens?.access_token
-      )
+        session.data?.tokens?.access_token,
+      );
 
       if (res.success) {
-        toast.success(t('createSuccess'))
-        mutate(
-          `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`
-        )
-        closeModal()
+        toast.success(t('createSuccess'));
+        mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta`);
+        closeModal();
       } else {
-        toast.error(
-          t('createError', { error: res.data?.detail || t('unknownError') })
-        )
+        toast.error(t('createError', { error: res.data?.detail || t('unknownError') }));
         if (activity_res?.activity_uuid) {
-          await deleteActivity(
-            activity_res.activity_uuid,
-            session.data?.tokens?.access_token
-          )
+          await deleteActivity(activity_res.activity_uuid, session.data?.tokens?.access_token);
         }
       }
     } catch (error: any) {
       toast.error(
         t('createError', {
           error: error?.message || t('unexpectedError'),
-        })
-      )
+        }),
+      );
       if (activity_res?.activity_uuid) {
         try {
-          await deleteActivity(
-            activity_res.activity_uuid,
-            session.data?.tokens?.access_token
-          )
+          await deleteActivity(activity_res.activity_uuid, session.data?.tokens?.access_token);
         } catch (rollbackError) {
-          console.error('Failed to rollback activity creation:', rollbackError)
+          console.error('Failed to rollback activity creation:', rollbackError);
         }
       }
     } finally {
-      toast.dismiss(toast_loading)
-      setIsSubmitting(false)
+      toast.dismiss(toast_loading);
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <FormLayout onSubmit={handleSubmit}>
       <FormField name="assignment-activity-title">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
           <FormLabel>{t('assignmentTitle')}</FormLabel>
-          <FormMessage match="valueMissing">
-            {t('valueMissingTitle')}
-          </FormMessage>
+          <FormMessage match="valueMissing">{t('valueMissingTitle')}</FormMessage>
         </Flex>
         <Form.Control asChild>
-          <Input onChange={handleNameChange} type="text" required />
+          <Input
+            onChange={handleNameChange}
+            type="text"
+            required
+          />
         </Form.Control>
       </FormField>
 
@@ -155,12 +143,14 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
       <FormField name="assignment-activity-description">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
           <FormLabel>{t('assignmentDescription')}</FormLabel>
-          <FormMessage match="valueMissing">
-            {t('valueMissingDescription')}
-          </FormMessage>
+          <FormMessage match="valueMissing">{t('valueMissingDescription')}</FormMessage>
         </Flex>
         <Form.Control asChild>
-          <Input onChange={handleDescriptionChange} type="text" required />
+          <Input
+            onChange={handleDescriptionChange}
+            type="text"
+            required
+          />
         </Form.Control>
       </FormField>
 
@@ -168,9 +158,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
       <FormField name="assignment-activity-due-date">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
           <FormLabel>{t('dueDate')}</FormLabel>
-          <FormMessage match="valueMissing">
-            {t('valueMissingDueDate')}
-          </FormMessage>
+          <FormMessage match="valueMissing">{t('valueMissingDueDate')}</FormMessage>
         </Flex>
         <Popover>
           <PopoverTrigger asChild>
@@ -178,19 +166,18 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
               <button
                 className={cn(
                   'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
-                  !dueDate && 'text-muted-foreground'
+                  !dueDate && 'text-muted-foreground',
                 )}
               >
-                {dueDate ? (
-                  format(new Date(dueDate), 'PPP')
-                ) : (
-                  <span>{t('selectDeadline')}</span>
-                )}
+                {dueDate ? format(new Date(dueDate), 'PPP') : <span>{t('selectDeadline')}</span>}
                 <CalendarIcon className="ml-2 size-4 opacity-50" />
               </button>
             </Form.Control>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent
+            className="w-auto p-0"
+            align="start"
+          >
             <Calendar
               mode="single"
               selected={dueDate ? new Date(dueDate) : undefined}
@@ -206,9 +193,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
       <FormField name="assignment-activity-grading-type">
         <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
           <FormLabel>{t('gradingType')}</FormLabel>
-          <FormMessage match="valueMissing">
-            {t('valueMissingGradingType')}
-          </FormMessage>
+          <FormMessage match="valueMissing">{t('valueMissingGradingType')}</FormMessage>
         </Flex>
         <Form.Control asChild>
           <select
@@ -225,7 +210,10 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
 
       <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
         <Form.Submit asChild>
-          <ButtonBlack type="submit" css={{ marginTop: 10 }}>
+          <ButtonBlack
+            type="submit"
+            css={{ marginTop: 10 }}
+          >
             {isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
@@ -239,7 +227,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
         </Form.Submit>
       </Flex>
     </FormLayout>
-  )
+  );
 }
 
-export default NewAssignment
+export default NewAssignment;

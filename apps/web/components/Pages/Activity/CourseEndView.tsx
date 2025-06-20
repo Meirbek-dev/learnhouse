@@ -1,29 +1,24 @@
-import type React from 'react'
-import ReactConfetti from 'react-confetti'
-import { Trophy, ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
-import { getUriWithOrg } from '@services/config/config'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { useTranslations } from 'next-intl'
-import { useWindowSize } from '@/hooks/useWindowSize'
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { useWindowSize } from '@/hooks/useWindowSize';
+import { Trophy, ArrowLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import ReactConfetti from 'react-confetti';
+import type React from 'react';
+import Link from 'next/link';
 
 interface CourseEndViewProps {
-  courseName: string
-  orgslug: string
-  courseUuid: string
-  thumbnailImage: string
+  courseName: string;
+  orgslug: string;
+  courseUuid: string;
+  thumbnailImage: string;
 }
 
-const CourseEndView: React.FC<CourseEndViewProps> = ({
-  courseName,
-  orgslug,
-  courseUuid,
-  thumbnailImage,
-}) => {
-  const t = useTranslations('CourseEndView')
-  const { width, height } = useWindowSize()
-  const org = useOrg() as any
+const CourseEndView: React.FC<CourseEndViewProps> = ({ courseName, orgslug, courseUuid, thumbnailImage }) => {
+  const t = useTranslations('CourseEndView');
+  const { width, height } = useWindowSize();
+  const org = useOrg() as any;
 
   return (
     <div className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
@@ -42,11 +37,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           {thumbnailImage && (
             <img
               className="h-[114px] w-[200px] rounded-lg object-cover shadow-md"
-              src={`${getCourseThumbnailMediaDirectory(
-                org?.org_uuid,
-                courseUuid,
-                thumbnailImage
-              )}`}
+              src={`${getCourseThumbnailMediaDirectory(org?.org_uuid, courseUuid, thumbnailImage)}`}
               alt={courseName}
             />
           )}
@@ -56,9 +47,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           </div>
         </div>
 
-        <h1 className="text-4xl font-bold text-gray-900">
-          {t('congratulations')}
-        </h1>
+        <h1 className="text-4xl font-bold text-gray-900">{t('congratulations')}</h1>
 
         <p className="text-xl text-gray-600">
           {t('completedMessage')}
@@ -78,7 +67,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CourseEndView
+export default CourseEndView;

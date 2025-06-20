@@ -1,16 +1,16 @@
-'use client'
-import { useState } from 'react'
-import DynamicPageActivityImage from 'public/activities_types/dynamic-page-activity.png'
-import VideoPageActivityImage from 'public//activities_types/video-page-activity.png'
-import DocumentPdfPageActivityImage from 'public//activities_types/documentpdf-page-activity.png'
-import AssignmentActivityImage from 'public//activities_types/assignment-page-activity.png'
+'use client';
+import DocumentPdfPageActivityImage from 'public//activities_types/documentpdf-page-activity.png';
+import AssignmentActivityImage from 'public//activities_types/assignment-page-activity.png';
+import DynamicPageActivityImage from 'public/activities_types/dynamic-page-activity.png';
+import VideoPageActivityImage from 'public//activities_types/video-page-activity.png';
+import { useState } from 'react';
 
-import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal'
-import VideoModal from './NewActivityModal/VideoActivityModal'
-import Image from 'next/image'
-import DocumentPdfModal from './NewActivityModal/DocumentActivityModal'
-import Assignment from './NewActivityModal/AssignmentActivityModal'
-import { useTranslations } from 'next-intl'
+import DocumentPdfModal from './NewActivityModal/DocumentActivityModal';
+import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal';
+import Assignment from './NewActivityModal/AssignmentActivityModal';
+import VideoModal from './NewActivityModal/VideoActivityModal';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 function NewActivityModal({
   closeModal,
@@ -20,8 +20,8 @@ function NewActivityModal({
   chapterId,
   course,
 }: any) {
-  const t = useTranslations('Components.NewActivity')
-  const [selectedView, setSelectedView] = useState('home')
+  const t = useTranslations('Components.NewActivity');
+  const [selectedView, setSelectedView] = useState('home');
 
   return (
     <>
@@ -29,7 +29,7 @@ function NewActivityModal({
         <div className="mt-2.5 grid w-full grid-cols-4 gap-2">
           <ActivityOption
             onClick={() => {
-              setSelectedView('dynamic')
+              setSelectedView('dynamic');
             }}
           >
             <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
@@ -46,7 +46,7 @@ function NewActivityModal({
           </ActivityOption>
           <ActivityOption
             onClick={() => {
-              setSelectedView('video')
+              setSelectedView('video');
             }}
           >
             <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
@@ -63,7 +63,7 @@ function NewActivityModal({
           </ActivityOption>
           <ActivityOption
             onClick={() => {
-              setSelectedView('documentpdf')
+              setSelectedView('documentpdf');
             }}
           >
             <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
@@ -80,7 +80,7 @@ function NewActivityModal({
           </ActivityOption>
           <ActivityOption
             onClick={() => {
-              setSelectedView('assignments')
+              setSelectedView('assignments');
             }}
           >
             <div className="m-0.5 flex h-20 flex-col items-center justify-end rounded-lg bg-white text-center hover:cursor-pointer">
@@ -132,7 +132,7 @@ function NewActivityModal({
         />
       )}
     </>
-  )
+  );
 }
 
 const ActivityOption = ({ onClick, children }: any) => (
@@ -142,6 +142,6 @@ const ActivityOption = ({ onClick, children }: any) => (
   >
     {children}
   </div>
-)
+);
 
-export default NewActivityModal
+export default NewActivityModal;

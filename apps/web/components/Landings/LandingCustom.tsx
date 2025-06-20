@@ -1,31 +1,30 @@
-'use client'
+'use client';
 
-import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types'
-import useSWR from 'swr'
-import { getOrgCourses } from '@services/courses/courses'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding'
-import UserAvatar from '@components/Objects/UserAvatar'
-import { useTranslations } from 'next-intl'
+import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types';
+import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getOrgCourses } from '@services/courses/courses';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { useTranslations } from 'next-intl';
+import useSWR from 'swr';
 
 interface LandingCustomProps {
   landing: {
-    sections: LandingSection[]
-    enabled: boolean
-  }
-  orgslug: string
+    sections: LandingSection[];
+    enabled: boolean;
+  };
+  orgslug: string;
 }
 
 function LandingCustom({ landing, orgslug }: LandingCustomProps) {
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const t = useTranslations('LandingCustom')
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('LandingCustom');
 
   // Fetch all courses for the organization
-  const { data: allCourses } = useSWR(
-    orgslug ? [orgslug, access_token] : null,
-    ([slug, token]) => getOrgCourses(slug, null, token)
-  )
+  const { data: allCourses } = useSWR(orgslug ? [orgslug, access_token] : null, ([slug, token]) =>
+    getOrgCourses(slug, null, token),
+  );
 
   const renderSection = (section: LandingSection) => {
     switch (section.type) {
@@ -45,9 +44,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
           >
             <div
               className={`flex size-full flex-col sm:flex-row ${
-                section.illustration?.position === 'right'
-                  ? 'sm:flex-row-reverse'
-                  : 'sm:flex-row'
+                section.illustration?.position === 'right' ? 'sm:flex-row-reverse' : 'sm:flex-row'
               } items-stretch`}
             >
               {/* Logo */}
@@ -119,7 +116,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               </div>
             </div>
           </div>
-        )
+        );
       case 'text-and-image':
         return (
           <div
@@ -132,9 +129,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               }`}
             >
               <div className="w-full max-w-2xl flex-1">
-                <h2 className="mb-4 text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">
-                  {section.title}
-                </h2>
+                <h2 className="mb-4 text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">{section.title}</h2>
                 <div className="prose prose-lg prose-gray max-w-none">
                   <p className="whitespace-pre-line text-base leading-relaxed text-gray-600 md:text-lg">
                     {section.text}
@@ -169,7 +164,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               </div>
             </div>
           </div>
-        )
+        );
       case 'logos':
         return (
           <div
@@ -177,9 +172,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
             {section.title && (
-              <h2 className="mb-16 text-left text-2xl font-bold text-gray-900 md:text-3xl">
-                {section.title}
-              </h2>
+              <h2 className="mb-16 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
             )}
             <div className="flex w-full justify-center">
               <div className="flex max-w-7xl flex-wrap justify-center gap-16">
@@ -198,16 +191,14 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               </div>
             </div>
           </div>
-        )
+        );
       case 'people':
         return (
           <div
             key={`people-${section.title}`}
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
-            <h2 className="mb-10 text-left text-2xl font-bold text-gray-900 md:text-3xl">
-              {section.title}
-            </h2>
+            <h2 className="mb-10 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
             <div className="flex flex-wrap justify-center gap-x-20 gap-y-8">
               {section.people.map((person, index) => (
                 <div
@@ -231,17 +222,13 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                       />
                     )}
                   </div>
-                  <h3 className="text-center text-lg font-semibold text-gray-900">
-                    {person.name}
-                  </h3>
-                  <p className="mt-1 text-center text-sm text-gray-600">
-                    {person.description}
-                  </p>
+                  <h3 className="text-center text-lg font-semibold text-gray-900">{person.name}</h3>
+                  <p className="mt-1 text-center text-sm text-gray-600">{person.description}</p>
                 </div>
               ))}
             </div>
           </div>
-        )
+        );
       case 'featured-courses': {
         if (!allCourses) {
           return (
@@ -249,56 +236,49 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               key={`featured-courses-${section.title}`}
               className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
             >
-              <h2 className="mb-6 text-left text-2xl font-bold text-gray-900 md:text-3xl">
-                {section.title}
-              </h2>
-              <div className="py-6 text-center text-gray-500">
-                {t('loadingCourses')}
-              </div>
+              <h2 className="mb-6 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
+              <div className="py-6 text-center text-gray-500">{t('loadingCourses')}</div>
             </div>
-          )
+          );
         }
 
-        const featuredCourses = allCourses.filter((course: any) =>
-          section.courses.includes(course.course_uuid)
-        )
+        const featuredCourses = allCourses.filter((course: any) => section.courses.includes(course.course_uuid));
 
         return (
           <div
             key={`featured-courses-${section.title}`}
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
-            <h2 className="mb-6 text-left text-2xl font-bold text-gray-900 md:text-3xl">
-              {section.title}
-            </h2>
+            <h2 className="mb-6 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
             <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {featuredCourses.map((course: any) => (
                 <div
                   key={course.course_uuid}
                   className="flex w-full justify-center"
                 >
-                  <CourseThumbnailLanding course={course} orgslug={orgslug} />
+                  <CourseThumbnailLanding
+                    course={course}
+                    orgslug={orgslug}
+                  />
                 </div>
               ))}
               {featuredCourses.length === 0 && (
-                <div className="col-span-full py-6 text-center text-gray-500">
-                  {t('noFeaturedCourses')}
-                </div>
+                <div className="col-span-full py-6 text-center text-gray-500">{t('noFeaturedCourses')}</div>
               )}
             </div>
           </div>
-        )
+        );
       }
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="max-w-(--breakpoint-2xl) mx-auto flex h-full w-full flex-col items-center justify-between px-4 sm:px-6 lg:px-16">
       {landing.sections.map((section) => renderSection(section))}
     </div>
-  )
+  );
 }
 
-export default LandingCustom
+export default LandingCustom;

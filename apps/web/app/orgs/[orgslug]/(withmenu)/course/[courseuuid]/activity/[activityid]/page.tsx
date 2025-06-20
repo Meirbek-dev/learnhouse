@@ -1,54 +1,45 @@
-import { getActivityWithAuthHeader } from '@services/courses/activities'
-import { getCourseMetadata } from '@services/courses/courses'
-import ActivityClient from './activity'
-import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import type { Metadata } from 'next'
-import { getServerSession } from 'next-auth/next'
-import { nextAuthOptions } from 'app/auth/options'
-import { getTranslations } from 'next-intl/server'
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getActivityWithAuthHeader } from '@services/courses/activities';
+import { getCourseMetadata } from '@services/courses/courses';
+import { getTranslations } from 'next-intl/server';
+import { nextAuthOptions } from 'app/auth/options';
+import { getServerSession } from 'next-auth/next';
+import ActivityClient from './activity';
+import type { Metadata } from 'next';
 
 type MetadataProps = {
-  params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
+  params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
 type Session = {
   tokens?: {
-    access_token?: string
-  }
-}
+    access_token?: string;
+  };
+};
 
 // Add this function at the top level to avoid duplicate fetches
-async function fetchCourseMetadata(
-  courseuuid: string,
-  access_token: string | null | undefined
-) {
-  return await getCourseMetadata(
-    courseuuid,
-    { revalidate: 60, tags: ['courses'] },
-    access_token || null
-  )
+async function fetchCourseMetadata(courseuuid: string, access_token: string | null | undefined) {
+  return await getCourseMetadata(courseuuid, { revalidate: 60, tags: ['courses'] }, access_token || null);
 }
 
-export async function generateMetadata(
-  props: MetadataProps
-): Promise<Metadata> {
-  const { orgslug, courseuuid, activityid } = await props.params
-  const session = (await getServerSession(nextAuthOptions as any)) as Session
-  const access_token = session?.tokens?.access_token || null
-  const t = await getTranslations('General')
+export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  const { orgslug, courseuuid, activityid } = await props.params;
+  const session = (await getServerSession(nextAuthOptions as any)) as Session;
+  const access_token = session?.tokens?.access_token || null;
+  const t = await getTranslations('General');
 
   // Get Org context information
   const _org = await getOrganizationContextInfo(orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
-  })
-  const course_meta = await fetchCourseMetadata(courseuuid, access_token)
+  });
+  const course_meta = await fetchCourseMetadata(courseuuid, access_token);
   const activity = await getActivityWithAuthHeader(
     activityid,
     { revalidate: 0, tags: ['activities'] },
-    access_token || null
-  )
+    access_token || null,
+  );
 
   // SEO
   return {
@@ -60,8 +51,8 @@ export async function generateMetadata(
       follow: true,
       nocache: true,
       googleBot: {
-        index: true,
-        follow: true,
+        'index': true,
+        'follow': true,
         'max-image-preview': 'large',
       },
     },
@@ -71,23 +62,19 @@ export async function generateMetadata(
       publishedTime: course_meta.creation_date,
       tags: course_meta.learnings,
     },
-  }
+  };
 }
 
 const ActivityPage = async (params: any) => {
   // Destructure params directly
-  const { orgslug, courseuuid, activityid } = await params.params
-  const session = (await getServerSession(nextAuthOptions as any)) as Session
-  const access_token = session?.tokens?.access_token || null
+  const { orgslug, courseuuid, activityid } = await params.params;
+  const session = (await getServerSession(nextAuthOptions as any)) as Session;
+  const access_token = session?.tokens?.access_token || null;
 
   const [course_meta, activity] = await Promise.all([
     fetchCourseMetadata(courseuuid, access_token),
-    getActivityWithAuthHeader(
-      activityid,
-      { revalidate: 0, tags: ['activities'] },
-      access_token || null
-    ),
-  ])
+    getActivityWithAuthHeader(activityid, { revalidate: 0, tags: ['activities'] }, access_token || null),
+  ]);
 
   return (
     <ActivityClient
@@ -97,7 +84,7 @@ const ActivityPage = async (params: any) => {
       activity={activity}
       course={course_meta}
     />
-  )
-}
+  );
+};
 
-export default ActivityPage
+export default ActivityPage;

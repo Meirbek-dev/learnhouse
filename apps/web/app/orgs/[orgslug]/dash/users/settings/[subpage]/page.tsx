@@ -1,61 +1,55 @@
-'use client'
-import { useState, useEffect, use } from 'react'
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import { getUriWithOrg } from '@services/config/config'
-import {
-  Monitor,
-  ScanEye,
-  SquareUserRound,
-  UserPlus,
-  Users,
-} from 'lucide-react'
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers'
-import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess'
-import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd'
-import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups'
-import { useTranslations } from 'next-intl'
+'use client';
+import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
+import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd';
+import { Monitor, ScanEye, SquareUserRound, UserPlus, Users } from 'lucide-react';
+import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess';
+import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { useState, useEffect, use } from 'react';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export type SettingsParams = {
-  subpage: string
-  orgslug: string
-}
+  subpage: string;
+  orgslug: string;
+};
 
 function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
-  const params = use(props.params)
-  const session = useLHSession() as any
-  const org = useOrg() as any
-  const t = useTranslations('DashPage.UserSettings')
-  const [H1Label, setH1Label] = useState('')
-  const [H2Label, setH2Label] = useState('')
-  const isMobile = useIsMobile()
+  const params = use(props.params);
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
+  const t = useTranslations('DashPage.UserSettings');
+  const [H1Label, setH1Label] = useState('');
+  const [H2Label, setH2Label] = useState('');
+  const isMobile = useIsMobile();
 
   function handleLabels() {
     if (params.subpage == 'users') {
-      setH1Label(t('usersTitle'))
-      setH2Label(t('usersDescription'))
+      setH1Label(t('usersTitle'));
+      setH2Label(t('usersDescription'));
     }
     if (params.subpage == 'signups') {
-      setH1Label(t('signupsTitle'))
-      setH2Label(t('signupsDescription'))
+      setH1Label(t('signupsTitle'));
+      setH2Label(t('signupsDescription'));
     }
     if (params.subpage == 'add') {
-      setH1Label(t('addTitle'))
-      setH2Label(t('addDescription'))
+      setH1Label(t('addTitle'));
+      setH2Label(t('addDescription'));
     }
     if (params.subpage == 'usergroups') {
-      setH1Label(t('usergroupsTitle'))
-      setH2Label(t('usergroupsDescription'))
+      setH1Label(t('usergroupsTitle'));
+      setH2Label(t('usergroupsDescription'));
     }
   }
 
   useEffect(() => {
-    handleLabels()
-  }, [session, org, params.subpage, params])
+    handleLabels();
+  }, [session, org, params.subpage, params]);
 
   if (isMobile) {
     // TODO: Work on a better mobile experience
@@ -63,12 +57,15 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
       <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8] p-4">
         <div className="rounded-lg bg-white p-6 text-center shadow-md">
           <h2 className="mb-4 text-xl font-bold">{t('desktopOnlyTitle')}</h2>
-          <Monitor className="mx-auto my-5" size={60} />
+          <Monitor
+            className="mx-auto my-5"
+            size={60}
+          />
           <p>{t('desktopOnlyMessage1')}</p>
           <p>{t('desktopOnlyMessage2')}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -77,23 +74,15 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
         <BreadCrumbs type="orgusers" />
         <div className="my-2 py-3">
           <div className="w-100 flex flex-col space-y-1">
-            <div className="flex pt-3 text-4xl font-bold tracking-tighter">
-              {H1Label}
-            </div>
-            <div className="text-md flex font-medium text-gray-400">
-              {H2Label}{' '}
-            </div>
+            <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
+            <div className="text-md flex font-medium text-gray-400">{H2Label} </div>
           </div>
         </div>
         <div className="flex space-x-5 text-sm font-black">
-          <Link
-            href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/users`}
-          >
+          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/users`}>
             <div
               className={`w-fit border-black py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'users'
-                  ? 'border-b-4'
-                  : 'opacity-50'
+                params.subpage.toString() === 'users' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
               <div className="mx-2 flex items-center space-x-2.5">
@@ -102,14 +91,10 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
               </div>
             </div>
           </Link>
-          <Link
-            href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/usergroups`}
-          >
+          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/usergroups`}>
             <div
               className={`w-fit border-black py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'usergroups'
-                  ? 'border-b-4'
-                  : 'opacity-50'
+                params.subpage.toString() === 'usergroups' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
               <div className="mx-2 flex items-center space-x-2.5">
@@ -118,14 +103,10 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
               </div>
             </div>
           </Link>
-          <Link
-            href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/signups`}
-          >
+          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/signups`}>
             <div
               className={`w-fit border-black py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'signups'
-                  ? 'border-b-4'
-                  : 'opacity-50'
+                params.subpage.toString() === 'signups' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
               <div className="mx-2 flex items-center space-x-2.5">
@@ -134,14 +115,10 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
               </div>
             </div>
           </Link>
-          <Link
-            href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/add`}
-          >
+          <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/add`}>
             <div
               className={`w-fit border-black py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'add'
-                  ? 'border-b-4'
-                  : 'opacity-50'
+                params.subpage.toString() === 'add' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
               <div className="mx-2 flex items-center space-x-2.5">
@@ -165,7 +142,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
         {params.subpage == 'usergroups' ? <OrgUserGroups /> : ''}
       </motion.div>
     </div>
-  )
+  );
 }
 
-export default UsersSettingsPage
+export default UsersSettingsPage;

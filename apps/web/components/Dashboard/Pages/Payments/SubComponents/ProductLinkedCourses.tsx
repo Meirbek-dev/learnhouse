@@ -1,78 +1,61 @@
-'use client'
-import { useEffect, useState } from 'react'
-import {
-  getCoursesLinkedToProduct,
-  unlinkCourseFromProduct,
-} from '@services/payments/products'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { Trash2, Plus, BookOpen } from 'lucide-react'
-import { Button } from '@components/ui/button'
-import toast from 'react-hot-toast'
-import { mutate } from 'swr'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import LinkCourseModal from './LinkCourseModal'
-import { useTranslations } from 'next-intl'
+'use client';
+import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Trash2, Plus, BookOpen } from 'lucide-react';
+import LinkCourseModal from './LinkCourseModal';
+import { Button } from '@components/ui/button';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { mutate } from 'swr';
 
 interface ProductLinkedCoursesProps {
-  productId: string
+  productId: string;
 }
 
-export default function ProductLinkedCourses({
-  productId,
-}: ProductLinkedCoursesProps) {
-  const [linkedCourses, setLinkedCourses] = useState<any[]>([])
-  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false)
-  const session = useLHSession() as any
-  const org = useOrg() as any
-  const tNotify = useTranslations('DashPage.Notifications')
-  const t = useTranslations('DashPage.Payments.LinkedCourses')
+export default function ProductLinkedCourses({ productId }: ProductLinkedCoursesProps) {
+  const [linkedCourses, setLinkedCourses] = useState<any[]>([]);
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
+  const tNotify = useTranslations('DashPage.Notifications');
+  const t = useTranslations('DashPage.Payments.LinkedCourses');
 
   const fetchLinkedCourses = async () => {
     try {
-      const response = await getCoursesLinkedToProduct(
-        org.id,
-        productId,
-        session.data?.tokens?.access_token
-      )
-      setLinkedCourses(response.data || [])
+      const response = await getCoursesLinkedToProduct(org.id, productId, session.data?.tokens?.access_token);
+      setLinkedCourses(response.data || []);
     } catch (_error) {
-      toast.error(tNotify('errors.fetchLinkedCoursesFailed'))
+      toast.error(tNotify('errors.fetchLinkedCoursesFailed'));
     }
-  }
+  };
 
   const handleUnlinkCourse = async (courseId: string) => {
     try {
-      const response = await unlinkCourseFromProduct(
-        org.id,
-        productId,
-        courseId,
-        session.data?.tokens?.access_token
-      )
+      const response = await unlinkCourseFromProduct(org.id, productId, courseId, session.data?.tokens?.access_token);
       if (response.success) {
-        await fetchLinkedCourses()
-        mutate([
-          `/payments/${org.id}/products`,
-          session.data?.tokens?.access_token,
-        ])
-        toast.success(tNotify('courseUnlinkedSuccess'))
+        await fetchLinkedCourses();
+        mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
+        toast.success(tNotify('courseUnlinkedSuccess'));
       } else {
         toast.error(
           tNotify('errors.unlinkCourseFailed', {
             error: response.data?.detail || '',
-          })
-        )
+          }),
+        );
       }
     } catch (_error) {
-      toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }))
+      toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }));
     }
-  }
+  };
 
   useEffect(() => {
     if (org && session && productId) {
-      fetchLinkedCourses()
+      fetchLinkedCourses();
     }
-  }, [org, session, productId])
+  }, [org, session, productId]);
 
   return (
     <div className="mt-4">
@@ -87,8 +70,8 @@ export default function ProductLinkedCourses({
             <LinkCourseModal
               productId={productId}
               onSuccess={() => {
-                setIsLinkModalOpen(false)
-                fetchLinkedCourses()
+                setIsLinkModalOpen(false);
+                fetchLinkedCourses();
               }}
             />
           }
@@ -131,5 +114,5 @@ export default function ProductLinkedCourses({
         )}
       </div>
     </div>
-  )
+  );
 }

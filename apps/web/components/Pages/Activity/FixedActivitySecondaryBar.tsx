@@ -1,18 +1,18 @@
-'use client'
-import { useTranslations } from 'next-intl'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { getUriWithOrg } from '@services/config/config'
-import { useRouter } from 'next/navigation'
-import type React from 'react'
-import { useEffect, useState, useRef, useMemo, memo } from 'react'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { useOrg } from '@components/Contexts/OrgContext'
+'use client';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useEffect, useState, useRef, useMemo, memo } from 'react';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getUriWithOrg } from '@services/config/config';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import type React from 'react';
 
 interface FixedActivitySecondaryBarProps {
-  course: any
-  currentActivityId: string
-  orgslug: string
-  activity: any
+  course: any;
+  currentActivityId: string;
+  orgslug: string;
+  activity: any;
 }
 
 // Memoized navigation buttons component
@@ -25,20 +25,18 @@ const NavigationButtons = memo(
     navigateToActivity,
     t,
   }: {
-    prevActivity: any
-    nextActivity: any
-    currentIndex: number
-    allActivities: any[]
-    navigateToActivity: (activity: any) => void
-    t: (key: string, values?: Record<string, any>) => string
+    prevActivity: any;
+    nextActivity: any;
+    currentIndex: number;
+    allActivities: any[];
+    navigateToActivity: (activity: any) => void;
+    t: (key: string, values?: Record<string, any>) => string;
   }) => (
     <div className="flex items-center space-x-2 sm:space-x-3">
       <button
         onClick={() => navigateToActivity(prevActivity)}
         className={`flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2 ${
-          prevActivity
-            ? 'text-gray-700 hover:bg-gray-100'
-            : 'cursor-not-allowed text-gray-300'
+          prevActivity ? 'text-gray-700 hover:bg-gray-100' : 'cursor-not-allowed text-gray-300'
         }`}
         disabled={!prevActivity}
         title={
@@ -49,15 +47,14 @@ const NavigationButtons = memo(
             : t('NavigationButtons.noPreviousActivity')
         }
       >
-        <ChevronLeft size={16} className="shrink-0 sm:h-5 sm:w-5" />
+        <ChevronLeft
+          size={16}
+          className="shrink-0 sm:h-5 sm:w-5"
+        />
         <div className="hidden flex-col items-start sm:flex">
-          <span className="text-xs text-gray-500">
-            {t('NavigationButtons.previous')}
-          </span>
+          <span className="text-xs text-gray-500">{t('NavigationButtons.previous')}</span>
           <span className="max-w-[100px] truncate text-left text-sm font-medium sm:max-w-[150px]">
-            {prevActivity
-              ? prevActivity.name
-              : t('NavigationButtons.noPreviousActivity')}
+            {prevActivity ? prevActivity.name : t('NavigationButtons.noPreviousActivity')}
           </span>
         </div>
       </button>
@@ -84,149 +81,120 @@ const NavigationButtons = memo(
         }
       >
         <div className="hidden flex-col items-end sm:flex">
-          <span
-            className={`text-xs ${nextActivity ? 'text-gray-500' : 'text-gray-500'}`}
-          >
+          <span className={`text-xs ${nextActivity ? 'text-gray-500' : 'text-gray-500'}`}>
             {t('NavigationButtons.next')}
           </span>
           <span className="max-w-[100px] truncate text-right text-sm font-medium sm:max-w-[150px]">
-            {nextActivity
-              ? nextActivity.name
-              : t('NavigationButtons.noNextActivity')}
+            {nextActivity ? nextActivity.name : t('NavigationButtons.noNextActivity')}
           </span>
         </div>
-        <ChevronRight size={16} className="shrink-0 sm:h-5 sm:w-5" />
+        <ChevronRight
+          size={16}
+          className="shrink-0 sm:h-5 sm:w-5"
+        />
       </button>
     </div>
-  )
-)
+  ),
+);
 
-NavigationButtons.displayName = 'NavigationButtons'
+NavigationButtons.displayName = 'NavigationButtons';
 
 // Memoized course info component
 const CourseInfo = memo(
-  ({
-    course,
-    org,
-    t,
-  }: {
-    course: any
-    org: any
-    t: (key: string, values?: Record<string, any>) => string
-  }) => (
+  ({ course, org, t }: { course: any; org: any; t: (key: string, values?: Record<string, any>) => string }) => (
     <div className="flex min-w-0 flex-shrink items-center space-x-2 sm:space-x-4">
       <img
         className="h-[20px] w-[35px] flex-shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"
         src={
           course.thumbnail_image
-            ? `${getCourseThumbnailMediaDirectory(
-                org?.org_uuid,
-                course.course_uuid,
-                course.thumbnail_image
-              )}`
+            ? `${getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)}`
             : '/empty_thumbnail.png'
         }
         alt=""
       />
       <div className="hidden min-w-0 flex-col -space-y-0.5 sm:block">
-        <p className="text-sm font-medium text-gray-500">
-          {t('CourseInfo.course')}
-        </p>
-        <h1 className="truncate text-base font-semibold text-gray-900">
-          {course.name}
-        </h1>
+        <p className="text-sm font-medium text-gray-500">{t('CourseInfo.course')}</p>
+        <h1 className="truncate text-base font-semibold text-gray-900">{course.name}</h1>
       </div>
     </div>
-  )
-)
+  ),
+);
 
-CourseInfo.displayName = 'CourseInfo'
+CourseInfo.displayName = 'CourseInfo';
 
-export default function FixedActivitySecondaryBar(
-  props: FixedActivitySecondaryBarProps
-): React.ReactNode {
-  const router = useRouter()
-  const t = useTranslations('FixedActivitySecondaryBar')
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [shouldShow, setShouldShow] = useState(false)
-  const mainActivityInfoRef = useRef<HTMLDivElement | null>(null)
-  const org = useOrg() as any
+export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryBarProps): React.ReactNode {
+  const router = useRouter();
+  const t = useTranslations('FixedActivitySecondaryBar');
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [shouldShow, setShouldShow] = useState(false);
+  const mainActivityInfoRef = useRef<HTMLDivElement | null>(null);
+  const org = useOrg() as any;
 
   // Memoize activity position calculation
   const { allActivities, currentIndex } = useMemo(() => {
-    const allActivities: any[] = []
-    let currentIndex = -1
+    const allActivities: any[] = [];
+    let currentIndex = -1;
 
     props.course.chapters.forEach((chapter: any) => {
       chapter.activities.forEach((activity: any) => {
-        const cleanActivityUuid = activity.activity_uuid?.replace(
-          'activity_',
-          ''
-        )
+        const cleanActivityUuid = activity.activity_uuid?.replace('activity_', '');
         allActivities.push({
           ...activity,
           cleanUuid: cleanActivityUuid,
           chapterName: chapter.name,
-        })
+        });
 
-        if (
-          cleanActivityUuid === props.currentActivityId.replace('activity_', '')
-        ) {
-          currentIndex = allActivities.length - 1
+        if (cleanActivityUuid === props.currentActivityId.replace('activity_', '')) {
+          currentIndex = allActivities.length - 1;
         }
-      })
-    })
+      });
+    });
 
-    return { allActivities, currentIndex }
-  }, [props.course, props.currentActivityId])
+    return { allActivities, currentIndex };
+  }, [props.course, props.currentActivityId]);
 
-  const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null
-  const nextActivity =
-    currentIndex < allActivities.length - 1
-      ? allActivities[currentIndex + 1]
-      : null
+  const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null;
+  const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
 
   const navigateToActivity = (activity: any) => {
-    if (!activity) return
+    if (!activity) return;
 
-    const cleanCourseUuid = props.course.course_uuid?.replace('course_', '')
-    router.push(
-      `${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`
-    )
-  }
+    const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
+    router.push(`${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0)
-    }
+      setIsScrolled(window.scrollY > 0);
+    };
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setShouldShow(!entry.isIntersecting)
+        setShouldShow(!entry.isIntersecting);
       },
       {
         threshold: [0, 0.1, 1],
         rootMargin: '-80px 0px 0px 0px',
-      }
-    )
+      },
+    );
 
-    const mainActivityInfo = document.querySelector('.activity-info-section')
+    const mainActivityInfo = document.querySelector('.activity-info-section');
     if (mainActivityInfo) {
-      mainActivityInfoRef.current = mainActivityInfo as HTMLDivElement
-      observer.observe(mainActivityInfo)
+      mainActivityInfoRef.current = mainActivityInfo as HTMLDivElement;
+      observer.observe(mainActivityInfo);
     }
 
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('scroll', handleScroll);
       if (mainActivityInfoRef.current) {
-        observer.unobserve(mainActivityInfoRef.current)
+        observer.unobserve(mainActivityInfoRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
-  if (!shouldShow) return null
+  if (!shouldShow) return null;
 
   return (
     <div
@@ -236,7 +204,11 @@ export default function FixedActivitySecondaryBar(
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between py-2">
-          <CourseInfo course={props.course} org={org} t={t} />
+          <CourseInfo
+            course={props.course}
+            org={org}
+            t={t}
+          />
 
           <div className="flex flex-shrink-0 items-center">
             <NavigationButtons
@@ -251,5 +223,5 @@ export default function FixedActivitySecondaryBar(
         </div>
       </div>
     </div>
-  )
+  );
 }

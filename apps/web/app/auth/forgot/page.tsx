@@ -1,12 +1,12 @@
-import ForgotPasswordClient from './forgot'
-import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server';
+import ForgotPasswordClient from './forgot';
+import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('Auth.Forgot')
+  const t = await getTranslations('Auth.Forgot');
   return {
     title: t('title'),
-  }
+  };
 }
 
 function ForgotPasswordPage() {
@@ -14,7 +14,7 @@ function ForgotPasswordPage() {
     <>
       <ForgotPasswordClient />
     </>
-  )
+  );
 }
 
-export default ForgotPasswordPage
+export default ForgotPasswordPage;

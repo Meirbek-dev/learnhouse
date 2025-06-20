@@ -1,33 +1,31 @@
-import CourseClient from './course'
-import { getCourseMetadata } from '@services/courses/courses'
-import { getOrganizationContextInfo } from '@services/organizations/orgs'
-import type { Metadata } from 'next'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { nextAuthOptions } from 'app/auth/options'
-import { getServerSession } from 'next-auth/next'
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getCourseMetadata } from '@services/courses/courses';
+import { nextAuthOptions } from 'app/auth/options';
+import { getServerSession } from 'next-auth/next';
+import type { Metadata } from 'next';
+import CourseClient from './course';
 
 type MetadataProps = {
-  params: Promise<{ orgslug: string; courseuuid: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
+  params: Promise<{ orgslug: string; courseuuid: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export async function generateMetadata(
-  props: MetadataProps
-): Promise<Metadata> {
-  const params = await props.params
-  const session = await getServerSession(nextAuthOptions)
-  const access_token = session?.tokens?.access_token
+export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  const params = await props.params;
+  const session = await getServerSession(nextAuthOptions);
+  const access_token = session?.tokens?.access_token;
 
   // Get Org context information
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
-  })
+  });
   const course_meta = await getCourseMetadata(
     params.courseuuid,
     { revalidate: 60, tags: ['courses'] },
-    access_token ? access_token : null
-  )
+    access_token ? access_token : null,
+  );
 
   // SEO
   return {
@@ -39,8 +37,8 @@ export async function generateMetadata(
       follow: true,
       nocache: true,
       googleBot: {
-        index: true,
-        follow: true,
+        'index': true,
+        'follow': true,
         'max-image-preview': 'large',
       },
     },
@@ -49,11 +47,7 @@ export async function generateMetadata(
       description: course_meta.description ? course_meta.description : '',
       images: [
         {
-          url: getCourseThumbnailMediaDirectory(
-            org?.org_uuid,
-            course_meta?.course_uuid,
-            course_meta?.thumbnail_image
-          ),
+          url: getCourseThumbnailMediaDirectory(org?.org_uuid, course_meta?.course_uuid, course_meta?.thumbnail_image),
           width: 800,
           height: 600,
           alt: course_meta.name,
@@ -63,22 +57,22 @@ export async function generateMetadata(
       publishedTime: course_meta.creation_date ? course_meta.creation_date : '',
       tags: course_meta.learnings ? course_meta.learnings : [],
     },
-  }
+  };
 }
 
 const CoursePage = async (params: any) => {
-  const session = await getServerSession(nextAuthOptions)
-  const access_token = session?.tokens?.access_token
+  const session = await getServerSession(nextAuthOptions);
+  const access_token = session?.tokens?.access_token;
 
   // Await params before using them
-  const { courseuuid, orgslug } = await params.params
+  const { courseuuid, orgslug } = await params.params;
 
   // Fetch course metadata once
   const course_meta = await getCourseMetadata(
     courseuuid,
     { revalidate: 0, tags: ['courses'] },
-    access_token ? access_token : null
-  )
+    access_token ? access_token : null,
+  );
 
   return (
     <CourseClient
@@ -87,7 +81,7 @@ const CoursePage = async (params: any) => {
       course={course_meta}
       access_token={access_token}
     />
-  )
-}
+  );
+};
 
-export default CoursePage
+export default CoursePage;

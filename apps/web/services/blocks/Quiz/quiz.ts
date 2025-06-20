@@ -1,15 +1,8 @@
-import { getAPIUrl } from '@services/config/config'
-import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests'
+import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
-export async function submitQuizBlock(
-  activity_id: string,
-  data: any,
-  access_token: string
-) {
-  return fetch(
-    `${getAPIUrl()}blocks/quiz/${activity_id}`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token)
-  )
+export async function submitQuizBlock(activity_id: string, data: any, access_token: string) {
+  return fetch(`${getAPIUrl()}blocks/quiz/${activity_id}`, RequestBodyWithAuthHeader('POST', data, null, access_token))
     .then((result) => result.json())
-    .catch((error) => console.log('error', error))
+    .catch((error) => console.log('error', error));
 }

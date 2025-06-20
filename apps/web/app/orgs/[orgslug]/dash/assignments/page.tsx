@@ -1,59 +1,52 @@
-'use client'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { getAssignmentsFromACourse } from '@services/courses/assignments'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { swrFetcher } from '@services/utils/ts/requests'
-import {
-  EllipsisVertical,
-  GalleryVerticalEnd,
-  Info,
-  Layers2,
-  UserRoundPen,
-} from 'lucide-react'
-import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import useSWR from 'swr'
-import { useTranslations } from 'next-intl'
+'use client';
+import { EllipsisVertical, GalleryVerticalEnd, Info, Layers2, UserRoundPen } from 'lucide-react';
+import { getAssignmentsFromACourse } from '@services/courses/assignments';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import useSWR from 'swr';
 
 function AssignmentsHome() {
-  const t = useTranslations('DashPage.Assignments.HomePage')
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const org = useOrg() as any
-  const [courseAssignments, setCourseAssignments] = useState<any[]>([])
+  const t = useTranslations('DashPage.Assignments.HomePage');
+  const session = useLHSession() as any;
+  const access_token = session?.data?.tokens?.access_token;
+  const org = useOrg() as any;
+  const [courseAssignments, setCourseAssignments] = useState<any[]>([]);
 
-  const { data: courses } = useSWR(
-    `${getAPIUrl()}courses/org_slug/${org?.slug}/page/1/limit/50`,
-    (url) => swrFetcher(url, access_token)
-  )
+  const { data: courses } = useSWR(`${getAPIUrl()}courses/org_slug/${org?.slug}/page/1/limit/50`, (url) =>
+    swrFetcher(url, access_token),
+  );
 
   async function getAvailableAssignmentsForCourse(course_uuid: string) {
-    const res = await getAssignmentsFromACourse(course_uuid, access_token)
-    return res.data
+    const res = await getAssignmentsFromACourse(course_uuid, access_token);
+    return res.data;
   }
 
   function removeAssignmentPrefix(assignment_uuid: string) {
-    return assignment_uuid.replace('assignment_', '')
+    return assignment_uuid.replace('assignment_', '');
   }
 
   function removeCoursePrefix(course_uuid: string) {
-    return course_uuid.replace('course_', '')
+    return course_uuid.replace('course_', '');
   }
 
   useEffect(() => {
     if (courses) {
-      const course_uuids = courses.map((course: any) => course.course_uuid)
-      const courseAssignmentsPromises = course_uuids.map(
-        (course_uuid: string) => getAvailableAssignmentsForCourse(course_uuid)
-      )
+      const course_uuids = courses.map((course: any) => course.course_uuid);
+      const courseAssignmentsPromises = course_uuids.map((course_uuid: string) =>
+        getAvailableAssignmentsForCourse(course_uuid),
+      );
       Promise.all(courseAssignmentsPromises).then((results) => {
-        setCourseAssignments(results)
-      })
+        setCourseAssignments(results);
+      });
     }
-  }, [courses])
+  }, [courses]);
 
   return (
     <div className="flex w-full">
@@ -73,9 +66,7 @@ function AssignmentsHome() {
                   <div className="flex items-center space-x-2">
                     <MiniThumbnail course={courses[index]} />
                     <div className="flex flex-col text-lg font-bold">
-                      <p className="w-fit rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-700">
-                        {t('course')}
-                      </p>
+                      <p className="w-fit rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-700">{t('course')}</p>
                       <p>{courses[index].name}</p>
                     </div>
                   </div>
@@ -83,7 +74,7 @@ function AssignmentsHome() {
                     href={{
                       pathname: getUriWithOrg(
                         org.slug,
-                        `/dash/courses/course/${removeCoursePrefix(courses[index].course_uuid)}/content`
+                        `/dash/courses/course/${removeCoursePrefix(courses[index].course_uuid)}/content`,
                       ),
                       query: { subpage: 'editor' },
                     }}
@@ -104,20 +95,21 @@ function AssignmentsHome() {
                       <div className="flex h-fit rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold text-gray-700">
                         <p>{t('assignment')}</p>
                       </div>
-                      <div className="flex text-lg font-semibold">
-                        {assignment.title}
-                      </div>
+                      <div className="flex text-lg font-semibold">{assignment.title}</div>
                       <div className="flex rounded px-2 py-0.5 font-semibold text-gray-600 outline outline-gray-200/70">
                         {assignment.description}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 text-sm font-bold">
-                      <EllipsisVertical className="text-gray-500" size={17} />
+                      <EllipsisVertical
+                        className="text-gray-500"
+                        size={17}
+                      />
                       <Link
                         href={{
                           pathname: getUriWithOrg(
                             org.slug,
-                            `/dash/assignments/${removeAssignmentPrefix(assignment.assignment_uuid)}`
+                            `/dash/assignments/${removeAssignmentPrefix(assignment.assignment_uuid)}`,
                           ),
                           query: { subpage: 'editor' },
                         }}
@@ -131,7 +123,7 @@ function AssignmentsHome() {
                         href={{
                           pathname: getUriWithOrg(
                             org.slug,
-                            `/dash/assignments/${removeAssignmentPrefix(assignment.assignment_uuid)}`
+                            `/dash/assignments/${removeAssignmentPrefix(assignment.assignment_uuid)}`,
                           ),
                           query: { subpage: 'submissions' },
                         }}
@@ -157,23 +149,18 @@ function AssignmentsHome() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 const MiniThumbnail = (props: { course: any }) => {
-  const org = useOrg() as any
+  const org = useOrg() as any;
 
   function removeCoursePrefix(course_uuid: string) {
-    return course_uuid.replace('course_', '')
+    return course_uuid.replace('course_', '');
   }
 
   return (
-    <Link
-      href={getUriWithOrg(
-        org.orgslug,
-        `/course/${removeCoursePrefix(props.course.course_uuid)}`
-      )}
-    >
+    <Link href={getUriWithOrg(org.orgslug, `/course/${removeCoursePrefix(props.course.course_uuid)}`)}>
       {props.course.thumbnail_image ? (
         <div
           className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
@@ -181,7 +168,7 @@ const MiniThumbnail = (props: { course: any }) => {
             backgroundImage: `url(${getCourseThumbnailMediaDirectory(
               org?.org_uuid,
               props.course.course_uuid,
-              props.course.thumbnail_image
+              props.course.thumbnail_image,
             )})`,
           }}
         />
@@ -195,7 +182,7 @@ const MiniThumbnail = (props: { course: any }) => {
         />
       )}
     </Link>
-  )
-}
+  );
+};
 
-export default AssignmentsHome
+export default AssignmentsHome;

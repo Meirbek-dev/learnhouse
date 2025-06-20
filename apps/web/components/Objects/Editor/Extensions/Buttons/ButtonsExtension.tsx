@@ -1,143 +1,115 @@
-import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
-import type { FC, ChangeEvent } from 'react'
-import { useState, useRef, useEffect } from 'react'
-import EmojiPicker, { Theme } from 'emoji-picker-react'
-import {
-  ArrowRight,
-  ChevronDown,
-  Link,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Palette,
-} from 'lucide-react'
-import { twMerge } from 'tailwind-merge'
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext'
-import { useTranslations } from 'next-intl'
+import { ArrowRight, ChevronDown, Link, AlignLeft, AlignCenter, AlignRight, Palette } from 'lucide-react';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
+import EmojiPicker, { Theme } from 'emoji-picker-react';
+import { useState, useRef, useEffect } from 'react';
+import type { FC, ChangeEvent } from 'react';
+import { useTranslations } from 'next-intl';
+import { twMerge } from 'tailwind-merge';
 
 const ButtonsExtension: FC = (props: any) => {
-  const t = useTranslations('DashPage.Editor.ButtonsExtension')
-  const [emoji, setEmoji] = useState(props.node.attrs.emoji)
-  const [link, setLink] = useState(props.node.attrs.link)
-  const [alignment, setAlignment] = useState(props.node.attrs.alignment)
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-  const [showLinkInput, setShowLinkInput] = useState(false)
-  const [color, setColor] = useState(props.node.attrs.color || 'blue')
-  const [showColorPicker, setShowColorPicker] = useState(false)
-  const pickerRef = useRef<HTMLDivElement>(null)
-  const linkInputRef = useRef<HTMLInputElement>(null)
-  const colorPickerRef = useRef<HTMLDivElement>(null)
-  const editorState = useEditorProvider() as any
-  const isEditable = editorState.isEditable
+  const t = useTranslations('DashPage.Editor.ButtonsExtension');
+  const [emoji, setEmoji] = useState(props.node.attrs.emoji);
+  const [link, setLink] = useState(props.node.attrs.link);
+  const [alignment, setAlignment] = useState(props.node.attrs.alignment);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [color, setColor] = useState(props.node.attrs.color || 'blue');
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const linkInputRef = useRef<HTMLInputElement>(null);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+  const editorState = useEditorProvider() as any;
+  const isEditable = editorState.isEditable;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        pickerRef.current &&
-        !pickerRef.current.contains(event.target as Node)
-      ) {
-        setShowEmojiPicker(false)
+      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
       }
-      if (
-        linkInputRef.current &&
-        !linkInputRef.current.contains(event.target as Node)
-      ) {
-        setShowLinkInput(false)
+      if (linkInputRef.current && !linkInputRef.current.contains(event.target as Node)) {
+        setShowLinkInput(false);
       }
-      if (
-        colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target as Node)
-      ) {
-        setShowColorPicker(false)
+      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+        setShowColorPicker(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleEmojiSelect = (emoji: any) => {
-    setEmoji(emoji.emoji)
-    setShowEmojiPicker(false)
+    setEmoji(emoji.emoji);
+    setShowEmojiPicker(false);
     props.updateAttributes({
       emoji: emoji.emoji,
-    })
-  }
+    });
+  };
 
   const handleLinkChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setLink(e.target.value)
+    setLink(e.target.value);
     props.updateAttributes({
       link: e.target.value,
-    })
-  }
+    });
+  };
 
   const handleAlignmentChange = (newAlignment: 'left' | 'center' | 'right') => {
-    setAlignment(newAlignment)
+    setAlignment(newAlignment);
     props.updateAttributes({
       alignment: newAlignment,
-    })
-  }
+    });
+  };
 
   const getAlignmentClass = () => {
     switch (alignment) {
       case 'left':
-        return 'text-left'
+        return 'text-left';
       case 'center':
-        return 'text-center'
+        return 'text-center';
       case 'right':
-        return 'text-right'
+        return 'text-right';
       default:
-        return 'text-left'
+        return 'text-left';
     }
-  }
+  };
 
   const handleColorSelect = (selectedColor: string) => {
-    setColor(selectedColor)
-    setShowColorPicker(false)
+    setColor(selectedColor);
+    setShowColorPicker(false);
     props.updateAttributes({
       color: selectedColor,
-    })
-  }
+    });
+  };
 
   const getButtonColor = (color: string) => {
     switch (color) {
       case 'sky':
-        return 'bg-sky-500 hover:bg-sky-600'
+        return 'bg-sky-500 hover:bg-sky-600';
       case 'green':
-        return 'bg-green-500 hover:bg-green-600'
+        return 'bg-green-500 hover:bg-green-600';
       case 'yellow':
-        return 'bg-yellow-500 hover:bg-yellow-600'
+        return 'bg-yellow-500 hover:bg-yellow-600';
       case 'red':
-        return 'bg-red-500 hover:bg-red-600'
+        return 'bg-red-500 hover:bg-red-600';
       case 'purple':
-        return 'bg-purple-500 hover:bg-purple-600'
+        return 'bg-purple-500 hover:bg-purple-600';
       case 'teal':
-        return 'bg-teal-500 hover:bg-teal-600'
+        return 'bg-teal-500 hover:bg-teal-600';
       case 'amber':
-        return 'bg-amber-500 hover:bg-amber-600'
+        return 'bg-amber-500 hover:bg-amber-600';
       case 'indigo':
-        return 'bg-indigo-500 hover:bg-indigo-600'
+        return 'bg-indigo-500 hover:bg-indigo-600';
       case 'neutral':
-        return 'bg-neutral-500 hover:bg-neutral-600'
+        return 'bg-neutral-500 hover:bg-neutral-600';
       default:
-        return 'bg-blue-500 hover:bg-blue-600'
+        return 'bg-blue-500 hover:bg-blue-600';
     }
-  }
+  };
 
-  const colors = [
-    'sky',
-    'green',
-    'yellow',
-    'red',
-    'purple',
-    'teal',
-    'amber',
-    'indigo',
-    'neutral',
-    'blue',
-  ]
+  const colors = ['sky', 'green', 'yellow', 'red', 'purple', 'teal', 'amber', 'indigo', 'neutral', 'blue'];
 
   return (
     <NodeViewWrapper className={`block-button ${getAlignmentClass()}`}>
@@ -148,7 +120,7 @@ const ButtonsExtension: FC = (props: any) => {
             'flex items-center space-x-2 rounded-xl px-4 py-2 text-white transition-colors',
             getButtonColor(color),
             isEditable && 'pointer-events-none',
-            !link && 'opacity-60'
+            !link && 'opacity-60',
           )}
         >
           <span>{emoji}</span>
@@ -237,7 +209,7 @@ const ButtonsExtension: FC = (props: any) => {
         </div>
       )}
     </NodeViewWrapper>
-  )
-}
+  );
+};
 
-export default ButtonsExtension
+export default ButtonsExtension;
