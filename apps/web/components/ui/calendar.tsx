@@ -15,6 +15,13 @@ const localeMap: Record<string, Locale> = {
   'ru-RU': ru,
 }
 
+const ChevronComponent = ({ ...props }: any) =>
+  props.orientation === 'left' ? (
+    <ChevronLeft {...props} className="h-4 w-4" />
+  ) : (
+    <ChevronRight {...props} className="h-4 w-4" />
+  )
+
 function Calendar({
   className,
   classNames,
@@ -77,12 +84,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Chevron: ({ ...props }) =>
-          props.orientation === 'left' ? (
-            <ChevronLeft {...props} className="h-4 w-4" />
-          ) : (
-            <ChevronRight {...props} className="h-4 w-4" />
-          ),
+        Chevron: ChevronComponent,
       }}
       {...props}
     />

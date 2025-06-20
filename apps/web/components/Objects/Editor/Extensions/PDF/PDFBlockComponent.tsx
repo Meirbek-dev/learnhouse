@@ -97,6 +97,7 @@ function PDFBlockComponent(props: any) {
           <div className="relative">
             <iframe
               className="h-96 w-full rounded-lg bg-black object-scale-down shadow-sm"
+              title="PDF Document Viewer"
               src={
                 blockObject && fileId && blockObject.block_uuid
                   ? getActivityBlockMediaDirectory(

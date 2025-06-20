@@ -107,13 +107,14 @@ function ResetPasswordClient() {
           <div className="m-auto flex flex-wrap items-center space-x-4">
             <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
               {org?.logo_image ? (
-                <img
+                <Image
                   src={`${getOrgLogoMediaDirectory(
                     org?.org_uuid,
                     org?.logo_image
                   )}`}
                   alt={org?.name}
-                  style={{ width: 'auto', height: 70 }}
+                  width={70}
+                  height={70}
                   className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
                 />
               ) : (

@@ -285,28 +285,24 @@ const UserEditForm = ({
 }: UserEditFormProps) => {
   const t = useTranslations('DashPage.UserAccountSettings.generalSection')
   // Memoize template handlers
-  const _templateHandlers = useMemo(
-    () =>
-      Object.entries(DETAIL_TEMPLATES).reduce(
-        (acc, [key, template]) => ({
-          ...acc,
-          [key]: () => {
-            const currentIds = new Set(Object.keys(values.details))
-            const newDetails = { ...values.details }
+  const _templateHandlers = useMemo(() => {
+    const handlers: Record<string, () => void> = {}
+    Object.entries(DETAIL_TEMPLATES).forEach(([key, template]) => {
+      handlers[key] = () => {
+        const currentIds = new Set(Object.keys(values.details))
+        const newDetails = { ...values.details }
 
-            template.forEach((item) => {
-              if (!currentIds.has(item.id)) {
-                newDetails[item.id] = { ...item }
-              }
-            })
+        template.forEach((item) => {
+          if (!currentIds.has(item.id)) {
+            newDetails[item.id] = { ...item }
+          }
+        })
 
-            setFieldValue('details', newDetails)
-          },
-        }),
-        {} as Record<string, () => void>
-      ),
-    [values.details, setFieldValue]
-  )
+        setFieldValue('details', newDetails)
+      }
+    })
+    return handlers
+  }, [values.details, setFieldValue])
 
   // Memoize detail handlers
   const _detailHandlers = useMemo(

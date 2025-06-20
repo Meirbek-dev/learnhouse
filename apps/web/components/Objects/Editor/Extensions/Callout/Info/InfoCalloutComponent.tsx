@@ -53,7 +53,9 @@ const DismissButton = styled.button`
   }
 `
 
-const InfoCalloutWrapper = styled.div<{ size?: string }>`
+const InfoCalloutWrapper = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isEditable'].includes(prop),
+})<{ size?: string; isEditable?: boolean }>`
   width: 100%;
   display: flex;
   position: relative;
@@ -72,7 +74,7 @@ const InfoCalloutWrapper = styled.div<{ size?: string }>`
     margin: 5px;
     padding: 0.5rem;
     border: ${(props) =>
-      props.contentEditable ? '2px dashed #1f3a8a12' : 'none'};
+      props.isEditable ? '2px dashed #1f3a8a12' : 'none'};
     border-radius: 0.5rem;
 
     @media (max-width: 640px) {
@@ -123,14 +125,14 @@ function InfoCalloutComponent(props: any) {
     <NodeViewWrapper>
       <InfoCalloutWrapper
         className={`flex items-center rounded-xl shadow-inner ${getVariantClasses()} ${getSizeClasses()}`}
-        contentEditable={isEditable}
         size={options.size}
+        isEditable={isEditable}
       >
         <IconWrapper size={options.size}>
           <Info />
         </IconWrapper>
         <ContentWrapper className="grow">
-          <NodeViewContent contentEditable={isEditable} className="content" />
+          <NodeViewContent className="content" />
         </ContentWrapper>
         {options.dismissible && !isEditable && (
           <DismissButton onClick={() => setDismissed(true)}>

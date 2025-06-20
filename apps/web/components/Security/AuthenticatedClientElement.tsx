@@ -57,14 +57,19 @@ export const AuthenticatedClientElement = (
     if (props.checkMethod === 'authentication') {
       setIsAllowed(session.status == 'authenticated')
     } else if (props.checkMethod === 'roles') {
-      return setIsAllowed(
-        isUserAllowed(
-          session?.data?.roles,
-          props.action!,
-          props.ressourceType!,
-          org?.org_uuid
+      if (props.action && props.ressourceType) {
+        return setIsAllowed(
+          isUserAllowed(
+            session?.data?.roles,
+            props.action,
+            props.ressourceType,
+            org?.org_uuid
+          )
         )
-      )
+      }
+      setIsAllowed(false)
+    } else {
+      setIsAllowed(false)
     }
   }
 

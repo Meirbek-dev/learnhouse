@@ -596,6 +596,7 @@
       "alignment": "Alignment",
       "buttonLabel": "Button label",
       "buttonLabelPlaceholder": "Button label",
+      "buttonOptions": "Button Options",
       "cancel": "Cancel",
       "center": "Center",
       "deleteCard": "Delete Card",
@@ -2837,6 +2838,7 @@
   },
   "HomePage": {
     "Collections": {
+      "collectionOfCourses": "Collections of courses from {orgName}",
       "noContent": "No collections yet",
       "noContentUserAdmin": "Create collections to group courses together",
       "title": "Collections"

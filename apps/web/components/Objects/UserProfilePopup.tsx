@@ -59,6 +59,12 @@ const ICON_MAP = {
   calendar: Calendar,
 } as const
 
+const IconComponent = ({ iconName }: { iconName: string }) => {
+  const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
+  if (!IconElement) return null
+  return <IconElement className="h-4 w-4 text-gray-500" />
+}
+
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const t = useTranslations('Components.UserProfilePopup')
   const session = useLHSession() as any
@@ -87,12 +93,6 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
 
     fetchUserData()
   }, [userId, session?.data?.tokens?.access_token, t])
-
-  const IconComponent = ({ iconName }: { iconName: string }) => {
-    const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
-    if (!IconElement) return null
-    return <IconElement className="h-4 w-4 text-gray-500" />
-  }
 
   return (
     <HoverCard openDelay={100} closeDelay={150}>

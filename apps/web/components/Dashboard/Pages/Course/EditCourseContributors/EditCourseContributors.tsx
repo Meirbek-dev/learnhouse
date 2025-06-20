@@ -92,6 +92,92 @@ const formatDate = (dateString: string, locale: Locale) => {
   })
 }
 
+const RoleDropdown = ({
+  contributor,
+  updateContributor,
+  t,
+}: {
+  contributor: Contributor
+  updateContributor: any
+  t: any
+}) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button
+        variant="outline"
+        className="w-[200px] justify-between"
+        disabled={contributor.authorship === 'CREATOR'}
+      >
+        {t(contributor.authorship.toLowerCase() as any) ||
+          contributor.authorship}
+        <ChevronDown className="text-muted-foreground ml-2 h-4 w-4" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-[200px]">
+      {['CONTRIBUTOR', 'MAINTAINER', 'REPORTER'].map((role) => (
+        <DropdownMenuItem
+          key={role}
+          onClick={() =>
+            updateContributor(contributor.user_id, {
+              authorship: role as ContributorRole,
+            })
+          }
+          className="justify-between"
+        >
+          {t(role.toLowerCase() as any)}
+          {contributor.authorship === role && (
+            <Check className="ml-2 h-4 w-4" />
+          )}
+        </DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+)
+
+const StatusDropdown = ({
+  contributor,
+  updateContributor,
+  t,
+  getStatusStyle,
+}: {
+  contributor: Contributor
+  updateContributor: any
+  t: any
+  getStatusStyle: any
+}) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button
+        variant="outline"
+        className={`w-[200px] justify-between ${getStatusStyle(contributor.authorship_status)}`}
+        disabled={contributor.authorship === 'CREATOR'}
+      >
+        {t(contributor.authorship_status.toLowerCase() as any) ||
+          contributor.authorship_status}
+        <ChevronDown className="ml-2 h-4 w-4" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-[200px]">
+      {['ACTIVE', 'INACTIVE', 'PENDING'].map((status) => (
+        <DropdownMenuItem
+          key={status}
+          onClick={() =>
+            updateContributor(contributor.user_id, {
+              authorship_status: status as ContributorStatus,
+            })
+          }
+          className="justify-between"
+        >
+          {t(status.toLowerCase() as any)}
+          {contributor.authorship_status === status && (
+            <Check className="ml-2 h-4 w-4" />
+          )}
+        </DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+)
+
 function EditCourseContributors(props: EditCourseContributorsProps) {
   const t = useTranslations('DashPage.EditCourseContributors')
   const locale = useLocale() as Locale
@@ -297,74 +383,6 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
       toast.error(t('errorUpdatingContributor'))
     }
   }
-
-  const RoleDropdown = ({ contributor }: { contributor: Contributor }) => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-[200px] justify-between"
-          disabled={contributor.authorship === 'CREATOR'}
-        >
-          {t(contributor.authorship.toLowerCase() as any) ||
-            contributor.authorship}
-          <ChevronDown className="text-muted-foreground ml-2 h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[200px]">
-        {['CONTRIBUTOR', 'MAINTAINER', 'REPORTER'].map((role) => (
-          <DropdownMenuItem
-            key={role}
-            onClick={() =>
-              updateContributor(contributor.user_id, {
-                authorship: role as ContributorRole,
-              })
-            }
-            className="justify-between"
-          >
-            {t(role.toLowerCase() as any)}
-            {contributor.authorship === role && (
-              <Check className="ml-2 h-4 w-4" />
-            )}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-
-  const StatusDropdown = ({ contributor }: { contributor: Contributor }) => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className={`w-[200px] justify-between ${getStatusStyle(contributor.authorship_status)}`}
-          disabled={contributor.authorship === 'CREATOR'}
-        >
-          {t(contributor.authorship_status.toLowerCase() as any) ||
-            contributor.authorship_status}
-          <ChevronDown className="ml-2 h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[200px]">
-        {['ACTIVE', 'INACTIVE', 'PENDING'].map((status) => (
-          <DropdownMenuItem
-            key={status}
-            onClick={() =>
-              updateContributor(contributor.user_id, {
-                authorship_status: status as ContributorStatus,
-              })
-            }
-            className="justify-between"
-          >
-            {t(status.toLowerCase() as any)}
-            {contributor.authorship_status === status && (
-              <Check className="ml-2 h-4 w-4" />
-            )}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
 
   const getStatusStyle = (status: ContributorStatus) => {
     switch (status) {
@@ -748,10 +766,19 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                             {contributor.user.email}
                           </TableCell>
                           <TableCell>
-                            <RoleDropdown contributor={contributor} />
+                            <RoleDropdown
+                              contributor={contributor}
+                              updateContributor={updateContributor}
+                              t={t}
+                            />
                           </TableCell>
                           <TableCell>
-                            <StatusDropdown contributor={contributor} />
+                            <StatusDropdown
+                              contributor={contributor}
+                              updateContributor={updateContributor}
+                              t={t}
+                              getStatusStyle={getStatusStyle}
+                            />
                           </TableCell>
                           <TableCell className="text-sm text-gray-500">
                             {formatDate(contributor.creation_date, locale)}

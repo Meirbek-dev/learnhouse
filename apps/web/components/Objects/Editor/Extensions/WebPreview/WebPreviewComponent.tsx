@@ -174,7 +174,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({
         dialogContent={
           <iframe
             src={previewData.url}
-            title={t("embeddedWebsitePreview")}
+            title={t('embeddedWebsitePreview')}
             className="h-full w-full border-0 bg-white"
             style={{ display: 'block', borderRadius: 0 }}
             allowFullScreen

@@ -66,13 +66,14 @@ function SignUpClient(props: SignUpClientProps) {
             <div>{t('invitedToJoin')} </div>
             <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
               {props.org?.logo_image ? (
-                <img
+                <Image
                   src={`${getOrgLogoMediaDirectory(
                     props.org.org_uuid,
                     props.org?.logo_image
                   )}`}
                   alt="OpenU"
-                  style={{ width: 'auto', height: 70 }}
+                  width={70}
+                  height={70}
                   className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
                 />
               ) : (

@@ -122,9 +122,7 @@ function SaveState(props: { orgslug: string }) {
 
   return (
     <div className="flex space-x-4">
-      {saved ? (
-        <></>
-      ) : (
+      {!saved && (
         <div className="flex items-center space-x-2 text-gray-600 antialiased">
           <Timer size={15} />
           <div>{t('unsavedChanges')}</div>

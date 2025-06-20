@@ -78,6 +78,102 @@ interface SearchResults {
 
 type ContentType = 'all' | 'courses' | 'collections' | 'users'
 
+const FilterButton = ({
+  type,
+  count,
+  icon: Icon,
+  selectedType,
+  onTypeChange,
+  t,
+}: {
+  type: ContentType
+  count: number
+  icon: any
+  selectedType: ContentType
+  onTypeChange: (type: ContentType) => void
+  t: (key: string) => string
+}) => (
+  <button
+    onClick={() => onTypeChange(type)}
+    className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${
+      selectedType === type
+        ? 'bg-black/10 font-medium text-black/80'
+        : 'text-black/60 hover:bg-black/5'
+    }`}
+  >
+    <Icon size={16} />
+    <span>{t(`filter${type.charAt(0).toUpperCase() + type.slice(1)}`)}</span>
+    <span className="text-black/40">({count})</span>
+  </button>
+)
+
+const Pagination = ({
+  totalPages,
+  currentPage,
+  onPageChange,
+}: {
+  totalPages: number
+  currentPage: number
+  onPageChange: (page: number) => void
+}) => {
+  if (totalPages <= 1) return null
+
+  return (
+    <div className="mt-8 flex justify-center gap-2">
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+        <button
+          key={pageNum}
+          onClick={() => onPageChange(pageNum)}
+          className={`h-8 w-8 rounded-lg text-sm transition-colors ${
+            currentPage === pageNum
+              ? 'bg-black/10 font-medium text-black/80'
+              : 'text-black/60 hover:bg-black/5'
+          }`}
+        >
+          {pageNum}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+const LoadingState = () => (
+  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {[1, 2, 3, 4, 5, 6].map((i) => (
+      <div
+        key={i}
+        className="nice-shadow animate-pulse rounded-xl bg-white p-4"
+      >
+        <div className="mb-4 h-32 w-full rounded-lg bg-black/5" />
+        <div className="space-y-2">
+          <div className="h-4 w-3/4 rounded bg-black/5" />
+          <div className="h-3 w-1/2 rounded bg-black/5" />
+        </div>
+      </div>
+    ))}
+  </div>
+)
+
+const EmptyState = ({
+  query,
+  t,
+}: {
+  query: string
+  t: (key: string, params?: any) => string
+}) => (
+  <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div className="mb-4 rounded-full bg-black/5 p-4">
+      <Search className="h-8 w-8 text-black/40" />
+    </div>
+    <h3 className="mb-2 text-lg font-medium text-black/80">
+      {t('noResultsTitle')}
+    </h3>
+    <p className="max-w-md text-sm text-black/50">
+      {t('noResultsMessage', { query: query })}
+    </p>
+  </div>
+)
+
 function SearchPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -197,85 +293,6 @@ function SearchPage() {
     searchResults.total_users
   const totalPages = Math.ceil(totalResults / perPage)
 
-  const FilterButton = ({
-    type,
-    count,
-    icon: Icon,
-  }: {
-    type: ContentType
-    count: number
-    icon: any
-  }) => (
-    <button
-      onClick={() => {
-        setSelectedType(type)
-        updateSearchParams({ type: type === 'all' ? '' : type, page: '1' })
-      }}
-      className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${
-        selectedType === type
-          ? 'bg-black/10 font-medium text-black/80'
-          : 'text-black/60 hover:bg-black/5'
-      }`}
-    >
-      <Icon size={16} />
-      <span>{t(`filter${type.charAt(0).toUpperCase() + type.slice(1)}`)}</span>
-      <span className="text-black/40">({count})</span>
-    </button>
-  )
-
-  const Pagination = () => {
-    if (totalPages <= 1) return null
-
-    return (
-      <div className="mt-8 flex justify-center gap-2">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-          <button
-            key={pageNum}
-            onClick={() => updateSearchParams({ page: pageNum.toString() })}
-            className={`h-8 w-8 rounded-lg text-sm transition-colors ${
-              page === pageNum
-                ? 'bg-black/10 font-medium text-black/80'
-                : 'text-black/60 hover:bg-black/5'
-            }`}
-          >
-            {pageNum}
-          </button>
-        ))}
-      </div>
-    )
-  }
-
-  const LoadingState = () => (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div
-          key={i}
-          className="nice-shadow animate-pulse rounded-xl bg-white p-4"
-        >
-          <div className="mb-4 h-32 w-full rounded-lg bg-black/5" />
-          <div className="space-y-2">
-            <div className="h-4 w-3/4 rounded bg-black/5" />
-            <div className="h-3 w-1/2 rounded bg-black/5" />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-
-  const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-4 rounded-full bg-black/5 p-4">
-        <Search className="h-8 w-8 text-black/40" />
-      </div>
-      <h3 className="mb-2 text-lg font-medium text-black/80">
-        {t('noResultsTitle')}
-      </h3>
-      <p className="max-w-md text-sm text-black/50">
-        {t('noResultsMessage', { query: query })}
-      </p>
-    </div>
-  )
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Search Header */}
@@ -311,21 +328,61 @@ function SearchPage() {
 
             {/* Filters */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              <FilterButton type="all" count={totalResults} icon={Search} />
+              <FilterButton
+                type="all"
+                count={totalResults}
+                icon={Search}
+                selectedType={selectedType}
+                onTypeChange={(type) => {
+                  setSelectedType(type)
+                  updateSearchParams({
+                    type: type === 'all' ? '' : type,
+                    page: '1',
+                  })
+                }}
+                t={t}
+              />
               <FilterButton
                 type="courses"
                 count={searchResults.total_courses}
                 icon={GraduationCap}
+                selectedType={selectedType}
+                onTypeChange={(type) => {
+                  setSelectedType(type)
+                  updateSearchParams({
+                    type: type === 'all' ? '' : type,
+                    page: '1',
+                  })
+                }}
+                t={t}
               />
               <FilterButton
                 type="collections"
                 count={searchResults.total_collections}
                 icon={Book}
+                selectedType={selectedType}
+                onTypeChange={(type) => {
+                  setSelectedType(type)
+                  updateSearchParams({
+                    type: type === 'all' ? '' : type,
+                    page: '1',
+                  })
+                }}
+                t={t}
               />
               <FilterButton
                 type="users"
                 count={searchResults.total_users}
                 icon={Users}
+                selectedType={selectedType}
+                onTypeChange={(type) => {
+                  setSelectedType(type)
+                  updateSearchParams({
+                    type: type === 'all' ? '' : type,
+                    page: '1',
+                  })
+                }}
+                t={t}
               />
             </div>
           </div>
@@ -344,7 +401,7 @@ function SearchPage() {
           {isLoading ? (
             <LoadingState />
           ) : totalResults === 0 && query ? (
-            <EmptyState />
+            <EmptyState query={query} t={t} />
           ) : (
             <div className="space-y-12">
               {/* Courses Grid */}
@@ -519,7 +576,13 @@ function SearchPage() {
             </div>
           )}
 
-          <Pagination />
+          <Pagination
+            totalPages={totalPages}
+            currentPage={page}
+            onPageChange={(pageNum) =>
+              updateSearchParams({ page: pageNum.toString() })
+            }
+          />
         </div>
       </div>
     </div>

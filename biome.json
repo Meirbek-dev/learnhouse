@@ -76,7 +76,11 @@
       },
       "performance": {
         "useTopLevelRegex": "off",
-        "noNamespaceImport": "off"
+        "noNamespaceImport": "off",
+        "noImgElement": "off"
+      },
+      "nursery": {
+        "useUniqueElementIds": "off"
       }
     }
   },

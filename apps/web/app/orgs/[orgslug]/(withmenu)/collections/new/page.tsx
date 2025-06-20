@@ -4,14 +4,14 @@ import { useState } from 'react'
 import * as React from 'react'
 import { createCollection } from '@services/courses/collections'
 import useSWR from 'swr'
+import { toast } from 'react-hot-toast'
+import { getCourseThumbnailMediaDirectory } from '@services/media/media'
+import { useTranslations } from 'next-intl'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { Loader2, Image as ImageIcon } from 'lucide-react'
-import { toast } from 'react-hot-toast'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { useTranslations } from 'next-intl'
 
 function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
   const t = useTranslations('NewCollectionPage')

@@ -596,6 +596,7 @@
       "alignment": "Выравнивание",
       "buttonLabel": "Надпись на кнопке",
       "buttonLabelPlaceholder": "Надпись на кнопке",
+      "buttonOptions": "Параметры кнопки",
       "cancel": "Отмена",
       "center": "По центру",
       "deleteCard": "Удалить карточку",
@@ -2837,6 +2838,7 @@
   },
   "HomePage": {
     "Collections": {
+      "collectionOfCourses": "Коллекции курсов от {orgName}",
       "noContent": "Коллекции отсутствуют",
       "noContentUserAdmin": "Создавайте коллекции для группировки курсов",
       "title": "Коллекции"

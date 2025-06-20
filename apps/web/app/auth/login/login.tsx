@@ -206,9 +206,11 @@ const LoginClient = (props: LoginClientProps) => {
               }
               className="text-md flex w-full justify-center space-x-3 rounded-md bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm hover:cursor-pointer"
             >
-              <img
+              <Image
                 src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"
-                alt=""
+                alt="Google logo"
+                width={24}
+                height={24}
               />
               <span>{t('signInWithGoogle')}</span>
             </button>

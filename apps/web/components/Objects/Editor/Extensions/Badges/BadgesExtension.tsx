@@ -180,7 +180,6 @@ const BadgesExtension: FC = (props: any) => {
             )}
           </div>
           <NodeViewContent
-            contentEditable={isEditable}
             className="content text capitalize tracking-wide"
           />
           {isEditable && (

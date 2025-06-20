@@ -22,13 +22,11 @@ export async function generateMetadata(
   const access_token = session?.tokens?.access_token
   const t = await getTranslations('DashPage.Editor')
 
-  const [course_meta] = await Promise.all([
-    getCourseMetadata(
-      params.courseid,
-      { revalidate: 60, tags: ['courses'] },
-      access_token ?? null
-    ),
-  ])
+  const course_meta = await getCourseMetadata(
+    params.courseid,
+    { revalidate: 60, tags: ['courses'] },
+    access_token ?? null
+  )
 
   return {
     title: t('metaTitleEdit', { activityName: course_meta.name }),
@@ -44,6 +42,7 @@ const EditActivity = async (props: {
   const access_token = session?.tokens?.access_token
   const { activityuuid, courseid } = params
 
+  // This Promise.all() is correct as it handles two promises
   const [courseInfo, activity] = await Promise.all([
     getCourseMetadata(
       courseid,

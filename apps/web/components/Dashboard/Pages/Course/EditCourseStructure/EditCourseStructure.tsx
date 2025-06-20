@@ -185,9 +185,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
             }
           />
         </DragDropContext>
-      ) : (
-        <></>
-      )}
+      ) : null}
     </div>
   )
 }

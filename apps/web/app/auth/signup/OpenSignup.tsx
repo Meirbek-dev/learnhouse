@@ -14,6 +14,7 @@ import { signup } from '@services/auth/auth'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 
 function OpenSignUpComponent() {
   const validationT = useTranslations('Validation')
@@ -194,9 +195,11 @@ function OpenSignUpComponent() {
           onClick={() => signIn('google')}
           className="text-md flex w-full justify-center space-x-3 rounded-md bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm hover:cursor-pointer"
         >
-          <img
+          <Image
             src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"
-            alt=""
+            alt="Google logo"
+            width={24}
+            height={24}
           />
           <span>{t('signInWithGoogle')}</span>
         </button>

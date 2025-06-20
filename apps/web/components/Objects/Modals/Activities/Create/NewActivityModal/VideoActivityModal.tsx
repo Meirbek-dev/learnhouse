@@ -25,6 +25,184 @@ interface ExternalVideoObject {
   details: VideoDetails
 }
 
+const VideoSettingsForm = ({
+  videoDetails,
+  setVideoDetails,
+  t,
+}: {
+  videoDetails: VideoDetails
+  setVideoDetails: (details: VideoDetails) => void
+  t: any
+}) => {
+  const convertToSeconds = (minutes: number, seconds: number) => {
+    return minutes * 60 + seconds
+  }
+
+  const convertFromSeconds = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return { minutes, seconds }
+  }
+
+  const startTimeParts = convertFromSeconds(videoDetails.startTime)
+  const endTimeParts = videoDetails.endTime
+    ? convertFromSeconds(videoDetails.endTime)
+    : { minutes: 0, seconds: 0 }
+
+  return (
+    <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4">
+      <h3 className="mb-3 font-medium text-gray-900">
+        {t('videoSettingsHeading')}
+      </h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>{t('startTimeLabel')}</Label>
+          <div className="mt-1 flex gap-2">
+            <div className="flex-1">
+              <Input
+                type="number"
+                min="0"
+                value={startTimeParts.minutes}
+                onChange={(e) => {
+                  const minutes = Math.max(
+                    0,
+                    Number.parseInt(e.target.value) || 0
+                  )
+                  const seconds = startTimeParts.seconds
+                  setVideoDetails({
+                    ...videoDetails,
+                    startTime: convertToSeconds(minutes, seconds),
+                  })
+                }}
+                placeholder={t('minutesPlaceholder')}
+                className="w-full"
+              />
+              <span className="mt-1 block text-xs text-gray-500">
+                {t('minutes')}
+              </span>
+            </div>
+            <div className="flex-1">
+              <Input
+                type="number"
+                min="0"
+                max="59"
+                value={startTimeParts.seconds}
+                onChange={(e) => {
+                  const minutes = startTimeParts.minutes
+                  const seconds = Math.max(
+                    0,
+                    Math.min(59, Number.parseInt(e.target.value) || 0)
+                  )
+                  setVideoDetails({
+                    ...videoDetails,
+                    startTime: convertToSeconds(minutes, seconds),
+                  })
+                }}
+                placeholder={t('secondsPlaceholder')}
+                className="w-full"
+              />
+              <span className="mt-1 block text-xs text-gray-500">
+                {t('seconds')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <Label>{t('endTimeLabel')}</Label>
+          <div className="mt-1 flex gap-2">
+            <div className="flex-1">
+              <Input
+                type="number"
+                min="0"
+                value={endTimeParts.minutes}
+                onChange={(e) => {
+                  const minutes = Math.max(
+                    0,
+                    Number.parseInt(e.target.value) || 0
+                  )
+                  const seconds = endTimeParts.seconds
+                  const totalSeconds = convertToSeconds(minutes, seconds)
+                  if (totalSeconds > videoDetails.startTime) {
+                    setVideoDetails({
+                      ...videoDetails,
+                      endTime: totalSeconds,
+                    })
+                  }
+                }}
+                placeholder={t('secondsPlaceholder')}
+                className="w-full"
+              />
+              <span className="mt-1 block text-xs text-gray-500">
+                {t('minutes')}
+              </span>
+            </div>
+            <div className="flex-1">
+              <Input
+                type="number"
+                min="0"
+                max="59"
+                value={endTimeParts.seconds}
+                onChange={(e) => {
+                  const minutes = endTimeParts.minutes
+                  const seconds = Math.max(
+                    0,
+                    Math.min(59, Number.parseInt(e.target.value) || 0)
+                  )
+                  const totalSeconds = convertToSeconds(minutes, seconds)
+                  if (totalSeconds > videoDetails.startTime) {
+                    setVideoDetails({
+                      ...videoDetails,
+                      endTime: totalSeconds,
+                    })
+                  }
+                }}
+                placeholder={t('secondsPlaceholder')}
+                className="w-full"
+              />
+              <span className="mt-1 block text-xs text-gray-500">
+                {t('seconds')}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center space-x-6">
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={videoDetails.autoplay}
+            onChange={(e) =>
+              setVideoDetails({
+                ...videoDetails,
+                autoplay: e.target.checked,
+              })
+            }
+            className="rounded border-gray-300 text-black focus:ring-black"
+          />
+          <span className="text-sm text-gray-700">{t('autoplay')}</span>
+        </label>
+
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={videoDetails.muted}
+            onChange={(e) =>
+              setVideoDetails({
+                ...videoDetails,
+                muted: e.target.checked,
+              })
+            }
+            className="rounded border-gray-300 text-black focus:ring-black"
+          />
+          <span className="text-sm text-gray-700">{t('startMuted')}</span>
+        </label>
+      </div>
+    </div>
+  )
+}
+
 function VideoModal({
   submitFileActivity,
   submitExternalVideo,
@@ -92,176 +270,6 @@ function VideoModal({
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const VideoSettingsForm = () => {
-    const convertToSeconds = (minutes: number, seconds: number) => {
-      return minutes * 60 + seconds
-    }
-
-    const convertFromSeconds = (totalSeconds: number) => {
-      const minutes = Math.floor(totalSeconds / 60)
-      const seconds = totalSeconds % 60
-      return { minutes, seconds }
-    }
-
-    const startTimeParts = convertFromSeconds(videoDetails.startTime)
-    const endTimeParts = videoDetails.endTime
-      ? convertFromSeconds(videoDetails.endTime)
-      : { minutes: 0, seconds: 0 }
-
-    return (
-      <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4">
-        <h3 className="mb-3 font-medium text-gray-900">
-          {t('videoSettingsHeading')}
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>{t('startTimeLabel')}</Label>
-            <div className="mt-1 flex gap-2">
-              <div className="flex-1">
-                <Input
-                  type="number"
-                  min="0"
-                  value={startTimeParts.minutes}
-                  onChange={(e) => {
-                    const minutes = Math.max(
-                      0,
-                      Number.parseInt(e.target.value) || 0
-                    )
-                    const seconds = startTimeParts.seconds
-                    setVideoDetails({
-                      ...videoDetails,
-                      startTime: convertToSeconds(minutes, seconds),
-                    })
-                  }}
-                  placeholder={t('minutesPlaceholder')}
-                  className="w-full"
-                />
-                <span className="mt-1 block text-xs text-gray-500">
-                  {t('minutes')}
-                </span>
-              </div>
-              <div className="flex-1">
-                <Input
-                  type="number"
-                  min="0"
-                  max="59"
-                  value={startTimeParts.seconds}
-                  onChange={(e) => {
-                    const minutes = startTimeParts.minutes
-                    const seconds = Math.max(
-                      0,
-                      Math.min(59, Number.parseInt(e.target.value) || 0)
-                    )
-                    setVideoDetails({
-                      ...videoDetails,
-                      startTime: convertToSeconds(minutes, seconds),
-                    })
-                  }}
-                  placeholder={t('secondsPlaceholder')}
-                  className="w-full"
-                />
-                <span className="mt-1 block text-xs text-gray-500">
-                  {t('seconds')}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <Label>{t('endTimeLabel')}</Label>
-            <div className="mt-1 flex gap-2">
-              <div className="flex-1">
-                <Input
-                  type="number"
-                  min="0"
-                  value={endTimeParts.minutes}
-                  onChange={(e) => {
-                    const minutes = Math.max(
-                      0,
-                      Number.parseInt(e.target.value) || 0
-                    )
-                    const seconds = endTimeParts.seconds
-                    const totalSeconds = convertToSeconds(minutes, seconds)
-                    if (totalSeconds > videoDetails.startTime) {
-                      setVideoDetails({
-                        ...videoDetails,
-                        endTime: totalSeconds,
-                      })
-                    }
-                  }}
-                  placeholder={t('secondsPlaceholder')}
-                  className="w-full"
-                />
-                <span className="mt-1 block text-xs text-gray-500">
-                  {t('minutes')}
-                </span>
-              </div>
-              <div className="flex-1">
-                <Input
-                  type="number"
-                  min="0"
-                  max="59"
-                  value={endTimeParts.seconds}
-                  onChange={(e) => {
-                    const minutes = endTimeParts.minutes
-                    const seconds = Math.max(
-                      0,
-                      Math.min(59, Number.parseInt(e.target.value) || 0)
-                    )
-                    const totalSeconds = convertToSeconds(minutes, seconds)
-                    if (totalSeconds > videoDetails.startTime) {
-                      setVideoDetails({
-                        ...videoDetails,
-                        endTime: totalSeconds,
-                      })
-                    }
-                  }}
-                  placeholder={t('secondsPlaceholder')}
-                  className="w-full"
-                />
-                <span className="mt-1 block text-xs text-gray-500">
-                  {t('seconds')}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center space-x-6">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={videoDetails.autoplay}
-              onChange={(e) =>
-                setVideoDetails({
-                  ...videoDetails,
-                  autoplay: e.target.checked,
-                })
-              }
-              className="rounded border-gray-300 text-black focus:ring-black"
-            />
-            <span className="text-sm text-gray-700">{t('autoplay')}</span>
-          </label>
-
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={videoDetails.muted}
-              onChange={(e) =>
-                setVideoDetails({
-                  ...videoDetails,
-                  muted: e.target.checked,
-                })
-              }
-              className="rounded border-gray-300 text-black focus:ring-black"
-            />
-            <span className="text-sm text-gray-700">{t('startMuted')}</span>
-          </label>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -334,7 +342,11 @@ function VideoModal({
                   )}
                 </div>
               </div>
-              <VideoSettingsForm />
+              <VideoSettingsForm
+                videoDetails={videoDetails}
+                setVideoDetails={setVideoDetails}
+                t={t}
+              />
             </div>
           )}
 
@@ -351,7 +363,11 @@ function VideoModal({
                   placeholder={t('youtubeUrlPlaceholder')}
                 />
               </div>
-              <VideoSettingsForm />
+              <VideoSettingsForm
+                videoDetails={videoDetails}
+                setVideoDetails={setVideoDetails}
+                t={t}
+              />
             </div>
           )}
         </div>

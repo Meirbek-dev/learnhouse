@@ -23,6 +23,7 @@ export async function generateMetadata(
   props: MetadataProps
 ): Promise<Metadata> {
   const params = await props.params
+  const t = await getTranslations('HomePage.Collections')
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 0,
     tags: ['organizations'],
@@ -30,8 +31,8 @@ export async function generateMetadata(
 
   // SEO
   return {
-    title: `Collections — ${org.name}`,
-    description: `Collections of courses from ${org.name}`,
+    title: `${t('title')} — ${org.name}`,
+    description: `${t('collectionOfCourses', { orgName: org.name })}`,
     robots: {
       index: true,
       follow: true,
@@ -43,8 +44,8 @@ export async function generateMetadata(
       },
     },
     openGraph: {
-      title: `Collections — ${org.name}`,
-      description: `Collections of courses from ${org.name}`,
+      title: `${t('title')} — ${org.name}`,
+      description: `${t('collectionOfCourses', { orgName: org.name })}`,
       type: 'website',
       images: [
         {

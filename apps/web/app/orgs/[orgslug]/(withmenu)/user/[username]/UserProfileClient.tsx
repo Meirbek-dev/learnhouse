@@ -3,6 +3,7 @@
 import type { FC } from 'react'
 import { useState, useEffect } from 'react'
 import UserAvatar from '@components/Objects/UserAvatar'
+import Image from 'next/image'
 import {
   Briefcase,
   Building2,
@@ -44,6 +45,12 @@ const ICON_MAP = {
   calendar: Calendar,
 } as const
 
+const IconComponent = ({ iconName }: { iconName: string }) => {
+  const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
+  if (!IconElement) return null
+  return <IconElement className="h-4 w-4 text-gray-600" />
+}
+
 const ImageModal: FC<{
   image: { url: string; caption?: string }
   onClose: () => void
@@ -57,9 +64,11 @@ const ImageModal: FC<{
         >
           <X className="h-6 w-6" />
         </button>
-        <img
+        <Image
           src={image.url}
           alt={image.caption || ''}
+          width={800}
+          height={600}
           className="h-auto w-full rounded-lg"
         />
         {image.caption && (
@@ -103,12 +112,6 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
     fetchUserCourses()
   }, [userData.id, access_token])
 
-  const IconComponent = ({ iconName }: { iconName: string }) => {
-    const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
-    if (!IconElement) return null
-    return <IconElement className="h-4 w-4 text-gray-600" />
-  }
-
   return (
     <div className="container mx-auto py-8">
       {/* Banner */}
@@ -151,9 +154,11 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                       key={index}
                       className="rounded-lg border-2 border-white bg-white p-2 shadow-lg"
                     >
-                      <img
+                      <Image
                         src={affiliation.logoUrl}
                         alt={affiliation.name}
+                        width={64}
+                        height={64}
                         className="h-16 w-16 object-contain"
                         title={affiliation.name}
                       />
@@ -221,9 +226,11 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                                 className="group relative cursor-pointer"
                                 onClick={() => setSelectedImage(image)}
                               >
-                                <img
+                                <Image
                                   src={image.url}
                                   alt={image.caption || ''}
+                                  width={300}
+                                  height={192}
                                   className="h-48 w-full rounded-lg object-cover"
                                 />
                                 {image.caption && (
@@ -344,9 +351,11 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               >
                                 <div className="flex items-start gap-4">
                                   {affiliation.logoUrl && (
-                                    <img
+                                    <Image
                                       src={affiliation.logoUrl}
                                       alt={affiliation.name}
+                                      width={48}
+                                      height={48}
                                       className="h-12 w-12 object-contain"
                                     />
                                   )}

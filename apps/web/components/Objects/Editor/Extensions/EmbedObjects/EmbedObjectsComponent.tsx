@@ -145,6 +145,7 @@ const MemoizedEmbed = React.memo(
           src={processedUrl}
           className="h-full w-full border-0"
           allowFullScreen
+          title="Embedded Content"
         />
       )
     }

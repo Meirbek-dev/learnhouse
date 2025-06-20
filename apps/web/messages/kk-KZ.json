@@ -596,6 +596,7 @@
       "alignment": "Туралау",
       "buttonLabel": "Түйме белгісі",
       "buttonLabelPlaceholder": "Түйме белгісі",
+      "buttonOptions": "Түймешік параметрлері",
       "cancel": "Бас тарту",
       "center": "Ортасы",
       "deleteCard": "Картаны жою",
@@ -2837,6 +2838,7 @@
   },
   "HomePage": {
     "Collections": {
+      "collectionOfCourses": "Курстардың жинақтары {orgName}",
       "noContent": "Жинақтар жоқ",
       "noContentUserAdmin": "Курстарды топтастыру үшін жинақтар жасаңыз",
       "title": "Жинақтар"

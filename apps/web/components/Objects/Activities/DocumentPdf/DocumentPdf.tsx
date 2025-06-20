@@ -17,6 +17,7 @@ function DocumentPdfActivity({
     <div className="m-8 mt-14 rounded-md bg-zinc-900">
       <iframe
         className="h-[900px] w-full rounded-lg"
+        title="PDF Document Viewer"
         src={getActivityMediaDirectory(
           org?.org_uuid,
           course?.course_uuid,
