@@ -24,7 +24,7 @@ export default function RootLayout(props: { children: React.ReactNode; params: P
           showSpinner={false}
         />
         <Toast />
-        <Onboarding />
+        {/* <Onboarding /> */}
         {children}
         <Footer />
       </OrgProvider>

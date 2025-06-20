@@ -8,6 +8,7 @@ import { getTranslations } from 'next-intl/server';
 import { nextAuthOptions } from 'app/auth/options';
 import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
+import { JetBrains_Mono } from 'next/font/google';
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; courseid: string; activityid: string }>;
@@ -32,6 +33,15 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   };
 }
 
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+  preload: true,
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
+  style: ['normal', 'italic'],
+});
+
 const EditActivity = async (props: { params: Promise<{ courseid: string; activityuuid: string }> }) => {
   const params = await props.params;
   const session = await getServerSession(nextAuthOptions);
@@ -54,16 +64,18 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
   );
 
   return (
-    <EditorOptionsProvider options={{ isEditable: true }}>
-      <AIEditorProvider>
-        <EditorWrapper
-          org={org}
-          course={courseInfo}
-          activity={activity}
-          content={activity.content}
-        />
-      </AIEditorProvider>
-    </EditorOptionsProvider>
+    <div className={jetbrainsMono.variable}>
+      <EditorOptionsProvider options={{ isEditable: true }}>
+        <AIEditorProvider>
+          <EditorWrapper
+            org={org}
+            course={courseInfo}
+            activity={activity}
+            content={activity.content}
+          />
+        </AIEditorProvider>
+      </EditorOptionsProvider>
+    </div>
   );
 };
 

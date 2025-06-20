@@ -46,10 +46,13 @@ def install(
     if short:
         # Create the Organization
         print("Creating OpenU...")
+        slug = typer.prompt(
+            "What's the slug for your organization? (e.g. school, acme)"
+        )
         org = OrganizationCreate(
             name="OpenU",
             description="OpenU",
-            slug="default",
+            slug=slug,
             email="meirbek.123@gmail.com",
             logo_image="",
             thumbnail_image="",
@@ -63,7 +66,7 @@ def install(
         email = "meirbek.dev@gmail.com"
         password = generate_password(8)
         user = UserCreate(username="Meirbek", email=EmailStr(email), password=password)
-        install_create_organization_user(user, "default", db_session)
+        install_create_organization_user(user, "openu", db_session)
         print("OpenU user created ✅")
 
         # Show the user how to login
@@ -78,10 +81,13 @@ def install(
         # Create the Organization
         print("Creating your organization...")
         orgname = typer.prompt("What's shall we call your organization?")
+        slug = typer.prompt(
+            "What's the slug for your organization? (e.g. school, acme)"
+        )
         org = OrganizationCreate(
             name=orgname,
             description="OpenU",
-            slug="default",
+            slug=slug,
             email="",
             logo_image="",
             thumbnail_image="",
@@ -95,7 +101,7 @@ def install(
         email = typer.prompt("What's the email for the user?")
         password = typer.prompt("What's the password for the user?", hide_input=True)
         user = UserCreate(username=username, email=EmailStr(email), password=password)
-        install_create_organization_user(user, "default", db_session)
+        install_create_organization_user(user, "openu", db_session)
         print(username + " user created ✅")
 
         # Show the user how to login

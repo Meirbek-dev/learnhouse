@@ -36,6 +36,7 @@ import css from 'highlight.js/lib/languages/css';
 import AICanvaToolkit from './AI/AICanvaToolkit';
 import TableOfContents from './TableOfContents';
 import Table from '@tiptap/extension-table';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface Editor {
   content: string;
@@ -49,6 +50,7 @@ function Canva(props: Editor) {
    * To let the various Custom Extensions know that the editor is not editable, React context (EditorOptionsProvider) will be used instead of props.extension.options.editable.
    */
   const isEditable = true;
+  const isMobile = useIsMobile();
 
   // Code Block Languages for Lowlight
   lowlight.register('html', html);
@@ -154,7 +156,7 @@ function Canva(props: Editor) {
           />
         </AIToolkitWrapper>
         <ContentWrapper>
-          <TableOfContents editor={editor} />
+          {!isMobile && <TableOfContents editor={editor} />}
           <EditorContent editor={editor} />
         </ContentWrapper>
       </CanvaWrapper>
@@ -213,39 +215,40 @@ const ContentWrapper = styled.div`
   .ProseMirror {
     flex: 1;
     padding: 1rem;
+    font-family: var(--font-dm-sans), system-ui, 'Segoe UI', Arial, sans-serif;
+    font-size: 1.1rem;
+    color: #222;
     // disable chrome outline
     caret-color: transparent;
 
     h1 {
-      margin-bottom: 10px;
+      font-size: 32px;
       font-weight: 600;
-      font-size: 30px;
+      margin-bottom: 24px;
     }
 
     h2 {
-      margin-bottom: 10px;
+      font-size: 28px;
       font-weight: 600;
-      font-size: 25px;
+      margin-bottom: 24px;
     }
 
     h3 {
-      margin-bottom: 10px;
+      font-size: 24px;
       font-weight: 600;
-      font-size: 20px;
+      margin-bottom: 24px;
     }
 
     h4 {
-      margin-top: 10px;
-      margin-bottom: 10px;
+      font-size: 20px;
       font-weight: 600;
-      font-size: 18px;
+      margin-bottom: 24px;
     }
 
     h5 {
-      margin-top: 10px;
-      margin-bottom: 10px;
+      font-size: 18px;
       font-weight: 600;
-      font-size: 16px;
+      margin-bottom: 24px;
     }
 
     // Link styling
@@ -335,7 +338,7 @@ const ContentWrapper = styled.div`
     pre {
       padding: 0.75rem 1rem;
       color: #fff;
-      font-family: 'JetBrainsMono', monospace;
+      font-family: var(--font-jetbrains-mono), monospace;
       background: #0d0d0d;
       border-radius: 0.5rem;
 

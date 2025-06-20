@@ -22,7 +22,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html
-      className={`${dmSans.className}`}
+      className={`${dmSans.variable}`}
       lang={locale}
     >
       <head />

@@ -6,6 +6,7 @@ import { nextAuthOptions } from 'app/auth/options';
 import { getServerSession } from 'next-auth/next';
 import ActivityClient from './activity';
 import type { Metadata } from 'next';
+import { JetBrains_Mono } from 'next/font/google';
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>;
@@ -22,6 +23,15 @@ type Session = {
 async function fetchCourseMetadata(courseuuid: string, access_token: string | null | undefined) {
   return await getCourseMetadata(courseuuid, { revalidate: 60, tags: ['courses'] }, access_token || null);
 }
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+  preload: true,
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
+  style: ['normal', 'italic'],
+});
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const { orgslug, courseuuid, activityid } = await props.params;
@@ -77,13 +87,15 @@ const ActivityPage = async (params: any) => {
   ]);
 
   return (
-    <ActivityClient
-      activityid={activityid}
-      courseuuid={courseuuid}
-      orgslug={orgslug}
-      activity={activity}
-      course={course_meta}
-    />
+    <div className={jetbrainsMono.variable}>
+      <ActivityClient
+        activityid={activityid}
+        courseuuid={courseuuid}
+        orgslug={orgslug}
+        activity={activity}
+        course={course_meta}
+      />
+    </div>
   );
 };
 

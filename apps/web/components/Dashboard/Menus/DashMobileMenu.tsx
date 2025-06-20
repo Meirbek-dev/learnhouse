@@ -6,11 +6,13 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 
 function DashMobileMenu() {
   const _org = useOrg() as any;
   const session = useLHSession() as any;
   const t = useTranslations('DashboardMenu');
+  const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
@@ -58,20 +60,22 @@ function DashMobileMenu() {
               <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
             </Link>
           </ToolTip>
-          <ToolTip
-            content={t('tooltips.payments')}
-            slateBlack
-            sideOffset={8}
-            side="top"
-          >
-            <Link
-              href={'/dash/payments/customers'}
-              className="flex flex-col items-center p-2"
+          {arePaymentsEnabled && (
+            <ToolTip
+              content={t('tooltips.payments')}
+              slateBlack
+              sideOffset={8}
+              side="top"
             >
-              <BadgeDollarSign size={20} />
-              <span className="mt-1 text-xs">{t('mobile.payments')}</span>
-            </Link>
-          </ToolTip>
+              <Link
+                href={'/dash/payments/customers'}
+                className="flex flex-col items-center p-2"
+              >
+                <BadgeDollarSign size={20} />
+                <span className="mt-1 text-xs">{t('mobile.payments')}</span>
+              </Link>
+            </ToolTip>
+          )}
           <ToolTip
             content={t('tooltips.users')}
             slateBlack

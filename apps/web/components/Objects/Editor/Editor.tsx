@@ -64,8 +64,18 @@ interface EditorProps {
 
 function Editor(props: EditorProps) {
   const t = useTranslations('DashPage.Editor.Editor');
-  const dispatchAIEditor = useAIEditorDispatch() as any;
-  const aiEditorState = useAIEditor() as AIEditorStateTypes;
+
+  // Add defensive checks for context hooks
+  let dispatchAIEditor: any = null;
+  let aiEditorState: AIEditorStateTypes | null = null;
+
+  try {
+    dispatchAIEditor = useAIEditorDispatch() as any;
+    aiEditorState = useAIEditor() as AIEditorStateTypes;
+  } catch (error) {
+    console.warn('AI Editor context not available:', error);
+  }
+
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
   const [isButtonAvailable, setIsButtonAvailable] = useState(false);
 
@@ -243,7 +253,7 @@ function Editor(props: EditorProps) {
             <EditorUsersSection className="space-x-2">
               <div>
                 <div className="rounded-md text-teal-100 transition-all ease-linear hover:cursor-pointer">
-                  {isButtonAvailable && (
+                  {isButtonAvailable && dispatchAIEditor && aiEditorState && (
                     <div
                       onClick={() =>
                         dispatchAIEditor({
@@ -455,62 +465,56 @@ export const EditorContentWrapper = styled.div`
   // disable chrome outline
 
   .ProseMirror {
-    h1 {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 30px;
-    }
+    font-family: var(--font-dm-sans), system-ui, 'Segoe UI', Arial, sans-serif;
+    font-size: 1.1rem;
+    color: #222;
 
-    h2 {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 25px;
-    }
-
-    h3 {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 20px;
-    }
-
-    h4 {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 18px;
-    }
-
+    h1,
+    h2,
+    h3,
+    h4,
     h5 {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 16px;
+      font-family: inherit;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+      color: #18181b;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 2.25rem;
+    }
+    h2 {
+      font-size: 2rem;
+    }
+    h3 {
+      font-size: 1.5rem;
+    }
+    h4 {
+      font-size: 1.25rem;
+    }
+    h5 {
+      font-size: 1.125rem;
     }
 
-    // Link styling
     a {
-      color: #2563eb;
+      color: #1a0dab;
       text-decoration: underline;
       cursor: pointer;
       transition: color 0.2s ease;
 
-      &:hover {
-        color: #1d4ed8;
-        text-decoration: none;
+      &:hover,
+      &:focus {
+        color: #0b0080;
+        text-decoration: underline;
+        outline: 2px solid #0b0080;
+        outline-offset: 2px;
       }
     }
-    padding-top: 20px;
-    padding-right: 20px;
-    padding-bottom: 20px;
-
-    padding-left: 20px;
+    padding: 20px;
 
     &:focus {
       outline: none !important;
-      outline-style: none !important;
       box-shadow: none !important;
     }
 
@@ -518,7 +522,7 @@ export const EditorContentWrapper = styled.div`
     pre {
       padding: 0.75rem 1rem;
       color: #fff;
-      font-family: 'JetBrainsMono', monospace;
+      font-family: var(--font-jetbrains-mono), monospace;
       background: #0d0d0d;
       border-radius: 0.5rem;
 

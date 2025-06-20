@@ -385,7 +385,6 @@ const UserProfileBuilder = () => {
           <div>
             <h2 className="flex items-center text-xl font-semibold">
               {t('title')}{' '}
-              <div className="ml-2 rounded-full bg-gray-200 px-2 py-1 text-xs text-gray-700">{t('betaBadge')}</div>
             </h2>
             <p className="text-gray-600">{t('description')}</p>
           </div>
