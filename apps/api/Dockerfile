@@ -1,6 +1,6 @@
 # Stage 1: Builder
 # Use a uv image with Python pre-installed.
-FROM ghcr.io/astral-sh/uv:latest-python3.13-alpine AS builder
+FROM ghcr.io/astral-sh/uv:0.7.13-python3.13-alpine AS builder
 
 # Set the working directory
 WORKDIR /app
