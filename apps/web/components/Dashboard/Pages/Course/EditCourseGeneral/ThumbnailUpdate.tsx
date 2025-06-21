@@ -264,7 +264,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
 
     if (activeTab === 'image') {
       return (
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex justify-center gap-2">
           <input
             ref={imageInputRef}
             type="file"
@@ -293,7 +293,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
     }
 
     return (
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex justify-center gap-2">
         <input
           ref={videoInputRef}
           type="file"
@@ -314,7 +314,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
   };
 
   return (
-    <div className="w-full rounded-xl bg-white">
+    <div className="w-full justify-center rounded-xl bg-white">
       {/* Tabs Navigation */}
       {thumbnailType === 'both' && (
         <div className="flex border-b border-gray-100">
@@ -348,7 +348,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           {renderThumbnailPreview()}
           {renderTabContent()}
 
-          <p className="text-sm text-gray-500">
+          <p className="text-center text-sm text-gray-500">
             {activeTab === 'image' && t('supportedFormats')}
             {activeTab === 'video' && t('supportedVideoFormats')}
           </p>
