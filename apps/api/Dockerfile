@@ -1,6 +1,6 @@
 # Stage 1: Builder
 # Use a uv image with Python pre-installed.
-FROM ghcr.io/astral-sh/uv:0.7.13-python3.13-slim AS builder
+FROM ghcr.io/astral-sh/uv:0.7.13-python3.13-bookworm AS builder
 
 # Set the working directory
 WORKDIR /app
