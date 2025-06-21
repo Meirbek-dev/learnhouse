@@ -1,10 +1,10 @@
+import { getAPIUrl } from '@services/config/config';
 import {
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 
 /*
  This file includes only POST, PUT, DELETE requests
@@ -13,7 +13,7 @@ import { getAPIUrl } from '@services/config/config';
 
 export async function getOrgCourses(org_slug: string, next: any, access_token?: any) {
   const result: any = await fetch(
-    `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/20`,
+    `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/10`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
   const res = await errorHandling(result);
@@ -24,7 +24,7 @@ export async function searchOrgCourses(
   org_slug: string,
   query: string,
   page = 1,
-  limit = 20,
+  limit = 10,
   next: any,
   access_token?: any,
 ) {
@@ -72,9 +72,7 @@ export async function getCourseById(course_id: string, next: any, access_token: 
   return res;
 }
 
-export async function updateCourseThumbnail(course_uuid: any, thumbnail: any, access_token: any) {
-  const formData = new FormData();
-  formData.append('thumbnail', thumbnail);
+export async function updateCourseThumbnail(course_uuid: any, formData: FormData, access_token: any) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),

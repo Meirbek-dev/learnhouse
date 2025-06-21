@@ -383,9 +383,7 @@ const UserProfileBuilder = () => {
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-4">
           <div>
-            <h2 className="flex items-center text-xl font-semibold">
-              {t('title')}{' '}
-            </h2>
+            <h2 className="flex items-center text-xl font-semibold">{t('title')} </h2>
             <p className="text-gray-600">{t('description')}</p>
           </div>
           <Button

@@ -680,20 +680,29 @@
         "searchEmojis": "Эмодзи іздеу..."
       },
       "Thumbnail": {
+        "currentThumbnailAlt": "Курстың ағымдағы нобайы",
         "errors": {
-          "fileTooLarge": "Файл өлшемі ({fileSize}МБ) 8МБ шегінен асып кетті",
-          "invalidMimeType": "Жарамсыз файл түрі: {fileType}. JPG немесе PNG қолданыңыз.",
+          "fileTooLarge": "Файл өлшемі ({fileSize}МБ) 8МБ шегінен асады",
+          "invalidMimeType": "Жарамсыз файл түрі: {fileType}. Тек PNG немесе JPG/JPEG кескіндерін жүктеңіз",
+          "invalidVideoMimeType": "Жарамсыз файл түрі: ${file.type}. Тек MP4 немесе WebM бейнелерін жүктеңіз",
           "pleaseSelectAFile": "Файлды таңдаңыз",
-          "unsplashInvalidFormat": "Unsplash-тан жарамсыз кескін пішімі",
+          "unsplashInvalidFormat": "Unsplash-тен жарамсыз кескін пішімі",
           "unsplashProcessFailed": "Галереядан кескінді өңдеу сәтсіз аяқталды",
-          "updateFailed": "Нобайды жаңарту сәтсіз аяқталды"
+          "updateFailed": "Нобайды жаңарту сәтсіз аяқталды",
+          "videoFileTooLarge": "Файл өлшемі ({fileSize}МБ) 100МБ шегінен асады"
         },
         "gallery": "Галерея",
+        "image": "Кескін",
         "imageAltText": "Курс нобайы",
         "pleaseSelectAFile": "Файлды таңдаңыз",
         "supportedFormats": "Қолдау көрсетілетін пішімдер: JPG, PNG (макс. 8МБ)",
-        "uploadImageButton": "Суретті жүктеу",
-        "uploading": "Жүктелуде..."
+        "supportedVideoFormats": "Қолдау көрсетілетін пішімдер: MP4, WebM (макс. 100МБ)",
+        "thumbnailPreviewAlt": "Курс нобайының алдын ала қарауы",
+        "thumbnailUpdatedSuccessfully": "Нобай сәтті жаңартылды",
+        "uploadImageButton": "Кескінді жүктеу",
+        "uploadVideo": "Бейнені жүктеу",
+        "uploading": "Жүктелуде...",
+        "video": "Бейне"
       },
       "UnsplashPicker": {
         "Labels": {
@@ -705,14 +714,14 @@
           "fashion": "Сән",
           "finance": "Қаржы",
           "fitness": "Фитнес",
-          "food": "Тағам",
+          "food": "Тамақ",
           "gaming": "Ойындар",
           "health": "Денсаулық",
           "history": "Тарих",
           "lifestyle": "Өмір салты",
           "music": "Музыка",
           "nature": "Табиғат",
-          "photography": "Фотография",
+          "photography": "Фотосурет",
           "science": "Ғылым",
           "sports": "Спорт",
           "technology": "Технология",
@@ -720,41 +729,46 @@
         },
         "loadMoreButton": "Көбірек жүктеу",
         "loading": "Жүктелуде...",
-        "modalTitle": "Unsplash-тан кескін таңдаңыз",
-        "noResults": "Нәтижелер жоқ",
+        "modalTitle": "Unsplash-тен кескін таңдаңыз",
+        "noResults": "Нәтиже жоқ",
         "searchPlaceholder": "Жоғары ажыратымдылықтағы тегін фотосуреттерді іздеу..."
       },
       "about": {
-        "label": "Курс туралы"
-      },
-      "description": {
         "label": "Сипаттамасы"
+      },
+      "both": "Екеуі де",
+      "description": {
+        "label": "Сипаттама"
       },
       "errors": {
         "allLearningItemsMustHaveText": "Барлық оқу элементтерінде мәтін болуы керек",
-        "atLeastOneLearningItem": "Мәтіні бар кем дегенде бір оқу элементі болуы керек",
-        "invalidFormat": "Жарамсыз формат",
-        "invalidJsonFormat": "Жарамсыз JSON форматы",
-        "maxLength": "{count} таңбадан аспауы керек",
-        "required": "{fieldName} өрісі міндетті",
-        "saveFailed": "Курс туралы жалпы ақпаратты сақтау мүмкін болмады."
+        "atLeastOneLearningItem": "Мәтіні бар кемінде бір оқу элементі болуы керек",
+        "invalidFormat": "Жарамсыз пішім",
+        "invalidJsonFormat": "Жарамсыз JSON пішімі",
+        "maxLength": "{count} таңбадан аз болуы керек",
+        "required": "{fieldName} міндетті",
+        "saveFailed": "Курстың жалпы ақпаратын сақтау сәтсіз аяқталды."
       },
+      "image": "Кескін",
       "learnings": {
-        "label": "Не үйренесіз"
+        "label": "Сіз не үйренесіз"
       },
+      "loading": "Жүктелуде...",
       "name": {
         "label": "Курс атауы"
       },
       "tags": {
         "label": "Курс тегтері",
-        "placeholder": "Қосу үшін Enter басыңыз..."
+        "placeholder": "Қосу үшін Enter пернесін басыңыз..."
       },
       "thumbnail": {
-        "chooseFromGalleryButton": "Галереядан таңдау",
-        "label": "Курс мұқабасы",
-        "uploadImageButton": "Суретті жүктеу",
+        "chooseFromGalleryButton": "Галереядан таңдаңыз",
+        "label": "Курс нобайы",
+        "uploadImageButton": "Кескінді жүктеу",
         "uploading": "Жүктелуде..."
-      }
+      },
+      "thumbnailType": "Нобай түрі",
+      "video": "Бейне"
     },
     "NewActivityModal": {
       "buttonText": "Белсенділік қосу",
@@ -811,6 +825,7 @@
     "current": "Ағымдағы",
     "document": "Құжат",
     "general": "Жалпы",
+    "image": "Сурет",
     "linkTo": "{learningText} сілтеме",
     "markAsComplete": "Аяқталды деп белгілеу",
     "next": "Келесі",

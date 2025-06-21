@@ -680,20 +680,29 @@
         "searchEmojis": "Искать эмодзи..."
       },
       "Thumbnail": {
+        "currentThumbnailAlt": "Текущая миниатюра курса",
         "errors": {
           "fileTooLarge": "Размер файла ({fileSize}МБ) превышает лимит в 8МБ",
-          "invalidMimeType": "Недопустимый тип файла: {fileType}. Пожалуйста, используйте JPG или PNG.",
+          "invalidMimeType": "Недопустимый тип файла: {fileType}. Пожалуйста, загружайте изображения PNG или JPG/JPEG",
+          "invalidVideoMimeType": "Недопустимый тип файла: ${file.type}. Пожалуйста, загружайте видео MP4 или WebM",
           "pleaseSelectAFile": "Пожалуйста, выберите файл",
           "unsplashInvalidFormat": "Недопустимый формат изображения из Unsplash",
           "unsplashProcessFailed": "Не удалось обработать изображение из галереи",
-          "updateFailed": "Не удалось обновить миниатюру"
+          "updateFailed": "Не удалось обновить миниатюру",
+          "videoFileTooLarge": "Размер файла ({fileSize}МБ) превышает лимит в 100МБ"
         },
         "gallery": "Галерея",
+        "image": "Изображение",
         "imageAltText": "Миниатюра курса",
         "pleaseSelectAFile": "Пожалуйста, выберите файл",
         "supportedFormats": "Поддерживаемые форматы: JPG, PNG (макс. 8МБ)",
+        "supportedVideoFormats": "Поддерживаемые форматы: MP4, WebM (макс. 100МБ)",
+        "thumbnailPreviewAlt": "Предварительный просмотр миниатюры курса",
+        "thumbnailUpdatedSuccessfully": "Миниатюра успешно обновлена",
         "uploadImageButton": "Загрузить изображение",
-        "uploading": "Загрузка..."
+        "uploadVideo": "Загрузить видео",
+        "uploading": "Загрузка...",
+        "video": "Видео"
       },
       "UnsplashPicker": {
         "Labels": {
@@ -718,7 +727,7 @@
           "technology": "Технологии",
           "travel": "Путешествия"
         },
-        "loadMoreButton": "Загрузить еще",
+        "loadMoreButton": "Загрузить ещё",
         "loading": "Загрузка...",
         "modalTitle": "Выберите изображение из Unsplash",
         "noResults": "Нет результатов",
@@ -727,6 +736,7 @@
       "about": {
         "label": "О курсе"
       },
+      "both": "Оба",
       "description": {
         "label": "Описание"
       },
@@ -739,9 +749,11 @@
         "required": "Поле {fieldName} обязательно для заполнения",
         "saveFailed": "Не удалось сохранить общую информацию о курсе."
       },
+      "image": "Изображение",
       "learnings": {
-        "label": "Чему вы научитесь"
+        "label": "Что вы узнаете"
       },
+      "loading": "Загрузка...",
       "name": {
         "label": "Название курса"
       },
@@ -751,10 +763,12 @@
       },
       "thumbnail": {
         "chooseFromGalleryButton": "Выбрать из галереи",
-        "label": "Обложка курса",
+        "label": "Миниатюра курса",
         "uploadImageButton": "Загрузить изображение",
         "uploading": "Загрузка..."
-      }
+      },
+      "thumbnailType": "Тип миниатюры",
+      "video": "Видео"
     },
     "NewActivityModal": {
       "buttonText": "Добавить активность",
@@ -811,6 +825,7 @@
     "current": "Текущая",
     "document": "Документ",
     "general": "Общие",
+    "image": "Изображение",
     "linkTo": "Ссылка на {learningText}",
     "markAsComplete": "Отметить как завершенное",
     "next": "Далее",

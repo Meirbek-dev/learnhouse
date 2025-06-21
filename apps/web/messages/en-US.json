@@ -680,20 +680,29 @@
         "searchEmojis": "Search emojis..."
       },
       "Thumbnail": {
+        "currentThumbnailAlt": "Current course thumbnail",
         "errors": {
           "fileTooLarge": "File size ({fileSize}MB) exceeds the 8MB limit",
-          "invalidMimeType": "Invalid file type: {fileType}. Please use JPG or PNG.",
+          "invalidMimeType": "Invalid file type: {fileType}. Please upload only PNG or JPG/JPEG images",
+          "invalidVideoMimeType": "Invalid file type: ${file.type}. Please upload only MP4 or WebM videos",
           "pleaseSelectAFile": "Please select a file",
           "unsplashInvalidFormat": "Invalid image format from Unsplash",
           "unsplashProcessFailed": "Failed to process image from gallery",
-          "updateFailed": "Failed to update thumbnail"
+          "updateFailed": "Failed to update thumbnail",
+          "videoFileTooLarge": "File size ({fileSize}MB) exceeds the 100MB limit"
         },
         "gallery": "Gallery",
+        "image": "Image",
         "imageAltText": "Course thumbnail",
         "pleaseSelectAFile": "Please select a file",
         "supportedFormats": "Supported formats: JPG, PNG (max 8MB)",
+        "supportedVideoFormats": "Supported formats: MP4, WebM (max 100MB)",
+        "thumbnailPreviewAlt": "Course thumbnail preview",
+        "thumbnailUpdatedSuccessfully": "Thumbnail updated successfully",
         "uploadImageButton": "Upload Image",
-        "uploading": "Uploading..."
+        "uploadVideo": "Upload Video",
+        "uploading": "Uploading...",
+        "video": "Video"
       },
       "UnsplashPicker": {
         "Labels": {
@@ -727,6 +736,7 @@
       "about": {
         "label": "About"
       },
+      "both": "Both",
       "description": {
         "label": "Description"
       },
@@ -739,9 +749,11 @@
         "required": "{fieldName} is required",
         "saveFailed": "Failed to save course general info."
       },
+      "image": "Image",
       "learnings": {
         "label": "What you will learn"
       },
+      "loading": "Loading...",
       "name": {
         "label": "Course Name"
       },
@@ -754,7 +766,9 @@
         "label": "Course Thumbnail",
         "uploadImageButton": "Upload Image",
         "uploading": "Uploading..."
-      }
+      },
+      "thumbnailType": "Thumbnail Type",
+      "video": "Video"
     },
     "NewActivityModal": {
       "buttonText": "Add Activity",
@@ -811,6 +825,7 @@
     "current": "Current",
     "document": "Document",
     "general": "General",
+    "image": "Image",
     "linkTo": "Link to {learningText}",
     "markAsComplete": "Mark as complete",
     "next": "Next",

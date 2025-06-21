@@ -1,37 +1,54 @@
-'use client';
-import { ArrowBigUpDash, UploadCloud, Image as ImageIcon } from 'lucide-react';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { updateCourseThumbnail } from '@services/courses/courses';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import UnsplashImagePicker from './UnsplashImagePicker';
 import { getAPIUrl } from '@services/config/config';
+import { updateCourseThumbnail } from '@services/courses/courses';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { ArrowBigUpDash, UploadCloud, Image as ImageIcon, Video } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import type React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import type React from 'react';
 import { mutate } from 'swr';
+import UnsplashImagePicker from './UnsplashImagePicker';
+import toast from 'react-hot-toast';
 
-const MAX_FILE_SIZE = 8_000_000; // 8MB
-const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
+const MAX_FILE_SIZE = 8_000_000; // 8MB for images
+const MAX_VIDEO_FILE_SIZE = 100_000_000; // 100MB for videos
+const VALID_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
+const VALID_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm'] as const;
 
-type ValidMimeType = (typeof VALID_MIME_TYPES)[number];
+type ValidImageMimeType = (typeof VALID_IMAGE_MIME_TYPES)[number];
+type ValidVideoMimeType = (typeof VALID_VIDEO_MIME_TYPES)[number];
 
-function ThumbnailUpdate() {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+type ThumbnailUpdateProps = {
+  thumbnailType: 'image' | 'video' | 'both';
+};
+
+type TabType = 'image' | 'video';
+
+function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const course = useCourse() as any;
   const session = useLHSession() as any;
   const org = useOrg() as any;
-  const [localThumbnail, setLocalThumbnail] = useState<{
-    file: File;
-    url: string;
-  } | null>(null);
+  const [localThumbnail, setLocalThumbnail] = useState<{ file: File; url: string; type: 'image' | 'video' } | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [showError, setShowError] = useState(false);
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const t = useTranslations('CourseEdit.General.Thumbnail');
+  const [activeTab, setActiveTab] = useState<TabType>('image');
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
+
+  // Set initial active tab based on thumbnailType
+  useEffect(() => {
+    if (thumbnailType === 'video') {
+      setActiveTab('video');
+    } else {
+      setActiveTab('image');
+    }
+  }, [thumbnailType]);
 
   // Cleanup blob URLs when component unmounts or when thumbnail changes
   useEffect(() => {
@@ -42,46 +59,63 @@ function ThumbnailUpdate() {
     };
   }, [localThumbnail]);
 
-  const validateFile = (file: File): boolean => {
-    if (!VALID_MIME_TYPES.includes(file.type as ValidMimeType)) {
-      setError(t('errors.invalidMimeType', { fileType: file.type }));
-      setShowError(true);
-      return false;
+  const showError = (message: string) => {
+    toast.error(message, {
+      duration: 3000,
+      position: 'top-center',
+    });
+  };
+
+  const validateFile = (file: File, type: 'image' | 'video'): boolean => {
+    if (type === 'image') {
+      if (!VALID_IMAGE_MIME_TYPES.includes(file.type as ValidImageMimeType)) {
+        showError(t('errors.invalidMimeType', { fileType: file.type }));
+        return false;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        showError(
+          t('errors.fileTooLarge', {
+            fileSize: (file.size / 1024 / 1024).toFixed(2),
+          }),
+        );
+        return false;
+      }
+    } else {
+      if (!VALID_VIDEO_MIME_TYPES.includes(file.type as ValidVideoMimeType)) {
+        showError(t('errors.invalidVideoMimeType', { fileType: file.type }));
+        return false;
+      }
+
+      if (file.size > MAX_VIDEO_FILE_SIZE) {
+        showError(
+          t('errors.videoFileTooLarge', {
+            fileSize: (file.size / 1024 / 1024).toFixed(2),
+          }),
+        );
+        return false;
+      }
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      setError(
-        t('errors.fileTooLarge', {
-          fileSize: (file.size / 1024 / 1024).toFixed(2),
-        }),
-      );
-      setShowError(true);
-      return false;
-    }
-
-    setShowError(false);
     return true;
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setError('');
-    setShowError(false);
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
     const file = event.target.files?.[0];
 
     if (!file) {
-      setError(t('errors.pleaseSelectAFile'));
-      setShowError(true);
+      showError(t('errors.pleaseSelectAFile'));
       return;
     }
 
-    if (!validateFile(file)) {
+    if (!validateFile(file, type)) {
       event.target.value = '';
       return;
     }
 
     const blobUrl = URL.createObjectURL(file);
-    setLocalThumbnail({ file, url: blobUrl });
-    await updateThumbnail(file);
+    setLocalThumbnail({ file, url: blobUrl, type });
+    await updateThumbnail(file, type);
   };
 
   const handleUnsplashSelect = async (imageUrl: string) => {
@@ -90,33 +124,35 @@ function ThumbnailUpdate() {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
 
-      if (!VALID_MIME_TYPES.includes(blob.type as ValidMimeType)) {
+      if (!VALID_IMAGE_MIME_TYPES.includes(blob.type as ValidImageMimeType)) {
         throw new Error(t('errors.unsplashInvalidFormat'));
       }
 
-      const file = new File([blob], `unsplash_${Date.now()}.jpg`, {
-        type: blob.type,
-      });
+      const file = new File([blob], `unsplash_${Date.now()}.jpg`, { type: blob.type });
 
-      if (!validateFile(file)) {
+      if (!validateFile(file, 'image')) {
         return;
       }
 
       const blobUrl = URL.createObjectURL(file);
-      setLocalThumbnail({ file, url: blobUrl });
-      await updateThumbnail(file);
-    } catch (_err) {
-      setError(t('errors.unsplashProcessFailed'));
+      setLocalThumbnail({ file, url: blobUrl, type: 'image' });
+      await updateThumbnail(file, 'image');
+    } catch (err) {
+      showError(t('errors.unsplashProcessFailed'));
       setIsLoading(false);
     }
   };
 
-  const updateThumbnail = async (file: File) => {
+  const updateThumbnail = async (file: File, type: 'image' | 'video') => {
     setIsLoading(true);
     try {
+      const formData = new FormData();
+      formData.append('thumbnail', file);
+      formData.append('thumbnail_type', type);
+
       const res = await updateCourseThumbnail(
         course.courseStructure.course_uuid,
-        file,
+        formData,
         session.data?.tokens?.access_token,
       );
 
@@ -126,100 +162,197 @@ function ThumbnailUpdate() {
       await new Promise((r) => setTimeout(r, 1500));
 
       if (res.success === false) {
-        setError(res.HTTPmessage);
-        setShowError(true);
+        showError(res.HTTPmessage);
       } else {
-        setError('');
-        setShowError(false);
+        setLocalThumbnail(null);
+        toast.success(t('thumbnailUpdatedSuccessfully'), {
+          duration: 3000,
+          position: 'top-center',
+        });
       }
     } catch (err) {
-      setError(t('errors.updateFailed'));
-      setShowError(true);
+      showError(t('errors.updateFailed'));
     } finally {
       setIsLoading(false);
     }
   };
 
+  const getThumbnailUrl = (type: 'image' | 'video') => {
+    if (type === 'image') {
+      return course.courseStructure.thumbnail_image
+        ? getCourseThumbnailMediaDirectory(
+            org?.org_uuid,
+            course.courseStructure.course_uuid,
+            course.courseStructure.thumbnail_image,
+          )
+        : '/empty_thumbnail.png';
+    }
+    return course.courseStructure.thumbnail_video
+      ? getCourseThumbnailMediaDirectory(
+          org?.org_uuid,
+          course.courseStructure.course_uuid,
+          course.courseStructure.thumbnail_video,
+        )
+      : undefined;
+  };
+
+  const renderThumbnailPreview = () => {
+    if (localThumbnail) {
+      if (localThumbnail.type === 'video') {
+        return (
+          <div className="mx-auto max-w-[480px]">
+            <video
+              src={localThumbnail.url}
+              className={`${isLoading ? 'animate-pulse' : ''} aspect-video w-full rounded-lg border border-gray-200 object-cover`}
+              controls
+            />
+          </div>
+        );
+      }
+      return (
+        <div className="mx-auto max-w-[480px]">
+          <img
+            src={localThumbnail.url}
+            alt={t('thumbnailPreviewAlt')}
+            className={`${isLoading ? 'animate-pulse' : ''} aspect-video w-full rounded-lg border border-gray-200 object-cover`}
+          />
+        </div>
+      );
+    }
+
+    const currentThumbnailUrl = getThumbnailUrl(activeTab);
+    if (activeTab === 'video' && currentThumbnailUrl) {
+      return (
+        <div className="mx-auto max-w-[480px]">
+          <video
+            src={currentThumbnailUrl}
+            className="aspect-video w-full rounded-lg border border-gray-200 object-cover"
+            controls
+          />
+        </div>
+      );
+    }
+    if (currentThumbnailUrl) {
+      return (
+        <div className="mx-auto max-w-[480px]">
+          <img
+            src={currentThumbnailUrl}
+            alt={t('currentThumbnailAlt')}
+            className="aspect-video w-full rounded-lg border border-gray-200 object-cover"
+          />
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const renderTabContent = () => {
+    if (isLoading) {
+      return (
+        <div className="mt-4 flex items-center justify-center">
+          <div className="flex items-center rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-800">
+            <ArrowBigUpDash
+              size={16}
+              className="mr-2 animate-bounce"
+            />
+            {t('uploading')}
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'image') {
+      return (
+        <div className="mt-4 flex gap-2">
+          <input
+            ref={imageInputRef}
+            type="file"
+            className="hidden"
+            accept=".jpg,.jpeg,.png"
+            onChange={(e) => handleFileChange(e, 'image')}
+          />
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            onClick={() => imageInputRef.current?.click()}
+          >
+            <UploadCloud size={16} />
+            {t('uploadImageButton')}
+          </button>
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            onClick={() => setShowUnsplashPicker(true)}
+          >
+            <ImageIcon size={16} />
+            {t('gallery')}
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mt-4 flex gap-2">
+        <input
+          ref={videoInputRef}
+          type="file"
+          className="hidden"
+          accept=".mp4,.webm"
+          onChange={(e) => handleFileChange(e, 'video')}
+        />
+        <button
+          type="button"
+          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          onClick={() => videoInputRef.current?.click()}
+        >
+          <Video size={16} />
+          {t('uploadVideo')}
+        </button>
+      </div>
+    );
+  };
+
   return (
-    <div className="light-shadow relative h-[250px] w-auto rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200">
-      {showError && error && (
-        <div className="absolute left-0 right-0 top-4 z-50 mx-auto w-[90%] rounded-lg border border-red-200 bg-red-50 p-3 text-red-800 shadow-lg transition-all">
-          <div className="text-center text-sm font-medium">{error}</div>
+    <div className="w-full rounded-xl bg-white">
+      {/* Tabs Navigation */}
+      {thumbnailType === 'both' && (
+        <div className="flex border-b border-gray-100">
+          <button
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'image'
+                ? 'border-b-2 border-blue-600 bg-blue-50/50 text-blue-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+            onClick={() => setActiveTab('image')}
+          >
+            <ImageIcon size={16} />
+            {t('image')}
+          </button>
+          <button
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'video'
+                ? 'border-b-2 border-blue-600 bg-blue-50/50 text-blue-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+            onClick={() => setActiveTab('video')}
+          >
+            <Video size={16} />
+            {t('video')}
+          </button>
         </div>
       )}
-      <div className="flex h-full flex-col items-center justify-center space-y-4 p-6">
-        <div className="flex flex-col items-center space-y-4">
-          {localThumbnail ? (
-            <img
-              src={localThumbnail.url}
-              className={`${
-                isLoading ? 'animate-pulse' : ''
-              } h-[140px] w-[280px] rounded-lg border border-gray-200 object-cover shadow-sm`}
-              alt={t('imageAltText')}
-            />
-          ) : (
-            <img
-              src={`${
-                course.courseStructure.thumbnail_image
-                  ? getCourseThumbnailMediaDirectory(
-                      org?.org_uuid,
-                      course.courseStructure.course_uuid,
-                      course.courseStructure.thumbnail_image,
-                    )
-                  : '/empty_thumbnail.png'
-              }`}
-              className="h-[140px] w-[280px] rounded-lg border border-gray-200 bg-gray-50 object-cover shadow-sm"
-              alt={t('imageAltText')}
-            />
-          )}
 
-          {!isLoading && (
-            <div className="flex space-x-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                accept=".jpg,.jpeg,.png"
-                onChange={handleFileChange}
-              />
-              <button
-                type="button"
-                className="flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-100"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <UploadCloud
-                  size={16}
-                  className="mr-2"
-                />
-                {t('uploadImageButton')}
-              </button>
-              <button
-                className="flex items-center rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-100"
-                onClick={() => setShowUnsplashPicker(true)}
-              >
-                <ImageIcon
-                  size={16}
-                  className="mr-2"
-                />
-                {t('gallery')}
-              </button>
-            </div>
-          )}
+      <div className="p-6">
+        <div className="space-y-6">
+          {renderThumbnailPreview()}
+          {renderTabContent()}
+
+          <p className="text-sm text-gray-500">
+            {activeTab === 'image' && t('supportedFormats')}
+            {activeTab === 'video' && t('supportedVideoFormats')}
+          </p>
         </div>
-
-        {isLoading && (
-          <div className="flex items-center justify-center">
-            <div className="flex items-center rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-800">
-              <ArrowBigUpDash
-                size={16}
-                className="mr-2 animate-bounce"
-              />
-              {t('uploading')}
-            </div>
-          </div>
-        )}
-
-        <p className="text-xs text-gray-500">{t('supportedFormats')}</p>
       </div>
 
       {showUnsplashPicker && (

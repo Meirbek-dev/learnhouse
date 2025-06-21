@@ -14,6 +14,7 @@ import * as Form from '@radix-ui/react-form';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 
 type EditCourseStructureProps = {
   orgslug: string;
@@ -27,6 +28,7 @@ interface MyCourseFormValues {
   learnings: string;
   tags: string;
   public: boolean;
+  thumbnail_type: 'image' | 'video' | 'both';
 }
 
 const validate = (values: MyCourseFormValues, t: (key: string, values?: any) => string) => {
@@ -71,116 +73,141 @@ const validate = (values: MyCourseFormValues, t: (key: string, values?: any) => 
   return errors;
 };
 
-const initializeLearnings = (learningsInput: any): string => {
-  if (typeof learningsInput === 'string') {
-    try {
-      const parsed = JSON.parse(learningsInput);
-      if (Array.isArray(parsed)) {
-        return learningsInput;
-      }
-    } catch {
-      if (learningsInput.trim() !== '') {
-        return JSON.stringify([
-          // Use a stable placeholder ID for the item created from a simple string
-          {
-            id: 'init-learn-item-from-string',
-            text: learningsInput,
-            emoji: '📝',
-          },
-        ]);
-      }
-    }
+// Initialize learnings as a JSON array if it's not already
+const initializeLearnings = (learnings: any) => {
+  if (!learnings) {
+    return JSON.stringify([{ id: 'initial-learning-item', text: '', emoji: '📝' }]);
   }
-  // Use a stable placeholder ID for the default new learning item
-  return JSON.stringify([{ id: 'init-new-learn-item', text: '', emoji: '📝' }]);
-};
 
-function EditCourseGeneral(_props: EditCourseStructureProps) {
+  try {
+    // Check if it's already a valid JSON array
+    const parsed = JSON.parse(learnings);
+    if (Array.isArray(parsed)) {
+      return learnings;
+    }
+
+    // If it's a string but not a JSON array, convert it to a learning item
+    if (typeof learnings === 'string') {
+      return JSON.stringify([
+        {
+          id: 'initial-learning-item',
+          text: learnings,
+          emoji: '📝',
+        },
+      ]);
+    }
+
+    // Default empty array
+    return JSON.stringify([{ id: 'init-learn-item', text: '', emoji: '📝' }]);
+  } catch (e) {
+    // If it's not valid JSON, convert the string to a learning item
+    if (typeof learnings === 'string') {
+      return JSON.stringify([
+        {
+          id: 'init-learn-item-from-string',
+          text: learnings,
+          emoji: '📝',
+        },
+      ]);
+    }
+
+    // Default empty array
+    return JSON.stringify([{ id: 'init-new-learn-item', text: '', emoji: '📝' }]);
+  }
+};
+function EditCourseGeneral(props: EditCourseStructureProps) {
   const [error, setError] = useState('');
   const course = useCourse();
-  const dispatchCourse = useCourseDispatch();
-  if (!(course && dispatchCourse)) throw new Error('Course context not found');
-  const { isLoading, courseStructure } = course;
+  const dispatchCourse = useCourseDispatch() as any;
+  const { isLoading, courseStructure } = course as any;
   const t = useTranslations('CourseEdit.General');
+  const thumbnailType = courseStructure?.thumbnail_type || 'image';
 
   const formik = useFormik<MyCourseFormValues>({
     initialValues: {
       name: courseStructure?.name || '',
       description: courseStructure?.description || '',
       about: courseStructure?.about || '',
-      learnings: initializeLearnings(courseStructure?.learnings),
+      learnings: initializeLearnings(courseStructure?.learnings || ''),
       tags: courseStructure?.tags || '',
       public: courseStructure?.public,
+      thumbnail_type: thumbnailType,
     },
     validate: (values) => validate(values, t),
-    onSubmit: async () => {
+    onSubmit: async (values) => {
       try {
-        dispatchCourse?.({ type: 'setIsSaved' });
-      } catch {
+        dispatchCourse({ type: 'setIsSaved' });
+      } catch (e) {
         setError(t('errors.saveFailed'));
       }
     },
     enableReinitialize: true,
-  });
+  }) as any;
 
-  const handleLearningsChange = useCallback(
-    (newLearningsValue: string) => {
-      formik.setFieldValue('learnings', newLearningsValue);
-    },
-    [formik],
-  );
+  // Reset form when courseStructure changes
+  useEffect(() => {
+    if (courseStructure && !isLoading) {
+      const newValues = {
+        name: courseStructure?.name || '',
+        description: courseStructure?.description || '',
+        about: courseStructure?.about || '',
+        learnings: initializeLearnings(courseStructure?.learnings || ''),
+        tags: courseStructure?.tags || '',
+        public: courseStructure?.public,
+        thumbnail_type: thumbnailType,
+      };
+      formik.resetForm({ values: newValues });
+    }
+  }, [courseStructure, isLoading]);
 
   useEffect(() => {
-    if (!isLoading && courseStructure && dispatchCourse) {
-      const { values, initialValues } = formik;
-      const learningsChanged = values.learnings !== initialValues.learnings;
-      const otherChanged = (Object.keys(values) as Array<keyof MyCourseFormValues>)
-        .filter((k) => k !== 'learnings' && k !== 'public')
-        .some((key) => values[key] !== initialValues[key]);
+    if (!isLoading) {
+      const formikValues = formik.values as any;
+      const initialValues = formik.initialValues as any;
+      const valuesChanged = Object.keys(formikValues).some((key) => formikValues[key] !== initialValues[key]);
 
-      if (learningsChanged || otherChanged) {
+      if (valuesChanged) {
         dispatchCourse({ type: 'setIsNotSaved' });
-        dispatchCourse({
-          type: 'setCourseStructure',
-          payload: {
-            ...courseStructure,
-            ...values,
-          },
-        });
+        const updatedCourse = {
+          ...courseStructure,
+          ...formikValues,
+        };
+        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
       }
     }
-  }, [formik.values, isLoading, courseStructure, dispatchCourse]);
+  }, [formik.values, isLoading]);
 
-  // Early return after all hooks have been called
-  if (!dispatchCourse) {
+  if (isLoading || !courseStructure) {
     return <div>{t('loading')}</div>;
   }
 
   return (
-    <div>
+    <div className="h-full">
       <div className="h-6" />
-      <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-6 py-5">
-        {courseStructure && (
-          <div className="editcourse-form">
+      <div className="px-10 pb-10">
+        <div className="shadow-xs rounded-xl bg-white">
+          <FormLayout
+            onSubmit={formik.handleSubmit}
+            className="p-6"
+          >
             {error && (
-              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
+              <div className="shadow-xs mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
                 <AlertTriangle size={18} />
                 <div className="text-sm font-bold">{error}</div>
               </div>
             )}
-            <FormLayout onSubmit={formik.handleSubmit}>
+
+            <div className="space-y-6">
               <FormField name="name">
                 <FormLabelAndMessage
                   label={t('name.label')}
-                  message={formik.touched.name ? formik.errors.name : undefined}
+                  message={formik.errors.name}
                 />
                 <Form.Control asChild>
                   <Input
                     style={{ backgroundColor: 'white' }}
                     onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
                     value={formik.values.name}
-                    name="name"
                     type="text"
                     required
                   />
@@ -190,15 +217,13 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
               <FormField name="description">
                 <FormLabelAndMessage
                   label={t('description.label')}
-                  message={formik.touched.description ? formik.errors.description : undefined}
+                  message={formik.errors.description}
                 />
                 <Form.Control asChild>
                   <Input
                     style={{ backgroundColor: 'white' }}
                     onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
                     value={formik.values.description}
-                    name="description"
                     type="text"
                     required
                   />
@@ -208,19 +233,14 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
               <FormField name="about">
                 <FormLabelAndMessage
                   label={t('about.label')}
-                  message={formik.touched.about ? formik.errors.about : undefined}
+                  message={formik.errors.about}
                 />
                 <Form.Control asChild>
                   <Textarea
-                    style={{
-                      backgroundColor: 'white',
-                      height: '200px',
-                      minHeight: '200px',
-                    }}
+                    style={{ backgroundColor: 'white', height: '200px', minHeight: '200px' }}
                     onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
                     value={formik.values.about}
-                    name="about"
+                    required
                   />
                 </Form.Control>
               </FormField>
@@ -228,34 +248,70 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
               <FormField name="learnings">
                 <FormLabelAndMessage
                   label={t('learnings.label')}
-                  message={formik.touched.learnings ? formik.errors.learnings : undefined}
+                  message={formik.errors.learnings}
                 />
-                <LearningItemsList
-                  value={formik.values.learnings}
-                  onChange={handleLearningsChange}
-                  error={formik.errors.learnings}
-                />
+                <Form.Control asChild>
+                  <LearningItemsList
+                    value={formik.values.learnings}
+                    onChange={(value) => formik.setFieldValue('learnings', value)}
+                    error={formik.errors.learnings}
+                  />
+                </Form.Control>
               </FormField>
 
               <FormField name="tags">
                 <FormLabelAndMessage
                   label={t('tags.label')}
-                  message={formik.touched.tags ? formik.errors.tags : undefined}
+                  message={formik.errors.tags}
                 />
-                <FormTagInput
-                  placeholder={t('tags.placeholder')}
-                  onChange={(value) => formik.setFieldValue('tags', value)}
-                  value={formik.values.tags}
-                />
+                <Form.Control asChild>
+                  <FormTagInput
+                    placeholder={t('tags.placeholder')}
+                    onChange={(value) => formik.setFieldValue('tags', value)}
+                    value={formik.values.tags}
+                  />
+                </Form.Control>
+              </FormField>
+
+              <FormField name="thumbnail_type">
+                <FormLabelAndMessage label={t('thumbnailType')} />
+                <Form.Control asChild>
+                  <Select
+                    value={formik.values.thumbnail_type}
+                    onValueChange={(value) => {
+                      if (!value) return;
+                      formik.setFieldValue('thumbnail_type', value);
+                    }}
+                  >
+                    <SelectTrigger className="w-full bg-white">
+                      <SelectValue>
+                        {formik.values.thumbnail_type === 'image'
+                          ? t('image')
+                          : formik.values.thumbnail_type === 'video'
+                            ? t('video')
+                            : formik.values.thumbnail_type === 'both'
+                              ? t('both')
+                              : t('image')}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="image">{t('image')}</SelectItem>
+                      <SelectItem value="video">{t('video')}</SelectItem>
+                      <SelectItem value="both">{t('both')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Form.Control>
               </FormField>
 
               <FormField name="thumbnail">
                 <FormLabelAndMessage label={t('thumbnail.label')} />
-                <ThumbnailUpdate />
+                <Form.Control asChild>
+                  <ThumbnailUpdate thumbnailType={formik.values.thumbnail_type} />
+                </Form.Control>
               </FormField>
-            </FormLayout>
-          </div>
-        )}
+            </div>
+          </FormLayout>
+        </div>
       </div>
     </div>
   );
