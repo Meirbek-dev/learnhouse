@@ -3,7 +3,7 @@ name: Web Lint
 on:
   push:
     branches:
-      - dev
+      - openu
     paths:
       - 'apps/web/**'
   pull_request:

@@ -2,7 +2,7 @@ name: API Lint
 on:
   push:
     branches:
-      - dev
+      - openu
     paths:
       - 'apps/api/**'
   pull_request:
