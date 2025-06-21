@@ -1,0 +1,96 @@
+# Backend Configuration
+# This file configures your backend services on Render/Railway for use with Vercel frontend
+
+services:
+  # 1. Redis Cache
+  - type: redis
+    name: openu-redis-backend
+    plan: free
+    ipAllowList: []
+
+  # 2. Python Backend API
+  - type: web
+    name: openu-api-backend
+    runtime: docker
+    repo: https://github.com/Meirbek-dev/learnhouse
+    rootDir: ./apps/api
+    dockerfilePath: ./Dockerfile
+    envVars:
+      # Database and Redis connections
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: openu-redis-backend
+          property: connectionString
+      - key: DATABASE_URL
+        fromDatabase:
+          name: openu-db-backend
+          property: connectionString
+
+      # General configuration
+      - key: OPENU_SITE_NAME
+        value: "OpenU"
+      - key: OPENU_SITE_DESCRIPTION
+        value: "Платформа обучения OpenU"
+      - key: OPENU_CONTACT_EMAIL
+        value: contact@openu.tou.edu.kz
+      - key: OPENU_DEVELOPMENT_MODE
+        value: "False"
+      - key: OPENU_INSTALL_MODE
+        value: "False"
+
+      # Security
+      - key: OPENU_AUTH_JWT_SECRET_KEY
+        value: your-production-jwt-secret-here
+
+      # Hosting configuration
+      - key: OPENU_DOMAIN
+        value: openu-api-backend.onrender.com
+      - key: OPENU_SSL
+        value: "True"
+      - key: OPENU_PORT
+        value: "10000"
+      - key: OPENU_USE_DEFAULT_ORG
+        value: "False"
+      - key: OPENU_ALLOWED_ORIGINS
+        value: "https://*.vercel.app,https://openu.vercel.app,https://openu-api-backend.onrender.com"
+      - key: OPENU_COOKIE_DOMAIN
+        value: ".onrender.com"
+      - key: OPENU_ALLOWED_REGEXP
+        value: "\\b((?:https?://)[^\\s/$.?#].[^\\s]*)\\b"
+      - key: OPENU_SELF_HOSTED
+        value: "True"
+
+      # ChromaDB
+      - key: CHROMA_HOST
+        value: openu-chroma-backend
+      - key: CHROMA_PORT
+        value: "8000"
+      - key: OPENU_CHROMADB_SEPARATE
+        value: "True"
+      - key: OPENU_CHROMADB_HOST
+        value: openu-chroma-backend
+
+      # Content delivery
+      - key: OPENU_CONTENT_DELIVERY_TYPE
+        value: filesystem
+
+      # AI Configuration
+      - key: OPENU_OPENAI_API_KEY
+        value: your-production-openai-api-key
+      - key: OPENU_GOOGLE_API_KEY
+        value: your-production-google-api-key
+      - key: OPENU_IS_AI_ENABLED
+        value: "True"
+
+      # Email configuration
+      - key: OPENU_RESEND_API_KEY
+        value: your-production-resend-api-key
+      - key: OPENU_SYSTEM_EMAIL_ADDRESS
+        value: noreply@your-domain.com
+
+databases:
+  # PostgreSQL Database
+  - name: openu-db-backend
+    databaseName: openu
+    user: openu
