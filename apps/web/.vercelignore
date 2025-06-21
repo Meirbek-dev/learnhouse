@@ -1,0 +1,15 @@
+# Files to exclude from Vercel deployment
+node_modules/
+.next/
+.env*
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+/apps/api/
+/extra/
+Dockerfile
+docker-compose.yml
+render.yaml
+render-backend.yaml

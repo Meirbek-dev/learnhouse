@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     reactCompiler: false,
+    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },
   compiler: {
     styledComponents: false,
@@ -23,6 +24,20 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   devIndicators: false,
   output: 'standalone',
+  // Vercel-specific optimizations
+  images: {
+    domains: ['localhost', 'openu-api-backend.onrender.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.onrender.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.vercel.app',
+      },
+    ],
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();
