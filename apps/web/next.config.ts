@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   // Vercel-specific optimizations
   images: {
-    domains: ['localhost', 'openu-api-backend.onrender.com'],
+    domains: ['localhost', 'openu.onrender.com'],
     remotePatterns: [
       {
         protocol: 'https',
