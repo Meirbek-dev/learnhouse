@@ -69,12 +69,8 @@ function Editor(props: EditorProps) {
   let dispatchAIEditor: any = null;
   let aiEditorState: AIEditorStateTypes | null = null;
 
-  try {
-    dispatchAIEditor = useAIEditorDispatch() as any;
-    aiEditorState = useAIEditor() as AIEditorStateTypes;
-  } catch (error) {
-    console.warn('AI Editor context not available:', error);
-  }
+  dispatchAIEditor = useAIEditorDispatch() as any;
+  aiEditorState = useAIEditor() as AIEditorStateTypes;
 
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
   const [isButtonAvailable, setIsButtonAvailable] = useState(false);
