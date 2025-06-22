@@ -421,7 +421,7 @@ def install_create_organization_user(
         )
 
     # Exclude unset values
-    user_data = user.dict(exclude_unset=True)
+    user_data = user.model_dump(exclude_unset=True)
     for key, value in user_data.items():
         setattr(user, key, value)
 

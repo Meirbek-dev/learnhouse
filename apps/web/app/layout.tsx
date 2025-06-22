@@ -11,7 +11,7 @@ const dmSans = DM_Sans({
   variable: '--font-dm-sans',
   display: 'swap',
   preload: true,
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900', '1000'],
   style: ['normal', 'italic'],
 });
 

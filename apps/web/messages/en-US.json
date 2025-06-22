@@ -1959,6 +1959,7 @@
           "saveButton": "Save Changes",
           "savingButton": "Saving...",
           "xPlaceholder": "X profile URL",
+          "tiktokPlaceholder": "TikTok profile URL",
           "youtubePlaceholder": "YouTube channel URL"
         },
         "customLinksTitle": "Custom Links",

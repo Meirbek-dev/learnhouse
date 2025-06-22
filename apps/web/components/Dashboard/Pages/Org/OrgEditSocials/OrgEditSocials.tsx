@@ -1,5 +1,5 @@
 'use client';
-import { SiX, SiFacebook, SiInstagram, SiYoutube } from '@icons-pack/react-simple-icons';
+import { SiX, SiFacebook, SiInstagram, SiYoutube, SiTiktok } from '@icons-pack/react-simple-icons';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
@@ -21,6 +21,7 @@ interface OrganizationValues {
     instagram?: string;
     linkedin?: string;
     youtube?: string;
+    tiktok?: string;
   };
   links: {
     [key: string]: string;
@@ -77,18 +78,18 @@ export default function OrgEditSocials() {
                     <div className="nice-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
                       <div className="grid gap-3">
                         <div className="flex items-center space-x-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#1DA1F2]/10">
-                            <SiX
+                          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#E4405F]/10">
+                            <SiInstagram
                               size={16}
-                              color="#1DA1F2"
+                              color="#E4405F"
                             />
                           </div>
                           <Input
-                            id="socials.twitter"
-                            name="socials.twitter"
-                            value={values.socials.twitter || ''}
+                            id="socials.instagram"
+                            name="socials.instagram"
+                            value={values.socials.instagram || ''}
                             onChange={handleChange}
-                            placeholder={t('Form.xPlaceholder')}
+                            placeholder={t('Form.instagramPlaceholder')}
                             className="h-9 bg-white"
                           />
                         </div>
@@ -111,23 +112,6 @@ export default function OrgEditSocials() {
                         </div>
 
                         <div className="flex items-center space-x-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#E4405F]/10">
-                            <SiInstagram
-                              size={16}
-                              color="#E4405F"
-                            />
-                          </div>
-                          <Input
-                            id="socials.instagram"
-                            name="socials.instagram"
-                            value={values.socials.instagram || ''}
-                            onChange={handleChange}
-                            placeholder={t('Form.instagramPlaceholder')}
-                            className="h-9 bg-white"
-                          />
-                        </div>
-
-                        <div className="flex items-center space-x-3">
                           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#FF0000]/10">
                             <SiYoutube
                               size={16}
@@ -140,6 +124,34 @@ export default function OrgEditSocials() {
                             value={values.socials.youtube || ''}
                             onChange={handleChange}
                             placeholder={t('Form.youtubePlaceholder')}
+                            className="h-9 bg-white"
+                          />
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#82878a]/10">
+                            <SiTiktok size={16} />
+                          </div>
+                          <Input
+                            id="socials.tiktok"
+                            name="socials.tiktok"
+                            value={values.socials.tiktok || ''}
+                            onChange={handleChange}
+                            placeholder={t('Form.tiktokPlaceholder')}
+                            className="h-9 bg-white"
+                          />
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#707577]/10">
+                            <SiX size={16} />
+                          </div>
+                          <Input
+                            id="socials.twitter"
+                            name="socials.twitter"
+                            value={values.socials.twitter || ''}
+                            onChange={handleChange}
+                            placeholder={t('Form.xPlaceholder')}
                             className="h-9 bg-white"
                           />
                         </div>

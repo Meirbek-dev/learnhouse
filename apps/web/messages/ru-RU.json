@@ -168,7 +168,7 @@
     "Forgot": {
       "checkEmail": "Проверьте свою электронную почту на наличие ссылки для сброса пароля",
       "email": "Электронная почта",
-      "emailPlaceholder": "Введите вашу электронную почту",
+      "emailPlaceholder": "Введите ваш email",
       "enterEmailMessage": "Введите ваш email, чтобы получить ссылку для сброса пароля",
       "invalidEmail": "Неверный адрес электронной почты",
       "loading": "Загрузка...",
@@ -182,7 +182,7 @@
     },
     "Login": {
       "email": "Электронная почта",
-      "emailPlaceholder": "Введите вашу электронную почту",
+      "emailPlaceholder": "Введите ваш email",
       "forgotPassword": "Забыли пароль?",
       "loading": "Загрузка...",
       "login": "Войти",
@@ -200,7 +200,7 @@
       "confirmPassword": "Подтвердите пароль",
       "confirmPasswordPlaceholder": "Подтвердите новый пароль",
       "email": "Электронная почта",
-      "emailPlaceholder": "Введите вашу электронную почту",
+      "emailPlaceholder": "Введите ваш email",
       "enterResetDetails": "Введите ваш email и код сброса, чтобы сбросить пароль",
       "loading": "Загрузка...",
       "loginAgain": "Пожалуйста, войдите снова с вашим новым паролем",
@@ -1959,6 +1959,7 @@
           "saveButton": "Сохранить изменения",
           "savingButton": "Сохранение...",
           "xPlaceholder": "URL-адрес профиля X",
+          "tiktokPlaceholder": "URL-адрес профиля TikTok",
           "youtubePlaceholder": "URL-адрес канала YouTube"
         },
         "customLinksTitle": "Пользовательские ссылки",

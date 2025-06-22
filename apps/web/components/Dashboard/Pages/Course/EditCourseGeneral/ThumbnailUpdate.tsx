@@ -317,7 +317,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
     <div className="w-full justify-center rounded-xl bg-white">
       {/* Tabs Navigation */}
       {thumbnailType === 'both' && (
-        <div className="flex border-b border-gray-100">
+        <div className="flex justify-center border-b border-gray-100">
           <button
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
               activeTab === 'image'

@@ -12,7 +12,7 @@ from src.services.install.install import (
 # TODO: Depreceated and need to be removed and remade
 async def create_initial_data_for_tests(db_session: Session):
     # Install default elements
-    await install_default_elements({}, db_session)
+    install_default_elements(db_session)
 
     # Initiate test Organization
     test_org = OrganizationCreate(
@@ -21,10 +21,11 @@ async def create_initial_data_for_tests(db_session: Session):
         slug="openu",
         email="meirbek.b2k@gmail.com",
         logo_image=None,
+        thumbnail_image=None,
     )
 
     # Create test organization
-    await install_create_organization(test_org, db_session)
+    install_create_organization(test_org, db_session)
 
     users = [
         UserCreate(
@@ -45,10 +46,10 @@ async def create_initial_data_for_tests(db_session: Session):
 
     # Create 2 users in that Organization
     for user in users:
-        await install_create_organization_user(user, "wayne", db_session)
+        install_create_organization_user(user, "openu", db_session)
 
     # Make robin a normal user
-    statement = select(UserOrganization).join(User).where(User.username == "robin")
+    statement = select(UserOrganization).join(User).where(User.username == "testo")
     user_org = db_session.exec(statement).first()
 
     user_org.role_id = 3  # type: ignore

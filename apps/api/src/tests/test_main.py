@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
@@ -43,7 +48,7 @@ def execute_before_all_tests(session: Session):
 
 def test_create_default_elements(client: TestClient, session: Session):
     response = client.get(
-        "/api/v1/orgs/slug/wayne",
+        "/api/v1/orgs/slug/openu",
     )
 
     assert response.status_code == 200

@@ -64,18 +64,6 @@ export const HeaderProfileBox = () => {
             </div>
             <div className="flex items-center space-x-2">
               <Tooltip
-                content={t('tooltips.ownedCourses')}
-                sideOffset={15}
-                side="bottom"
-              >
-                <Link
-                  className="text-gray-600"
-                  href={'/dash/user-account/owned'}
-                >
-                  <Package2 size={14} />
-                </Link>
-              </Tooltip>
-              <Tooltip
                 content={t('tooltips.yourSettings')}
                 sideOffset={15}
                 side="bottom"
