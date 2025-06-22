@@ -17,7 +17,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { PencilLine, Rss, TentTree } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
 import * as Form from '@radix-ui/react-form';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
@@ -244,7 +244,9 @@ const UpdatesListView = () => {
               <div className="flex items-center space-x-2">
                 <span> {update.title}</span>{' '}
                 <span
-                  title={t('createdAtTooltipPrefix') + format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })}
+                  title={
+                    t('createdAtTooltipPrefix') + format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })
+                  }
                   className="text-xs font-semibold text-gray-300"
                 >
                   {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}

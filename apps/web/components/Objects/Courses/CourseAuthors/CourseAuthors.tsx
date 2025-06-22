@@ -16,7 +16,7 @@ import { Rss, PencilLine, TentTree } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import * as Form from '@radix-ui/react-form';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import UserAvatar from '../../UserAvatar';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';

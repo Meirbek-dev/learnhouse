@@ -499,7 +499,7 @@ const ToolSelect = styled.select`
   height: 25px;
   padding: 2px 5px;
   font-size: 11px;
-  font-family: 'DM Sans';
+  font-family: Inter, sans-serif;
   margin-right: 5px;
   cursor: pointer;
   appearance: none;
@@ -558,7 +558,7 @@ const TableMenuItem = styled.div`
 
   .label {
     font-size: 12px;
-    font-family: 'DM Sans';
+    font-family: Inter, sans-serif;
   }
 `;
 
@@ -603,6 +603,6 @@ const ListMenuItem = styled.div`
 
   .label {
     font-size: 12px;
-    font-family: 'DM Sans';
+    font-family: Inter, sans-serif;
   }
 `;

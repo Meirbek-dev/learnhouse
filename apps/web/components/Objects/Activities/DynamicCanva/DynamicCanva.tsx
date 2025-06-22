@@ -215,7 +215,7 @@ const ContentWrapper = styled.div`
   .ProseMirror {
     flex: 1;
     padding: 1rem;
-    font-family: var(--font-dm-sans), system-ui, 'Segoe UI', Arial, sans-serif;
+    font-family: var(--font-inter), Inter, system-ui, 'Segoe UI', Arial, sans-serif;
     font-size: 1.1rem;
     color: #222;
     // disable chrome outline

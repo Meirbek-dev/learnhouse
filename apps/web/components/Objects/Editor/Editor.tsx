@@ -461,7 +461,7 @@ export const EditorContentWrapper = styled.div`
   // disable chrome outline
 
   .ProseMirror {
-    font-family: var(--font-dm-sans), system-ui, 'Segoe UI', Arial, sans-serif;
+    font-family: var(--font-inter), Inter, system-ui, 'Segoe UI', Arial, sans-serif;
     font-size: 1.1rem;
     color: #222;
 

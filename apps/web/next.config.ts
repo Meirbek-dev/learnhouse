@@ -25,20 +25,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   devIndicators: false,
   output: 'standalone',
-  // Vercel-specific optimizations
-  images: {
-    domains: ['localhost', 'openu.onrender.com'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '*.onrender.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.vercel.app',
-      },
-    ],
-  },
 };
 
 const withNextIntl = createNextIntlPlugin();

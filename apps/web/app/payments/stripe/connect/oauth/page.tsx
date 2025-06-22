@@ -65,7 +65,7 @@ function StripeConnectCallback() {
             width={50}
             height={50}
             src={openuIcon}
-            alt=""
+            alt="OpenU logo"
           />
         </div>
 

@@ -82,7 +82,7 @@ function ResetPasswordClient() {
           background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
         }}
       >
-        <div className="login-topbar m-10">
+        <div className="m-10">
           <Link
             prefetch
             href={getUriWithOrg(org?.slug, '/')}
@@ -92,7 +92,7 @@ function ResetPasswordClient() {
               width={30}
               height={30}
               src={openuIcon}
-              alt=""
+              alt="OpenU logo"
             />
           </Link>
         </div>
@@ -113,7 +113,7 @@ function ResetPasswordClient() {
                   width={70}
                   height={70}
                   src={openuIcon}
-                  alt=""
+                  alt="OpenU logo"
                 />
               )}
             </div>
@@ -122,25 +122,25 @@ function ResetPasswordClient() {
         </div>
       </div>
       <div className="left-login-part flex flex-row bg-white">
-        <div className="login-form m-auto w-72">
+        <div className="m-auto w-72">
           <h1 className="mb-4 text-2xl font-bold">{t('title')}</h1>
-          <p className="mb-4 text-sm">{t('enterResetDetails')}</p>
+          <p className="mb-4 text-sm text-gray-600">{t('enterResetDetails')}</p>
 
           {error && (
-            <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
+            <div className="shadow-xs mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
               <AlertTriangle size={18} />
               <div className="text-sm font-bold">{error}</div>
             </div>
           )}
           {message && (
-            <div className="flex flex-col gap-2">
+            <div className="mb-4 flex flex-col gap-2">
               <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 transition-all">
                 <Info size={18} />
                 <div className="text-sm font-bold">{t('success')}</div>
               </div>
               <Link
                 href={getUriWithoutOrg(`/login?orgslug=${org.slug}`)}
-                className="text-center text-sm text-blue-600 hover:text-blue-800"
+                className="text-center text-sm text-blue-600 transition-colors hover:text-blue-800 hover:underline"
               >
                 {t('loginAgain')}
               </Link>
@@ -158,6 +158,9 @@ function ResetPasswordClient() {
                   value={formik.values.email}
                   type="email"
                   placeholder={t('emailPlaceholder')}
+                  disabled={isSubmitting}
+                  autoComplete="email"
+                  aria-describedby={formik.errors.email ? 'email-error' : undefined}
                 />
               </Form.Control>
             </FormField>
@@ -173,6 +176,9 @@ function ResetPasswordClient() {
                   value={formik.values.reset_code}
                   type="text"
                   placeholder={t('resetCodePlaceholder')}
+                  disabled={isSubmitting}
+                  autoComplete="one-time-code"
+                  aria-describedby={formik.errors.reset_code ? 'reset-code-error' : undefined}
                 />
               </Form.Control>
             </FormField>
@@ -188,6 +194,9 @@ function ResetPasswordClient() {
                   value={formik.values.new_password}
                   type="password"
                   placeholder={t('newPasswordPlaceholder')}
+                  disabled={isSubmitting}
+                  autoComplete="new-password"
+                  aria-describedby={formik.errors.new_password ? 'new-password-error' : undefined}
                 />
               </Form.Control>
             </FormField>
@@ -203,13 +212,20 @@ function ResetPasswordClient() {
                   value={formik.values.confirm_password}
                   type="password"
                   placeholder={t('confirmPasswordPlaceholder')}
+                  disabled={isSubmitting}
+                  autoComplete="new-password"
+                  aria-describedby={formik.errors.confirm_password ? 'confirm-password-error' : undefined}
                 />
               </Form.Control>
             </FormField>
 
             <div className="flex py-4">
               <Form.Submit asChild>
-                <button className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md hover:cursor-pointer">
+                <button
+                  className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md transition-all duration-200 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={isSubmitting}
+                  aria-label={isSubmitting ? t('loading') : t('changePassword')}
+                >
                   {isSubmitting ? t('loading') : t('changePassword')}
                 </button>
               </Form.Submit>

@@ -5,7 +5,7 @@ import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { Package2, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import styled from 'styled-components';

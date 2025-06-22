@@ -23,7 +23,7 @@ export const FormLabelAndMessage = (props: { label: string; message?: string }) 
   <div className="flex items-center space-x-3">
     <FormLabel className="grow text-sm">{props.label}</FormLabel>
     {props.message && (
-      <div className="flex items-center space-x-1 rounded-md text-sm text-red-700">
+      <div className="flex w-auto items-center space-x-1 rounded-md text-sm text-red-700">
         <Info size={10} />
         <div>{props.message}</div>
       </div>
@@ -42,7 +42,7 @@ export const FormField = styled(Form.Field, {
 
 export const FormLabel = styled(Form.Label, {
   fontWeight: 500,
-  lineHeight: '35px',
+  paddingBottom: 4,
   color: 'black',
 });
 
@@ -62,7 +62,7 @@ export const inputStyles = {
   'alignItems': 'center',
   'justifyContent': 'center',
   'borderRadius': 4,
-  'fontSize': 15,
+  'fontSize': '1rem',
   'color': '#7c7c7c',
   'background': '#fbfdff',
   'boxShadow': '0 0 0 1px #edeeef',

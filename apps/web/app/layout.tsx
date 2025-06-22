@@ -1,18 +1,18 @@
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
-import { DM_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import ClientLayout from './client-layout';
 import { isDevEnv } from './auth/options';
 import Script from 'next/script';
 import '../styles/globals.css';
 
-const dmSans = DM_Sans({
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-dm-sans',
+const inter = Inter({
+  subsets: ['latin', 'cyrillic'],
+  variable: '--font-inter',
   display: 'swap',
   preload: true,
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900', '1000'],
-  style: ['normal', 'italic'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
 });
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -22,7 +22,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html
-      className={`${dmSans.variable}`}
+      className={`${inter.variable}`}
       lang={locale}
     >
       <head />

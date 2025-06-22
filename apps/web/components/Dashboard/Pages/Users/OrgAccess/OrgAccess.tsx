@@ -11,7 +11,7 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useRouter } from 'next/navigation';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';

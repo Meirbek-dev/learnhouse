@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import openuIcon from 'public/black_logo.png';
+import openuIcon from 'public/dark_logo.png';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

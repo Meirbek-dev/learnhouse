@@ -113,7 +113,7 @@ const EditBar = styled.div`
     width: 100%;
     color: #494949;
     font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: Inter, sans-serif;
     background: none;
     border: none;
 

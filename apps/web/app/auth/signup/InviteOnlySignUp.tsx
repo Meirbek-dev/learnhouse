@@ -92,22 +92,22 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
   useEffect(() => {}, [org]);
 
   return (
-    <div className="login-form m-auto w-72">
+    <div className="m-auto w-72">
       {error && (
-        <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
+        <div className="shadow-xs mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
           <AlertTriangle size={18} />
           <div className="text-sm font-bold">{error}</div>
         </div>
       )}
       {message && (
-        <div className="shadow-xs flex flex-col items-center justify-center space-x-2 space-y-4 rounded-md bg-green-200 p-4 text-green-950 transition-all">
+        <div className="shadow-xs mb-4 flex flex-col items-center justify-center space-x-2 space-y-4 rounded-md bg-green-200 p-4 text-green-950 transition-all">
           <div className="flex space-x-2">
             <Check size={18} />
             <div className="text-sm font-bold">{t('accountCreated')}</div>
           </div>
-          <hr className="800 w-40 border border-green-900/20" />
+          <hr className="w-40 border border-green-900/20" />
           <Link
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 transition-colors hover:text-green-800"
             href={`/login?orgslug=${org?.slug}`}
           >
             <User size={14} /> <div>{t('loginToAccount')}</div>
@@ -127,6 +127,9 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
               placeholder={t('emailPlaceholder')}
               type="email"
               required
+              disabled={isSubmitting}
+              autoComplete="email"
+              aria-describedby={formik.errors.email ? 'email-error' : undefined}
             />
           </Form.Control>
         </FormField>
@@ -144,6 +147,9 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
               placeholder={t('passwordPlaceholder')}
               type="password"
               required
+              disabled={isSubmitting}
+              autoComplete="new-password"
+              aria-describedby={formik.errors.password ? 'password-error' : undefined}
             />
           </Form.Control>
         </FormField>
@@ -161,6 +167,9 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
               placeholder={t('usernamePlaceholder')}
               type="text"
               required
+              disabled={isSubmitting}
+              autoComplete="username"
+              aria-describedby={formik.errors.username ? 'username-error' : undefined}
             />
           </Form.Control>
         </FormField>
@@ -178,13 +187,20 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
               value={formik.values.bio}
               placeholder={t('bioPlaceholder')}
               required
+              disabled={isSubmitting}
+              aria-describedby={formik.errors.bio ? 'bio-error' : undefined}
+              className="min-h-[80px] resize-none"
             />
           </Form.Control>
         </FormField>
 
         <div className="flex py-4">
           <Form.Submit asChild>
-            <button className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md hover:cursor-pointer">
+            <button
+              className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md transition-all duration-200 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isSubmitting}
+              aria-label={isSubmitting ? t('loading') : t('createAccountAndJoin')}
+            >
               {isSubmitting ? t('loading') : t('createAccountAndJoin')}
             </button>
           </Form.Submit>
@@ -194,7 +210,8 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
         <div className="mx-10 mb-5 mt-5 flex h-0.5 rounded-2xl bg-slate-100" />
         <button
           onClick={() => signIn('google')}
-          className="text-md flex w-full justify-center space-x-3 rounded-md bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm hover:cursor-pointer"
+          className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isSubmitting}
         >
           <Image
             src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"

@@ -435,7 +435,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
             className="rounded-lg outline-neutral-200/20"
             width={24}
             src={openuAI_icon}
-            alt=""
+            alt="OpenU logo"
           />
         </div>
         <div className="mx-auto flex h-[115px] justify-center antialiased">

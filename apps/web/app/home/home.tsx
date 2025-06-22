@@ -4,7 +4,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ArrowRightCircle, Info } from 'lucide-react';
-import openuIcon from 'public/openu_icon.png';
+import openuIcon from 'public/dark_logo.png';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import { useEffect } from 'react';
@@ -23,11 +23,11 @@ function HomeClient() {
   useEffect(() => {}, [session, orgs]);
   return (
     <div className="flex flex-col">
-      <div className="mx-auto flex items-center space-x-4 rounded-b-2xl bg-black pt-16 text-3xl font-semibold">
+      <div className="mx-auto flex items-center space-x-4 rounded-b-2xl pt-16 text-3xl font-semibold">
         <Image
           quality={100}
-          width={60}
-          height={60}
+          width={230}
+          height={100}
           src={openuIcon}
           alt="OpenU Logo"
         />

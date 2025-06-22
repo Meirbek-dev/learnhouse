@@ -166,6 +166,7 @@
   },
   "Auth": {
     "Forgot": {
+      "backToLogin": "Back to Login",
       "checkEmail": "Check your email for the reset link",
       "email": "Email",
       "emailPlaceholder": "Enter your email",

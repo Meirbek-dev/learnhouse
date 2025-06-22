@@ -4,7 +4,6 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { validateInviteCode } from '@services/organizations/invites';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { getOrgLogoMediaDirectory } from '@services/media/media';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MailWarning, Ticket, UserPlus } from 'lucide-react';
 import InviteOnlySignUpComponent from './InviteOnlySignUp';
@@ -12,7 +11,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { joinOrg } from '@services/organizations/orgs';
 import OpenSignUpComponent from './OpenSignup';
-import openuIcon from 'public/openu_icon.png';
+import openuIcon from 'public/dark_logo.png';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { BarLoader } from 'react-spinners';
@@ -25,7 +24,6 @@ interface SignUpClientProps {
 }
 
 function SignUpClient(props: SignUpClientProps) {
-  const t = useTranslations('Auth.Signup');
   const session = useLHSession() as any;
   const [joinMethod, setJoinMethod] = useState('open');
   const [inviteCode, setInviteCode] = useState('');
@@ -42,54 +40,22 @@ function SignUpClient(props: SignUpClientProps) {
   }, [props.org, inviteCodeParam]);
 
   return (
-    <div className="grid h-screen grid-flow-col justify-stretch">
-      <div
-        className="right-login-part"
-        style={{
-          background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
-        }}
-      >
-        <div className="login-topbar m-10">
+    <div className="flex h-screen flex-col items-center justify-center bg-neutral-100">
+      <div className="rounded-xl border-2 bg-white p-12">
+        <div className="flex justify-center pb-8">
           <Link
             prefetch
             href={getUriWithOrg(props.org.slug, '/')}
           >
             <Image
               quality={100}
-              width={30}
-              height={30}
+              width={230}
+              height={100}
               src={openuIcon}
-              alt=""
+              alt="OpenU logo"
             />
           </Link>
         </div>
-        <div className="ml-10 flex h-3/4 flex-row text-white">
-          <div className="m-auto flex flex-wrap items-center space-x-4">
-            <div>{t('invitedToJoin')} </div>
-            <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
-              {props.org?.logo_image ? (
-                <Image
-                  src={`${getOrgLogoMediaDirectory(props.org.org_uuid, props.org?.logo_image)}`}
-                  alt="OpenU"
-                  width={70}
-                  height={70}
-                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
-                />
-              ) : (
-                <Image
-                  quality={100}
-                  width={70}
-                  height={70}
-                  src={openuIcon}
-                  alt=""
-                />
-              )}
-            </div>
-            <div className="text-xl font-bold">{props.org?.name}</div>
-          </div>
-        </div>
-      </div>
-      <div className="left-join-part flex flex-row bg-white">
         {joinMethod == 'open' &&
           (session.status == 'authenticated' ? (
             <LoggedInJoinScreen inviteCode={inviteCode} />
