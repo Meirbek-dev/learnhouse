@@ -1,8 +1,12 @@
 import * as Form from '@radix-ui/react-form';
-import { blackA } from '@radix-ui/colors';
-import { styled } from '@stitches/react';
 import type { ReactNode } from 'react';
+import * as React from 'react';
 import { Info } from 'lucide-react';
+import { Input as ShadcnInput } from '@/components/ui/input';
+import { Textarea as ShadcnTextarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 interface FormLayoutProps {
   children: ReactNode;
@@ -11,17 +15,17 @@ interface FormLayoutProps {
 }
 
 const FormLayout = ({ children, onSubmit, className }: FormLayoutProps) => (
-  <FormRoot
+  <Form.Root
     onSubmit={onSubmit}
-    className={className}
+    className={cn('space-y-4', className)}
   >
     {children}
-  </FormRoot>
+  </Form.Root>
 );
 
 export const FormLabelAndMessage = (props: { label: string; message?: string }) => (
   <div className="flex items-center space-x-3">
-    <FormLabel className="grow text-sm">{props.label}</FormLabel>
+    <Label className="grow text-sm font-medium">{props.label}</Label>
     {props.message && (
       <div className="flex w-auto items-center space-x-1 rounded-md text-sm text-red-700">
         <Info size={10} />
@@ -31,85 +35,50 @@ export const FormLabelAndMessage = (props: { label: string; message?: string }) 
   </div>
 );
 
-export const FormRoot = styled(Form.Root, {
-  margin: 4,
-});
+export const FormField = ({ className, ...props }: React.ComponentProps<typeof Form.Field>) => (
+  <Form.Field
+    className={cn('grid gap-1', className)}
+    {...props}
+  />
+);
 
-export const FormField = styled(Form.Field, {
-  display: 'grid',
-  marginBottom: 10,
-});
+export const FormLabel = ({ className, ...props }: React.ComponentProps<typeof Form.Label>) => (
+  <Form.Label
+    className={cn(
+      'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+      className,
+    )}
+    {...props}
+  />
+);
 
-export const FormLabel = styled(Form.Label, {
-  fontWeight: 500,
-  paddingBottom: 4,
-  color: 'black',
-});
+export const FormMessage = ({ className, ...props }: React.ComponentProps<typeof Form.Message>) => (
+  <Form.Message
+    className={cn('text-destructive text-sm font-medium', className)}
+    {...props}
+  />
+);
 
-export const FormMessage = styled(Form.Message, {
-  fontSize: 13,
-  color: 'white',
-  opacity: 0.8,
-});
+export const Flex = ({ className, ...props }: React.ComponentProps<'div'>) => (
+  <div
+    className={cn('flex', className)}
+    {...props}
+  />
+);
 
-export const Flex = styled('div', { display: 'flex' });
+export const Input = ShadcnInput;
+export const Textarea = ShadcnTextarea;
 
-export const inputStyles = {
-  'all': 'unset',
-  'boxSizing': 'border-box',
-  'width': '100%',
-  'display': 'inline-flex',
-  'alignItems': 'center',
-  'justifyContent': 'center',
-  'borderRadius': 4,
-  'fontSize': '1rem',
-  'color': '#7c7c7c',
-  'background': '#fbfdff',
-  'boxShadow': '0 0 0 1px #edeeef',
-  '&:hover': { boxShadow: '0 0 0 1px #edeeef' },
-  '&:focus': { boxShadow: '0 0 0 2px #edeeef' },
-  '&::selection': { backgroundColor: blackA.blackA9, color: 'white' },
-};
-
-export const Input = styled('input', {
-  ...inputStyles,
-  height: 35,
-  lineHeight: 1,
-  padding: '0 10px',
-  border: 'none',
-});
-
-export const Textarea = styled('textarea', {
-  ...inputStyles,
-  resize: 'none',
-  padding: 10,
-});
-
-export const ButtonBlack = styled('button', {
-  'variants': {
-    state: {
-      loading: {
-        pointerEvents: 'none',
-        backgroundColor: '#808080',
-      },
-      none: {},
-    },
-  },
-  'all': 'unset',
-  'display': 'inline-flex',
-  'alignItems': 'center',
-  'justifyContent': 'center',
-  'borderRadius': 8,
-  'padding': '0 15px',
-  'fontSize': 15,
-  'lineHeight': 1,
-  'fontWeight': 500,
-  'height': 35,
-
-  'background': '#000000',
-  'color': '#FFFFFF',
-  '&:hover': { backgroundColor: '#181818', cursor: 'pointer' },
-  '&:focus': { boxShadow: '0 0 0 2px black' },
-});
+export const ButtonBlack = ({ className, children, ...props }: React.ComponentProps<typeof Button>) => (
+  <Button
+    className={cn(
+      'bg-black text-white transition-colors hover:bg-black/90 disabled:pointer-events-none disabled:opacity-50',
+      className,
+    )}
+    {...props}
+  >
+    {children}
+  </Button>
+);
 
 export default FormLayout;

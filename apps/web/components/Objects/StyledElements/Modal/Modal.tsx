@@ -93,7 +93,7 @@ const Modal = (params: ModalParams) => {
           )}
           {params.dialogDescription && <DialogDescription>{params.dialogDescription}</DialogDescription>}
         </DialogHeader>
-        <div className="overflow-auto">{params.dialogContent}</div>
+        <div>{params.dialogContent}</div>
         {(params.dialogClose || params.addDefCloseButton) && (
           <DialogFooter>
             {params.dialogClose}
