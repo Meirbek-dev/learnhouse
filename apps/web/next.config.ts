@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     reactCompiler: false,
+    ppr: false,
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },
   compiler: {

@@ -11,18 +11,20 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import dayjs from 'dayjs';
+import { addYears, format } from 'date-fns';
+import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 
 function OrgAccess() {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.signupsSection');
+  const locale = useDateFnsLocale();
 
   const { data: invites } = useSWR(org ? `${getAPIUrl()}orgs/${org?.id}/invites` : null, (url) =>
     swrFetcher(url, access_token),
@@ -190,7 +192,7 @@ function OrgAccess() {
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          {dayjs(invite.expiration_date).add(1, 'year').format('DD/MM/YYYY')}{' '}
+                          {format(addYears(new Date(invite.expiration_date), 1), 'dd/MM/yyyy', { locale })}{' '}
                         </td>
                         <td className="px-4 py-3">
                           <ConfirmationModal

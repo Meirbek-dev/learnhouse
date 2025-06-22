@@ -7,7 +7,7 @@ import FormLayout, {
 } from '@components/Objects/StyledElements/Form/Form';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import LearningItemsList from './LearningItemsList';
 import ThumbnailUpdate from './ThumbnailUpdate';
 import * as Form from '@radix-ui/react-form';

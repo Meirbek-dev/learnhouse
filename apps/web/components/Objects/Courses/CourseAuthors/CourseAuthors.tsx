@@ -13,20 +13,18 @@ import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { Rss, PencilLine, TentTree } from 'lucide-react';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import { getAPIUrl } from '@services/config/config';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import UserAvatar from '../../UserAvatar';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
 import { useFormik } from 'formik';
 import { useState } from 'react';
-import dayjs from 'dayjs';
-
-dayjs.extend(relativeTime);
+import { format, formatDistanceToNow } from 'date-fns';
+import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 
 interface Author {
   user: {
@@ -296,6 +294,7 @@ const UpdatesListView = () => {
     swrFetcher(url, access_token),
   );
   const t = useTranslations('Courses.CourseAuthors');
+  const locale = useDateFnsLocale();
 
   if (!updates || updates.length === 0) {
     return (
@@ -325,10 +324,10 @@ const UpdatesListView = () => {
               <div className="flex items-baseline space-x-2">
                 <h4 className="truncate text-sm font-medium text-neutral-800">{update.title}</h4>
                 <span
-                  title={dayjs(update.creation_date).format('MMMM D, YYYY')}
+                  title={format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })}
                   className="whitespace-nowrap text-[11px] font-medium text-neutral-400"
                 >
-                  {dayjs(update.creation_date).fromNow()}
+                  {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
                 </span>
               </div>
               <p className="line-clamp-3 text-sm text-neutral-600">{update.content}</p>

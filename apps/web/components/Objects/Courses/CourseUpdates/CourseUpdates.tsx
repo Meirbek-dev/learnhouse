@@ -15,21 +15,20 @@ import { useState, useLayoutEffect, useEffect } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { PencilLine, Rss, TentTree } from 'lucide-react';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import { getAPIUrl } from '@services/config/config';
 import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
 import { useFormik } from 'formik';
-import dayjs from 'dayjs';
-
-dayjs.extend(relativeTime);
+import { format, formatDistanceToNow } from 'date-fns';
+import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 
 function CourseUpdates() {
   const course = useCourse() as any;
   const session = useLHSession() as any;
+  const locale = useDateFnsLocale();
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`, (url) =>
     swrFetcher(url, access_token),
@@ -227,6 +226,7 @@ const UpdatesListView = () => {
     swrFetcher(url, access_token),
   );
   const t = useTranslations('Courses.CourseUpdates');
+  const locale = useDateFnsLocale();
 
   return (
     <div
@@ -242,12 +242,12 @@ const UpdatesListView = () => {
           >
             <div className="flex items-center justify-between space-x-2 font-bold text-gray-500">
               <div className="flex items-center space-x-2">
-                <span> {update.title}</span>
+                <span> {update.title}</span>{' '}
                 <span
-                  title={t('createdAtTooltipPrefix') + dayjs(update.creation_date).format('MMMM D, YYYY')}
+                  title={t('createdAtTooltipPrefix') + format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })}
                   className="text-xs font-semibold text-gray-300"
                 >
-                  {dayjs(update.creation_date).fromNow()}
+                  {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
                 </span>
               </div>
               {adminStatus.isAdmin && !adminStatus.loading && <DeleteUpdateButton update={update} />}

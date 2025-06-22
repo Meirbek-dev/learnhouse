@@ -53,7 +53,7 @@ function DashLeftMenu() {
       className="sticky top-0 flex h-screen w-[90px] flex-col bg-black text-white shadow-xl"
     >
       <div className="flex h-full flex-col">
-        <div className="mt-6 flex h-20">
+        <div className="mt-6 flex h-auto">
           <Link
             className="mx-auto flex flex-col items-center space-y-3"
             href={'/'}
@@ -66,7 +66,7 @@ function DashLeftMenu() {
             >
               <Image
                 alt="OpenU лого"
-                width={40}
+                width={52}
                 src={OpenUDashboardLogo}
               />
             </ToolTip>
