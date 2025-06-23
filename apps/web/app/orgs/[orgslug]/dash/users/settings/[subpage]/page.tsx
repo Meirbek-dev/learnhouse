@@ -28,28 +28,28 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
   const [H2Label, setH2Label] = useState('');
   const isMobile = useIsMobile();
 
-  function handleLabels() {
-    if (params.subpage == 'users') {
-      setH1Label(t('usersTitle'));
-      setH2Label(t('usersDescription'));
-    }
-    if (params.subpage == 'signups') {
-      setH1Label(t('signupsTitle'));
-      setH2Label(t('signupsDescription'));
-    }
-    if (params.subpage == 'add') {
-      setH1Label(t('addTitle'));
-      setH2Label(t('addDescription'));
-    }
-    if (params.subpage == 'usergroups') {
-      setH1Label(t('usergroupsTitle'));
-      setH2Label(t('usergroupsDescription'));
-    }
-  }
-
   useEffect(() => {
+    const handleLabels = () => {
+      if (params.subpage == 'users') {
+        setH1Label(t('usersTitle'));
+        setH2Label(t('usersDescription'));
+      }
+      if (params.subpage == 'signups') {
+        setH1Label(t('signupsTitle'));
+        setH2Label(t('signupsDescription'));
+      }
+      if (params.subpage == 'add') {
+        setH1Label(t('addTitle'));
+        setH2Label(t('addDescription'));
+      }
+      if (params.subpage == 'usergroups') {
+        setH1Label(t('usergroupsTitle'));
+        setH2Label(t('usergroupsDescription'));
+      }
+    };
+
     handleLabels();
-  }, [session, org, params.subpage, params]);
+  }, [session, org, params.subpage, t]);
 
   if (isMobile) {
     // TODO: Work on a better mobile experience

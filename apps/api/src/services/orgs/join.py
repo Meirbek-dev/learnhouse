@@ -87,7 +87,7 @@ async def join_org(
             db_session.add(user_organization)
             db_session.commit()
 
-            return "Great, You're part of the Organization"
+            return "Добро пожаловать!"
 
         else:
             raise HTTPException(
@@ -111,7 +111,7 @@ async def join_org(
 
             increase_feature_usage("members", org.id, db_session)
 
-            return "Great, You're part of the Organization"
+            return "Добро пожаловать!"
 
         else:
             raise HTTPException(

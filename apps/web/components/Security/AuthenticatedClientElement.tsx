@@ -1,7 +1,7 @@
 'use client';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 
 interface AuthenticatedClientElementProps {
@@ -17,7 +17,7 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
   const session = useLHSession() as any;
   const org = useOrg() as any;
 
-  function isUserAllowed(roles: any[], action: string, resourceType: string, org_uuid: string): boolean {
+  const isUserAllowed = useCallback((roles: any[], action: string, resourceType: string, org_uuid: string): boolean => {
     // Iterate over the user's roles
     for (const role of roles) {
       // Check if the role is for the right organization
@@ -35,15 +35,15 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
 
     // If no role matches the organization, resource type, and action, return false
     return false;
-  }
+  }, []);
 
-  function check() {
-    if (session.status == 'unauthenticated') {
+  const check = useCallback(() => {
+    if (session.status === 'unauthenticated') {
       setIsAllowed(false);
       return;
     }
     if (props.checkMethod === 'authentication') {
-      setIsAllowed(session.status == 'authenticated');
+      setIsAllowed(session.status === 'authenticated');
     } else if (props.checkMethod === 'roles') {
       if (props.action && props.ressourceType) {
         return setIsAllowed(isUserAllowed(session?.data?.roles, props.action, props.ressourceType, org?.org_uuid));
@@ -52,15 +52,23 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
     } else {
       setIsAllowed(false);
     }
-  }
+  }, [
+    session.status,
+    session?.data?.roles,
+    props.checkMethod,
+    props.action,
+    props.ressourceType,
+    org?.org_uuid,
+    isUserAllowed,
+  ]);
 
   useEffect(() => {
-    if (session.status == 'loading') {
+    if (session.status === 'loading') {
       return;
     }
 
     check();
-  }, [session.data, org]);
+  }, [session.status, check]);
 
   return <>{isAllowed && props.children}</>;
 };

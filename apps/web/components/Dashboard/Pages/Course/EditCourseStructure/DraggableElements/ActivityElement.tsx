@@ -12,7 +12,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import * as React from 'react';
 import Link from 'next/link';
@@ -321,24 +321,27 @@ const ActivityElementOptions = ({
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
-  async function getAssignmentUUIDFromActivityUUID(activityUUID: string): Promise<string | undefined> {
-    const assignment = await getAssignmentFromActivityUUID(activityUUID, access_token);
-    if (assignment?.data) {
-      return assignment.data.assignment_uuid;
-    }
-    return undefined;
-  }
+  const getAssignmentUUIDFromActivityUUID = useCallback(
+    async (activityUUID: string): Promise<string | undefined> => {
+      const assignment = await getAssignmentFromActivityUUID(activityUUID, access_token);
+      if (assignment?.data) {
+        return assignment.data.assignment_uuid;
+      }
+      return undefined;
+    },
+    [access_token],
+  );
 
-  const fetchAssignmentUUID = async () => {
+  const fetchAssignmentUUID = useCallback(async () => {
     if (activity.activity_type === 'TYPE_ASSIGNMENT') {
       const assignment_uuid = await getAssignmentUUIDFromActivityUUID(activity.activity_uuid);
       if (assignment_uuid) setAssignmentUUID(assignment_uuid.replace('assignment_', ''));
     }
-  };
+  }, [activity.activity_type, activity.activity_uuid, getAssignmentUUIDFromActivityUUID]);
 
   useEffect(() => {
     fetchAssignmentUUID();
-  }, [activity, course]);
+  }, [fetchAssignmentUUID]);
 
   return (
     <>

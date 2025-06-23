@@ -158,7 +158,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       };
       formik.resetForm({ values: newValues });
     }
-  }, [courseStructure, isLoading]);
+  }, [courseStructure, isLoading, thumbnailType]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -175,7 +175,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
         dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
       }
     }
-  }, [formik.values, isLoading]);
+  }, [formik.values, formik.initialValues, isLoading, courseStructure, dispatchCourse]);
 
   if (isLoading || !courseStructure) {
     return <div>{t('loading')}</div>;

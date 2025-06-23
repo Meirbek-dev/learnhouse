@@ -183,7 +183,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     if (linkedProducts.length > 0) {
       checkAccess();
     }
-  }, [course.id, course.org_id, session.data?.tokens?.access_token, linkedProducts]);
+  }, [course.id, course.org_id, session.data?.tokens?.access_token, session.data?.user, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {

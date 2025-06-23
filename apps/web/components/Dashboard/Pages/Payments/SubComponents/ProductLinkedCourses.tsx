@@ -7,7 +7,7 @@ import { Trash2, Plus, BookOpen } from 'lucide-react';
 import LinkCourseModal from './LinkCourseModal';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { mutate } from 'swr';
 
@@ -23,14 +23,14 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkedCourses');
 
-  const fetchLinkedCourses = async () => {
+  const fetchLinkedCourses = useCallback(async () => {
     try {
       const response = await getCoursesLinkedToProduct(org.id, productId, session.data?.tokens?.access_token);
       setLinkedCourses(response.data || []);
     } catch (_error) {
       toast.error(tNotify('errors.fetchLinkedCoursesFailed'));
     }
-  };
+  }, [org.id, productId, session.data?.tokens?.access_token, tNotify]);
 
   const handleUnlinkCourse = async (courseId: string) => {
     try {
@@ -55,7 +55,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     if (org && session && productId) {
       fetchLinkedCourses();
     }
-  }, [org, session, productId]);
+  }, [org, session, productId, fetchLinkedCourses]);
 
   return (
     <div className="mt-4">

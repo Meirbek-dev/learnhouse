@@ -13,7 +13,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import * as React from 'react';
 import Link from 'next/link';
@@ -87,7 +87,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     }
   };
 
-  async function getAssignmentTaskSubmissionFromUserUI() {
+  const getAssignmentTaskSubmissionFromUserUI = useCallback(async () => {
     if (!access_token) {
       // Silently fail if not authenticated
       return;
@@ -110,9 +110,9 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         });
       }
     }
-  }
+  }, [assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
 
-  const submitFC = async () => {
+  async function submitFC() {
     // Check if user is authenticated
     if (!access_token) {
       toast.error(t('authRequiredSubmit'));
@@ -143,9 +143,9 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         toast.error(t('errorSaving'));
       }
     }
-  };
+  }
 
-  async function getAssignmentTaskUI() {
+  const getAssignmentTaskUI = useCallback(async () => {
     if (!access_token) {
       // Silently fail if not authenticated
       return;
@@ -158,22 +158,9 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         setAssignmentTaskOutsideProvider(res.data);
       }
     }
-  }
+  }, [assignmentTaskUUID, access_token]);
 
-  // Detect changes between initial and current submissions
-  useEffect(() => {
-    if (userSubmissions.fileUUID !== initialUserSubmissions.fileUUID) {
-      setShowSavingDisclaimer(true);
-    } else {
-      setShowSavingDisclaimer(false);
-    }
-  }, [userSubmissions]);
-
-  /* STUDENT VIEW CODE */
-
-  /* GRADING VIEW CODE */
-  const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
-  async function getAssignmentTaskSubmissionFromIdentifiedUserUI() {
+  const getAssignmentTaskSubmissionFromIdentifiedUserUI = useCallback(async () => {
     if (!access_token) {
       // Silently fail if not authenticated
       return;
@@ -198,7 +185,21 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         });
       }
     }
-  }
+  }, [assignmentTaskUUID, user_id, assignment.assignment_object.assignment_uuid, access_token]);
+
+  // Detect changes between initial and current submissions
+  useEffect(() => {
+    if (userSubmissions.fileUUID !== initialUserSubmissions.fileUUID) {
+      setShowSavingDisclaimer(true);
+    } else {
+      setShowSavingDisclaimer(false);
+    }
+  }, [userSubmissions, initialUserSubmissions.fileUUID]);
+
+  /* STUDENT VIEW CODE */
+
+  /* GRADING VIEW CODE */
+  const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
 
   async function gradeCustomFC(grade: number) {
     if (assignmentTaskUUID) {
@@ -251,7 +252,16 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
       //setQuestions(assignmentTaskState.assignmentTask.contents.questions);
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [assignmentTaskUUID]);
+  }, [
+    assignmentTaskUUID,
+    view,
+    assignment,
+    access_token,
+    user_id,
+    getAssignmentTaskUI,
+    getAssignmentTaskSubmissionFromUserUI,
+    getAssignmentTaskSubmissionFromIdentifiedUserUI,
+  ]);
 
   return (
     <AssignmentBoxUI

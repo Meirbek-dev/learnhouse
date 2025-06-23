@@ -27,7 +27,7 @@ def auto_install():
     if orgs:
         for org in orgs:
             default_org = db_session.exec(
-                select(Organization).where(Organization.slug == "default")
+                select(Organization).where(Organization.slug == "openu")
             ).first()
 
             if not default_org:

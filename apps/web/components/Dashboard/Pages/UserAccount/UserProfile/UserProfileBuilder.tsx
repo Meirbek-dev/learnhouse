@@ -238,7 +238,7 @@ const UserProfileBuilder = () => {
     };
 
     fetchUserData();
-  }, [session?.data?.user?.id, access_token]);
+  }, [session?.data?.user?.id, access_token, t]);
 
   const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): ProfileSection => {
     const sectionTypesConfig = getSectionTypesConfig(t);

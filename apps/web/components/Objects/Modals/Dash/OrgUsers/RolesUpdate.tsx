@@ -65,7 +65,7 @@ function RolesUpdate(props: Props) {
       <FormLayout onSubmit={handleSubmit}>
         <FormField name="role-select">
           {error && <div className="mb-2 rounded-md bg-red-100 px-3 py-2 text-xs font-bold text-red-500">{error}</div>}
-          <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <Flex className="items-baseline justify-between">
             <FormLabel>{t('rolesLabel')}</FormLabel>
             <FormMessage match="valueMissing">{t('selectRolePlaceholder')}</FormMessage>
           </Flex>
@@ -82,11 +82,11 @@ function RolesUpdate(props: Props) {
             </select>
           </Form.Control>
         </FormField>
-        <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
+        <Flex className="mt-6 justify-end">
           <Form.Submit asChild>
             <ButtonBlack
               type="submit"
-              css={{ marginTop: 10 }}
+              className="mt-2.5"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

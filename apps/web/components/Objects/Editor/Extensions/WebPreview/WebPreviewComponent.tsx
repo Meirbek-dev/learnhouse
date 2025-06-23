@@ -2,7 +2,7 @@ import { Edit2, Save, X, AlignLeft, AlignCenter, AlignRight, Trash } from 'lucid
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUrlPreview } from '@services/courses/activities';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Checkbox } from '@components/ui/checkbox';
 import { NodeViewWrapper } from '@tiptap/react';
 import { Button } from '@components/ui/button';
@@ -58,39 +58,41 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
   const [popupOpen, setPopupOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(!node.attrs.url);
 
-  const fetchPreview = async (url: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getUrlPreview(url);
-      if (!res) throw new Error(t('errorFetchingPreview'));
-      const data = res;
-      updateAttributes({ ...data, url });
-      setEditing(false);
-    } catch (err: any) {
-      setError(err.message || t('errorFetchingPreview'));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchPreview = useCallback(
+    async (url: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await getUrlPreview(url);
+        if (!res) throw new Error(t('errorFetchingPreview'));
+        const data = res;
+        updateAttributes({ ...data, url });
+        setEditing(false);
+      } catch (err: any) {
+        setError(err.message || t('errorFetchingPreview'));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [t, updateAttributes],
+  );
 
   useEffect(() => {
     if (node.attrs.url && !hasPreview) {
       fetchPreview(node.attrs.url);
     }
-  }, []);
+  }, [node.attrs.url, hasPreview, fetchPreview]);
 
   useEffect(() => {
     if (editing && inputRef.current) {
       inputRef.current.focus();
     }
   }, [editing]);
-
   useEffect(() => {
     setButtonLabel(node.attrs.buttonLabel || t('visitSite'));
     setShowButton(!!node.attrs.showButton);
     setOpenInPopup(!!node.attrs.openInPopup);
-  }, [node.attrs.buttonLabel, node.attrs.showButton, node.attrs.openInPopup]);
+  }, [node.attrs.buttonLabel, node.attrs.showButton, node.attrs.openInPopup, t]);
 
   useEffect(() => {
     if (!node.attrs.url) {

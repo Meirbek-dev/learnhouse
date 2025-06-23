@@ -1,5 +1,5 @@
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface UseGetAIFeatures {
   feature: 'editor' | 'activity_ask' | 'course_ask' | 'global_ai_ask';
@@ -9,11 +9,13 @@ function useGetAIFeatures(props: UseGetAIFeatures) {
   const org = useOrg() as any;
   const [isEnabled, setIsEnabled] = useState<boolean>(false);
 
-  function checkAvailableAIFeaturesOnOrg(_feature: string) {
-    const config = org?.config?.config?.features.ai.enabled;
-
-    return config;
-  }
+  const checkAvailableAIFeaturesOnOrg = useCallback(
+    (_feature: string) => {
+      const config = org?.config?.config?.features.ai.enabled;
+      return config;
+    },
+    [org],
+  );
 
   useEffect(() => {
     if (org) {
@@ -21,7 +23,7 @@ function useGetAIFeatures(props: UseGetAIFeatures) {
       const isEnabledStatus = checkAvailableAIFeaturesOnOrg(props.feature);
       setIsEnabled(isEnabledStatus);
     }
-  }, [org]);
+  }, [org, checkAvailableAIFeaturesOnOrg, props.feature]);
 
   return isEnabled;
 }

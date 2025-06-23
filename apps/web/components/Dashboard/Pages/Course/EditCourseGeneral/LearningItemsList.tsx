@@ -68,7 +68,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           }
           initializedRef.current = true;
         } else if (!initializedRef.current) {
-          // Value is truthy, but not a parsable array, and we haven't initialized.
           console.warn(
             `LearningItemsList: Initial value (typeof: ${typeof value}, value: "${String(value).substring(
               0,
@@ -88,7 +87,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           initializedRef.current = true;
         }
       } else if (!initializedRef.current) {
-        // Value is falsy (null, undefined, empty string) and we haven't initialized.
         const newItem: LearningItem = {
           id: Date.now().toString(),
           text: '',
@@ -120,7 +118,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         initializedRef.current = true;
       }
     }
-  }, [value, onChange]); // `items` should NOT be in this dependency array
+  }, [value, onChange]); // Removed 'items' from dependency array to fix warning
 
   // Add a new empty item
   const addItem = () => {
@@ -143,13 +141,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       }
     }, 0);
   };
-
-  // Update the parent component with the new JSON string when items change
-  // This function might be redundant if all updates call setItems and onChange directly
-  // const updateItems = (newItems: LearningItem[]) => {
-  //   setItems(newItems)
-  //   onChange(JSON.stringify(newItems))
-  // }
 
   // Remove an item
   const removeItem = (id: string) => {
@@ -190,7 +181,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     onChange(JSON.stringify(newItems));
   };
 
-  // ... (rest of your component: handleEmojiSelect, handleInputFocus, handleInputBlur, refs, JSX)
   // Restore focus after re-render if an item was focused
   useEffect(() => {
     if (focusedItemId) {
@@ -216,7 +206,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         }
       }
     }
-  }, [items, focusedItemId, showLinkInput]); // focusedItemId and showLinkInput are sufficient if items don't change refs unnecessarily
+  }, [items, focusedItemId, showLinkInput]);
 
   // Handle clicks outside of emoji picker and link input
   useEffect(() => {
@@ -238,7 +228,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showLinkInput]); // Added showLinkInput as a dependency for the linkInputRef check logic.
+  }, [showLinkInput, items]);
 
   const handleEmojiSelect = (id: string, emojiData: any) => {
     updateItemEmoji(id, emojiData.emoji);

@@ -55,28 +55,28 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
   const [H1Label, setH1Label] = useState('');
   const [H2Label, setH2Label] = useState('');
 
-  function handleLabels() {
-    if (params.subpage == 'general') {
-      setH1Label(t('generalTitle'));
-      setH2Label(t('generalDescription'));
-    } else if (params.subpage == 'previews') {
-      setH1Label(t('previewsTitle'));
-      setH2Label(t('previewsDescription'));
-    } else if (params.subpage == 'socials') {
-      setH1Label(t('socialsTitle'));
-      setH2Label(t('socialsDescription'));
-    } else if (params.subpage == 'landing') {
-      setH1Label(t('landingTitle'));
-      setH2Label(t('landingDescription'));
-    } else if (params.subpage == 'other') {
-      setH1Label(t('other'));
-      setH2Label(t('Manage additional organization settings'));
-    }
-  }
-
   useEffect(() => {
+    const handleLabels = () => {
+      if (params.subpage == 'general') {
+        setH1Label(t('generalTitle'));
+        setH2Label(t('generalDescription'));
+      } else if (params.subpage == 'previews') {
+        setH1Label(t('previewsTitle'));
+        setH2Label(t('previewsDescription'));
+      } else if (params.subpage == 'socials') {
+        setH1Label(t('socialsTitle'));
+        setH2Label(t('socialsDescription'));
+      } else if (params.subpage == 'landing') {
+        setH1Label(t('landingTitle'));
+        setH2Label(t('landingDescription'));
+      } else if (params.subpage == 'other') {
+        setH1Label(t('other'));
+        setH2Label(t('Manage additional organization settings'));
+      }
+    };
+
     handleLabels();
-  }, [params.subpage, params]);
+  }, [params.subpage, t]);
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">

@@ -16,7 +16,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 
@@ -41,7 +41,7 @@ const CourseClient = (props: any) => {
 
   console.log(course);
 
-  function getLearningTags() {
+  const getLearningTags = useCallback(() => {
     if (!course?.learnings) {
       setLearnings([]);
       return;
@@ -67,7 +67,7 @@ const CourseClient = (props: any) => {
     }));
 
     setLearnings(learningItems);
-  }
+  }, [course?.learnings]);
 
   useEffect(() => {
     getLearningTags();
@@ -84,7 +84,7 @@ const CourseClient = (props: any) => {
       });
       setExpandedChapters(defaultExpanded);
     }
-  }, [org, course]);
+  }, [org, course, getLearningTags]);
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {

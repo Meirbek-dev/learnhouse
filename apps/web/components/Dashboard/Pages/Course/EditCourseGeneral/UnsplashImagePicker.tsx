@@ -96,10 +96,10 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
   }, []);
 
   const debouncedFetchImages = useCallback(
-    debounce((searchQuery: string) => {
+    (searchQuery: string) => {
       setPage(1);
       fetchImages(searchQuery, 1);
-    }, 300),
+    },
     [fetchImages],
   );
 
@@ -110,7 +110,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
       setImages([]);
       setPage(1);
     }
-  }, [query, debouncedFetchImages]);
+  }, [query, debouncedFetchImages, page]);
 
   useEffect(() => {
     if (isOpen && images.length === 0 && !query && !loading) {

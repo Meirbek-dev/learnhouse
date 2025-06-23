@@ -180,12 +180,13 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
   // Set up intersection observer to detect when bottom nav is out of viewport
   // and measure the width of the bottom navigation
   useEffect(() => {
-    if (!bottomNavRef.current) return;
+    const bottomNavElement = bottomNavRef.current;
+    if (!bottomNavElement) return;
 
     // Update width when component mounts and on window resize
     const updateWidth = () => {
-      if (bottomNavRef.current) {
-        setNavWidth(bottomNavRef.current.offsetWidth);
+      if (bottomNavElement) {
+        setNavWidth(bottomNavElement.offsetWidth);
       }
     };
 
@@ -202,13 +203,11 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
       { threshold: 0.1 },
     );
 
-    observer.observe(bottomNavRef.current);
+    observer.observe(bottomNavElement);
 
     return () => {
       window.removeEventListener('resize', updateWidth);
-      if (bottomNavRef.current) {
-        observer.unobserve(bottomNavRef.current);
-      }
+      observer.unobserve(bottomNavElement);
     };
   }, []);
 

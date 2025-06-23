@@ -133,7 +133,7 @@ export default function ArtPlayer({
         art.destroy(false);
       }
     };
-  }, []);
+  }, [option, getInstance, subtitle, locale, subtitleEntries, startTime, endTime, onPlayerReady]);
 
   return (
     <div

@@ -8,7 +8,7 @@ import { updateCourse } from '@services/courses/courses';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { mutate } from 'swr';
 
 function SaveState(props: { orgslug: string }) {
@@ -69,38 +69,41 @@ function SaveState(props: { orgslug: string }) {
     dispatchCourse({ type: 'setIsSaved' });
   };
 
-  const handleCourseOrder = (course_structure: any) => {
-    const chapters = course_structure.chapters;
-    const chapter_order_by_ids = chapters.map((chapter: any) => {
-      return {
-        chapter_id: chapter.id,
-        activities_order_by_ids: chapter.activities.map((activity: any) => {
-          return {
-            activity_id: activity.id,
-          };
-        }),
-      };
-    });
-    dispatchCourse({
-      type: 'setCourseOrder',
-      payload: { chapter_order_by_ids: chapter_order_by_ids },
-    });
-    dispatchCourse({ type: 'setIsNotSaved' });
-  };
+  const handleCourseOrder = useCallback(
+    (course_structure: any) => {
+      const chapters = course_structure.chapters;
+      const chapter_order_by_ids = chapters.map((chapter: any) => {
+        return {
+          chapter_id: chapter.id,
+          activities_order_by_ids: chapter.activities.map((activity: any) => {
+            return {
+              activity_id: activity.id,
+            };
+          }),
+        };
+      });
+      dispatchCourse({
+        type: 'setCourseOrder',
+        payload: { chapter_order_by_ids: chapter_order_by_ids },
+      });
+      dispatchCourse({ type: 'setIsNotSaved' });
+    },
+    [dispatchCourse],
+  );
 
-  const initOrderPayload = () => {
+  const initOrderPayload = useCallback(() => {
     if (course_structure?.chapters) {
       handleCourseOrder(course_structure);
       dispatchCourse({ type: 'setIsSaved' });
     }
-  };
+  }, [course_structure, handleCourseOrder, dispatchCourse]);
 
-  const changeOrderPayload = () => {
+  const changeOrderPayload = useCallback(() => {
     if (course_structure?.chapters) {
       handleCourseOrder(course_structure);
       dispatchCourse({ type: 'setIsNotSaved' });
     }
-  };
+  }, [course_structure, handleCourseOrder, dispatchCourse]);
 
   useEffect(() => {
     if (course_structure?.chapters) {
@@ -109,7 +112,7 @@ function SaveState(props: { orgslug: string }) {
     if (course_structure?.chapters && !saved) {
       changeOrderPayload();
     }
-  }, [course_structure]);
+  }, [course_structure, saved, initOrderPayload, changeOrderPayload]);
 
   return (
     <div className="flex space-x-4">

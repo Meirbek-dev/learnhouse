@@ -24,7 +24,7 @@ import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { FormEvent } from 'react';
 
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
@@ -85,33 +85,39 @@ function UserBlockComponent(props: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (props.node.attrs.user_id) {
-      fetchUserById(props.node.attrs.user_id);
-    }
-  }, [props.node.attrs.user_id]);
+  // Destructure props to avoid dependency on entire props object
+  const { updateAttributes, node } = props;
 
-  const fetchUserById = async (userId: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getUser(userId);
-      if (!data) {
-        throw new Error('User not found');
+  const fetchUserById = useCallback(
+    async (userId: string) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await getUser(userId);
+        if (!data) {
+          throw new Error('User not found');
+        }
+        setUserData(data);
+        setUsername(data.username);
+      } catch (err: any) {
+        console.error('Error fetching user by ID:', err);
+        setError(err.detail || t('errorNotFound'));
+        // Clear the invalid user_id from the node attributes
+        updateAttributes({
+          user_id: null,
+        });
+      } finally {
+        setIsLoading(false);
       }
-      setUserData(data);
-      setUsername(data.username);
-    } catch (err: any) {
-      console.error('Error fetching user by ID:', err);
-      setError(err.detail || t('errorNotFound'));
-      // Clear the invalid user_id from the node attributes
-      props.updateAttributes({
-        user_id: null,
-      });
-    } finally {
-      setIsLoading(false);
+    },
+    [t, updateAttributes],
+  );
+
+  useEffect(() => {
+    if (node.attrs.user_id) {
+      fetchUserById(node.attrs.user_id);
     }
-  };
+  }, [node.attrs.user_id, fetchUserById]);
 
   const fetchUserByUsername = async (username: string) => {
     setIsLoading(true);
@@ -122,7 +128,7 @@ function UserBlockComponent(props: any) {
         throw new Error('User not found');
       }
       setUserData(data);
-      props.updateAttributes({
+      updateAttributes({
         user_id: data.id,
       });
     } catch (err: any) {

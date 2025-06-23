@@ -15,14 +15,13 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
-    reactCompiler: false,
-    ppr: false,
+    reactCompiler: true,
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },
   compiler: {
-    styledComponents: false,
+    styledComponents: true,
   },
-  reactStrictMode: false,
+  reactStrictMode: true,
   devIndicators: false,
   output: 'standalone',
 };

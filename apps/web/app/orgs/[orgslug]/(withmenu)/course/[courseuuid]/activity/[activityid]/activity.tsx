@@ -30,7 +30,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
-import React, { useEffect, useRef, useMemo, lazy, Suspense } from 'react';
+import React, { useEffect, useRef, useMemo, lazy, Suspense, useCallback } from 'react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -310,10 +310,10 @@ function ActivityClient(props: ActivityClientProps) {
     return null; // return null if no matching activity is found
   }
 
-  async function getAssignmentUI() {
+  const getAssignmentUI = useCallback(async () => {
     const assignment = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
     setAssignment(assignment.data);
-  }
+  }, [activity.activity_uuid, access_token]);
 
   useEffect(() => {
     if (activity.activity_type == 'TYPE_DYNAMIC') {
@@ -325,7 +325,7 @@ function ActivityClient(props: ActivityClientProps) {
     } else {
       setBgColor(isFocusMode ? 'bg-zinc-950' : 'bg-zinc-950 nice-shadow');
     }
-  }, [activity, pathname, isFocusMode]);
+  }, [activity, pathname, isFocusMode, getAssignmentUI]);
 
   return (
     <>
@@ -1286,7 +1286,17 @@ function AssignmentTools(props: {
     }
   };
 
-  const getGradingBasedOnMethod = async () => {
+  // Helper function to convert numeric grade to alphabet grade
+  function convertNumericToAlphabet(grade: any, maxGrade: any) {
+    const percentage = (grade / maxGrade) * 100;
+    if (percentage >= 90) return 'A';
+    if (percentage >= 80) return 'B';
+    if (percentage >= 70) return 'C';
+    if (percentage >= 60) return 'D';
+    return 'F';
+  }
+
+  const getGradingBasedOnMethod = React.useCallback(async () => {
     const res = await getFinalGrade(
       session.data?.user?.id,
       props.assignment?.assignment_uuid,
@@ -1317,23 +1327,13 @@ function AssignmentTools(props: {
       setFinalGrade(displayGrade);
     } else {
     }
-  };
-
-  // Helper function to convert numeric grade to alphabet grade
-  function convertNumericToAlphabet(grade: any, maxGrade: any) {
-    const percentage = (grade / maxGrade) * 100;
-    if (percentage >= 90) return 'A';
-    if (percentage >= 80) return 'B';
-    if (percentage >= 70) return 'C';
-    if (percentage >= 60) return 'D';
-    return 'F';
-  }
+  }, [session.data?.user?.id, props.assignment?.assignment_uuid, session.data?.tokens?.access_token, t]);
 
   useEffect(() => {
     if (submission && submission.length > 0 && submission[0].submission_status === 'GRADED') {
       getGradingBasedOnMethod();
     }
-  }, [submission, props.assignment]);
+  }, [submission, props.assignment, getGradingBasedOnMethod]);
 
   if (!submission || submission.length === 0) {
     return (

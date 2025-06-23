@@ -111,7 +111,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     if (linkedProducts.length > 0) {
       checkAccess();
     }
-  }, [course.id, course.org_id, session.data?.tokens?.access_token, linkedProducts]);
+  }, [course.id, course.org_id, session.data?.tokens?.access_token, session.data?.user, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {

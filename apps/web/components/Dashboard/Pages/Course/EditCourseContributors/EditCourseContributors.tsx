@@ -238,7 +238,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
     if (org?.slug && access_token) {
       searchUsers();
     }
-  }, [debouncedSearch, org?.slug, access_token]);
+  }, [debouncedSearch, org?.slug, access_token, t]);
 
   useEffect(() => {
     if (contributors) {

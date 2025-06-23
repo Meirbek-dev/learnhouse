@@ -7,7 +7,8 @@
     "dev-https": "next dev --experimental-https -p 443",
     "build": "next build",
     "start": "next start",
-    "start-standalone": "node ./.next/standalone/server.js",
+    "start-standalone": "node ./.next/standalone/apps/web/server.js",
+    "postbuild": "xcopy .\\.next\\static .\\.next\\standalone\\.next\\static /E /I /Y || cp -r ./.next/static ./.next/standalone/.next/static",
     "lint": "next lint",
     "lint:fix": "eslint --fix .",
     "typecheck": "tsc --noEmit",
@@ -64,12 +65,12 @@
     "emblor": "^1.4.8",
     "emoji-picker-react": "^4.12.2",
     "formik": "^2.4.6",
-    "framer-motion": "^12.18.1",
+    "framer-motion": "^12.19.1",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.22",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.522.0",
-    "next": "15.3.4",
+    "next": "^15.3.4",
     "next-auth": "^4.24.11",
     "next-intl": "4.1.0",
     "nextjs-toploader": "^3.8.16",
@@ -112,11 +113,6 @@
     "tailwindcss": "4.1.10",
     "typescript": "5.8.3"
   },
-  "engines": {
-    "node": ">=22.0.0",
-    "pnpm": ">=10.0.0"
-  },
-  "packageManager": "pnpm@10.12.1",
   "pnpm": {
     "overrides": {
       "@types/react": "19.1.8",

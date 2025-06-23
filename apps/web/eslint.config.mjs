@@ -27,7 +27,7 @@ export default defineConfig([
       'unused-imports/no-unused-imports': 'off',
       'no-console': 'off',
       'react/no-unescaped-entities': 'off',
-      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/exhaustive-deps': 'warn',
       // 'react/jsx-no-literals': 'warn',
     },
   },

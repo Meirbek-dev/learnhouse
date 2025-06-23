@@ -108,7 +108,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
     };
 
     fetchUserCourses();
-  }, [userData.id, access_token]);
+  }, [userData.id, access_token, t]);
 
   return (
     <div className="container mx-auto py-8">

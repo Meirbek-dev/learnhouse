@@ -11,7 +11,7 @@ import { createChapter } from '@services/courses/chapters';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Hexagon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { mutate } from 'swr';
@@ -48,7 +48,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
   const [_order, _setOrder] = useState<OrderPayload>();
   const course = useCourse() as any;
-  const course_structure = course ? course.courseStructure : {};
+  const course_structure = useMemo(() => (course ? course.courseStructure : {}), [course]);
   const course_uuid = course ? course.courseStructure.course_uuid : '';
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
   // New Chapter creation

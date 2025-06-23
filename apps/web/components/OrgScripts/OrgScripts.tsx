@@ -3,7 +3,7 @@
 import { useOrg } from '@/components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import type React from 'react';
 
 const OrgScripts: React.FC = () => {
@@ -83,49 +83,50 @@ const OrgScripts: React.FC = () => {
   };
 
   // Function to safely load and execute a script
-  const loadScript = (scriptContent: string, scriptName: string) => {
-    try {
-      if (isScriptLoaded(scriptName) || !scriptContent.trim()) {
-        return;
-      }
-
-      const safeScriptId = `learnhouse-org-script-${scriptName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Math.random().toString(36).substr(2, 9)}`;
-
-      cleanupExistingScript(safeScriptId);
-
-      if (scriptContent.trim().toLowerCase().startsWith('<script')) {
-        const sanitizedHtml = sanitizeScriptContent(scriptContent.trim());
-        const div = document.createElement('div');
-        div.innerHTML = sanitizedHtml;
-        const scriptTag = div.querySelector('script');
-
-        if (!scriptTag) {
+  const loadScript = useCallback(
+    (scriptContent: string, scriptName: string) => {
+      try {
+        if (isScriptLoaded(scriptName) || !scriptContent.trim()) {
           return;
         }
 
-        const scriptElement = document.createElement('script');
-        Array.from(scriptTag.attributes).forEach((attr) => {
-          scriptElement.setAttribute(attr.name, attr.value);
-        });
+        const safeScriptId = `learnhouse-org-script-${scriptName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Math.random().toString(36).substr(2, 9)}`;
 
-        if (scriptTag.src) {
-          try {
-            new URL(scriptTag.src);
-            scriptElement.async = true;
-            scriptElement.onload = () => {
-              scriptElement.dataset.loaded = 'true';
-            };
-            scriptElement.onerror = (error) => {
-              console.error(t('failedToLoadExternalScript', { scriptName }), error);
-              cleanupExistingScript(safeScriptId);
-            };
-          } catch (error) {
-            console.error(t('invalidScriptUrl', { scriptName }), error);
+        cleanupExistingScript(safeScriptId);
+
+        if (scriptContent.trim().toLowerCase().startsWith('<script')) {
+          const sanitizedHtml = sanitizeScriptContent(scriptContent.trim());
+          const div = document.createElement('div');
+          div.innerHTML = sanitizedHtml;
+          const scriptTag = div.querySelector('script');
+
+          if (!scriptTag) {
             return;
           }
-        } else {
-          const sanitizedContent = sanitizeScriptContent(scriptTag.textContent || '');
-          scriptElement.textContent = `
+
+          const scriptElement = document.createElement('script');
+          Array.from(scriptTag.attributes).forEach((attr) => {
+            scriptElement.setAttribute(attr.name, attr.value);
+          });
+
+          if (scriptTag.src) {
+            try {
+              new URL(scriptTag.src);
+              scriptElement.async = true;
+              scriptElement.onload = () => {
+                scriptElement.dataset.loaded = 'true';
+              };
+              scriptElement.onerror = (error) => {
+                console.error(t('failedToLoadExternalScript', { scriptName }), error);
+                cleanupExistingScript(safeScriptId);
+              };
+            } catch (error) {
+              console.error(t('invalidScriptUrl', { scriptName }), error);
+              return;
+            }
+          } else {
+            const sanitizedContent = sanitizeScriptContent(scriptTag.textContent || '');
+            scriptElement.textContent = `
             /* OpenU Organization Script - ${scriptName} */
             try {
               (function() {
@@ -136,24 +137,24 @@ const OrgScripts: React.FC = () => {
               console.error(t('scriptError', { scriptName }), error);
             }
           `;
-        }
+          }
 
-        scriptElement.id = safeScriptId;
-        scriptElement.dataset.scriptName = scriptName;
-        scriptElement.dataset.loadTime = new Date().toISOString();
-        scriptElement.dataset.type = scriptTag.src ? 'external' : 'inline';
-        scriptElement.dataset.orgId = org?.id;
-        scriptElement.dataset.orgSlug = org?.slug;
+          scriptElement.id = safeScriptId;
+          scriptElement.dataset.scriptName = scriptName;
+          scriptElement.dataset.loadTime = new Date().toISOString();
+          scriptElement.dataset.type = scriptTag.src ? 'external' : 'inline';
+          scriptElement.dataset.orgId = org?.id;
+          scriptElement.dataset.orgSlug = org?.slug;
 
-        const comment = document.createComment(` OpenU Organization Script - ${scriptName} (${safeScriptId}) `);
-        document.body.appendChild(comment);
-        document.body.appendChild(scriptElement);
-      } else {
-        const scriptElement = document.createElement('script');
-        scriptElement.type = 'text/javascript';
+          const comment = document.createComment(` OpenU Organization Script - ${scriptName} (${safeScriptId}) `);
+          document.body.appendChild(comment);
+          document.body.appendChild(scriptElement);
+        } else {
+          const scriptElement = document.createElement('script');
+          scriptElement.type = 'text/javascript';
 
-        const sanitizedContent = sanitizeScriptContent(scriptContent);
-        scriptElement.textContent = `
+          const sanitizedContent = sanitizeScriptContent(scriptContent);
+          scriptElement.textContent = `
           /* OpenU Organization Script - ${scriptName} */
           try {
             (function() {
@@ -165,21 +166,23 @@ const OrgScripts: React.FC = () => {
           }
         `;
 
-        scriptElement.id = safeScriptId;
-        scriptElement.dataset.scriptName = scriptName;
-        scriptElement.dataset.loadTime = new Date().toISOString();
-        scriptElement.dataset.type = 'raw';
-        scriptElement.dataset.orgId = org?.id;
-        scriptElement.dataset.orgSlug = org?.slug;
+          scriptElement.id = safeScriptId;
+          scriptElement.dataset.scriptName = scriptName;
+          scriptElement.dataset.loadTime = new Date().toISOString();
+          scriptElement.dataset.type = 'raw';
+          scriptElement.dataset.orgId = org?.id;
+          scriptElement.dataset.orgSlug = org?.slug;
 
-        const comment = document.createComment(` OpenU Organization Script - ${scriptName} (${safeScriptId}) `);
-        document.body.appendChild(comment);
-        document.body.appendChild(scriptElement);
+          const comment = document.createComment(` OpenU Organization Script - ${scriptName} (${safeScriptId}) `);
+          document.body.appendChild(comment);
+          document.body.appendChild(scriptElement);
+        }
+      } catch (error) {
+        console.error(t('failedToLoadScript', { scriptName }), error);
       }
-    } catch (error) {
-      console.error(t('failedToLoadScript', { scriptName }), error);
-    }
-  };
+    },
+    [t, org?.id, org?.slug],
+  );
 
   useEffect(() => {
     if (!(org?.scripts?.scripts && Array.isArray(org.scripts.scripts))) {
@@ -196,14 +199,13 @@ const OrgScripts: React.FC = () => {
         loadScript(script.content, scriptName);
       }
     });
-
     return () => {
       const scripts = document.querySelectorAll('script[id^="learnhouse-org-script-"]');
       scripts.forEach((script) => {
         cleanupExistingScript(script.id);
       });
     };
-  }, [org]);
+  }, [org, loadScript]);
 
   return null;
 };

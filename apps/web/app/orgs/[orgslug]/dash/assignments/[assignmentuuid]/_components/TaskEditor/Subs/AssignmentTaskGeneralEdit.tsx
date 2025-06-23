@@ -19,7 +19,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useFormik } from 'formik';
 import Link from 'next/link';
@@ -215,14 +215,14 @@ function UpdateTaskRef() {
     }
   };
 
-  async function getActivityUI() {
+  const getActivityUI = useCallback(async () => {
     const res = await getActivityByID(assignment.assignment_object.activity_id, null, access_token);
     setActivity(res.data);
-  }
+  }, [assignment.assignment_object.activity_id, access_token]);
 
   useEffect(() => {
     getActivityUI();
-  }, [assignmentTaskState, org]);
+  }, [getActivityUI]);
 
   return (
     <div className="h-[200px] w-auto rounded-xl bg-gray-50 shadow-sm outline-gray-200">

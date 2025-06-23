@@ -14,7 +14,7 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -209,7 +209,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     });
   }
 
-  async function getAssignmentTaskUI() {
+  const getAssignmentTaskUI = useCallback(async () => {
     if (assignmentTaskUUID) {
       const res = await getAssignmentTask(assignmentTaskUUID, access_token);
       if (res.success) {
@@ -217,9 +217,9 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         setQuestions(res.data.contents.questions);
       }
     }
-  }
+  }, [assignmentTaskUUID, access_token]);
 
-  async function getAssignmentTaskSubmissionFromUserUI() {
+  const getAssignmentTaskSubmissionFromUserUI = useCallback(async () => {
     if (assignmentTaskUUID) {
       const res = await getAssignmentTaskSubmissionsMe(
         assignmentTaskUUID,
@@ -237,7 +237,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         });
       }
     }
-  }
+  }, [assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
 
   // Detect changes between initial and current submissions
   useEffect(() => {
@@ -302,7 +302,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
 
   /* GRADING VIEW CODE */
   const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
-  async function getAssignmentTaskSubmissionFromIdentifiedUserUI() {
+  const getAssignmentTaskSubmissionFromIdentifiedUserUI = useCallback(async () => {
     if (assignmentTaskUUID && user_id) {
       const res = await getAssignmentTaskSubmissionsUser(
         assignmentTaskUUID,
@@ -322,7 +322,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         });
       }
     }
-  }
+  }, [assignmentTaskUUID, user_id, assignment.assignment_object.assignment_uuid, access_token]);
 
   async function gradeFC() {
     if (assignmentTaskUUID) {
@@ -388,7 +388,18 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       //setQuestions(assignmentTaskState.assignmentTask.contents.questions);
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [assignmentTaskState, assignment, assignmentTaskStateHook, access_token]);
+  }, [
+    assignmentTaskState,
+    assignment,
+    assignmentTaskStateHook,
+    access_token,
+    assignmentTaskUUID,
+    view,
+    user_id,
+    getAssignmentTaskUI,
+    getAssignmentTaskSubmissionFromUserUI,
+    getAssignmentTaskSubmissionFromIdentifiedUserUI,
+  ]);
 
   if (questions && questions.length >= 0) {
     return (

@@ -13,7 +13,7 @@ import * as Form from '@radix-ui/react-form';
 import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BarLoader } from 'react-spinners';
 import type { ChangeEvent } from 'react';
 import toast from 'react-hot-toast';
@@ -84,20 +84,19 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       }
     },
   });
-
-  const getOrgMetadata = async () => {
+  const getOrgMetadata = useCallback(async () => {
     const org = await getOrganizationContextInfoWithoutCredentials(orgslug, {
       revalidate: 360,
       tags: ['organizations'],
     });
     setOrgId(org.id);
-  };
+  }, [orgslug]);
 
   useEffect(() => {
     if (orgslug) {
       getOrgMetadata();
     }
-  }, [orgslug]);
+  }, [orgslug, getOrgMetadata]);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

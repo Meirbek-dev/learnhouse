@@ -8,7 +8,7 @@ import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 
@@ -23,10 +23,13 @@ function AssignmentsHome() {
     swrFetcher(url, access_token),
   );
 
-  async function getAvailableAssignmentsForCourse(course_uuid: string) {
-    const res = await getAssignmentsFromACourse(course_uuid, access_token);
-    return res.data;
-  }
+  const getAvailableAssignmentsForCourse = useCallback(
+    async (course_uuid: string) => {
+      const res = await getAssignmentsFromACourse(course_uuid, access_token);
+      return res.data;
+    },
+    [access_token],
+  );
 
   function removeAssignmentPrefix(assignment_uuid: string) {
     return assignment_uuid.replace('assignment_', '');
@@ -46,7 +49,7 @@ function AssignmentsHome() {
         setCourseAssignments(results);
       });
     }
-  }, [courses]);
+  }, [courses, getAvailableAssignmentsForCourse]);
 
   return (
     <div className="flex w-full">

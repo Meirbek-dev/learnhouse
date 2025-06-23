@@ -294,7 +294,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
     if (isOpen) {
       fetchConfig();
     }
-  }, [isOpen, orgId, configId, accessToken]);
+  }, [isOpen, orgId, configId, accessToken, t]);
 
   const handleSubmit = async () => {
     const loadingToast = toast.loading(t('updatingConfig'));
@@ -329,7 +329,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
               placeholder="acct_..."
             />
           </FormField>
-          <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
+          <Flex className="mt-6 justify-end">
             <ButtonBlack
               type="submit"
               className="rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-300 hover:bg-blue-600"

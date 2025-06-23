@@ -18,9 +18,9 @@ import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
 import { useFormik } from 'formik';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import type { FC } from 'react';
 import { mutate } from 'swr';
+import { cn } from '@/lib/utils';
 
 interface Assignment {
   assignment_uuid: string;
@@ -77,7 +77,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
   return (
     <FormLayout onSubmit={formik.handleSubmit}>
       <FormField name="title">
-        <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Flex className="items-baseline justify-between">
           <FormLabel>{t('assignmentTitle')}</FormLabel>
           <FormMessage match="valueMissing">{t('valueMissingTitle')}</FormMessage>
         </Flex>
@@ -92,7 +92,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
       </FormField>
 
       <FormField name="description">
-        <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Flex className="items-baseline justify-between">
           <FormLabel>{t('assignmentDescription')}</FormLabel>
           <FormMessage match="valueMissing">{t('valueMissingDescription')}</FormMessage>
         </Flex>
@@ -106,7 +106,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
       </FormField>
 
       <FormField name="due_date">
-        <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Flex className="items-baseline justify-between">
           <FormLabel>{t('dueDate')}</FormLabel>
           <FormMessage match="valueMissing">{t('valueMissingDueDate')}</FormMessage>
         </Flex>
@@ -155,7 +155,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
       </FormField>
 
       <FormField name="grading_type">
-        <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Flex className="items-baseline justify-between">
           <FormLabel>{t('gradingType')}</FormLabel>
           <FormMessage match="valueMissing">{t('valueMissingGradingType')}</FormMessage>
         </Flex>

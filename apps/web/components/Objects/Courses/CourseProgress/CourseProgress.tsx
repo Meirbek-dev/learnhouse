@@ -1,7 +1,7 @@
 import { Check, Square, ArrowRight, Folder, FileText, Video, Layers, BookOpenCheck } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUriWithOrg } from '@services/config/config';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { FC } from 'react';
 import Link from 'next/link';
 
@@ -16,6 +16,21 @@ interface CourseProgressProps {
 const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onClose, trailData }) => {
   const [completedActivities, setCompletedActivities] = useState(0);
   const [totalActivities, setTotalActivities] = useState(0);
+
+  const isActivityDone = useCallback(
+    (activity: any) => {
+      const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+      const run = trailData?.runs?.find((run: any) => {
+        const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+        return cleanRunCourseUuid === cleanCourseUuid;
+      });
+      if (run) {
+        return run.steps.find((step: any) => step.activity_id === activity.id);
+      }
+      return false;
+    },
+    [course.course_uuid, trailData?.runs],
+  );
 
   useEffect(() => {
     let total = 0;
@@ -32,19 +47,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
 
     setTotalActivities(total);
     setCompletedActivities(completed);
-  }, [course]);
-
-  const isActivityDone = (activity: any) => {
-    const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-    const run = trailData?.runs?.find((run: any) => {
-      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
-      return cleanRunCourseUuid === cleanCourseUuid;
-    });
-    if (run) {
-      return run.steps.find((step: any) => step.activity_id === activity.id);
-    }
-    return false;
-  };
+  }, [course.chapters, isActivityDone]);
 
   const getActivityTypeIcon = (activityType: string) => {
     switch (activityType) {

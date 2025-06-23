@@ -157,6 +157,7 @@ MemoizedEmbed.displayName = 'MemoizedEmbed';
 
 function EmbedObjectsComponent(props: any) {
   const t = useTranslations('DashPage.Editor.EmbedObjects');
+  const { updateAttributes } = props;
   const [embedType, setEmbedType] = useState<'url' | 'code'>(props.node.attrs.embedType || 'url');
   const [embedUrl, setEmbedUrl] = useState(props.node.attrs.embedUrl || '');
   const [embedCode, setEmbedCode] = useState(props.node.attrs.embedCode || '');
@@ -187,11 +188,11 @@ function EmbedObjectsComponent(props: any) {
           const percentage = Number.parseInt(embedWidth, 10);
           const newWidth = `${Math.min(100, percentage)}%`;
           setEmbedWidth(newWidth);
-          props.updateAttributes({ embedWidth: newWidth });
+          updateAttributes({ embedWidth: newWidth });
         } else if (newParentWidth < Number.parseInt(String(embedWidth), 10)) {
           // If parent is smaller than current width, adjust to fit
           setEmbedWidth('100%');
-          props.updateAttributes({ embedWidth: '100%' });
+          updateAttributes({ embedWidth: '100%' });
         }
       }
     };
@@ -212,7 +213,7 @@ function EmbedObjectsComponent(props: any) {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [embedWidth, updateAttributes]);
 
   const supportedProducts = [
     {

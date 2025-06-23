@@ -1,22 +1,31 @@
 {
   "name": "openu",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "start": "turbo run start",
+    "start-standalone": "node ./apps/web/.next/standalone/apps/web/server.js",
+    "postbuild": "xcopy .\\.next\\static .\\.next\\standalone\\.next\\static /E /I /Y || cp -r ./.next/static ./.next/standalone/.next/static",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{js,ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{js,ts,tsx,md,css}\"",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "fresh-install": "rm -rf node_modules apps/web/node_modules && pnpm install"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.4",
     "eslint": "^9.29.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.0",
     "prettier-plugin-tailwindcss": "^0.6.13",
     "turbo": "^2.5.4"
   },
   "packageManager": "pnpm@10.12.1",
-  "dependencies": {
-    "openu": "file:"
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
   }
 }

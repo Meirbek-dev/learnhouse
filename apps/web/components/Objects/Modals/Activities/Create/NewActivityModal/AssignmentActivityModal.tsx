@@ -126,7 +126,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
   return (
     <FormLayout onSubmit={handleSubmit}>
       <FormField name="assignment-activity-title">
-        <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Flex className="items-baseline justify-between">
           <FormLabel>{t('assignmentTitle')}</FormLabel>
           <FormMessage match="valueMissing">{t('valueMissingTitle')}</FormMessage>
         </Flex>
@@ -141,7 +141,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
 
       {/* Description  */}
       <FormField name="assignment-activity-description">
-        <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Flex className="items-baseline justify-between">
           <FormLabel>{t('assignmentDescription')}</FormLabel>
           <FormMessage match="valueMissing">{t('valueMissingDescription')}</FormMessage>
         </Flex>
@@ -156,7 +156,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
 
       {/* Due date  */}
       <FormField name="assignment-activity-due-date">
-        <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Flex className="items-baseline justify-between">
           <FormLabel>{t('dueDate')}</FormLabel>
           <FormMessage match="valueMissing">{t('valueMissingDueDate')}</FormMessage>
         </Flex>
@@ -191,7 +191,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
 
       {/* Grading type  */}
       <FormField name="assignment-activity-grading-type">
-        <Flex css={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Flex className="items-baseline justify-between">
           <FormLabel>{t('gradingType')}</FormLabel>
           <FormMessage match="valueMissing">{t('valueMissingGradingType')}</FormMessage>
         </Flex>
@@ -208,11 +208,11 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
         </Form.Control>
       </FormField>
 
-      <Flex css={{ marginTop: 25, justifyContent: 'flex-end' }}>
+      <Flex className="mt-6 justify-end">
         <Form.Submit asChild>
           <ButtonBlack
             type="submit"
-            css={{ marginTop: 10 }}
+            className="mt-2.5"
           >
             {isSubmitting ? (
               <BarLoader

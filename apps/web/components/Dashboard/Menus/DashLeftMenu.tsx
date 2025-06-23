@@ -9,7 +9,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import openuLogoLight from '@public/openu_logo_light.png';
 import UserAvatar from '../../Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -24,9 +24,9 @@ function DashLeftMenu() {
   });
   const t = useTranslations('DashboardMenu');
 
-  function waitForEverythingToLoad() {
+  const waitForEverythingToLoad = useCallback(() => {
     return org && session;
-  }
+  }, [org, session]);
 
   async function logOutUI() {
     const res = await signOut({
@@ -42,7 +42,7 @@ function DashLeftMenu() {
     if (waitForEverythingToLoad()) {
       setLoading(false);
     }
-  }, [loading]);
+  }, [waitForEverythingToLoad]);
 
   return (
     <div
