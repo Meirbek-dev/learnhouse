@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import openuIcon from 'public/dark_logo.png';
+import openuLogoDark from 'public/openu_logo_dark.png';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ export default async function NotFound() {
           quality={100}
           width={270}
           height={100}
-          src={openuIcon}
+          src={openuLogoDark}
           alt="logo"
         />
       </div>

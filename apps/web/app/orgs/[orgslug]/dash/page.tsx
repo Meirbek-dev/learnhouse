@@ -1,6 +1,7 @@
-import { BookCopy, School, Settings, University, Users } from 'lucide-react';
+import touEmblemLight from 'public/tou_emblem_light.png';
+import { BookCopy, School, Settings, Users } from 'lucide-react';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
-import openuTextlogo from '../../../../public/openu_logo.png';
+import openuLogoDark from '../../../../public/openu_logo_dark.png';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
@@ -14,9 +15,9 @@ async function DashboardHome() {
       <div className="mx-auto pb-6 sm:pb-10">
         <Image
           alt={t('openuLogo')}
-          width={230}
-          src={openuTextlogo}
-          className="w-48 sm:w-auto"
+          width={210}
+          src={openuLogoDark}
+          className="w-48 pb-24 sm:w-auto"
         />
       </div>
       <AdminAuthorization authorizationMode="component">
@@ -64,11 +65,12 @@ async function DashboardHome() {
             <Link
               href={'https://tou.edu.kz/ru/'}
               target="_blank"
-              className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-black px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
+              className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-sky-900 px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
             >
-              <University
-                className="text-gray-100/100"
-                size={20}
+              <Image
+                width={26}
+                src={touEmblemLight}
+                alt={t('touUniversity')}
               />
               <div className="text-sm font-bold text-gray-100/100">{t('touUniversity')}</div>
             </Link>

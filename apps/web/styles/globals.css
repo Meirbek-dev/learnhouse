@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -95,7 +95,6 @@
 }
 
 @layer base {
-
   *,
   ::after,
   ::before,
@@ -133,7 +132,15 @@
     padding: 0;
     margin: 0;
     transition: all 0.2s ease;
-    font-family: var(--font-inter), Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family:
+      var(--font-inter),
+      Inter,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
   }
 
   a {
@@ -157,7 +164,7 @@
   }
 
   /* Basic editor styles */
-  .ProseMirror>*+* {
+  .ProseMirror > * + * {
     margin-top: 0.75em;
   }
 

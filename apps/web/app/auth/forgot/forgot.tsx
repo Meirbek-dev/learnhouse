@@ -4,7 +4,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { sendResetLink } from '@services/auth/auth';
 import { AlertTriangle, Info } from 'lucide-react';
-import darkLogo from 'public/dark_logo.png';
+import openuLogoDark from 'public/openu_logo_dark.png';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
@@ -62,7 +62,7 @@ function ForgotPasswordClient() {
                 quality={100}
                 width={230}
                 height={100}
-                src={darkLogo}
+                src={openuLogoDark}
                 alt="OpenU logo"
               />
             </Link>

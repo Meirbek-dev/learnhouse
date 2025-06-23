@@ -15,7 +15,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import openuAI_icon from 'public/openu_ai_simple.png';
+import touEmblemLight from 'public/tou_emblem_light.png';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
@@ -77,15 +77,14 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                     background:
                       'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
                   }}
-                  className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
+                  className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10"
                 >
                   <div className="flex space-x-2">
                     <div className="pr-1">
                       <div className="flex w-full items-center space-x-2 font-bold text-white/80">
                         <Image
-                          className="rounded-lg outline-neutral-200/20"
-                          width={24}
-                          src={openuAI_icon}
+                          width={28}
+                          src={touEmblemLight}
                           alt={t('aiIconAlt')}
                         />
                         <div className="flex items-center">
@@ -430,11 +429,10 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         }}
         className="max-w-(--breakpoint-2xl) fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
       >
-        <div className="flex justify-center space-x-2">
+        <div className="flex justify-center">
           <Image
-            className="rounded-lg outline-neutral-200/20"
-            width={24}
-            src={openuAI_icon}
+            width={32}
+            src={touEmblemLight}
             alt="OpenU logo"
           />
         </div>

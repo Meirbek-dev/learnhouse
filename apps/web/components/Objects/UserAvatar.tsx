@@ -59,7 +59,7 @@ function UserAvatar(props: UserAvatarProps) {
   const getAvatarUrl = (): string => {
     // If predefined avatar is specified
     if (props.predefined_avatar) {
-      const avatarType = props.predefined_avatar === 'ai' ? 'ai_avatar.png' : 'empty_avatar.png';
+      const avatarType = props.predefined_avatar === 'ai' ? 'tou_emblem_light.png' : 'empty_avatar.png';
       return getUriWithOrg(params.orgslug, `/${avatarType}`);
     }
 

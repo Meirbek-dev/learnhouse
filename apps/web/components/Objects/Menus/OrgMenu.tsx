@@ -1,11 +1,8 @@
 'use client';
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { SearchBar } from '@components/Objects/Search/SearchBar';
-import { getOrgLogoMediaDirectory } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { OpenULogo100 } from '@components/svg/OpenU';
+import { OpenULogoSVG } from '@components/svg/openuLogoSvg';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import MenuLinks from './OrgMenuLinks';
@@ -15,10 +12,7 @@ import Link from 'next/link';
 
 export const OrgMenu = (props: any) => {
   const orgslug = props.orgslug;
-  const session = useLHSession() as any;
-  const _access_token = session?.data?.tokens?.access_token;
   const [_feedbackModal, setFeedbackModal] = React.useState(false);
-  const org = useOrg() as any;
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const pathname = usePathname();
@@ -77,17 +71,8 @@ export const OrgMenu = (props: any) => {
           <div className="flex w-full items-center space-x-5 md:w-auto">
             <div className="logo flex w-full justify-center md:w-auto">
               <Link href={getUriWithOrg(orgslug, '/')}>
-                <div className="m-auto flex h-9 w-auto items-center justify-center rounded-md py-1">
-                  {org?.logo_image ? (
-                    <img
-                      src={`${getOrgLogoMediaDirectory(org.org_uuid, org?.logo_image)}`}
-                      alt={org?.name}
-                      style={{ width: 'auto', height: '100%' }}
-                      className="rounded-md"
-                    />
-                  ) : (
-                    <OpenULogo100 />
-                  )}
+                <div className="m-auto flex h-auto w-auto items-center justify-center rounded-md py-1">
+                  <OpenULogoSVG />
                 </div>
               </Link>
             </div>

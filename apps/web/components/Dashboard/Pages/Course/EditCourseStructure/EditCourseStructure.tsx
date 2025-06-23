@@ -168,7 +168,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                     size={16}
                     className="text-sm text-white"
                   />
-                  <div className="text-sm font-bold">{t('addChapterButton')}</div>
+                  <div className="text-sm font-semibold">{t('addChapterButton')}</div>
                 </div>
               </div>
             }

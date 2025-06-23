@@ -3,7 +3,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Loader2, AlertTriangle } from 'lucide-react';
-import openuIcon from 'public/openu_icon.png';
+import touEmblemDark from 'public/tou_emblem_dark.png';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -64,7 +64,7 @@ function StripeConnectCallback() {
             quality={100}
             width={50}
             height={50}
-            src={openuIcon}
+            src={touEmblemDark}
             alt="OpenU logo"
           />
         </div>

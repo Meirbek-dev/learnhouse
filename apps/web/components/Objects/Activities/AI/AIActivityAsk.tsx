@@ -4,13 +4,12 @@ import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@c
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
 import { AlertTriangle, BadgeInfo, NotebookTabs } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import openuAI_logo_black from 'public/openu_ai_black_logo.png';
 import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
 import { FlaskConical, MessageCircle, X } from 'lucide-react';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { KeyboardEvent, ChangeEvent } from 'react';
-import openuAI_icon from 'public/openu_ai_simple.png';
+import touEmblemLight from 'public/tou_emblem_light.png';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -40,19 +39,16 @@ function AIActivityAsk(props: AIActivityAskProps) {
             onClick={() => dispatchAIChatBot({ type: 'setIsModalOpen' })}
             style={{
               background:
-                'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)',
+                'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(66, 35, 202, 0.88) 281deg)',
             }}
-            className="flex items-center space-x-1.5 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
+            className="flex items-center space-x-1 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
           >
-            {' '}
-            <i>
-              <Image
-                className="rounded-md outline-neutral-200/20"
-                width={20}
-                src={openuAI_icon}
-                alt={t('askAI')}
-              />
-            </i>{' '}
+            <Image
+              className="rounded-md outline-neutral-200/20"
+              width={24}
+              src={touEmblemLight}
+              alt={t('askAI')}
+            />
             <i className="text-xs font-bold not-italic">{t('askAI')}</i>
           </div>
         </div>
@@ -216,7 +212,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                 />
               </div>
               <div
-                className={`-ml-[100px] flex items-center space-x-2 ${
+                className={`-ml-[120px] flex items-center space-x-1 ${
                   aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
                 }`}
               >
@@ -224,11 +220,11 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                   className={`rounded-lg outline-neutral-200/20 ${
                     aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
                   }`}
-                  width={24}
-                  src={openuAI_icon}
+                  width={28}
+                  src={touEmblemLight}
                   alt={t('askAI')}
                 />
-                <span className="text-sm font-semibold text-white/70"> {t('AI')}</span>
+                <span className="text-sm font-bold text-white"> {t('AI')}</span>
               </div>
               <div className="flex items-center space-x-1 rounded-full bg-white/5 px-3 py-0.5 text-white/40">
                 <FlaskConical size={14} />
@@ -384,13 +380,7 @@ const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }
               delay: 0.17,
             }}
           >
-            <Image
-              width={100}
-              className="mx-auto"
-              src={openuAI_logo_black}
-              alt="Openu AI Logo"
-            />
-            <p className="flex items-center justify-center space-x-2 pt-3 text-2xl font-semibold text-white/70">
+            <p className="flex items-center justify-center space-x-2 pt-4 text-2xl font-semibold text-white/70">
               <span className="items-center">{t('hello')}</span>
               <span className="flex items-center space-x-2 capitalize">
                 <UserAvatar
@@ -398,7 +388,7 @@ const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }
                   border="border-2"
                   width={35}
                 />
-                <span>{session.data.user.username},</span>
+                <span>{session.data.user.first_name ?? session.data.user.username},</span>
               </span>
               <span>{t('howCanWeHelp')}</span>
             </p>

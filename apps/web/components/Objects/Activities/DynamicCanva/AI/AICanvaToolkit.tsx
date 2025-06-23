@@ -4,7 +4,7 @@ import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures';
-import openuAI_icon from 'public/openu_ai_simple.png';
+import touEmblemDark from 'public/tou_emblem_dark.png';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { BubbleMenu } from '@tiptap/react';
@@ -46,7 +46,7 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
               <Image
                 className="rounded-lg outline-neutral-200/10"
                 width={24}
-                src={openuAI_icon}
+                src={touEmblemDark}
                 alt={t('aiIconAlt')}
               />
               <div>{t('aiTitle')}</div>

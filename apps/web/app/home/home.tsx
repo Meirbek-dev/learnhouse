@@ -4,7 +4,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ArrowRightCircle, Info } from 'lucide-react';
-import openuIcon from 'public/dark_logo.png';
+import openuLogoDark from 'public/openu_logo_dark.png';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
 import { useEffect } from 'react';
@@ -28,7 +28,7 @@ function HomeClient() {
           quality={100}
           width={230}
           height={100}
-          src={openuIcon}
+          src={openuLogoDark}
           alt="OpenU Logo"
         />
       </div>

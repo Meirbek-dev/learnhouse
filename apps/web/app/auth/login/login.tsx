@@ -2,7 +2,7 @@
 import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { AlertTriangle, UserRoundPlus } from 'lucide-react';
-import darkLogo from 'public/dark_logo.png';
+import openuLogoDark from 'public/openu_logo_dark.png';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
 import { signIn } from 'next-auth/react';
@@ -88,7 +88,7 @@ const LoginClient = (props: LoginClientProps) => {
                 quality={100}
                 width={230}
                 height={100}
-                src={darkLogo}
+                src={openuLogoDark}
                 alt="OpenU logo"
               />
             </Link>

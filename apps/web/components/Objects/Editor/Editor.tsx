@@ -3,8 +3,7 @@ import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@comp
 import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons';
 import { ToolbarButtons } from './Toolbar/ToolbarButtons';
 import { useEditor, EditorContent } from '@tiptap/react';
-import openuAI_icon from 'public/openu_ai_simple.png';
-import openuIcon from 'public/openu_icon.png';
+import touEmblemLight from 'public/tou_emblem_light.png';
 import StarterKit from '@tiptap/starter-kit';
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
@@ -216,7 +215,7 @@ function Editor(props: EditorProps) {
                   <EditorInfoOpenULogo
                     width={25}
                     height={25}
-                    src={openuIcon}
+                    src={touEmblemLight}
                     alt="OpenU Logo"
                   />
                 </Link>
@@ -258,20 +257,19 @@ function Editor(props: EditorProps) {
                       }
                       style={{
                         background:
-                          'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)',
+                          'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(66, 35, 202, 0.88) 281deg)',
                       }}
-                      className="flex items-center space-x-1.5 rounded-md px-3 py-2 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
+                      className="flex items-center space-x-1 rounded-md px-3 py-2 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
                       title={t('aiEditor')}
                     >
-                      {' '}
                       <i>
                         <Image
                           className=""
-                          width={20}
-                          src={openuAI_icon}
+                          width={24}
+                          src={touEmblemLight}
                           alt="AI Editor Icon"
                         />
-                      </i>{' '}
+                      </i>
                       <i className="text-xs font-bold not-italic">{t('aiEditor')}</i>
                     </div>
                   )}

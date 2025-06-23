@@ -6,7 +6,7 @@ import AdminAuthorization from '@components/Security/AdminAuthorization';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import { useOrg } from '@components/Contexts/OrgContext';
-import OpenUDashboardLogo from '@public/dashLogo.png';
+import openuLogoLight from '@public/openu_logo_light.png';
 import UserAvatar from '../../Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
@@ -67,7 +67,7 @@ function DashLeftMenu() {
               <Image
                 alt="OpenU лого"
                 width={52}
-                src={OpenUDashboardLogo}
+                src={openuLogoLight}
               />
             </ToolTip>
           </Link>

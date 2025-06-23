@@ -1,6 +1,6 @@
 import * as Form from '@radix-ui/react-form';
 import type { ReactNode } from 'react';
-import * as React from 'react';
+import type * as React from 'react';
 import { Info } from 'lucide-react';
 import { Input as ShadcnInput } from '@/components/ui/input';
 import { Textarea as ShadcnTextarea } from '@/components/ui/textarea';

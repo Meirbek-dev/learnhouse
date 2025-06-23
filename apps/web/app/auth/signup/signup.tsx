@@ -11,7 +11,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { joinOrg } from '@services/organizations/orgs';
 import OpenSignUpComponent from './OpenSignup';
-import openuIcon from 'public/dark_logo.png';
+import openuLogoDark from 'public/openu_logo_dark.png';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { BarLoader } from 'react-spinners';
@@ -51,7 +51,7 @@ function SignUpClient(props: SignUpClientProps) {
               quality={100}
               width={230}
               height={100}
-              src={openuIcon}
+              src={openuLogoDark}
               alt="OpenU logo"
             />
           </Link>

@@ -6,7 +6,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { resetPassword } from '@services/auth/auth';
 import { AlertTriangle, Info } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import openuIcon from 'public/openu_icon.png';
+import touEmblemDark from 'public/tou_emblem_dark.png';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
@@ -91,7 +91,7 @@ function ResetPasswordClient() {
               quality={100}
               width={30}
               height={30}
-              src={openuIcon}
+              src={touEmblemDark}
               alt="OpenU logo"
             />
           </Link>
@@ -112,7 +112,7 @@ function ResetPasswordClient() {
                   quality={100}
                   width={70}
                   height={70}
-                  src={openuIcon}
+                  src={touEmblemDark}
                   alt="OpenU logo"
                 />
               )}
