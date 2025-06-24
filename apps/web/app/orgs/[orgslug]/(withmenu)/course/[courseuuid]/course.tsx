@@ -158,7 +158,8 @@ const CourseClient = (props: any) => {
                     (course.thumbnail_type === 'both' && activeThumbnailType === 'video');
                   const showImage =
                     course.thumbnail_type === 'image' ||
-                    (course.thumbnail_type === 'both' && activeThumbnailType === 'image');
+                    (course.thumbnail_type === 'both' && activeThumbnailType === 'image') ||
+                    !course.thumbnail_type;
 
                   if (showVideo && course.thumbnail_video) {
                     return (
