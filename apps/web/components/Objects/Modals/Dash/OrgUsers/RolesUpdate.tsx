@@ -10,7 +10,7 @@ import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { BarLoader } from 'react-spinners';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
 interface Props {

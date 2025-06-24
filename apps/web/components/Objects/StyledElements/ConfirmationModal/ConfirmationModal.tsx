@@ -6,7 +6,7 @@ import { useState, useCallback } from 'react';
 import { blackA } from '@radix-ui/colors';
 import type { ReactNode } from 'react';
 
-type ModalParams = {
+interface ModalParams {
   confirmationMessage: string;
   confirmationButtonText: string;
   dialogTitle: string;
@@ -14,7 +14,7 @@ type ModalParams = {
   dialogTrigger?: ReactNode;
   status?: 'warning' | 'info';
   buttonid?: string;
-};
+}
 
 const ConfirmationModal = (params: ModalParams) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

@@ -11,12 +11,12 @@ import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
-type EditCourseAccessProps = {
+interface EditCourseAccessProps {
   orgslug: string;
   course_uuid?: string;
-};
+}
 
 function EditCourseAccess(_props: EditCourseAccessProps) {
   const session = useLHSession() as any;
@@ -30,7 +30,7 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
     courseStructure ? `${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}` : null,
     (url) => swrFetcher(url, access_token),
   );
-  const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>(undefined);
+  const [isClientPublic, setIsClientPublic] = useState<boolean | undefined>();
 
   useEffect(() => {
     if (!isLoading && courseStructure?.public !== undefined) {
@@ -56,12 +56,12 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
       {courseStructure && (
         <div>
           <div className="h-6" />
-          <div className="shadow-xs mx-4 rounded-xl bg-white px-4 py-4 sm:mx-10">
+          <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
               <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('accessToTheCourse')}</h1>
               <h2 className="text-xs text-gray-500 sm:text-sm">{t('accessDescription')}</h2>
             </div>
-            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <ConfirmationModal
                 confirmationButtonText={t('changeToPublicButton')}
                 confirmationMessage={t('changeToPublicConfirmMsg')}
@@ -143,7 +143,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
       } else {
         toast.error(t('unlinkUserGroupErrorDetailed', { error: res.data.detail }));
       }
-    } catch (_error) {
+    } catch {
       toast.error(t('unlinkUserGroupErrorGeneric'));
     }
   };
@@ -155,8 +155,8 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
         <h2 className="text-xs text-gray-500 sm:text-sm">{t('description')}</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-          <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
+        <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+          <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
             <tr className="font-bolder text-sm">
               <th className="px-4 py-3">{t('tableHeaderName')}</th>
               <th className="px-4 py-3">{t('tableHeaderActions')}</th>
@@ -189,7 +189,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
           </tbody>
         </table>
       </div>
-      <div className="mr-2 mt-3 flex flex-row-reverse">
+      <div className="mt-3 mr-2 flex flex-row-reverse">
         <Modal
           isDialogOpen={userGroupModal}
           onOpenChange={() => setUserGroupModal(!userGroupModal)}

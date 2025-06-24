@@ -5,13 +5,13 @@ import type { Metadata } from 'next';
 import SignUpClient from './signup';
 import { Suspense } from 'react';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
 export async function generateMetadata(params: MetadataProps): Promise<Metadata> {
-  const orgslug = (await params.searchParams).orgslug;
+  const { orgslug } = await params.searchParams;
   const t = await getTranslations('Auth.Signup');
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 0,
@@ -24,7 +24,7 @@ export async function generateMetadata(params: MetadataProps): Promise<Metadata>
 }
 
 const SignUp = async (params: any) => {
-  const orgslug = (await params.searchParams).orgslug;
+  const { orgslug } = await params.searchParams;
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 0,
     tags: ['organizations'],

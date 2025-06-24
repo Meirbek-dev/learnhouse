@@ -36,19 +36,19 @@ const LinkItem = (props: any) => {
   return (
     <Link href={getUriWithOrg(orgslug, link)}>
       <li className="flex items-center space-x-2 font-medium text-[#909192]">
-        {props.type == 'courses' && (
+        {props.type === 'courses' && (
           <>
             <BookCopy size={20} /> <span>{t('courses')}</span>
           </>
         )}
 
-        {props.type == 'collections' && (
+        {props.type === 'collections' && (
           <>
             <SquareLibrary size={20} /> <span>{t('collections')}</span>
           </>
         )}
 
-        {props.type == 'trail' && (
+        {props.type === 'trail' && (
           <>
             <Signpost size={20} /> <span>{t('trail')}</span>
           </>

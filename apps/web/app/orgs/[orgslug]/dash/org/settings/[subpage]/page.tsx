@@ -12,10 +12,10 @@ import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-export type OrgParams = {
+export interface OrgParams {
   subpage: string;
   orgslug: string;
-};
+}
 
 interface TabItem {
   id: string;
@@ -57,19 +57,19 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
 
   useEffect(() => {
     const handleLabels = () => {
-      if (params.subpage == 'general') {
+      if (params.subpage === 'general') {
         setH1Label(t('generalTitle'));
         setH2Label(t('generalDescription'));
-      } else if (params.subpage == 'previews') {
+      } else if (params.subpage === 'previews') {
         setH1Label(t('previewsTitle'));
         setH2Label(t('previewsDescription'));
-      } else if (params.subpage == 'socials') {
+      } else if (params.subpage === 'socials') {
         setH1Label(t('socialsTitle'));
         setH2Label(t('socialsDescription'));
-      } else if (params.subpage == 'landing') {
+      } else if (params.subpage === 'landing') {
         setH1Label(t('landingTitle'));
         setH2Label(t('landingDescription'));
-      } else if (params.subpage == 'other') {
+      } else if (params.subpage === 'other') {
         setH1Label(t('other'));
         setH2Label(t('Manage additional organization settings'));
       }
@@ -80,10 +80,10 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="nice-shadow flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
+      <div className="nice-shadow flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
         <BreadCrumbs type="org" />
         <div className="my-2 py-2">
-          <div className="w-100 flex flex-col space-y-1">
+          <div className="flex w-100 flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
             <div className="text-md flex font-medium text-gray-400">{H2Label}</div>
           </div>
@@ -107,11 +107,11 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
         transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
         className="flex-1 overflow-y-auto"
       >
-        {params.subpage == 'general' ? <OrgEditGeneral /> : ''}
-        {params.subpage == 'previews' ? <OrgEditImages /> : ''}
-        {params.subpage == 'socials' ? <OrgEditSocials /> : ''}
-        {params.subpage == 'landing' ? <OrgEditLanding /> : ''}
-        {params.subpage == 'other' ? <OrgEditOther /> : ''}
+        {params.subpage === 'general' ? <OrgEditGeneral /> : ''}
+        {params.subpage === 'previews' ? <OrgEditImages /> : ''}
+        {params.subpage === 'socials' ? <OrgEditSocials /> : ''}
+        {params.subpage === 'landing' ? <OrgEditLanding /> : ''}
+        {params.subpage === 'other' ? <OrgEditOther /> : ''}
       </motion.div>
     </div>
   );

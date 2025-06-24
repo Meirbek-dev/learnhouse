@@ -11,11 +11,11 @@ export const CustomHeading = Heading.extend({
     const slug = headingText
       .toLowerCase()
       .trim()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
-      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+      .replaceAll(/[^\w\s-]/g, '') // Remove special characters
+      .replaceAll(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+      .replaceAll(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 
-    const id = slug ? `heading-${slug}` : `heading-${Math.random().toString(36).substr(2, 9)}`;
+    const id = slug ? `heading-${slug}` : `heading-${Math.random().toString(36).slice(2, 9)}`;
 
     return [
       `h${level}`,

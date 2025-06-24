@@ -12,7 +12,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 
 function OrgUserGroups() {
@@ -43,7 +43,7 @@ function OrgUserGroups() {
       } else {
         toast.error(t('errors.deleteUserGroupFailed'), { id: toastId });
       }
-    } catch (_error) {
+    } catch {
       toast.error(t('errors.deleteUserGroupFailed'), { id: toastId });
     }
   };
@@ -84,14 +84,14 @@ function OrgUserGroups() {
   return (
     <>
       <div className="h-6" />
-      <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
+      <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
         <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
           <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
           <h2 className="text-sm text-gray-500">{t('description')}</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-            <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
+          <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+            <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
               <tr className="font-bolder text-sm">
                 <th className="px-4 py-3">{t('userGroupHeader')}</th>
                 <th className="px-4 py-3">{t('descriptionHeader')}</th>
@@ -181,7 +181,7 @@ function OrgUserGroups() {
             </tbody>
           </table>
         </div>
-        <div className="mr-2 mt-3 flex justify-end">
+        <div className="mt-3 mr-2 flex justify-end">
           <Modal
             isDialogOpen={createUserGroupModal}
             onOpenChange={(isOpen) => {

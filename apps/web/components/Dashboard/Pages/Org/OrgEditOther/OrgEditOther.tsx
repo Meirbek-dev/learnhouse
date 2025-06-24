@@ -82,8 +82,8 @@ const OrgEditOther: React.FC = () => {
       setSelectedView('list');
       setCurrentScript(null);
       toast.success(t('scriptSavedSuccess'), { id: loadingToast });
-    } catch (err) {
-      console.error('Error updating organization:', err);
+    } catch (error) {
+      console.error('Error updating organization:', error);
       toast.error(t('scriptSaveError'), { id: loadingToast });
     }
   };
@@ -106,8 +106,8 @@ const OrgEditOther: React.FC = () => {
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
       setScripts(updatedScripts);
       toast.success(t('scriptDeletedSuccess'), { id: loadingToast });
-    } catch (err) {
-      console.error('Error deleting script:', err);
+    } catch (error) {
+      console.error('Error deleting script:', error);
       toast.error(t('scriptDeleteError'), { id: loadingToast });
     }
   };
@@ -174,7 +174,7 @@ const OrgEditOther: React.FC = () => {
                         <h4 className="truncate text-sm font-medium text-gray-800">{script.name}</h4>
                       </div>
                       <pre className="overflow-x-auto rounded border border-gray-200 bg-white/80 p-2 font-mono text-sm text-gray-600">
-                        {script.content.length > 100 ? `${script.content.substring(0, 100)}...` : script.content}
+                        {script.content.length > 100 ? `${script.content.slice(0, 100)}...` : script.content}
                       </pre>
                     </div>
                     <div className="ml-4 flex space-x-2">

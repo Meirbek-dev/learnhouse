@@ -40,7 +40,7 @@ export default function MiniInfoTooltip({
       <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 transform bg-white" />
       <button
         onClick={onClose}
-        className="absolute right-1 top-1 text-gray-400 hover:text-gray-600"
+        className="absolute top-1 right-1 text-gray-400 hover:text-gray-600"
       >
         <X size={14} />
       </button>

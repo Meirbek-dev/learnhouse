@@ -24,7 +24,7 @@ function getArtplayerLocale(locale: string) {
   try {
     return require('@/messages/Artplayer')[locale] || undefined;
   } catch {
-    return undefined;
+    return;
   }
 }
 
@@ -101,7 +101,7 @@ export default function ArtPlayer({
           backgroundColor: 'rgba(0, 0, 0, 0.8)',
           textAlign: 'center',
         },
-        encoding: 'utf-8',
+        encoding: 'utf8',
       },
     });
 

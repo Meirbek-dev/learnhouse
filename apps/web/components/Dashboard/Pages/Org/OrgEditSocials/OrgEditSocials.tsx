@@ -46,7 +46,7 @@ export default function OrgEditSocials() {
 
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
       toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
-    } catch (_err) {
+    } catch {
       toast.error(t('orgUpdateFailed'), { id: loadingToast });
     }
   };
@@ -233,7 +233,7 @@ export default function OrgEditSocials() {
                 </div>
               </div>
 
-              <div className="mx-5 mb-5 mt-3 flex flex-row-reverse">
+              <div className="mx-5 mt-3 mb-5 flex flex-row-reverse">
                 <Button
                   type="submit"
                   disabled={isSubmitting}

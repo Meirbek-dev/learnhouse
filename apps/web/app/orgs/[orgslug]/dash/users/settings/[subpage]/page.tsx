@@ -14,10 +14,10 @@ import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-export type SettingsParams = {
+export interface SettingsParams {
   subpage: string;
   orgslug: string;
-};
+}
 
 function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
   const params = use(props.params);
@@ -30,19 +30,19 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
 
   useEffect(() => {
     const handleLabels = () => {
-      if (params.subpage == 'users') {
+      if (params.subpage === 'users') {
         setH1Label(t('usersTitle'));
         setH2Label(t('usersDescription'));
       }
-      if (params.subpage == 'signups') {
+      if (params.subpage === 'signups') {
         setH1Label(t('signupsTitle'));
         setH2Label(t('signupsDescription'));
       }
-      if (params.subpage == 'add') {
+      if (params.subpage === 'add') {
         setH1Label(t('addTitle'));
         setH2Label(t('addDescription'));
       }
-      if (params.subpage == 'usergroups') {
+      if (params.subpage === 'usergroups') {
         setH1Label(t('usergroupsTitle'));
         setH2Label(t('usergroupsDescription'));
       }
@@ -70,10 +70,10 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
 
   return (
     <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
-      <div className="z-10 bg-[#fcfbfc] pl-10 pr-10 tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+      <div className="z-10 bg-[#fcfbfc] pr-10 pl-10 tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
         <BreadCrumbs type="orgusers" />
         <div className="my-2 py-3">
-          <div className="w-100 flex flex-col space-y-1">
+          <div className="flex w-100 flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
             <div className="text-md flex font-medium text-gray-400">{H2Label} </div>
           </div>
@@ -136,10 +136,10 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
         transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
         className="flex-1 overflow-y-auto"
       >
-        {params.subpage == 'users' ? <OrgUsers /> : ''}
-        {params.subpage == 'signups' ? <OrgAccess /> : ''}
-        {params.subpage == 'add' ? <OrgUsersAdd /> : ''}
-        {params.subpage == 'usergroups' ? <OrgUserGroups /> : ''}
+        {params.subpage === 'users' ? <OrgUsers /> : ''}
+        {params.subpage === 'signups' ? <OrgAccess /> : ''}
+        {params.subpage === 'add' ? <OrgUsersAdd /> : ''}
+        {params.subpage === 'usergroups' ? <OrgUserGroups /> : ''}
       </motion.div>
     </div>
   );

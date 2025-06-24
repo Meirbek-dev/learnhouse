@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 export type CalendarProps = ComponentProps<typeof DayPicker>;
 
-const localeMap: Record<string, Locale> = {
+const localeMap: { [key: string]: Locale } = {
   'en-US': enUS,
   'kk-KZ': kk,
   'ru-RU': ru,

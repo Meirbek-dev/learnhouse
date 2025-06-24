@@ -10,10 +10,10 @@ import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string; activityid: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;

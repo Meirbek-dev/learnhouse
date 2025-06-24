@@ -44,7 +44,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { mutate } from 'swr';
 import useSWR from 'swr';
@@ -63,8 +63,8 @@ const AIChatBotProvider = lazy(() => import('@components/Contexts/AI/AIChatBotCo
 const LoadingFallback = () => (
   <div className="flex h-64 items-center justify-center">
     <div className="relative h-6 w-6">
-      <div className="absolute left-0 top-0 h-full w-full rounded-full border-2 border-gray-100" />
-      <div className="absolute left-0 top-0 h-full w-full animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+      <div className="absolute top-0 left-0 h-full w-full rounded-full border-2 border-gray-100" />
+      <div className="absolute top-0 left-0 h-full w-full animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
     </div>
   </div>
 );
@@ -132,9 +132,9 @@ function ActivityActions({
 
   return (
     <div className="flex items-center space-x-2">
-      {activity && activity.published == true && activity.content.paid_access != false && (
+      {activity && activity.published === true && activity.content.paid_access !== false && (
         <AuthenticatedClientElement checkMethod="authentication">
-          {activity.activity_type != 'TYPE_ASSIGNMENT' && (
+          {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
             <MarkStatus
               activity={activity}
               activityid={activityid}
@@ -144,7 +144,7 @@ function ActivityActions({
               t={t}
             />
           )}
-          {activity.activity_type == 'TYPE_ASSIGNMENT' && (
+          {activity.activity_type === 'TYPE_ASSIGNMENT' && (
             <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
               <AssignmentTools
                 assignment={assignment}
@@ -309,16 +309,15 @@ function ActivityClient(props: ActivityClientProps) {
     }
     return null; // return null if no matching activity is found
   }
-
   const getAssignmentUI = useCallback(async () => {
     const assignment = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
     setAssignment(assignment.data);
-  }, [activity.activity_uuid, access_token]);
+  }, [activity.activity_uuid, access_token, setAssignment]);
 
   useEffect(() => {
-    if (activity.activity_type == 'TYPE_DYNAMIC') {
+    if (activity.activity_type === 'TYPE_DYNAMIC') {
       setBgColor(isFocusMode ? 'bg-white' : 'bg-white nice-shadow');
-    } else if (activity.activity_type == 'TYPE_ASSIGNMENT') {
+    } else if (activity.activity_type === 'TYPE_ASSIGNMENT') {
       setMarkStatusButtonActive(false);
       setBgColor(isFocusMode ? 'bg-white' : 'bg-white nice-shadow');
       getAssignmentUI();
@@ -328,109 +327,284 @@ function ActivityClient(props: ActivityClientProps) {
   }, [activity, pathname, isFocusMode, getAssignmentUI]);
 
   return (
-    <>
-      <CourseProvider courseuuid={course?.course_uuid}>
-        <Suspense fallback={<LoadingFallback />}>
-          <AIChatBotProvider>
-            {isFocusMode ? (
-              <AnimatePresence>
+    <CourseProvider courseuuid={course?.course_uuid}>
+      <Suspense fallback={<LoadingFallback />}>
+        <AIChatBotProvider>
+          {isFocusMode ? (
+            <AnimatePresence>
+              <motion.div
+                initial={isInitialRender.current ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="fixed inset-0 z-50 bg-white"
+              >
+                {/* Focus Mode Top Bar */}
                 <motion.div
-                  initial={isInitialRender.current ? false : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={isInitialRender.current ? false : { y: -100 }}
+                  animate={{ y: 0 }}
+                  exit={{ y: -100 }}
                   transition={{ duration: 0.3 }}
-                  className="fixed inset-0 z-50 bg-white"
+                  className="fixed top-0 right-0 left-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-xl"
                 >
-                  {/* Focus Mode Top Bar */}
-                  <motion.div
-                    initial={isInitialRender.current ? false : { y: -100 }}
-                    animate={{ y: 0 }}
-                    exit={{ y: -100 }}
-                    transition={{ duration: 0.3 }}
-                    className="fixed left-0 right-0 top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-xl"
-                  >
-                    <div className="container mx-auto px-4 py-2">
-                      <div className="flex h-14 items-center justify-between">
-                        {/* Progress Indicator - Moved to left */}
-                        <motion.div
-                          initial={isInitialRender.current ? false : { opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className="flex items-center space-x-2"
-                        >
-                          <div className="relative h-8 w-8">
-                            <svg className="h-full w-full -rotate-90 transform">
-                              <circle
-                                cx="16"
-                                cy="16"
-                                r="14"
-                                stroke="#e5e7eb"
-                                strokeWidth="3"
-                                fill="none"
-                              />
-                              <circle
-                                cx="16"
-                                cy="16"
-                                r="14"
-                                stroke="#10b981"
-                                strokeWidth="3"
-                                fill="none"
-                                strokeLinecap="round"
-                                strokeDasharray={2 * Math.PI * 14}
-                                strokeDashoffset={
-                                  2 *
-                                  Math.PI *
-                                  14 *
-                                  (1 -
-                                    (trailData?.runs
-                                      ?.find((run: any) => run.course_uuid === course.course_uuid)
-                                      ?.steps?.filter((step: any) => step.complete)?.length || 0) /
-                                      (course.chapters?.reduce(
-                                        (acc: number, chapter: any) => acc + chapter.activities.length,
-                                        0,
-                                      ) || 1))
-                                }
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-bold text-gray-800">
-                                {Math.round(
-                                  ((trailData?.runs
+                  <div className="container mx-auto px-4 py-2">
+                    <div className="flex h-14 items-center justify-between">
+                      {/* Progress Indicator - Moved to left */}
+                      <motion.div
+                        initial={isInitialRender.current ? false : { opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="flex items-center space-x-2"
+                      >
+                        <div className="relative h-8 w-8">
+                          <svg className="h-full w-full -rotate-90 transform">
+                            <circle
+                              cx="16"
+                              cy="16"
+                              r="14"
+                              stroke="#e5e7eb"
+                              strokeWidth="3"
+                              fill="none"
+                            />
+                            <circle
+                              cx="16"
+                              cy="16"
+                              r="14"
+                              stroke="#10b981"
+                              strokeWidth="3"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeDasharray={2 * Math.PI * 14}
+                              strokeDashoffset={
+                                2 *
+                                Math.PI *
+                                14 *
+                                (1 -
+                                  (trailData?.runs
                                     ?.find((run: any) => run.course_uuid === course.course_uuid)
                                     ?.steps?.filter((step: any) => step.complete)?.length || 0) /
                                     (course.chapters?.reduce(
                                       (acc: number, chapter: any) => acc + chapter.activities.length,
                                       0,
-                                    ) || 1)) *
-                                    100,
-                                )}
-                                %
+                                    ) || 1))
+                              }
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs font-bold text-gray-800">
+                              {Math.round(
+                                ((trailData?.runs
+                                  ?.find((run: any) => run.course_uuid === course.course_uuid)
+                                  ?.steps?.filter((step: any) => step.complete)?.length || 0) /
+                                  (course.chapters?.reduce(
+                                    (acc: number, chapter: any) => acc + chapter.activities.length,
+                                    0,
+                                  ) || 1)) *
+                                  100,
+                              )}
+                              %
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {trailData?.runs
+                            ?.find((run: any) => run.course_uuid === course.course_uuid)
+                            ?.steps?.filter((step: any) => step.complete)?.length || 0}{' '}
+                          {t('of')}{' '}
+                          {course.chapters?.reduce((acc: number, chapter: any) => acc + chapter.activities.length, 0) ||
+                            0}
+                        </div>
+                      </motion.div>
+
+                      {/* Center Course Info */}
+                      <motion.div
+                        initial={isInitialRender.current ? false : { opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="flex items-center space-x-4"
+                      >
+                        <div className="flex">
+                          <Link href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
+                            <img
+                              className="h-[34px] w-[60px] rounded-md drop-shadow-md"
+                              src={
+                                course.thumbnail_image
+                                  ? `${getCourseThumbnailMediaDirectory(
+                                      org?.org_uuid,
+                                      course.course_uuid,
+                                      course.thumbnail_image,
+                                    )}`
+                                  : '/empty_thumbnail.png'
+                              }
+                              alt=""
+                            />
+                          </Link>
+                        </div>
+                        <div className="flex flex-col -space-y-1">
+                          <p className="text-sm font-bold text-gray-700">{t('courseTitle')} </p>
+                          <h1 className="text-lg font-bold text-gray-950 first-letter:uppercase">{course.name}</h1>
+                        </div>
+                      </motion.div>
+
+                      {/* Minimize and Chapters - Moved to right */}
+                      <motion.div
+                        initial={isInitialRender.current ? false : { opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="flex items-center space-x-2"
+                      >
+                        <ActivityChapterDropdown
+                          course={course}
+                          currentActivityId={
+                            activity.activity_uuid
+                              ? activity.activity_uuid.replace('activity_', '')
+                              : activityid.replace('activity_', '')
+                          }
+                          orgslug={orgslug}
+                          trailData={trailData}
+                        />
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setIsFocusMode(false)}
+                          className="nice-shadow cursor-pointer rounded-full bg-white p-2 hover:bg-gray-50"
+                          title={t('exitFocusMode')}
+                        >
+                          <Minimize2
+                            size={16}
+                            className="text-gray-700"
+                          />
+                        </motion.button>
+                      </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Focus Mode Content */}
+                <div className="h-full overflow-auto pt-16 pb-20">
+                  <div className="container mx-auto px-4">
+                    {activity &&
+                      activity.published === true &&
+                      (activity.content.paid_access === false ? (
+                        <PaidCourseActivityDisclaimer course={course} />
+                      ) : (
+                        <motion.div
+                          initial={isInitialRender.current ? false : { scale: 0.95, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                          className={`rounded-lg p-7 ${bgColor} mt-4`}
+                        >
+                          {/* Activity Types */}
+                          <div>{activityContent}</div>
+                        </motion.div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Focus Mode Bottom Bar */}
+                {activity && activity.published === true && activity.content.paid_access !== false && (
+                  <motion.div
+                    initial={isInitialRender.current ? false : { y: 100 }}
+                    animate={{ y: 0 }}
+                    exit={{ y: 100 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed right-0 bottom-0 left-0 z-50 border-t border-gray-100 bg-white/90 backdrop-blur-xl"
+                  >
+                    <div className="container mx-auto px-4">
+                      <div className="flex h-16 items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => navigateToActivity(prevActivity)}
+                            className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
+                              prevActivity ? 'text-gray-700' : 'cursor-not-allowed text-gray-400 opacity-50'
+                            }`}
+                            disabled={!prevActivity}
+                            title={
+                              prevActivity
+                                ? t('previousActivityTooltip', {
+                                    activityName: prevActivity.name,
+                                  })
+                                : t('noPreviousActivity')
+                            }
+                          >
+                            <ChevronLeft
+                              size={20}
+                              className="shrink-0 text-gray-800"
+                            />
+                            <div className="flex flex-col items-start">
+                              <span className="text-xs text-gray-500">{t('previous')}</span>
+                              <span className="text-left text-sm font-semibold capitalize">
+                                {prevActivity ? prevActivity.name : t('noPreviousActivity')}
                               </span>
                             </div>
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            {trailData?.runs
-                              ?.find((run: any) => run.course_uuid === course.course_uuid)
-                              ?.steps?.filter((step: any) => step.complete)?.length || 0}{' '}
-                            {t('of')}{' '}
-                            {course.chapters?.reduce(
-                              (acc: number, chapter: any) => acc + chapter.activities.length,
-                              0,
-                            ) || 0}
-                          </div>
-                        </motion.div>
-
-                        {/* Center Course Info */}
-                        <motion.div
-                          initial={isInitialRender.current ? false : { opacity: 0, y: -20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.1 }}
-                          className="flex items-center space-x-4"
-                        >
+                          </button>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <ActivityActions
+                            activity={activity}
+                            activityid={activityid}
+                            course={course}
+                            orgslug={orgslug}
+                            assignment={assignment}
+                            showNavigation={false}
+                          />
+                          <button
+                            onClick={() => navigateToActivity(nextActivity)}
+                            className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
+                              nextActivity ? 'text-gray-700' : 'cursor-not-allowed text-gray-400 opacity-50'
+                            }`}
+                            disabled={!nextActivity}
+                            title={
+                              nextActivity
+                                ? t('nextActivityTooltip', {
+                                    activityName: nextActivity.name,
+                                  })
+                                : t('noNextActivity')
+                            }
+                          >
+                            <div className="flex flex-col items-end">
+                              <span className="text-xs text-gray-500">{t('next')}</span>
+                              <span className="text-right text-sm font-semibold capitalize">
+                                {nextActivity ? nextActivity.name : t('noNextActivity')}
+                              </span>
+                            </div>
+                            <ChevronRight
+                              size={20}
+                              className="shrink-0 text-gray-800"
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <GeneralWrapperStyled>
+              {/* Original non-focus mode UI */}
+              {activityid === 'end' ? (
+                <CourseEndView
+                  courseName={course.name}
+                  orgslug={orgslug}
+                  courseUuid={course.course_uuid}
+                  thumbnailImage={course.thumbnail_image}
+                />
+              ) : (
+                <div className="space-y-4 pt-0">
+                  <div className="pt-2">
+                    <ActivityBreadcrumbs
+                      course={course}
+                      activity={activity}
+                      orgslug={orgslug}
+                    />
+                    <div className="activity-info-section space-y-4 pb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex space-x-6">
                           <div className="flex">
                             <Link href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
                               <img
-                                className="h-[34px] w-[60px] rounded-md drop-shadow-md"
+                                className="h-[57px] w-[100px] rounded-md drop-shadow-md"
                                 src={
                                   course.thumbnail_image
                                     ? `${getCourseThumbnailMediaDirectory(
@@ -445,428 +619,245 @@ function ActivityClient(props: ActivityClientProps) {
                             </Link>
                           </div>
                           <div className="flex flex-col -space-y-1">
-                            <p className="text-sm font-bold text-gray-700">{t('courseTitle')} </p>
-                            <h1 className="text-lg font-bold text-gray-950 first-letter:uppercase">{course.name}</h1>
-                          </div>
-                        </motion.div>
-
-                        {/* Minimize and Chapters - Moved to right */}
-                        <motion.div
-                          initial={isInitialRender.current ? false : { opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className="flex items-center space-x-2"
-                        >
-                          <ActivityChapterDropdown
-                            course={course}
-                            currentActivityId={
-                              activity.activity_uuid
-                                ? activity.activity_uuid.replace('activity_', '')
-                                : activityid.replace('activity_', '')
-                            }
-                            orgslug={orgslug}
-                            trailData={trailData}
-                          />
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setIsFocusMode(false)}
-                            className="nice-shadow cursor-pointer rounded-full bg-white p-2 hover:bg-gray-50"
-                            title={t('exitFocusMode')}
-                          >
-                            <Minimize2
-                              size={16}
-                              className="text-gray-700"
-                            />
-                          </motion.button>
-                        </motion.div>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Focus Mode Content */}
-                  <div className="h-full overflow-auto pb-20 pt-16">
-                    <div className="container mx-auto px-4">
-                      {activity &&
-                        activity.published == true &&
-                        (activity.content.paid_access == false ? (
-                          <PaidCourseActivityDisclaimer course={course} />
-                        ) : (
-                          <motion.div
-                            initial={isInitialRender.current ? false : { scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className={`rounded-lg p-7 ${bgColor} mt-4`}
-                          >
-                            {/* Activity Types */}
-                            <div>{activityContent}</div>
-                          </motion.div>
-                        ))}
-                    </div>
-                  </div>
-
-                  {/* Focus Mode Bottom Bar */}
-                  {activity && activity.published == true && activity.content.paid_access != false && (
-                    <motion.div
-                      initial={isInitialRender.current ? false : { y: 100 }}
-                      animate={{ y: 0 }}
-                      exit={{ y: 100 }}
-                      transition={{ duration: 0.3 }}
-                      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-100 bg-white/90 backdrop-blur-xl"
-                    >
-                      <div className="container mx-auto px-4">
-                        <div className="flex h-16 items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => navigateToActivity(prevActivity)}
-                              className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
-                                prevActivity ? 'text-gray-700' : 'cursor-not-allowed text-gray-400 opacity-50'
-                              }`}
-                              disabled={!prevActivity}
-                              title={
-                                prevActivity
-                                  ? t('previousActivityTooltip', {
-                                      activityName: prevActivity.name,
-                                    })
-                                  : t('noPreviousActivity')
-                              }
-                            >
-                              <ChevronLeft
-                                size={20}
-                                className="shrink-0 text-gray-800"
-                              />
-                              <div className="flex flex-col items-start">
-                                <span className="text-xs text-gray-500">{t('previous')}</span>
-                                <span className="text-left text-sm font-semibold capitalize">
-                                  {prevActivity ? prevActivity.name : t('noPreviousActivity')}
-                                </span>
-                              </div>
-                            </button>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <ActivityActions
-                              activity={activity}
-                              activityid={activityid}
-                              course={course}
-                              orgslug={orgslug}
-                              assignment={assignment}
-                              showNavigation={false}
-                            />
-                            <button
-                              onClick={() => navigateToActivity(nextActivity)}
-                              className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
-                                nextActivity ? 'text-gray-700' : 'cursor-not-allowed text-gray-400 opacity-50'
-                              }`}
-                              disabled={!nextActivity}
-                              title={
-                                nextActivity
-                                  ? t('nextActivityTooltip', {
-                                      activityName: nextActivity.name,
-                                    })
-                                  : t('noNextActivity')
-                              }
-                            >
-                              <div className="flex flex-col items-end">
-                                <span className="text-xs text-gray-500">{t('next')}</span>
-                                <span className="text-right text-sm font-semibold capitalize">
-                                  {nextActivity ? nextActivity.name : t('noNextActivity')}
-                                </span>
-                              </div>
-                              <ChevronRight
-                                size={20}
-                                className="shrink-0 text-gray-800"
-                              />
-                            </button>
+                            <p className="text-md font-bold text-gray-700">{t('courseTitle')} </p>
+                            <h1 className="text-3xl font-bold text-gray-950 first-letter:uppercase">{course.name}</h1>
                           </div>
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            ) : (
-              <GeneralWrapperStyled>
-                {/* Original non-focus mode UI */}
-                {activityid === 'end' ? (
-                  <CourseEndView
-                    courseName={course.name}
-                    orgslug={orgslug}
-                    courseUuid={course.course_uuid}
-                    thumbnailImage={course.thumbnail_image}
-                  />
-                ) : (
-                  <div className="space-y-4 pt-0">
-                    <div className="pt-2">
-                      <ActivityBreadcrumbs
-                        course={course}
-                        activity={activity}
+
+                      <ActivityIndicators
+                        course_uuid={courseuuid}
+                        current_activity={activityid}
                         orgslug={orgslug}
+                        course={course}
+                        enableNavigation
+                        trailData={trailData}
                       />
-                      <div className="activity-info-section space-y-4 pb-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex space-x-6">
-                            <div className="flex">
-                              <Link href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}>
-                                <img
-                                  className="h-[57px] w-[100px] rounded-md drop-shadow-md"
-                                  src={
-                                    course.thumbnail_image
-                                      ? `${getCourseThumbnailMediaDirectory(
-                                          org?.org_uuid,
-                                          course.course_uuid,
-                                          course.thumbnail_image,
-                                        )}`
-                                      : '/empty_thumbnail.png'
-                                  }
-                                  alt=""
-                                />
-                              </Link>
-                            </div>
-                            <div className="flex flex-col -space-y-1">
-                              <p className="text-md font-bold text-gray-700">{t('courseTitle')} </p>
-                              <h1 className="text-3xl font-bold text-gray-950 first-letter:uppercase">{course.name}</h1>
-                            </div>
-                          </div>
-                        </div>
 
-                        <ActivityIndicators
-                          course_uuid={courseuuid}
-                          current_activity={activityid}
-                          orgslug={orgslug}
-                          course={course}
-                          enableNavigation={true}
-                          trailData={trailData}
-                        />
-
-                        <div className="flex w-full items-center justify-between">
-                          <div className="flex-1/3 flex items-center space-x-3">
-                            <div className="flex flex-col -space-y-1">
-                              <p className="text-md font-bold text-gray-700">
-                                {getChapterNameByActivityId(course, activity.id)}
-                              </p>
-                              <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">
-                                {activity.name}
-                              </h1>
-                              {/* Authors and Dates Section */}
-                              <div className="mt-2 flex flex-wrap items-center gap-3">
-                                {/* Avatars */}
-                                {course.authors && course.authors.length > 0 && (
-                                  <div className="flex -space-x-3">
-                                    {course.authors
-                                      .filter((a: any) => a.authorship_status === 'ACTIVE')
-                                      .slice(0, 3)
-                                      .map((author: any, idx: number) => (
-                                        <div
-                                          key={author.user.user_uuid}
-                                          className="z-[${10-idx}] relative"
-                                        >
-                                          <UserAvatar
-                                            border="border-2"
-                                            rounded="rounded-full"
-                                            avatar_url={
-                                              author.user.avatar_image
-                                                ? getUserAvatarMediaDirectory(
-                                                    author.user.user_uuid,
-                                                    author.user.avatar_image,
-                                                  )
-                                                : ''
-                                            }
-                                            predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                                            width={26}
-                                            showProfilePopup={true}
-                                            userId={author.user.id}
-                                          />
-                                        </div>
-                                      ))}
-                                    {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 3 && (
-                                      <div className="z-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-neutral-100 text-xs font-medium text-neutral-600 shadow-sm">
-                                        +
-                                        {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length - 3}
+                      <div className="flex w-full items-center justify-between">
+                        <div className="flex flex-1/3 items-center space-x-3">
+                          <div className="flex flex-col -space-y-1">
+                            <p className="text-md font-bold text-gray-700">
+                              {getChapterNameByActivityId(course, activity.id)}
+                            </p>
+                            <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">{activity.name}</h1>
+                            {/* Authors and Dates Section */}
+                            <div className="mt-2 flex flex-wrap items-center gap-3">
+                              {/* Avatars */}
+                              {course.authors && course.authors.length > 0 && (
+                                <div className="flex -space-x-3">
+                                  {course.authors
+                                    .filter((a: any) => a.authorship_status === 'ACTIVE')
+                                    .slice(0, 3)
+                                    .map((author: any, idx: number) => (
+                                      <div
+                                        key={author.user.user_uuid}
+                                        className="z-[${10-idx}] relative"
+                                      >
+                                        <UserAvatar
+                                          border="border-2"
+                                          rounded="rounded-full"
+                                          avatar_url={
+                                            author.user.avatar_image
+                                              ? getUserAvatarMediaDirectory(
+                                                  author.user.user_uuid,
+                                                  author.user.avatar_image,
+                                                )
+                                              : ''
+                                          }
+                                          predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
+                                          width={26}
+                                          showProfilePopup
+                                          userId={author.user.id}
+                                        />
                                       </div>
-                                    )}
-                                  </div>
-                                )}
-                                {/* Author names */}
-                                {course.authors && course.authors.length > 0 && (
-                                  <div className="flex items-center gap-1 text-xs font-medium text-gray-700">
-                                    {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 1 && (
-                                      <span>{t('coCreatedBy')} </span>
-                                    )}
-                                    {course.authors
-                                      .filter((a: any) => a.authorship_status === 'ACTIVE')
-                                      .slice(0, 2)
-                                      .map((author: any, idx: number, arr: any[]) => (
-                                        <span key={author.user.user_uuid}>
-                                          {author.user.first_name && author.user.last_name
-                                            ? `${author.user.first_name} ${author.user.last_name}`
-                                            : `@${author.user.username}`}
-                                          {idx === 0 && arr.length > 1 ? ' & ' : ''}
-                                        </span>
-                                      ))}
-                                    {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 2 && (
-                                      <ToolTip
-                                        content={
-                                          <div className="p-2">
-                                            {course.authors
-                                              .filter((a: any) => a.authorship_status === 'ACTIVE')
-                                              .slice(2)
-                                              .map((author: any) => (
-                                                <div
-                                                  key={author.user.user_uuid}
-                                                  className="py-1 text-sm text-white"
-                                                >
-                                                  {author.user.first_name && author.user.last_name
-                                                    ? `${author.user.first_name} ${author.user.last_name}`
-                                                    : `@${author.user.username}`}
-                                                </div>
-                                              ))}
-                                          </div>
-                                        }
-                                      >
-                                        <div className="cursor-pointer rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 transition-colors duration-200 hover:bg-gray-200">
-                                          +
-                                          {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length -
-                                            2}
-                                        </div>
-                                      </ToolTip>
-                                    )}
-                                  </div>
-                                )}
-                                {/* Dates */}
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                  <span>
-                                    {t('createdOn')}{' '}
-                                    {new Date(course.creation_date).toLocaleDateString(locale, {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric',
-                                    })}
-                                  </span>
-                                  <span className="mx-1">•</span>
-                                  <span>
-                                    {t('lastUpdated')}{' '}
-                                    {getRelativeTimeIntl(
-                                      new Date(course.updated_at || course.last_updated || course.creation_date),
-                                    )}
-                                  </span>
+                                    ))}
+                                  {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 3 && (
+                                    <div className="z-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-neutral-100 text-xs font-medium text-neutral-600 shadow-sm">
+                                      +{course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length - 3}
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {activity && activity.published == true && activity.content.paid_access != false && (
-                              <AuthenticatedClientElement checkMethod="authentication">
-                                {activity.activity_type != 'TYPE_ASSIGNMENT' && (
-                                  <>
-                                    <AIActivityAsk activity={activity} />
-                                    <ActivityChapterDropdown
-                                      course={course}
-                                      currentActivityId={
-                                        activity.activity_uuid
-                                          ? activity.activity_uuid.replace('activity_', '')
-                                          : activityid.replace('activity_', '')
+                              )}
+                              {/* Author names */}
+                              {course.authors && course.authors.length > 0 && (
+                                <div className="flex items-center gap-1 text-xs font-medium text-gray-700">
+                                  {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 1 && (
+                                    <span>{t('coCreatedBy')} </span>
+                                  )}
+                                  {course.authors
+                                    .filter((a: any) => a.authorship_status === 'ACTIVE')
+                                    .slice(0, 2)
+                                    .map((author: any, idx: number, arr: any[]) => (
+                                      <span key={author.user.user_uuid}>
+                                        {author.user.first_name && author.user.last_name
+                                          ? `${author.user.first_name} ${author.user.last_name}`
+                                          : `@${author.user.username}`}
+                                        {idx === 0 && arr.length > 1 ? ' & ' : ''}
+                                      </span>
+                                    ))}
+                                  {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 2 && (
+                                    <ToolTip
+                                      content={
+                                        <div className="p-2">
+                                          {course.authors
+                                            .filter((a: any) => a.authorship_status === 'ACTIVE')
+                                            .slice(2)
+                                            .map((author: any) => (
+                                              <div
+                                                key={author.user.user_uuid}
+                                                className="py-1 text-sm text-white"
+                                              >
+                                                {author.user.first_name && author.user.last_name
+                                                  ? `${author.user.first_name} ${author.user.last_name}`
+                                                  : `@${author.user.username}`}
+                                              </div>
+                                            ))}
+                                        </div>
                                       }
-                                      orgslug={orgslug}
-                                      trailData={trailData}
-                                    />
-                                    {contributorStatus === 'ACTIVE' && activity.activity_type == 'TYPE_DYNAMIC' && (
-                                      <Link
-                                        href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${activityid}/edit`}
-                                        className="flex items-center space-x-2 rounded-full bg-emerald-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
-                                      >
-                                        <Edit2 size={17} />
-                                        <span className="text-xs font-bold">{t('contribute')}</span>
-                                      </Link>
-                                    )}
-                                  </>
-                                )}
-                              </AuthenticatedClientElement>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {activity && activity.published == false && (
-                        <div className="drop-shadow-xs rounded-lg bg-gray-800 p-7">
-                          <div className="text-white">
-                            <h1 className="text-2xl font-bold">{t('activityNotPublished')}</h1>
-                          </div>
-                        </div>
-                      )}
-
-                      {activity &&
-                        activity.published == true &&
-                        (activity.content.paid_access == false ? (
-                          <PaidCourseActivityDisclaimer course={course} />
-                        ) : (
-                          <div className={`drop-shadow-xs rounded-lg p-7 ${bgColor} relative`}>
-                            <button
-                              onClick={() => setIsFocusMode(true)}
-                              className="nice-shadow group pointer-events-auto absolute right-4 top-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
-                              title={t('enterFocusMode')}
-                            >
-                              <div className="flex items-center">
-                                <Maximize2
-                                  size={16}
-                                  className="text-gray-700"
-                                />
-                                <span className="w-0 whitespace-nowrap text-xs font-bold text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
-                                  {t('focusMode')}
+                                    >
+                                      <div className="cursor-pointer rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 transition-colors duration-200 hover:bg-gray-200">
+                                        +
+                                        {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length - 2}
+                                      </div>
+                                    </ToolTip>
+                                  )}
+                                </div>
+                              )}
+                              {/* Dates */}
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <span>
+                                  {t('createdOn')}{' '}
+                                  {new Date(course.creation_date).toLocaleDateString(locale, {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  })}
+                                </span>
+                                <span className="mx-1">•</span>
+                                <span>
+                                  {t('lastUpdated')}{' '}
+                                  {getRelativeTimeIntl(
+                                    new Date(course.updated_at || course.last_updated || course.creation_date),
+                                  )}
                                 </span>
                               </div>
-                            </button>
-                            {activityContent}
-                          </div>
-                        ))}
-
-                      {/* Activity Actions below the content box */}
-                      {activity && activity.published == true && activity.content.paid_access != false && (
-                        <div className="mt-4 flex w-full items-center justify-between">
-                          <div>
-                            <PreviousActivityButton
-                              course={course}
-                              currentActivityId={activity.id}
-                              orgslug={orgslug}
-                            />
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <ActivityActions
-                              activity={activity}
-                              activityid={activityid}
-                              course={course}
-                              orgslug={orgslug}
-                              assignment={assignment}
-                              showNavigation={false}
-                            />
-                            <NextActivityButton
-                              course={course}
-                              currentActivityId={activity.id}
-                              orgslug={orgslug}
-                            />
+                            </div>
                           </div>
                         </div>
-                      )}
-
-                      {/* Fixed Activity Secondary Bar */}
-                      {activity && activity.published == true && activity.content.paid_access != false && (
-                        <FixedActivitySecondaryBar
-                          course={course}
-                          currentActivityId={activityid}
-                          orgslug={orgslug}
-                          activity={activity}
-                        />
-                      )}
-
-                      <div style={{ height: '100px' }} />
+                        <div className="flex items-center space-x-2">
+                          {activity && activity.published === true && activity.content.paid_access !== false && (
+                            <AuthenticatedClientElement checkMethod="authentication">
+                              {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
+                                <>
+                                  <AIActivityAsk activity={activity} />
+                                  <ActivityChapterDropdown
+                                    course={course}
+                                    currentActivityId={
+                                      activity.activity_uuid
+                                        ? activity.activity_uuid.replace('activity_', '')
+                                        : activityid.replace('activity_', '')
+                                    }
+                                    orgslug={orgslug}
+                                    trailData={trailData}
+                                  />
+                                  {contributorStatus === 'ACTIVE' && activity.activity_type === 'TYPE_DYNAMIC' && (
+                                    <Link
+                                      href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${activityid}/edit`}
+                                      className="flex items-center space-x-2 rounded-full bg-emerald-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
+                                    >
+                                      <Edit2 size={17} />
+                                      <span className="text-xs font-bold">{t('contribute')}</span>
+                                    </Link>
+                                  )}
+                                </>
+                              )}
+                            </AuthenticatedClientElement>
+                          )}
+                        </div>
+                      </div>
                     </div>
+
+                    {activity && activity.published === false && (
+                      <div className="rounded-lg bg-gray-800 p-7 drop-shadow-xs">
+                        <div className="text-white">
+                          <h1 className="text-2xl font-bold">{t('activityNotPublished')}</h1>
+                        </div>
+                      </div>
+                    )}
+
+                    {activity &&
+                      activity.published === true &&
+                      (activity.content.paid_access === false ? (
+                        <PaidCourseActivityDisclaimer course={course} />
+                      ) : (
+                        <div className={`rounded-lg p-7 drop-shadow-xs ${bgColor} relative`}>
+                          <button
+                            onClick={() => setIsFocusMode(true)}
+                            className="nice-shadow group pointer-events-auto absolute top-4 right-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
+                            title={t('enterFocusMode')}
+                          >
+                            <div className="flex items-center">
+                              <Maximize2
+                                size={16}
+                                className="text-gray-700"
+                              />
+                              <span className="w-0 text-xs font-bold whitespace-nowrap text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
+                                {t('focusMode')}
+                              </span>
+                            </div>
+                          </button>
+                          {activityContent}
+                        </div>
+                      ))}
+
+                    {/* Activity Actions below the content box */}
+                    {activity && activity.published === true && activity.content.paid_access !== false && (
+                      <div className="mt-4 flex w-full items-center justify-between">
+                        <div>
+                          <PreviousActivityButton
+                            course={course}
+                            currentActivityId={activity.id}
+                            orgslug={orgslug}
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <ActivityActions
+                            activity={activity}
+                            activityid={activityid}
+                            course={course}
+                            orgslug={orgslug}
+                            assignment={assignment}
+                            showNavigation={false}
+                          />
+                          <NextActivityButton
+                            course={course}
+                            currentActivityId={activity.id}
+                            orgslug={orgslug}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Fixed Activity Secondary Bar */}
+                    {activity && activity.published === true && activity.content.paid_access !== false && (
+                      <FixedActivitySecondaryBar
+                        course={course}
+                        currentActivityId={activityid}
+                        orgslug={orgslug}
+                        activity={activity}
+                      />
+                    )}
+
+                    <div style={{ height: '100px' }} />
                   </div>
-                )}
-              </GeneralWrapperStyled>
-            )}
-          </AIChatBotProvider>
-        </Suspense>
-      </CourseProvider>
-    </>
+                </div>
+              )}
+            </GeneralWrapperStyled>
+          )}
+        </AIChatBotProvider>
+      </Suspense>
+    </CourseProvider>
   );
 }
 
@@ -892,10 +883,10 @@ export function MarkStatus(props: {
       const markedTooltipCount = localStorage.getItem('activity_marked_tooltip_count');
       const unmarkedTooltipCount = localStorage.getItem('activity_unmarked_tooltip_count');
 
-      if (!markedTooltipCount || Number.parseInt(markedTooltipCount) < 3) {
+      if (!markedTooltipCount || Number.parseInt(markedTooltipCount, 10) < 3) {
         setShowMarkedTooltip(true);
       }
-      if (!unmarkedTooltipCount || Number.parseInt(unmarkedTooltipCount) < 3) {
+      if (!unmarkedTooltipCount || Number.parseInt(unmarkedTooltipCount, 10) < 3) {
         setShowUnmarkedTooltip(true);
       }
     }
@@ -993,7 +984,7 @@ export function MarkStatus(props: {
       );
 
       await mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
-    } catch (error) {
+    } catch {
       toast.error(t('unmarkCompleteError'));
     } finally {
       setIsLoading(false);
@@ -1188,7 +1179,7 @@ function NextActivityButton({
       onClick={navigateToActivity}
       className="flex flex-col rounded-md bg-gray-200 p-2.5 px-4 text-gray-600 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] transition delay-150 duration-300 ease-in-out hover:cursor-pointer hover:bg-gray-200"
     >
-      <span className="mb-1 text-[10px] font-bold uppercase text-gray-500">{t('next')}</span>
+      <span className="mb-1 text-[10px] font-bold text-gray-500 uppercase">{t('next')}</span>
       <div className="flex items-center space-x-1">
         <span className="max-w-[200px] truncate text-sm font-semibold">{nextActivity.name}</span>
         <ChevronRight size={17} />
@@ -1249,7 +1240,7 @@ function PreviousActivityButton({
       onClick={navigateToActivity}
       className="nice-shadow flex flex-col rounded-md bg-white p-2.5 px-4 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
     >
-      <span className="mb-1 text-[10px] font-bold uppercase text-gray-500">{t('previous')}</span>
+      <span className="mb-1 text-[10px] font-bold text-gray-500 uppercase">{t('previous')}</span>
       <div className="flex items-center space-x-1">
         <ChevronLeft size={17} />
         <span className="max-w-[200px] truncate text-sm font-semibold">{previousActivity.name}</span>
@@ -1321,13 +1312,11 @@ function AssignmentTools(props: {
         }
         default:
           displayGrade = t('unknownGradingType');
-      }
-
-      // Use displayGrade here, e.g., update state or display it
+      } // Use displayGrade here, e.g., update state or display it
       setFinalGrade(displayGrade);
     } else {
     }
-  }, [session.data?.user?.id, props.assignment?.assignment_uuid, session.data?.tokens?.access_token, t]);
+  }, [session.data?.user?.id, props.assignment?.assignment_uuid, session.data?.tokens?.access_token, t, setFinalGrade]);
 
   useEffect(() => {
     if (submission && submission.length > 0 && submission[0].submission_status === 'GRADED') {

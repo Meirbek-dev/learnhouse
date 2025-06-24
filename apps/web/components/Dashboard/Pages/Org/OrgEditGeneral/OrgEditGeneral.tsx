@@ -65,7 +65,7 @@ const getOrgLabels = (t: Function) =>
         value: item.value,
         label: item.label,
       };
-    } catch (error) {
+    } catch {
       // If translation fails, use hardcoded label
       return {
         value: item.value,
@@ -115,7 +115,7 @@ const OrgEditGeneral: FC = () => {
       await revalidateTags(['organizations'], org.slug);
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
       toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
-    } catch (_err) {
+    } catch {
       toast.error(t('orgUpdateFailed'), { id: loadingToast });
     }
   };
@@ -226,7 +226,7 @@ const OrgEditGeneral: FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
+              <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
                 <Button
                   type="submit"
                   disabled={isSubmitting}

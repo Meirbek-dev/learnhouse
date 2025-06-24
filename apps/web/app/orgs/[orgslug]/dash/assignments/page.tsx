@@ -65,7 +65,7 @@ function AssignmentsHome() {
               className="nice-shadow flex w-full flex-col space-y-2 rounded-xl bg-white p-3 sm:p-4"
             >
               <div>
-                <div className="flex w-full flex-col items-start justify-between space-y-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0">
+                <div className="flex w-full flex-col items-start justify-between space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
                   <div className="flex items-center space-x-2">
                     <MiniThumbnail course={courses[index]} />
                     <div className="flex flex-col text-lg font-bold">
@@ -92,9 +92,9 @@ function AssignmentsHome() {
                 {assignments?.map((assignment: any) => (
                   <div
                     key={assignment.assignment_uuid}
-                    className="light-shadow mt-3 flex w-full flex-col items-start justify-between space-y-2 rounded bg-gray-50 p-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0 sm:p-3"
+                    className="light-shadow mt-3 flex w-full flex-col items-start justify-between space-y-2 rounded bg-gray-50 p-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2 sm:p-3"
                   >
-                    <div className="flex flex-col items-start space-y-1 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0">
+                    <div className="flex flex-col items-start space-y-1 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
                       <div className="flex h-fit rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold text-gray-700">
                         <p>{t('assignment')}</p>
                       </div>
@@ -166,7 +166,7 @@ const MiniThumbnail = (props: { course: any }) => {
     <Link href={getUriWithOrg(org.orgslug, `/course/${removeCoursePrefix(props.course.course_uuid)}`)}>
       {props.course.thumbnail_image ? (
         <div
-          className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
+          className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
           style={{
             backgroundImage: `url(${getCourseThumbnailMediaDirectory(
               org?.org_uuid,
@@ -177,7 +177,7 @@ const MiniThumbnail = (props: { course: any }) => {
         />
       ) : (
         <div
-          className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
+          className="inset-0 h-[40px] w-[70px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
           style={{
             backgroundImage: `url('../empty_thumbnail.png')`,
             backgroundSize: 'contain',

@@ -68,8 +68,8 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
         const data = res;
         updateAttributes({ ...data, url });
         setEditing(false);
-      } catch (err: any) {
-        setError(err.message || t('errorFetchingPreview'));
+      } catch (error: any) {
+        setError(error.message || t('errorFetchingPreview'));
       } finally {
         setLoading(false);
       }
@@ -171,11 +171,11 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
       />
       <div className={`flex w-full ${alignClass}`}>
         {/* CardWrapper */}
-        <div className="nice-shadow relative my-2 min-w-[260px] max-w-[420px] rounded-xl bg-white px-6 pb-4 pt-6">
+        <div className="nice-shadow relative my-2 max-w-[420px] min-w-[260px] rounded-xl bg-white px-6 pt-6 pb-4">
           {/* PreviewCard */}
           {/* Floating edit and delete buttons (only if not editing and isEditable) */}
           {isEditable && !editing && (
-            <div className="absolute -right-3 -top-3 z-20 flex flex-col gap-2">
+            <div className="absolute -top-3 -right-3 z-20 flex flex-col gap-2">
               <button
                 className="flex items-center justify-center rounded-md border border-yellow-200 bg-yellow-50 p-1.5 text-yellow-700 shadow-md hover:bg-yellow-100"
                 onClick={handleEdit}
@@ -222,7 +222,6 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                     value={inputUrl}
                     onChange={(e) => setInputUrl(e.target.value)}
                     disabled={loading}
-                    autoFocus
                   />
                 </div>
                 <div className="space-y-2">
@@ -344,9 +343,9 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                     />
                   </div>
                 )}
-                <div className="pb-2 pt-4">
+                <div className="pt-4 pb-2">
                   <span
-                    className="mb-1.5 text-lg font-semibold leading-tight text-[#232323] no-underline hover:no-underline focus:no-underline active:no-underline"
+                    className="mb-1.5 text-lg leading-tight font-semibold text-[#232323] no-underline hover:no-underline focus:no-underline active:no-underline"
                     style={{ textDecoration: 'none', borderBottom: 'none' }}
                   >
                     {previewData.title}
@@ -404,7 +403,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                         onClick={() => handleAlignmentChange(opt.value)}
                         title={t('alignOption', { value: t(opt.value) })}
                         type="button"
-                        className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+                        className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:ring-2 focus:ring-blue-300 focus:outline-none ${
                           alignment === opt.value
                             ? 'border-gray-600 bg-gray-600 text-white hover:bg-gray-700'
                             : 'border-gray-200 bg-white hover:bg-gray-100'

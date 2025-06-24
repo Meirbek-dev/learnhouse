@@ -15,7 +15,7 @@ function DashMobileMenu() {
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
+    <div className="fixed right-0 bottom-0 left-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
       <div className="flex h-16 items-center justify-around px-2">
         <AdminAuthorization authorizationMode="component">
           <ToolTip

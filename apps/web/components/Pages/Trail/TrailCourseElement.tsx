@@ -48,7 +48,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
     >
       <Link href={getUriWithOrg(orgslug, `/course/${courseid}`)}>
         <div
-          className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-inset ring-black/10"
+          className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-black/10 ring-inset"
           style={{
             backgroundImage: course.thumbnail_image
               ? `url(${getCourseThumbnailMediaDirectory(org.org_uuid, course.course_uuid, course.thumbnail_image)})`

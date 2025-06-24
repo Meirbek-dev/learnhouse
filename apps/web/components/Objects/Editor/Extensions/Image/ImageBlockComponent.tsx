@@ -25,7 +25,7 @@ function ImageBlockComponent(props: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
   const [imageSize, setImageSize] = useState({
-    width: props.node.attrs.size ? props.node.attrs.size.width : 300,
+    width: props.node.attrs.size > 0 ? props.node.attrs.size.width : 300,
   });
   const [alignment, setAlignment] = useState(props.node.attrs.alignment || 'center');
 
@@ -67,7 +67,7 @@ function ImageBlockComponent(props: any) {
     link.setAttribute('download', '');
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
-    document.body.appendChild(link);
+    document.body.append(link);
     link.click();
     document.body.removeChild(link);
   };
@@ -163,7 +163,7 @@ function ImageBlockComponent(props: any) {
                 className="h-auto max-w-full rounded-lg shadow-sm"
                 style={{ width: '100%' }}
               />
-              <div className="shadow-xs backdrop-blur-xs absolute right-2 top-2 flex items-center gap-1.5 rounded-lg bg-white bg-opacity-90 p-1 opacity-70 transition-opacity hover:opacity-100">
+              <div className="bg-opacity-90 absolute top-2 right-2 flex items-center gap-1.5 rounded-lg bg-white p-1 opacity-70 shadow-xs backdrop-blur-xs transition-opacity hover:opacity-100">
                 <button
                   onClick={() => handleAlignmentChange('left')}
                   className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'left' ? 'bg-gray-100' : ''}`}
@@ -209,7 +209,7 @@ function ImageBlockComponent(props: any) {
             />
             <button
               onClick={handleDownload}
-              className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+              className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
               title="Download image"
             >
               <Download className="h-4 w-4 text-white" />

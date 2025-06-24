@@ -11,8 +11,15 @@
     "postbuild": "xcopy .\\.next\\static .\\.next\\standalone\\.next\\static /E /I /Y || cp -r ./.next/static ./.next/standalone/.next/static",
     "lint": "next lint",
     "lint:fix": "eslint --fix .",
+    "lint:strict": "eslint . --max-warnings 0",
+    "lint:report": "eslint . --format json --output-file eslint-report.json",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"**/*.{js,ts,tsx,md,css}\""
+    "typecheck:watch": "tsc --noEmit --watch",
+    "format": "prettier --write \"**/*.{js,ts,tsx,md,css}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,tsx,md,css}\"",
+    "quality": "pnpm run typecheck && pnpm run lint:strict && pnpm run format:check",
+    "quality:fix": "pnpm run format && pnpm run lint:fix && pnpm run typecheck",
+    "pre-commit": "pnpm run quality:fix"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

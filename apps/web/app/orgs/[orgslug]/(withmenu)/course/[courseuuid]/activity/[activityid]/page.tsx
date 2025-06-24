@@ -8,16 +8,16 @@ import ActivityClient from './activity';
 import type { Metadata } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
-type Session = {
+interface Session {
   tokens?: {
     access_token?: string;
   };
-};
+}
 
 // Add this function at the top level to avoid duplicate fetches
 async function fetchCourseMetadata(courseuuid: string, access_token: string | null | undefined) {

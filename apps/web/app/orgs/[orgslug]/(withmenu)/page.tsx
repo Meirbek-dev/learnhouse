@@ -10,10 +10,10 @@ import { nextAuthOptions } from 'app/auth/options';
 import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
@@ -55,20 +55,16 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const OrgHomePage = async (params: any) => {
-  const orgslug = (await params.params).orgslug;
+  const { orgslug } = await params.params;
   const session = await getServerSession(nextAuthOptions);
   const access_token = session?.tokens?.access_token;
-  const courses = await getOrgCourses(
-    orgslug,
-    { revalidate: 0, tags: ['courses'] },
-    access_token ? access_token : null,
-  );
+  const courses = await getOrgCourses(orgslug, { revalidate: 0, tags: ['courses'] }, access_token || null);
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 0,
     tags: ['organizations'],
   });
   const org_id = org.id;
-  const collections = await getOrgCollections(org.id, access_token ? access_token : null, {
+  const collections = await getOrgCollections(org.id, access_token || null, {
     revalidate: 0,
     tags: ['courses'],
   });

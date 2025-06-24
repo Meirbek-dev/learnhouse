@@ -13,12 +13,12 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { mutate } from 'swr';
 
-type ChapterElementProps = {
+interface ChapterElementProps {
   chapter: any;
   chapterIndex: number;
   orgslug: string;
   course_uuid: string;
-};
+}
 
 interface ModifiedChapterInterface {
   chapterId: string;
@@ -29,8 +29,8 @@ function ChapterElement(props: ChapterElementProps) {
   const activities = props.chapter.activities || [];
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>(undefined);
-  const [selectedChapter, setSelectedChapter] = useState<string | undefined>(undefined);
+  const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>();
+  const [selectedChapter, setSelectedChapter] = useState<string | undefined>();
   const t = useTranslations('CourseEdit');
   const course = useCourse() as any;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
@@ -89,7 +89,7 @@ function ChapterElement(props: ChapterElementProps) {
                   <div className="chapter-modification-zone flex items-center space-x-2 rounded-lg bg-neutral-100 px-2 py-1 sm:px-4">
                     <input
                       type="text"
-                      className="outline-hidden w-full max-w-[150px] bg-transparent text-sm text-neutral-700 sm:max-w-none"
+                      className="w-full max-w-[150px] bg-transparent text-sm text-neutral-700 outline-hidden sm:max-w-none"
                       placeholder={t('chapterNamePlaceholder')}
                       value={modifiedChapter ? modifiedChapter?.chapterName : props.chapter.name}
                       onChange={(e) =>

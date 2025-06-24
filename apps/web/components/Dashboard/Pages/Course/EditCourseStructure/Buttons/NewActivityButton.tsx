@@ -11,13 +11,13 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { Layers } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
-type NewActivityButtonProps = {
+interface NewActivityButtonProps {
   chapterId: string;
   orgslug: string;
-};
+}
 
 function NewActivityButton(props: NewActivityButtonProps) {
   const [newActivityModal, setNewActivityModal] = useState(false);

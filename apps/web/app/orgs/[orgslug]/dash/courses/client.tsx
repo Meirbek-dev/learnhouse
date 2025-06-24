@@ -10,11 +10,11 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-type CourseProps = {
+interface CourseProps {
   orgslug: string;
   courses: any;
   org_id: string;
-};
+}
 
 function CoursesHome(params: CourseProps) {
   const searchParams = useSearchParams();
@@ -30,7 +30,7 @@ function CoursesHome(params: CourseProps) {
   }
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
+    <div className="h-full w-full bg-[#f8f8f8] pr-10 pl-10">
       <div className="mb-6">
         <BreadCrumbs type="courses" />
         <div className="mt-4 flex flex-col items-start justify-between sm:flex-row sm:items-center">

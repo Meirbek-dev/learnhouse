@@ -7,7 +7,7 @@ import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import Activity from './Activity';
 import { useState } from 'react';
 import { mutate } from 'swr';
@@ -22,8 +22,8 @@ function Chapter(props: any) {
   const router = useRouter();
   const session = useLHSession() as any;
   const t = useTranslations('CourseEdit');
-  const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>(undefined);
-  const [selectedChapter, setSelectedChapter] = useState<string | undefined>(undefined);
+  const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>();
+  const [selectedChapter, setSelectedChapter] = useState<string | undefined>();
   const course = useCourse() as any;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
@@ -54,10 +54,10 @@ function Chapter(props: any) {
           {...provided.draggableProps}
           ref={provided.innerRef}
           //  isDragging={snapshot.isDragging}
-          className="max-w-(--breakpoint-2xl) mx-auto bg-white px-5"
+          className="mx-auto max-w-(--breakpoint-2xl) bg-white px-5"
           key={props.info.list.chapter.id}
         >
-          <div className="text-md flex items-center space-x-2 pr-3 pt-3 font-bold">
+          <div className="text-md flex items-center space-x-2 pt-3 pr-3 font-bold">
             <div className="flex grow items-center space-x-3 rounded-md px-3 py-1 text-lg">
               <div className="rounded-md bg-neutral-100 p-2">
                 <Hexagon
@@ -72,7 +72,7 @@ function Chapter(props: any) {
                   <div className="chapter-modification-zone space-x-3 rounded-lg bg-neutral-100 px-4 py-1">
                     <input
                       type="text"
-                      className="outline-hidden bg-transparent text-sm text-neutral-700"
+                      className="bg-transparent text-sm text-neutral-700 outline-hidden"
                       placeholder={t('chapterNamePlaceholder')}
                       value={modifiedChapter ? modifiedChapter?.chapterName : props.info.list.chapter.name}
                       onChange={(e) =>

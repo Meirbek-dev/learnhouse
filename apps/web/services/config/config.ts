@@ -18,6 +18,7 @@ export const getOrgFromUri = () => {
     const hostname = window.location.hostname;
     return hostname.replace(`.${OPENU_DOMAIN}`, '');
   }
+  return;
 };
 
 export const getDefaultOrg = () => process.env.NEXT_PUBLIC_OPENU_DEFAULT_ORG;

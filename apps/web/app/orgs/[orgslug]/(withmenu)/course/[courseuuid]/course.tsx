@@ -55,7 +55,7 @@ const CourseClient = (props: any) => {
         setLearnings(parsedLearnings);
         return;
       }
-    } catch (e) {
+    } catch {
       // Not valid JSON, continue to legacy format handling
     }
 
@@ -123,14 +123,14 @@ const CourseClient = (props: any) => {
       return cleanRunCourseUuid === cleanCourseUuid;
     });
     if (run) {
-      return run.steps.find((step: any) => step.activity_id == activity.id);
+      return run.steps.find((step: any) => step.activity_id === activity.id);
     }
     return false;
   };
 
   const isActivityCurrent = (activity: any) => {
     const activity_uuid = activity.activity_uuid.replace('activity_', '');
-    return props.current_activity && props.current_activity == activity_uuid;
+    return props.current_activity && props.current_activity === activity_uuid;
   };
 
   return (
@@ -144,7 +144,7 @@ const CourseClient = (props: any) => {
               course={course}
               orgslug={orgslug}
             />
-            <div className="flex flex-col items-start justify-between pb-2 pt-3 md:flex-row md:items-center">
+            <div className="flex flex-col items-start justify-between pt-3 pb-2 md:flex-row md:items-center">
               <div>
                 <h1 className="text-3xl font-bold md:text-3xl">{course.name}</h1>
               </div>
@@ -163,9 +163,9 @@ const CourseClient = (props: any) => {
 
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
                         {course.thumbnail_type === 'both' && (
-                          <div className="absolute right-3 top-3 z-10">
+                          <div className="absolute top-3 right-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
                               <button
                                 onClick={() => setActiveThumbnailType('image')}
@@ -214,7 +214,7 @@ const CourseClient = (props: any) => {
                   }
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
                         <img
                           src={getCourseThumbnailMediaDirectory(
                             org?.org_uuid,
@@ -225,7 +225,7 @@ const CourseClient = (props: any) => {
                           className="h-auto w-full object-contain"
                         />
                         {course.thumbnail_type === 'both' && (
-                          <div className="absolute right-3 top-3 z-10">
+                          <div className="absolute top-3 right-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
                               <button
                                 onClick={() => setActiveThumbnailType('image')}
@@ -263,7 +263,7 @@ const CourseClient = (props: any) => {
                   }
                   return (
                     <div
-                      className="relative w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset ring-black/10"
+                      className="relative w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-black/10 ring-inset"
                       style={{
                         backgroundImage: `url('../empty_thumbnail.png')`,
                         backgroundSize: 'auto',
@@ -290,7 +290,7 @@ const CourseClient = (props: any) => {
 
                 <div className="course_metadata_left space-y-2">
                   <div className="">
-                    <p className="w-full hyphens-auto whitespace-pre-line text-pretty break-words py-5 leading-relaxed tracking-normal">
+                    <p className="w-full py-5 leading-relaxed tracking-normal text-pretty break-words hyphens-auto whitespace-pre-line">
                       {course.about}
                     </p>
                   </div>
@@ -386,7 +386,7 @@ const CourseClient = (props: any) => {
                       >
                         <h3 className="mr-3 grow break-words">{chapter.name}</h3>
                         <div className="flex items-center space-x-3">
-                          <p className="shrink-0 whitespace-nowrap rounded-full px-3 py-[2px] text-sm font-normal text-neutral-400 outline-1 outline-neutral-200">
+                          <p className="shrink-0 rounded-full px-3 py-[2px] text-sm font-normal whitespace-nowrap text-neutral-400 outline-1 outline-neutral-200">
                             {t('activities', {
                               activitiesLength: chapter.activities.length,
                             })}
@@ -415,7 +415,7 @@ const CourseClient = (props: any) => {
                                         />
                                         <Check
                                           size={16}
-                                          className="absolute left-0 top-0 stroke-[2.5] text-teal-600"
+                                          className="absolute top-0 left-0 stroke-[2.5] text-teal-600"
                                         />
                                       </div>
                                     ) : (

@@ -6,10 +6,10 @@ import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
 import CoursesHome from './client';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const t = await getTranslations('General');
@@ -43,18 +43,14 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 async function CoursesPage(params: any) {
-  const orgslug = (await params.params).orgslug;
+  const { orgslug } = await params.params;
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
   });
   const session = await getServerSession(nextAuthOptions);
   const access_token = session?.tokens?.access_token;
-  const courses = await getOrgCourses(
-    orgslug,
-    { revalidate: 0, tags: ['courses'] },
-    access_token ? access_token : null,
-  );
+  const courses = await getOrgCourses(orgslug, { revalidate: 0, tags: ['courses'] }, access_token || null);
 
   return (
     <CoursesHome

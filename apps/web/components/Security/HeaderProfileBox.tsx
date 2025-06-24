@@ -8,7 +8,7 @@ import UserAvatar from '@components/Objects/UserAvatar';
 import { Settings } from 'lucide-react';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { useEffect } from 'react';
 import Link from 'next/link';
 

@@ -10,7 +10,7 @@ import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useState, useEffect } from 'react';
 import type { ChangeEvent } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
@@ -60,7 +60,7 @@ function PDFBlockComponent(props: any) {
     link.setAttribute('download', '');
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
-    document.body.appendChild(link);
+    document.body.append(link);
     link.click();
     document.body.removeChild(link);
   };
@@ -107,7 +107,7 @@ function PDFBlockComponent(props: any) {
             {!isEditable && (
               <button
                 onClick={handleDownload}
-                className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                 title="Download PDF"
               >
                 <Download className="h-4 w-4 text-white" />

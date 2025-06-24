@@ -33,7 +33,7 @@ import UserAvatar from '@components/Objects/UserAvatar';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-type UserData = {
+interface UserData {
   id: string;
   user_uuid: string;
   first_name: string;
@@ -49,7 +49,7 @@ type UserData = {
       text: string;
     };
   };
-};
+}
 
 const AVAILABLE_ICONS = {
   'briefcase': Briefcase,
@@ -99,9 +99,9 @@ function UserBlockComponent(props: any) {
         }
         setUserData(data);
         setUsername(data.username);
-      } catch (err: any) {
-        console.error('Error fetching user by ID:', err);
-        setError(err.detail || t('errorNotFound'));
+      } catch (error: any) {
+        console.error('Error fetching user by ID:', error);
+        setError(error.detail || t('errorNotFound'));
         // Clear the invalid user_id from the node attributes
         updateAttributes({
           user_id: null,
@@ -131,9 +131,9 @@ function UserBlockComponent(props: any) {
       updateAttributes({
         user_id: data.id,
       });
-    } catch (err: any) {
-      console.error('Error fetching user by username:', err);
-      setError(err.detail || t('errorNotFound'));
+    } catch (error: any) {
+      console.error('Error fetching user by username:', error);
+      setError(error.detail || t('errorNotFound'));
     } finally {
       setIsLoading(false);
     }
@@ -218,7 +218,7 @@ function UserBlockComponent(props: any) {
           <div className="absolute inset-0 h-28 rounded-t-lg bg-gradient-to-b from-gray-100/30 to-transparent" />
 
           {/* Content */}
-          <div className="relative px-5 pb-4 pt-5">
+          <div className="relative px-5 pt-5 pb-4">
             <div className="flex items-start gap-4">
               {/* Avatar */}
               <div className="flex-shrink-0">
@@ -273,7 +273,7 @@ function UserBlockComponent(props: any) {
 
         {/* Details */}
         {userData.details && Object.values(userData.details).length > 0 && (
-          <div className="space-y-2.5 border-t border-gray-100 px-5 pb-4 pt-3.5">
+          <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
             {Object.values(userData.details).map((detail) => (
               <div
                 key={detail.id}

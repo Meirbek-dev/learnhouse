@@ -6,7 +6,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import touEmblemLight from 'public/tou_emblem_light.png';
 import StarterKit from '@tiptap/starter-kit';
 import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
@@ -81,10 +81,10 @@ function Editor(props: EditorProps) {
   }, [is_ai_feature_enabled]);
 
   // remove course_ from course_uuid
-  const course_uuid = props.course.course_uuid.substring(7);
+  const course_uuid = props.course.course_uuid.slice(7);
 
   // remove activity_ from activity_uuid
-  const activity_uuid = props.activity.activity_uuid.substring(9);
+  const activity_uuid = props.activity.activity_uuid.slice(9);
 
   // Code Block Languages for Lowlight
   lowlight.register('html', html);
@@ -208,7 +208,7 @@ function Editor(props: EditorProps) {
           }}
           exit={{ opacity: 0 }}
         >
-          <EditorTop className="fixed bg-white bg-opacity-95 backdrop-blur-sm backdrop-brightness-125">
+          <EditorTop className="bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125">
             <EditorDocSection>
               <EditorInfoWrapper>
                 <Link href="/">
@@ -317,7 +317,7 @@ function Editor(props: EditorProps) {
               <EditorUserProfileWrapper>
                 <UserAvatar
                   border="border-4"
-                  use_with_session={true}
+                  use_with_session
                   width={45}
                 />
               </EditorUserProfileWrapper>

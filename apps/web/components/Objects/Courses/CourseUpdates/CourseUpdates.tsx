@@ -20,7 +20,7 @@ import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useFormik } from 'formik';
 import { format, formatDistanceToNow } from 'date-fns';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';

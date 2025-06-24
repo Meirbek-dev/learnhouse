@@ -30,7 +30,7 @@ const NavigationButtons = memo(
     currentIndex: number;
     allActivities: any[];
     navigateToActivity: (activity: any) => void;
-    t: (key: string, values?: Record<string, any>) => string;
+    t: (key: string, values?: { [key: string]: any }) => string;
   }) => (
     <div className="flex items-center space-x-2 sm:space-x-3">
       <button
@@ -101,7 +101,7 @@ NavigationButtons.displayName = 'NavigationButtons';
 
 // Memoized course info component
 const CourseInfo = memo(
-  ({ course, org, t }: { course: any; org: any; t: (key: string, values?: Record<string, any>) => string }) => (
+  ({ course, org, t }: { course: any; org: any; t: (key: string, values?: { [key: string]: any }) => string }) => (
     <div className="flex min-w-0 flex-shrink items-center space-x-2 sm:space-x-4">
       <img
         className="h-[20px] w-[35px] flex-shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"
@@ -170,7 +170,9 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setShouldShow(!entry.isIntersecting);
+        if (entry) {
+          setShouldShow(!entry.isIntersecting);
+        }
       },
       {
         threshold: [0, 0.1, 1],
@@ -198,7 +200,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
 
   return (
     <div
-      className={`animate-in fade-in slide-in-from-top fixed left-0 right-0 top-[60px] z-40 bg-white/90 backdrop-blur-xl transition-all duration-300 ${
+      className={`animate-in fade-in slide-in-from-top fixed top-[60px] right-0 left-0 z-40 bg-white/90 backdrop-blur-xl transition-all duration-300 ${
         isScrolled ? 'nice-shadow' : ''
       }`}
     >

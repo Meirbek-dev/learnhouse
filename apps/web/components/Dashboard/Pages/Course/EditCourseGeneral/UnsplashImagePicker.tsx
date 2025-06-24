@@ -110,7 +110,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
       setImages([]);
       setPage(1);
     }
-  }, [query, debouncedFetchImages, page]);
+  }, [query, debouncedFetchImages, page, images.length]);
 
   useEffect(() => {
     if (isOpen && images.length === 0 && !query && !loading) {
@@ -146,10 +146,10 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
             value={query}
             onChange={handleSearch}
             placeholder={t('searchPlaceholder')}
-            className="focus:outline-hidden w-full rounded-lg border p-2 pl-10 focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border p-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
           />
           <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400"
+            className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400"
             size={20}
           />
         </div>

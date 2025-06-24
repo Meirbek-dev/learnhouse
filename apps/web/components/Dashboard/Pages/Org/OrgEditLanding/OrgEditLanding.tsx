@@ -42,7 +42,7 @@ import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import type { FC, ChangeEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import useSWR from 'swr';
 
 const SECTION_TYPES = {
@@ -75,63 +75,63 @@ const SECTION_TYPES = {
 
 const PREDEFINED_GRADIENTS = {
   'sunrise': {
-    colors: ['#fef9f3', '#ffecd2'] as Array<string>,
+    colors: ['#fef9f3', '#ffecd2'] as string[],
     direction: '45deg',
   },
   'mint-breeze': {
-    colors: ['#f0fff4', '#dcfce7'] as Array<string>,
+    colors: ['#f0fff4', '#dcfce7'] as string[],
     direction: '45deg',
   },
   'deep-ocean': {
-    colors: ['#0f172a', '#1e3a8a'] as Array<string>,
+    colors: ['#0f172a', '#1e3a8a'] as string[],
     direction: '135deg',
   },
   'sunset-blaze': {
-    colors: ['#7f1d1d', '#ea580c'] as Array<string>,
+    colors: ['#7f1d1d', '#ea580c'] as string[],
     direction: '45deg',
   },
   'midnight-purple': {
-    colors: ['#581c87', '#7e22ce'] as Array<string>,
+    colors: ['#581c87', '#7e22ce'] as string[],
     direction: '90deg',
   },
   'forest-depths': {
-    colors: ['#064e3b', '#059669'] as Array<string>,
+    colors: ['#064e3b', '#059669'] as string[],
     direction: '225deg',
   },
   'berry-fusion': {
-    colors: ['#831843', '#be185d'] as Array<string>,
+    colors: ['#831843', '#be185d'] as string[],
     direction: '135deg',
   },
   'cosmic-night': {
-    colors: ['#1e1b4b', '#4338ca'] as Array<string>,
+    colors: ['#1e1b4b', '#4338ca'] as string[],
     direction: '45deg',
   },
   'autumn-fire': {
-    colors: ['#7c2d12', '#c2410c'] as Array<string>,
+    colors: ['#7c2d12', '#c2410c'] as string[],
     direction: '90deg',
   },
   'emerald-depths': {
-    colors: ['#064e3b', '#10b981'] as Array<string>,
+    colors: ['#064e3b', '#10b981'] as string[],
     direction: '135deg',
   },
   'royal-navy': {
-    colors: ['#1e3a8a', '#3b82f6'] as Array<string>,
+    colors: ['#1e3a8a', '#3b82f6'] as string[],
     direction: '225deg',
   },
   'volcanic': {
-    colors: ['#991b1b', '#f97316'] as Array<string>,
+    colors: ['#991b1b', '#f97316'] as string[],
     direction: '315deg',
   },
   'arctic-night': {
-    colors: ['#0f172a', '#475569'] as Array<string>,
+    colors: ['#0f172a', '#475569'] as string[],
     direction: '90deg',
   },
   'grape-punch': {
-    colors: ['#6b21a8', '#d946ef'] as Array<string>,
+    colors: ['#6b21a8', '#d946ef'] as string[],
     direction: '135deg',
   },
   'marine-blue': {
-    colors: ['#0c4a6e', '#0ea5e9'] as Array<string>,
+    colors: ['#0c4a6e', '#0ea5e9'] as string[],
     direction: '45deg',
   },
 } as const;
@@ -333,9 +333,11 @@ const OrgEditLanding = () => {
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
 
-    const items = Array.from(landingData.sections);
+    const items = [...landingData.sections];
     const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    if (reorderedItem) {
+      items.splice(result.destination.index, 0, reorderedItem);
+    }
 
     setLandingData((prev: LandingObject) => ({
       ...prev,
@@ -392,7 +394,7 @@ const OrgEditLanding = () => {
                 onChange={() => setIsLandingEnabled(!isLandingEnabled)}
                 className="peer sr-only"
               />
-              <div className="peer-focus:outline-hidden peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300" />
+              <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-hidden after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
             </label>
             <Button
               variant="default"
@@ -432,10 +434,10 @@ const OrgEditLanding = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 onClick={() => setSelectedSection(index)}
-                                className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
+                                className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
                                   selectedSection === index
-                                    ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
-                                    : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
+                                    ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
+                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
                                 } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                               >
                                 <div className="group flex items-center justify-between">
@@ -513,7 +515,7 @@ const OrgEditLanding = () => {
                     }}
                   >
                     <SelectTrigger className="w-full border-0 bg-black p-0">
-                      <div className="hover:bg-primary/90 inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-black text-sm font-medium text-white outline-none transition-all">
+                      <div className="hover:bg-primary/90 inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md bg-black text-sm font-medium whitespace-nowrap text-white transition-all outline-none">
                         <Plus
                           size="8"
                           color="white"
@@ -548,7 +550,7 @@ const OrgEditLanding = () => {
 
               {/* Editor Panel */}
               <div className="col-span-3">
-                {selectedSection !== null ? (
+                {selectedSection !== null && landingData.sections[selectedSection] ? (
                   <SectionEditor
                     t={t}
                     section={landingData.sections[selectedSection]}
@@ -1601,7 +1603,8 @@ const LogosSectionEditor: FC<{
                   id={`logo-${index}`}
                   onImageUploaded={(url) => {
                     const newLogos = [...section.logos];
-                    newLogos[index] = { ...section.logos[index], url };
+                    const existingLogo = section.logos[index];
+                    newLogos[index] = { ...existingLogo, url, alt: existingLogo?.alt || '' };
                     onChange({ ...section, logos: newLogos });
                   }}
                   buttonText={t('LogosEditor.uploadButton')}
@@ -1746,9 +1749,14 @@ const PeopleSectionEditor: FC<{
                       id={`person-${index}`}
                       onImageUploaded={(url) => {
                         const newPeople = [...section.people];
+                        const existingPerson = section.people[index];
                         newPeople[index] = {
-                          ...section.people[index],
+                          ...existingPerson,
                           image_url: url,
+                          user_uuid: existingPerson?.user_uuid || '',
+                          name: existingPerson?.name || '',
+                          description: existingPerson?.description || '',
+                          username: existingPerson?.username || '',
                         };
                         onChange({ ...section, people: newPeople });
                       }}

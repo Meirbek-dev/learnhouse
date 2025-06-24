@@ -6,14 +6,14 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import { mutate } from 'swr';
 
-type AddUserGroupProps = {
+interface AddUserGroupProps {
   setCreateUserGroupModal: any;
-};
+}
 
 function AddUserGroup(props: AddUserGroupProps) {
   const t = useTranslations('Components.AddUserGroup');

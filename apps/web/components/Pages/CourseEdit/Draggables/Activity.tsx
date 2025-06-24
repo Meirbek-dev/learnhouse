@@ -20,8 +20,8 @@ interface ModifiedActivityInterface {
 function Activity(props: any) {
   const router = useRouter();
   const session = useLHSession() as any;
-  const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>(undefined);
-  const [selectedActivity, setSelectedActivity] = useState<string | undefined>(undefined);
+  const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>();
+  const [selectedActivity, setSelectedActivity] = useState<string | undefined>();
   const t = useTranslations('CourseEdit');
   const course = useCourse() as any;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
@@ -60,7 +60,7 @@ function Activity(props: any) {
     >
       {(provided) => (
         <div
-          className="shadow-xs hover:scale-102 my-2 flex w-auto flex-row items-center space-x-1 rounded-md bg-gray-50 py-2 text-gray-500 ring-1 ring-inset ring-gray-400/10 transition-all delay-100 duration-75 ease-linear hover:bg-gray-100 hover:shadow-sm"
+          className="my-2 flex w-auto flex-row items-center space-x-1 rounded-md bg-gray-50 py-2 text-gray-500 shadow-xs ring-1 ring-gray-400/10 transition-all delay-100 duration-75 ease-linear ring-inset hover:scale-102 hover:bg-gray-100 hover:shadow-sm"
           key={props.activity.id}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -100,7 +100,7 @@ function Activity(props: any) {
               <div className="chapter-modification-zone space-x-3 rounded-lg bg-gray-200/60 px-4 py-1 text-[7px] text-gray-600 shadow-inner">
                 <input
                   type="text"
-                  className="outline-hidden bg-transparent text-xs text-gray-500"
+                  className="bg-transparent text-xs text-gray-500 outline-hidden"
                   placeholder={t('activityNamePlaceholder')}
                   value={modifiedActivity ? modifiedActivity?.activityName : props.activity.name}
                   onChange={(e) =>

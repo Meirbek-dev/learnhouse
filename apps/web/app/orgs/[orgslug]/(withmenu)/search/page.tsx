@@ -22,8 +22,8 @@ interface User {
   email: string;
   avatar_image: string;
   bio: string;
-  details: Record<string, any>;
-  profile: Record<string, any>;
+  details: { [key: string]: any };
+  profile: { [key: string]: any };
   id: number;
   user_uuid: string;
 }
@@ -178,15 +178,15 @@ function SearchPage() {
 
   // URL parameters
   const query = searchParams.get('q') || '';
-  const page = Number.parseInt(searchParams.get('page') || '1');
+  const page = Number.parseInt(searchParams.get('page') || '1', 10);
   const type = (searchParams.get('type') as ContentType) || 'all';
   const perPage = 9;
 
   // Filter state
   const [selectedType, setSelectedType] = useState<ContentType>(type);
 
-  const updateSearchParams = (updates: Record<string, string>) => {
-    const current = new URLSearchParams(Array.from(searchParams.entries()));
+  const updateSearchParams = (updates: { [key: string]: string }) => {
+    const current = new URLSearchParams([...searchParams.entries()]);
     Object.entries(updates).forEach(([key, value]) => {
       if (value) {
         current.set(key, value);
@@ -285,7 +285,7 @@ function SearchPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('searchInputPlaceholder')}
-                className="nice-shadow h-12 w-full rounded-xl bg-white pl-12 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
+                className="nice-shadow h-12 w-full rounded-xl bg-white pr-4 pl-12 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:ring-1 focus:ring-black/5 focus:outline-none"
               />
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <Search
@@ -420,7 +420,7 @@ function SearchPage() {
                         <div className="p-4">
                           <h3 className="mb-1 text-sm font-medium text-black/80">{course.name}</h3>
                           <p className="line-clamp-2 text-xs text-black/50">{course.description}</p>
-                          {course.authors && course.authors.length > 0 && (
+                          {course.authors && course.authors.length > 0 && course.authors[0]?.user && (
                             <div className="mt-3 flex items-center gap-2">
                               <UserAvatar
                                 width={20}

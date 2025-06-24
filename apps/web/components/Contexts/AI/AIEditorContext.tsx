@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 export const AIEditorContext = createContext(null) as any;
 export const AIEditorDispatchContext = createContext(null) as any;
 
-export type AIEditorStateTypes = {
+export interface AIEditorStateTypes {
   messages: AIMessage[];
   isModalOpen: boolean;
   isFeedbackModalOpen: boolean;
@@ -15,13 +15,13 @@ export type AIEditorStateTypes = {
   selectedTool: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate';
   isUserInputEnabled: boolean;
   error: AIError;
-};
+}
 
-type AIError = {
+interface AIError {
   isError: boolean;
   status: number;
   error_message: string;
-};
+}
 
 function AIEditorProvider({ children }: { children: ReactNode }) {
   const [aIEditorState, dispatchAIEditor] = useReducer(aIEditorReducer, {

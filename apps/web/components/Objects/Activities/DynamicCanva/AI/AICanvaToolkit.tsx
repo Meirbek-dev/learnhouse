@@ -11,10 +11,10 @@ import { BubbleMenu } from '@tiptap/react';
 import type { Editor } from '@tiptap/core';
 import Image from 'next/image';
 
-type AICanvaToolkitProps = {
+interface AICanvaToolkitProps {
   editor: Editor;
   activity: any;
-};
+}
 
 function AICanvaToolkit(props: AICanvaToolkitProps) {
   const t = useTranslations('Activities.AICanvaToolkit');

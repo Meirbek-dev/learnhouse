@@ -13,13 +13,13 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, useMemo } from 'react';
 import { Hexagon } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
-type EditCourseStructureProps = {
+interface EditCourseStructureProps {
   orgslug: string;
   course_uuid?: string;
-};
+}
 
 export type OrderPayload =
   | {
@@ -84,14 +84,14 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     const newCourseStructure = { ...course_structure };
 
     if (type === 'chapter') {
-      const newChapterOrder = Array.from(newCourseStructure.chapters);
+      const newChapterOrder = [...newCourseStructure.chapters];
       const [movedChapter] = newChapterOrder.splice(source.index, 1);
       newChapterOrder.splice(destination.index, 0, movedChapter);
       newCourseStructure.chapters = newChapterOrder;
     }
 
     if (type === 'activity') {
-      const newChapterOrder = Array.from(newCourseStructure.chapters);
+      const newChapterOrder = [...newCourseStructure.chapters];
       const sourceChapter = newChapterOrder.find((chapter: any) => chapter.chapter_uuid === source.droppableId) as any;
       const destinationChapter =
         newChapterOrder.find((chapter: any) => chapter.chapter_uuid === destination.droppableId) ?? sourceChapter;
@@ -161,7 +161,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
             dialogTitle={t('NewChapterModal.title')}
             dialogDescription={t('NewChapterModal.description')}
             dialogTrigger={
-              <div className="max-w-(--breakpoint-2xl) shadow-xs mx-auto my-16 flex h-10 flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white">
+              <div className="mx-auto my-16 flex h-10 max-w-(--breakpoint-2xl) flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white shadow-xs">
                 <div className="mx-auto flex items-center space-x-2 hover:cursor-pointer">
                   <Hexagon
                     strokeWidth={3}

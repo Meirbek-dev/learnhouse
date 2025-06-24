@@ -19,18 +19,18 @@ import touEmblemLight from 'public/tou_emblem_light.png';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 
-type AIEditorToolkitProps = {
+interface AIEditorToolkitProps {
   editor: Editor;
   activity: any;
-};
+}
 
-type AIPromptsLabels = {
+interface AIPromptsLabels {
   label: 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate';
   selection: string;
-};
+}
 
 function AIEditorToolkit(props: AIEditorToolkitProps) {
   const dispatchAIEditor = useAIEditorDispatch() as any;
@@ -62,7 +62,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                   mass: 0.2,
                   velocity: 2,
                 }}
-                className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center"
+                className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
                 {aiEditorState.isFeedbackModalOpen && (
@@ -77,7 +77,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                     background:
                       'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
                   }}
-                  className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10"
+                  className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 ring-inset"
                 >
                   <div className="flex space-x-2">
                     <div className="pr-1">
@@ -388,6 +388,8 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         selection: selection,
       });
     }
+
+    return;
   };
 
   const getTipTapEditorSelectedTextGlobal = () => {
@@ -418,7 +420,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         mass: 0.2,
         velocity: 2,
       }}
-      className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center backdrop-blur-md"
+      className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center backdrop-blur-md"
       style={{ pointerEvents: 'none' }}
     >
       <div
@@ -427,7 +429,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
           background:
             'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 95%)',
         }}
-        className="max-w-(--breakpoint-2xl) fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
+        className="fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 backdrop-blur-md ring-inset"
       >
         <div className="flex justify-center">
           <Image
@@ -448,7 +450,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               value={aiEditorState.chatInputValue}
               onChange={handleChange}
               placeholder={t('askAI')}
-              className="outline-hidden w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-inset ring-white/20 placeholder:text-white/30"
+              className="w-full rounded-lg bg-gray-950/20 px-4 py-2 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
             />
             <div
               onClick={() => handleOperation(aiEditorState.selectedTool, aiEditorState.chatInputValue)}
@@ -563,7 +565,7 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
                 value={aiEditorState.chatInputValue}
                 onChange={handleChange}
                 placeholder={t('translateExample')}
-                className="py- outline-hidden w-full rounded-lg bg-gray-950/20 px-4 text-sm text-white ring-1 ring-inset ring-white/20 placeholder:text-white/30"
+                className="py- w-full rounded-lg bg-gray-950/20 px-4 text-sm text-white ring-1 ring-white/20 outline-hidden ring-inset placeholder:text-white/30"
               />
             </div>
             <div

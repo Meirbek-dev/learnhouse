@@ -7,7 +7,7 @@ import touEmblemDark from 'public/tou_emblem_dark.png';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 
 function StripeConnectCallback() {
@@ -30,7 +30,7 @@ function StripeConnectCallback() {
         }
 
         const _response = await verifyStripeConnection(
-          Number.parseInt(orgId),
+          Number.parseInt(orgId, 10),
           code,
           session?.data?.tokens?.access_token,
         );

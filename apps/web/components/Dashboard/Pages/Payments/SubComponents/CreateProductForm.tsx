@@ -11,7 +11,7 @@ import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import currencyCodes from 'currency-codes';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import type { FC } from 'react';
 import { mutate } from 'swr';
 import * as Yup from 'yup';

@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl';
 import UserAvatar from '../../UserAvatar';
 import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -76,7 +76,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
                 }
                 predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
                 width={avatarSize}
-                showProfilePopup={true}
+                showProfilePopup
                 userId={author.user.id}
               />
             </div>
@@ -106,9 +106,9 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
         <div className="text-sm font-medium text-neutral-800">
           {authors.length === 1 ? (
             <span>
-              {authors[0].user.first_name && authors[0].user.last_name
+              {authors[0]?.user?.first_name && authors[0]?.user?.last_name
                 ? `${authors[0].user.first_name} ${authors[0].user.last_name}`
-                : `@${authors[0].user.username}`}
+                : `@${authors[0]?.user?.username || 'Unknown'}`}
             </span>
           ) : (
             <>
@@ -128,11 +128,11 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
         </div>
         <div className="mt-0.5 text-xs text-neutral-500">
           {authors.length === 1 ? (
-            <span>@{authors[0].user.username}</span>
+            <span>@{authors[0]?.user?.username || 'Unknown'}</span>
           ) : (
             displayedNames.map((author, index) => (
               <span key={author.user.user_uuid}>
-                @{author.user.username}
+                @{author.user?.username || 'Unknown'}
                 {index === 0 && authors.length > 1 && index < displayedNames.length - 1 && t('and')}
               </span>
             ))
@@ -325,7 +325,7 @@ const UpdatesListView = () => {
                 <h4 className="truncate text-sm font-medium text-neutral-800">{update.title}</h4>
                 <span
                   title={format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })}
-                  className="whitespace-nowrap text-[11px] font-medium text-neutral-400"
+                  className="text-[11px] font-medium whitespace-nowrap text-neutral-400"
                 >
                   {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
                 </span>
@@ -405,13 +405,15 @@ const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
   const sortedAuthors = [...authors]
     .filter((author) => author.authorship_status === 'ACTIVE')
     .sort((a, b) => {
-      const rolePriority: Record<string, number> = {
+      const rolePriority: { [key: string]: number } = {
         CREATOR: 0,
         MAINTAINER: 1,
         CONTRIBUTOR: 2,
         REPORTER: 3,
       };
-      return rolePriority[a.authorship] - rolePriority[b.authorship];
+      const aPriority = rolePriority[a.authorship] ?? 999;
+      const bPriority = rolePriority[b.authorship] ?? 999;
+      return aPriority - bPriority;
     });
 
   return (

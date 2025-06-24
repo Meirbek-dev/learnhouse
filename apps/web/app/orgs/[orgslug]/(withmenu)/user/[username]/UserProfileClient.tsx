@@ -127,7 +127,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
               avatar_url={
                 userData.avatar_image ? getUserAvatarMediaDirectory(userData.user_uuid, userData.avatar_image) : ''
               }
-              predefined_avatar={userData.avatar_image ? undefined : 'empty'}
+              {...(!userData.avatar_image && { predefined_avatar: 'empty' })}
               userId={userData.id}
               showProfilePopup
               rounded="rounded-xl"
@@ -195,7 +195,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                 {userData.bio ? (
                   <p className="text-gray-700">{userData.bio}</p>
                 ) : (
-                  <p className="italic text-gray-500">{t('noBiography')}</p>
+                  <p className="text-gray-500 italic">{t('noBiography')}</p>
                 )}
               </div>
 

@@ -74,7 +74,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
       await revalidateTags(['collections'], org.slug);
       toast.success(t('toast.success'));
       router.push(getUriWithOrg(orgslug, '/collections'));
-    } catch (_error) {
+    } catch {
       toast.error(t('toast.failure'));
     } finally {
       setIsSubmitting(false);
@@ -109,7 +109,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 placeholder={t('namePlaceholder')}
                 value={name}
                 onChange={handleNameChange}
-                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 maxLength={100}
               />
             </label>
@@ -118,7 +118,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
               <span className="text-sm font-medium text-gray-700">{t('visibilityLabel')}</span>
               <select
                 onChange={handleVisibilityChange}
-                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 defaultValue={isPublic}
               >
                 <option value="true">{t('visibilityPublic')}</option>
@@ -133,7 +133,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 value={description}
                 onChange={handleDescriptionChange}
                 rows={4}
-                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 maxLength={500}
               />
             </label>
@@ -206,14 +206,14 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
             <button
               type="button"
               onClick={() => router.back()}
-              className="focus:outline-hidden rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden"
             >
               {t('cancelButton')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="shadow-xs focus:outline-hidden flex items-center space-x-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center space-x-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white shadow-xs transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               <span>{isSubmitting ? t('creatingButton') : t('createButton')}</span>

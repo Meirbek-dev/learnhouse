@@ -4,14 +4,14 @@ import type { ReactNode } from 'react';
 
 export const EditorProviderContext = createContext(null) as any;
 
-type EditorProviderProps = {
+interface EditorProviderProps {
   children: ReactNode;
   options: EditorProviderState;
-};
+}
 
-type EditorProviderState = {
+interface EditorProviderState {
   isEditable: boolean;
-};
+}
 
 function EditorOptionsProvider({ children, options }: EditorProviderProps) {
   const [editorOptions, _setEditorOptions] = useState<EditorProviderState>(options);

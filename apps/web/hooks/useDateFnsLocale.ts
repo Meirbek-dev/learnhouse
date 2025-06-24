@@ -2,7 +2,7 @@ import { useLocale } from 'next-intl';
 import { enUS, kk, ru } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
 
-const localeMap: Record<string, Locale> = {
+const localeMap: { [key: string]: Locale } = {
   'en-US': enUS,
   'kk-KZ': kk,
   'ru-RU': ru,

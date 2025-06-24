@@ -14,10 +14,10 @@ import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
@@ -61,13 +61,13 @@ const CollectionsPage = async (params: any) => {
   const t = await getTranslations('HomePage.Collections');
   const session = await getServerSession(nextAuthOptions);
   const access_token = session?.tokens?.access_token;
-  const orgslug = (await params.params).orgslug;
+  const { orgslug } = await params.params;
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
   });
   const org_id = org.id;
-  const collections = await getOrgCollections(org_id, access_token ? access_token : null, {
+  const collections = await getOrgCollections(org_id, access_token || null, {
     revalidate: 0,
     tags: ['collections'],
   });

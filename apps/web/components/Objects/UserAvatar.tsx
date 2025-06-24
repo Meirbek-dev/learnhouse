@@ -8,7 +8,7 @@ import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
-type UserAvatarProps = {
+interface UserAvatarProps {
   width?: number;
   avatar_url?: string;
   use_with_session?: boolean;
@@ -20,7 +20,7 @@ type UserAvatarProps = {
   showProfilePopup?: boolean;
   userId?: string;
   username?: string;
-};
+}
 
 function UserAvatar(props: UserAvatarProps) {
   const t = useTranslations('Components.UserAvatar');

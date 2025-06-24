@@ -18,7 +18,7 @@ import * as Form from '@radix-ui/react-form';
 import { CalendarIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BarLoader } from 'react-spinners';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -113,8 +113,8 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
       if (activity_res?.activity_uuid) {
         try {
           await deleteActivity(activity_res.activity_uuid, session.data?.tokens?.access_token);
-        } catch (rollbackError) {
-          console.error('Failed to rollback activity creation:', rollbackError);
+        } catch (error) {
+          console.error('Failed to rollback activity creation:', error);
         }
       }
     } finally {
@@ -165,7 +165,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
             <Form.Control asChild>
               <button
                 className={cn(
-                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
+                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
                   !dueDate && 'text-muted-foreground',
                 )}
               >
@@ -183,7 +183,6 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
               selected={dueDate ? new Date(dueDate) : undefined}
               onSelect={handleDueDateChange}
               disabled={false}
-              autoFocus
             />
           </PopoverContent>
         </Popover>

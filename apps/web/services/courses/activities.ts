@@ -121,7 +121,7 @@ export async function updateActivity(data: any, activity_uuid: string, access_to
 export async function getUrlPreview(url: string) {
   const result = await fetch(
     `${getAPIUrl()}utils/link-preview?url=${url}`,
-    RequestBodyWithAuthHeader('GET', null, null, undefined),
+    RequestBodyWithAuthHeader('GET', null, null),
   );
   const res = await result.json();
   return res;

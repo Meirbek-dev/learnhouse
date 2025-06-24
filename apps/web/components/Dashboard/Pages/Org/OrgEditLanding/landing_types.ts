@@ -1,7 +1,7 @@
 export interface LandingBackground {
   type: 'solid' | 'gradient' | 'image';
   color?: string;
-  colors?: Array<string>;
+  colors?: string[];
   direction?: string;
   image?: string;
 }

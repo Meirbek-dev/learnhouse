@@ -29,14 +29,14 @@ import { useState } from 'react';
 
 const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg']);
 
-type Preview = {
+interface Preview {
   id: string;
   url: string;
   type: 'image' | 'youtube' | 'loom';
   filename?: string;
   thumbnailUrl?: string;
   order: number;
-};
+}
 
 // Update the height constant
 const PREVIEW_HEIGHT = 'h-28'; // Reduced height
@@ -124,18 +124,20 @@ export default function OrgEditImages() {
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
-      setLocalLogo(URL.createObjectURL(file));
-      setIsLogoUploading(true);
-      const loadingToast = toast.loading(tNotify('uploadingLogo'));
-      try {
-        await uploadOrganizationLogo(org.id, file, access_token);
-        await new Promise((r) => setTimeout(r, 1500));
-        toast.success(tNotify('logoUpdatedSuccess'), { id: loadingToast });
-        router.refresh();
-      } catch (_err) {
-        toast.error(tNotify('logoUploadFailed'), { id: loadingToast });
-      } finally {
-        setIsLogoUploading(false);
+      if (file) {
+        setLocalLogo(URL.createObjectURL(file));
+        setIsLogoUploading(true);
+        const loadingToast = toast.loading(tNotify('uploadingLogo'));
+        try {
+          await uploadOrganizationLogo(org.id, file, access_token);
+          await new Promise((r) => setTimeout(r, 1500));
+          toast.success(tNotify('logoUpdatedSuccess'), { id: loadingToast });
+          router.refresh();
+        } catch {
+          toast.error(tNotify('logoUploadFailed'), { id: loadingToast });
+        } finally {
+          setIsLogoUploading(false);
+        }
       }
     }
   };
@@ -143,18 +145,20 @@ export default function OrgEditImages() {
   const handleThumbnailChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
-      setLocalThumbnail(URL.createObjectURL(file));
-      setIsThumbnailUploading(true);
-      const loadingToast = toast.loading(tNotify('uploadingThumbnail'));
-      try {
-        await uploadOrganizationThumbnail(org.id, file, access_token);
-        await new Promise((r) => setTimeout(r, 1500));
-        toast.success(tNotify('thumbnailUpdatedSuccess'), { id: loadingToast });
-        router.refresh();
-      } catch (_err) {
-        toast.error(tNotify('thumbnailUploadFailed'), { id: loadingToast });
-      } finally {
-        setIsThumbnailUploading(false);
+      if (file) {
+        setLocalThumbnail(URL.createObjectURL(file));
+        setIsThumbnailUploading(true);
+        const loadingToast = toast.loading(tNotify('uploadingThumbnail'));
+        try {
+          await uploadOrganizationThumbnail(org.id, file, access_token);
+          await new Promise((r) => setTimeout(r, 1500));
+          toast.success(tNotify('thumbnailUpdatedSuccess'), { id: loadingToast });
+          router.refresh();
+        } catch {
+          toast.error(tNotify('thumbnailUploadFailed'), { id: loadingToast });
+        } finally {
+          setIsThumbnailUploading(false);
+        }
       }
     }
   };
@@ -166,7 +170,7 @@ export default function OrgEditImages() {
 
   const handlePreviewUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      const files = Array.from(event.target.files);
+      const files = [...event.target.files];
       const remainingSlots = 4 - previews.length;
 
       if (files.length > remainingSlots) {
@@ -220,7 +224,7 @@ export default function OrgEditImages() {
           id: loadingToast,
         });
         router.refresh();
-      } catch (_err) {
+      } catch {
         toast.error(tNotify('previewsUploadFailed'), { id: loadingToast });
       } finally {
         setIsPreviewUploading(false);
@@ -247,7 +251,7 @@ export default function OrgEditImages() {
       setPreviews(updatedPreviews);
       toast.success(tNotify('previewRemovedSuccess'), { id: loadingToast });
       router.refresh();
-    } catch (_err) {
+    } catch {
       toast.error(tNotify('previewRemoveFailed'), { id: loadingToast });
     }
   };
@@ -256,12 +260,12 @@ export default function OrgEditImages() {
     if (type === 'youtube') {
       const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
       const match = url.match(regex);
-      return match ? match[1] : null;
+      return match ? match[1] || null : null;
     }
     if (type === 'loom') {
       const regex = /(?:loom\.com\/(?:share|embed)\/)([a-zA-Z0-9]+)/;
       const match = url.match(regex);
-      return match ? match[1] : null;
+      return match ? match[1] || null : null;
     }
     return null;
   };
@@ -327,7 +331,7 @@ export default function OrgEditImages() {
       setVideoDialogOpen(false);
       toast.success(tNotify('videoPreviewAddedSuccess'), { id: loadingToast });
       router.refresh();
-    } catch (_err) {
+    } catch {
       toast.error(tNotify('videoPreviewAddFailed'), { id: loadingToast });
     }
   };
@@ -335,15 +339,14 @@ export default function OrgEditImages() {
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
-    const items = Array.from(previews);
+    const items = [...previews];
     const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    if (reorderedItem) {
+      items.splice(result.destination.index, 0, reorderedItem);
+    }
 
     // Update order numbers
-    const reorderedItems = items.map((item, index) => ({
-      ...item,
-      order: index,
-    }));
+    const reorderedItems = items.map((item, index) => Object.assign(item, { order: index }));
 
     setPreviews(reorderedItems);
 
@@ -377,7 +380,7 @@ export default function OrgEditImages() {
         id: loadingToast,
       });
       router.refresh();
-    } catch (_err) {
+    } catch {
       toast.error(tNotify('previewOrderUpdateFailed'), { id: loadingToast });
       setPreviews(previews);
     }
@@ -402,21 +405,21 @@ export default function OrgEditImages() {
         <TabsList className="grid w-full grid-cols-3 rounded-lg bg-gray-100 p-1">
           <TabsTrigger
             value="logo"
-            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <StarIcon size={16} />
             <span>{t('Tabs.logo')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="thumbnail"
-            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <ImageIcon size={16} />
             <span>{t('Tabs.thumbnail')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="previews"
-            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <Images size={16} />
             <span>{t('Tabs.previews')}</span>
@@ -428,7 +431,7 @@ export default function OrgEditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <div
@@ -491,7 +494,7 @@ export default function OrgEditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <div
@@ -556,7 +559,7 @@ export default function OrgEditImages() {
           className="mt-4"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-6 transition-all duration-300">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-6 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable
@@ -591,8 +594,8 @@ export default function OrgEditImages() {
                                 <button
                                   onClick={() => removePreview(preview.id)}
                                   className={cn(
-                                    'absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
-                                    'shadow-xs z-10 opacity-0 group-hover:opacity-100',
+                                    'absolute -top-2 -right-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
+                                    'z-10 opacity-0 shadow-xs group-hover:opacity-100',
                                     'transition-opacity duration-200',
                                   )}
                                 >
@@ -601,8 +604,8 @@ export default function OrgEditImages() {
                                 <div
                                   {...provided.dragHandleProps}
                                   className={cn(
-                                    'absolute -left-2 -top-2 rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
-                                    'shadow-xs z-10 cursor-grab opacity-0 active:cursor-grabbing group-hover:opacity-100',
+                                    'absolute -top-2 -left-2 rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
+                                    'z-10 cursor-grab opacity-0 shadow-xs group-hover:opacity-100 active:cursor-grabbing',
                                     'transition-opacity duration-200',
                                   )}
                                 >
@@ -634,7 +637,7 @@ export default function OrgEditImages() {
                                         backgroundImage: `url(${preview.thumbnailUrl})`,
                                       }}
                                     />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-[2px]">
+                                    <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black backdrop-blur-[2px]">
                                       {preview.type === 'youtube' ? (
                                         <SiYoutube className="h-10 w-10 text-red-500" />
                                       ) : (
@@ -767,7 +770,6 @@ export default function OrgEditImages() {
                                           value={videoUrl}
                                           onChange={(e) => setVideoUrl(e.target.value)}
                                           className="w-full"
-                                          autoFocus
                                         />
                                         <Button
                                           onClick={() => handleVideoSubmit(selectedService)}

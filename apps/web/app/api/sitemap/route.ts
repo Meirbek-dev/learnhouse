@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const baseUrl = getUriWithOrg(orgSlug, '/');
 
   const sitemapUrls: SitemapUrl[] = [
-    { loc: baseUrl, priority: 1.0, changefreq: 'daily' },
+    { loc: baseUrl, priority: 1, changefreq: 'daily' },
     { loc: `${baseUrl}collections`, priority: 0.9, changefreq: 'weekly' },
     { loc: `${baseUrl}courses`, priority: 0.9, changefreq: 'weekly' },
     // Courses

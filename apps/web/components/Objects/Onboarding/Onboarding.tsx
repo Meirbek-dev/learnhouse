@@ -48,7 +48,7 @@ const Onboarding: FC = () => {
   const [currentStep, setCurrentStep] = useState(() => {
     // Initialize with saved step or 0
     const savedStep = localStorage.getItem('onboardingLastStep');
-    return savedStep ? Number.parseInt(savedStep) : 0;
+    return savedStep ? Number.parseInt(savedStep, 10) : 0;
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(true);
@@ -179,7 +179,7 @@ const Onboarding: FC = () => {
 
     // If temporarily closed, check if 24 hours have passed
     if (temporarilyClosed === 'true' && lastClosedTime) {
-      const hoursSinceClosed = (Date.now() - Number.parseInt(lastClosedTime)) / (1000 * 60 * 60);
+      const hoursSinceClosed = (Date.now() - Number.parseInt(lastClosedTime, 10)) / (1000 * 60 * 60);
       if (hoursSinceClosed >= 24) {
         // Reset temporary closure after 24 hours
         localStorage.removeItem('onboardingTemporarilyClosed');
@@ -228,7 +228,7 @@ const Onboarding: FC = () => {
   };
 
   const goToStep = (index: number) => {
-    if (index >= 0 && index < onboardingData.length) {
+    if (index >= 0 && index < onboardingData.length && onboardingData[index]) {
       setCurrentStep(index);
     }
   };
@@ -242,18 +242,20 @@ const Onboarding: FC = () => {
           minHeight="sm"
           minWidth="md"
           dialogContent={
-            <OnboardingScreen
-              step={onboardingData[currentStep]}
-              onboardingData={onboardingData}
-              currentStep={currentStep}
-              nextStep={nextStep}
-              skipOnboarding={skipOnboarding}
-              setIsModalOpen={handleModalClose}
-              goToStep={goToStep}
-            />
+            onboardingData[currentStep] ? (
+              <OnboardingScreen
+                step={onboardingData[currentStep]}
+                onboardingData={onboardingData}
+                currentStep={currentStep}
+                nextStep={nextStep}
+                skipOnboarding={skipOnboarding}
+                setIsModalOpen={handleModalClose}
+                goToStep={goToStep}
+              />
+            ) : null
           }
           dialogTrigger={
-            <div className="bg-linear-to-t from-1% fixed bottom-0 w-full from-gray-950/25 to-transparent pb-10">
+            <div className="fixed bottom-0 w-full bg-linear-to-t from-gray-950/25 from-1% to-transparent pb-10">
               <div className="mx-auto flex w-fit cursor-pointer items-center space-x-2 rounded-full bg-gray-950 px-5 py-2 font-bold text-gray-200 shadow-md hover:bg-gray-900">
                 <Sprout size={20} />
                 <p>{t('onboarding')}</p>
@@ -350,7 +352,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
             {step.buttons?.map((button, index) => (
               <div
                 key={index}
-                className="inline-flex cursor-pointer items-center space-x-2 whitespace-nowrap rounded-full bg-black px-5 py-1 font-bold text-gray-200 antialiased shadow-md hover:bg-gray-700"
+                className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-black px-5 py-1 font-bold whitespace-nowrap text-gray-200 antialiased shadow-md hover:bg-gray-700"
                 onClick={button.action}
               >
                 <p>{button.label}</p>
@@ -359,7 +361,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
             ))}
             {isLastStep ? (
               <div
-                className="inline-flex cursor-pointer items-center space-x-2 whitespace-nowrap rounded-full bg-black px-5 py-1 font-bold text-gray-200 antialiased shadow-md hover:bg-gray-700"
+                className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-black px-5 py-1 font-bold whitespace-nowrap text-gray-200 antialiased shadow-md hover:bg-gray-700"
                 onClick={nextStep}
               >
                 <p>{t('finishButtonLabel')}</p>
@@ -367,7 +369,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
               </div>
             ) : (
               <div
-                className="inline-flex cursor-pointer items-center space-x-2 whitespace-nowrap rounded-full bg-black px-5 py-1 font-bold text-gray-200 antialiased shadow-md hover:bg-gray-700"
+                className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-black px-5 py-1 font-bold whitespace-nowrap text-gray-200 antialiased shadow-md hover:bg-gray-700"
                 onClick={nextStep}
               >
                 <p>{t('nextButtonLabel')}</p>

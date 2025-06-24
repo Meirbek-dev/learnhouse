@@ -15,7 +15,7 @@ import { ButtonBlack } from '../Form/Form';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-type ModalParams = {
+interface ModalParams {
   dialogTitle?: string;
   dialogDescription?: string;
   dialogContent: ReactNode;
@@ -28,7 +28,7 @@ type ModalParams = {
   minWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'no-min';
   customHeight?: string;
   customWidth?: string;
-};
+}
 
 const Modal = (params: ModalParams) => {
   const t = useTranslations('Components.Modal');
@@ -65,7 +65,7 @@ const Modal = (params: ModalParams) => {
 
   return (
     <Dialog
-      open={params.isDialogOpen}
+      open={params.isDialogOpen ?? false}
       onOpenChange={params.onOpenChange}
     >
       {params.dialogTrigger && <DialogTrigger asChild>{params.dialogTrigger}</DialogTrigger>}

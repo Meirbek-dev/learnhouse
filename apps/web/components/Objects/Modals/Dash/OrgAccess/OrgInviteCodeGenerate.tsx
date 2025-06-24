@@ -8,12 +8,12 @@ import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { Ticket } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
-type OrgInviteCodeGenerateProps = {
+interface OrgInviteCodeGenerateProps {
   setInvitesModal: any;
-};
+}
 
 function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
   const t = useTranslations('Components.OrgInviteCodeGenerate');

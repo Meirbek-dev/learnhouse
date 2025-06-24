@@ -9,7 +9,7 @@ import PDFBlock from '@components/Objects/Editor/Extensions/PDF/PDFBlock';
 import { useEditor, EditorContent } from '@tiptap/react';
 import Youtube from '@tiptap/extension-youtube';
 import StarterKit from '@tiptap/starter-kit';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 // Lowlight
 import { common, createLowlight } from 'lowlight';

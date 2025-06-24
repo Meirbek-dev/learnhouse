@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
           lastName: userData.last_name,
         }),
     };
-  } catch (_error) {
+  } catch {
     return {
       title: t('metaTitleError'),
     };

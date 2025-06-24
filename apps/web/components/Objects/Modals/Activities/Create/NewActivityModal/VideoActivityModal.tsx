@@ -60,7 +60,7 @@ const VideoSettingsForm = ({
                 min="0"
                 value={startTimeParts.minutes}
                 onChange={(e) => {
-                  const minutes = Math.max(0, Number.parseInt(e.target.value) || 0);
+                  const minutes = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
                   const seconds = startTimeParts.seconds;
                   setVideoDetails({
                     ...videoDetails,
@@ -80,7 +80,7 @@ const VideoSettingsForm = ({
                 value={startTimeParts.seconds}
                 onChange={(e) => {
                   const minutes = startTimeParts.minutes;
-                  const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value) || 0));
+                  const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0));
                   setVideoDetails({
                     ...videoDetails,
                     startTime: convertToSeconds(minutes, seconds),
@@ -103,7 +103,7 @@ const VideoSettingsForm = ({
                 min="0"
                 value={endTimeParts.minutes}
                 onChange={(e) => {
-                  const minutes = Math.max(0, Number.parseInt(e.target.value) || 0);
+                  const minutes = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
                   const seconds = endTimeParts.seconds;
                   const totalSeconds = convertToSeconds(minutes, seconds);
                   if (totalSeconds > videoDetails.startTime) {
@@ -126,7 +126,7 @@ const VideoSettingsForm = ({
                 value={endTimeParts.seconds}
                 onChange={(e) => {
                   const minutes = endTimeParts.minutes;
-                  const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value) || 0));
+                  const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0));
                   const totalSeconds = convertToSeconds(minutes, seconds);
                   if (totalSeconds > videoDetails.startTime) {
                     setVideoDetails({

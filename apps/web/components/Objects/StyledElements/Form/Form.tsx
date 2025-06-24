@@ -45,7 +45,7 @@ export const FormField = ({ className, ...props }: React.ComponentProps<typeof F
 export const FormLabel = ({ className, ...props }: React.ComponentProps<typeof Form.Label>) => (
   <Form.Label
     className={cn(
-      'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+      'text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
       className,
     )}
     {...props}

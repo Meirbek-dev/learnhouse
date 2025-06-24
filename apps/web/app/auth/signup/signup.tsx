@@ -15,7 +15,7 @@ import openuLogoDark from 'public/openu_logo_dark.png';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { BarLoader } from 'react-spinners';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -56,15 +56,15 @@ function SignUpClient(props: SignUpClientProps) {
             />
           </Link>
         </div>
-        {joinMethod == 'open' &&
-          (session.status == 'authenticated' ? (
+        {joinMethod === 'open' &&
+          (session.status === 'authenticated' ? (
             <LoggedInJoinScreen inviteCode={inviteCode} />
           ) : (
             <OpenSignUpComponent />
           ))}
-        {joinMethod == 'inviteOnly' &&
+        {joinMethod === 'inviteOnly' &&
           (inviteCode ? (
-            session.status == 'authenticated' ? (
+            session.status === 'authenticated' ? (
               <LoggedInJoinScreen inviteCode={inviteCode} />
             ) : (
               <InviteOnlySignUpComponent inviteCode={inviteCode} />

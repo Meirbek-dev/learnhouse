@@ -5,20 +5,20 @@ import type { ReactNode } from 'react';
 export const AIChatBotContext = createContext(null) as any;
 export const AIChatBotDispatchContext = createContext(null) as any;
 
-export type AIChatBotStateTypes = {
+export interface AIChatBotStateTypes {
   messages: AIMessage[];
   isModalOpen: boolean;
   aichat_uuid: string;
   isWaitingForResponse: boolean;
   chatInputValue: string;
   error: AIError;
-};
+}
 
-type AIError = {
+interface AIError {
   isError: boolean;
   status: number;
   error_message: string;
-};
+}
 
 function AIChatBotProvider({ children }: { children: ReactNode }) {
   const [aiChatBotState, dispatchAIChatBot] = useReducer(aiChatBotReducer, {

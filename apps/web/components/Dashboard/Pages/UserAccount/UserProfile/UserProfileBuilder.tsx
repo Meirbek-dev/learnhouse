@@ -139,45 +139,45 @@ interface BaseSection {
   title: string;
 }
 
-interface ImageGallerySection extends BaseSection {
+type ImageGallerySection = {
   type: 'image-gallery';
   images: ProfileImage[];
-}
+} & BaseSection;
 
-interface TextSection extends BaseSection {
+type TextSection = {
   type: 'text';
   content: string;
-}
+} & BaseSection;
 
-interface LinksSection extends BaseSection {
+type LinksSection = {
   type: 'links';
   links: ProfileLink[];
-}
+} & BaseSection;
 
-interface SkillsSection extends BaseSection {
+type SkillsSection = {
   type: 'skills';
   skills: ProfileSkill[];
-}
+} & BaseSection;
 
-interface ExperienceSection extends BaseSection {
+type ExperienceSection = {
   type: 'experience';
   experiences: ProfileExperience[];
-}
+} & BaseSection;
 
-interface EducationSection extends BaseSection {
+type EducationSection = {
   type: 'education';
   education: ProfileEducation[];
-}
+} & BaseSection;
 
-interface AffiliationSection extends BaseSection {
+type AffiliationSection = {
   type: 'affiliation';
   affiliations: ProfileAffiliation[];
-}
+} & BaseSection;
 
-interface CoursesSection extends BaseSection {
+type CoursesSection = {
   type: 'courses';
   // No need to store courses as they will be fetched from API
-}
+} & BaseSection;
 
 type ProfileSection =
   | ImageGallerySection
@@ -330,9 +330,11 @@ const UserProfileBuilder = () => {
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
 
-    const items = Array.from(profileData.sections);
+    const items = [...profileData.sections];
     const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    if (reorderedItem) {
+      items.splice(result.destination.index, 0, reorderedItem);
+    }
 
     setProfileData((prev) => ({
       ...prev,
@@ -420,10 +422,10 @@ const UserProfileBuilder = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             onClick={() => setSelectedSection(index)}
-                            className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
+                            className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
                               selectedSection === index
-                                ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
-                                : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
+                                ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
+                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
                             } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                           >
                             <div className="group flex items-center justify-between">
@@ -533,7 +535,7 @@ const UserProfileBuilder = () => {
 
           {/* Editor Panel */}
           <div className="col-span-3">
-            {selectedSection !== null ? (
+            {selectedSection !== null && profileData.sections[selectedSection] ? (
               <SectionEditor
                 t={t}
                 section={profileData.sections[selectedSection]}
@@ -1125,10 +1127,11 @@ const ExperienceEditor: FC<{
             <Button
               variant="outline"
               onClick={() => {
+                const startDateStr = new Date().toISOString().split('T')[0];
                 const newExperience: ProfileExperience = {
                   title: '',
                   organization: '',
-                  startDate: new Date().toISOString().split('T')[0],
+                  startDate: startDateStr || '',
                   current: false,
                   description: '',
                 };
@@ -1322,7 +1325,7 @@ const EducationEditor: FC<{
                   institution: '',
                   degree: '',
                   field: '',
-                  startDate: new Date().toISOString().split('T')[0],
+                  startDate: new Date().toISOString().split('T')[0] || '',
                   current: false,
                   description: '',
                 };
@@ -1490,7 +1493,7 @@ const CoursesEditor: FC<{
           />
         </div>
 
-        <div className="text-sm italic text-gray-500">{t('CoursesEditor.autoDisplayMessage')}</div>
+        <div className="text-sm text-gray-500 italic">{t('CoursesEditor.autoDisplayMessage')}</div>
       </div>
     </div>
   );

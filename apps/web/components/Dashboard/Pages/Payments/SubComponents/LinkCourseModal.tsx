@@ -9,7 +9,7 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 import { mutate } from 'swr';
 import useSWR from 'swr';
@@ -44,7 +44,7 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
     <div className="flex gap-4 rounded-lg border border-gray-100 bg-white p-4 transition-colors hover:border-gray-200">
       {/* Thumbnail */}
       <div
-        className="h-[68px] w-[120px] shrink-0 rounded-md bg-cover bg-center ring-1 ring-inset ring-black/10"
+        className="h-[68px] w-[120px] shrink-0 rounded-md bg-cover bg-center ring-1 ring-black/10 ring-inset"
         style={{ backgroundImage: `url(${thumbnailImage})` }}
       />
 
@@ -110,7 +110,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
           }),
         );
       }
-    } catch (_error) {
+    } catch {
       toast.error(tNotify('errors.linkCourseFailed', { error: '' }));
     }
   };
@@ -137,7 +137,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
           className="w-full pl-10"
         />
         <Search
-          className="absolute left-6 top-1/2 -translate-y-1/2 transform text-gray-400"
+          className="absolute top-1/2 left-6 -translate-y-1/2 transform text-gray-400"
           size={20}
         />
       </div>

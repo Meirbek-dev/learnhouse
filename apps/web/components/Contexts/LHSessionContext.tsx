@@ -9,12 +9,14 @@ export const SessionContext = createContext({}) as any;
 function LHSessionProvider({ children }: { children: ReactNode }) {
   const session = useSession();
 
-  if (session && session.status == 'loading') {
+  if (session && session.status === 'loading') {
     return <PageLoading />;
   }
   if (session) {
     return <SessionContext value={session}>{children}</SessionContext>;
   }
+
+  return;
 }
 
 export function useLHSession() {

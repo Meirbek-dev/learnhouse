@@ -12,11 +12,11 @@ import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 
-type PropsType = {
+interface PropsType {
   collection: any;
   orgslug: string;
   org_id: string;
-};
+}
 
 const removeCollectionPrefix = (collectionid: string) => {
   return collectionid.replace('collection_', '');
@@ -100,7 +100,7 @@ const CollectionAdminEditsArea = (props: any) => {
           })}
           dialogTrigger={
             <button
-              className="absolute right-2 top-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
+              className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
               rel="noopener noreferrer"
             >
               <X size={14} />

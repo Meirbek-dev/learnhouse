@@ -66,8 +66,8 @@ export const OrgMenu = (props: any) => {
   return (
     <>
       <div className="-z-10 h-[60px] blur-3xl backdrop-blur-lg" />
-      <div className="fixed left-0 right-0 top-0 z-50 h-[60px] bg-white/90 shadow-[0px_4px_16px_rgba(0,0,0,0.03)] ring-1 ring-inset ring-gray-500/10 backdrop-blur-lg">
-        <div className="max-w-(--breakpoint-2xl) mx-auto flex h-full w-full items-center justify-between px-4 sm:px-6 lg:px-16">
+      <div className="fixed top-0 right-0 left-0 z-50 h-[60px] bg-white/90 shadow-[0px_4px_16px_rgba(0,0,0,0.03)] ring-1 ring-gray-500/10 backdrop-blur-lg ring-inset">
+        <div className="mx-auto flex h-full w-full max-w-(--breakpoint-2xl) items-center justify-between px-4 sm:px-6 lg:px-16">
           <div className="flex w-full items-center space-x-5 md:w-auto">
             <div className="logo flex w-full justify-center md:w-auto">
               <Link href={getUriWithOrg(orgslug, '/')}>
@@ -94,7 +94,7 @@ export const OrgMenu = (props: any) => {
               <HeaderProfileBox />
             </div>
             <button
-              className="focus:outline-hidden text-gray-600 md:hidden"
+              className="text-gray-600 focus:outline-hidden md:hidden"
               onClick={toggleMenu}
             >
               {isMenuOpen ? <X color="black" /> : <Menu color="black" />}
@@ -112,7 +112,7 @@ export const OrgMenu = (props: any) => {
           <div className="w-full px-2">
             <SearchBar
               orgslug={orgslug}
-              isMobile={true}
+              isMobile
             />
           </div>
           <div className="py-4">

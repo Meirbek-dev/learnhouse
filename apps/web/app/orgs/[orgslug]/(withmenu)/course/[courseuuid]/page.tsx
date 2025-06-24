@@ -6,10 +6,10 @@ import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
 import CourseClient from './course';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string; courseuuid: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
@@ -24,7 +24,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const course_meta = await getCourseMetadata(
     params.courseuuid,
     { revalidate: 60, tags: ['courses'] },
-    access_token ? access_token : null,
+    access_token || null,
   );
 
   // SEO
@@ -68,11 +68,7 @@ const CoursePage = async (params: any) => {
   const { courseuuid, orgslug } = await params.params;
 
   // Fetch course metadata once
-  const course_meta = await getCourseMetadata(
-    courseuuid,
-    { revalidate: 0, tags: ['courses'] },
-    access_token ? access_token : null,
-  );
+  const course_meta = await getCourseMetadata(courseuuid, { revalidate: 0, tags: ['courses'] }, access_token || null);
 
   return (
     <CourseClient

@@ -26,8 +26,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const pickerRef = useRef<HTMLDivElement>(null);
   const linkInputRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
-  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const linkInputFieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  const linkInputFieldRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations('CourseEdit.General.LearningItems');
 
@@ -69,7 +69,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           initializedRef.current = true;
         } else if (!initializedRef.current) {
           console.warn(
-            `LearningItemsList: Initial value (typeof: ${typeof value}, value: "${String(value).substring(
+            `LearningItemsList: Initial value (typeof: ${typeof value}, value: "${String(value).slice(
               0,
               50,
             )}") is not a valid JSON array. Initializing with a default item.`,
@@ -99,8 +99,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         onChange(defaultJSON); // Then inform parent
         initializedRef.current = true;
       }
-    } catch (e) {
-      console.error('Error parsing learning items:', e);
+    } catch (error) {
+      console.error('Error parsing learning items:', error);
       if (!initializedRef.current) {
         console.warn(
           'LearningItemsList: Parsing failed for initial value. Initializing with a default item due to error.',
@@ -118,7 +118,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         initializedRef.current = true;
       }
     }
-  }, [value, onChange]); // Removed 'items' from dependency array to fix warning
+  }, [value, onChange, items, items.length]);
 
   // Add a new empty item
   const addItem = () => {
@@ -358,8 +358,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                   theme={Theme.LIGHT}
                   previewConfig={{ showPreview: false }}
                   searchPlaceHolder={t('searchEmojis')}
-                  autoFocusSearch={true}
-                  skinTonesDisabled={true}
+                  autoFocusSearch
+                  skinTonesDisabled
                 />
               </div>
             )}
@@ -367,7 +367,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
             {showLinkInput === item.id && (
               <div
                 ref={linkInputRef}
-                className="shadow-xs mt-1 rounded-lg border border-gray-200 bg-white p-2"
+                className="mt-1 rounded-lg border border-gray-200 bg-white p-2 shadow-xs"
               >
                 <Input
                   ref={setLinkInputRef(item.id)}

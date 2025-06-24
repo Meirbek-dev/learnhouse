@@ -11,7 +11,7 @@ function TypeOfContentTitle({ title, type }: { title: string; type: string }) {
     if (type === 'col') return CollectionsLogo;
     if (type === 'cou') return CoursesLogo;
     if (type === 'tra') return TrailLogo;
-    return undefined;
+    return;
   }
 
   let logoAltType = 'unknown';
@@ -22,7 +22,7 @@ function TypeOfContentTitle({ title, type }: { title: string; type: string }) {
 
   return (
     <div className="home_category_title my-5 flex items-center">
-      <div className="my-auto ml-2 mr-4 rounded-full p-2 shadow-inner ring-1 ring-slate-900/5">
+      <div className="my-auto mr-4 ml-2 rounded-full p-2 shadow-inner ring-1 ring-slate-900/5">
         <Image
           unoptimized
           src={getLogo()}

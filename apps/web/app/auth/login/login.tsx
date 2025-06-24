@@ -96,7 +96,7 @@ const LoginClient = (props: LoginClientProps) => {
           <div className="left-login-part flex flex-row bg-white">
             <div className="m-auto w-72">
               {error && (
-                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
+                <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
                   <AlertTriangle size={18} />
                   <div className="text-sm font-bold">{t('wrongCredentials')}</div>
                 </div>

@@ -90,7 +90,7 @@ const OrgScripts: React.FC = () => {
           return;
         }
 
-        const safeScriptId = `learnhouse-org-script-${scriptName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Math.random().toString(36).substr(2, 9)}`;
+        const safeScriptId = `learnhouse-org-script-${scriptName.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}-${Math.random().toString(36).slice(2, 9)}`;
 
         cleanupExistingScript(safeScriptId);
 
@@ -105,7 +105,7 @@ const OrgScripts: React.FC = () => {
           }
 
           const scriptElement = document.createElement('script');
-          Array.from(scriptTag.attributes).forEach((attr) => {
+          [...scriptTag.attributes].forEach((attr) => {
             scriptElement.setAttribute(attr.name, attr.value);
           });
 
@@ -147,8 +147,8 @@ const OrgScripts: React.FC = () => {
           scriptElement.dataset.orgSlug = org?.slug;
 
           const comment = document.createComment(` OpenU Organization Script - ${scriptName} (${safeScriptId}) `);
-          document.body.appendChild(comment);
-          document.body.appendChild(scriptElement);
+          document.body.append(comment);
+          document.body.append(scriptElement);
         } else {
           const scriptElement = document.createElement('script');
           scriptElement.type = 'text/javascript';
@@ -174,8 +174,8 @@ const OrgScripts: React.FC = () => {
           scriptElement.dataset.orgSlug = org?.slug;
 
           const comment = document.createComment(` OpenU Organization Script - ${scriptName} (${safeScriptId}) `);
-          document.body.appendChild(comment);
-          document.body.appendChild(scriptElement);
+          document.body.append(comment);
+          document.body.append(scriptElement);
         }
       } catch (error) {
         console.error(t('failedToLoadScript', { scriptName }), error);

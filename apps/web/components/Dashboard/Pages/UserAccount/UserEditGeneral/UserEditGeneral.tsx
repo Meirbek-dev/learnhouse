@@ -281,7 +281,7 @@ const UserEditForm = ({
   const t = useTranslations('DashPage.UserAccountSettings.generalSection');
   // Memoize template handlers
   const _templateHandlers = useMemo(() => {
-    const handlers: Record<string, () => void> = {};
+    const handlers: { [key: string]: () => void } = {};
     Object.entries(DETAIL_TEMPLATES).forEach(([key, template]) => {
       handlers[key] = () => {
         const currentIds = new Set(Object.keys(values.details));
@@ -304,7 +304,15 @@ const UserEditForm = ({
     () => ({
       handleDetailUpdate: (id: string, field: keyof DetailItem, value: string) => {
         const newDetails = { ...values.details };
-        newDetails[id] = { ...newDetails[id], [field]: value };
+        const existingDetail = newDetails[id];
+        newDetails[id] = {
+          id: existingDetail?.id || id,
+          label: existingDetail?.label || '',
+          icon: existingDetail?.icon || '',
+          text: existingDetail?.text || '',
+          ...existingDetail,
+          [field]: value,
+        };
         setFieldValue('details', newDetails);
       },
       handleDetailRemove: (id: string) => {
@@ -479,7 +487,15 @@ const UserEditForm = ({
                     detail={detail}
                     onUpdate={(id, field, value) => {
                       const newDetails = { ...values.details };
-                      newDetails[id] = { ...newDetails[id], [field]: value };
+                      const existingDetail = newDetails[id];
+                      newDetails[id] = {
+                        id: existingDetail?.id || id,
+                        label: existingDetail?.label || '',
+                        icon: existingDetail?.icon || '',
+                        text: existingDetail?.text || '',
+                        ...existingDetail,
+                        [field]: value,
+                      };
                       setFieldValue('details', newDetails);
                     }}
                     onRemove={(id) => {
@@ -489,7 +505,14 @@ const UserEditForm = ({
                     }}
                     onLabelChange={(id, newLabel) => {
                       const newDetails = { ...values.details };
-                      newDetails[id] = { ...newDetails[id], label: newLabel };
+                      const existingDetail = newDetails[id];
+                      newDetails[id] = {
+                        id: existingDetail?.id || id,
+                        label: newLabel,
+                        icon: existingDetail?.icon || '',
+                        text: existingDetail?.text || '',
+                        ...existingDetail,
+                      };
                       setFieldValue('details', newDetails);
                     }}
                   />
@@ -577,7 +600,7 @@ const UserEditForm = ({
             </div>
           </div>
         </div>
-        <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
+        <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
           <Button
             type="submit"
             disabled={isSubmitting}
@@ -619,9 +642,9 @@ function UserEditGeneral() {
           ]);
           setUserData(userDataResponse);
           setCurrentLocale(localeResponse as Locale);
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-          console.error('Error fetching initial data:', errorMessage, err);
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error('Error fetching initial data:', errorMessage, error);
           setError('Failed to load user data.');
         } finally {
           setInitialLoading(false);
@@ -650,8 +673,8 @@ function UserEditGeneral() {
       } else {
         setSuccess(t('avatarSuccess'));
       }
-    } catch (uploadError) {
-      console.error('Avatar upload error:', uploadError);
+    } catch (error) {
+      console.error('Avatar upload error:', error);
       setError(t('avatarError'));
     } finally {
       setIsLoading(false);
@@ -723,8 +746,8 @@ function UserEditGeneral() {
             } else {
               toast.success(t('profileUpdateSuccess'));
             }
-          } catch (updateError) {
-            console.error('Profile update error:', updateError);
+          } catch (error) {
+            console.error('Profile update error:', error);
             toast.error(t('profileUpdateError'), {
               id: loadingToast,
             });

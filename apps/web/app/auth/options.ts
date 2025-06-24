@@ -19,7 +19,7 @@ declare global {
   };
 }
 
-export const isDevEnv = OPENU_TOP_DOMAIN == 'localhost';
+export const isDevEnv = OPENU_TOP_DOMAIN === 'localhost';
 
 export const nextAuthOptions = {
   debug: true,
@@ -72,12 +72,12 @@ export const nextAuthOptions = {
   callbacks: {
     async jwt({ token, user, account }: any) {
       // First sign in with Credentials provider
-      if (account?.provider == 'credentials' && user) {
+      if (account?.provider === 'credentials' && user) {
         token.user = user;
       }
 
       // Sign up with Google
-      if (account?.provider == 'google' && user) {
+      if (account?.provider === 'google' && user) {
         const unsanitized_req = await loginWithOAuthToken(user.email, 'google', account.access_token);
         const userFromOAuth = await getResponseMetadata(unsanitized_req);
         token.user = userFromOAuth.data;

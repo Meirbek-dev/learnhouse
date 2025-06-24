@@ -9,10 +9,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ReactNode, FC } from 'react';
 
-type AuthorizationProps = {
+interface AuthorizationProps {
   children: ReactNode;
   authorizationMode: 'component' | 'page';
-};
+}
 
 const ADMIN_PATHS = [
   '/dash/org/*',
@@ -37,7 +37,9 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
 
   const checkPathname = useCallback((pattern: string, pathname: string) => {
     if (typeof pattern !== 'string' || typeof pathname !== 'string') return false;
-    const regexPattern = new RegExp(`^${pattern.replace(/[/.+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`);
+    const regexPattern = new RegExp(
+      `^${pattern.replaceAll(/[/.+?^${}()|[\]\\]/g, String.raw`\$&`).replaceAll(/\\\*/g, '.*')}$`,
+    );
     return regexPattern.test(pathname);
   }, []);
 

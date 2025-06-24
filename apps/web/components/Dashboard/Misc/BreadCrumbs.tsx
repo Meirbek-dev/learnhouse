@@ -3,10 +3,10 @@ import { Backpack, Book, ChevronRight, CreditCard, School, User, Users } from 'l
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-type BreadCrumbsProps = {
+interface BreadCrumbsProps {
   type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments';
   last_breadcrumb?: string;
-};
+}
 
 function BreadCrumbs(props: BreadCrumbsProps) {
   const t = useTranslations('DashPage');

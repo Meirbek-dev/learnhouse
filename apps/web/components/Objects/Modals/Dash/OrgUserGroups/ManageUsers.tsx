@@ -7,11 +7,11 @@ import { getAPIUrl } from '@services/config/config';
 import { Check, Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
-type ManageUsersProps = {
+interface ManageUsersProps {
   usergroup_id: any;
-};
+}
 
 function ManageUsers(props: ManageUsersProps) {
   const t = useTranslations('Components.ManageUsers');
@@ -54,8 +54,8 @@ function ManageUsers(props: ManageUsersProps) {
 
   return (
     <div className="py-3">
-      <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-        <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
+      <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+        <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
           <tr className="font-bolder text-sm">
             <th className="px-4 py-3">{t('userHeader')}</th>
             <th className="px-4 py-3">{t('linkedHeader')}</th>

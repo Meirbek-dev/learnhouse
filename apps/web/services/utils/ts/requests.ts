@@ -14,7 +14,7 @@ const createRequestInit = (
 ): RequestInit & { next?: any } => {
   const { data, token, next, isJson = true, limitBodyToMethods = false } = config;
 
-  const headers: Record<string, string> = {};
+  const headers: { [key: string]: string } = {};
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -85,7 +85,7 @@ export const RequestBodyFormWithAuthHeader = (method: string, data: any, next: a
 };
 
 export const swrFetcher = async (url: string, token?: string) => {
-  const headers: Record<string, string> = {
+  const headers: { [key: string]: string } = {
     'Content-Type': 'application/json',
   };
   if (token) {
@@ -112,12 +112,12 @@ export const errorHandling = (res: Response) => {
   return res.json();
 };
 
-type CustomResponseTyping = {
+interface CustomResponseTyping {
   success: boolean;
   data: any;
   status: number;
   HTTPmessage: string;
-};
+}
 
 export const getResponseMetadata = async (response: Response): Promise<CustomResponseTyping> => {
   let data: any = null;
@@ -126,7 +126,7 @@ export const getResponseMetadata = async (response: Response): Promise<CustomRes
   // This prevents errors if the response is empty (e.g., 204 No Content) or not valid JSON.
   try {
     data = await response.json();
-  } catch (error) {
+  } catch {
     // Ignore parsing error; data will remain null.
   }
 

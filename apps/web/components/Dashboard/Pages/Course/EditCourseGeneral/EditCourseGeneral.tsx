@@ -16,10 +16,10 @@ import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 
-type EditCourseStructureProps = {
+interface EditCourseStructureProps {
   orgslug: string;
   course_uuid?: string;
-};
+}
 
 interface MyCourseFormValues {
   name: string;
@@ -99,7 +99,7 @@ const initializeLearnings = (learnings: any) => {
 
     // Default empty array
     return JSON.stringify([{ id: 'init-learn-item', text: '', emoji: '📝' }]);
-  } catch (e) {
+  } catch {
     // If it's not valid JSON, convert the string to a learning item
     if (typeof learnings === 'string') {
       return JSON.stringify([
@@ -137,7 +137,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     onSubmit: async (values) => {
       try {
         dispatchCourse({ type: 'setIsSaved' });
-      } catch (e) {
+      } catch {
         setError(t('errors.saveFailed'));
       }
     },
@@ -158,7 +158,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       };
       formik.resetForm({ values: newValues });
     }
-  }, [courseStructure, isLoading, thumbnailType]);
+  }, [courseStructure, isLoading, thumbnailType, formik]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -185,13 +185,13 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     <div className="h-full">
       <div className="h-6" />
       <div className="px-10 pb-10">
-        <div className="shadow-xs rounded-xl bg-white">
+        <div className="rounded-xl bg-white shadow-xs">
           <FormLayout
             onSubmit={formik.handleSubmit}
             className="p-6"
           >
             {error && (
-              <div className="shadow-xs mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
+              <div className="mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
                 <AlertTriangle size={18} />
                 <div className="text-sm font-bold">{error}</div>
               </div>

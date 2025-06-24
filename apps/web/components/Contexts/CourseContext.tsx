@@ -9,13 +9,13 @@ import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
 
 type CourseDispatch = React.Dispatch<any>;
-type CourseState = {
+interface CourseState {
   courseStructure: any;
   courseOrder: any;
   isSaved: boolean;
   isLoading: boolean;
   withUnpublishedActivities: boolean;
-};
+}
 
 export const CourseContext = createContext<CourseState | null>(null);
 export const CourseDispatchContext = createContext<CourseDispatch | null>(null);
@@ -51,7 +51,7 @@ export function CourseProvider({ children, courseuuid, withUnpublishedActivities
       dispatch({ type: 'setCourseStructure', payload: courseStructureData });
       dispatch({ type: 'setIsLoaded' });
     }
-  }, [courseStructureData]);
+  }, [courseStructureData, dispatch]);
 
   const isLoading = isSWRLoading || state.isLoading;
 
@@ -65,6 +65,8 @@ export function CourseProvider({ children, courseuuid, withUnpublishedActivities
       </CourseContext.Provider>
     );
   }
+
+  return;
 }
 
 export function useCourse() {

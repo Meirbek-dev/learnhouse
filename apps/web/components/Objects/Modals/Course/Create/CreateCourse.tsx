@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
 import { BarLoader } from 'react-spinners';
 import type { ChangeEvent } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
@@ -77,7 +77,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         } else {
           toast.error(res.data.detail || t('toastError'));
         }
-      } catch (_error) {
+      } catch {
         toast.error(t('toastError'));
       } finally {
         setSubmitting(false);
@@ -90,7 +90,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       tags: ['organizations'],
     });
     setOrgId(org.id);
-  }, [orgslug]);
+  }, [orgslug, setOrgId]);
 
   useEffect(() => {
     if (orgslug) {
@@ -114,7 +114,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         type: 'image/jpeg',
       });
       formik.setFieldValue('thumbnail', file);
-    } catch (_error) {
+    } catch {
       toast.error(t('toastErrorUnsplash'));
     } finally {
       setIsUploading(false);

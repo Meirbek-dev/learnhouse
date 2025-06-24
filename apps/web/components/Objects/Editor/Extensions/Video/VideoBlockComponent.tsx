@@ -16,7 +16,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import type { ChangeEvent, DragEvent } from 'react';
 import type ArtplayerType from 'artplayer';
 import type { Node } from '@tiptap/core';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { cn } from '@/lib/utils';
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4']);
@@ -111,7 +111,7 @@ interface VideoBlockObject {
   size: VideoSize;
 }
 
-interface ExtendedNodeViewProps extends Omit<NodeViewProps, 'extension'> {
+type ExtendedNodeViewProps = {
   extension: Node & {
     options: {
       activity: {
@@ -119,7 +119,7 @@ interface ExtendedNodeViewProps extends Omit<NodeViewProps, 'extension'> {
       };
     };
   };
-}
+} & Omit<NodeViewProps, 'extension'>;
 
 function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const t = useTranslations('DashPage.Editor.VideoBlock');
@@ -144,6 +144,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     if ('size' in node.attrs.blockObject && typeof node.attrs.blockObject.size === 'string') {
       return node.attrs.blockObject as VideoBlockObject;
     }
+    return;
   }, [node.attrs.blockObject]);
 
   const [_video, setVideo] = useState<File | null>(null);
@@ -240,7 +241,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
       setTimeout(() => {
         setUploadProgress(0);
       }, 1000);
-    } catch (_err) {
+    } catch {
       setError(t('errorUpload'));
     } finally {
       setIsLoading(false);
@@ -281,7 +282,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     link.setAttribute('download', '');
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
-    document.body.appendChild(link);
+    document.body.append(link);
     link.click();
     document.body.removeChild(link);
   };
@@ -321,7 +322,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     textAlign: 'center',
                   },
-                  encoding: 'utf-8',
+                  encoding: 'utf8',
                 }}
                 locale={locale}
                 subtitleEntries={subtitleEntries}
@@ -330,7 +331,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               />
               <button
                 onClick={handleDownload}
-                className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                 title="Download video"
               >
                 <Download className="h-4 w-4 text-white" />
@@ -511,7 +512,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                           backgroundColor: 'rgba(0, 0, 0, 0.8)',
                           textAlign: 'center',
                         },
-                        encoding: 'utf-8',
+                        encoding: 'utf8',
                       }}
                       locale={locale}
                       subtitleEntries={subtitleEntries}

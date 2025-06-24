@@ -6,18 +6,18 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import { mutate } from 'swr';
 
-type EditUserGroupProps = {
+interface EditUserGroupProps {
   usergroup: {
     id: number;
     name: string;
     description: string;
   };
-};
+}
 
 function EditUserGroup(props: EditUserGroupProps) {
   const t = useTranslations('Components.EditUserGroup');

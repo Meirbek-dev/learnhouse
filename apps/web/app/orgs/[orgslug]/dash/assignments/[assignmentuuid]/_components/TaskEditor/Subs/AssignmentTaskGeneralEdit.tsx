@@ -20,7 +20,7 @@ import { constructAcceptValue } from '@/lib/constants';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useFormik } from 'formik';
 import Link from 'next/link';
 
@@ -218,7 +218,7 @@ function UpdateTaskRef() {
   const getActivityUI = useCallback(async () => {
     const res = await getActivityByID(assignment.assignment_object.activity_id, null, access_token);
     setActivity(res.data);
-  }, [assignment.assignment_object.activity_id, access_token]);
+  }, [assignment.assignment_object.activity_id, access_token, setActivity]);
 
   useEffect(() => {
     getActivityUI();
@@ -230,14 +230,14 @@ function UpdateTaskRef() {
         <div className="flex flex-col items-center justify-center">
           <div className="flex flex-col items-center justify-center">
             {error && (
-              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 transition-all">
+              <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 shadow-xs transition-all">
                 <div className="text-sm font-semibold">{error}</div>
               </div>
             )}
           </div>
           {assignmentTaskState.assignmentTask.reference_file && !isLoading && (
             <div className="nice-shadow relative flex flex-col items-center space-y-1 rounded-lg bg-white px-5 py-3 text-gray-400 shadow-lg">
-              <div className="absolute right-0 top-0 flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
+              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
                 <Cloud size={15} />
               </div>
               <File

@@ -10,7 +10,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { mutate } from 'swr';
 import UnsplashImagePicker from './UnsplashImagePicker';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB for images
 const MAX_VIDEO_FILE_SIZE = 100_000_000; // 100MB for videos
@@ -20,9 +20,9 @@ const VALID_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm'] as const;
 type ValidImageMimeType = (typeof VALID_IMAGE_MIME_TYPES)[number];
 type ValidVideoMimeType = (typeof VALID_VIDEO_MIME_TYPES)[number];
 
-type ThumbnailUpdateProps = {
+interface ThumbnailUpdateProps {
   thumbnailType: 'image' | 'video' | 'both';
-};
+}
 
 type TabType = 'image' | 'video';
 
@@ -137,7 +137,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
       const blobUrl = URL.createObjectURL(file);
       setLocalThumbnail({ file, url: blobUrl, type: 'image' });
       await updateThumbnail(file, 'image');
-    } catch (err) {
+    } catch {
       showError(t('errors.unsplashProcessFailed'));
       setIsLoading(false);
     }
@@ -170,7 +170,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           position: 'top-center',
         });
       }
-    } catch (err) {
+    } catch {
       showError(t('errors.updateFailed'));
     } finally {
       setIsLoading(false);
@@ -274,7 +274,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           />
           <button
             type="button"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
             onClick={() => imageInputRef.current?.click()}
           >
             <UploadCloud size={16} />
@@ -282,7 +282,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           </button>
           <button
             type="button"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
             onClick={() => setShowUnsplashPicker(true)}
           >
             <ImageIcon size={16} />
@@ -303,7 +303,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
         />
         <button
           type="button"
-          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
           onClick={() => videoInputRef.current?.click()}
         >
           <Video size={16} />

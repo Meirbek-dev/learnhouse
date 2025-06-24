@@ -39,14 +39,14 @@ interface Course {
   trail?: {
     runs: CourseRun[];
   };
-  chapters?: Array<{
+  chapters?: {
     name: string;
-    activities: Array<{
+    activities: {
       activity_uuid: string;
       name: string;
       activity_type: string;
-    }>;
-  }>;
+    }[];
+  }[];
 }
 
 interface CourseActionsMobileProps {
@@ -61,6 +61,16 @@ interface CourseActionsMobileProps {
 // Component for displaying multiple authors
 const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
   const t = useTranslations('Courses.CourseActionsMobile');
+
+  // Early return if no authors
+  if (!authors || authors.length === 0) {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="text-sm text-neutral-400">{t('noAuthors')}</div>
+      </div>
+    );
+  }
+
   const displayedAvatars = authors.slice(0, 3);
   const remainingCount = Math.max(0, authors.length - 3);
 
@@ -113,15 +123,15 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
         <span className="text-xs font-medium text-neutral-400">{authors.length > 1 ? t('authors') : t('author')}</span>
         {authors.length === 1 ? (
           <span className="text-sm font-semibold text-neutral-800">
-            {authors[0].user.first_name && authors[0].user.last_name
+            {authors[0]?.user?.first_name && authors[0]?.user?.last_name
               ? `${authors[0].user.first_name} ${authors[0].user.last_name}`
-              : `@${authors[0].user.username}`}
+              : `@${authors[0]?.user?.username || 'Unknown'}`}
           </span>
         ) : (
           <span className="text-sm font-semibold text-neutral-800">
-            {authors[0].user.first_name && authors[0].user.last_name
+            {authors[0]?.user?.first_name && authors[0]?.user?.last_name
               ? `${authors[0].user.first_name} ${authors[0].user.last_name}`
-              : `@${authors[0].user.username}`}
+              : `@${authors[0]?.user?.username || 'Unknown'}`}
             {authors.length > 1 && ` ${t('moreAuthors', { count: authors.length - 1 })}`}
           </span>
         )}
@@ -154,7 +164,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
       try {
         const response = await getProductsByCourse(course.org_id, course.id, session.data?.tokens?.access_token);
         setLinkedProducts(response.data || []);
-      } catch (error) {
+      } catch {
         console.error('Failed to fetch linked products');
       } finally {
         setIsLoading(false);
@@ -169,12 +179,12 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
       if (!session.data?.user) return;
       try {
         const response = await checkPaidAccess(
-          Number.parseInt(course.id),
+          Number.parseInt(course.id, 10),
           course.org_id,
           session.data?.tokens?.access_token,
         );
         setHasAccess(response.has_access);
-      } catch (error) {
+      } catch {
         console.error('Failed to check course access');
         setHasAccess(false);
       }
@@ -224,20 +234,22 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   };
 
   if (isLoading) {
-    return <div className="mb-8 mt-4 h-16 animate-pulse rounded-lg bg-gray-100" />;
+    return <div className="mt-4 mb-8 h-16 animate-pulse rounded-lg bg-gray-100" />;
   }
 
   // Filter active authors and sort by role priority
   const sortedAuthors = [...course.authors]
     .filter((author) => author.authorship_status === 'ACTIVE')
     .sort((a, b) => {
-      const rolePriority: Record<string, number> = {
+      const rolePriority: { [key: string]: number } = {
         CREATOR: 0,
         MAINTAINER: 1,
         CONTRIBUTOR: 2,
         REPORTER: 3,
       };
-      return rolePriority[a.authorship] - rolePriority[b.authorship];
+      const aPriority = rolePriority[a.authorship] ?? 999;
+      const bPriority = rolePriority[b.authorship] ?? 999;
+      return aPriority - bPriority;
     });
 
   return (

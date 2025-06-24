@@ -15,11 +15,7 @@ async function DashboardLayout(props: { children: ReactNode; params: Promise<any
 
   const { children } = props;
 
-  return (
-    <>
-      <ClientAdminLayout params={params}>{children}</ClientAdminLayout>
-    </>
-  );
+  return <ClientAdminLayout params={params}>{children}</ClientAdminLayout>;
 }
 
 export default DashboardLayout;

@@ -13,7 +13,7 @@ import { getAPIUrl } from '@services/config/config';
 import { KeyRound, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 
 function OrgUsers() {
@@ -50,7 +50,7 @@ function OrgUsers() {
       } else {
         toast.error(t('errors.removeUserFailed'), { id: toastId });
       }
-    } catch (_error) {
+    } catch {
       toast.error(t('errors.removeUserFailed'), { id: toastId });
     }
   };
@@ -65,14 +65,14 @@ function OrgUsers() {
         <>
           <Toast />
           <div className="h-6" />
-          <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
+          <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('activeUsersTitle')}</h1>
               <h2 className="text-md text-gray-500"> {t('description')}</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-                <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
+              <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
+                <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
                   <tr className="font-bolder text-sm">
                     <th className="px-4 py-3">{t('userHeader')}</th>
                     <th className="px-4 py-3">{t('roleHeader')}</th>

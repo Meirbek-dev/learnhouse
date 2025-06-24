@@ -8,14 +8,14 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { Info } from 'lucide-react';
 import Link from 'next/link';
 
-type LinkToUserGroupProps = {
+interface LinkToUserGroupProps {
   // React function, todo: fix types
   setUserGroupModal: any;
-};
+}
 
 function LinkToUserGroup(props: LinkToUserGroupProps) {
   const t = useTranslations('Components.LinkToUserGroup');
@@ -45,7 +45,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
     if (usergroups && usergroups.length > 0) {
       setSelectedUserGroup(usergroups[0].id);
     }
-  }, [usergroups]);
+  }, [usergroups, setSelectedUserGroup]);
 
   return (
     <div className="flex flex-col space-y-1">

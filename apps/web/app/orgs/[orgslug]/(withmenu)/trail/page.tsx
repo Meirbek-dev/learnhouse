@@ -5,10 +5,10 @@ import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
 import Trail from './trail';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
@@ -31,7 +31,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const TrailPage = async (params: any) => {
-  const orgslug = (await params.params).orgslug;
+  const { orgslug } = await params.params;
 
   return (
     <div>

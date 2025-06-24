@@ -15,7 +15,7 @@ import { getAPIUrl } from '@services/config/config';
 import * as Form from '@radix-ui/react-form';
 import { CalendarIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useFormik } from 'formik';
 import { format } from 'date-fns';
 import type { FC } from 'react';
@@ -65,7 +65,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
         } else {
           toast.error(t('updateError'));
         }
-      } catch (_error) {
+      } catch {
         toast.error(t('updateErrorGeneric'));
       } finally {
         toast.dismiss(toast_loading);
@@ -115,7 +115,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
             <Form.Control asChild>
               <button
                 className={cn(
-                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
+                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
                   !formik.values.due_date && 'text-muted-foreground',
                 )}
               >
@@ -148,7 +148,6 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                 }
               }}
               disabled={false}
-              autoFocus
             />
           </PopoverContent>
         </Popover>

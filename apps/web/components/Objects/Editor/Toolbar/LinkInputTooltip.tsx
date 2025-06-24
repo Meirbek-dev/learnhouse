@@ -1,6 +1,6 @@
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import type React from 'react';
 
 interface LinkInputTooltipProps {
@@ -33,7 +33,6 @@ const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, c
           placeholder="Enter URL"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          autoFocus
         />
         <ButtonGroup>
           <SaveButton

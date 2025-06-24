@@ -39,13 +39,13 @@ const FileUploadBlockButton: FC<ButtonHTMLAttributes<HTMLButtonElement>> = ({ on
   );
 };
 
-interface UploadBlockComponentProps extends HTMLAttributes<HTMLDivElement> {
+type UploadBlockComponentProps = {
   isLoading: boolean;
   isEditable: boolean;
   isEmpty: boolean;
   Icon: any;
   children: ReactNode;
-}
+} & HTMLAttributes<HTMLDivElement>;
 
 function FileUploadBlock({ isLoading, isEditable, isEmpty, Icon, children }: UploadBlockComponentProps) {
   const t = useTranslations('DashPage.Editor.FileUploadBlock');

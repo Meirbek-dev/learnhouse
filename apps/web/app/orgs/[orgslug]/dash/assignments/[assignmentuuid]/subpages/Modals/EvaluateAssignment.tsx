@@ -9,7 +9,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getTaskRefFileDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 function EvaluateAssignment({ user_id }: any) {
@@ -103,14 +103,14 @@ function EvaluateAssignment({ user_id }: any) {
                       task.reference_file,
                     )}
                     target="_blank"
-                    download={true}
+                    download
                     className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900"
                   >
                     <Download size={13} />
                     <div className="flex items-center space-x-2">
                       {task.reference_file && (
                         <span className="relative">
-                          <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
+                          <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
                         </span>
                       )}
                       <p className="text-xs font-semibold">{t('refDoc')}</p>

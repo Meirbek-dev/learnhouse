@@ -11,11 +11,11 @@ import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { use } from 'react';
-export type CourseOverviewParams = {
+export interface CourseOverviewParams {
   orgslug: string;
   courseuuid: string;
   subpage: string;
-};
+}
 
 function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   const t = useTranslations('DashPage.Courses.CoursePage');
@@ -28,9 +28,9 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
     <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
       <CourseProvider
         courseuuid={getEntireCourseUUID(params.courseuuid)}
-        withUnpublishedActivities={true}
+        withUnpublishedActivities
       >
-        <div className="nice-shadow z-10 bg-[#fcfbfc] pl-10 pr-10 text-sm tracking-tight">
+        <div className="nice-shadow z-10 bg-[#fcfbfc] pr-10 pl-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
           <div className="flex space-x-3 text-sm font-black">
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/general`}>
@@ -92,10 +92,10 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
           className="relative h-full overflow-y-auto"
         >
           <div className="absolute inset-0">
-            {params.subpage == 'content' ? <EditCourseStructure orgslug={params.orgslug} /> : ''}
-            {params.subpage == 'general' ? <EditCourseGeneral orgslug={params.orgslug} /> : ''}
-            {params.subpage == 'access' ? <EditCourseAccess orgslug={params.orgslug} /> : ''}
-            {params.subpage == 'contributors' ? <EditCourseContributors orgslug={params.orgslug} /> : ''}
+            {params.subpage === 'content' ? <EditCourseStructure orgslug={params.orgslug} /> : ''}
+            {params.subpage === 'general' ? <EditCourseGeneral orgslug={params.orgslug} /> : ''}
+            {params.subpage === 'access' ? <EditCourseAccess orgslug={params.orgslug} /> : ''}
+            {params.subpage === 'contributors' ? <EditCourseContributors orgslug={params.orgslug} /> : ''}
           </div>
         </motion.div>
       </CourseProvider>

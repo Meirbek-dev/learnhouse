@@ -15,16 +15,16 @@ import CoursePaidOptions from './CoursePaidOptions';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
 interface CourseRun {
   status: string;
   course_id: string;
-  steps: Array<{
+  steps: {
     activity_id: string;
     complete: boolean;
-  }>;
+  }[];
 }
 
 interface Course {
@@ -33,14 +33,14 @@ interface Course {
   trail?: {
     runs: CourseRun[];
   };
-  chapters?: Array<{
+  chapters?: {
     name: string;
-    activities: Array<{
+    activities: {
       activity_uuid: string;
       name: string;
       activity_type: string;
-    }>;
-  }>;
+    }[];
+  }[];
   open_to_contributors?: boolean;
 }
 
@@ -81,7 +81,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
       try {
         const response = await getProductsByCourse(course.org_id, course.id, session.data?.tokens?.access_token);
         setLinkedProducts(response.data || []);
-      } catch (error) {
+      } catch {
         console.error('Failed to fetch linked products');
       } finally {
         setIsLoading(false);
@@ -96,12 +96,12 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
       if (!session.data?.user) return;
       try {
         const response = await checkPaidAccess(
-          Number.parseInt(course.id),
+          Number.parseInt(course.id, 10),
           course.org_id,
           session.data?.tokens?.access_token,
         );
         setHasAccess(response.has_access);
-      } catch (error) {
+      } catch {
         console.error('Failed to check course access');
         toast.error('Failed to check course access. Please try again later.');
         setHasAccess(false);
@@ -204,7 +204,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
       <>
         <UserAvatar
           width={24}
-          use_with_session={true}
+          use_with_session
           rounded="rounded-full"
           border="border-2"
           borderColor="border-white"

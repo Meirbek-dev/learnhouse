@@ -8,7 +8,7 @@ import LinkCourseModal from './LinkCourseModal';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, useCallback } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
 interface ProductLinkedCoursesProps {
@@ -27,7 +27,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     try {
       const response = await getCoursesLinkedToProduct(org.id, productId, session.data?.tokens?.access_token);
       setLinkedCourses(response.data || []);
-    } catch (_error) {
+    } catch {
       toast.error(tNotify('errors.fetchLinkedCoursesFailed'));
     }
   }, [org.id, productId, session.data?.tokens?.access_token, tNotify]);
@@ -46,7 +46,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
           }),
         );
       }
-    } catch (_error) {
+    } catch {
       toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }));
     }
   };

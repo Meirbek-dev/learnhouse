@@ -4,7 +4,7 @@ import { createAssignmentTask } from '@services/courses/assignments';
 import { AArrowUp, FileUp, ListTodo } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
 function NewTaskModal({ closeModal, assignment_uuid }: any) {
@@ -19,7 +19,7 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
       setTimeout(() => {
         toast(t('reminderToast'), {
           icon: '✋',
-          duration: 10000,
+          duration: 10_000,
           style: { minWidth: 600 },
         });
         // Mark the reminder as shown in sessionStorage

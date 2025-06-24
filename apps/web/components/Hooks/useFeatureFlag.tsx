@@ -1,10 +1,10 @@
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useEffect, useState } from 'react';
 
-type FeatureType = {
+interface FeatureType {
   path: string[];
   defaultValue?: boolean;
-};
+}
 
 function useFeatureFlag(feature: FeatureType) {
   const org = useOrg() as any;

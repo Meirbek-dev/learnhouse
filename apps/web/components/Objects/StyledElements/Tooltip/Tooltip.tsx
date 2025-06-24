@@ -3,14 +3,14 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { styled, keyframes } from '@stitches/react';
 import type { ReactNode } from 'react';
 
-type TooltipProps = {
+interface TooltipProps {
   sideOffset?: number;
   content: ReactNode;
   children: ReactNode;
   side?: 'top' | 'right' | 'bottom' | 'left'; // default is bottom
   slateBlack?: boolean;
   unstyled?: boolean; // new prop to remove default styling
-};
+}
 
 const ToolTip = ({ sideOffset, content, children, side = 'bottom', slateBlack, unstyled }: TooltipProps) => (
   <TooltipPrimitive.Provider delayDuration={200}>

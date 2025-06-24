@@ -9,10 +9,10 @@ import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-type MetadataProps = {
+interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string; collectionid: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+}
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
@@ -25,7 +25,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     revalidate: 1800,
     tags: ['organizations'],
   });
-  const col = await getCollectionById(params.collectionid, access_token ? access_token : null, {
+  const col = await getCollectionById(params.collectionid, access_token || null, {
     revalidate: 0,
     tags: ['collections'],
   });
@@ -60,8 +60,8 @@ const CollectionPage = async (params: any) => {
     revalidate: 1800,
     tags: ['organizations'],
   });
-  const orgslug = (await params.params).orgslug;
-  const col = await getCollectionById((await params.params).collectionid, access_token ? access_token : null, {
+  const { orgslug } = await params.params;
+  const col = await getCollectionById((await params.params).collectionid, access_token || null, {
     revalidate: 0,
     tags: ['collections'],
   });
@@ -83,7 +83,7 @@ const CollectionPage = async (params: any) => {
           >
             <Link href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
               <div
-                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
+                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
                 style={{
                   backgroundImage: course.thumbnail_image
                     ? `url(${getCourseThumbnailMediaDirectory(

@@ -39,10 +39,10 @@ function HomeClient() {
           {session?.data?.user.first_name} {session?.data?.user.last_name}
         </span>
       </div>
-      <div className="mx-auto mt-12 flex items-center space-x-4 rounded-md bg-slate-200 px-3 py-2 text-sm font-semibold uppercase text-gray-600">
+      <div className="mx-auto mt-12 flex items-center space-x-4 rounded-md bg-slate-200 px-3 py-2 text-sm font-semibold text-gray-600 uppercase">
         {t('yourOrganizations')}
       </div>
-      {orgs && orgs.length == 0 && (
+      {orgs && orgs.length === 0 && (
         <div className="mx-auto my-5 flex space-x-3 rounded-lg bg-rose-200 px-3 py-2">
           <Info />
           <span>{t('noOrganizations')}</span>

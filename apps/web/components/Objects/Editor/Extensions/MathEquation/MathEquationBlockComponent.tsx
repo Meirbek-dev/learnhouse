@@ -7,7 +7,7 @@ import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import type { ChangeEvent } from 'react';
 import { BlockMath } from 'react-katex';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { motion } from 'framer-motion';
 import 'katex/dist/katex.min.css';
 import Link from 'next/link';
@@ -269,7 +269,7 @@ function MathEquationBlockComponent(props: any) {
 
   const insertSymbol = (symbol: string) => {
     const cursorPosition = inputRef.current?.selectionStart || equation.length;
-    const newEquation = equation.substring(0, cursorPosition) + symbol + equation.substring(cursorPosition);
+    const newEquation = equation.slice(0, cursorPosition) + symbol + equation.slice(cursorPosition);
 
     setEquation(newEquation);
     props.updateAttributes({

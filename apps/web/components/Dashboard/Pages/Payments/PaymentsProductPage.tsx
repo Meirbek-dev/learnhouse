@@ -21,7 +21,7 @@ import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import currencyCodes from 'currency-codes';
 import useSWR, { mutate } from 'swr';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import * as Yup from 'yup';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
@@ -93,7 +93,7 @@ function PaymentsProductPage() {
           }),
         );
       }
-    } catch (_error) {
+    } catch {
       toast.error(t('errors.archiveProductFailed', { error: '' }));
     }
   };
@@ -114,7 +114,7 @@ function PaymentsProductPage() {
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
-      <div className="mx-auto pl-10 pr-10">
+      <div className="mx-auto pr-10 pl-10">
         <Modal
           isDialogOpen={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
@@ -234,7 +234,7 @@ function PaymentsProductPage() {
         <div className="flex items-center justify-center py-10">
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className={`nice-shadow bg-linear-to-bl mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
+            className={`nice-shadow mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 bg-linear-to-bl from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
               isStripeEnabled ? 'hover:from-gray-600 hover:to-gray-800' : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}
@@ -289,7 +289,7 @@ const EditProductForm = ({
       mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
       onSuccess();
       toast.success(t('productUpdatedSuccess'));
-    } catch (_error) {
+    } catch {
       toast.error(t('updateProductFailed'));
     } finally {
       setSubmitting(false);

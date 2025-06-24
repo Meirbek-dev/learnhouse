@@ -177,8 +177,8 @@ const ButtonsExtension: FC = (props: any) => {
             theme={Theme.LIGHT}
             previewConfig={{ showPreview: false }}
             searchPlaceHolder={t('searchEmojis')}
-            autoFocusSearch={true}
-            skinTonesDisabled={true}
+            autoFocusSearch
+            skinTonesDisabled
           />
         </div>
       )}
@@ -201,7 +201,7 @@ const ButtonsExtension: FC = (props: any) => {
             {colors.map((c) => (
               <button
                 key={c}
-                className={`h-6 w-6 rounded-full ${getButtonColor(c)} focus:outline-hidden hover:ring-2 hover:ring-opacity-50 focus:ring-2 focus:ring-opacity-50`}
+                className={`h-6 w-6 rounded-full ${getButtonColor(c)} hover:ring-opacity-50 focus:ring-opacity-50 hover:ring-2 focus:ring-2 focus:outline-hidden`}
                 onClick={() => handleColorSelect(c)}
               />
             ))}

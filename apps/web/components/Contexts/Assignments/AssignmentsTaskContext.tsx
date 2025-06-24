@@ -9,7 +9,7 @@ import { mutate } from 'swr';
 
 interface State {
   selectedAssignmentTaskUUID: string | null;
-  assignmentTask: Record<string, any>;
+  assignmentTask: { [key: string]: any };
   reloadTrigger: number;
 }
 

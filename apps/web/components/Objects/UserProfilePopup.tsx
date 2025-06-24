@@ -22,12 +22,12 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
-type UserProfilePopupProps = {
+interface UserProfilePopupProps {
   children: ReactNode;
   userId: string;
-};
+}
 
-type UserData = {
+interface UserData {
   first_name: string;
   last_name: string;
   username: string;
@@ -41,7 +41,7 @@ type UserData = {
       text: string;
     };
   };
-};
+}
 
 const ICON_MAP = {
   'briefcase': Briefcase,
@@ -79,9 +79,9 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
       try {
         const data = await getUser(userId, session?.data?.tokens?.access_token);
         setUserData(data);
-      } catch (err) {
+      } catch (error) {
         setError(t('loadingError'));
-        console.error('Error fetching user data:', err);
+        console.error('Error fetching user data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -111,7 +111,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
               <div className="absolute inset-0 h-28 rounded-t-lg bg-gradient-to-b from-gray-100/30 to-transparent" />
 
               {/* Content */}
-              <div className="relative px-5 pb-4 pt-5">
+              <div className="relative px-5 pt-5 pb-4">
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
                   <div className="flex-shrink-0">
@@ -153,7 +153,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
 
             {/* Details */}
             {userData.details && Object.values(userData.details).length > 0 && (
-              <div className="space-y-2.5 border-t border-gray-100 px-5 pb-4 pt-3.5">
+              <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
                 {Object.values(userData.details).map((detail) => (
                   <div
                     key={detail.id}

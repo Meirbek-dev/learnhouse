@@ -9,7 +9,7 @@ import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 import useSWR from 'swr';
 
@@ -60,7 +60,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
       } else {
         toast.error(t('checkoutError'));
       }
-    } catch (_error) {
+    } catch {
       toast.error(t('requestError'));
     } finally {
       setIsProcessing((prev) => ({ ...prev, [productId]: false }));

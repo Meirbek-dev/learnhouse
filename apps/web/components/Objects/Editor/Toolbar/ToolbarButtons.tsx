@@ -38,7 +38,7 @@ import { SiYoutube } from '@icons-pack/react-simple-icons';
 import LinkInputTooltip from './LinkInputTooltip';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 export const ToolbarButtons = ({ editor, props }: any) => {
   const t = useTranslations('DashPage.Editor.Toolbar');
@@ -225,7 +225,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
             editor
               .chain()
               .focus()
-              .toggleHeading({ level: Number.parseInt(value) })
+              .toggleHeading({ level: Number.parseInt(value, 10) })
               .run();
           }
         }}

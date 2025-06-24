@@ -15,10 +15,10 @@ import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, useCallback } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
 
-type QuizSchema = {
+interface QuizSchema {
   questionText: string;
   questionUUID?: string;
   options: {
@@ -28,9 +28,9 @@ type QuizSchema = {
     type: 'text' | 'image' | 'audio' | 'video';
     assigned_right_answer: boolean;
   }[];
-};
+}
 
-type QuizSubmitSchema = {
+interface QuizSubmitSchema {
   questions: QuizSchema[];
   submissions: {
     questionUUID: string;
@@ -38,19 +38,19 @@ type QuizSubmitSchema = {
     answer: boolean;
   }[];
   assignment_task_submission_uuid?: string;
-};
+}
 
-type TaskQuizObjectProps = {
+interface TaskQuizObjectProps {
   view: 'teacher' | 'student' | 'grading';
   user_id?: string; // Only for read-only view
   assignmentTaskUUID?: string;
-};
+}
 
-type Submission = {
+interface Submission {
   questionUUID: string;
   optionUUID: string;
   answer: boolean;
-};
+}
 
 function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectProps) {
   const t = useTranslations('DashPage.Assignments.TaskQuizObject');
@@ -79,31 +79,37 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
 
   const handleQuestionChange = (index: number, value: string) => {
     const updatedQuestions = [...questions];
-    updatedQuestions[index].questionText = value;
-    setQuestions(updatedQuestions);
+    if (updatedQuestions[index]) {
+      updatedQuestions[index].questionText = value;
+      setQuestions(updatedQuestions);
+    }
   };
 
   const handleOptionChange = (qIndex: number, oIndex: number, value: string) => {
     const updatedQuestions = [...questions];
-    updatedQuestions[qIndex].options[oIndex].text = value;
-    setQuestions(updatedQuestions);
+    if (updatedQuestions[qIndex]?.options[oIndex]) {
+      updatedQuestions[qIndex].options[oIndex].text = value;
+      setQuestions(updatedQuestions);
+    }
   };
 
   const addOption = (qIndex: number) => {
     const updatedQuestions = [...questions];
-    updatedQuestions[qIndex].options.push({
-      text: '',
-      fileID: '',
-      type: 'text',
-      assigned_right_answer: false,
-      optionUUID: `option_${uuidv4()}`,
-    });
+    if (updatedQuestions[qIndex]) {
+      updatedQuestions[qIndex].options.push({
+        text: '',
+        fileID: '',
+        type: 'text',
+        assigned_right_answer: false,
+        optionUUID: `option_${uuidv4()}`,
+      });
+    }
     setQuestions(updatedQuestions);
   };
 
   const removeOption = (qIndex: number, oIndex: number) => {
     const updatedQuestions = [...questions];
-    if (updatedQuestions[qIndex].options.length > 1) {
+    if (updatedQuestions[qIndex] && updatedQuestions[qIndex].options.length > 1) {
       updatedQuestions[qIndex].options.splice(oIndex, 1);
       setQuestions(updatedQuestions);
     } else {
@@ -139,10 +145,12 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const toggleOption = (qIndex: number, oIndex: number) => {
     const updatedQuestions = [...questions];
     // Find the option to toggle
-    const optionToToggle = updatedQuestions[qIndex].options[oIndex];
-    // Toggle the 'correct' property of the option
-    optionToToggle.assigned_right_answer = !optionToToggle.assigned_right_answer;
-    setQuestions(updatedQuestions);
+    const optionToToggle = updatedQuestions[qIndex]?.options[oIndex];
+    if (optionToToggle) {
+      // Toggle the 'correct' property of the option
+      optionToToggle.assigned_right_answer = !optionToToggle.assigned_right_answer;
+      setQuestions(updatedQuestions);
+    }
   };
 
   const saveFC = async () => {
@@ -200,7 +208,10 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     if (submissionIndex === -1) {
       updatedSubmissions.push({ questionUUID, optionUUID, answer: true });
     } else {
-      updatedSubmissions[submissionIndex].answer = !updatedSubmissions[submissionIndex].answer;
+      const submission = updatedSubmissions[submissionIndex];
+      if (submission) {
+        submission.answer = !submission.answer;
+      }
     }
 
     setUserSubmissions({
@@ -373,17 +384,17 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       setSelectedAssignmentTaskUUID: assignmentTaskUUID,
     });
     // Teacher area
-    if (view == 'teacher' && assignmentTaskState.assignmentTask.contents?.questions) {
+    if (view === 'teacher' && assignmentTaskState.assignmentTask.contents?.questions) {
       setQuestions(assignmentTaskState.assignmentTask.contents.questions);
     }
     // Student area
-    else if (view == 'student') {
+    else if (view === 'student') {
       getAssignmentTaskUI();
       getAssignmentTaskSubmissionFromUserUI();
     }
 
     // Grading area
-    else if (view == 'grading') {
+    else if (view === 'grading') {
       getAssignmentTaskUI();
       //setQuestions(assignmentTaskState.assignmentTask.contents.questions);
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
@@ -452,10 +463,10 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                   >
                     <div
                       onClick={() => view === 'student' && chooseOption(qIndex, oIndex)}
-                      className={`answer nice-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md ${
-                        view == 'student'
+                      className={`answer nice-shadow hover:bg-opacity-100 flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-3 outline-white duration-150 ease-linear hover:shadow-md ${
+                        view === 'student'
                           ? `active:scale-110 ${
-                              userSubmissions.submissions.find(
+                              userSubmissions.submissions.some(
                                 (submission) =>
                                   submission.questionUUID === question.questionUUID &&
                                   submission.optionUUID === option.optionUUID &&
@@ -468,7 +479,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                       }`}
                     >
                       <div className="flex h-full w-[40px] items-center rounded-l-md bg-slate-100/80 text-base font-bold text-slate-800">
-                        <p className="mx-auto text-sm font-bold">{String.fromCharCode(65 + oIndex)}</p>
+                        <p className="mx-auto text-sm font-bold">{String.fromCodePoint(65 + oIndex)}</p>
                       </div>
                       {view === 'teacher' ? (
                         <>
@@ -548,7 +559,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                       {view === 'student' && (
                         <div
                           className={`flex h-[20px] w-[20px] flex-none items-center rounded-lg ${
-                            userSubmissions.submissions.find(
+                            userSubmissions.submissions.some(
                               (submission) =>
                                 submission.questionUUID === question.questionUUID &&
                                 submission.optionUUID === option.optionUUID &&
@@ -559,7 +570,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                           } cursor-pointer text-sm transition-all ease-linear`}
                           onClick={() => chooseOption(qIndex, oIndex)}
                         >
-                          {userSubmissions.submissions.find(
+                          {userSubmissions.submissions.some(
                             (submission) =>
                               submission.questionUUID === question.questionUUID &&
                               submission.optionUUID === option.optionUUID &&
@@ -580,7 +591,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                       {view === 'grading' && (
                         <div
                           className={`flex h-[20px] w-[20px] flex-none items-center rounded-lg ${
-                            userSubmissions.submissions.find(
+                            userSubmissions.submissions.some(
                               (submission) =>
                                 submission.questionUUID === question.questionUUID &&
                                 submission.optionUUID === option.optionUUID &&
@@ -590,7 +601,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                               : 'bg-slate-200/60 text-slate-500'
                           } text-sm`}
                         >
-                          {userSubmissions.submissions.find(
+                          {userSubmissions.submissions.some(
                             (submission) =>
                               submission.questionUUID === question.questionUUID &&
                               submission.optionUUID === option.optionUUID &&
@@ -611,10 +622,10 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                     </div>
                     {view === 'teacher' &&
                       oIndex === question.options.length - 1 &&
-                      questions[qIndex].options.length <= 5 && (
+                      (questions[qIndex]?.options.length ?? 0) <= 5 && (
                         <div className="mx-auto flex justify-center px-2">
                           <div
-                            className="nice-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md"
+                            className="nice-shadow hover:bg-opacity-100 flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline-3 outline-white duration-150 ease-linear hover:shadow-md"
                             onClick={() => addOption(qIndex)}
                           >
                             <Plus
@@ -633,7 +644,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         {view === 'teacher' && questions.length <= 10 && (
           <div className="mx-auto flex justify-center px-2">
             <div
-              className="text-slate nice-shadow hover:shadow-xs my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear"
+              className="text-slate nice-shadow my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear hover:shadow-xs"
               onClick={addQuestion}
             >
               <PlusCircle

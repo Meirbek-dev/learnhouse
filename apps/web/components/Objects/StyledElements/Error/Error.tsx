@@ -15,7 +15,7 @@ function ErrorUI({ message, submessage }: { message?: string; submessage?: strin
   }
 
   return (
-    <div className="bg-linear-to-b mx-auto flex flex-col items-center space-y-6 from-rose-100 to-rose-100/5 py-10 antialiased">
+    <div className="mx-auto flex flex-col items-center space-y-6 bg-linear-to-b from-rose-100 to-rose-100/5 py-10 antialiased">
       <div className="flex flex-row items-center space-x-5 rounded-xl">
         <AlertTriangle
           className="text-rose-700"
