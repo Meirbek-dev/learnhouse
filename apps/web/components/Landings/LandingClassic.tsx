@@ -1,14 +1,15 @@
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
+import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { getUriWithOrg } from '@services/config/config';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 
 interface LandingClassicProps {
   courses: any[];

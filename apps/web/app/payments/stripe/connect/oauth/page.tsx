@@ -1,14 +1,15 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { verifyStripeConnection } from '@services/payments/payments';
+import { motion } from 'framer-motion';
+import { AlertTriangle, Check, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Check, Loader2, AlertTriangle } from 'lucide-react';
-import touEmblemDark from 'public/tou_emblem_dark.png';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import Image from 'next/image';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { verifyStripeConnection } from '@services/payments/payments';
+import touEmblemDark from 'public/tou_emblem_dark.png';
 
 function StripeConnectCallback() {
   const t = useTranslations('Stripe');

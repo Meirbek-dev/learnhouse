@@ -1,7 +1,7 @@
 import type { Editor } from '@tiptap/react';
+import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
-import { Check } from 'lucide-react';
 
 interface TableOfContentsProps {
   editor: Editor | null;
@@ -31,7 +31,7 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
           const slug = headingText
             .toLowerCase()
             .trim()
-            .replaceAll(/[^\w\s-]/g, '') // Remove special characters
+            .replaceAll(/[^\s\w-]/g, '') // Remove special characters
             .replaceAll(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
             .replaceAll(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 

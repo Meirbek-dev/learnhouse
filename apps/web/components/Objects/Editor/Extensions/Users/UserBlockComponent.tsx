@@ -1,37 +1,37 @@
 'use client';
 
+import { NodeViewWrapper } from '@tiptap/react';
 import {
-  Loader2,
-  User,
-  ExternalLink,
-  Briefcase,
-  GraduationCap,
-  MapPin,
-  Building2,
-  Globe,
-  Laptop2,
   Award,
   BookOpen,
-  Link,
-  Users,
+  Briefcase,
+  Building2,
   Calendar,
+  ExternalLink,
+  Globe,
+  GraduationCap,
+  Laptop2,
   Lightbulb,
+  Link,
+  Loader2,
+  MapPin,
+  User,
+  Users,
 } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getUserByUsername, getUser } from '@services/users/users';
-import { NodeViewWrapper } from '@tiptap/react';
-import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
-import { Badge } from '@components/ui/badge';
-import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { Badge } from '@components/ui/badge';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { getUser, getUserByUsername } from '@services/users/users';
 
 interface UserData {
   id: string;
@@ -77,7 +77,7 @@ function UserBlockComponent(props: any) {
   const session = useLHSession() as any;
   const _access_token = session?.data?.tokens?.access_token;
   const editorState = useEditorProvider() as any;
-  const isEditable = editorState.isEditable;
+  const { isEditable } = editorState;
   const router = useRouter();
 
   const [username, setUsername] = useState('');
@@ -218,7 +218,7 @@ function UserBlockComponent(props: any) {
           <div className="absolute inset-0 h-28 rounded-t-lg bg-gradient-to-b from-gray-100/30 to-transparent" />
 
           {/* Content */}
-          <div className="relative px-5 pt-5 pb-4">
+          <div className="relative px-5 pb-4 pt-5">
             <div className="flex items-start gap-4">
               {/* Avatar */}
               <div className="flex-shrink-0">
@@ -273,7 +273,7 @@ function UserBlockComponent(props: any) {
 
         {/* Details */}
         {userData.details && Object.values(userData.details).length > 0 && (
-          <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
+          <div className="space-y-2.5 border-t border-gray-100 px-5 pb-4 pt-3.5">
             {Object.values(userData.details).map((detail) => (
               <div
                 key={detail.id}

@@ -1,30 +1,32 @@
+import * as Form from '@radix-ui/react-form';
+import { format, formatDistanceToNow } from 'date-fns';
+import { useFormik } from 'formik';
+import { motion } from 'framer-motion';
+import { PencilLine, Rss, TentTree } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+
+import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
 } from '@components/Objects/StyledElements/Form/Form';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { useCourse } from '@components/Contexts/CourseContext';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { Rss, PencilLine, TentTree } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
+import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { swrFetcher } from '@services/utils/ts/requests';
+
 import UserAvatar from '../../UserAvatar';
-import { motion } from 'framer-motion';
-import useSWR, { mutate } from 'swr';
-import { toast } from 'react-hot-toast';
-import { useFormik } from 'formik';
-import { useState } from 'react';
-import { format, formatDistanceToNow } from 'date-fns';
-import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 
 interface Author {
   user: {
@@ -325,7 +327,7 @@ const UpdatesListView = () => {
                 <h4 className="truncate text-sm font-medium text-neutral-800">{update.title}</h4>
                 <span
                   title={format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })}
-                  className="text-[11px] font-medium whitespace-nowrap text-neutral-400"
+                  className="whitespace-nowrap text-[11px] font-medium text-neutral-400"
                 >
                   {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
                 </span>

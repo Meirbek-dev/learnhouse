@@ -1,9 +1,11 @@
-import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
-import { NextIntlClientProvider } from 'next-intl';
 import { Inter } from 'next/font/google';
-import ClientLayout from './client-layout';
-import { isDevEnv } from './auth/options';
 import Script from 'next/script';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
+
+import { isDevEnv } from './auth/options';
+import ClientLayout from './client-layout';
+
 import '../styles/globals.css';
 
 const inter = Inter({

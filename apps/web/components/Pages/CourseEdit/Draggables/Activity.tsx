@@ -1,16 +1,17 @@
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { Video, Sparkles, X, Pencil, MoreVertical, Eye, Save, File } from 'lucide-react';
-import { deleteActivity, updateActivity } from '@services/courses/activities';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { Draggable } from '@hello-pangea/dnd';
+import { Eye, File, MoreVertical, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import Link from 'next/link';
 import { mutate } from 'swr';
+
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { deleteActivity, updateActivity } from '@services/courses/activities';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 interface ModifiedActivityInterface {
   activityId: string;
@@ -60,7 +61,7 @@ function Activity(props: any) {
     >
       {(provided) => (
         <div
-          className="my-2 flex w-auto flex-row items-center space-x-1 rounded-md bg-gray-50 py-2 text-gray-500 shadow-xs ring-1 ring-gray-400/10 transition-all delay-100 duration-75 ease-linear ring-inset hover:scale-102 hover:bg-gray-100 hover:shadow-sm"
+          className="shadow-xs hover:scale-102 my-2 flex w-auto flex-row items-center space-x-1 rounded-md bg-gray-50 py-2 text-gray-500 ring-1 ring-inset ring-gray-400/10 transition-all delay-100 duration-75 ease-linear hover:bg-gray-100 hover:shadow-sm"
           key={props.activity.id}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -100,7 +101,7 @@ function Activity(props: any) {
               <div className="chapter-modification-zone space-x-3 rounded-lg bg-gray-200/60 px-4 py-1 text-[7px] text-gray-600 shadow-inner">
                 <input
                   type="text"
-                  className="bg-transparent text-xs text-gray-500 outline-hidden"
+                  className="outline-hidden bg-transparent text-xs text-gray-500"
                   placeholder={t('activityNamePlaceholder')}
                   value={modifiedActivity ? modifiedActivity?.activityName : props.activity.name}
                   onChange={(e) =>

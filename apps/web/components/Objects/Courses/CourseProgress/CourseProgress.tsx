@@ -1,9 +1,10 @@
-import { Check, Square, ArrowRight, Folder, FileText, Video, Layers, BookOpenCheck } from 'lucide-react';
+import { ArrowRight, BookOpenCheck, Check, FileText, Folder, Layers, Square, Video } from 'lucide-react';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUriWithOrg } from '@services/config/config';
-import { useState, useEffect, useCallback } from 'react';
-import type { FC } from 'react';
-import Link from 'next/link';
 
 interface CourseProgressProps {
   course: any;
@@ -127,7 +128,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
                           />
                           <Check
                             size={18}
-                            className="absolute top-0 left-0 stroke-[2.5] text-teal-600"
+                            className="absolute left-0 top-0 stroke-[2.5] text-teal-600"
                           />
                         </div>
                       ) : (

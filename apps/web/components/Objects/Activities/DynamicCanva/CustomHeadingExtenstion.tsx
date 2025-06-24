@@ -11,7 +11,7 @@ export const CustomHeading = Heading.extend({
     const slug = headingText
       .toLowerCase()
       .trim()
-      .replaceAll(/[^\w\s-]/g, '') // Remove special characters
+      .replaceAll(/[^\s\w-]/g, '') // Remove special characters
       .replaceAll(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
       .replaceAll(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 

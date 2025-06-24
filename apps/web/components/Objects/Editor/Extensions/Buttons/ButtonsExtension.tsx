@@ -1,11 +1,12 @@
-import { ArrowRight, ChevronDown, Link, AlignLeft, AlignCenter, AlignRight, Palette } from 'lucide-react';
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
-import { useState, useRef, useEffect } from 'react';
-import type { FC, ChangeEvent } from 'react';
+import { AlignCenter, AlignLeft, AlignRight, ArrowRight, ChevronDown, Link, Palette } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import type { ChangeEvent, FC } from 'react';
 import { twMerge } from 'tailwind-merge';
+
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 
 const ButtonsExtension: FC = (props: any) => {
   const t = useTranslations('DashPage.Editor.ButtonsExtension');
@@ -20,7 +21,7 @@ const ButtonsExtension: FC = (props: any) => {
   const linkInputRef = useRef<HTMLInputElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const editorState = useEditorProvider() as any;
-  const isEditable = editorState.isEditable;
+  const { isEditable } = editorState;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -201,7 +202,7 @@ const ButtonsExtension: FC = (props: any) => {
             {colors.map((c) => (
               <button
                 key={c}
-                className={`h-6 w-6 rounded-full ${getButtonColor(c)} hover:ring-opacity-50 focus:ring-opacity-50 hover:ring-2 focus:ring-2 focus:outline-hidden`}
+                className={`h-6 w-6 rounded-full ${getButtonColor(c)} focus:outline-hidden hover:ring-2 hover:ring-opacity-50 focus:ring-2 focus:ring-opacity-50`}
                 onClick={() => handleColorSelect(c)}
               />
             ))}

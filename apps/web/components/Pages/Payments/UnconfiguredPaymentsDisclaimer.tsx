@@ -1,15 +1,15 @@
-import { Alert, AlertTitle, AlertDescription } from '@components/ui/alert';
-import { Settings, ChevronRight, CreditCard } from 'lucide-react';
-import { AlertTriangle, ShoppingCart, Users } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { AlertTriangle, ChevronRight, CreditCard, Settings, ShoppingCart, Users } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 
 function UnconfiguredPaymentsDisclaimer() {
   const t = useTranslations('DashPage.Payments');
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
-      <div className="mx-auto mr-10 ml-10">
+      <div className="mx-auto ml-10 mr-10">
         <Alert className="light-shadow mb-3 border-2 border-yellow-200 bg-yellow-100/50 p-6">
           <AlertTitle className="mb-2 flex items-center space-x-2 text-lg font-semibold">
             <AlertTriangle className="h-5 w-5" />

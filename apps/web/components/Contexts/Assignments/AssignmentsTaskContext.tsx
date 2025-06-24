@@ -1,11 +1,13 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getAssignmentTask } from '@services/courses/assignments';
-import { createContext, use, useEffect, useReducer, useCallback } from 'react';
-import { useAssignments } from './AssignmentContext';
-import { getAPIUrl } from '@services/config/config';
+import { createContext, use, useCallback, useEffect, useReducer } from 'react';
 import type { ReactNode } from 'react';
 import { mutate } from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl } from '@services/config/config';
+import { getAssignmentTask } from '@services/courses/assignments';
+
+import { useAssignments } from './AssignmentContext';
 
 interface State {
   selectedAssignmentTaskUUID: string | null;

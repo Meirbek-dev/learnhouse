@@ -1,18 +1,20 @@
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { Hexagon, MoreVertical, Pencil, Save, Sparkles, X } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { updateChapter } from '@services/courses/chapters';
-import { Droppable, Draggable } from '@hello-pangea/dnd';
-import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { styled } from 'styled-components';
-import Activity from './Activity';
 import { useState } from 'react';
+import { styled } from 'styled-components';
 import { mutate } from 'swr';
 
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { getAPIUrl } from '@services/config/config';
+import { updateChapter } from '@services/courses/chapters';
+import { revalidateTags } from '@services/utils/ts/requests';
+
+import Activity from './Activity';
+
 interface ModifiedChapterInterface {
   chapterId: string;
   chapterName: string;
@@ -54,10 +56,10 @@ function Chapter(props: any) {
           {...provided.draggableProps}
           ref={provided.innerRef}
           //  isDragging={snapshot.isDragging}
-          className="mx-auto max-w-(--breakpoint-2xl) bg-white px-5"
+          className="max-w-(--breakpoint-2xl) mx-auto bg-white px-5"
           key={props.info.list.chapter.id}
         >
-          <div className="text-md flex items-center space-x-2 pt-3 pr-3 font-bold">
+          <div className="text-md flex items-center space-x-2 pr-3 pt-3 font-bold">
             <div className="flex grow items-center space-x-3 rounded-md px-3 py-1 text-lg">
               <div className="rounded-md bg-neutral-100 p-2">
                 <Hexagon
@@ -72,7 +74,7 @@ function Chapter(props: any) {
                   <div className="chapter-modification-zone space-x-3 rounded-lg bg-neutral-100 px-4 py-1">
                     <input
                       type="text"
-                      className="bg-transparent text-sm text-neutral-700 outline-hidden"
+                      className="outline-hidden bg-transparent text-sm text-neutral-700"
                       placeholder={t('chapterNamePlaceholder')}
                       value={modifiedChapter ? modifiedChapter?.chapterName : props.info.list.chapter.name}
                       onChange={(e) =>

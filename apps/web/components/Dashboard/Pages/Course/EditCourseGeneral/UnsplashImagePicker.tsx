@@ -1,30 +1,31 @@
 import {
-  Search,
-  Cpu,
+  Bike,
+  Book,
   Briefcase,
+  Building,
+  Camera,
+  Coffee,
+  Coins,
+  Cpu,
+  Dumbbell,
+  Flower,
+  Gamepad,
   GraduationCap,
   Heart,
+  Microscope,
+  Music,
   Palette,
   Plane,
-  Utensils,
-  Dumbbell,
-  Music,
+  Search,
   Shirt,
-  Book,
-  Building,
-  Bike,
-  Camera,
-  Microscope,
-  Coins,
-  Coffee,
-  Gamepad,
-  Flower,
+  Utensils,
 } from 'lucide-react';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useState, useEffect, useCallback } from 'react';
-import type { FC, ChangeEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import type { ChangeEvent, FC } from 'react';
 import { createApi } from 'unsplash-js';
+
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 
 const unsplash = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
@@ -71,8 +72,8 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
   // Generate predefined labels with translations
   const predefinedLabels = LABEL_KEYS_WITH_ICONS.map(({ key, icon }) => ({
     name: t(`Labels.${key}`),
-    icon: icon,
-    key: key,
+    icon,
+    key,
   }));
 
   const fetchImages = useCallback(async (searchQuery: string, pageNum: number) => {
@@ -146,10 +147,10 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
             value={query}
             onChange={handleSearch}
             placeholder={t('searchPlaceholder')}
-            className="w-full rounded-lg border p-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+            className="focus:outline-hidden w-full rounded-lg border p-2 pl-10 focus:ring-2 focus:ring-blue-500"
           />
           <Search
-            className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400"
             size={20}
           />
         </div>

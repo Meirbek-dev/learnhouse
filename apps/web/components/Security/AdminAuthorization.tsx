@@ -1,13 +1,14 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { getUriWithoutOrg } from '@services/config/config';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import type { ReactNode, FC } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { getUriWithoutOrg } from '@services/config/config';
 
 interface AuthorizationProps {
   children: ReactNode;
@@ -38,7 +39,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
   const checkPathname = useCallback((pattern: string, pathname: string) => {
     if (typeof pattern !== 'string' || typeof pathname !== 'string') return false;
     const regexPattern = new RegExp(
-      `^${pattern.replaceAll(/[/.+?^${}()|[\]\\]/g, String.raw`\$&`).replaceAll(/\\\*/g, '.*')}$`,
+      `^${pattern.replaceAll(/[$()+./?[\\\]^{|}]/g, String.raw`\$&`).replaceAll(/\\\*/g, '.*')}$`,
     );
     return regexPattern.test(pathname);
   }, []);

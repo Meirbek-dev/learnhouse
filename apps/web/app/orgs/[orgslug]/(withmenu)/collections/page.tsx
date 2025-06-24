@@ -1,18 +1,19 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { getServerSession } from 'next-auth/next';
+import { getTranslations } from 'next-intl/server';
+
+import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { getOrgThumbnailMediaDirectory } from '@services/media/media';
-import { getOrgCollections } from '@services/courses/collections';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { getUriWithOrg } from '@services/config/config';
-import { getTranslations } from 'next-intl/server';
+import { getOrgCollections } from '@services/courses/collections';
+import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { nextAuthOptions } from 'app/auth/options';
-import { getServerSession } from 'next-auth/next';
-import type { Metadata } from 'next';
-import Link from 'next/link';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string }>;

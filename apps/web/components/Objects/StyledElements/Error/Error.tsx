@@ -1,9 +1,10 @@
 'use client';
 import { AlertTriangle, HomeIcon, RefreshCcw } from 'lucide-react';
-import { getUriWithoutOrg } from '@services/config/config';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+
+import { getUriWithoutOrg } from '@services/config/config';
 
 function ErrorUI({ message, submessage }: { message?: string; submessage?: string }) {
   const t = useTranslations('Components.ErrorUI');
@@ -15,7 +16,7 @@ function ErrorUI({ message, submessage }: { message?: string; submessage?: strin
   }
 
   return (
-    <div className="mx-auto flex flex-col items-center space-y-6 bg-linear-to-b from-rose-100 to-rose-100/5 py-10 antialiased">
+    <div className="bg-linear-to-b mx-auto flex flex-col items-center space-y-6 from-rose-100 to-rose-100/5 py-10 antialiased">
       <div className="flex flex-row items-center space-x-5 rounded-xl">
         <AlertTriangle
           className="text-rose-700"

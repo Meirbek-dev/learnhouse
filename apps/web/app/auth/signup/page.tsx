@@ -1,9 +1,11 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import SignUpClient from './signup';
+import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
+
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+
+import SignUpClient from './signup';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string }>;

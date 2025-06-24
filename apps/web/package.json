@@ -7,19 +7,10 @@
     "dev-https": "next dev --experimental-https -p 443",
     "build": "next build",
     "start": "next start",
-    "start-standalone": "node ./.next/standalone/apps/web/server.js",
-    "postbuild": "xcopy .\\.next\\static .\\.next\\standalone\\.next\\static /E /I /Y || cp -r ./.next/static ./.next/standalone/.next/static",
     "lint": "next lint",
     "lint:fix": "eslint --fix .",
-    "lint:strict": "eslint . --max-warnings 0",
-    "lint:report": "eslint . --format json --output-file eslint-report.json",
     "typecheck": "tsc --noEmit",
-    "typecheck:watch": "tsc --noEmit --watch",
-    "format": "prettier --write \"**/*.{js,ts,tsx,md,css}\"",
-    "format:check": "prettier --check \"**/*.{js,ts,tsx,md,css}\"",
-    "quality": "pnpm run typecheck && pnpm run lint:strict && pnpm run format:check",
-    "quality:fix": "pnpm run format && pnpm run lint:fix && pnpm run typecheck",
-    "pre-commit": "pnpm run quality:fix"
+    "format": "prettier --write \"**/*.{js,ts,tsx,md,css}\""
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

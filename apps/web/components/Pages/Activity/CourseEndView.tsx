@@ -1,12 +1,13 @@
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { ArrowLeft, Trophy } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import type React from 'react';
+import ReactConfetti from 'react-confetti';
+
+import { useWindowSize } from '@/hooks/useWindowSize';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { useWindowSize } from '@/hooks/useWindowSize';
-import { Trophy, ArrowLeft } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import ReactConfetti from 'react-confetti';
-import type React from 'react';
-import Link from 'next/link';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 
 interface CourseEndViewProps {
   courseName: string;

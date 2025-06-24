@@ -1,9 +1,11 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { getOrgCourses } from '@services/courses/courses';
-import { getTranslations } from 'next-intl/server';
-import { nextAuthOptions } from 'app/auth/options';
-import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
+import { getServerSession } from 'next-auth/next';
+import { getTranslations } from 'next-intl/server';
+
+import { getOrgCourses } from '@services/courses/courses';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { nextAuthOptions } from 'app/auth/options';
+
 import CoursesHome from './client';
 
 interface MetadataProps {

@@ -1,4 +1,18 @@
 'use client';
+import * as Form from '@radix-ui/react-form';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { BarLoader } from 'react-spinners';
+import { mutate } from 'swr';
+
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -7,22 +21,9 @@ import FormLayout, {
   FormMessage,
   Input,
 } from '@components/Objects/StyledElements/Form/Form';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { createActivity, deleteActivity } from '@services/courses/activities';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { createAssignment } from '@services/courses/assignments';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
-import * as Form from '@radix-ui/react-form';
-import { CalendarIcon } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { BarLoader } from 'react-spinners';
-import { toast } from 'react-hot-toast';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
-import { mutate } from 'swr';
+import { createActivity, deleteActivity } from '@services/courses/activities';
+import { createAssignment } from '@services/courses/assignments';
 
 function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
   const t = useTranslations('Components.NewAssignmentModal');
@@ -165,7 +166,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
             <Form.Control asChild>
               <button
                 className={cn(
-                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
                   !dueDate && 'text-muted-foreground',
                 )}
               >

@@ -1,5 +1,5 @@
-import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { getResponseMetadata, RequestBody } from '@services/utils/ts/requests';
 
 interface LoginAndGetTokenResponse {
   access_token: 'string';
@@ -17,8 +17,8 @@ export async function loginAndGetToken(username: any, password: any): Promise<an
     'Content-Type': 'application/x-www-form-urlencoded',
   });
   const urlencoded = new URLSearchParams({
-    username: username,
-    password: password,
+    username,
+    password,
   });
 
   const requestOptions: any = {
@@ -42,8 +42,8 @@ export async function loginWithOAuthToken(email: any, provider: any, accessToken
     'Content-Type': 'application/json',
   });
   const body = {
-    email: email,
-    provider: provider,
+    email,
+    provider,
     access_token: accessToken,
   };
   const jsonBody = JSON.stringify(body);
@@ -102,7 +102,7 @@ export async function logout(): Promise<any> {
 }
 
 export async function getUserInfo(token: string): Promise<any> {
-  const origin = window.location.origin;
+  const { origin } = window.location;
   const HeadersConfig = new Headers({
     Authorization: `Bearer ${token}`,
     Origin: origin,

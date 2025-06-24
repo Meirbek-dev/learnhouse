@@ -1,16 +1,17 @@
 'use client';
 
-import { Save, Sigma, ExternalLink, ChevronDown, BookOpen, Lightbulb } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useState, useRef, useEffect } from 'react';
+
 import { NodeViewWrapper } from '@tiptap/react';
-import { useTranslations } from 'next-intl';
-import type { ChangeEvent } from 'react';
-import { BlockMath } from 'react-katex';
-import { styled } from 'styled-components';
 import { motion } from 'framer-motion';
+import { BookOpen, ChevronDown, ExternalLink, Lightbulb, Save, Sigma } from 'lucide-react';
 import 'katex/dist/katex.min.css';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import type { ChangeEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { BlockMath } from 'react-katex';
+import { styled } from 'styled-components';
 
 // Predefined LaTeX templates
 const mathTemplates = [
@@ -213,7 +214,7 @@ function MathEquationBlockComponent(props: any) {
   const [showSymbols, setShowSymbols] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const editorState = useEditorProvider() as any;
-  const isEditable = editorState.isEditable;
+  const { isEditable } = editorState;
   const inputRef = useRef<HTMLInputElement>(null);
   const templatesRef = useRef<HTMLDivElement>(null);
   const symbolsRef = useRef<HTMLDivElement>(null);
@@ -250,7 +251,7 @@ function MathEquationBlockComponent(props: any) {
     props.updateAttributes({
       math_equation: equation,
     });
-    //setIsEditing(false);
+    // setIsEditing(false);
   };
 
   const insertTemplate = (template: string) => {

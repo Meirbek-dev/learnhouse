@@ -1,18 +1,19 @@
 'use client';
-import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { getOrgLogoMediaDirectory } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { resetPassword } from '@services/auth/auth';
-import { AlertTriangle, Info } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
-import touEmblemDark from 'public/tou_emblem_dark.png';
 import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { AlertTriangle, Info } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+
+import { useOrg } from '@components/Contexts/OrgContext';
+import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
+import { resetPassword } from '@services/auth/auth';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getOrgLogoMediaDirectory } from '@services/media/media';
+import touEmblemDark from 'public/tou_emblem_dark.png';
 
 function ResetPasswordClient() {
   const validationT = useTranslations('Validation');
@@ -30,7 +31,7 @@ function ResetPasswordClient() {
 
     if (!values.email) {
       errors.email = validationT('required');
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+    } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,}$/i.test(values.email)) {
       errors.email = validationT('invalidEmail');
     }
 
@@ -56,10 +57,10 @@ function ResetPasswordClient() {
 
   const formik = useFormik({
     initialValues: {
-      email: email,
+      email,
       new_password: '',
       confirm_password: '',
-      reset_code: reset_code,
+      reset_code,
     },
     validate,
     enableReinitialize: true,
@@ -105,7 +106,7 @@ function ResetPasswordClient() {
                   alt={org?.name}
                   width={70}
                   height={70}
-                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-black/10 ring-inset"
+                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
                 />
               ) : (
                 <Image
@@ -127,14 +128,14 @@ function ResetPasswordClient() {
           <p className="mb-4 text-sm text-gray-600">{t('enterResetDetails')}</p>
 
           {error && (
-            <div className="mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+            <div className="shadow-xs mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
               <AlertTriangle size={18} />
               <div className="text-sm font-bold">{error}</div>
             </div>
           )}
           {message && (
             <div className="mb-4 flex flex-col gap-2">
-              <div className="flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
+              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 transition-all">
                 <Info size={18} />
                 <div className="text-sm font-bold">{t('success')}</div>
               </div>

@@ -1,6 +1,7 @@
-import { OPENU_TOP_DOMAIN, getDefaultOrg, getUriWithOrg } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+
+import { getDefaultOrg, getUriWithOrg, OPENU_TOP_DOMAIN } from './services/config/config';
 
 export const config = {
   matcher: [
@@ -66,7 +67,7 @@ export default async function middleware(req: NextRequest) {
   // Auth Redirects
   if (pathname === '/redirect_from_auth') {
     if (cookie_orgslug) {
-      const searchParams = req.nextUrl.searchParams;
+      const { searchParams } = req.nextUrl;
       const queryString = searchParams.toString();
       const redirectUrl = new URL(getUriWithOrg(cookie_orgslug, '/'), req.url);
       if (queryString) {

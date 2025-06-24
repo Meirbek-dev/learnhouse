@@ -1,19 +1,20 @@
 'use client';
 
+import { SiYoutube } from '@icons-pack/react-simple-icons';
 import {
-  FontBoldIcon,
-  FontItalicIcon,
-  StrikethroughIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
-  DividerVerticalIcon,
-  ListBulletIcon,
-  TableIcon,
-  RowsIcon,
-  ColumnsIcon,
-  SectionIcon,
-  ContainerIcon,
   ChevronDownIcon,
+  ColumnsIcon,
+  ContainerIcon,
+  DividerVerticalIcon,
+  FontBoldIcon,
+  FontItalicIcon,
+  ListBulletIcon,
+  RowsIcon,
+  SectionIcon,
+  StrikethroughIcon,
+  TableIcon,
 } from '@radix-ui/react-icons';
 import {
   AlertCircle,
@@ -22,23 +23,24 @@ import {
   Code,
   Cuboid,
   FileText,
+  Globe,
   ImagePlus,
   Link2,
+  List,
+  ListOrdered,
   MousePointerClick,
   Sigma,
   Tags,
   User,
   Video,
-  List,
-  ListOrdered,
-  Globe,
 } from 'lucide-react';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { SiYoutube } from '@icons-pack/react-simple-icons';
-import LinkInputTooltip from './LinkInputTooltip';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { styled } from 'styled-components';
+
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+
+import LinkInputTooltip from './LinkInputTooltip';
 
 export const ToolbarButtons = ({ editor, props }: any) => {
   const t = useTranslations('DashPage.Editor.Toolbar');
@@ -218,7 +220,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                       : '0'
         }
         onChange={(e) => {
-          const value = e.target.value;
+          const { value } = e.target;
           if (value === '0') {
             editor.chain().focus().setParagraph().run();
           } else {

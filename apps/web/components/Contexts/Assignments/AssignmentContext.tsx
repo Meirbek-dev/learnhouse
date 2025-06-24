@@ -1,13 +1,14 @@
 'use client';
-import ErrorUI from '@components/Objects/StyledElements/Error/Error';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useState, createContext, use, useEffect } from 'react';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
+import { createContext, use, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import ErrorUI from '@components/Objects/StyledElements/Error/Error';
+import { getAPIUrl } from '@services/config/config';
+import { swrFetcher } from '@services/utils/ts/requests';
 
 export const AssignmentContext = createContext({});
 
@@ -49,9 +50,9 @@ export function AssignmentProvider({ children, assignment_uuid }: { children: Re
     if (assignment && assignment_tasks && (!course_id || course_object) && (!activity_id || activity_object)) {
       setAssignmentsFull({
         assignment_object: assignment,
-        assignment_tasks: assignment_tasks,
-        course_object: course_object,
-        activity_object: activity_object,
+        assignment_tasks,
+        course_object,
+        activity_object,
       });
     }
   }, [assignment, assignment_tasks, course_object, activity_object, course_id, activity_id]);

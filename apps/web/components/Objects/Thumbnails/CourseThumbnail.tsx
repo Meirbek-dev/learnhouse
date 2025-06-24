@@ -1,19 +1,20 @@
 'use client';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { BookMinus, FilePenLine, Settings2, MoreVertical } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { deleteCourseFromBackend } from '@services/courses/courses';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { useOrg } from '@components/Contexts/OrgContext';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { getUriWithOrg } from '@services/config/config';
-import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import { BookMinus, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import { toast } from 'react-hot-toast';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import UserAvatar from '@components/Objects/UserAvatar';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
+import { getUriWithOrg } from '@services/config/config';
+import { deleteCourseFromBackend } from '@services/courses/courses';
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 interface Course {
   course_uuid: string;
@@ -75,7 +76,7 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
     : '../empty_thumbnail.png';
 
   return (
-    <div className="nice-shadow relative flex w-full max-w-sm min-w-[280px] shrink-0 flex-col overflow-hidden rounded-xl bg-white">
+    <div className="nice-shadow relative flex w-full min-w-[280px] max-w-sm shrink-0 flex-col overflow-hidden rounded-xl bg-white">
       <AdminEditOptions
         course={course}
         orgSlug={orgslug}
@@ -86,14 +87,14 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
         href={customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
       >
         <img
-          className="inset-0 aspect-video w-full rounded-t-xl bg-cover bg-center ring-1 ring-black/10 ring-inset"
+          className="inset-0 aspect-video w-full rounded-t-xl bg-cover bg-center ring-1 ring-inset ring-black/10"
           src={thumbnailImage}
           alt={course.name}
         />
       </Link>
       <div className="flex w-full flex-col space-y-3 p-4">
         <div className="space-y-2">
-          <h2 className="line-clamp-2 min-h-[2.75rem] text-base leading-tight font-bold text-gray-800">
+          <h2 className="line-clamp-2 min-h-[2.75rem] text-base font-bold leading-tight text-gray-800">
             {course.name}
           </h2>
           <p className="line-clamp-3 min-h-[2.75rem] text-xs leading-normal text-gray-700">{course.description}</p>
@@ -176,7 +177,7 @@ const AdminEditOptions = ({
       checkMethod="roles"
       orgId={course.org_id}
     >
-      <div className="absolute top-2 right-2 z-20">
+      <div className="absolute right-2 top-2 z-20">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="rounded-full bg-white p-1 shadow-md transition-colors hover:bg-gray-100">

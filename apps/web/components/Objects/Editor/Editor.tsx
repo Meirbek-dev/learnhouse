@@ -1,56 +1,61 @@
 'use client';
 import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
+
 import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons';
+
 import { ToolbarButtons } from './Toolbar/ToolbarButtons';
-import { useEditor, EditorContent } from '@tiptap/react';
-import touEmblemLight from 'public/tou_emblem_light.png';
-import StarterKit from '@tiptap/starter-kit';
-import { useState, useEffect } from 'react';
-import { styled } from 'styled-components';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
 
 // Extensions
-import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import InfoCallout from './Extensions/Callout/Info/InfoCallout';
-import WebPreview from './Extensions/WebPreview/WebPreview';
-import TableHeader from '@tiptap/extension-table-header';
-import VideoBlock from './Extensions/Video/VideoBlock';
-import ImageBlock from './Extensions/Image/ImageBlock';
-import TableCell from '@tiptap/extension-table-cell';
 import QuizBlock from './Extensions/Quiz/QuizBlock';
-import TableRow from '@tiptap/extension-table-row';
-import PDFBlock from './Extensions/PDF/PDFBlock';
-import Youtube from '@tiptap/extension-youtube';
-import { getLinkExtension } from './EditorConf';
-import Table from '@tiptap/extension-table';
-import { Eye, Monitor } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 
 // Lowlight
-import { common, createLowlight } from 'lowlight';
 const lowlight = createLowlight(common);
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { CourseProvider } from '@components/Contexts/CourseContext';
-import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
-import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import { getUriWithOrg } from '@services/config/config';
-import ts from 'highlight.js/lib/languages/typescript';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
+import Youtube from '@tiptap/extension-youtube';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import { motion } from 'framer-motion';
+import css from 'highlight.js/lib/languages/css';
+import java from 'highlight.js/lib/languages/java';
 import js from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
-import UserBlock from './Extensions/Users/UserBlock';
-import java from 'highlight.js/lib/languages/java';
-import Buttons from './Extensions/Buttons/Buttons';
-import AIEditorToolkit from './AI/AIEditorToolkit';
+import ts from 'highlight.js/lib/languages/typescript';
 import html from 'highlight.js/lib/languages/xml';
+import { common, createLowlight } from 'lowlight';
+import { Eye, Monitor } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { styled } from 'styled-components';
+
 import { useIsMobile } from '@/hooks/useIsMobile';
-import css from 'highlight.js/lib/languages/css';
-import Badges from './Extensions/Badges/Badges';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { getUriWithOrg } from '@services/config/config';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import touEmblemLight from 'public/tou_emblem_light.png';
+
 import UserAvatar from '../UserAvatar';
+
+import AIEditorToolkit from './AI/AIEditorToolkit';
+import { getLinkExtension } from './EditorConf';
+import Badges from './Extensions/Badges/Badges';
+import Buttons from './Extensions/Buttons/Buttons';
+import InfoCallout from './Extensions/Callout/Info/InfoCallout';
+import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
+import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
+import ImageBlock from './Extensions/Image/ImageBlock';
+import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
+import PDFBlock from './Extensions/PDF/PDFBlock';
+import UserBlock from './Extensions/Users/UserBlock';
+import VideoBlock from './Extensions/Video/VideoBlock';
+import WebPreview from './Extensions/WebPreview/WebPreview';
 
 interface EditorProps {
   content: string;
@@ -208,7 +213,7 @@ function Editor(props: EditorProps) {
           }}
           exit={{ opacity: 0 }}
         >
-          <EditorTop className="bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125">
+          <EditorTop className="fixed bg-white bg-opacity-95 backdrop-blur-sm backdrop-brightness-125">
             <EditorDocSection>
               <EditorInfoWrapper>
                 <Link href="/">
@@ -414,7 +419,7 @@ const EditorUserProfileWrapper = styled.div`
 `;
 
 // Inside EditorInfoWrapper
-//..todo
+// ..todo
 const EditorInfoOpenULogo = styled(Image)`
   border-radius: 6px;
   margin-right: 0px;

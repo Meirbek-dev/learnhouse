@@ -1,7 +1,9 @@
 'use client';
-import type { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk';
 import { createContext, use, useReducer } from 'react';
 import type { ReactNode } from 'react';
+
+import type { AIMessage } from '@components/Objects/Activities/AI/AIActivityAsk';
+
 export const AIChatBotContext = createContext(null) as any;
 export const AIChatBotDispatchContext = createContext(null) as any;
 

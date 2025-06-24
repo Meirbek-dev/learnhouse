@@ -1,20 +1,22 @@
 'use client';
+import * as Form from '@radix-ui/react-form';
+import { useFormik } from 'formik';
+import { AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
 } from '@components/Objects/StyledElements/Form/Form';
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
-import { useEffect, useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+
 import LearningItemsList from './LearningItemsList';
 import ThumbnailUpdate from './ThumbnailUpdate';
-import * as Form from '@radix-ui/react-form';
-import { AlertTriangle } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useFormik } from 'formik';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 
 interface EditCourseStructureProps {
   orgslug: string;
@@ -185,13 +187,13 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     <div className="h-full">
       <div className="h-6" />
       <div className="px-10 pb-10">
-        <div className="rounded-xl bg-white shadow-xs">
+        <div className="shadow-xs rounded-xl bg-white">
           <FormLayout
             onSubmit={formik.handleSubmit}
             className="p-6"
           >
             {error && (
-              <div className="mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+              <div className="shadow-xs mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
                 <AlertTriangle size={18} />
                 <div className="text-sm font-bold">{error}</div>
               </div>

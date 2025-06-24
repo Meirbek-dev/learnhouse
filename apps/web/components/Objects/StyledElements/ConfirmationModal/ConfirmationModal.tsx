@@ -1,9 +1,9 @@
 'use client';
-import { styled, keyframes } from '@stitches/react';
-import { AlertTriangle, Info } from 'lucide-react';
-import * as Dialog from '@radix-ui/react-dialog';
-import { useState, useCallback } from 'react';
 import { blackA } from '@radix-ui/colors';
+import * as Dialog from '@radix-ui/react-dialog';
+import { keyframes, styled } from '@stitches/react';
+import { AlertTriangle, Info } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface ModalParams {

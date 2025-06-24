@@ -1,5 +1,6 @@
-import { useOrg } from '@components/Contexts/OrgContext';
 import { useEffect, useState } from 'react';
+
+import { useOrg } from '@components/Contexts/OrgContext';
 
 interface FeatureType {
   path: string[];

@@ -1,17 +1,18 @@
 'use client';
-import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
-import { sendResetLink } from '@services/auth/auth';
-import { AlertTriangle, Info } from 'lucide-react';
-import openuLogoDark from 'public/openu_logo_dark.png';
 import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { AlertTriangle, Info } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+
+import { useOrg } from '@components/Contexts/OrgContext';
+import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
 import { Button } from '@components/ui/button';
+import { sendResetLink } from '@services/auth/auth';
+import { getUriWithOrg } from '@services/config/config';
+import openuLogoDark from 'public/openu_logo_dark.png';
 
 function ForgotPasswordClient() {
   const t = useTranslations('Auth.Forgot');
@@ -25,7 +26,7 @@ function ForgotPasswordClient() {
 
     if (!values.email) {
       errors.email = t('required');
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+    } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,}$/i.test(values.email)) {
       errors.email = t('invalidEmail');
     }
 
@@ -73,13 +74,13 @@ function ForgotPasswordClient() {
               <p className="mb-4 text-sm">{t('enterEmailMessage')}</p>
 
               {error && (
-                <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
                   <AlertTriangle size={18} />
                   <div className="text-sm font-bold">{error}</div>
                 </div>
               )}
               {message && (
-                <div className="flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
+                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 transition-all">
                   <Info size={18} />
                   <div className="text-sm font-bold">{t('checkEmail')}</div>
                 </div>

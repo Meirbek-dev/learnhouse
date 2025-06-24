@@ -1,26 +1,27 @@
 'use client';
-import FormLayout, {
-  FormField,
-  Input,
-  Textarea,
-  Flex,
-  FormLabel,
-  FormMessage,
-} from '@components/Objects/StyledElements/Form/Form';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { updateAssignment } from '@services/courses/assignments';
-import { Calendar } from '@/components/ui/calendar';
-import { getAPIUrl } from '@services/config/config';
 import * as Form from '@radix-ui/react-form';
+import { format } from 'date-fns';
+import { useFormik } from 'formik';
 import { CalendarIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
-import { useFormik } from 'formik';
-import { format } from 'date-fns';
 import type { FC } from 'react';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import FormLayout, {
+  Flex,
+  FormField,
+  FormLabel,
+  FormMessage,
+  Input,
+  Textarea,
+} from '@components/Objects/StyledElements/Form/Form';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getAPIUrl } from '@services/config/config';
+import { updateAssignment } from '@services/courses/assignments';
 
 interface Assignment {
   assignment_uuid: string;
@@ -115,7 +116,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
             <Form.Control asChild>
               <button
                 className={cn(
-                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
                   !formik.values.due_date && 'text-muted-foreground',
                 )}
               >

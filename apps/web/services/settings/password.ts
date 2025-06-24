@@ -1,5 +1,5 @@
-import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { getResponseMetadata, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 
 /*
  This file includes only POST, PUT, DELETE requests

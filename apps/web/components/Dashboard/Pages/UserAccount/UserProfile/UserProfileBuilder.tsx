@@ -1,30 +1,31 @@
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import {
-  Plus,
-  Trash2,
+  Award,
+  BookOpen,
+  Briefcase,
+  Edit,
+  GraduationCap,
   GripVertical,
   ImageIcon,
   Link as LinkIcon,
-  Award,
-  Edit,
-  TextIcon,
-  Briefcase,
-  GraduationCap,
   MapPin,
-  BookOpen,
+  Plus,
+  TextIcon,
+  Trash2,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { updateProfile } from '@services/settings/profile';
-import { useState, useEffect, createElement } from 'react';
-import { Textarea } from '@components/ui/textarea';
-import { getUser } from '@services/users/users';
-import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
+import { createElement, useEffect, useState } from 'react';
 import type { FC } from 'react';
+import { toast } from 'react-hot-toast';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
+import { updateProfile } from '@services/settings/profile';
+import { getUser } from '@services/users/users';
 
 // Define section type keys (mapping to translation keys)
 const SECTION_TYPE_KEYS = {
@@ -422,10 +423,10 @@ const UserProfileBuilder = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             onClick={() => setSelectedSection(index)}
-                            className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
+                            className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
                               selectedSection === index
-                                ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
-                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
+                                ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
+                                : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
                             } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                           >
                             <div className="group flex items-center justify-between">
@@ -1493,7 +1494,7 @@ const CoursesEditor: FC<{
           />
         </div>
 
-        <div className="text-sm text-gray-500 italic">{t('CoursesEditor.autoDisplayMessage')}</div>
+        <div className="text-sm italic text-gray-500">{t('CoursesEditor.autoDisplayMessage')}</div>
       </div>
     </div>
   );

@@ -1,17 +1,18 @@
 'use client';
-import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
-import { getOrgCustomers } from '@services/payments/payments';
-import { useOrg } from '@components/Contexts/OrgContext';
-import UserAvatar from '@components/Objects/UserAvatar';
 import { RefreshCcw, SquareCheck } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Badge } from '@components/ui/badge';
 import useSWR from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import UserAvatar from '@components/Objects/UserAvatar';
+import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
+import { Badge } from '@components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
+import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { getOrgCustomers } from '@services/payments/payments';
 
 interface PaymentUserData {
   payment_user_id: number;
@@ -136,7 +137,7 @@ function PaymentsCustomersPage() {
   if (!customers) return <div>{t('noCustomerData')}</div>;
 
   return (
-    <div className="nice-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">
+    <div className="nice-shadow mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
       <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
         <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
         <h2 className="text-md text-gray-500">{t('description')}</h2>

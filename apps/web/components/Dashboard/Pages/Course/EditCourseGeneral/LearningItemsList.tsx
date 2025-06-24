@@ -1,9 +1,10 @@
 'use client';
-import { Plus, X, Link as LinkIcon } from 'lucide-react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
-import { useState, useEffect, useRef } from 'react';
-import { Input } from '@components/ui/input'; // Assuming this path is correct
+import { Link as LinkIcon, Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+
+import { Input } from '@components/ui/input'; // Assuming this path is correct
 
 interface LearningItem {
   id: string;
@@ -367,7 +368,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
             {showLinkInput === item.id && (
               <div
                 ref={linkInputRef}
-                className="mt-1 rounded-lg border border-gray-200 bg-white p-2 shadow-xs"
+                className="shadow-xs mt-1 rounded-lg border border-gray-200 bg-white p-2"
               >
                 <Input
                   ref={setLinkInputRef(item.id)}

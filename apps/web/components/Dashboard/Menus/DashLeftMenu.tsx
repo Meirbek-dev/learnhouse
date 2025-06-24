@@ -1,18 +1,20 @@
 'use client';
 import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, Package2, School, Settings, Users } from 'lucide-react';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import AdminAuthorization from '@components/Security/AdminAuthorization';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import useFeatureFlag from '@components/Hooks/useFeatureFlag';
-import { useOrg } from '@components/Contexts/OrgContext';
-import openuLogoLight from '@public/openu_logo_light.png';
-import UserAvatar from '../../Objects/UserAvatar';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect, useCallback } from 'react';
-import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import useFeatureFlag from '@components/Hooks/useFeatureFlag';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import AdminAuthorization from '@components/Security/AdminAuthorization';
+import openuLogoLight from '@public/openu_logo_light.png';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+
+import UserAvatar from '../../Objects/UserAvatar';
 
 function DashLeftMenu() {
   const org = useOrg() as any;

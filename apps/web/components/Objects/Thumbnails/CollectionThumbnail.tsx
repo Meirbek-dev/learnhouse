@@ -1,16 +1,17 @@
 'use client';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { deleteCollection } from '@services/courses/collections';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { getUriWithOrg } from '@services/config/config';
+import { deleteCollection } from '@services/courses/collections';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 interface PropsType {
   collection: any;
@@ -100,7 +101,7 @@ const CollectionAdminEditsArea = (props: any) => {
           })}
           dialogTrigger={
             <button
-              className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
+              className="absolute right-2 top-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
               rel="noopener noreferrer"
             >
               <X size={14} />

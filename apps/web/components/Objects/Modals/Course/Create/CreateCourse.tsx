@@ -1,24 +1,25 @@
 'use client';
-import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker';
-import FormLayout, { FormField, FormLabelAndMessage } from '@components/Objects/StyledElements/Form/Form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
-import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { UploadCloud, Image as ImageIcon } from 'lucide-react';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { createNewCourse } from '@services/courses/courses';
-import { Textarea } from '@components/ui/textarea';
 import * as Form from '@radix-ui/react-form';
-import { Input } from '@components/ui/input';
+import { useFormik } from 'formik';
+import { Image as ImageIcon, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect, useCallback } from 'react';
-import { BarLoader } from 'react-spinners';
+import { useCallback, useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import { useFormik } from 'formik';
+import { BarLoader } from 'react-spinners';
 import * as Yup from 'yup';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker';
+import FormLayout, { FormField, FormLabelAndMessage } from '@components/Objects/StyledElements/Form/Form';
+import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
+import { Input } from '@components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
+import { createNewCourse } from '@services/courses/courses';
+import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   const t = useTranslations('Components.CreateCourseModal');

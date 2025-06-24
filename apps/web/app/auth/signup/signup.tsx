@@ -1,23 +1,25 @@
 'use client';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { validateInviteCode } from '@services/organizations/invites';
-import Toast from '@components/Objects/StyledElements/Toast/Toast';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { MailWarning, Ticket, UserPlus } from 'lucide-react';
-import InviteOnlySignUpComponent from './InviteOnlySignUp';
-import { useOrg } from '@components/Contexts/OrgContext';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { joinOrg } from '@services/organizations/orgs';
-import OpenSignUpComponent from './OpenSignup';
-import openuLogoDark from 'public/openu_logo_dark.png';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import { BarLoader } from 'react-spinners';
-import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { BarLoader } from 'react-spinners';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import Toast from '@components/Objects/StyledElements/Toast/Toast';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { validateInviteCode } from '@services/organizations/invites';
+import { joinOrg } from '@services/organizations/orgs';
+import openuLogoDark from 'public/openu_logo_dark.png';
+
+import InviteOnlySignUpComponent from './InviteOnlySignUp';
+import OpenSignUpComponent from './OpenSignup';
 
 interface SignUpClientProps {
   org: any;
@@ -97,7 +99,7 @@ const LoggedInJoinScreen = (props: any) => {
       null,
       session.data?.tokens?.access_token,
     );
-    //wait for 1.5s
+    // wait for 1.5s
     if (res.success) {
       toast.success(res.data + toastT('orgJoinSuccess'));
       setTimeout(() => {
@@ -171,7 +173,7 @@ const NoTokenScreen = (_props: any) => {
   const validateCode = async () => {
     setIsLoading(true);
     const res = await validateInviteCode(org?.id, inviteCode, session?.user?.tokens.access_token);
-    //wait for 1.5s
+    // wait for 1.5s
     if (res.success) {
       toast.success(toastT('inviteCodeValid'));
       setTimeout(() => {

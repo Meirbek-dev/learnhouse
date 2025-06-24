@@ -1,6 +1,7 @@
-import EmbedObjectsComponent from './EmbedObjectsComponent';
-import { ReactNodeViewRenderer } from '@tiptap/react';
 import { mergeAttributes, Node } from '@tiptap/core';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+
+import EmbedObjectsComponent from './EmbedObjectsComponent';
 
 export default Node.create({
   name: 'blockEmbed',

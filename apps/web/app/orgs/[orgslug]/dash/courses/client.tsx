@@ -1,14 +1,15 @@
 'use client';
-import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
-import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 
 interface CourseProps {
   orgslug: string;
@@ -20,8 +21,8 @@ function CoursesHome(params: CourseProps) {
   const searchParams = useSearchParams();
   const isCreatingCourse = !!searchParams.get('new');
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
-  const orgslug = params.orgslug;
-  const courses = params.courses;
+  const { orgslug } = params;
+  const { courses } = params;
   const isUserAdmin = useAdminStatus() as any;
   const t = useTranslations('DashPage.Courses.HomePageClient');
 
@@ -30,7 +31,7 @@ function CoursesHome(params: CourseProps) {
   }
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] pr-10 pl-10">
+    <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
       <div className="mb-6">
         <BreadCrumbs type="courses" />
         <div className="mt-4 flex flex-col items-start justify-between sm:flex-row sm:items-center">

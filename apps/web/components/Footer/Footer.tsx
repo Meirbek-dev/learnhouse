@@ -1,8 +1,9 @@
 'use client';
 
-import OrgScripts from '@/components/OrgScripts/OrgScripts';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
+
+import OrgScripts from '@/components/OrgScripts/OrgScripts';
 
 const Footer: React.FC = () => {
   const pathname = usePathname();

@@ -1,12 +1,13 @@
 'use client';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useEffect, useState, useRef, useMemo, memo } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
+
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 
 interface FixedActivitySecondaryBarProps {
   course: any;
@@ -200,7 +201,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
 
   return (
     <div
-      className={`animate-in fade-in slide-in-from-top fixed top-[60px] right-0 left-0 z-40 bg-white/90 backdrop-blur-xl transition-all duration-300 ${
+      className={`animate-in fade-in slide-in-from-top fixed left-0 right-0 top-[60px] z-40 bg-white/90 backdrop-blur-xl transition-all duration-300 ${
         isScrolled ? 'nice-shadow' : ''
       }`}
     >

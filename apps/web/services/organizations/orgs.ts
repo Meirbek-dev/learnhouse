@@ -1,10 +1,10 @@
+import { getAPIUrl } from '@services/config/config';
 import {
-  RequestBodyFormWithAuthHeader,
-  RequestBodyWithAuthHeader,
   errorHandling,
   getResponseMetadata,
+  RequestBodyFormWithAuthHeader,
+  RequestBodyWithAuthHeader,
 } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 
 /*
  This file includes only POST, PUT, DELETE requests
@@ -51,7 +51,7 @@ export async function getOrganizationContextInfoWithoutCredentials(org_slug: any
     headers: HeadersConfig,
     redirect: 'follow',
     // Next.js
-    next: next,
+    next,
   };
 
   const result = await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, options);

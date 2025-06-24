@@ -1,18 +1,19 @@
 'use client';
-import { SiX, SiFacebook, SiInstagram, SiYoutube, SiTiktok } from '@icons-pack/react-simple-icons';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { updateOrganization } from '@services/settings/org';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getAPIUrl } from '@services/config/config';
+import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/react-simple-icons';
+import { Form, Formik } from 'formik';
 import { Plus, X as XIcon } from 'lucide-react';
-import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import { Form, Formik } from 'formik';
 import { mutate } from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { getAPIUrl } from '@services/config/config';
+import { updateOrganization } from '@services/settings/org';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 interface OrganizationValues {
   socials: {
@@ -233,7 +234,7 @@ export default function OrgEditSocials() {
                 </div>
               </div>
 
-              <div className="mx-5 mt-3 mb-5 flex flex-row-reverse">
+              <div className="mx-5 mb-5 mt-3 flex flex-row-reverse">
                 <Button
                   type="submit"
                   disabled={isSubmitting}

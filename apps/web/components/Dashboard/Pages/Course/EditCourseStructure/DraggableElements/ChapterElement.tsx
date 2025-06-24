@@ -1,17 +1,20 @@
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { Hexagon, MoreHorizontal, MoreVertical, Pencil, Save, Trash2 } from 'lucide-react';
-import { deleteChapter, updateChapter } from '@services/courses/chapters';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useCourse } from '@components/Contexts/CourseContext';
-import NewActivityButton from '../Buttons/NewActivityButton';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { getAPIUrl } from '@services/config/config';
-import ActivityElement from './ActivityElement';
+import { Hexagon, MoreHorizontal, MoreVertical, Pencil, Save, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { mutate } from 'swr';
+
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { getAPIUrl } from '@services/config/config';
+import { deleteChapter, updateChapter } from '@services/courses/chapters';
+import { revalidateTags } from '@services/utils/ts/requests';
+
+import NewActivityButton from '../Buttons/NewActivityButton';
+
+import ActivityElement from './ActivityElement';
 
 interface ChapterElementProps {
   chapter: any;
@@ -89,7 +92,7 @@ function ChapterElement(props: ChapterElementProps) {
                   <div className="chapter-modification-zone flex items-center space-x-2 rounded-lg bg-neutral-100 px-2 py-1 sm:px-4">
                     <input
                       type="text"
-                      className="w-full max-w-[150px] bg-transparent text-sm text-neutral-700 outline-hidden sm:max-w-none"
+                      className="outline-hidden w-full max-w-[150px] bg-transparent text-sm text-neutral-700 sm:max-w-none"
                       placeholder={t('chapterNamePlaceholder')}
                       value={modifiedChapter ? modifiedChapter?.chapterName : props.chapter.name}
                       onChange={(e) =>

@@ -1,6 +1,7 @@
-import { getActivityMediaDirectory } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { useEffect } from 'react';
+
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getActivityMediaDirectory } from '@services/media/media';
 
 function DocumentPdfActivity({ activity, course }: { activity: any; course: any }) {
   const org = useOrg() as any;

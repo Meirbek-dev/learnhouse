@@ -1,7 +1,7 @@
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
-import { useState, useEffect } from 'react';
-import { styled } from 'styled-components';
+import { useEffect, useState } from 'react';
 import type React from 'react';
+import { styled } from 'styled-components';
 
 interface LinkInputTooltipProps {
   onSave: (url: string) => void;

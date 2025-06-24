@@ -1,11 +1,12 @@
 'use client';
-import { BookOpenCheck, Check, FileText, Layers, Video, ChevronLeft, ChevronRight } from 'lucide-react';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { useMemo, memo, useState, Fragment } from 'react';
-import { getUriWithOrg } from '@services/config/config';
+import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Video } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Fragment, memo, useMemo, useState } from 'react';
+
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { getUriWithOrg } from '@services/config/config';
 
 interface Props {
   course: any;
@@ -156,10 +157,10 @@ ChapterTooltipContent.displayName = 'ChapterTooltipContent';
 
 function ActivityIndicators(props: Props) {
   const t = useTranslations('ActivityIndicators');
-  const course = props.course;
-  const orgslug = props.orgslug;
+  const { course } = props;
+  const { orgslug } = props;
   const courseid = props.course_uuid.replace('course_', '');
-  const enableNavigation = props.enableNavigation;
+  const { enableNavigation } = props;
   const router = useRouter();
 
   const [currentIndex, setCurrentIndex] = useState(0);

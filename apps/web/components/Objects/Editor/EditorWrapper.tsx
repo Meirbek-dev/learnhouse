@@ -1,11 +1,13 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Toast from '@components/Objects/StyledElements/Toast/Toast';
-import { OrgProvider } from '@components/Contexts/OrgContext';
-import { updateActivity } from '@services/courses/activities';
-import { type JSX, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { type JSX, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { OrgProvider } from '@components/Contexts/OrgContext';
+import Toast from '@components/Objects/StyledElements/Toast/Toast';
+import { updateActivity } from '@services/courses/activities';
+
 import Editor from './Editor';
 
 interface EditorWrapperProps {
@@ -28,7 +30,7 @@ function EditorWrapper(props: EditorWrapperProps): JSX.Element {
   }, [session.isLoading]);
 
   async function setContent(content: any) {
-    const activity = props.activity;
+    const { activity } = props;
     activity.content = content;
 
     toast.promise(

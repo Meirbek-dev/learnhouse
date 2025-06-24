@@ -1,17 +1,18 @@
 'use client';
-import FormLayout, { ButtonBlack, Flex, FormField, FormLabel } from '@components/Objects/StyledElements/Form/Form';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { updateUserRole } from '@services/organizations/orgs';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getAPIUrl } from '@services/config/config';
-import type { ChangeEvent, FormEvent } from 'react';
 import { FormMessage } from '@radix-ui/react-form';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import { BarLoader } from 'react-spinners';
+import type { ChangeEvent, FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { BarLoader } from 'react-spinners';
 import { mutate } from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import FormLayout, { ButtonBlack, Flex, FormField, FormLabel } from '@components/Objects/StyledElements/Form/Form';
+import { getAPIUrl } from '@services/config/config';
+import { updateUserRole } from '@services/organizations/orgs';
 
 interface Props {
   user: any;

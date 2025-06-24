@@ -1,41 +1,49 @@
-import MathEquationBlock from '@components/Objects/Editor/Extensions/MathEquation/MathEquationBlock';
-import WarningCallout from '@components/Objects/Editor/Extensions/Callout/Warning/WarningCallout';
-// Custom Extensions
-import InfoCallout from '@components/Objects/Editor/Extensions/Callout/Info/InfoCallout';
-import VideoBlock from '@components/Objects/Editor/Extensions/Video/VideoBlock';
-import ImageBlock from '@components/Objects/Editor/Extensions/Image/ImageBlock';
-import QuizBlock from '@components/Objects/Editor/Extensions/Quiz/QuizBlock';
-import PDFBlock from '@components/Objects/Editor/Extensions/PDF/PDFBlock';
-import { useEditor, EditorContent } from '@tiptap/react';
 import Youtube from '@tiptap/extension-youtube';
+import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import java from 'highlight.js/lib/languages/java';
+import js from 'highlight.js/lib/languages/javascript';
+import python from 'highlight.js/lib/languages/python';
+import ts from 'highlight.js/lib/languages/typescript';
+import html from 'highlight.js/lib/languages/xml';
+import { common, createLowlight } from 'lowlight';
 import { styled } from 'styled-components';
 
+import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
+import InfoCallout from '@components/Objects/Editor/Extensions/Callout/Info/InfoCallout';
+import WarningCallout from '@components/Objects/Editor/Extensions/Callout/Warning/WarningCallout';
+import ImageBlock from '@components/Objects/Editor/Extensions/Image/ImageBlock';
+import MathEquationBlock from '@components/Objects/Editor/Extensions/MathEquation/MathEquationBlock';
+// Custom Extensions
+import PDFBlock from '@components/Objects/Editor/Extensions/PDF/PDFBlock';
+import QuizBlock from '@components/Objects/Editor/Extensions/Quiz/QuizBlock';
+import UserBlock from '@components/Objects/Editor/Extensions/Users/UserBlock';
+import VideoBlock from '@components/Objects/Editor/Extensions/Video/VideoBlock';
+
 // Lowlight
-import { common, createLowlight } from 'lowlight';
+
 const lowlight = createLowlight(common);
 import { NoTextInput } from '@components/Objects/Editor/Extensions/NoTextInput/NoTextInput';
 import EmbedObjects from '@components/Objects/Editor/Extensions/EmbedObjects/EmbedObjects';
 import WebPreview from '@components/Objects/Editor/Extensions/WebPreview/WebPreview';
-import UserBlock from '@components/Objects/Editor/Extensions/Users/UserBlock';
-import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import Buttons from '@components/Objects/Editor/Extensions/Buttons/Buttons';
 import Badges from '@components/Objects/Editor/Extensions/Badges/Badges';
 import { getLinkExtension } from '@components/Objects/Editor/EditorConf';
+
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { CustomHeading } from './CustomHeadingExtenstion';
-import TableHeader from '@tiptap/extension-table-header';
-import ts from 'highlight.js/lib/languages/typescript';
-import js from 'highlight.js/lib/languages/javascript';
-import python from 'highlight.js/lib/languages/python';
-import TableCell from '@tiptap/extension-table-cell';
-import java from 'highlight.js/lib/languages/java';
-import TableRow from '@tiptap/extension-table-row';
-import html from 'highlight.js/lib/languages/xml';
-import css from 'highlight.js/lib/languages/css';
+
 import AICanvaToolkit from './AI/AICanvaToolkit';
+import { CustomHeading } from './CustomHeadingExtenstion';
+
+import TableHeader from '@tiptap/extension-table-header';
+import TableCell from '@tiptap/extension-table-cell';
+import TableRow from '@tiptap/extension-table-row';
+import css from 'highlight.js/lib/languages/css';
+
 import TableOfContents from './TableOfContents';
+
 import Table from '@tiptap/extension-table';
+
 import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface Editor {

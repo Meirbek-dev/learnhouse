@@ -1,15 +1,17 @@
 'use client';
-import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Trash2, Plus, BookOpen } from 'lucide-react';
-import LinkCourseModal from './LinkCourseModal';
-import { Button } from '@components/ui/button';
+import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Button } from '@components/ui/button';
+import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
+
+import LinkCourseModal from './LinkCourseModal';
 
 interface ProductLinkedCoursesProps {
   productId: string;

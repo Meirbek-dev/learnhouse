@@ -1,23 +1,27 @@
 'use client';
 import { BookOpen, BookX, EllipsisVertical, Eye, Layers2, Monitor, Pencil, UserRoundPen } from 'lucide-react';
-import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal';
-import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { updateAssignment } from '@services/courses/assignments';
-import { updateActivity } from '@services/courses/activities';
-import { useParams, useSearchParams } from 'next/navigation';
-import { getAPIUrl } from '@services/config/config';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
-// Lazy Loading
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { getAPIUrl } from '@services/config/config';
+import { updateActivity } from '@services/courses/activities';
+import { updateAssignment } from '@services/courses/assignments';
+
+import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';
+
+// Lazy Loading
+
 const AssignmentSubmissionsSubPage = dynamic(() => import('./subpages/AssignmentSubmissionsSubPage'));
 
 function AssignmentEdit() {
@@ -51,7 +55,7 @@ function AssignmentEdit() {
           <div className="mr-10 flex h-full justify-between">
             <div className="mr-10 pl-10 tracking-tighter">
               <BrdCmpx />
-              <div className="flex w-100 justify-between">
+              <div className="w-100 flex justify-between">
                 <div className="flex text-2xl font-bold">
                   <div className="flex items-center gap-2">{t('assignmentTools')}</div>
                 </div>
@@ -61,7 +65,7 @@ function AssignmentEdit() {
               <PublishingState />
             </div>
           </div>
-          <div className="mr-10 flex space-x-2 pt-2 pl-10 text-sm font-semibold tracking-tight">
+          <div className="mr-10 flex space-x-2 pl-10 pt-2 text-sm font-semibold tracking-tight">
             <div
               onClick={() => setSelectedSubPage('editor')}
               className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
@@ -165,7 +169,7 @@ function PublishingState() {
         >
           <div
             onClick={() => setIsEditModalOpen(true)}
-            className="flex cursor-pointer items-center space-x-2 rounded-md border border-blue-600/10 bg-linear-to-bl from-blue-400/50 to-blue-200/80 px-3 py-2 font-medium text-blue-800 shadow-lg shadow-blue-900/10"
+            className="bg-linear-to-bl flex cursor-pointer items-center space-x-2 rounded-md border border-blue-600/10 from-blue-400/50 to-blue-200/80 px-3 py-2 font-medium text-blue-800 shadow-lg shadow-blue-900/10"
           >
             <Pencil size={18} />
             <p className="text-sm font-bold">{t('edit')}</p>
@@ -181,7 +185,7 @@ function PublishingState() {
           <Link
             target="_blank"
             href={`/course/${assignment?.course_object?.course_uuid.replace('course_', '')}/activity/${assignment?.activity_object?.activity_uuid.replace('activity_', '')}`}
-            className="flex cursor-pointer items-center space-x-2 rounded-md border border-cyan-600/10 bg-linear-to-bl from-sky-400/50 to-cyan-200/80 px-3 py-2 font-medium text-cyan-800 shadow-lg shadow-cyan-900/10"
+            className="bg-linear-to-bl flex cursor-pointer items-center space-x-2 rounded-md border border-cyan-600/10 from-sky-400/50 to-cyan-200/80 px-3 py-2 font-medium text-cyan-800 shadow-lg shadow-cyan-900/10"
           >
             <Eye size={18} />
             <p className="text-sm font-bold">{t('preview')}</p>
@@ -196,7 +200,7 @@ function PublishingState() {
           >
             <div
               onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
-              className="flex cursor-pointer items-center space-x-2 rounded-md border border-gray-600/10 bg-linear-to-bl from-gray-400/50 to-gray-200/80 px-3 py-2 font-medium text-gray-800 shadow-lg shadow-gray-900/10"
+              className="bg-linear-to-bl flex cursor-pointer items-center space-x-2 rounded-md border border-gray-600/10 from-gray-400/50 to-gray-200/80 px-3 py-2 font-medium text-gray-800 shadow-lg shadow-gray-900/10"
             >
               <BookX size={18} />
               <p className="text-sm font-bold">{t('unpublish')}</p>
@@ -212,7 +216,7 @@ function PublishingState() {
           >
             <div
               onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
-              className="flex cursor-pointer items-center space-x-2 rounded-md border border-green-600/10 bg-linear-to-bl from-green-400/50 to-lime-200/80 px-3 py-2 font-medium text-green-800 shadow-lg shadow-green-900/10"
+              className="bg-linear-to-bl flex cursor-pointer items-center space-x-2 rounded-md border border-green-600/10 from-green-400/50 to-lime-200/80 px-3 py-2 font-medium text-green-800 shadow-lg shadow-green-900/10"
             >
               <BookOpen size={18} />
               <p className="text-sm font-bold">{t('publish')}</p>

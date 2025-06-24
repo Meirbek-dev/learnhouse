@@ -1,13 +1,14 @@
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getCollectionById } from '@services/courses/collections';
-import { getUriWithOrg } from '@services/config/config';
-import { getTranslations } from 'next-intl/server';
-import { nextAuthOptions } from 'app/auth/options';
-import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getServerSession } from 'next-auth/next';
+import { getTranslations } from 'next-intl/server';
+
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import { getUriWithOrg } from '@services/config/config';
+import { getCollectionById } from '@services/courses/collections';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { nextAuthOptions } from 'app/auth/options';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string; collectionid: string }>;
@@ -83,7 +84,7 @@ const CollectionPage = async (params: any) => {
           >
             <Link href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
               <div
-                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
+                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
                 style={{
                   backgroundImage: course.thumbnail_image
                     ? `url(${getCourseThumbnailMediaDirectory(

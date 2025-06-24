@@ -1,19 +1,22 @@
 'use client';
 
-import { getUriWithoutOrg, getUriWithOrg } from '@services/config/config';
-import { LogIn, LogOut, ShoppingCart, AlertCircle } from 'lucide-react';
-import { removeCourse, startCourse } from '@services/courses/activity';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { getProductsByCourse } from '@services/payments/products';
-import { checkPaidAccess } from '@services/payments/payments';
-import { revalidateTags } from '@services/utils/ts/requests';
-import CoursePaidOptions from './CoursePaidOptions';
+import { AlertCircle, LogIn, LogOut, ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { removeCourse, startCourse } from '@services/courses/activity';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { checkPaidAccess } from '@services/payments/payments';
+import { getProductsByCourse } from '@services/payments/products';
+import { revalidateTags } from '@services/utils/ts/requests';
+
 import UserAvatar from '../../UserAvatar';
+
+import CoursePaidOptions from './CoursePaidOptions';
 
 interface Author {
   user: {
@@ -234,7 +237,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   };
 
   if (isLoading) {
-    return <div className="mt-4 mb-8 h-16 animate-pulse rounded-lg bg-gray-100" />;
+    return <div className="mb-8 mt-4 h-16 animate-pulse rounded-lg bg-gray-100" />;
   }
 
   // Filter active authors and sort by role priority

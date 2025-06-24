@@ -1,18 +1,19 @@
 'use client';
-import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
-import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
-import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { Layers } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import { Layers } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getAPIUrl } from '@services/config/config';
+import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
+import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 interface NewActivityButtonProps {
   chapterId: string;

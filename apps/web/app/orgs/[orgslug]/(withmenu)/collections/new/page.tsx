@@ -1,17 +1,18 @@
 'use client';
-import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { createCollection } from '@services/courses/collections';
-import { Loader2, Image as ImageIcon } from 'lucide-react';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 import * as React from 'react';
+import { toast } from 'react-hot-toast';
 import useSWR from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { createCollection } from '@services/courses/collections';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 
 function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
   const t = useTranslations('NewCollectionPage');
@@ -109,7 +110,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 placeholder={t('namePlaceholder')}
                 value={name}
                 onChange={handleNameChange}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 maxLength={100}
               />
             </label>
@@ -118,7 +119,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
               <span className="text-sm font-medium text-gray-700">{t('visibilityLabel')}</span>
               <select
                 onChange={handleVisibilityChange}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 defaultValue={isPublic}
               >
                 <option value="true">{t('visibilityPublic')}</option>
@@ -133,7 +134,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 value={description}
                 onChange={handleDescriptionChange}
                 rows={4}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                className="focus:outline-hidden mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 maxLength={500}
               />
             </label>
@@ -206,14 +207,14 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
             <button
               type="button"
               onClick={() => router.back()}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden"
+              className="focus:outline-hidden rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               {t('cancelButton')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center space-x-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white shadow-xs transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+              className="shadow-xs focus:outline-hidden flex items-center space-x-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               <span>{isSubmitting ? t('creatingButton') : t('createButton')}</span>

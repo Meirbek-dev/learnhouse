@@ -1,16 +1,18 @@
-import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf';
-import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { AlertTriangle, FileText, Download } from 'lucide-react';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
-import { useState, useEffect } from 'react';
+import { AlertTriangle, Download, FileText } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { styled } from 'styled-components';
+
+import { constructAcceptValue } from '@/lib/constants';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getActivityBlockMediaDirectory } from '@services/media/media';
+
+import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf';
+import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
@@ -24,7 +26,7 @@ function PDFBlockComponent(props: any) {
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
   const fileId = blockObject ? `${blockObject.content.file_id}.${blockObject.content.file_format}` : null;
   const editorState = useEditorProvider() as any;
-  const isEditable = editorState.isEditable;
+  const { isEditable } = editorState;
 
   const handlePDFChange = (event: ChangeEvent<any>) => {
     setPDF(event.target.files[0]);
@@ -107,7 +109,7 @@ function PDFBlockComponent(props: any) {
             {!isEditable && (
               <button
                 onClick={handleDownload}
-                className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                 title="Download PDF"
               >
                 <Download className="h-4 w-4 text-white" />

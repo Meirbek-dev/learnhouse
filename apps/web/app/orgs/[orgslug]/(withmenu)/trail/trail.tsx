@@ -1,22 +1,22 @@
 'use client';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { removeCourse } from '@services/courses/activity';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
+import { getAPIUrl } from '@services/config/config';
+import { removeCourse } from '@services/courses/activity';
+import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
+
 function Trail(params: any) {
-  const orgslug = params.orgslug;
+  const { orgslug } = params;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;

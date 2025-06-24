@@ -1,18 +1,20 @@
 'use client';
-import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext';
-import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import EvaluateAssignment from './Modals/EvaluateAssignment';
 import { SendHorizonal, UserCheck, X } from 'lucide-react';
-import { swrFetcher } from '@services/utils/ts/requests';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { useTranslations, useLocale } from 'next-intl'; // Import useLocale
-import { getAPIUrl } from '@services/config/config';
-import { useState, useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl'; // Import useLocale
+import { useEffect, useState } from 'react';
 import useSWR from 'swr';
+
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { getAPIUrl } from '@services/config/config';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { swrFetcher } from '@services/utils/ts/requests';
+
+import EvaluateAssignment from './Modals/EvaluateAssignment';
 
 function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: string }) {
   const t = useTranslations('DashPage.Assignments');
@@ -42,7 +44,7 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
   };
 
   return (
-    <div className="mr-10 flex w-full flex-col pt-3 pl-10">
+    <div className="mr-10 flex w-full flex-col pl-10 pt-3">
       <div className="flex w-full flex-row">
         <div className="flex-1">
           <div className="mx-auto my-5 flex w-fit items-center space-x-2 rounded-full bg-rose-600/80 px-3.5 py-1 text-sm font-bold text-white">
@@ -88,8 +90,8 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
     <div className="nice-shadow mx-auto flex w-[350px] flex-row rounded-lg bg-white p-4 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
       <div className="flex w-full flex-col space-y-2">
         <div className="flex w-full justify-between">
-          <h2 className="text-xs font-semibold tracking-tight text-slate-400 uppercase">{t('submission')}</h2>
-          <p className="text-xs font-semibold tracking-tight uppercase">
+          <h2 className="text-xs font-semibold uppercase tracking-tight text-slate-400">{t('submission')}</h2>
+          <p className="text-xs font-semibold uppercase tracking-tight">
             {new Date(submission.creation_date).toLocaleDateString(locale, {
               year: 'numeric',
               month: 'long',

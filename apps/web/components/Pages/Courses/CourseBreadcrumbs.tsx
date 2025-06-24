@@ -1,7 +1,8 @@
-import { getUriWithOrg } from '@services/config/config';
 import { Book, ChevronRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+import { getUriWithOrg } from '@services/config/config';
 
 interface CourseBreadcrumbsProps {
   course: any;

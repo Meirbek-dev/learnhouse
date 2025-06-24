@@ -1,10 +1,12 @@
 'use client';
-import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import AssignmentTasks from '../_components/Tasks';
-import { useTranslations } from 'next-intl';
 import { LayoutList } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
+
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+
+import AssignmentTasks from '../_components/Tasks';
 
 const AssignmentTaskEditor = dynamic(() => import('../_components/TaskEditor/TaskEditor'));
 

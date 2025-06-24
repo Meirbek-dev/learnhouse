@@ -1,16 +1,17 @@
 'use client';
-import { ImageIcon, TextIcon, type LucideIcon, Share2Icon, LayoutDashboardIcon, CodeIcon } from 'lucide-react';
-import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
-import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
+import { motion } from 'framer-motion';
+import { CodeIcon, ImageIcon, LayoutDashboardIcon, type LucideIcon, Share2Icon, TextIcon } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { use, useEffect, useState } from 'react';
+
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral';
 import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages';
+import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
 import OrgEditOther from '@components/Dashboard/Pages/Org/OrgEditOther/OrgEditOther';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
 import { getUriWithOrg } from '@services/config/config';
-import { useState, useEffect, use } from 'react';
-import { useTranslations } from 'next-intl';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
 
 export interface OrgParams {
   subpage: string;
@@ -80,10 +81,10 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="nice-shadow flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="nice-shadow flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
         <BreadCrumbs type="org" />
         <div className="my-2 py-2">
-          <div className="flex w-100 flex-col space-y-1">
+          <div className="w-100 flex flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
             <div className="text-md flex font-medium text-gray-400">{H2Label}</div>
           </div>

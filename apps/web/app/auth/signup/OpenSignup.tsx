@@ -1,21 +1,22 @@
 'use client';
+import * as Form from '@radix-ui/react-form';
+import { useFormik } from 'formik';
+import { AlertTriangle, Check, User } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { signIn } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+
+import { useOrg } from '@components/Contexts/OrgContext';
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
 } from '@components/Objects/StyledElements/Form/Form';
-import { AlertTriangle, Check, User } from 'lucide-react';
-import { useOrg } from '@components/Contexts/OrgContext';
-import * as Form from '@radix-ui/react-form';
-import { signup } from '@services/auth/auth';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
-import { useFormik } from 'formik';
-import Image from 'next/image';
-import Link from 'next/link';
 import { Button } from '@components/ui/button';
+import { signup } from '@services/auth/auth';
 
 function OpenSignUpComponent() {
   const validationT = useTranslations('Validation');
@@ -30,7 +31,7 @@ function OpenSignUpComponent() {
 
     if (!values.email) {
       errors.email = validationT('required');
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+    } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,}$/i.test(values.email)) {
       errors.email = validationT('invalidEmail');
     }
 
@@ -75,7 +76,7 @@ function OpenSignUpComponent() {
       const res = await signup(values);
       const responseMessage = await res.json();
       if (res.status == 200) {
-        //router.push(`/login`);
+        // router.push(`/login`);
         setMessage(t('accountCreated'));
         setIsSubmitting(false);
       } else if (res.status == 401 || res.status == 400 || res.status == 404 || res.status == 409) {
@@ -92,13 +93,13 @@ function OpenSignUpComponent() {
   return (
     <div className="m-auto w-72">
       {error && (
-        <div className="mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+        <div className="shadow-xs mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
           <AlertTriangle size={18} />
           <div className="text-sm font-bold">{error}</div>
         </div>
       )}
       {message && (
-        <div className="mb-4 flex flex-col items-center justify-center space-y-4 space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
+        <div className="shadow-xs mb-4 flex flex-col items-center justify-center space-x-2 space-y-4 rounded-md bg-green-200 p-4 text-green-950 transition-all">
           <div className="flex space-x-2">
             <Check size={18} />
             <div className="text-sm font-bold">{message}</div>
@@ -205,7 +206,7 @@ function OpenSignUpComponent() {
         </div>
       </FormLayout>
       <div>
-        <div className="mx-10 mt-5 mb-5 flex h-0.5 rounded-2xl bg-slate-100" />
+        <div className="mx-10 mb-5 mt-5 flex h-0.5 rounded-2xl bg-slate-100" />
         <button
           onClick={() => signIn('google')}
           className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"

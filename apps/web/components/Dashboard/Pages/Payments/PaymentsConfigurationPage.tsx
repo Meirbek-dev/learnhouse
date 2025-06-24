@@ -1,18 +1,5 @@
 'use client';
-import {
-  getPaymentConfigs,
-  initializePaymentConfig,
-  deletePaymentConfig,
-  updateStripeAccountID,
-  getStripeOnboardingLink,
-} from '@services/payments/payments';
-import FormLayout, {
-  ButtonBlack,
-  Input,
-  FormField,
-  FormLabelAndMessage,
-  Flex,
-} from '@components/Objects/StyledElements/Form/Form';
+import { SiStripe } from '@icons-pack/react-simple-icons';
 import {
   BarChart2,
   Coins,
@@ -24,20 +11,34 @@ import {
   Trash2,
   UnplugIcon,
 } from 'lucide-react';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { getUriWithoutOrg } from '@services/config/config';
-import { SiStripe } from '@icons-pack/react-simple-icons';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import useSWR, { mutate } from 'swr';
-import { toast } from 'react-hot-toast';
+import { useEffect, useState } from 'react';
 import type { FC } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import FormLayout, {
+  ButtonBlack,
+  Flex,
+  FormField,
+  FormLabelAndMessage,
+  Input,
+} from '@components/Objects/StyledElements/Form/Form';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
+import { Button } from '@components/ui/button';
+import { getUriWithoutOrg } from '@services/config/config';
+import {
+  deletePaymentConfig,
+  getPaymentConfigs,
+  getStripeOnboardingLink,
+  initializePaymentConfig,
+  updateStripeAccountID,
+} from '@services/payments/payments';
 
 const PaymentsConfigurationPage: FC = () => {
   const org = useOrg() as any;
@@ -124,7 +125,7 @@ const PaymentsConfigurationPage: FC = () => {
 
   return (
     <div>
-      <div className="nice-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">
+      <div className="nice-shadow mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
         <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
           <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
           <h2 className="text-md text-gray-500">{t('pageDescription')}</h2>
@@ -170,7 +171,7 @@ const PaymentsConfigurationPage: FC = () => {
 
         <div className="light-shadow flex flex-col rounded-lg">
           {stripeConfig ? (
-            <div className="flex items-center justify-between rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 p-6 shadow-md">
+            <div className="bg-linear-to-r flex items-center justify-between rounded-lg from-indigo-500 to-purple-600 p-6 shadow-md">
               <div className="flex items-center space-x-3">
                 <SiStripe
                   className="text-white"
@@ -231,7 +232,7 @@ const PaymentsConfigurationPage: FC = () => {
           ) : (
             <Button
               onClick={enableStripe}
-              className="flex items-center justify-center space-x-2 rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 p-3 px-6 text-white shadow-md transition duration-300 hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-linear-to-r flex items-center justify-center space-x-2 rounded-lg from-indigo-500 to-purple-600 p-3 px-6 text-white shadow-md transition duration-300 hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isOnboarding}
             >
               {isOnboarding ? (

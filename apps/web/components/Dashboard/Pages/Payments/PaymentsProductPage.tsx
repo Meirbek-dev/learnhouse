@@ -1,28 +1,30 @@
 'use client';
-import { Plus, Pencil, Info, RefreshCcw, SquareCheck, ChevronDown, ChevronUp, Archive } from 'lucide-react';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { getProducts, updateProduct, archiveProduct } from '@services/payments/products';
-import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import CreateProductForm from './SubComponents/CreateProductForm';
-import { getPaymentConfigs } from '@services/payments/payments';
-import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { useMemo, useState, useEffect } from 'react';
-import { Textarea } from '@components/ui/textarea';
-import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
-import { Badge } from '@components/ui/badge';
-import { useTranslations } from 'next-intl';
 import currencyCodes from 'currency-codes';
-import useSWR, { mutate } from 'swr';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+import { Archive, ChevronDown, ChevronUp, Info, Pencil, Plus, RefreshCcw, SquareCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
 import * as Yup from 'yup';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
+import { Badge } from '@components/ui/badge';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
+import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
+import { getPaymentConfigs } from '@services/payments/payments';
+import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
+
+import CreateProductForm from './SubComponents/CreateProductForm';
+import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   Yup.object().shape({
@@ -114,7 +116,7 @@ function PaymentsProductPage() {
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
-      <div className="mx-auto pr-10 pl-10">
+      <div className="mx-auto pl-10 pr-10">
         <Modal
           isDialogOpen={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
@@ -234,7 +236,7 @@ function PaymentsProductPage() {
         <div className="flex items-center justify-center py-10">
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className={`nice-shadow mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 bg-linear-to-bl from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
+            className={`nice-shadow bg-linear-to-bl mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
               isStripeEnabled ? 'hover:from-gray-600 hover:to-gray-800' : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}

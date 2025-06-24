@@ -1,8 +1,9 @@
 'use client';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useSession } from 'next-auth/react';
-import { use, createContext } from 'react';
+import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
+
+import PageLoading from '@components/Objects/Loaders/PageLoading';
 
 export const SessionContext = createContext({}) as any;
 

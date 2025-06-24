@@ -1,28 +1,29 @@
 'use client';
+import * as Form from '@radix-ui/react-form';
+import { useFormik } from 'formik';
+import { Cloud, File, Info, Loader, UploadCloud } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+
+import { constructAcceptValue } from '@/lib/constants';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import {
+  useAssignmentsTask,
+  useAssignmentsTaskDispatch,
+} from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
   Input,
   Textarea,
 } from '@components/Objects/StyledElements/Form/Form';
-import {
-  useAssignmentsTask,
-  useAssignmentsTaskDispatch,
-} from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { Cloud, File, Info, Loader, UploadCloud } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getActivityByID } from '@services/courses/activities';
+import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { getTaskRefFileDir } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { constructAcceptValue } from '@/lib/constants';
-import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect, useCallback } from 'react';
-import { toast } from 'react-hot-toast';
-import { useFormik } from 'formik';
-import Link from 'next/link';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);
 
@@ -230,14 +231,14 @@ function UpdateTaskRef() {
         <div className="flex flex-col items-center justify-center">
           <div className="flex flex-col items-center justify-center">
             {error && (
-              <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 shadow-xs transition-all">
+              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 transition-all">
                 <div className="text-sm font-semibold">{error}</div>
               </div>
             )}
           </div>
           {assignmentTaskState.assignmentTask.reference_file && !isLoading && (
             <div className="nice-shadow relative flex flex-col items-center space-y-1 rounded-lg bg-white px-5 py-3 text-gray-400 shadow-lg">
-              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
+              <div className="absolute right-0 top-0 flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
                 <Cloud size={15} />
               </div>
               <File

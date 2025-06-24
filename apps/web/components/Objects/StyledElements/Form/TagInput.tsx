@@ -1,7 +1,7 @@
 'use client';
-import { useState, type Dispatch, type SetStateAction, useEffect } from 'react';
-import { type Tag, TagInput as EmblorTagInput } from 'emblor';
+import { TagInput as EmblorTagInput, type Tag } from 'emblor';
 import { useTranslations } from 'next-intl';
+import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
 
 interface FormTagInputProps {
   value: string;

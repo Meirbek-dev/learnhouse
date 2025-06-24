@@ -1,4 +1,9 @@
 'use client';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import BarLoader from 'react-spinners/BarLoader';
+
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -8,10 +13,6 @@ import FormLayout, {
   Input,
   Textarea,
 } from '@components/Objects/StyledElements/Form/Form';
-import BarLoader from 'react-spinners/BarLoader';
-import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 
 function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
   const t = useTranslations('Components.DynamicCanvaModal');

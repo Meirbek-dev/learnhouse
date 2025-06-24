@@ -1,11 +1,12 @@
 'use client';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getUriWithOrg } from '@services/config/config';
-import { useState, useRef, useEffect } from 'react';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { getUriWithOrg } from '@services/config/config';
 
 interface ActivityNavigationProps {
   course: any;
@@ -218,7 +219,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
       {/* Bottom navigation (in-place) */}
       <div
         ref={bottomNavRef}
-        className="mt-6 mb-2 w-full"
+        className="mb-2 mt-6 w-full"
       >
         <NavigationButtons
           isFloating={false}
@@ -234,7 +235,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
       {/* Floating bottom navigation - shown when bottom nav is not visible */}
       {!isBottomNavVisible && (
         <div className="fixed bottom-8 left-1/2 z-50 w-[85%] max-w-lg -translate-x-1/2 transform transition-all duration-300 ease-in-out sm:w-auto sm:min-w-[350px]">
-          <div className="animate-in fade-in slide-in-from-bottom rounded-full bg-white/90 px-2.5 py-1.5 shadow-xs backdrop-blur-xl duration-300">
+          <div className="animate-in fade-in slide-in-from-bottom shadow-xs rounded-full bg-white/90 px-2.5 py-1.5 backdrop-blur-xl duration-300">
             <NavigationButtons
               isFloating
               prevActivity={prevActivity}

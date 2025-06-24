@@ -1,26 +1,27 @@
 'use client';
 import {
-  MapPin,
-  Building2,
-  Globe,
   Briefcase,
-  GraduationCap,
-  Link,
-  Users,
+  Building2,
   Calendar,
-  Lightbulb,
-  Loader2,
   ExternalLink,
+  Globe,
+  GraduationCap,
+  Lightbulb,
+  Link,
+  Loader2,
+  MapPin,
+  Users,
 } from 'lucide-react';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Button } from '@/components/ui/button';
-import { getUser } from '@services/users/users';
-import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUser } from '@services/users/users';
 
 interface UserProfilePopupProps {
   children: ReactNode;
@@ -111,7 +112,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
               <div className="absolute inset-0 h-28 rounded-t-lg bg-gradient-to-b from-gray-100/30 to-transparent" />
 
               {/* Content */}
-              <div className="relative px-5 pt-5 pb-4">
+              <div className="relative px-5 pb-4 pt-5">
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
                   <div className="flex-shrink-0">
@@ -153,7 +154,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
 
             {/* Details */}
             {userData.details && Object.values(userData.details).length > 0 && (
-              <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
+              <div className="space-y-2.5 border-t border-gray-100 px-5 pb-4 pt-3.5">
                 {Object.values(userData.details).map((detail) => (
                   <div
                     key={detail.id}

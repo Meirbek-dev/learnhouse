@@ -1,5 +1,5 @@
-import { errorHandling, RequestBodyWithAuthHeader, RequestBodyFormWithAuthHeader } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { errorHandling, RequestBodyFormWithAuthHeader, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 
 /*
  This file includes only POST, PUT, DELETE requests

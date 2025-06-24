@@ -1,6 +1,7 @@
-import WebPreviewComponent from './WebPreviewComponent';
-import { ReactNodeViewRenderer } from '@tiptap/react';
 import { mergeAttributes, Node } from '@tiptap/core';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+
+import WebPreviewComponent from './WebPreviewComponent';
 
 const WebPreview = Node.create({
   name: 'blockWebPreview',

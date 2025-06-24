@@ -1,8 +1,9 @@
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { BookCopy, Signpost, SquareLibrary } from 'lucide-react';
-import { getUriWithOrg } from '@services/config/config';
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { getUriWithOrg } from '@services/config/config';
 
 function MenuLinks(props: { orgslug: string }) {
   return (
@@ -31,8 +32,8 @@ function MenuLinks(props: { orgslug: string }) {
 }
 const LinkItem = (props: any) => {
   const t = useTranslations('Components.OrgMenuLinks');
-  const link = props.link;
-  const orgslug = props.orgslug;
+  const { link } = props;
+  const { orgslug } = props;
   return (
     <Link href={getUriWithOrg(orgslug, link)}>
       <li className="flex items-center space-x-2 font-medium text-[#909192]">

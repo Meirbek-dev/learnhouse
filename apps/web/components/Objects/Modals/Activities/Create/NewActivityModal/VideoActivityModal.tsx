@@ -1,12 +1,13 @@
-import { constructAcceptValue } from '@/lib/constants';
-import BarLoader from 'react-spinners/BarLoader';
-import { Button } from '@components/ui/button';
-import { Youtube, Upload } from 'lucide-react';
 import * as Form from '@radix-ui/react-form';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
+import { Upload, Youtube } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
+import BarLoader from 'react-spinners/BarLoader';
+
+import { constructAcceptValue } from '@/lib/constants';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 
@@ -61,7 +62,7 @@ const VideoSettingsForm = ({
                 value={startTimeParts.minutes}
                 onChange={(e) => {
                   const minutes = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
-                  const seconds = startTimeParts.seconds;
+                  const { seconds } = startTimeParts;
                   setVideoDetails({
                     ...videoDetails,
                     startTime: convertToSeconds(minutes, seconds),
@@ -79,7 +80,7 @@ const VideoSettingsForm = ({
                 max="59"
                 value={startTimeParts.seconds}
                 onChange={(e) => {
-                  const minutes = startTimeParts.minutes;
+                  const { minutes } = startTimeParts;
                   const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0));
                   setVideoDetails({
                     ...videoDetails,
@@ -104,7 +105,7 @@ const VideoSettingsForm = ({
                 value={endTimeParts.minutes}
                 onChange={(e) => {
                   const minutes = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
-                  const seconds = endTimeParts.seconds;
+                  const { seconds } = endTimeParts;
                   const totalSeconds = convertToSeconds(minutes, seconds);
                   if (totalSeconds > videoDetails.startTime) {
                     setVideoDetails({
@@ -125,7 +126,7 @@ const VideoSettingsForm = ({
                 max="59"
                 value={endTimeParts.seconds}
                 onChange={(e) => {
-                  const minutes = endTimeParts.minutes;
+                  const { minutes } = endTimeParts;
                   const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0));
                   const totalSeconds = convertToSeconds(minutes, seconds);
                   if (totalSeconds > videoDetails.startTime) {
@@ -210,7 +211,7 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
           video,
           'video',
           {
-            name: name,
+            name,
             chapter_id: chapterId,
             activity_type: 'TYPE_VIDEO',
             activity_sub_type: 'SUBTYPE_VIDEO_HOSTED',

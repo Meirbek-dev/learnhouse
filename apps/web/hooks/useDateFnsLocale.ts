@@ -1,6 +1,6 @@
-import { useLocale } from 'next-intl';
-import { enUS, kk, ru } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
+import { enUS, kk, ru } from 'date-fns/locale';
+import { useLocale } from 'next-intl';
 
 const localeMap: { [key: string]: Locale } = {
   'en-US': enUS,

@@ -1,8 +1,9 @@
 'use client';
-import ErrorUI from '@components/Objects/StyledElements/Error/Error';
-import { OrgProvider } from '@components/Contexts/OrgContext';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+
+import { OrgProvider } from '@components/Contexts/OrgContext';
+import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('Auth.Layout');

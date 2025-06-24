@@ -1,16 +1,19 @@
 'use client';
-import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors';
-import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
-import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
-import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
-import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
-import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
-import { GalleryVerticalEnd, Globe, Info, UserPen } from 'lucide-react';
-import { getUriWithOrg } from '@services/config/config';
-import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
+import { GalleryVerticalEnd, Globe, Info, UserPen } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { use } from 'react';
+
+import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
+import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
+import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors';
+import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
+import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
+import { getUriWithOrg } from '@services/config/config';
+
+import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
+
 export interface CourseOverviewParams {
   orgslug: string;
   courseuuid: string;
@@ -30,7 +33,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
         courseuuid={getEntireCourseUUID(params.courseuuid)}
         withUnpublishedActivities
       >
-        <div className="nice-shadow z-10 bg-[#fcfbfc] pr-10 pl-10 text-sm tracking-tight">
+        <div className="nice-shadow z-10 bg-[#fcfbfc] pl-10 pr-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
           <div className="flex space-x-3 text-sm font-black">
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/general`}>

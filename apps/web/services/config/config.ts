@@ -15,7 +15,7 @@ export const getUriWithoutOrg = (path: string) => `${OPENU_HTTP_PROTOCOL}${OPENU
 
 export const getOrgFromUri = () => {
   if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
+    const { hostname } = window.location;
     return hostname.replace(`.${OPENU_DOMAIN}`, '');
   }
   return;

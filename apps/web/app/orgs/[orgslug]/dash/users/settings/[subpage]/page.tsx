@@ -1,18 +1,19 @@
 'use client';
-import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
-import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd';
-import { Monitor, ScanEye, SquareUserRound, UserPlus, Users } from 'lucide-react';
-import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess';
-import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { useState, useEffect, use } from 'react';
-import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
+import { Monitor, ScanEye, SquareUserRound, UserPlus, Users } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { use, useEffect, useState } from 'react';
+
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess';
+import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
+import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
+import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd';
+import { getUriWithOrg } from '@services/config/config';
 
 export interface SettingsParams {
   subpage: string;
@@ -70,10 +71,10 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
 
   return (
     <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
-      <div className="z-10 bg-[#fcfbfc] pr-10 pl-10 tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+      <div className="z-10 bg-[#fcfbfc] pl-10 pr-10 tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
         <BreadCrumbs type="orgusers" />
         <div className="my-2 py-3">
-          <div className="flex w-100 flex-col space-y-1">
+          <div className="w-100 flex flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
             <div className="text-md flex font-medium text-gray-400">{H2Label} </div>
           </div>

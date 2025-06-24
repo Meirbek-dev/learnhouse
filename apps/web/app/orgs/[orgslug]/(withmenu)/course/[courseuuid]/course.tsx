@@ -1,33 +1,34 @@
 'use client';
-import { ArrowRight, Backpack, Check, File, StickyNote, Video, Square, ChevronUp, ImageIcon } from 'lucide-react';
-import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions';
-import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
-import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
-import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { CourseProvider } from '@components/Contexts/CourseContext';
-import { getUriWithOrg, getAPIUrl } from '@services/config/config';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { ArrowRight, Backpack, Check, ChevronUp, File, ImageIcon, Square, StickyNote, Video } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
+
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
+import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions';
+import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { swrFetcher } from '@services/utils/ts/requests';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');
   const [learnings, setLearnings] = useState<any>([]);
   const [expandedChapters, setExpandedChapters] = useState<{ [key: string]: boolean }>({});
   const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image');
-  const courseuuid = props.courseuuid;
-  const orgslug = props.orgslug;
-  const course = props.course;
+  const { courseuuid } = props;
+  const { orgslug } = props;
+  const { course } = props;
   const org = useOrg() as any;
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -144,7 +145,7 @@ const CourseClient = (props: any) => {
               course={course}
               orgslug={orgslug}
             />
-            <div className="flex flex-col items-start justify-between pt-3 pb-2 md:flex-row md:items-center">
+            <div className="flex flex-col items-start justify-between pb-2 pt-3 md:flex-row md:items-center">
               <div>
                 <h1 className="text-3xl font-bold md:text-3xl">{course.name}</h1>
               </div>
@@ -163,9 +164,9 @@ const CourseClient = (props: any) => {
 
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
                         {course.thumbnail_type === 'both' && (
-                          <div className="absolute top-3 right-3 z-10">
+                          <div className="absolute right-3 top-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
                               <button
                                 onClick={() => setActiveThumbnailType('image')}
@@ -214,7 +215,7 @@ const CourseClient = (props: any) => {
                   }
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
                         <img
                           src={getCourseThumbnailMediaDirectory(
                             org?.org_uuid,
@@ -225,7 +226,7 @@ const CourseClient = (props: any) => {
                           className="h-auto w-full object-contain"
                         />
                         {course.thumbnail_type === 'both' && (
-                          <div className="absolute top-3 right-3 z-10">
+                          <div className="absolute right-3 top-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
                               <button
                                 onClick={() => setActiveThumbnailType('image')}
@@ -263,7 +264,7 @@ const CourseClient = (props: any) => {
                   }
                   return (
                     <div
-                      className="relative w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-black/10 ring-inset"
+                      className="relative w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset ring-black/10"
                       style={{
                         backgroundImage: `url('../empty_thumbnail.png')`,
                         backgroundSize: 'auto',
@@ -290,7 +291,7 @@ const CourseClient = (props: any) => {
 
                 <div className="course_metadata_left space-y-2">
                   <div className="">
-                    <p className="w-full py-5 leading-relaxed tracking-normal text-pretty break-words hyphens-auto whitespace-pre-line">
+                    <p className="w-full hyphens-auto whitespace-pre-line text-pretty break-words py-5 leading-relaxed tracking-normal">
                       {course.about}
                     </p>
                   </div>
@@ -352,7 +353,7 @@ const CourseClient = (props: any) => {
                           >
                             <span className="sr-only">
                               {t('linkTo', {
-                                learningText: learningText,
+                                learningText,
                               })}
                             </span>
                             <ArrowRight size={14} />
@@ -386,7 +387,7 @@ const CourseClient = (props: any) => {
                       >
                         <h3 className="mr-3 grow break-words">{chapter.name}</h3>
                         <div className="flex items-center space-x-3">
-                          <p className="shrink-0 rounded-full px-3 py-[2px] text-sm font-normal whitespace-nowrap text-neutral-400 outline-1 outline-neutral-200">
+                          <p className="shrink-0 whitespace-nowrap rounded-full px-3 py-[2px] text-sm font-normal text-neutral-400 outline-1 outline-neutral-200">
                             {t('activities', {
                               activitiesLength: chapter.activities.length,
                             })}
@@ -415,7 +416,7 @@ const CourseClient = (props: any) => {
                                         />
                                         <Check
                                           size={16}
-                                          className="absolute top-0 left-0 stroke-[2.5] text-teal-600"
+                                          className="absolute left-0 top-0 stroke-[2.5] text-teal-600"
                                         />
                                       </div>
                                     ) : (

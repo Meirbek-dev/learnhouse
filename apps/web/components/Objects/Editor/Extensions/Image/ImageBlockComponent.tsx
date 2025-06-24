@@ -1,15 +1,17 @@
-import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
-import { AlertTriangle, Image, Download, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
-import { uploadNewImageFile } from '../../../../../services/blocks/Image/images';
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
-import { useEffect, useState } from 'react';
+import { AlertTriangle, AlignCenter, AlignLeft, AlignRight, Download, Image } from 'lucide-react';
 import { Resizable } from 're-resizable';
+import { useEffect, useState } from 'react';
+
+import { constructAcceptValue } from '@/lib/constants';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getActivityBlockMediaDirectory } from '@services/media/media';
+
+import { uploadNewImageFile } from '../../../../../services/blocks/Image/images';
+import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
 
@@ -20,7 +22,7 @@ function ImageBlockComponent(props: any) {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
-  const isEditable = editorState.isEditable;
+  const { isEditable } = editorState;
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
@@ -45,7 +47,7 @@ function ImageBlockComponent(props: any) {
     props.updateAttributes({
       blockObject: object,
       size: imageSize,
-      alignment: alignment,
+      alignment,
     });
   };
 
@@ -163,7 +165,7 @@ function ImageBlockComponent(props: any) {
                 className="h-auto max-w-full rounded-lg shadow-sm"
                 style={{ width: '100%' }}
               />
-              <div className="bg-opacity-90 absolute top-2 right-2 flex items-center gap-1.5 rounded-lg bg-white p-1 opacity-70 shadow-xs backdrop-blur-xs transition-opacity hover:opacity-100">
+              <div className="shadow-xs backdrop-blur-xs absolute right-2 top-2 flex items-center gap-1.5 rounded-lg bg-white bg-opacity-90 p-1 opacity-70 transition-opacity hover:opacity-100">
                 <button
                   onClick={() => handleAlignmentChange('left')}
                   className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'left' ? 'bg-gray-100' : ''}`}
@@ -209,7 +211,7 @@ function ImageBlockComponent(props: any) {
             />
             <button
               onClick={handleDownload}
-              className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+              className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
               title="Download image"
             >
               <Download className="h-4 w-4 text-white" />

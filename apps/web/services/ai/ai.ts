@@ -1,5 +1,5 @@
-import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 
 export async function startActivityAIChatSession(message: string, access_token: string, activity_uuid?: string) {
   const data = { message, activity_uuid };

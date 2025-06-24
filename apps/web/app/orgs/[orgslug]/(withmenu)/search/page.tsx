@@ -1,18 +1,19 @@
 'use client';
 
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
+import { Book, GraduationCap, Search, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Book, GraduationCap, Users, Search } from 'lucide-react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getUriWithOrg } from '@services/config/config';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import type { FormEvent } from 'react';
-import Link from 'next/link';
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { searchOrgContent } from '@services/search/search';
 
 // Types from SearchBar component
 interface User {
@@ -153,7 +154,7 @@ const EmptyState = ({ query, t }: { query: string; t: (key: string, params?: any
       <Search className="h-8 w-8 text-black/40" />
     </div>
     <h3 className="mb-2 text-lg font-medium text-black/80">{t('noResultsTitle')}</h3>
-    <p className="max-w-md text-sm text-black/50">{t('noResultsMessage', { query: query })}</p>
+    <p className="max-w-md text-sm text-black/50">{t('noResultsMessage', { query })}</p>
   </div>
 );
 
@@ -285,7 +286,7 @@ function SearchPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('searchInputPlaceholder')}
-                className="nice-shadow h-12 w-full rounded-xl bg-white pr-4 pl-12 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:ring-1 focus:ring-black/5 focus:outline-none"
+                className="nice-shadow h-12 w-full rounded-xl bg-white pl-12 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
               />
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <Search
@@ -368,7 +369,7 @@ function SearchPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-7xl">
           {query && (
-            <div className="mb-6 text-sm text-black/60">{t('resultsFound', { count: totalResults, query: query })}</div>
+            <div className="mb-6 text-sm text-black/60">{t('resultsFound', { count: totalResults, query })}</div>
           )}
 
           {isLoading ? (

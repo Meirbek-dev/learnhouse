@@ -1,8 +1,9 @@
 'use client';
+import { useCallback, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useState, useEffect, useCallback } from 'react';
-import type { ReactNode } from 'react';
 
 interface AuthenticatedClientElementProps {
   children: ReactNode;
@@ -21,14 +22,14 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
     // Iterate over the user's roles
     for (const role of roles) {
       // Check if the role is for the right organization
-      if (role.org.org_uuid === org_uuid) {
-        // Check if the user has the role for the resource type
-        if (role.role.rights?.[resourceType]) {
-          // Check if the user is allowed to execute the action
-          const actionKey = `action_${action}`;
-          if (role.role.rights[resourceType][actionKey] === true) {
-            return true;
-          }
+      if (
+        role.org.org_uuid === org_uuid && // Check if the user has the role for the resource type
+        role.role.rights?.[resourceType]
+      ) {
+        // Check if the user is allowed to execute the action
+        const actionKey = `action_${action}`;
+        if (role.role.rights[resourceType][actionKey] === true) {
+          return true;
         }
       }
     }

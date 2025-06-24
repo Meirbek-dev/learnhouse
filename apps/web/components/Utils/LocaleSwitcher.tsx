@@ -1,14 +1,13 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type Locale, locales } from '@/i18n/config';
 import { setUserLocale } from '@/i18n/locale';
 import { cn } from '@/lib/utils';
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface LocaleSwitcherProps {
   className?: string;

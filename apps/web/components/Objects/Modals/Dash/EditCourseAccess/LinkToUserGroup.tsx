@@ -1,16 +1,17 @@
 'use client';
-import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import useSWR, { mutate } from 'swr';
-import { toast } from 'react-hot-toast';
 import { Info } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
+import { swrFetcher } from '@services/utils/ts/requests';
 
 interface LinkToUserGroupProps {
   // React function, todo: fix types
@@ -23,7 +24,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const courseStructure = course.courseStructure;
+  const { courseStructure } = course;
 
   const { data: usergroups } = useSWR(courseStructure && org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) =>
     swrFetcher(url, access_token),

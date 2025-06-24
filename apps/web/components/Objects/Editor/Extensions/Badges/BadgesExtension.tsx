@@ -1,11 +1,12 @@
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { ChevronDown, ChevronRight, Palette } from 'lucide-react';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
-import { useState, useRef, useEffect } from 'react';
+import { ChevronDown, ChevronRight, Palette } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { twMerge } from 'tailwind-merge';
+import { useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
+import { twMerge } from 'tailwind-merge';
+
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 
 const BadgesExtension: FC = (props: any) => {
   const t = useTranslations('DashPage.Editor.BadgesExtension');
@@ -17,7 +18,7 @@ const BadgesExtension: FC = (props: any) => {
   const pickerRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const editorState = useEditorProvider() as any;
-  const isEditable = editorState.isEditable;
+  const { isEditable } = editorState;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -167,7 +168,7 @@ const BadgesExtension: FC = (props: any) => {
               </button>
             )}
           </div>
-          <NodeViewContent className="content text tracking-wide capitalize" />
+          <NodeViewContent className="content text capitalize tracking-wide" />
           {isEditable && (
             <div className="relative flex items-center justify-center space-x-2">
               <button onClick={() => setShowColorPicker(!showColorPicker)}>
@@ -182,7 +183,7 @@ const BadgesExtension: FC = (props: any) => {
                     {colors.map((c) => (
                       <button
                         key={c}
-                        className={`h-8 w-8 rounded-full ${getBadgeColor(c)} hover:ring-opacity-50 focus:ring-opacity-50 hover:ring-2 focus:ring-2 focus:outline-hidden`}
+                        className={`h-8 w-8 rounded-full ${getBadgeColor(c)} focus:outline-hidden hover:ring-2 hover:ring-opacity-50 focus:ring-2 focus:ring-opacity-50`}
                         onClick={() => handleColorSelect(c)}
                       />
                     ))}
@@ -203,7 +204,7 @@ const BadgesExtension: FC = (props: any) => {
         )}
 
         {isEditable && showPredefinedCallouts && (
-          <div className="nice-shadow absolute top-full left-0 z-10 mt-2 flex flex-wrap gap-2 rounded-lg bg-white/90 p-2 backdrop-blur-md">
+          <div className="nice-shadow absolute left-0 top-full z-10 mt-2 flex flex-wrap gap-2 rounded-lg bg-white/90 p-2 backdrop-blur-md">
             {predefinedBadges.map((badge, index) => (
               <button
                 key={index}

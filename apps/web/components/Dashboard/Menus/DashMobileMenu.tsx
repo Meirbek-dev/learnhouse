@@ -1,12 +1,13 @@
 'use client';
 import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, Users } from 'lucide-react';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import AdminAuthorization from '@components/Security/AdminAuthorization';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import AdminAuthorization from '@components/Security/AdminAuthorization';
 
 function DashMobileMenu() {
   const _org = useOrg() as any;
@@ -15,7 +16,7 @@ function DashMobileMenu() {
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
 
   return (
-    <div className="fixed right-0 bottom-0 left-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
       <div className="flex h-16 items-center justify-around px-2">
         <AdminAuthorization authorizationMode="component">
           <ToolTip

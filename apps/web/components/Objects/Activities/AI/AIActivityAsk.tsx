@@ -1,18 +1,19 @@
 'use client';
 
-import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
-import { AlertTriangle, BadgeInfo, NotebookTabs } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
-import { FlaskConical, MessageCircle, X } from 'lucide-react';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { KeyboardEvent, ChangeEvent } from 'react';
-import touEmblemLight from 'public/tou_emblem_light.png';
-import { useState, useEffect, useRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertTriangle, BadgeInfo, FlaskConical, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import type { ChangeEvent, KeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import touEmblemLight from 'public/tou_emblem_light.png';
+
+import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
 
 interface AIActivityAskProps {
   activity: any;
@@ -80,11 +81,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
     : 'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30';
 
   useEffect(() => {
-    if (aiChatBotState.isModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = aiChatBotState.isModalOpen ? 'hidden' : 'unset';
   }, [aiChatBotState.isModalOpen]);
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -105,7 +102,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
     if (aiChatBotState.aichat_uuid) {
       await dispatchAIChatBot({
         type: 'addMessage',
-        payload: { sender: 'user', message: message, type: 'user' },
+        payload: { sender: 'user', message, type: 'user' },
       });
       await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
       const response = await sendActivityAIChatMessage(
@@ -136,7 +133,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
     } else {
       await dispatchAIChatBot({
         type: 'addMessage',
-        payload: { sender: 'user', message: message, type: 'user' },
+        payload: { sender: 'user', message, type: 'user' },
       });
       await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
       const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
@@ -192,7 +189,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
             mass: 0.2,
             velocity: 2,
           }}
-          className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
+          className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center"
           style={{ pointerEvents: 'none' }}
         >
           <div
@@ -201,7 +198,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
               background:
                 'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
             }}
-            className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-white/10 backdrop-blur-md ring-inset"
+            className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-inset ring-white/10 backdrop-blur-md"
           >
             <div className="flex flex-row-reverse items-center justify-between pb-3">
               <div className="flex items-center space-x-2">
@@ -232,7 +229,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
               </div>
             </div>
             <div
-              className={`mx-auto mb-3 h-0.5 w-100 rounded-full bg-white/5 ${
+              className={`w-100 mx-auto mb-3 h-0.5 rounded-full bg-white/5 ${
                 aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
               }`}
             />
@@ -335,7 +332,7 @@ function AIMessage(props: AIMessageProps) {
       </div>
       <div className="w-full">
         <p
-          className="text-md w-full rounded-lg px-2 py-1 text-white outline-hidden placeholder:text-white/30"
+          className="text-md outline-hidden w-full rounded-lg px-2 py-1 text-white placeholder:text-white/30"
           id=""
         >
           <AnimatePresence>

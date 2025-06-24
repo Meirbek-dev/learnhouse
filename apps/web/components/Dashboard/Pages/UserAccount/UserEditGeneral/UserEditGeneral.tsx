@@ -1,47 +1,47 @@
 'use client';
+import { Form, Formik } from 'formik';
 import {
-  ArrowBigUpDash,
-  Check,
-  FileWarning,
-  Info,
-  UploadCloud,
   AlertTriangle,
-  Briefcase,
-  GraduationCap,
-  MapPin,
-  Building2,
-  Globe,
-  Laptop2,
+  ArrowBigUpDash,
   Award,
   BookOpen,
-  Link,
-  Users,
+  Briefcase,
+  Building2,
   Calendar,
+  Check,
+  FileWarning,
+  Globe,
+  GraduationCap,
+  Info,
+  Laptop2,
   Lightbulb,
+  Link,
+  MapPin,
+  UploadCloud,
+  Users,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { LocaleSwitcher } from '@components/Utils/LocaleSwitcher';
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { updateProfile } from '@services/settings/profile';
-import { getUriWithoutOrg } from '@services/config/config';
-import { updateUserAvatar } from '@services/users/users';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { constructAcceptValue } from '@/lib/constants';
-import { Textarea } from '@components/ui/textarea';
-import { useDebounce } from '@/hooks/useDebounce';
-import { getUser } from '@services/users/users';
-import { Button } from '@components/ui/button';
-import { getUserLocale } from '@/i18n/locale';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
-import type { Locale } from '@/i18n/config';
-import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import { toast } from 'react-hot-toast';
-import { Formik, Form } from 'formik';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as React from 'react';
+import { toast } from 'react-hot-toast';
 import * as Yup from 'yup';
+
+import { useDebounce } from '@/hooks/useDebounce';
+import type { Locale } from '@/i18n/config';
+import { getUserLocale } from '@/i18n/locale';
+import { constructAcceptValue } from '@/lib/constants';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
+import { LocaleSwitcher } from '@components/Utils/LocaleSwitcher';
+import { getUriWithoutOrg } from '@services/config/config';
+import { updateProfile } from '@services/settings/profile';
+import { getUser, updateUserAvatar } from '@services/users/users';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
 
@@ -600,7 +600,7 @@ const UserEditForm = ({
             </div>
           </div>
         </div>
-        <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
+        <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
           <Button
             type="submit"
             disabled={isSubmitting}

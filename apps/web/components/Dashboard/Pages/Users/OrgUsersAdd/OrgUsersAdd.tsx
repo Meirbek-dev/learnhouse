@@ -1,17 +1,18 @@
 'use client';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Toast from '@components/Objects/StyledElements/Toast/Toast';
-import { inviteBatchUsers } from '@services/organizations/invites';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import { Info, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import useSWR, { mutate } from 'swr';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import Toast from '@components/Objects/StyledElements/Toast/Toast';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { getAPIUrl } from '@services/config/config';
+import { inviteBatchUsers } from '@services/organizations/invites';
+import { swrFetcher } from '@services/utils/ts/requests';
 
 function OrgUsersAdd() {
   const org = useOrg() as any;
@@ -71,7 +72,7 @@ function OrgUsersAdd() {
       ) : (
         <>
           <div className="h-6" />
-          <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
+          <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
               <h2 className="text-md text-gray-500">{t('description')}</h2>
@@ -80,7 +81,7 @@ function OrgUsersAdd() {
               <textarea
                 value={invitedUsers}
                 onChange={(e) => setInvitedUsers(e.target.value)}
-                className="h-[200px] w-full rounded-md border bg-gray-100/40 px-3 py-2 placeholder:text-slate-300 placeholder:italic"
+                className="h-[200px] w-full rounded-md border bg-gray-100/40 px-3 py-2 placeholder:italic placeholder:text-slate-300"
                 placeholder={t('textAreaPlaceholder')}
                 name="invitedUsers"
                 id="invitedUsersTextArea"
@@ -134,13 +135,13 @@ function OrgUsersAdd() {
               </div>
             </div>
 
-            <div className="mt-3 mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+            <div className="mb-3 mt-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('invitedUsersTitle')}</h1>
               <h2 className="text-md text-gray-500">{t('invitedUsersDescription')}</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
-                <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
+              <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
+                <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
                   <tr className="font-bolder text-sm">
                     <th className="px-4 py-3">{t('emailHeader')}</th>
                     <th className="px-4 py-3">{t('signupStatusHeader')}</th>

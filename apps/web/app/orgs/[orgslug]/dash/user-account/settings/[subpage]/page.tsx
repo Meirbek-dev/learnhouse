@@ -1,16 +1,17 @@
 'use client';
-import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
-import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral';
-import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile';
+import { motion } from 'framer-motion';
 import { Info, Lock, type LucideIcon, User as UserIcon } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { getUriWithOrg } from '@services/config/config';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { ComponentType } from 'react';
-import { motion } from 'framer-motion';
-import { useEffect, use } from 'react';
-import Link from 'next/link';
+import { use, useEffect } from 'react';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral';
+import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
+import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile';
+import { getUriWithOrg } from '@services/config/config';
 
 interface User {
   username: string;
@@ -100,13 +101,13 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
         <BreadCrumbs
           type="user"
           last_breadcrumb={session?.user?.username}
         />
         <div className="my-2 tracking-tighter">
-          <div className="flex w-100 justify-between">
+          <div className="w-100 flex justify-between">
             <div className="flex pt-3 text-4xl font-bold">{t('title')}</div>
           </div>
         </div>

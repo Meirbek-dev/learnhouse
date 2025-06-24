@@ -1,16 +1,17 @@
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
-import { deleteUserSubmission, markActivityAsDoneForUser, putFinalGrade } from '@services/courses/assignments';
-import TaskQuizObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
-import TaskFileObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { BookOpenCheck, Check, Download, Info, MoveRight, X } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getTaskRefFileDir } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import Link from 'next/link';
+
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { deleteUserSubmission, markActivityAsDoneForUser, putFinalGrade } from '@services/courses/assignments';
+import { getTaskRefFileDir } from '@services/media/media';
+
+import TaskFileObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
+import TaskQuizObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
 
 function EvaluateAssignment({ user_id }: any) {
   const t = useTranslations('DashPage.Assignments.EvaluateModal');
@@ -110,7 +111,7 @@ function EvaluateAssignment({ user_id }: any) {
                     <div className="flex items-center space-x-2">
                       {task.reference_file && (
                         <span className="relative">
-                          <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
+                          <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
                         </span>
                       )}
                       <p className="text-xs font-semibold">{t('refDoc')}</p>

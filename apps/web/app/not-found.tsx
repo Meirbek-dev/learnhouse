@@ -1,8 +1,9 @@
-import { getTranslations } from 'next-intl/server';
-import openuLogoDark from 'public/openu_logo_dark.png';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
+
+import openuLogoDark from 'public/openu_logo_dark.png';
 
 export default async function NotFound() {
   const t = await getTranslations('NotFoundPage');
@@ -19,8 +20,8 @@ export default async function NotFound() {
         />
       </div>
       <div className="space-y-6 text-center">
-        <h1 className="text-8xl leading-7 font-bold text-black drop-shadow-md">404!</h1>
-        <p className="pt-8 text-lg leading-normal font-medium tracking-tight text-black">{t('message')}</p>
+        <h1 className="text-8xl font-bold leading-7 text-black drop-shadow-md">404!</h1>
+        <p className="pt-8 text-lg font-medium leading-normal tracking-tight text-black">{t('message')}</p>
       </div>
       <div className="flex flex-col items-center pt-8">
         <button className="text-md flex h-[50px] w-fit items-center space-x-2 rounded-lg bg-black px-6 py-2 text-xl font-bold text-white shadow-md">

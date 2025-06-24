@@ -1,13 +1,14 @@
 'use client';
 
-import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { getOwnedCourses } from '@services/payments/payments';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { BookOpen, Package2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
+import { getOwnedCourses } from '@services/payments/payments';
 
 function OwnedCoursesPage() {
   const t = useTranslations('DashPage.Courses');
@@ -27,7 +28,7 @@ function OwnedCoursesPage() {
   if (error) return <div>{t('error')}</div>;
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] pt-5 pr-10 pl-10">
+    <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10 pt-5">
       <div className="nice-shadow mb-6 flex flex-col rounded-md bg-white px-5 py-3">
         <div className="flex items-center gap-4">
           <Package2 className="h-8 w-8 text-gray-800" />

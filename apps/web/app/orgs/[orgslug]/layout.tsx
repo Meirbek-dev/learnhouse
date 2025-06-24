@@ -2,6 +2,7 @@
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import { OrgProvider } from '@components/Contexts/OrgContext';
 import Footer from '@components/Footer/Footer';
+
 import NextTopLoader from 'nextjs-toploader';
 import '@styles/globals.css';
 import { use } from 'react';

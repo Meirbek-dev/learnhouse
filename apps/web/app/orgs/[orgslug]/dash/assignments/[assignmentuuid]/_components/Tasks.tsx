@@ -1,13 +1,15 @@
+import { FileUp, ListTodo, PanelLeftOpen, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import {
   useAssignmentsTask,
   useAssignmentsTaskDispatch,
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { FileUp, ListTodo, PanelLeftOpen, Plus } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+
 import NewTaskModal from './Modals/NewTaskModal';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
 
 function AssignmentTasks({ assignment_uuid }: any) {
   const t = useTranslations('DashPage.Assignments.Tasks');

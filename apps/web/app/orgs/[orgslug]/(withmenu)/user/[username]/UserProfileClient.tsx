@@ -1,29 +1,30 @@
 'use client';
 
 import {
-  Briefcase,
-  Building2,
-  MapPin,
-  Globe,
-  Link as LinkIcon,
-  GraduationCap,
   Award,
   BookOpen,
-  Laptop2,
-  Users,
+  Briefcase,
+  Building2,
   Calendar,
+  Globe,
+  GraduationCap,
+  Laptop2,
   Lightbulb,
+  Link as LinkIcon,
+  MapPin,
+  Users,
   X,
 } from 'lucide-react';
-import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
+
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import UserAvatar from '@components/Objects/UserAvatar';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getCoursesByUser } from '@services/users/users';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import type { FC } from 'react';
-import Image from 'next/image';
 
 interface UserProfileClientProps {
   userData: any;
@@ -195,7 +196,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                 {userData.bio ? (
                   <p className="text-gray-700">{userData.bio}</p>
                 ) : (
-                  <p className="text-gray-500 italic">{t('noBiography')}</p>
+                  <p className="italic text-gray-500">{t('noBiography')}</p>
                 )}
               </div>
 

@@ -1,13 +1,14 @@
 'use client';
-import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import { Check, Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl } from '@services/config/config';
+import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
+import { swrFetcher } from '@services/utils/ts/requests';
 
 interface ManageUsersProps {
   usergroup_id: any;
@@ -54,8 +55,8 @@ function ManageUsers(props: ManageUsersProps) {
 
   return (
     <div className="py-3">
-      <table className="w-full table-auto overflow-hidden rounded-md text-left whitespace-nowrap">
-        <thead className="rounded-xl bg-gray-100 text-gray-500 uppercase">
+      <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
+        <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
           <tr className="font-bolder text-sm">
             <th className="px-4 py-3">{t('userHeader')}</th>
             <th className="px-4 py-3">{t('linkedHeader')}</th>

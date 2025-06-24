@@ -1,20 +1,21 @@
 'use client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { updateOrganization } from '@services/settings/org';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getAPIUrl } from '@services/config/config';
-import { Textarea } from '@components/ui/textarea';
-import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
-import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
 import { Form, Formik } from 'formik';
+import { useTranslations } from 'next-intl';
 import type { FC } from 'react';
+import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 import * as Yup from 'yup';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
+import { getAPIUrl } from '@services/config/config';
+import { updateOrganization } from '@services/settings/org';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 const ORG_LABELS = [
   { value: 'languages', label: '🌐 Languages' },
@@ -226,7 +227,7 @@ const OrgEditGeneral: FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
+              <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
                 <Button
                   type="submit"
                   disabled={isSubmitting}

@@ -1,10 +1,10 @@
 'use client';
 
-import type { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes } from 'react';
 import { UploadIcon } from '@radix-ui/react-icons';
-import { useTranslations } from 'next-intl';
-import type { FC, ReactNode } from 'react';
 import { Loader } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import type { ButtonHTMLAttributes, FC, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
+
 import { cn } from '@/lib/utils';
 
 const FileUploadBlockInput: FC<InputHTMLAttributes<HTMLInputElement>> = ({ onChange, className, ...props }) => {

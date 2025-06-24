@@ -1,15 +1,16 @@
 'use client';
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { updateCourseOrderStructure } from '@services/courses/chapters';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Check, SaveAllIcon, Timer, Loader2 } from 'lucide-react';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { updateCourse } from '@services/courses/courses';
-import { getAPIUrl } from '@services/config/config';
+import { Check, Loader2, SaveAllIcon, Timer } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { mutate } from 'swr';
+
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl } from '@services/config/config';
+import { updateCourseOrderStructure } from '@services/courses/chapters';
+import { updateCourse } from '@services/courses/courses';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 function SaveState(props: { orgslug: string }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +72,7 @@ function SaveState(props: { orgslug: string }) {
 
   const handleCourseOrder = useCallback(
     (course_structure: any) => {
-      const chapters = course_structure.chapters;
+      const { chapters } = course_structure;
       const chapter_order_by_ids = chapters.map((chapter: any) => {
         return {
           chapter_id: chapter.id,
@@ -84,7 +85,7 @@ function SaveState(props: { orgslug: string }) {
       });
       dispatchCourse({
         type: 'setCourseOrder',
-        payload: { chapter_order_by_ids: chapter_order_by_ids },
+        payload: { chapter_order_by_ids },
       });
       dispatchCourse({ type: 'setIsNotSaved' });
     },

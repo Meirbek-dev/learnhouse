@@ -1,29 +1,30 @@
+import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useDebounce } from '@/hooks/useDebounce';
+import type { Locale } from '@/i18n/config';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { getAPIUrl } from '@services/config/config';
+import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { useLocale, useTranslations } from 'next-intl';
-import { getAPIUrl } from '@services/config/config';
-import { useDebounce } from '@/hooks/useDebounce';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import type { Locale } from '@/i18n/config';
-import { useEffect, useState } from 'react';
-import useSWR, { mutate } from 'swr';
-import { toast } from 'react-hot-toast';
 
 interface EditCourseContributorsProps {
   orgslug: string;
@@ -195,15 +196,18 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
   }, [isLoading, courseStructure]);
 
   useEffect(() => {
-    if (!isLoading && courseStructure?.open_to_contributors !== undefined && isOpenToContributors !== undefined) {
-      if (isOpenToContributors !== courseStructure.open_to_contributors) {
-        dispatchCourse({ type: 'setIsNotSaved' });
-        const updatedCourse = {
-          ...courseStructure,
-          open_to_contributors: isOpenToContributors,
-        };
-        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
-      }
+    if (
+      !isLoading &&
+      courseStructure?.open_to_contributors !== undefined &&
+      isOpenToContributors !== undefined &&
+      isOpenToContributors !== courseStructure.open_to_contributors
+    ) {
+      dispatchCourse({ type: 'setIsNotSaved' });
+      const updatedCourse = {
+        ...courseStructure,
+        open_to_contributors: isOpenToContributors,
+      };
+      dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
     }
   }, [isLoading, isOpenToContributors, courseStructure, dispatchCourse]);
 
@@ -407,12 +411,12 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
       {courseStructure && (
         <div>
           <div className="h-6" />
-          <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
+          <div className="shadow-xs mx-4 rounded-xl bg-white px-4 py-4 sm:mx-10">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
               <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('courseContributorsTitle')}</h1>
               <h2 className="text-xs text-gray-500 sm:text-sm">{t('courseContributorsSubtitle')}</h2>
             </div>
-            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
               <ConfirmationModal
                 confirmationButtonText={t('openToContributorsButton')}
                 confirmationMessage={t('openToContributorsMessage')}
@@ -470,7 +474,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             </div>
             <div className="space-y-4">
               <div className="relative">
-                <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
+                <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
                 <Input
                   placeholder={t('searchUsersPlaceholder')}
                   value={searchQuery}

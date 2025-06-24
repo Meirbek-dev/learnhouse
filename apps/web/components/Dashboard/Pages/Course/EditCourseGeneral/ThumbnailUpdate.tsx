@@ -1,16 +1,18 @@
+import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { mutate } from 'swr';
+
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import { updateCourseThumbnail } from '@services/courses/courses';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { ArrowBigUpDash, UploadCloud, Image as ImageIcon, Video } from 'lucide-react';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import type React from 'react';
-import { useState, useEffect, useRef } from 'react';
-import { useTranslations } from 'next-intl';
-import { mutate } from 'swr';
+
 import UnsplashImagePicker from './UnsplashImagePicker';
-import { toast } from 'react-hot-toast';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB for images
 const MAX_VIDEO_FILE_SIZE = 100_000_000; // 100MB for videos
@@ -274,7 +276,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           />
           <button
             type="button"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             onClick={() => imageInputRef.current?.click()}
           >
             <UploadCloud size={16} />
@@ -282,7 +284,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           </button>
           <button
             type="button"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             onClick={() => setShowUnsplashPicker(true)}
           >
             <ImageIcon size={16} />
@@ -303,7 +305,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
         />
         <button
           type="button"
-          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           onClick={() => videoInputRef.current?.click()}
         >
           <Video size={16} />

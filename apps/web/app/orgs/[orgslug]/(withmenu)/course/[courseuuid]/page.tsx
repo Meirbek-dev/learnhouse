@@ -1,9 +1,11 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getCourseMetadata } from '@services/courses/courses';
-import { nextAuthOptions } from 'app/auth/options';
-import { getServerSession } from 'next-auth/next';
 import type { Metadata } from 'next';
+import { getServerSession } from 'next-auth/next';
+
+import { getCourseMetadata } from '@services/courses/courses';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { nextAuthOptions } from 'app/auth/options';
+
 import CourseClient from './course';
 
 interface MetadataProps {

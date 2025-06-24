@@ -1,12 +1,13 @@
 'use client';
-import ErrorUI from '@components/Objects/StyledElements/Error/Error';
+import { useTranslations } from 'next-intl';
+import { createContext, use, useEffect, useReducer } from 'react';
+import useSWR from 'swr';
+
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { createContext, use, useEffect, useReducer } from 'react';
-import { swrFetcher } from '@services/utils/ts/requests';
+import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 import { getAPIUrl } from '@services/config/config';
-import { useTranslations } from 'next-intl';
-import useSWR from 'swr';
+import { swrFetcher } from '@services/utils/ts/requests';
 
 type CourseDispatch = React.Dispatch<any>;
 interface CourseState {
@@ -41,7 +42,7 @@ export function CourseProvider({ children, courseuuid, withUnpublishedActivities
     courseOrder: {},
     isSaved: true,
     isLoading: true,
-    withUnpublishedActivities: withUnpublishedActivities,
+    withUnpublishedActivities,
   };
 
   const [state, dispatch] = useReducer(courseReducer, initialState) as any;

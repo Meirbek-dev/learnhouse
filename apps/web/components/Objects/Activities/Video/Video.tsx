@@ -1,16 +1,17 @@
-import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
-import { getActivityMediaDirectory } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { useState, useEffect } from 'react';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
+import { useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
+
+import { useOrg } from '@components/Contexts/OrgContext';
+import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
+import { getActivityMediaDirectory } from '@services/media/media';
 
 // Function to extract YouTube video ID from various YouTube URL formats
 function getYouTubeID(url: string): string | null {
   if (!url) return null;
 
-  const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
+  const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[&?]v=)|youtu\.be\/)([^\s"&/?]{11})/;
   const match = url.match(regex);
 
   return match?.[1] || null;
@@ -77,7 +78,7 @@ function VideoActivity({ activity, course }: VideoActivityProps) {
     <div className="w-full max-w-full px-2 sm:px-4">
       {activity && (
         <div className="my-3 w-full md:my-5">
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg shadow-xs ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
+          <div className="shadow-xs relative aspect-video w-full overflow-hidden rounded-lg ring-1 ring-gray-300/30 sm:shadow-none sm:ring-gray-200/10 dark:ring-gray-600/30 sm:dark:ring-gray-700/20">
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_HOSTED' && (
               <ArtPlayer
                 option={{

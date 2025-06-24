@@ -1,16 +1,17 @@
 'use client';
-import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import UserAvatar from '@components/Objects/UserAvatar';
 import { ArrowRightCircle, Info } from 'lucide-react';
-import openuLogoDark from 'public/openu_logo_dark.png';
-import { useTranslations } from 'next-intl';
-import { signOut } from 'next-auth/react';
-import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import { useEffect } from 'react';
 import useSWR from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { swrFetcher } from '@services/utils/ts/requests';
+import openuLogoDark from 'public/openu_logo_dark.png';
 
 function HomeClient() {
   const t = useTranslations('HomeClient');
@@ -39,7 +40,7 @@ function HomeClient() {
           {session?.data?.user.first_name} {session?.data?.user.last_name}
         </span>
       </div>
-      <div className="mx-auto mt-12 flex items-center space-x-4 rounded-md bg-slate-200 px-3 py-2 text-sm font-semibold text-gray-600 uppercase">
+      <div className="mx-auto mt-12 flex items-center space-x-4 rounded-md bg-slate-200 px-3 py-2 text-sm font-semibold uppercase text-gray-600">
         {t('yourOrganizations')}
       </div>
       {orgs && orgs.length === 0 && (

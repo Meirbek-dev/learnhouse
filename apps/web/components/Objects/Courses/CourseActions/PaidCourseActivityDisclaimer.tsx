@@ -1,6 +1,7 @@
-import CoursePaidOptions from './CoursePaidOptions';
-import { useTranslations } from 'next-intl';
 import { AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+import CoursePaidOptions from './CoursePaidOptions';
 
 interface PaidCourseActivityProps {
   course: any;

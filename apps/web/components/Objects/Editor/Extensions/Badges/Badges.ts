@@ -1,6 +1,7 @@
-import BadgesExtension from '@/components/Objects/Editor/Extensions/Badges/BadgesExtension';
-import { ReactNodeViewRenderer } from '@tiptap/react';
 import { mergeAttributes, Node } from '@tiptap/core';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+
+import BadgesExtension from '@/components/Objects/Editor/Extensions/Badges/BadgesExtension';
 
 export default Node.create({
   name: 'badge',

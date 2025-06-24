@@ -1,31 +1,32 @@
 'use client';
-import {
-  uploadOrganizationLogo,
-  uploadOrganizationThumbnail,
-  uploadOrganizationPreview,
-  updateOrganization,
-} from '@services/settings/org';
+import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
+import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
+import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import type { ChangeEvent, MouseEvent } from 'react';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+
+import { constructAcceptValue } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
+import { Input } from '@components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import {
   getOrgLogoMediaDirectory,
   getOrgPreviewMediaDirectory,
   getOrgThumbnailMediaDirectory,
 } from '@services/media/media';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
-import { UploadCloud, Info, Plus, X, GripVertical, Images, StarIcon, ImageIcon } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { constructAcceptValue } from '@/lib/constants';
-import type { ChangeEvent, MouseEvent } from 'react';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { toast } from 'react-hot-toast';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import {
+  updateOrganization,
+  uploadOrganizationLogo,
+  uploadOrganizationPreview,
+  uploadOrganizationThumbnail,
+} from '@services/settings/org';
 
 const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg']);
 
@@ -258,12 +259,12 @@ export default function OrgEditImages() {
 
   const extractVideoId = (url: string, type: 'youtube' | 'loom'): string | null => {
     if (type === 'youtube') {
-      const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
+      const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[&?]v=)|youtu\.be\/)([^\s"&/?]{11})/;
       const match = url.match(regex);
       return match ? match[1] || null : null;
     }
     if (type === 'loom') {
-      const regex = /(?:loom\.com\/(?:share|embed)\/)([a-zA-Z0-9]+)/;
+      const regex = /loom\.com\/(?:share|embed)\/([\dA-Za-z]+)/;
       const match = url.match(regex);
       return match ? match[1] || null : null;
     }
@@ -405,21 +406,21 @@ export default function OrgEditImages() {
         <TabsList className="grid w-full grid-cols-3 rounded-lg bg-gray-100 p-1">
           <TabsTrigger
             value="logo"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
           >
             <StarIcon size={16} />
             <span>{t('Tabs.logo')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="thumbnail"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
           >
             <ImageIcon size={16} />
             <span>{t('Tabs.thumbnail')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="previews"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
           >
             <Images size={16} />
             <span>{t('Tabs.previews')}</span>
@@ -431,7 +432,7 @@ export default function OrgEditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <div
@@ -494,7 +495,7 @@ export default function OrgEditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <div
@@ -559,7 +560,7 @@ export default function OrgEditImages() {
           className="mt-4"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-6 transition-all duration-300">
+            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-6 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable
@@ -594,8 +595,8 @@ export default function OrgEditImages() {
                                 <button
                                   onClick={() => removePreview(preview.id)}
                                   className={cn(
-                                    'absolute -top-2 -right-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
-                                    'z-10 opacity-0 shadow-xs group-hover:opacity-100',
+                                    'absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
+                                    'shadow-xs z-10 opacity-0 group-hover:opacity-100',
                                     'transition-opacity duration-200',
                                   )}
                                 >
@@ -604,8 +605,8 @@ export default function OrgEditImages() {
                                 <div
                                   {...provided.dragHandleProps}
                                   className={cn(
-                                    'absolute -top-2 -left-2 rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
-                                    'z-10 cursor-grab opacity-0 shadow-xs group-hover:opacity-100 active:cursor-grabbing',
+                                    'absolute -left-2 -top-2 rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
+                                    'shadow-xs z-10 cursor-grab opacity-0 active:cursor-grabbing group-hover:opacity-100',
                                     'transition-opacity duration-200',
                                   )}
                                 >
@@ -637,7 +638,7 @@ export default function OrgEditImages() {
                                         backgroundImage: `url(${preview.thumbnailUrl})`,
                                       }}
                                     />
-                                    <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black backdrop-blur-[2px]">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-[2px]">
                                       {preview.type === 'youtube' ? (
                                         <SiYoutube className="h-10 w-10 text-red-500" />
                                       ) : (

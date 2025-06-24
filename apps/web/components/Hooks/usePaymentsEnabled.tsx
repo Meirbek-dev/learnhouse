@@ -1,8 +1,9 @@
 // hooks/usePaymentsEnabled.ts
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getPaymentConfigs } from '@services/payments/payments';
-import { useOrg } from '@components/Contexts/OrgContext';
 import useSWR from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getPaymentConfigs } from '@services/payments/payments';
 
 export function usePaymentsEnabled() {
   const org = useOrg() as any;

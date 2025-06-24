@@ -1,15 +1,17 @@
-import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
-import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures';
-import touEmblemDark from 'public/tou_emblem_dark.png';
-import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
-import { BubbleMenu } from '@tiptap/react';
 import type { Editor } from '@tiptap/core';
+import { BubbleMenu } from '@tiptap/react';
+import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+
+import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import touEmblemDark from 'public/tou_emblem_dark.png';
+
+import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures';
 
 interface AICanvaToolkitProps {
   editor: Editor;
@@ -101,9 +103,9 @@ function AIActionButton(props: { editor: Editor; label: string; activity: any })
   }
 
   const getTipTapEditorSelectedText = () => {
-    const selection = props.editor.state.selection;
-    const from = selection.from;
-    const to = selection.to;
+    const { selection } = props.editor.state;
+    const { from } = selection;
+    const { to } = selection;
     const text = props.editor.state.doc.textBetween(from, to);
     return text;
   };
@@ -127,7 +129,7 @@ function AIActionButton(props: { editor: Editor; label: string; activity: any })
     if (aiChatBotState.aichat_uuid) {
       await dispatchAIChatBot({
         type: 'addMessage',
-        payload: { sender: 'user', message: message, type: 'user' },
+        payload: { sender: 'user', message, type: 'user' },
       });
       await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
       const response = await sendActivityAIChatMessage(
@@ -158,7 +160,7 @@ function AIActionButton(props: { editor: Editor; label: string; activity: any })
     } else {
       await dispatchAIChatBot({
         type: 'addMessage',
-        payload: { sender: 'user', message: message, type: 'user' },
+        payload: { sender: 'user', message, type: 'user' },
       });
       await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
       const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);

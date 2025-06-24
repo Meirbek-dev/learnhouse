@@ -1,12 +1,14 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { getActivityWithAuthHeader } from '@services/courses/activities';
-import { getCourseMetadata } from '@services/courses/courses';
-import { getTranslations } from 'next-intl/server';
-import { nextAuthOptions } from 'app/auth/options';
-import { getServerSession } from 'next-auth/next';
-import ActivityClient from './activity';
 import type { Metadata } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
+import { getServerSession } from 'next-auth/next';
+import { getTranslations } from 'next-intl/server';
+
+import { getActivityWithAuthHeader } from '@services/courses/activities';
+import { getCourseMetadata } from '@services/courses/courses';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { nextAuthOptions } from 'app/auth/options';
+
+import ActivityClient from './activity';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>;

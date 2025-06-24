@@ -1,6 +1,6 @@
 import type ArtplayerType from 'artplayer';
-import { useEffect, useRef } from 'react';
 import Artplayer from 'artplayer';
+import { useEffect, useRef } from 'react';
 
 interface SubtitleEntry {
   html: string;

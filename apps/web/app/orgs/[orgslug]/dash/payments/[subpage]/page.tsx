@@ -1,18 +1,19 @@
 'use client';
+import { motion } from 'framer-motion';
+import { Gem, Settings, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
+import { use } from 'react';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage';
 import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage';
 import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { Settings, Users, Gem } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
-import Link from 'next/link';
-import { use } from 'react';
 
 export interface PaymentsParams {
   subpage: string;
@@ -72,10 +73,10 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
 
   return (
     <div className="flex h-screen w-full flex-col bg-[#f8f8f8]">
-      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
         <BreadCrumbs type="payments" />
         <div className="my-2 py-2">
-          <div className="flex w-100 flex-col space-y-1">
+          <div className="w-100 flex flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{h1}</div>
             <div className="text-md flex font-medium text-gray-400">{h2}</div>
           </div>

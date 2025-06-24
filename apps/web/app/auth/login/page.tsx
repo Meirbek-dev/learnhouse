@@ -1,6 +1,8 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
+
 import LoginClient from './login';
 
 interface MetadataProps {

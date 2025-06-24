@@ -1,7 +1,9 @@
-import { getUserByUsername } from '@services/users/users';
-import UserProfileClient from './UserProfileClient';
-import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+import { getUserByUsername } from '@services/users/users';
+
+import UserProfileClient from './UserProfileClient';
 
 interface UserPageParams {
   username: string;

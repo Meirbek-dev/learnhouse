@@ -1,20 +1,22 @@
 'use client';
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import ChapterElement from './DraggableElements/ChapterElement';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { createChapter } from '@services/courses/chapters';
-import { getAPIUrl } from '@services/config/config';
+import { Hexagon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useMemo } from 'react';
-import { Hexagon } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getAPIUrl } from '@services/config/config';
+import { createChapter } from '@services/courses/chapters';
+import { revalidateTags } from '@services/utils/ts/requests';
+
+import ChapterElement from './DraggableElements/ChapterElement';
 
 interface EditCourseStructureProps {
   orgslug: string;
@@ -161,7 +163,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
             dialogTitle={t('NewChapterModal.title')}
             dialogDescription={t('NewChapterModal.description')}
             dialogTrigger={
-              <div className="mx-auto my-16 flex h-10 max-w-(--breakpoint-2xl) flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white shadow-xs">
+              <div className="max-w-(--breakpoint-2xl) shadow-xs mx-auto my-16 flex h-10 flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white">
                 <div className="mx-auto flex items-center space-x-2 hover:cursor-pointer">
                   <Hexagon
                     strokeWidth={3}

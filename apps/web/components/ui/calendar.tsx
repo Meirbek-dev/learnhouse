@@ -1,10 +1,11 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { buttonVariants } from '@/components/ui/button';
-import { enUS, kk, ru } from 'date-fns/locale';
-import { DayPicker } from 'react-day-picker';
-import type { ComponentProps } from 'react';
 import type { Locale } from 'date-fns';
+import { enUS, kk, ru } from 'date-fns/locale';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocale } from 'next-intl';
+import type { ComponentProps } from 'react';
+import { DayPicker } from 'react-day-picker';
+
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export type CalendarProps = ComponentProps<typeof DayPicker>;

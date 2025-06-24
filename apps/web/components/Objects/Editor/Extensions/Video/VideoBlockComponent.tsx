@@ -1,23 +1,25 @@
 'use client';
 
-import { Loader2, Video, Upload, X, ArrowLeftRight, CheckCircle2, AlertCircle, Download } from 'lucide-react';
-import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video';
+import type { Node } from '@tiptap/core';
+import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
+import type ArtplayerType from 'artplayer';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, ArrowLeftRight, CheckCircle2, Download, Loader2, Upload, Video, X } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import type { ChangeEvent, DragEvent } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { styled } from 'styled-components';
+
+import { constructAcceptValue } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { useCourse } from '@components/Contexts/CourseContext';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useRef, useMemo, useState, useEffect } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import { constructAcceptValue } from '@/lib/constants';
-import { useTranslations, useLocale } from 'next-intl';
-import type { ChangeEvent, DragEvent } from 'react';
-import type ArtplayerType from 'artplayer';
-import type { Node } from '@tiptap/core';
-import { styled } from 'styled-components';
-import { cn } from '@/lib/utils';
+
+import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video';
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4']);
 
@@ -289,7 +291,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
 
   // If we're in preview mode and have a video, show only the video player
   if (!isEditable && blockObject && videoUrl) {
-    const width = VIDEO_SIZES[blockObject.size].width;
+    const { width } = VIDEO_SIZES[blockObject.size];
     return (
       <NodeViewWrapper className="block-video w-full">
         <motion.div
@@ -331,7 +333,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               />
               <button
                 onClick={handleDownload}
-                className="absolute top-2 right-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                 title="Download video"
               >
                 <Download className="h-4 w-4 text-white" />

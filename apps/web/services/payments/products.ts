@@ -1,6 +1,6 @@
 'use server';
-import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { getResponseMetadata, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 
 export async function getProducts(orgId: number, access_token: string) {
   const result = await fetch(

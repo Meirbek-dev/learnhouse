@@ -1,10 +1,11 @@
 'use client';
 
-import { useOrg } from '@/components/Contexts/OrgContext';
-import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';
-import { useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect } from 'react';
 import type React from 'react';
+
+import { useOrg } from '@/components/Contexts/OrgContext';
 
 const OrgScripts: React.FC = () => {
   const org = useOrg() as any;
@@ -90,7 +91,7 @@ const OrgScripts: React.FC = () => {
           return;
         }
 
-        const safeScriptId = `learnhouse-org-script-${scriptName.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}-${Math.random().toString(36).slice(2, 9)}`;
+        const safeScriptId = `learnhouse-org-script-${scriptName.toLowerCase().replaceAll(/[^\da-z]+/g, '-')}-${Math.random().toString(36).slice(2, 9)}`;
 
         cleanupExistingScript(safeScriptId);
 
@@ -113,9 +114,9 @@ const OrgScripts: React.FC = () => {
             try {
               new URL(scriptTag.src);
               scriptElement.async = true;
-              scriptElement.onload = () => {
+              scriptElement.addEventListener('load', () => {
                 scriptElement.dataset.loaded = 'true';
-              };
+              });
               scriptElement.onerror = (error) => {
                 console.error(t('failedToLoadExternalScript', { scriptName }), error);
                 cleanupExistingScript(safeScriptId);

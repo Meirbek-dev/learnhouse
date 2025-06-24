@@ -1,49 +1,51 @@
 'use client';
-import type {
-  LandingObject,
-  LandingSection,
-  LandingHeroSection,
-  LandingTextAndImageSection,
-  LandingLogos,
-  LandingPeople,
-  LandingBackground,
-  LandingButton,
-  LandingImage,
-  LandingFeaturedCourses,
-} from './landing_types';
-import {
-  Plus,
-  Trash2,
-  GripVertical,
-  LayoutTemplate,
-  ImageIcon,
-  Users,
-  Award,
-  Edit,
-  Link,
-  Upload,
-  Save,
-  BookOpen,
-  TextIcon,
-} from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui/tabs';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getOrgLandingMediaDirectory } from '@services/media/media';
-import { useState, useEffect, createElement } from 'react';
-import { getOrgCourses } from '@services/courses/courses';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Textarea } from '@components/ui/textarea';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { ButtonIcon } from '@radix-ui/react-icons';
-import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
-import type { FC, ChangeEvent } from 'react';
+import {
+  Award,
+  BookOpen,
+  Edit,
+  GripVertical,
+  ImageIcon,
+  LayoutTemplate,
+  Link,
+  Plus,
+  Save,
+  TextIcon,
+  Trash2,
+  Upload,
+  Users,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import type { ChangeEvent, FC } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { Textarea } from '@components/ui/textarea';
+import { getOrgCourses } from '@services/courses/courses';
+import { getOrgLandingMediaDirectory } from '@services/media/media';
+import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
+
+import type {
+  LandingBackground,
+  LandingButton,
+  LandingFeaturedCourses,
+  LandingHeroSection,
+  LandingImage,
+  LandingLogos,
+  LandingObject,
+  LandingPeople,
+  LandingSection,
+  LandingTextAndImageSection,
+} from './landing_types';
 
 const SECTION_TYPES = {
   'hero': {
@@ -394,7 +396,7 @@ const OrgEditLanding = () => {
                 onChange={() => setIsLandingEnabled(!isLandingEnabled)}
                 className="peer sr-only"
               />
-              <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-hidden after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
+              <div className="peer-focus:outline-hidden peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300" />
             </label>
             <Button
               variant="default"
@@ -434,10 +436,10 @@ const OrgEditLanding = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 onClick={() => setSelectedSection(index)}
-                                className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
+                                className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
                                   selectedSection === index
-                                    ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
-                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
+                                    ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
+                                    : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
                                 } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                               >
                                 <div className="group flex items-center justify-between">
@@ -515,7 +517,7 @@ const OrgEditLanding = () => {
                     }}
                   >
                     <SelectTrigger className="w-full border-0 bg-black p-0">
-                      <div className="hover:bg-primary/90 inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md bg-black text-sm font-medium whitespace-nowrap text-white transition-all outline-none">
+                      <div className="hover:bg-primary/90 inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-black text-sm font-medium text-white outline-none transition-all">
                         <Plus
                           size="8"
                           color="white"

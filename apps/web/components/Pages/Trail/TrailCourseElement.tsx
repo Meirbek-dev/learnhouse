@@ -1,15 +1,16 @@
 'use client';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { removeCourse } from '@services/courses/activity';
-import { useOrg } from '@components/Contexts/OrgContext';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
-import Link from 'next/link';
 import { mutate } from 'swr';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { removeCourse } from '@services/courses/activity';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { revalidateTags } from '@services/utils/ts/requests';
 
 interface TrailCourseElementProps {
   course: any;
@@ -25,7 +26,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
   const router = useRouter();
   const t = useTranslations('Trail');
   const orgID = org?.id;
-  const course_total_steps = run.course_total_steps;
+  const { course_total_steps } = run;
   const course_completed_steps = run.steps.length;
   const course_progress = useMemo(
     () => (course_total_steps > 0 ? Math.round((course_completed_steps / course_total_steps) * 100) : 0),
@@ -48,7 +49,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
     >
       <Link href={getUriWithOrg(orgslug, `/course/${courseid}`)}>
         <div
-          className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-black/10 ring-inset"
+          className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-inset ring-black/10"
           style={{
             backgroundImage: course.thumbnail_image
               ? `url(${getCourseThumbnailMediaDirectory(org.org_uuid, course.course_uuid, course.thumbnail_image)})`

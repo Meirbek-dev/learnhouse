@@ -1,13 +1,14 @@
+import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
+
 import {
   getNewAccessTokenUsingRefreshTokenServer,
   getUserSession,
   loginAndGetToken,
   loginWithOAuthToken,
 } from '@services/auth/auth';
-import { OPENU_TOP_DOMAIN, getUriWithOrg } from '@services/config/config';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import { getUriWithOrg, OPENU_TOP_DOMAIN } from '@services/config/config';
 import { getResponseMetadata } from '@services/utils/ts/requests';
-import GoogleProvider from 'next-auth/providers/google';
 
 // Add type declarations at the top of the file
 declare global {

@@ -1,15 +1,16 @@
 'use client';
-import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { AlertTriangle, UserRoundPlus } from 'lucide-react';
-import openuLogoDark from 'public/openu_logo_dark.png';
 import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
-import { signIn } from 'next-auth/react';
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { AlertTriangle, UserRoundPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+
+import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import openuLogoDark from 'public/openu_logo_dark.png';
 
 interface LoginClientProps {
   org: any;
@@ -25,7 +26,7 @@ const LoginClient = (props: LoginClientProps) => {
 
     if (!values.email) {
       errors.email = validationT('required');
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+    } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,}$/i.test(values.email)) {
       errors.email = validationT('invalidEmail');
     }
 
@@ -96,7 +97,7 @@ const LoginClient = (props: LoginClientProps) => {
           <div className="left-login-part flex flex-row bg-white">
             <div className="m-auto w-72">
               {error && (
-                <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
+                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
                   <AlertTriangle size={18} />
                   <div className="text-sm font-bold">{t('wrongCredentials')}</div>
                 </div>

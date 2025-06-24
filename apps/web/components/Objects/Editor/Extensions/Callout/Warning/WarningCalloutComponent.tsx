@@ -1,8 +1,9 @@
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import { AlertTriangle, X } from 'lucide-react';
-import { styled } from 'styled-components';
 import { useState } from 'react';
+import { styled } from 'styled-components';
+
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 
 interface CalloutOptions {
   dismissible?: boolean;
@@ -86,7 +87,7 @@ const CalloutWrapper = styled.div.withConfig({
 
 function WarningCalloutComponent(props: any) {
   const editorState = useEditorProvider() as any;
-  const isEditable = editorState.isEditable;
+  const { isEditable } = editorState;
   const [dismissed, setDismissed] = useState(false);
 
   // Extract options from props or use defaults

@@ -1,27 +1,29 @@
 'use client';
 import {
-  Search,
   ArrowRight,
-  Sparkles,
+  ArrowUpRight,
   Book,
   GraduationCap,
-  ArrowUpRight,
-  TextSearch,
   ScanSearch,
+  Search,
+  Sparkles,
+  TextSearch,
   Users,
 } from 'lucide-react';
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent, FC } from 'react';
+
+import { useDebounce } from '@/hooks/useDebounce';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
-import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { useDebounce } from '@/hooks/useDebounce';
-import type { FC, ChangeEvent } from 'react';
-import { useTranslations } from 'next-intl';
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { searchOrgContent } from '@services/search/search';
+
+import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import UserAvatar from '../UserAvatar';
-import Link from 'next/link';
 
 interface User {
   username: string;
@@ -312,7 +314,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                       />
                     </div>
                   )}
-                  <div className="absolute -right-1 -bottom-1 rounded-full bg-white p-1 shadow-sm">
+                  <div className="absolute -bottom-1 -right-1 rounded-full bg-white p-1 shadow-sm">
                     <GraduationCap
                       size={11}
                       className="text-black/60"
@@ -322,7 +324,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="truncate text-sm font-medium text-black/80">{course.name}</h3>
-                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
+                    <span className="whitespace-nowrap text-[10px] font-medium uppercase tracking-wide text-black/40">
                       {t('courseType')}
                     </span>
                   </div>
@@ -355,7 +357,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="truncate text-sm font-medium text-black/80">{collection.name}</h3>
-                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
+                    <span className="whitespace-nowrap text-[10px] font-medium uppercase tracking-wide text-black/40">
                       {t('collectionType')}
                     </span>
                   </div>
@@ -393,7 +395,7 @@ export const SearchBar: FC<SearchBarProps> = ({
                     <h3 className="truncate text-sm font-medium text-black/80">
                       {user.first_name} {user.last_name}
                     </h3>
-                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
+                    <span className="whitespace-nowrap text-[10px] font-medium uppercase tracking-wide text-black/40">
                       {t('userType')}
                     </span>
                   </div>
@@ -424,7 +426,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           onChange={handleSearchChange}
           onFocus={() => setShowResults(true)}
           placeholder={t('placeholder')}
-          className="nice-shadow h-9 w-full rounded-xl bg-white pr-4 pl-11 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:ring-1 focus:ring-black/5 focus:outline-none"
+          className="nice-shadow h-9 w-full rounded-xl bg-white pl-11 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
         />
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
           <Search

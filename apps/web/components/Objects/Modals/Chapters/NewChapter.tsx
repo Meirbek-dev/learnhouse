@@ -1,17 +1,18 @@
 'use client';
-import FormLayout, {
-  Flex,
-  FormField,
-  Input,
-  Textarea,
-  FormLabel,
-  ButtonBlack,
-} from '@components/Objects/StyledElements/Form/Form';
 import { FormMessage } from '@radix-ui/react-form';
-import BarLoader from 'react-spinners/BarLoader';
 import * as Form from '@radix-ui/react-form';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import BarLoader from 'react-spinners/BarLoader';
+
+import FormLayout, {
+  ButtonBlack,
+  Flex,
+  FormField,
+  FormLabel,
+  Input,
+  Textarea,
+} from '@components/Objects/StyledElements/Form/Form';
 
 function NewChapterModal({ submitChapter, closeModal, course }: any) {
   const t = useTranslations('Components.NewChapterModal');

@@ -1,11 +1,12 @@
 import * as Form from '@radix-ui/react-form';
+import { Info } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type * as React from 'react';
-import { Info } from 'lucide-react';
-import { Input as ShadcnInput } from '@/components/ui/input';
-import { Textarea as ShadcnTextarea } from '@/components/ui/textarea';
+
 import { Button } from '@/components/ui/button';
+import { Input as ShadcnInput } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea as ShadcnTextarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 interface FormLayoutProps {
@@ -45,7 +46,7 @@ export const FormField = ({ className, ...props }: React.ComponentProps<typeof F
 export const FormLabel = ({ className, ...props }: React.ComponentProps<typeof Form.Label>) => (
   <Form.Label
     className={cn(
-      'text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+      'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
       className,
     )}
     {...props}

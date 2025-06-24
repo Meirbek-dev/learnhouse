@@ -1,6 +1,6 @@
 'use client';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
-import { styled, keyframes } from '@stitches/react';
+import { keyframes, styled } from '@stitches/react';
 import type { ReactNode } from 'react';
 
 interface TooltipProps {

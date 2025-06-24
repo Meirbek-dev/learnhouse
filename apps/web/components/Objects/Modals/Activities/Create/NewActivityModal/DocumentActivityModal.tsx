@@ -1,4 +1,11 @@
 'use client';
+import * as Form from '@radix-ui/react-form';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import * as React from 'react';
+import BarLoader from 'react-spinners/BarLoader';
+
+import { constructAcceptValue } from '@/lib/constants';
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -7,12 +14,6 @@ import FormLayout, {
   FormMessage,
   Input,
 } from '@components/Objects/StyledElements/Form/Form';
-import { constructAcceptValue } from '@/lib/constants';
-import BarLoader from 'react-spinners/BarLoader';
-import * as Form from '@radix-ui/react-form';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import * as React from 'react';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
@@ -37,7 +38,7 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
       documentpdf,
       'documentpdf',
       {
-        name: name,
+        name,
         chapter_id: chapterId,
         activity_type: 'TYPE_DOCUMENT',
         activity_sub_type: 'SUBTYPE_DOCUMENT_PDF',

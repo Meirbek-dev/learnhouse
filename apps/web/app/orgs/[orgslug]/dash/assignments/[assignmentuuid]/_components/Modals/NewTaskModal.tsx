@@ -1,11 +1,12 @@
-import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { createAssignmentTask } from '@services/courses/assignments';
 import { AArrowUp, FileUp, ListTodo } from 'lucide-react';
-import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+
+import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl } from '@services/config/config';
+import { createAssignmentTask } from '@services/courses/assignments';
 
 function NewTaskModal({ closeModal, assignment_uuid }: any) {
   const t = useTranslations('DashPage.Assignments.NewTaskModal');

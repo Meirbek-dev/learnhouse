@@ -1,13 +1,13 @@
 import type { OrderPayload } from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
-import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { errorHandling, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 
 /*
  This file includes only POST, PUT, DELETE requests
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
-//TODO : deprecate this function
+// TODO : deprecate this function
 export async function getCourseChaptersMetadata(course_uuid: any, next: any, access_token: any) {
   const result = await fetch(
     `${getAPIUrl()}chapters/meta/course_${course_uuid}`,
