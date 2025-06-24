@@ -23,7 +23,7 @@ WORKDIR /app/web
 COPY ./apps/web/package.json ./apps/web/pnpm-lock.yaml* ./
 COPY ./apps/web /app/web
 RUN rm -f .env*
-RUN if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile && pnpm run build; \
+RUN if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i && pnpm run build; \
   else echo "Lockfile not found." && exit 1; \
   fi
 

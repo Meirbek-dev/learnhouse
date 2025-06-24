@@ -138,12 +138,18 @@ const DetailCard = React.memo(
     const [localLabel, setLocalLabel] = useState(detail.label);
     const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
+    // Create a stable callback for label changes
+    const stableLabelChangeCallback = useCallback(
+      (newLabel: string) => {
+        if (newLabel !== detail.label) {
+          onLabelChange(id, newLabel);
+        }
+      },
+      [id, onLabelChange, detail.label],
+    );
+
     // Debounce the label change handler
-    const debouncedLabelChange = useDebounce((newLabel: string) => {
-      if (newLabel !== detail.label) {
-        onLabelChange(id, newLabel);
-      }
-    }, 500);
+    const debouncedLabelChange = useDebounce(stableLabelChangeCallback, 500);
 
     // Memoize handlers to prevent unnecessary re-renders
     const handleLabelChange = useCallback(
