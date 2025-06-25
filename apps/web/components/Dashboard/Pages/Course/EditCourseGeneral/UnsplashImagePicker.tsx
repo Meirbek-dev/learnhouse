@@ -111,7 +111,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
       setImages([]);
       setPage(1);
     }
-  }, [query, debouncedFetchImages, page, images.length]);
+  }, [query, debouncedFetchImages, page]);
 
   useEffect(() => {
     if (isOpen && images.length === 0 && !query && !loading) {

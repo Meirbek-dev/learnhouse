@@ -2,7 +2,7 @@
 import { Check, Loader2, SaveAllIcon, Timer } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { mutate } from 'swr';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
@@ -17,10 +17,11 @@ function SaveState(props: { orgslug: string }) {
   const course = useCourse() as any;
   const session = useLHSession() as any;
   const router = useRouter();
-  const saved = course ? course.isSaved : true;
+  const saved = course ? course.isSaved : false;
   const dispatchCourse = useCourseDispatch() as any;
   const course_structure = course.courseStructure;
   const t = useTranslations('Common');
+  const isInitialized = useRef(false);
 
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
   const saveCourseState = async () => {
@@ -95,7 +96,6 @@ function SaveState(props: { orgslug: string }) {
   const initOrderPayload = useCallback(() => {
     if (course_structure?.chapters) {
       handleCourseOrder(course_structure);
-      dispatchCourse({ type: 'setIsSaved' });
     }
   }, [course_structure, handleCourseOrder, dispatchCourse]);
 
@@ -107,8 +107,9 @@ function SaveState(props: { orgslug: string }) {
   }, [course_structure, handleCourseOrder, dispatchCourse]);
 
   useEffect(() => {
-    if (course_structure?.chapters) {
+    if (course_structure?.chapters && !isInitialized.current) {
       initOrderPayload();
+      isInitialized.current = true;
     }
     if (course_structure?.chapters && !saved) {
       changeOrderPayload();
