@@ -1,7 +1,7 @@
 'use client';
-import { TagInput as EmblorTagInput, type Tag } from 'emblor';
 import { useTranslations } from 'next-intl';
-import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
+import { X } from 'lucide-react';
 
 interface FormTagInputProps {
   value: string;
@@ -9,6 +9,11 @@ interface FormTagInputProps {
   separator?: string;
   error?: string;
   placeholder?: string;
+}
+
+interface Tag {
+  id: string;
+  text: string;
 }
 
 const FormTagInput = ({ value, onChange, separator = ' | ', error, placeholder }: FormTagInputProps) => {
@@ -21,6 +26,9 @@ const FormTagInput = ({ value, onChange, separator = ' | ', error, placeholder }
           .map((text, i) => ({ id: i.toString(), text: text.trim() }))
       : [],
   );
+  const [inputValue, setInputValue] = useState('');
+  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (value && typeof value === 'string') {
@@ -34,34 +42,82 @@ const FormTagInput = ({ value, onChange, separator = ' | ', error, placeholder }
     }
   }, [value, separator]);
 
-  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
-
-  const handleTagsChange: Dispatch<SetStateAction<Tag[]>> = (newTagsOrUpdater) => {
-    const newTags = typeof newTagsOrUpdater === 'function' ? newTagsOrUpdater(tags) : newTagsOrUpdater;
+  const handleTagsChange = (newTags: Tag[]) => {
     setTags(newTags);
     onChange(newTags.map((tag) => tag.text).join(separator));
+  };
+
+  const addTag = (text: string) => {
+    const trimmedText = text.trim();
+    if (trimmedText && !tags.some((tag) => tag.text === trimmedText)) {
+      const newTag = { id: Date.now().toString(), text: trimmedText };
+      handleTagsChange([...tags, newTag]);
+    }
+    setInputValue('');
+  };
+
+  const removeTag = (indexToRemove: number) => {
+    handleTagsChange(tags.filter((_, index) => index !== indexToRemove));
+    setActiveTagIndex(null);
+  };
+
+  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && inputValue.trim()) {
+      e.preventDefault();
+      addTag(inputValue);
+    } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
+      if (activeTagIndex !== null) {
+        removeTag(activeTagIndex);
+        setActiveTagIndex(null);
+      } else {
+        setActiveTagIndex(tags.length - 1);
+      }
+    } else if (e.key === 'Escape') {
+      setActiveTagIndex(null);
+    }
+  };
+
+  const handleContainerClick = () => {
+    inputRef.current?.focus();
   };
 
   return (
     <div>
       <div className="space-y-2">
-        <EmblorTagInput
-          tags={tags}
-          setTags={handleTagsChange}
-          placeholder={placeholder || t('placeholderTags')}
-          styleClasses={{
-            inlineTagsContainer:
-              'border-input rounded-lg bg-background shadow-2xs transition-shadow focus-within:border-ring/40 focus-within:outline-hidden focus-within:ring-[3px] ring-ring/8 dark:ring-ring/12 p-1 gap-1',
-            input: 'w-full min-w-[80px] focus-visible:outline-hidden shadow-none px-2 h-7',
-            tag: {
-              body: 'h-7 relative bg-background border border-input hover:bg-background rounded-md font-medium text-xs ps-2 pe-7',
-              closeButton:
-                'absolute -inset-y-px -end-px p-0 rounded-e-lg flex size-7 transition-colors outline-hidden focus-visible:ring-2 focus-visible:ring-ring/30 dark:focus-visible:ring-ring/40 text-muted-foreground/80 hover:text-foreground',
-            },
-          }}
-          activeTagIndex={activeTagIndex}
-          setActiveTagIndex={setActiveTagIndex}
-        />
+        <div
+          className="border-input bg-background shadow-2xs focus-within:border-ring/40 focus-within:outline-hidden ring-ring/8 dark:ring-ring/12 flex min-h-[38px] cursor-text flex-wrap items-center gap-1 rounded-lg p-1 transition-shadow focus-within:ring-[3px]"
+          onClick={handleContainerClick}
+        >
+          {tags.map((tag, index) => (
+            <span
+              key={tag.id}
+              className={`bg-background border-input hover:bg-background relative flex h-7 items-center rounded-md border pe-7 ps-2 text-xs font-medium ${
+                activeTagIndex === index ? 'ring-ring/30 ring-2' : ''
+              }`}
+            >
+              {tag.text}
+              <button
+                type="button"
+                className="outline-hidden focus-visible:ring-ring/30 dark:focus-visible:ring-ring/40 text-muted-foreground/80 hover:text-foreground absolute -inset-y-px -end-px flex size-7 items-center justify-center rounded-e-lg p-0 transition-colors focus-visible:ring-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeTag(index);
+                }}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))}
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            placeholder={tags.length === 0 ? placeholder || t('placeholderTags') : ''}
+            className="focus-visible:outline-hidden h-7 w-full min-w-[80px] flex-1 border-none bg-transparent px-2 shadow-none"
+          />
+        </div>
         {error && <p className="text-destructive text-sm font-medium">{error}</p>}
       </div>
     </div>

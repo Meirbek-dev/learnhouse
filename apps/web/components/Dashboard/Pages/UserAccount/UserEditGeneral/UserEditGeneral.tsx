@@ -93,16 +93,18 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
     username: z.string().min(1, t('Form.requiredField', { fieldName: 'Username' })),
     first_name: z.string().min(1, t('Form.requiredField', { fieldName: 'First name' })),
     last_name: z.string().min(1, t('Form.requiredField', { fieldName: 'Last name' })),
-    bio: z.string().max(400, t('Form.maxChars', { count: 400 })).optional(),
-    details: z
-      .record(
-        z.object({
-          id: z.string(),
-          label: z.string(),
-          icon: z.string(),
-          text: z.string(),
-        }),
-      ),
+    bio: z
+      .string()
+      .max(400, t('Form.maxChars', { count: 400 }))
+      .optional(),
+    details: z.record(
+      z.object({
+        id: z.string(),
+        label: z.string(),
+        icon: z.string(),
+        text: z.string(),
+      }),
+    ),
   });
 
 // Memoized detail card component for better performance
