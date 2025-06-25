@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { BarLoader } from 'react-spinners';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { mutate } from 'swr';
 import { z } from 'zod';
 

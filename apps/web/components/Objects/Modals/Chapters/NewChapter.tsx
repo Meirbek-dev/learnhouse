@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import BarLoader from 'react-spinners/BarLoader';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';

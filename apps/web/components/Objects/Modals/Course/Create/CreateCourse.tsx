@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { BarLoader } from 'react-spinners';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';

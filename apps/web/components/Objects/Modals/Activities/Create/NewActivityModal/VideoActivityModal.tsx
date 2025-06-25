@@ -2,12 +2,12 @@ import * as Form from '@radix-ui/react-form';
 import { Upload, Youtube } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
-import BarLoader from 'react-spinners/BarLoader';
 
 import { constructAcceptValue } from '@/lib/constants';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 
@@ -348,7 +348,7 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
         >
           {isSubmitting ? (
             <BarLoader
-              cssOverride={{ borderRadius: 60 }}
+              cssOverride={{ borderRadius: '60px' }}
               width={60}
               color="#ffffff"
             />

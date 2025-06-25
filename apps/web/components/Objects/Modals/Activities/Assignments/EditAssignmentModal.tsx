@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getAPIUrl } from '@services/config/config';
 import { updateAssignment } from '@services/courses/assignments';
-import { BarLoader } from 'react-spinners';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 
 interface Assignment {
   assignment_uuid: string;
