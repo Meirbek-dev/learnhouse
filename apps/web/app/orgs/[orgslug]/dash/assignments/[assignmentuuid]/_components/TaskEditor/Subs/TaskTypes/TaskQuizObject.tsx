@@ -2,7 +2,6 @@ import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import {
@@ -65,14 +64,14 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const [questions, setQuestions] = useState<QuizSchema[]>([
     {
       questionText: '',
-      questionUUID: `question_${uuidv4()}`,
+      questionUUID: `question_${crypto.randomUUID()}`,
       options: [
         {
           text: '',
           fileID: '',
           type: 'text',
           assigned_right_answer: false,
-          optionUUID: `option_${uuidv4()}`,
+          optionUUID: `option_${crypto.randomUUID()}`,
         },
       ],
     },
@@ -102,7 +101,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         fileID: '',
         type: 'text',
         assigned_right_answer: false,
-        optionUUID: `option_${uuidv4()}`,
+        optionUUID: `option_${crypto.randomUUID()}`,
       });
     }
     setQuestions(updatedQuestions);
@@ -123,14 +122,14 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       ...questions,
       {
         questionText: '',
-        questionUUID: `question_${uuidv4()}`,
+        questionUUID: `question_${crypto.randomUUID()}`,
         options: [
           {
             text: '',
             fileID: '',
             type: 'text',
             assigned_right_answer: false,
-            optionUUID: `option_${uuidv4()}`,
+            optionUUID: `option_${crypto.randomUUID()}`,
           },
         ],
       },

@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import ReactConfetti from 'react-confetti';
 import { twMerge } from 'tailwind-merge';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 
@@ -98,12 +97,12 @@ function QuizBlockComponent(props: any) {
   };
   const addSampleQuestion = () => {
     const newQuestion = {
-      question_id: uuidv4(),
+      question_id: crypto.randomUUID(),
       question: '',
       type: 'multiple_choice',
       answers: [
         {
-          answer_id: uuidv4(),
+          answer_id: crypto.randomUUID(),
           answer: '',
           correct: false,
         },
@@ -114,7 +113,7 @@ function QuizBlockComponent(props: any) {
 
   const addAnswer = (question_id: string) => {
     const newAnswer = {
-      answer_id: uuidv4(),
+      answer_id: crypto.randomUUID(),
       answer: '',
       correct: false,
     };
