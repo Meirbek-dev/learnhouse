@@ -81,9 +81,7 @@ interface FormValues {
   last_name: string;
   email: string;
   bio?: string;
-  details: {
-    [key: string]: DetailItem;
-  };
+  details: Record<string, DetailItem>;
 }
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
@@ -95,11 +93,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
     username: z.string().min(1, t('Form.requiredField', { fieldName: 'Username' })),
     first_name: z.string().min(1, t('Form.requiredField', { fieldName: 'First name' })),
     last_name: z.string().min(1, t('Form.requiredField', { fieldName: 'Last name' })),
-    bio: z
-      .string()
-      .max(400, t('Form.maxChars', { count: 400 }))
-      .optional()
-      .or(z.literal('')),
+    bio: z.string().max(400, t('Form.maxChars', { count: 400 })).optional(),
     details: z
       .record(
         z.object({
@@ -108,9 +102,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
           icon: z.string(),
           text: z.string(),
         }),
-      )
-      .optional()
-      .default({}),
+      ),
   });
 
 // Memoized detail card component for better performance

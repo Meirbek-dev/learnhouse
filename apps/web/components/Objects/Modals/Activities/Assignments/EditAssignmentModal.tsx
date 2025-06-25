@@ -53,7 +53,7 @@ interface FormValues {
 const validationSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
-  due_date: z.string().optional().or(z.literal('')),
+  due_date: z.string(),
   grading_type: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
 });
 

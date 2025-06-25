@@ -41,7 +41,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       .string()
       .min(1, t('errors.required', { fieldName: t('description.label') }))
       .max(1000, t('errors.maxLength', { count: 1000 })),
-    about: z.string().optional(),
+    about: z.string(),
     learnings: z
       .string()
       .min(1, t('errors.required', { fieldName: t('learnings.label') }))
@@ -60,7 +60,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
           return false;
         }
       }, t('errors.invalidJsonFormat')),
-    tags: z.string().optional(),
+    tags: z.string(),
     public: z.boolean(),
     thumbnail_type: z.enum(['image', 'video', 'both']),
   });
