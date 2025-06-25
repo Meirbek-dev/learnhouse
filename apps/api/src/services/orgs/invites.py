@@ -71,7 +71,7 @@ async def create_invite_code(
         return "".join(random.choice(letters_and_digits) for _ in range(length))
 
     generated_invite_code = generate_code()
-    invite_code_uuid = f"org_invite_code_{uuid.uuid4()}"
+    invite_code_uuid = f"org_invite_code_{uuid.ULID()}"
 
     # time to live in days to seconds
     ttl = int(timedelta(days=365).total_seconds())
@@ -149,7 +149,7 @@ async def create_invite_code_with_usergroup(
         return "".join(random.choice(letters_and_digits) for _ in range(length))
 
     generated_invite_code = generate_code()
-    invite_code_uuid = f"org_invite_code_{uuid.uuid4()}"
+    invite_code_uuid = f"org_invite_code_{uuid.ULID()}"
 
     # time to live in days to seconds
     ttl = int(timedelta(days=365).total_seconds())

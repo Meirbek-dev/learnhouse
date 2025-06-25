@@ -1,5 +1,5 @@
 from typing import Literal, List
-from uuid import uuid4
+from ulid import ULID
 from sqlmodel import Session, select, or_, and_, text
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
@@ -434,13 +434,13 @@ async def create_course(
     org_statement = select(Organization).where(Organization.id == org_id)
     org = db_session.exec(org_statement).first()
 
-    course.course_uuid = str(f"course_{uuid4()}")
+    course.course_uuid = str(f"course_{ULID()}")
     course.creation_date = str(datetime.now())
     course.update_date = str(datetime.now())
 
     # Upload thumbnail
     if thumbnail_file and thumbnail_file.filename:
-        name_in_disk = f"{course.course_uuid}_thumbnail_{uuid4()}.{thumbnail_file.filename.split('.')[-1]}"
+        name_in_disk = f"{course.course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
         await upload_thumbnail(
             thumbnail_file,
             name_in_disk,
@@ -535,7 +535,9 @@ async def update_course_thumbnail(
 
     # Upload thumbnail
     if thumbnail_file and thumbnail_file.filename:
-        name_in_disk = f"{course_uuid}_thumbnail_{uuid4()}.{thumbnail_file.filename.split('.')[-1]}"
+        name_in_disk = (
+            f"{course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
+        )
         await upload_thumbnail(
             thumbnail_file,
             name_in_disk,

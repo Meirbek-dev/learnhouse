@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Literal
-from uuid import uuid4
+from ulid import ULID
 from sqlmodel import Session, select
 from src.db.users import AnonymousUser
 from src.security.rbac.rbac import (
@@ -46,7 +46,7 @@ async def create_chapter(
 
     # complete chapter object
     chapter.course_id = chapter_object.course_id
-    chapter.chapter_uuid = f"chapter_{uuid4()}"
+    chapter.chapter_uuid = f"chapter_{ULID()}"
     chapter.creation_date = str(datetime.now())
     chapter.update_date = str(datetime.now())
     chapter.org_id = course.org_id

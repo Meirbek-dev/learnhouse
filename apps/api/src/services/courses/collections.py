@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Literal
-from uuid import uuid4
+from ulid import ULID
 from sqlmodel import Session, select
 from src.db.users import AnonymousUser
 from src.security.rbac.rbac import (
@@ -90,7 +90,7 @@ async def create_collection(
     await rbac_check(request, "collection_x", current_user, "create", db_session)
 
     # Complete the collection object
-    collection.collection_uuid = f"collection_{uuid4()}"
+    collection.collection_uuid = f"collection_{ULID()}"
     collection.creation_date = str(datetime.now())
     collection.update_date = str(datetime.now())
 

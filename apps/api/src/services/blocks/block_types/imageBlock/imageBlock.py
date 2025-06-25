@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import uuid4
+from ulid import ULID
 from src.db.organizations import Organization
 from fastapi import HTTPException, status, UploadFile, Request
 from sqlmodel import Session, select
@@ -37,7 +37,7 @@ async def create_image_block(
         )
 
     # get block id
-    block_uuid = str(f"block_{uuid4()}")
+    block_uuid = str(f"block_{ULID()}")
 
     block_data = await upload_file_and_return_file_object(
         request,

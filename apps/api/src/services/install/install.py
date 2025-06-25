@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from uuid import uuid4
+from ulid import ULID
 from fastapi import HTTPException, Request
 from sqlalchemy import desc
 from sqlmodel import Session, select
@@ -47,7 +47,7 @@ async def create_install_instance(request: Request, data: dict, db_session: Sess
     install = Install.model_validate(data)
 
     # complete install instance
-    install.install_uuid = str(f"install_{uuid4()}")
+    install.install_uuid = str(f"install_{ULID()}")
     install.update_date = str(datetime.now())
     install.creation_date = str(datetime.now())
     install.step = 1
@@ -328,7 +328,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
     org = Organization.model_validate(org_object)
 
     # Complete the org object
-    org.org_uuid = f"org_{uuid4()}"
+    org.org_uuid = f"org_{ULID()}"
     org.creation_date = str(datetime.now())
     org.update_date = str(datetime.now())
 
@@ -382,7 +382,7 @@ def install_create_organization_user(
     user = User.model_validate(user_object)
 
     # Complete the user object
-    user.user_uuid = f"user_{uuid4()}"
+    user.user_uuid = f"user_{ULID()}"
     user.password = security_hash_password(user_object.password)
     user.email_verified = False
     user.creation_date = str(datetime.now())

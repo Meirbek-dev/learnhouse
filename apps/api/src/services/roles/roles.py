@@ -1,5 +1,5 @@
 from typing import Literal
-from uuid import uuid4
+from ulid import ULID
 from sqlmodel import Session, select
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
@@ -23,7 +23,7 @@ async def create_role(
     await rbac_check(request, current_user, "create", "role_xxx", db_session)
 
     # Complete the role object
-    role.role_uuid = f"role_{uuid4()}"
+    role.role_uuid = f"role_{ULID()}"
     role.creation_date = str(datetime.now())
     role.update_date = str(datetime.now())
 

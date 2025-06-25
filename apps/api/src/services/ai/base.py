@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from uuid import uuid4
+from ulid import ULID
 from langchain.agents import AgentExecutor
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import Chroma
@@ -112,7 +112,7 @@ def ask_ai(
 
 def get_chat_session_history(aichat_uuid: Optional[str] = None) -> Dict[str, Any]:
     """Get or create a new chat session history"""
-    session_id = aichat_uuid if aichat_uuid else f"aichat_{uuid4()}"
+    session_id = aichat_uuid if aichat_uuid else f"aichat_{ULID()}"
 
     LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string

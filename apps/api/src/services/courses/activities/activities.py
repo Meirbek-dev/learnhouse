@@ -16,7 +16,7 @@ from src.db.courses.activities import (
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.users import AnonymousUser, PublicUser
 from fastapi import HTTPException, Request
-from uuid import uuid4
+from ulid import ULID
 from datetime import datetime
 
 from src.services.payments.payments_access import check_activity_paid_access
@@ -58,7 +58,7 @@ async def create_activity(
     # Create Activity
     activity = Activity(**activity_object.model_dump())
 
-    activity.activity_uuid = str(f"activity_{uuid4()}")
+    activity.activity_uuid = str(f"activity_{ULID()}")
     activity.creation_date = str(datetime.now())
     activity.update_date = str(datetime.now())
     activity.org_id = chapter.org_id

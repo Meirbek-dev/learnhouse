@@ -18,7 +18,7 @@ from src.db.courses.course_chapters import CourseChapter
 from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.activities.uploads.pdfs import upload_pdf
 from fastapi import HTTPException, status, UploadFile, Request
-from uuid import uuid4
+from ulid import ULID
 from datetime import datetime
 
 
@@ -64,7 +64,7 @@ async def create_documentpdf_activity(
     course = db_session.exec(statement).first()
 
     # create activity uuid
-    activity_uuid = f"activity_{uuid4()}"
+    activity_uuid = f"activity_{ULID()}"
 
     # check if pdf_file is not None
     if not pdf_file:

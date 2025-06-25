@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Literal
-from uuid import uuid4
+from ulid import ULID
 from sqlmodel import Session, select
 from src.db.organization_config import (
     AIOrgConfig,
@@ -142,7 +142,7 @@ async def create_org(
         )
 
     # Complete the org object
-    org.org_uuid = f"org_{uuid4()}"
+    org.org_uuid = f"org_{ULID()}"
     org.creation_date = str(datetime.now())
     org.update_date = str(datetime.now())
 
@@ -241,7 +241,7 @@ async def create_org_with_config(
         )
 
     # Complete the org object
-    org.org_uuid = f"org_{uuid4()}"
+    org.org_uuid = f"org_{ULID()}"
     org.creation_date = str(datetime.now())
     org.update_date = str(datetime.now())
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Literal
-from uuid import uuid4
+from ulid import ULID
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
 from src.security.features_utils.usage import (
@@ -48,7 +48,7 @@ async def create_user(
     await rbac_check(request, current_user, "create", "user_x", db_session)
 
     # Complete the user object
-    user.user_uuid = f"user_{uuid4()}"
+    user.user_uuid = f"user_{ULID()}"
     user.password = security_hash_password(user_object.password)
     user.email_verified = False
     user.creation_date = str(datetime.now())
@@ -177,7 +177,7 @@ async def create_user_without_org(
     await rbac_check(request, current_user, "create", "user_x", db_session)
 
     # Complete the user object
-    user.user_uuid = f"user_{uuid4()}"
+    user.user_uuid = f"user_{ULID()}"
     user.password = security_hash_password(user_object.password)
     user.email_verified = False
     user.creation_date = str(datetime.now())
@@ -311,7 +311,7 @@ async def update_user_avatar(
     # Upload thumbnail
     if avatar_file and avatar_file.filename:
         name_in_disk = (
-            f"{user.user_uuid}_avatar_{uuid4()}.{avatar_file.filename.split('.')[-1]}"
+            f"{user.user_uuid}_avatar_{ULID()}.{avatar_file.filename.split('.')[-1]}"
         )
         await upload_avatar(avatar_file, name_in_disk, user.user_uuid)
 

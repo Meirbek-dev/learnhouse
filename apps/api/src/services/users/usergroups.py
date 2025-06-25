@@ -1,7 +1,7 @@
 from datetime import datetime
 import logging
 from typing import Literal
-from uuid import uuid4
+from ulid import ULID
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 from src.security.features_utils.usage import (
@@ -50,7 +50,7 @@ async def create_usergroup(
     check_limits_with_usage("courses", org.id, db_session)
 
     # Complete the object
-    usergroup.usergroup_uuid = f"usergroup_{uuid4()}"
+    usergroup.usergroup_uuid = f"usergroup_{ULID()}"
     usergroup.creation_date = str(datetime.now())
     usergroup.update_date = str(datetime.now())
 

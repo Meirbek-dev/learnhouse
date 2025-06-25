@@ -73,7 +73,7 @@ async def send_reset_password_code(
         return "".join(random.choice(letters_and_digits) for _ in range(length))
 
     generated_reset_code = generate_code()
-    reset_email_invite_uuid = f"reset_email_invite_code_{uuid.uuid4()}"
+    reset_email_invite_uuid = f"reset_email_invite_code_{uuid.ULID()}"
 
     ttl = int(datetime.now().timestamp()) + 60 * 60 * 1  # 1 hour
 

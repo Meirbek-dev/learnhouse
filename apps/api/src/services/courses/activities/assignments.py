@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Literal
-from uuid import uuid4
+from ulid import ULID
 from fastapi import HTTPException, Request, UploadFile
 from sqlmodel import Session, select
 
@@ -73,7 +73,7 @@ async def create_assignment(
     # Create Assignment
     assignment = Assignment(**assignment_object.model_dump())
 
-    assignment.assignment_uuid = str(f"assignment_{uuid4()}")
+    assignment.assignment_uuid = str(f"assignment_{ULID()}")
     assignment.creation_date = str(datetime.now())
     assignment.update_date = str(datetime.now())
     assignment.org_id = course.org_id
@@ -337,7 +337,7 @@ async def create_assignment_task(
     # Create Assignment Task
     assignment_task = AssignmentTask(**assignment_task_object.model_dump())
 
-    assignment_task.assignment_task_uuid = str(f"assignmenttask_{uuid4()}")
+    assignment_task.assignment_task_uuid = str(f"assignmenttask_{ULID()}")
     assignment_task.creation_date = str(datetime.now())
     assignment_task.update_date = str(datetime.now())
     assignment_task.org_id = course.org_id
@@ -494,7 +494,7 @@ async def put_assignment_task_reference_file(
     # Upload reference file
     if reference_file and reference_file.filename and activity and org:
         name_in_disk = (
-            f"{assignment_task_uuid}{uuid4()}.{reference_file.filename.split('.')[-1]}"
+            f"{assignment_task_uuid}{ULID()}.{reference_file.filename.split('.')[-1]}"
         )
         await upload_reference_file(
             reference_file,
@@ -580,7 +580,7 @@ async def put_assignment_task_submission_file(
 
     # Upload submission file
     if sub_file and sub_file.filename and activity and org:
-        name_in_disk = f"{assignment_task_uuid}_sub_{current_user.email}_{uuid4()}.{sub_file.filename.split('.')[-1]}"
+        name_in_disk = f"{assignment_task_uuid}_sub_{current_user.email}_{ULID()}.{sub_file.filename.split('.')[-1]}"
         await upload_submission_file(
             sub_file,
             name_in_disk,
@@ -817,7 +817,7 @@ async def handle_assignment_task_submission(
 
         assignment_task_submission = AssignmentTaskSubmission(
             assignment_task_submission_uuid=assignment_task_submission_uuid
-            or f"assignmenttasksubmission_{uuid4()}",
+            or f"assignmenttasksubmission_{ULID()}",
             task_submission=model_data["task_submission"],
             grade=0,  # Always start with 0 for new submissions
             task_submission_grade_feedback="",  # Start with empty feedback
@@ -1167,7 +1167,7 @@ async def create_assignment_submission(
         user_id=current_user.id,
         assignment_id=assignment.id,  # type: ignore
         grade=0,
-        assignmentusersubmission_uuid=str(f"assignmentusersubmission_{uuid4()}"),
+        assignmentusersubmission_uuid=str(f"assignmentusersubmission_{ULID()}"),
         submission_status=AssignmentUserSubmissionStatus.SUBMITTED,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),

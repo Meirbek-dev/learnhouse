@@ -21,7 +21,7 @@ from src.db.courses.course_chapters import CourseChapter
 from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.activities.uploads.videos import upload_video
 from fastapi import HTTPException, status, UploadFile, Request
-from uuid import uuid4
+from ulid import ULID
 from datetime import datetime
 
 
@@ -101,7 +101,7 @@ async def create_video_activity(
     course = db_session.exec(statement).first()
 
     # generate activity_uuid
-    activity_uuid = str(f"activity_{uuid4()}")
+    activity_uuid = str(f"activity_{ULID()}")
 
     # Validate video file and get format
     video_format = validate_video_file(video_file)
@@ -200,7 +200,7 @@ async def create_external_video_activity(
         )
 
     # generate activity_uuid
-    activity_uuid = str(f"activity_{uuid4()}")
+    activity_uuid = str(f"activity_{ULID()}")
 
     # convert details to dict
     details = json.loads(data.details)

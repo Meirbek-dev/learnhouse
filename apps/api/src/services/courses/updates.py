@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List
-from uuid import uuid4
+from ulid import ULID
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, col, select
 from src.db.courses.course_updates import (
@@ -43,7 +43,7 @@ async def create_update(
     await rbac_check(request, course.course_uuid, current_user, "update", db_session)
 
     # Generate UUID
-    courseupdate_uuid = str(f"courseupdate_{uuid4()}")
+    courseupdate_uuid = str(f"courseupdate_{ULID()}")
 
     update = CourseUpdate(
         **update_object.model_dump(),

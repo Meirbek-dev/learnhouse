@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import uuid4
+from ulid import ULID
 from src.db.courses.chapter_activities import ChapterActivity
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
@@ -33,7 +33,7 @@ async def create_user_trail(
     trail.creation_date = str(datetime.now())
     trail.update_date = str(datetime.now())
     trail.org_id = trail_object.org_id
-    trail.trail_uuid = str(f"trail_{uuid4()}")
+    trail.trail_uuid = str(f"trail_{ULID()}")
 
     # create trail
     db_session.add(trail)
