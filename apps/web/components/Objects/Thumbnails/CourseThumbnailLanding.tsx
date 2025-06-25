@@ -11,6 +11,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import UserAvatar from '@components/Objects/UserAvatar';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { Button } from '@components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import { getUriWithOrg } from '@services/config/config';
 import { deleteCourseFromBackend } from '@services/courses/courses';
@@ -209,13 +210,18 @@ const CourseThumbnailLanding: FC<PropsType> = ({ course, orgslug, customLink }) 
             </div>
           )}
         </div>
-        <Link
-          prefetch
-          href={customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
-          className="inline-flex w-full items-center justify-center rounded-lg bg-black px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800"
+        <Button
+          asChild
+          size="sm"
+          className="w-full"
         >
-          {t('startLearningButton')}
-        </Link>
+          <Link
+            prefetch
+            href={customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+          >
+            {t('startLearningButton')}
+          </Link>
+        </Button>
       </div>
     </div>
   );

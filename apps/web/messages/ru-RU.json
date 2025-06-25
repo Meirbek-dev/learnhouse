@@ -1959,8 +1959,8 @@
           "newCustomLinkDefaultLabel": "Ссылка",
           "saveButton": "Сохранить изменения",
           "savingButton": "Сохранение...",
-          "xPlaceholder": "URL-адрес профиля X",
           "tiktokPlaceholder": "URL-адрес профиля TikTok",
+          "xPlaceholder": "URL-адрес профиля X",
           "youtubePlaceholder": "URL-адрес канала YouTube"
         },
         "customLinksTitle": "Пользовательские ссылки",
@@ -2855,6 +2855,7 @@
   "HomePage": {
     "Collections": {
       "collectionOfCourses": "Коллекции курсов от {orgName}",
+      "newCollection": "Создать коллекцию",
       "noContent": "Коллекции отсутствуют",
       "noContentUserAdmin": "Создавайте коллекции для группировки курсов",
       "title": "Коллекции"

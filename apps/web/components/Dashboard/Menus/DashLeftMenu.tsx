@@ -50,9 +50,9 @@ function DashLeftMenu() {
     <div
       style={{
         background:
-          'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(271.56% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(20 19 19)',
+          'linear-gradient(0deg, rgb(8, 28, 39) 0%, rgb(2, 74, 112) 100%), radial-gradient(271.56% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(20 19 19)',
       }}
-      className="sticky top-0 flex h-screen w-[90px] flex-col bg-black text-white shadow-xl"
+      className="sticky top-0 flex h-screen w-[90px] flex-col text-white shadow-xl"
     >
       <div className="flex h-full flex-col">
         <div className="mt-6 flex h-auto">
