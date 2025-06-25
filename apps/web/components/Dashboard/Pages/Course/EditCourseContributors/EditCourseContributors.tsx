@@ -1,3 +1,5 @@
+'use client';
+
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';

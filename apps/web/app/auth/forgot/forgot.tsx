@@ -50,7 +50,7 @@ function ForgotPasswordClient() {
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
       <div className="flex h-screen flex-col items-center justify-center bg-neutral-100">
-        <div className="border-2 bg-white px-10 py-6">
+        <div className="rounded-xl border-2 bg-white px-10 py-6 shadow-lg">
           <div className="flex justify-center pb-6">
             <Link
               prefetch

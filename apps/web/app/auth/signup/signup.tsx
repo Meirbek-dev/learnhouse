@@ -43,7 +43,7 @@ function SignUpClient(props: SignUpClientProps) {
 
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-neutral-100">
-      <div className="rounded-xl border-2 bg-white p-12">
+      <div className="rounded-xl border-2 bg-white p-12 shadow-lg">
         <div className="flex justify-center pb-8">
           <Link
             prefetch

@@ -1,7 +1,7 @@
 'use client';
 import { blackA } from '@radix-ui/colors';
 import * as Dialog from '@radix-ui/react-dialog';
-import { keyframes, styled } from '@stitches/react';
+import styled, { keyframes } from 'styled-components';
 import { AlertTriangle, Info } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -85,40 +85,46 @@ const contentClose = keyframes({
   '100%': { opacity: 0, transform: 'translate(-50%, -52%) scale(.96)' },
 });
 
-const DialogOverlay = styled(Dialog.Overlay, {
-  'backgroundColor': blackA.blackA9,
-  'position': 'fixed',
-  'zIndex': 500,
-  'inset': 0,
-  'animation': `${overlayShow} 150ms cubic-bezier(0.16, 1, 0.3, 1)`,
-  '&[data-state="closed"]': {
-    animation: `${overlayClose} 150ms cubic-bezier(0.16, 1, 0.3, 1)`,
-  },
-});
+const DialogOverlay = styled(Dialog.Overlay)`
+  background-color: ${blackA.blackA9};
+  position: fixed;
+  z-index: 500;
+  inset: 0;
+  animation: ${overlayShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
 
-const DialogContent = styled(Dialog.Content, {
-  'backgroundColor': 'white',
-  'borderRadius': 18,
-  'zIndex': 501,
-  'boxShadow': 'hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px',
-  'position': 'fixed',
-  'top': '50%',
-  'left': '50%',
-  'transform': 'translate(-50%, -50%)',
-  'width': 'auto',
-  'minWidth': '500px',
-  'maxWidth': '600px',
-  'overflow': 'visible',
-  'height': 'auto',
-  'maxHeight': '85vh',
-  'padding': '24px',
-  'animation': `${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1)`,
-  '&:focus': { outline: 'none' },
+  &[data-state='closed'] {
+    animation: ${overlayClose} 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+`;
 
-  '&[data-state="closed"]': {
-    animation: `${contentClose} 150ms cubic-bezier(0.16, 1, 0.3, 1)`,
-  },
-  'transition': 'max-height 0.3s ease-out',
-});
+const DialogContent = styled(Dialog.Content)`
+  background-color: white;
+  border-radius: 18px;
+  z-index: 501;
+  box-shadow:
+    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: auto;
+  min-width: 500px;
+  max-width: 600px;
+  overflow: visible;
+  height: auto;
+  max-height: 85vh;
+  padding: 24px;
+  animation: ${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: max-height 0.3s ease-out;
+
+  &:focus {
+    outline: none;
+  }
+
+  &[data-state='closed'] {
+    animation: ${contentClose} 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+`;
 
 export default ConfirmationModal;
