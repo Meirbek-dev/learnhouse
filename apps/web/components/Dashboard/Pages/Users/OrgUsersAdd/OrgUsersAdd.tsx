@@ -10,9 +10,12 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
 import { inviteBatchUsers } from '@services/organizations/invites';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { Label } from '@components/ui/label';
 
 function OrgUsersAdd() {
   const org = useOrg() as any;
@@ -78,10 +81,10 @@ function OrgUsersAdd() {
               <h2 className="text-md text-gray-500">{t('description')}</h2>
             </div>
             <div className="mx-auto flex space-x-2">
-              <textarea
+              <Textarea
                 value={invitedUsers}
                 onChange={(e) => setInvitedUsers(e.target.value)}
-                className="h-[200px] w-full rounded-md border bg-gray-100/40 px-3 py-2 placeholder:italic placeholder:text-slate-300"
+                className="h-[200px] w-full"
                 placeholder={t('textAreaPlaceholder')}
                 name="invitedUsers"
                 id="invitedUsersTextArea"
@@ -89,29 +92,36 @@ function OrgUsersAdd() {
             </div>
             <div className="mx-auto my-5 ml-2 flex items-center justify-between space-x-4">
               <div className="flex items-center space-x-2">
-                <label
+                <Label
                   htmlFor="inviteCodeSelect"
                   className="flex items-center"
                 >
                   {t('inviteCodeLabel')}
-                </label>
-                <select
-                  id="inviteCodeSelect"
-                  onChange={(e) => setSelectedInviteCode(e.target.value)}
+                </Label>
+                <Select
                   value={selectedInviteCode || ''}
-                  className="rounded-md border px-3 py-1 text-gray-400"
-                  disabled={!invites || invites.length === 0}
+                  onValueChange={setSelectedInviteCode}
                 >
-                  {invites?.length === 0 && <option value="">{t('noInviteCodesAvailable')}</option>}
-                  {invites?.map((invite: any) => (
-                    <option
-                      key={invite.invite_code_uuid}
-                      value={invite.invite_code_uuid}
-                    >
-                      {invite.invite_code}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger
+                    id="inviteCodeSelect"
+                    disabled={!invites || invites.length === 0}
+                    className="w-fit min-w-32"
+                  >
+                    <SelectValue
+                      placeholder={invites?.length === 0 ? t('noInviteCodesAvailable') : t('selectInviteCode')}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {invites?.map((invite: any) => (
+                      <SelectItem
+                        key={invite.invite_code_uuid}
+                        value={invite.invite_code_uuid}
+                      >
+                        {invite.invite_code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <ToolTip
                   content={t('inviteCodeTooltip')}
                   sideOffset={8}

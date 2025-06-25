@@ -20,6 +20,7 @@ import { toast } from 'react-hot-toast';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { Button } from '@components/ui/button';
+import { Checkbox } from '@components/ui/checkbox';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
@@ -1071,20 +1072,18 @@ const ExperienceEditor: FC<{
                   </div>
                   <div className="flex items-end">
                     <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         id={`current-${index}`}
                         checked={experience.current}
-                        onChange={(e) => {
+                        onCheckedChange={(checked) => {
                           const newExperiences = [...section.experiences];
                           newExperiences[index] = {
                             ...experience,
-                            current: e.target.checked,
-                            endDate: e.target.checked ? undefined : experience.endDate,
+                            current: !!checked,
+                            endDate: checked ? undefined : experience.endDate,
                           };
                           onChange({ ...section, experiences: newExperiences });
                         }}
-                        className="rounded border-gray-300"
                       />
                       <Label htmlFor={`current-${index}`}>{t('ExperienceEditor.currentLabel')}</Label>
                     </div>
@@ -1265,20 +1264,18 @@ const EducationEditor: FC<{
                   </div>
                   <div className="flex items-end">
                     <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         id={`current-edu-${index}`}
                         checked={edu.current}
-                        onChange={(e) => {
+                        onCheckedChange={(checked) => {
                           const newEducation = [...section.education];
                           newEducation[index] = {
                             ...edu,
-                            current: e.target.checked,
-                            endDate: e.target.checked ? undefined : edu.endDate,
+                            current: !!checked,
+                            endDate: checked ? undefined : edu.endDate,
                           };
                           onChange({ ...section, education: newEducation });
                         }}
-                        className="rounded border-gray-300"
                       />
                       <Label htmlFor={`current-edu-${index}`}>{t('EducationEditor.currentLabel')}</Label>
                     </div>

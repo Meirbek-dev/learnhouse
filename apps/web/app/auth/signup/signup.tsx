@@ -13,6 +13,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import UserAvatar from '@components/Objects/UserAvatar';
+import { Input } from '@components/ui/input';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { validateInviteCode } from '@services/organizations/invites';
 import { joinOrg } from '@services/organizations/orgs';
@@ -204,9 +205,9 @@ const NoTokenScreen = (_props: any) => {
             <MailWarning size={18} />
             <span>{t('inviteCodeRequired', { orgName: org?.name })}</span>
           </p>
-          <input
+          <Input
             onChange={handleInviteCodeChange}
-            className="h-[50px] w-[300px] rounded-lg bg-white px-5 outline-2 outline-gray-200"
+            className="h-[50px] w-[300px]"
             placeholder={t('enterInviteCode')}
             type="text"
           />

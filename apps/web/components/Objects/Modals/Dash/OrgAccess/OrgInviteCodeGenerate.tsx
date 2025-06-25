@@ -8,6 +8,7 @@ import useSWR, { mutate } from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { createInviteCode, createInviteCodeWithUserGroup } from '@services/organizations/invites';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -69,19 +70,24 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
           <div className="mx-auto flex items-center space-x-4 pt-3">
             {usergroups?.length >= 1 && (
               <div className="flex items-center space-x-4">
-                <select
-                  defaultValue={usergroup_id}
-                  className="flex w-fit rounded-md border-2 border-slate-300 bg-gray-100 p-2 text-sm"
+                <Select
+                  value={String(usergroup_id)}
+                  onValueChange={(value) => setUsergroup_id(Number(value))}
                 >
-                  {usergroups?.map((usergroup: any) => (
-                    <option
-                      key={usergroup.id}
-                      value={usergroup.id}
-                    >
-                      {usergroup.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-fit min-w-32">
+                    <SelectValue placeholder={t('selectUserGroup')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {usergroups?.map((usergroup: any) => (
+                      <SelectItem
+                        key={usergroup.id}
+                        value={String(usergroup.id)}
+                      >
+                        {usergroup.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
                 <div className="">
                   <button

@@ -25,6 +25,7 @@ import * as React from 'react';
 
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { Textarea } from '@components/ui/textarea';
 
 // Add new type for script-based embeds
 const SCRIPT_BASED_EMBEDS = {
@@ -773,11 +774,11 @@ function EmbedObjectsComponent(props: any) {
               ) : (
                 <>
                   <div className="relative mb-2">
-                    <textarea
+                    <Textarea
                       ref={codeInputRef}
                       value={embedCode}
                       onChange={handleCodeChange}
-                      className="focus:outline-hidden h-32 w-full rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                      className="h-32 w-full font-mono text-sm"
                       placeholder={t('codePlaceholder')}
                     />
                   </div>

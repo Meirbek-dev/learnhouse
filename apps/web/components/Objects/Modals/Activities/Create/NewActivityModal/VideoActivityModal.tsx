@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 
 import { constructAcceptValue } from '@/lib/constants';
 import { Button } from '@components/ui/button';
+import { Checkbox } from '@components/ui/checkbox';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
@@ -146,35 +147,31 @@ const VideoSettingsForm = ({
       </div>
 
       <div className="mt-4 flex items-center space-x-6">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
+        <Label className="flex items-center space-x-2">
+          <Checkbox
             checked={videoDetails.autoplay}
-            onChange={(e) =>
+            onCheckedChange={(checked) =>
               setVideoDetails({
                 ...videoDetails,
-                autoplay: e.target.checked,
+                autoplay: !!checked,
               })
             }
-            className="rounded border-gray-300 text-black focus:ring-black"
           />
           <span className="text-sm text-gray-700">{t('autoplay')}</span>
-        </label>
+        </Label>
 
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
+        <Label className="flex items-center space-x-2">
+          <Checkbox
             checked={videoDetails.muted}
-            onChange={(e) =>
+            onCheckedChange={(checked) =>
               setVideoDetails({
                 ...videoDetails,
-                muted: e.target.checked,
+                muted: !!checked,
               })
             }
-            className="rounded border-gray-300 text-black focus:ring-black"
           />
           <span className="text-sm text-gray-700">{t('startMuted')}</span>
-        </label>
+        </Label>
       </div>
     </div>
   );

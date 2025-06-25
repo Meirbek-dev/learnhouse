@@ -68,41 +68,63 @@ const TooltipContent = styled(TooltipPrimitive.Content).withConfig({
   font-size: 12px;
   line-height: 1;
   color: black;
-  background-color: rgba(217, 217, 217, 0.50);
+  background-color: rgba(217, 217, 217, 0.5);
   z-index: 500;
-  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  box-shadow:
+    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
   user-select: none;
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
 
-  ${(props) => props.slateBlack && css`
-    background-color: #0d0d0d;
-    color: white;
-  `}
+  ${(props) =>
+    props.slateBlack &&
+    css`
+      background-color: #0d0d0d;
+      color: white;
+    `}
 
-  ${(props) => props.unstyled && css`
-    padding: 0;
-    background-color: transparent;
-    box-shadow: none;
-    border-radius: 0;
-    font-size: inherit;
-    line-height: inherit;
-    color: inherit;
-  `}
+  ${(props) =>
+    props.unstyled &&
+    css`
+      padding: 0;
+      background-color: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      font-size: inherit;
+      line-height: inherit;
+      color: inherit;
+    `}
 
   &[data-state="delayed-open"] {
-    &[data-side="top"] { animation-name: ${slideDownAndFade}; }
-    &[data-side="right"] { animation-name: ${slideLeftAndFade}; }
-    &[data-side="bottom"] { animation-name: ${slideUpAndFade}; }
-    &[data-side="left"] { animation-name: ${slideRightAndFade}; }
+    &[data-side='top'] {
+      animation-name: ${slideDownAndFade};
+    }
+    &[data-side='right'] {
+      animation-name: ${slideLeftAndFade};
+    }
+    &[data-side='bottom'] {
+      animation-name: ${slideUpAndFade};
+    }
+    &[data-side='left'] {
+      animation-name: ${slideRightAndFade};
+    }
   }
 
-  &[data-state="closed"] {
-    &[data-side="top"] { animation-name: ${closeAndFade}; }
-    &[data-side="right"] { animation-name: ${closeAndFade}; }
-    &[data-side="bottom"] { animation-name: ${closeAndFade}; }
-    &[data-side="left"] { animation-name: ${closeAndFade}; }
+  &[data-state='closed'] {
+    &[data-side='top'] {
+      animation-name: ${closeAndFade};
+    }
+    &[data-side='right'] {
+      animation-name: ${closeAndFade};
+    }
+    &[data-side='bottom'] {
+      animation-name: ${closeAndFade};
+    }
+    &[data-side='left'] {
+      animation-name: ${closeAndFade};
+    }
   }
 `;
 

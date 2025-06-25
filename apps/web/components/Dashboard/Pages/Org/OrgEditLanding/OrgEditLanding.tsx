@@ -25,6 +25,7 @@ import useSWR from 'swr';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
+import { Checkbox } from '@components/ui/checkbox';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
@@ -390,11 +391,10 @@ const OrgEditLanding = () => {
           </div>
           <div className="flex items-center space-x-4">
             <label className="relative inline-flex cursor-pointer items-center">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={!!isLandingEnabled}
-                onChange={() => setIsLandingEnabled(!isLandingEnabled)}
-                className="peer sr-only"
+                onCheckedChange={() => setIsLandingEnabled(!isLandingEnabled)}
+                className="sr-only"
               />
               <div className="peer-focus:outline-hidden peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300" />
             </label>

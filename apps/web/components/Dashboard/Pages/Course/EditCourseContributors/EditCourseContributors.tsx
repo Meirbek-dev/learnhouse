@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -538,12 +539,10 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                           >
                             <div className="flex items-center space-x-3">
                               <div onClick={(e) => e.stopPropagation()}>
-                                <input
-                                  type="checkbox"
+                                <Checkbox
                                   checked={isSelected}
-                                  onChange={() => !isExistingContributor && handleUserSelect(user.username)}
+                                  onCheckedChange={() => !isExistingContributor && handleUserSelect(user.username)}
                                   disabled={isExistingContributor}
-                                  className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
                                 />
                               </div>
                               <UserAvatar
@@ -608,13 +607,12 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[30px]">
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={masterCheckboxChecked}
-                            onChange={(e) => {
-                              setMasterCheckboxChecked(e.target.checked);
+                            onCheckedChange={(checked) => {
+                              setMasterCheckboxChecked(!!checked);
                               if (contributors) {
-                                if (e.target.checked) {
+                                if (checked) {
                                   // Select all non-creator contributors
                                   const nonCreatorContributors = contributors
                                     .filter((c) => c.authorship !== 'CREATOR')
@@ -625,7 +623,6 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 }
                               }
                             }}
-                            className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                           />
                         </TableHead>
                         <TableHead className="w-[50px]" />
@@ -656,12 +653,10 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                           }}
                         >
                           <TableCell onClick={(e) => e.stopPropagation()}>
-                            <input
-                              type="checkbox"
+                            <Checkbox
                               checked={selectedContributors.includes(contributor.user_id)}
-                              onChange={() => handleContributorSelect(contributor.user_id)}
+                              onCheckedChange={() => handleContributorSelect(contributor.user_id)}
                               disabled={contributor.authorship === 'CREATOR'}
-                              className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
                             />
                           </TableCell>
                           <TableCell>

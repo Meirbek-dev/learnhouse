@@ -26,6 +26,7 @@ import type { ChangeEvent, FC } from 'react';
 import { createApi } from 'unsplash-js';
 
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Input } from '@components/ui/input';
 
 const unsplash = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
@@ -142,7 +143,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
     <div className="flex h-full flex-col">
       <div className="space-y-4 p-4">
         <div className="relative">
-          <input
+          <Input
             type="text"
             value={query}
             onChange={handleSearch}

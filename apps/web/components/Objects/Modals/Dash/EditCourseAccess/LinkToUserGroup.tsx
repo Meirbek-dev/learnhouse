@@ -9,6 +9,7 @@ import useSWR, { mutate } from 'swr';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -61,19 +62,24 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
               {t('userGroupNameLabel')}
             </span>
 
-            <select
-              onChange={(e) => setSelectedUserGroup(e.target.value)}
+            <Select
+              onValueChange={setSelectedUserGroup}
               defaultValue={selectedUserGroup}
             >
-              {usergroups?.map((group: any) => (
-                <option
-                  key={group.id}
-                  value={group.id}
-                >
-                  {group.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-fit min-w-32">
+                <SelectValue placeholder={t('selectUserGroup')} />
+              </SelectTrigger>
+              <SelectContent>
+                {usergroups?.map((group: any) => (
+                  <SelectItem
+                    key={group.id}
+                    value={group.id}
+                  >
+                    {group.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
         {usergroups?.length == 0 && (

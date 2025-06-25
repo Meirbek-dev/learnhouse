@@ -11,6 +11,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import UserAvatar from '@components/Objects/UserAvatar';
+import { Input } from '@components/ui/input';
 import { getUriWithOrg } from '@services/config/config';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { searchOrgContent } from '@services/search/search';
@@ -281,7 +282,7 @@ function SearchPage() {
               onSubmit={handleSearch}
               className="group relative mb-6"
             >
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
