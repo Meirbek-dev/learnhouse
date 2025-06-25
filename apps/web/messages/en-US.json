@@ -548,7 +548,57 @@
       "altText": "User Avatar"
     },
     "UserProfilePopup": {
-      "loadingError": "Failed to load user data"
+      "loadingError": "Failed to load user data",
+      "Icons": {
+        "nature": "Nature",
+        "technology": "Technology",
+        "business": "Business",
+        "education": "Education",
+        "health": "Health",
+        "art": "Art",
+        "science": "Science",
+        "travel": "Travel",
+        "food": "Food",
+        "sports": "Sports",
+        "music": "Music",
+        "fashion": "Fashion",
+        "history": "History",
+        "architecture": "Architecture",
+        "fitness": "Fitness",
+        "photography": "Photography",
+        "biology": "Biology",
+        "finance": "Finance",
+        "lifestyle": "Lifestyle",
+        "gaming": "Gaming",
+        "briefcase": "Work",
+        "graduation-cap": "Education",
+        "map-pin": "Location",
+        "building-2": "Organization",
+        "speciality": "Specialty",
+        "globe": "Website",
+        "laptop-2": "Technology",
+        "award": "Achievement",
+        "book-open": "Learning",
+        "link": "Link",
+        "users": "Community",
+        "calendar": "Schedule",
+        "cpu": "Technology",
+        "flower": "Nature",
+        "heart": "Health",
+        "palette": "Art",
+        "microscope": "Science",
+        "plane": "Travel",
+        "utensils": "Food",
+        "dumbbell": "Sports",
+        "shirt": "Fashion",
+        "book": "History",
+        "building": "Architecture",
+        "bike": "Fitness",
+        "camera": "Photography",
+        "coins": "Finance",
+        "coffee": "Lifestyle",
+        "gamepad": "Gaming"
+      }
     },
     "VideoModal": {
       "activityName": "Activity Name",
@@ -2872,7 +2922,8 @@
   },
   "LandingCustom": {
     "loadingCourses": "Loading courses...",
-    "noFeaturedCourses": "No featured courses selected"
+    "noFeaturedCourses": "No featured courses selected",
+    "noImage": "No Image"
   },
   "NewCollectionPage": {
     "cancelButton": "Cancel",

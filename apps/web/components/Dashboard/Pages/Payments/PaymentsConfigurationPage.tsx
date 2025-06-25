@@ -1,4 +1,5 @@
 'use client';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import {
   BarChart2,
@@ -15,22 +16,19 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import FormLayout, {
-  ButtonBlack,
-  Flex,
-  FormField,
-  FormLabelAndMessage,
-  Input,
-} from '@components/Objects/StyledElements/Form/Form';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
 import { getUriWithoutOrg } from '@services/config/config';
 import {
   deletePaymentConfig,
@@ -274,9 +272,23 @@ interface EditStripeConfigModalProps {
   onClose: () => void;
 }
 
+const createStripeConfigSchema = (t: (key: string) => string) =>
+  z.object({
+    stripeAccountId: z.string().min(1, t('stripeAccountIdRequired')),
+  });
+
+type StripeConfigFormValues = z.infer<ReturnType<typeof createStripeConfigSchema>>;
+
 const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId, accessToken, isOpen, onClose }) => {
-  const [stripeAccountId, setStripeAccountId] = useState('');
   const t = useTranslations('Payments.Configuration');
+  const validationSchema = createStripeConfigSchema(t);
+
+  const form = useForm<StripeConfigFormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      stripeAccountId: '',
+    },
+  });
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -284,7 +296,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
         const config = await getPaymentConfigs(orgId, accessToken);
         const stripeConfig = config.find((c: any) => c.id === configId);
         if (stripeConfig?.provider_specific_id) {
-          setStripeAccountId(stripeConfig.provider_specific_id || '');
+          form.setValue('stripeAccountId', stripeConfig.provider_specific_id || '');
         }
       } catch (error) {
         console.error('Error fetching Stripe configuration:', error);
@@ -295,13 +307,13 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
     if (isOpen) {
       fetchConfig();
     }
-  }, [isOpen, orgId, configId, accessToken, t]);
+  }, [isOpen, orgId, configId, accessToken, t, form]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: StripeConfigFormValues) => {
     const loadingToast = toast.loading(t('updatingConfig'));
     try {
       const stripe_config = {
-        stripe_account_id: stripeAccountId,
+        stripe_account_id: values.stripeAccountId,
       };
       await updateStripeAccountID(orgId, stripe_config, accessToken);
       toast.success(t('configUpdatedSuccess'), { id: loadingToast });
@@ -320,25 +332,39 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
       dialogDescription={t('editModalDescription')}
       onOpenChange={onClose}
       dialogContent={
-        <FormLayout onSubmit={handleSubmit}>
-          <FormField name="stripe-account-id">
-            <FormLabelAndMessage label={t('stripeAccountIdLabel')} />
-            <Input
-              type="text"
-              value={stripeAccountId}
-              onChange={(e) => setStripeAccountId(e.target.value)}
-              placeholder="acct_..."
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={form.control}
+              name="stripeAccountId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('stripeAccountIdLabel')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="acct_..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </FormField>
-          <Flex className="mt-6 justify-end">
-            <ButtonBlack
-              type="submit"
-              className="rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-300 hover:bg-blue-600"
-            >
-              {t('saveButton')}
-            </ButtonBlack>
-          </Flex>
-        </FormLayout>
+            <div className="flex justify-end pt-4">
+              <Button
+                type="submit"
+                className="rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-300 hover:bg-blue-600"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? t('saving') : t('saveButton')}
+              </Button>
+            </div>
+          </form>
+        </Form>
       }
     />
   );

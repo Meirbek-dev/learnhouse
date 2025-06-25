@@ -49,7 +49,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               } items-stretch`}
             >
               {/* Logo */}
-              {section.illustration?.image.url && (
+              {section.illustration?.image.url && section.illustration.image.url.trim() !== '' && (
                 <div
                   className={`flex items-${section.illustration.verticalAlign} w-full p-6 ${
                     section.illustration.size === 'small'
@@ -155,11 +155,13 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               <div className="w-full flex-1 md:w-auto">
                 <div className="relative mx-auto w-full max-w-[500px] px-4 md:px-8">
                   <div className="aspect-4/3 relative w-full">
-                    <img
-                      src={section.image.url}
-                      alt={section.image.alt}
-                      className="h-full w-full rounded-lg object-contain"
-                    />
+                    {section.image.url && section.image.url.trim() !== '' && (
+                      <img
+                        src={section.image.url}
+                        alt={section.image.alt}
+                        className="h-full w-full rounded-lg object-contain"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -182,11 +184,13 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                     key={index}
                     className="flex h-[120px] w-[220px] items-center justify-center"
                   >
-                    <img
-                      src={logo.url}
-                      alt={logo.alt}
-                      className="max-h-24 max-w-[200px] object-contain transition-opacity hover:opacity-80"
-                    />
+                    {logo.url && logo.url.trim() !== '' && (
+                      <img
+                        src={logo.url}
+                        alt={logo.alt}
+                        className="max-h-24 max-w-[200px] object-contain transition-opacity hover:opacity-80"
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -215,12 +219,16 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                         border="border-4"
                         showProfilePopup
                       />
-                    ) : (
+                    ) : person.image_url && person.image_url.trim() !== '' ? (
                       <img
                         src={person.image_url}
                         alt={person.name}
                         className="nice-shadow h-full w-full rounded-full border-4 border-white object-cover"
                       />
+                    ) : (
+                      <div className="nice-shadow flex h-full w-full items-center justify-center rounded-full border-4 border-white bg-gray-200">
+                        <span className="text-xs text-gray-400">{t('noImage')}</span>
+                      </div>
                     )}
                   </div>
                   <h3 className="text-center text-lg font-semibold text-gray-900">{person.name}</h3>

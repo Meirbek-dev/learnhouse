@@ -1,16 +1,17 @@
 'use client';
-import { Form, Formik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import type { FC } from 'react';
+import { useMemo, type FC } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
-import * as Yup from 'yup';
+import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
@@ -75,22 +76,19 @@ const getOrgLabels = (t: Function) =>
     }
   });
 
-const validationSchema = Yup.object().shape({
-  name: Yup.string()
-    .required('DashPage.OrgSettings.General.Form.nameRequired')
-    .max(60, 'DashPage.OrgSettings.General.Form.nameMax'),
-  description: Yup.string()
-    .required('DashPage.OrgSettings.General.Form.descriptionRequired')
-    .max(100, 'DashPage.OrgSettings.General.Form.descriptionMax'),
-  about: Yup.string().optional().max(400, 'DashPage.OrgSettings.General.Form.aboutMax'),
-  label: Yup.string().required('DashPage.OrgSettings.General.Form.labelRequired'),
-  explore: Yup.boolean(),
-});
+const createValidationSchema = (t: (key: string, values?: any) => string) =>
+  z.object({
+    name: z.string().min(1, t('Form.nameRequired')).max(60, t('Form.nameMax')),
+    description: z.string().min(1, t('Form.descriptionRequired')).max(100, t('Form.descriptionMax')),
+    about: z.string().max(400, t('Form.aboutMax')).optional().or(z.literal('')),
+    label: z.string().min(1, t('Form.labelRequired')),
+    explore: z.boolean(),
+  });
 
 interface OrganizationValues {
   name: string;
   description: string;
-  about: string;
+  about?: string;
   label: string;
   explore: boolean;
 }
@@ -100,14 +98,18 @@ const OrgEditGeneral: FC = () => {
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
   const t = useTranslations('DashPage.OrgSettings.General');
+  const validationSchema = useMemo(() => createValidationSchema(t), [t]);
 
-  const initialValues: OrganizationValues = {
-    name: org?.name,
-    description: org?.description || '',
-    about: org?.about || '',
-    label: org?.label || '',
-    explore: org?.explore ?? false,
-  };
+  const form = useForm<OrganizationValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      name: org?.name || '',
+      description: org?.description || '',
+      about: org?.about || '',
+      label: org?.label || '',
+      explore: org?.explore ?? false,
+    },
+  });
 
   const updateOrg = async (values: OrganizationValues) => {
     const loadingToast = toast.loading(t('updatingOrg'));
@@ -123,123 +125,131 @@ const OrgEditGeneral: FC = () => {
 
   return (
     <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
-      <Formik
-        enableReinitialize
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            setSubmitting(false);
-            updateOrg(values);
-          }, 400);
-        }}
-      >
-        {({ isSubmitting, values, handleChange, errors, touched, setFieldValue }) => (
-          <Form>
-            <div className="flex flex-col gap-0">
-              <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-                <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
-                <h2 className="text-md text-gray-500">{t('description')}</h2>
-              </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(updateOrg)}>
+          <div className="flex flex-col gap-0">
+            <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+              <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
+              <h2 className="text-md text-gray-500">{t('description')}</h2>
+            </div>
 
-              <div className="mx-5 my-5 mt-0 flex flex-col lg:flex-row lg:space-x-8">
-                <div className="w-full space-y-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">
-                        {t('Form.nameLabel')}
-                        <span className="text-sm text-gray-500">
-                          ({60 - (values.name?.length || 0)} {t('Form.charsLeft')}
-                        </span>
-                      </Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={values.name}
-                        onChange={handleChange}
-                        placeholder={t('Form.namePlaceholder')}
-                        maxLength={60}
-                      />
-                      {touched.name && errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
-                    </div>
+            <div className="mx-5 my-5 mt-0 flex flex-col lg:flex-row lg:space-x-8">
+              <div className="w-full space-y-6">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t('Form.nameLabel')}
+                          <span className="text-sm text-gray-500">
+                            ({60 - (field.value?.length || 0)} {t('Form.charsLeft')})
+                          </span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t('Form.namePlaceholder')}
+                            maxLength={60}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <div>
-                      <Label htmlFor="description">
-                        {t('Form.descriptionLabel')}
-                        <span className="text-sm text-gray-500">
-                          ({100 - (values.description?.length || 0)} {t('Form.charsLeft')}
-                        </span>
-                      </Label>
-                      <Input
-                        id="description"
-                        name="description"
-                        value={values.description}
-                        onChange={handleChange}
-                        placeholder={t('Form.descriptionPlaceholder')}
-                        maxLength={100}
-                      />
-                      {touched.description && errors.description && (
-                        <p className="mt-1 text-sm text-red-500">{errors.description}</p>
-                      )}
-                    </div>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t('Form.descriptionLabel')}
+                          <span className="text-sm text-gray-500">
+                            ({100 - (field.value?.length || 0)} {t('Form.charsLeft')})
+                          </span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t('Form.descriptionPlaceholder')}
+                            maxLength={100}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <div>
-                      <Label htmlFor="label">{t('Form.labelLabel')}</Label>
-                      <Select
-                        value={values.label || ''}
-                        onValueChange={(value) => setFieldValue('label', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('Form.labelPlaceholder')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getOrgLabels(t).map((type) => (
-                            <SelectItem
-                              key={type.value}
-                              value={type.value}
-                            >
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {touched.label && errors.label && <p className="mt-1 text-sm text-red-500">{errors.label}</p>}
-                    </div>
+                  <FormField
+                    control={form.control}
+                    name="label"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('Form.labelLabel')}</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('Form.labelPlaceholder')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {getOrgLabels(t).map((type) => (
+                              <SelectItem
+                                key={type.value}
+                                value={type.value}
+                              >
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <div>
-                      <Label htmlFor="about">
-                        {t('Form.aboutLabel')}
-                        <span className="text-sm text-gray-500">
-                          ({400 - (values.about?.length || 0)} {t('Form.charsLeft')}
-                        </span>
-                      </Label>
-                      <Textarea
-                        id="about"
-                        name="about"
-                        value={values.about}
-                        onChange={handleChange}
-                        placeholder={t('Form.aboutPlaceholder')}
-                        className="min-h-[250px]"
-                        maxLength={400}
-                      />
-                      {touched.about && errors.about && <p className="mt-1 text-sm text-red-500">{errors.about}</p>}
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="about"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t('Form.aboutLabel')}
+                          <span className="text-sm text-gray-500">
+                            ({400 - (field.value?.length || 0)} {t('Form.charsLeft')})
+                          </span>
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder={t('Form.aboutPlaceholder')}
+                            className="min-h-[250px]"
+                            maxLength={400}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
-              <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-black text-white hover:bg-black/90"
-                >
-                  {isSubmitting ? t('Form.savingButton') : t('Form.saveButton')}
-                </Button>
-              </div>
             </div>
-          </Form>
-        )}
-      </Formik>
+            <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? t('Form.savingButton') : t('Form.saveButton')}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };

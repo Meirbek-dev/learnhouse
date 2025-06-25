@@ -1,11 +1,12 @@
 'use client';
-import { Form, Formik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import * as Yup from 'yup';
+import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { Button } from '@components/ui/button';
@@ -15,20 +16,25 @@ import { getUriWithoutOrg } from '@services/config/config';
 import { updatePassword } from '@services/settings/password';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  Yup.object().shape({
-    old_password: Yup.string().required(
+  z.object({
+    old_password: z.string().min(
+      1,
       t('Form.requiredField', {
         fieldName: t('currentPasswordLabel'),
       }),
     ),
-    new_password: Yup.string()
-      .required(
+    new_password: z
+      .string()
+      .min(
+        1,
         t('Form.requiredField', {
           fieldName: t('newPasswordLabel'),
         }),
       )
       .min(8, t('Form.minChars', { count: 8 })),
   });
+
+type PasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
 function UserEditPassword() {
   const session = useLHSession() as any;
@@ -37,7 +43,19 @@ function UserEditPassword() {
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
   const validationSchema = useMemo(() => createValidationSchema(t), [t]);
 
-  const updatePasswordUI = async (values: any) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<PasswordFormData>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      old_password: '',
+      new_password: '',
+    },
+  });
+
+  const onSubmit = async (values: PasswordFormData) => {
     const loadingToast = toast.loading(t('updating'));
     try {
       const user_id = session.data.user.id;
@@ -87,63 +105,46 @@ function UserEditPassword() {
         </div>
 
         <div className="px-8 py-6">
-          <Formik
-            initialValues={{ old_password: '', new_password: '' }}
-            validationSchema={validationSchema}
-            onSubmit={(values, { setSubmitting }) => {
-              setTimeout(() => {
-                setSubmitting(false);
-                updatePasswordUI(values);
-              }, 400);
-            }}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="mx-auto w-full max-w-2xl space-y-6"
           >
-            {({ isSubmitting, handleChange, errors, touched }) => (
-              <Form className="mx-auto w-full max-w-2xl space-y-6">
-                <div>
-                  <Label htmlFor="old_password">{tPassword('currentPasswordLabel')}</Label>
-                  <Input
-                    type="password"
-                    id="old_password"
-                    name="old_password"
-                    onChange={handleChange}
-                    className="mt-1"
-                  />
-                  {touched.old_password && errors.old_password && (
-                    <p className="mt-1 text-sm text-red-500">{errors.old_password}</p>
-                  )}
-                </div>
+            <div>
+              <Label htmlFor="old_password">{tPassword('currentPasswordLabel')}</Label>
+              <Input
+                type="password"
+                id="old_password"
+                {...register('old_password')}
+                className="mt-1"
+              />
+              {errors.old_password && <p className="mt-1 text-sm text-red-500">{errors.old_password.message}</p>}
+            </div>
 
-                <div>
-                  <Label htmlFor="new_password">{tPassword('newPasswordLabel')}</Label>
-                  <Input
-                    type="password"
-                    id="new_password"
-                    name="new_password"
-                    onChange={handleChange}
-                    className="mt-1"
-                  />
-                  {touched.new_password && errors.new_password && (
-                    <p className="mt-1 text-sm text-red-500">{errors.new_password}</p>
-                  )}
-                </div>
+            <div>
+              <Label htmlFor="new_password">{tPassword('newPasswordLabel')}</Label>
+              <Input
+                type="password"
+                id="new_password"
+                {...register('new_password')}
+                className="mt-1"
+              />
+              {errors.new_password && <p className="mt-1 text-sm text-red-500">{errors.new_password.message}</p>}
+            </div>
 
-                <div className="flex items-center space-x-2 rounded-md bg-amber-50 p-3 text-amber-600">
-                  <AlertTriangle size={16} />
-                  <span className="text-sm">{tPassword('logoutWarning')}</span>
-                </div>
+            <div className="flex items-center space-x-2 rounded-md bg-amber-50 p-3 text-amber-600">
+              <AlertTriangle size={16} />
+              <span className="text-sm">{tPassword('logoutWarning')}</span>
+            </div>
 
-                <div className="flex justify-end pt-2">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-black text-white hover:bg-black/90"
-                  >
-                    {isSubmitting ? tPassword('updatingButton') : tPassword('updateButton')}
-                  </Button>
-                </div>
-              </Form>
-            )}
-          </Formik>
+            <div className="flex justify-end pt-2">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? tPassword('updatingButton') : tPassword('updateButton')}
+              </Button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

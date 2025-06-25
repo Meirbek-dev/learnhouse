@@ -402,7 +402,6 @@ const OrgEditLanding = () => {
               variant="default"
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-black hover:bg-black/90"
             >
               <Save className="mr-2 h-4 w-4" />
               {isSaving ? t('savingButton') : t('saveButton')}

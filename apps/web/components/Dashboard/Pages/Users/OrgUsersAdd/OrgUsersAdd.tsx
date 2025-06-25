@@ -35,7 +35,7 @@ function OrgUsersAdd() {
     const toastId = toast.loading(t('sendingInvite'));
     try {
       const res = await inviteBatchUsers(org.id, invitedUsers, selectedInviteCode, access_token);
-      if (res.status == 200) {
+      if (res.status === 200) {
         mutate(`${getAPIUrl()}orgs/${org?.id}/invites/users`);
         toast.success(t('inviteSentSuccess'), { id: toastId });
         setInvitedUsers('');

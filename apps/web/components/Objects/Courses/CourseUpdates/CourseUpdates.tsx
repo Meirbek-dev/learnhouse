@@ -1,14 +1,15 @@
 'use client';
 
-import * as Form from '@radix-ui/react-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { format, formatDistanceToNow } from 'date-fns';
-import { useFormik } from 'formik';
 import { motion } from 'framer-motion';
 import { PencilLine, Rss, TentTree } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useLayoutEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { z } from 'zod';
 
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -16,12 +17,10 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
+import { Textarea } from '@components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -119,48 +118,46 @@ const UpdatesSection = () => {
   );
 };
 
+const createUpdateFormSchema = (t: (key: string) => string) =>
+  z.object({
+    title: z.string().min(1, t('titleRequired')),
+    content: z.string().min(1, t('contentRequired')),
+  });
+
+type UpdateFormValues = z.infer<ReturnType<typeof createUpdateFormSchema>>;
+
 const NewUpdateForm = ({ setSelectedView }: any) => {
   const org = useOrg() as any;
   const course = useCourse() as any;
   const session = useLHSession() as any;
   const t = useTranslations('Courses.CourseUpdates');
+  const validationSchema = createUpdateFormSchema(t);
 
-  const validate = (values: any) => {
-    const errors: any = {};
-
-    if (!values.title) {
-      errors.title = t('titleRequired');
-    }
-    if (!values.content) {
-      errors.content = t('contentRequired');
-    }
-
-    return errors;
-  };
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<UpdateFormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       title: '',
       content: '',
     },
-    validate,
-    onSubmit: async (values) => {
-      const body = {
-        title: values.title,
-        content: values.content,
-        course_uuid: course.courseStructure.course_uuid,
-        org_id: org.id,
-      };
-      const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
-      if (res.status === 200) {
-        toast.success(t('updateAddedSuccess'));
-        setSelectedView('list');
-        mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
-      } else {
-        toast.error(t('updateAddFailed'));
-      }
-    },
-    enableReinitialize: true,
   });
+
+  const onSubmit = async (values: UpdateFormValues) => {
+    const body = {
+      title: values.title,
+      content: values.content,
+      course_uuid: course.courseStructure.course_uuid,
+      org_id: org.id,
+    };
+    const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
+    if (res.status === 200) {
+      toast.success(t('updateAddedSuccess'));
+      setSelectedView('list');
+      form.reset();
+      mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
+    } else {
+      toast.error(t('updateAddFailed'));
+    }
+  };
 
   useEffect(() => {}, [course, org]);
 
@@ -171,48 +168,62 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
         <div className="rounded-full px-3 py-0.5 text-lg font-bold text-black">{t('addNewCourseUpdate')}</div>
       </div>
       <div className="-py-2 px-5">
-        <FormLayout onSubmit={formik.handleSubmit}>
-          <FormField name="title">
-            <FormLabelAndMessage
-              label={t('title')}
-              message={formik.errors.title}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">{t('title')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      style={{ backgroundColor: 'white' }}
+                      type="text"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <Form.Control asChild>
-              <Input
-                style={{ backgroundColor: 'white' }}
-                onChange={formik.handleChange}
-                value={formik.values.title}
-                type="text"
-                required
-              />
-            </Form.Control>
-          </FormField>
-          <FormField name="content">
-            <FormLabelAndMessage
-              label={t('content')}
-              message={formik.errors.content}
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">{t('content')}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      style={{ backgroundColor: 'white', height: '100px' }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <Form.Control asChild>
-              <Textarea
-                style={{ backgroundColor: 'white', height: '100px' }}
-                onChange={formik.handleChange}
-                value={formik.values.content}
-                required
-              />
-            </Form.Control>
-          </FormField>
-          <div className="flex justify-end py-2">
-            <button
-              onClick={() => setSelectedView('list')}
-              className="rounded-md px-4 py-2 text-sm font-bold text-gray-500 antialiased"
-            >
-              {t('cancel')}
-            </button>
-            <button className="rounded-md bg-black px-4 py-2 text-sm font-bold text-white antialiased">
-              {t('addUpdate')}
-            </button>
-          </div>
-        </FormLayout>
+            <div className="flex justify-end py-2">
+              <button
+                type="button"
+                onClick={() => setSelectedView('list')}
+                className="rounded-md px-4 py-2 text-sm font-bold text-gray-500 antialiased"
+              >
+                {t('cancel')}
+              </button>
+              <Button
+                type="submit"
+                className="rounded-md px-4 py-2 text-sm font-bold antialiased"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? t('adding') : t('addUpdate')}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

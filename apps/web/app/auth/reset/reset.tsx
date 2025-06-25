@@ -1,80 +1,72 @@
 'use client';
-import * as Form from '@radix-ui/react-form';
-import { useFormik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, Info } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { useOrg } from '@components/Contexts/OrgContext';
-import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
 import { resetPassword } from '@services/auth/auth';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { getOrgLogoMediaDirectory } from '@services/media/media';
 import touEmblemDark from 'public/tou_emblem_dark.png';
 
+const createValidationSchema = (t: (key: string, values?: any) => string) =>
+  z
+    .object({
+      email: z.string().min(1, t('required')).email(t('invalidEmail')),
+      new_password: z
+        .string()
+        .min(1, t('required'))
+        .min(8, t('passwordMinLength', { length: 8 })),
+      confirm_password: z.string().min(1, t('required')),
+      reset_code: z.string().min(1, t('required')),
+    })
+    .refine((data) => data.new_password === data.confirm_password, {
+      message: t('passwordsDoNotMatch'),
+      path: ['confirm_password'],
+    });
+
+type ResetPasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+
 function ResetPasswordClient() {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Reset');
   const org = useOrg() as any;
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
   const reset_code = searchParams.get('resetCode') || '';
   const email = searchParams.get('email') || '';
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const validationSchema = createValidationSchema(validationT);
 
-  const validate = (values: any) => {
-    const errors: any = {};
-
-    if (!values.email) {
-      errors.email = validationT('required');
-    } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,}$/i.test(values.email)) {
-      errors.email = validationT('invalidEmail');
-    }
-
-    if (!values.new_password) {
-      errors.new_password = validationT('required');
-    } else if (values.new_password.length < 8) {
-      errors.new_password = validationT('passwordMinLength', { length: 8 });
-    }
-
-    if (!values.confirm_password) {
-      errors.confirm_password = validationT('required');
-    }
-
-    if (values.new_password !== values.confirm_password) {
-      errors.confirm_password = validationT('passwordsDoNotMatch');
-    }
-
-    if (!values.reset_code) {
-      errors.reset_code = validationT('required');
-    }
-    return errors;
-  };
-
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       email,
       new_password: '',
       confirm_password: '',
       reset_code,
     },
-    validate,
-    enableReinitialize: true,
-    onSubmit: async (values) => {
-      setIsSubmitting(true);
-      const res = await resetPassword(values.email, values.new_password, org?.id, values.reset_code);
-      if (res.status == 200) {
-        setMessage(t('success'));
-      } else {
-        setError(res.data.detail);
-      }
-      setIsSubmitting(false);
-    },
   });
+
+  const handleSubmit = async (values: ResetPasswordFormData) => {
+    setError('');
+    setMessage('');
+    const res = await resetPassword(values.email, values.new_password, org?.id, values.reset_code);
+    if (res.status === 200) {
+      setMessage(t('success'));
+    } else {
+      setError(res.data.detail);
+    }
+  };
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
       <div
@@ -147,91 +139,99 @@ function ResetPasswordClient() {
               </Link>
             </div>
           )}
-          <FormLayout onSubmit={formik.handleSubmit}>
-            <FormField name="email">
-              <FormLabelAndMessage
-                label={t('email')}
-                message={formik.errors.email}
-              />
-              <Form.Control asChild>
-                <Input
-                  onChange={formik.handleChange}
-                  value={formik.values.email}
-                  type="email"
-                  placeholder={t('emailPlaceholder')}
-                  disabled={isSubmitting}
-                  autoComplete="email"
-                  aria-describedby={formik.errors.email ? 'email-error' : undefined}
-                />
-              </Form.Control>
-            </FormField>
 
-            <FormField name="reset_code">
-              <FormLabelAndMessage
-                label={t('resetCode')}
-                message={formik.errors.reset_code}
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
+            >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('email')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder={t('emailPlaceholder')}
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <Form.Control asChild>
-                <Input
-                  onChange={formik.handleChange}
-                  value={formik.values.reset_code}
-                  type="text"
-                  placeholder={t('resetCodePlaceholder')}
-                  disabled={isSubmitting}
-                  autoComplete="one-time-code"
-                  aria-describedby={formik.errors.reset_code ? 'reset-code-error' : undefined}
-                />
-              </Form.Control>
-            </FormField>
 
-            <FormField name="new_password">
-              <FormLabelAndMessage
-                label={t('newPassword')}
-                message={formik.errors.new_password}
+              <FormField
+                control={form.control}
+                name="reset_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('resetCode')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder={t('resetCodePlaceholder')}
+                        autoComplete="one-time-code"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <Form.Control asChild>
-                <Input
-                  onChange={formik.handleChange}
-                  value={formik.values.new_password}
-                  type="password"
-                  placeholder={t('newPasswordPlaceholder')}
-                  disabled={isSubmitting}
-                  autoComplete="new-password"
-                  aria-describedby={formik.errors.new_password ? 'new-password-error' : undefined}
-                />
-              </Form.Control>
-            </FormField>
 
-            <FormField name="confirm_password">
-              <FormLabelAndMessage
-                label={t('confirmPassword')}
-                message={formik.errors.confirm_password}
+              <FormField
+                control={form.control}
+                name="new_password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('newPassword')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder={t('newPasswordPlaceholder')}
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <Form.Control asChild>
-                <Input
-                  onChange={formik.handleChange}
-                  value={formik.values.confirm_password}
-                  type="password"
-                  placeholder={t('confirmPasswordPlaceholder')}
-                  disabled={isSubmitting}
-                  autoComplete="new-password"
-                  aria-describedby={formik.errors.confirm_password ? 'confirm-password-error' : undefined}
-                />
-              </Form.Control>
-            </FormField>
 
-            <div className="flex py-4">
-              <Form.Submit asChild>
-                <button
+              <FormField
+                control={form.control}
+                name="confirm_password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('confirmPassword')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder={t('confirmPasswordPlaceholder')}
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex py-4">
+                <Button
+                  type="submit"
                   className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md transition-all duration-200 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={isSubmitting}
-                  aria-label={isSubmitting ? t('loading') : t('changePassword')}
+                  disabled={form.formState.isSubmitting}
                 >
-                  {isSubmitting ? t('loading') : t('changePassword')}
-                </button>
-              </Form.Submit>
-            </div>
-          </FormLayout>
+                  {form.formState.isSubmitting ? t('loading') : t('changePassword')}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
     </div>

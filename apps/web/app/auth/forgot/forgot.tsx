@@ -1,55 +1,52 @@
 'use client';
-import * as Form from '@radix-ui/react-form';
-import { useFormik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, Info } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { useOrg } from '@components/Contexts/OrgContext';
-import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
 import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
 import { sendResetLink } from '@services/auth/auth';
 import { getUriWithOrg } from '@services/config/config';
 import openuLogoDark from 'public/openu_logo_dark.png';
 
+const createValidationSchema = (t: (key: string) => string) =>
+  z.object({
+    email: z.string().min(1, t('required')).email(t('invalidEmail')),
+  });
+
+type ForgotPasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+
 function ForgotPasswordClient() {
   const t = useTranslations('Auth.Forgot');
   const org = useOrg() as any;
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const validationSchema = createValidationSchema(t);
 
-  const validate = (values: any) => {
-    const errors: any = {};
-
-    if (!values.email) {
-      errors.email = t('required');
-    } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,}$/i.test(values.email)) {
-      errors.email = t('invalidEmail');
-    }
-
-    return errors;
-  };
-
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       email: '',
     },
-    validate,
-    validateOnBlur: true,
-    onSubmit: async (values) => {
-      setIsSubmitting(true);
-      const res = await sendResetLink(values.email, org?.id);
-      if (res.status == 200) {
-        setMessage(t('checkEmail'));
-      } else {
-        setError(res.data.detail);
-      }
-      setIsSubmitting(false);
-    },
   });
+
+  const handleSubmit = async (values: ForgotPasswordFormData) => {
+    setError('');
+    setMessage('');
+    const res = await sendResetLink(values.email, org?.id);
+    if (res.status === 200) {
+      setMessage(t('checkEmail'));
+    } else {
+      setError(res.data.detail);
+    }
+  };
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
       <div className="flex h-screen flex-col items-center justify-center bg-neutral-100">
@@ -85,37 +82,42 @@ function ForgotPasswordClient() {
                   <div className="text-sm font-bold">{t('checkEmail')}</div>
                 </div>
               )}
-              <FormLayout onSubmit={formik.handleSubmit}>
-                <FormField name="email">
-                  <FormLabelAndMessage
-                    label={t('email')}
-                    message={formik.errors.email}
+
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(handleSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('email')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder={t('emailPlaceholder')}
+                            autoComplete="email"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <Form.Control asChild>
-                    <Input
-                      onChange={formik.handleChange}
-                      value={formik.values.email}
-                      type="email"
-                      required
-                      placeholder={t('emailPlaceholder')}
-                      disabled={isSubmitting}
-                      autoComplete="email"
-                      aria-describedby={formik.errors.email ? 'email-error' : undefined}
-                    />
-                  </Form.Control>
-                </FormField>
-                <div className="flex py-4">
-                  <Form.Submit asChild>
+
+                  <div className="flex py-4">
                     <Button
+                      type="submit"
                       className="w-full p-2 font-semibold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={isSubmitting}
-                      aria-label={isSubmitting ? t('loading') : t('sendResetLink')}
+                      disabled={form.formState.isSubmitting}
                     >
-                      {isSubmitting ? t('loading') : t('sendResetLink')}
+                      {form.formState.isSubmitting ? t('loading') : t('sendResetLink')}
                     </Button>
-                  </Form.Submit>
-                </div>
-              </FormLayout>
+                  </div>
+                </form>
+              </Form>
             </div>
           </div>
         </div>

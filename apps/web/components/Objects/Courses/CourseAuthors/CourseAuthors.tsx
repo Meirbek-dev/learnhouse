@@ -1,12 +1,13 @@
-import * as Form from '@radix-ui/react-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { format, formatDistanceToNow } from 'date-fns';
-import { useFormik } from 'formik';
 import { motion } from 'framer-motion';
 import { PencilLine, Rss, TentTree } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { z } from 'zod';
 
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -15,12 +16,10 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
+import { Textarea } from '@components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
@@ -202,87 +201,100 @@ const UpdatesSection = () => {
   );
 };
 
+const createUpdateFormSchema = (t: (key: string) => string) =>
+  z.object({
+    title: z.string().min(1, t('titleRequired')),
+    content: z.string().min(1, t('contentRequired')),
+  });
+
+type UpdateFormValues = z.infer<ReturnType<typeof createUpdateFormSchema>>;
+
 const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
   const org = useOrg() as any;
   const course = useCourse() as any;
   const session = useLHSession() as any;
   const t = useTranslations('Courses.CourseAuthors');
+  const validationSchema = createUpdateFormSchema(t);
 
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<UpdateFormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       title: '',
       content: '',
     },
-    validate: (values) => {
-      const errors: any = {};
-      if (!values.title) errors.title = t('titleRequired');
-      if (!values.content) errors.content = t('contentRequired');
-      return errors;
-    },
-    onSubmit: async (values) => {
-      const body = {
-        title: values.title,
-        content: values.content,
-        course_uuid: course.courseStructure.course_uuid,
-        org_id: org.id,
-      };
-      const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
-      if (res.status === 200) {
-        toast.success(t('updateAddedSuccess'));
-        setSelectedView('list');
-        mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
-      } else {
-        toast.error(t('updateAddFailed'));
-      }
-    },
   });
+
+  const onSubmit = async (values: UpdateFormValues) => {
+    const body = {
+      title: values.title,
+      content: values.content,
+      course_uuid: course.courseStructure.course_uuid,
+      org_id: org.id,
+    };
+    const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
+    if (res.status === 200) {
+      toast.success(t('updateAddedSuccess'));
+      setSelectedView('list');
+      form.reset();
+      mutate(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`);
+    } else {
+      toast.error(t('updateAddFailed'));
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <FormLayout
-        onSubmit={formik.handleSubmit}
-        className="space-y-4"
-      >
-        <FormField name="title">
-          <FormLabelAndMessage
-            label={t('updateTitle')}
-            message={formik.errors.title}
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4"
+        >
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('updateTitle')}</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder={t('updateTitlePlaceholder')}
+                    className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <Form.Control asChild>
-            <Input
-              onChange={formik.handleChange}
-              value={formik.values.title}
-              type="text"
-              required
-              placeholder={t('updateTitlePlaceholder')}
-              className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
-            />
-          </Form.Control>
-        </FormField>
-        <FormField name="content">
-          <FormLabelAndMessage
-            label={t('updateContent')}
-            message={formik.errors.content}
+          <FormField
+            control={form.control}
+            name="content"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('updateContent')}</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={t('updateContentPlaceholder')}
+                    className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <Form.Control asChild>
-            <Textarea
-              onChange={formik.handleChange}
-              value={formik.values.content}
-              required
-              placeholder={t('updateContentPlaceholder')}
-              className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
-            />
-          </Form.Control>
-        </FormField>
-        <div className="flex justify-end space-x-2 pt-2">
-          <button
-            type="submit"
-            className="rounded-full bg-neutral-900 px-4 py-1.5 text-xs font-medium text-white transition-colors duration-150 hover:bg-black"
-          >
-            {t('publishUpdate')}
-          </button>
-        </div>
-      </FormLayout>
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button
+              type="submit"
+              className="rounded-full px-4 py-1.5 text-xs font-medium text-white transition-colors duration-150"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? t('publishing') : t('publishUpdate')}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };

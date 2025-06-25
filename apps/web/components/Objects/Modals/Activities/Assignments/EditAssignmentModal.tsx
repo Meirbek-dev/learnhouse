@@ -1,27 +1,26 @@
 'use client';
-import * as Form from '@radix-ui/react-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { useFormik } from 'formik';
 import { CalendarIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { FC } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+import { z } from 'zod';
 
+import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import FormLayout, {
-  Flex,
-  FormField,
-  FormLabel,
-  FormMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getAPIUrl } from '@services/config/config';
 import { updateAssignment } from '@services/courses/assignments';
+import { BarLoader } from 'react-spinners';
 
 interface Assignment {
   assignment_uuid: string;
@@ -44,154 +43,187 @@ interface EditAssignmentModalProps {
   accessToken: string;
 }
 
+interface FormValues {
+  title: string;
+  description: string;
+  due_date: string;
+  grading_type: 'ALPHABET' | 'NUMERIC' | 'PERCENTAGE';
+}
+
+const validationSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  due_date: z.string().optional().or(z.literal('')),
+  grading_type: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
+});
+
 const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, accessToken }) => {
   const t = useTranslations('Components.EditAssignmentModal');
 
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       title: assignment.title || '',
       description: assignment.description || '',
       due_date: assignment.due_date || '',
       grading_type: assignment.grading_type || 'ALPHABET',
     },
-    enableReinitialize: true,
-    onSubmit: async (values, { setSubmitting }) => {
-      const toast_loading = toast.loading(t('updateLoading'));
-      try {
-        const res = await updateAssignment(values, assignment.assignment_uuid, accessToken);
-        if (res.success) {
-          mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
-          toast.success(t('updateSuccess'));
-          onClose();
-        } else {
-          toast.error(t('updateError'));
-        }
-      } catch {
-        toast.error(t('updateErrorGeneric'));
-      } finally {
-        toast.dismiss(toast_loading);
-        setSubmitting(false);
-      }
-    },
   });
 
+  const onSubmit = async (values: FormValues) => {
+    const toastLoading = toast.loading(t('updateLoading'));
+    try {
+      const res = await updateAssignment(values, assignment.assignment_uuid, accessToken);
+      if (res.success) {
+        mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
+        toast.success(t('updateSuccess'));
+        onClose();
+      } else {
+        toast.error(t('updateError'));
+      }
+    } catch {
+      toast.error(t('updateErrorGeneric'));
+    } finally {
+      toast.dismiss(toastLoading);
+    }
+  };
+
   return (
-    <FormLayout onSubmit={formik.handleSubmit}>
-      <FormField name="title">
-        <Flex className="items-baseline justify-between">
-          <FormLabel>{t('assignmentTitle')}</FormLabel>
-          <FormMessage match="valueMissing">{t('valueMissingTitle')}</FormMessage>
-        </Flex>
-        <Form.Control asChild>
-          <Input
-            onChange={formik.handleChange}
-            value={formik.values.title}
-            type="text"
-            required
-          />
-        </Form.Control>
-      </FormField>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('assignmentTitle')}</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="text"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField name="description">
-        <Flex className="items-baseline justify-between">
-          <FormLabel>{t('assignmentDescription')}</FormLabel>
-          <FormMessage match="valueMissing">{t('valueMissingDescription')}</FormMessage>
-        </Flex>
-        <Form.Control asChild>
-          <Textarea
-            onChange={formik.handleChange}
-            value={formik.values.description}
-            required
-          />
-        </Form.Control>
-      </FormField>
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('assignmentDescription')}</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField name="due_date">
-        <Flex className="items-baseline justify-between">
-          <FormLabel>{t('dueDate')}</FormLabel>
-          <FormMessage match="valueMissing">{t('valueMissingDueDate')}</FormMessage>
-        </Flex>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Form.Control asChild>
-              <button
-                className={cn(
-                  'bg-background focus:ring-ring flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
-                  !formik.values.due_date && 'text-muted-foreground',
-                )}
-              >
-                {formik.values.due_date ? (
-                  format(new Date(formik.values.due_date), 'PPP')
-                ) : (
-                  <span>{t('selectDeadline')}</span>
-                )}
-                <CalendarIcon className="ml-2 size-4 opacity-50" />
-              </button>
-            </Form.Control>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-auto p-0"
-            align="start"
-          >
-            <Calendar
-              mode="single"
-              selected={formik.values.due_date ? new Date(formik.values.due_date) : undefined}
-              onSelect={(date) => {
-                if (date) {
-                  // Format date as YYYY-MM-DD without timezone conversion
-                  const year = date.getFullYear();
-                  const month = String(date.getMonth() + 1).padStart(2, '0');
-                  const day = String(date.getDate()).padStart(2, '0');
-                  const isoDate = `${year}-${month}-${day}`;
-                  formik.setFieldValue('due_date', isoDate);
-                } else {
-                  formik.setFieldValue('due_date', '');
-                }
-              }}
-              disabled={false}
-            />
-          </PopoverContent>
-        </Popover>
-      </FormField>
+        <FormField
+          control={form.control}
+          name="due_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('dueDate')}</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !field.value && 'text-muted-foreground',
+                      )}
+                    >
+                      {field.value ? format(new Date(field.value), 'PPP') : <span>{t('selectDeadline')}</span>}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto p-0"
+                  align="start"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const isoDate = `${year}-${month}-${day}`;
+                        field.onChange(isoDate);
+                      } else {
+                        field.onChange('');
+                      }
+                    }}
+                    disabled={false}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField name="grading_type">
-        <Flex className="items-baseline justify-between">
-          <FormLabel>{t('gradingType')}</FormLabel>
-          <FormMessage match="valueMissing">{t('valueMissingGradingType')}</FormMessage>
-        </Flex>
-        <select
-          id="grading_type"
+        <FormField
+          control={form.control}
           name="grading_type"
-          className="w-full rounded-lg bg-gray-100/40 px-3 py-2 outline-gray-100"
-          onChange={(e) => formik.setFieldValue('grading_type', e.target.value, true)}
-          value={formik.values.grading_type}
-          required
-        >
-          <option value="ALPHABET">{t('alphabet')}</option>
-          <option value="NUMERIC">{t('numeric')}</option>
-          <option value="PERCENTAGE">{t('percentage')}</option>
-        </select>
-      </FormField>
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('gradingType')}</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('selectGradingType')} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="ALPHABET">{t('alphabet')}</SelectItem>
+                  <SelectItem value="NUMERIC">{t('numeric')}</SelectItem>
+                  <SelectItem value="PERCENTAGE">{t('percentage')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <div className="mt-6 flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-md px-4 py-2 text-gray-600 hover:bg-gray-100"
-        >
-          {t('cancel')}
-        </button>
-        <Form.Submit asChild>
-          <button
-            type="submit"
-            disabled={formik.isSubmitting}
-            className="rounded-md bg-black px-4 py-2 font-bold text-white hover:bg-black/90"
+        <div className="mt-6 flex justify-end space-x-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
           >
-            {formik.isSubmitting ? t('saving') : t('saveChanges')}
-          </button>
-        </Form.Submit>
-      </div>
-    </FormLayout>
+            {t('cancel')}
+          </Button>
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <BarLoader
+                cssOverride={{ borderRadius: 60 }}
+                width={30}
+                color="#ffffff"
+              />
+            ) : (
+              t('saveChanges')
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

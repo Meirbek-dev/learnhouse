@@ -1,11 +1,12 @@
 'use client';
-import * as Form from '@radix-ui/react-form';
-import { useFormik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Cloud, File, Info, Loader, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { z } from 'zod';
 
 import { constructAcceptValue } from '@/lib/constants';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
@@ -15,17 +16,25 @@ import {
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
+import { Textarea } from '@components/ui/textarea';
 import { getActivityByID } from '@services/courses/activities';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { getTaskRefFileDir } from '@services/media/media';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);
+
+const createValidationSchema = (t: (key: string) => string) =>
+  z.object({
+    title: z.string().min(1, t('titleRequired')),
+    description: z.string().min(1, t('descriptionRequired')),
+    hint: z.string().optional(),
+    max_grade_value: z.coerce.number().min(20, t('gradeValidationError')).max(100, t('gradeValidationError')),
+  });
+
+type TaskFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
 export function AssignmentTaskGeneralEdit() {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
@@ -34,118 +43,135 @@ export function AssignmentTaskGeneralEdit() {
   const assignmentTaskState = useAssignmentsTask() as any;
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
   const assignment = useAssignments() as any;
+  const validationSchema = createValidationSchema(t);
 
-  const validate = (values: any) => {
-    const errors: any = {};
-    if (values.max_grade_value < 20 || values.max_grade_value > 100) {
-      errors.max_grade_value = t('gradeValidationError');
-    }
-    return errors;
-  };
-
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<TaskFormData>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       title: assignmentTaskState.assignmentTask.title,
       description: assignmentTaskState.assignmentTask.description,
       hint: assignmentTaskState.assignmentTask.hint,
       max_grade_value: assignmentTaskState.assignmentTask.max_grade_value,
     },
-    validate,
-    onSubmit: async (values) => {
-      const res = await updateAssignmentTask(
-        values,
-        assignmentTaskState.assignmentTask.assignment_task_uuid,
-        assignment.assignment_object.assignment_uuid,
-        access_token,
-      );
-      if (res) {
-        assignmentTaskStateHook({ type: 'reload' });
-        toast.success(t('updateSuccess'));
-      } else {
-        toast.error(t('updateError'));
-      }
-    },
-    enableReinitialize: true,
-  }) as any;
+  });
+
+  const handleSubmit = async (values: TaskFormData) => {
+    const res = await updateAssignmentTask(
+      values,
+      assignmentTaskState.assignmentTask.assignment_task_uuid,
+      assignment.assignment_object.assignment_uuid,
+      access_token,
+    );
+    if (res) {
+      assignmentTaskStateHook({ type: 'reload' });
+      toast.success(t('updateSuccess'));
+    } else {
+      toast.error(t('updateError'));
+    }
+  };
+
+  // Update form values when assignment task changes
+  useEffect(() => {
+    form.reset({
+      title: assignmentTaskState.assignmentTask.title,
+      description: assignmentTaskState.assignmentTask.description,
+      hint: assignmentTaskState.assignmentTask.hint,
+      max_grade_value: assignmentTaskState.assignmentTask.max_grade_value,
+    });
+  }, [assignmentTaskState.assignmentTask, form]);
 
   return (
-    <FormLayout onSubmit={formik.handleSubmit}>
-      <FormField name="title">
-        <FormLabelAndMessage
-          label={t('title')}
-          message={formik.errors.title}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-6"
+      >
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('title')}</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Form.Control asChild>
-          <Input
-            onChange={formik.handleChange}
-            value={formik.values.title}
-            type="text"
-          />
-        </Form.Control>
-      </FormField>
 
-      <FormField name="description">
-        <FormLabelAndMessage
-          label={t('description')}
-          message={formik.errors.description}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('description')}</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Form.Control asChild>
-          <Input
-            onChange={formik.handleChange}
-            value={formik.values.description}
-            type="text"
-          />
-        </Form.Control>
-      </FormField>
 
-      <FormField name="hint">
-        <FormLabelAndMessage
-          label={t('hint')}
-          message={formik.errors.hint}
+        <FormField
+          control={form.control}
+          name="hint"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('hint')}</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Form.Control asChild>
-          <Textarea
-            onChange={formik.handleChange}
-            value={formik.values.hint}
-          />
-        </Form.Control>
-      </FormField>
 
-      <FormField name="hint">
-        <div className="flex items-center justify-between space-x-3">
-          <FormLabelAndMessage
-            label={t('referenceFile')}
-            message={formik.errors.hint}
-          />
-          <div className="flex items-center space-x-1.5 text-xs text-gray-500">
-            <Info size={16} />
-            <p>{t('allowedFormats')}</p>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between space-x-3">
+            <FormLabel>{t('referenceFile')}</FormLabel>
+            <div className="flex items-center space-x-1.5 text-xs text-gray-500">
+              <Info size={16} />
+              <p>{t('allowedFormats')}</p>
+            </div>
           </div>
-        </div>
-        <Form.Control asChild>
           <UpdateTaskRef />
-        </Form.Control>
-      </FormField>
+        </div>
 
-      <FormField name="max_grade_value">
-        <FormLabelAndMessage
-          label={t('maxGradeValue')}
-          message={formik.errors.max_grade_value}
+        <FormField
+          control={form.control}
+          name="max_grade_value"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('maxGradeValue')}</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Form.Control asChild>
-          <Input
-            onChange={formik.handleChange}
-            value={formik.values.max_grade_value}
-            type="number"
-          />
-        </Form.Control>
-      </FormField>
 
-      {/* Submit button */}
-      <Form.Submit className="mt-4 flex w-full items-center justify-center rounded-md bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600">
-        {t('save')}
-      </Form.Submit>
-    </FormLayout>
+        <Button
+          type="submit"
+          className="mt-4 w-full bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? t('saving') : t('save')}
+        </Button>
+      </form>
+    </Form>
   );
 }
 

@@ -16,6 +16,7 @@
     "incremental": true,
 
     // Strict type checking options
+    "noImplicitAny": false,
     "noImplicitThis": true,
     "noImplicitOverride": true,
     "strictNullChecks": true,

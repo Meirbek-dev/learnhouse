@@ -1,38 +1,39 @@
 'use client';
-import * as Form from '@radix-ui/react-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import BarLoader from 'react-spinners/BarLoader';
+import { z } from 'zod';
 
-import FormLayout, {
-  ButtonBlack,
-  Flex,
-  FormField,
-  FormLabel,
-  FormMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
+const validationSchema = z.object({
+  name: z.string().min(1, 'Activity name is required'),
+  description: z.string().min(1, 'Activity description is required'),
+});
+
+type FormValues = {
+  name: string;
+  description: string;
+};
 
 function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
   const t = useTranslations('Components.DynamicCanvaModal');
-  const [activityName, setActivityName] = useState('');
-  const [_activityDescription, setActivityDescription] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleActivityNameChange = (e: any) => {
-    setActivityName(e.target.value);
-  };
+  const form = useForm<FormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+  });
 
-  const handleActivityDescriptionChange = (e: any) => {
-    setActivityDescription(e.target.value);
-  };
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const onSubmit = async (values: FormValues) => {
     await submitActivity({
-      name: activityName,
+      name: values.name,
       chapter_id: chapterId,
       activity_type: 'TYPE_DYNAMIC',
       activity_sub_type: 'SUBTYPE_DYNAMIC_PAGE',
@@ -40,40 +41,52 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
       version: 1,
       course_id: course.id,
     });
-    setIsSubmitting(false);
   };
-  return (
-    <FormLayout onSubmit={handleSubmit}>
-      <FormField name="dynamic-activity-name">
-        <Flex className="items-baseline justify-between">
-          <FormLabel>{t('activityName')}</FormLabel>
-          <FormMessage match="valueMissing">{t('valueMissingName')}</FormMessage>
-        </Flex>
-        <Form.Control asChild>
-          <Input
-            onChange={handleActivityNameChange}
-            type="text"
-            required
-          />
-        </Form.Control>
-      </FormField>
-      <FormField name="dynamic-activity-desc">
-        <Flex className="items-baseline justify-between">
-          <FormLabel>{t('activityDescription')}</FormLabel>
-          <FormMessage match="valueMissing">{t('valueMissingDescription')}</FormMessage>
-        </Flex>
-        <Form.Control asChild>
-          <Textarea onChange={handleActivityDescriptionChange} />
-        </Form.Control>
-      </FormField>
 
-      <Flex className="mt-6 justify-end">
-        <Form.Submit asChild>
-          <ButtonBlack
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('activityName')}</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="text"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('activityDescription')}</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="mt-6 flex justify-end">
+          <Button
             type="submit"
             className="mt-2.5"
+            disabled={form.formState.isSubmitting}
           >
-            {isSubmitting ? (
+            {form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}
@@ -82,10 +95,10 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
             ) : (
               t('createActivity')
             )}
-          </ButtonBlack>
-        </Form.Submit>
-      </Flex>
-    </FormLayout>
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
 

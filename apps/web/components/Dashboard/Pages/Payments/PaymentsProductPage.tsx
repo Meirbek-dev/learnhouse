@@ -1,12 +1,13 @@
 'use client';
+import { zodResolver } from '@hookform/resolvers/zod';
 import currencyCodes from 'currency-codes';
-import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { Archive, ChevronDown, ChevronUp, Info, Pencil, Plus, RefreshCcw, SquareCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
-import * as Yup from 'yup';
+import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -15,8 +16,8 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { Badge } from '@components/ui/badge';
 import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
@@ -27,31 +28,30 @@ import CreateProductForm from './SubComponents/CreateProductForm';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  Yup.object().shape({
-    name: Yup.string().required(
+  z.object({
+    name: z.string().min(
+      1,
       t('Components.Form.requiredField', {
         fieldName: t('DashPage.Payments.ProductPage.editForm.nameLabel'),
       }),
     ),
-    description: Yup.string().required(
+    description: z.string().min(
+      1,
       t('Components.Form.requiredField', {
         fieldName: t('DashPage.Payments.ProductPage.editForm.descriptionLabel'),
       }),
     ),
-    amount: Yup.number()
-      .min(0, t('Components.Form.positiveNumber'))
-      .required(
-        t('Components.Form.requiredField', {
-          fieldName: t('DashPage.Payments.ProductPage.editForm.priceLabel'),
-        }),
-      ),
-    benefits: Yup.string(),
-    currency: Yup.string().required(
+    amount: z.coerce.number().min(0, t('Components.Form.positiveNumber')),
+    benefits: z.string().optional(),
+    currency: z.string().min(
+      1,
       t('Components.Form.requiredField', {
         fieldName: t('DashPage.Payments.ProductPage.editForm.currencyLabel'),
       }),
     ),
   });
+
+type EditProductFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
 function PaymentsProductPage() {
   const org = useOrg() as any;
@@ -273,19 +273,18 @@ const EditProductForm = ({
     setCurrencies(allCurrencies);
   }, []);
 
-  const initialValues = {
-    name: product.name,
-    description: product.description,
-    amount: product.amount,
-    benefits: product.benefits || '',
-    currency: product.currency || '',
-    product_type: product.product_type,
-  };
+  const form = useForm<EditProductFormData>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      name: product.name,
+      description: product.description,
+      amount: product.amount,
+      benefits: product.benefits || '',
+      currency: product.currency || '',
+    },
+  });
 
-  const handleSubmit = async (
-    values: typeof initialValues,
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-  ) => {
+  const handleSubmit = async (values: EditProductFormData) => {
     try {
       await updateProduct(org.id, product.id, values, session.data?.tokens?.access_token);
       mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
@@ -293,124 +292,140 @@ const EditProductForm = ({
       toast.success(t('productUpdatedSuccess'));
     } catch {
       toast.error(t('updateProductFailed'));
-    } finally {
-      setSubmitting(false);
     }
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      onSubmit={handleSubmit}
-    >
-      {({ isSubmitting, values, setFieldValue }) => (
-        <Form className="space-y-4">
-          <div className="flex-col space-y-3 px-1.5 py-2">
-            <div>
-              <Label htmlFor="name">{t('nameLabel')}</Label>
-              <Field
-                name="name"
-                as={Input}
-                placeholder={t('namePlaceholder')}
-              />
-              <ErrorMessage
-                name="name"
-                component="div"
-                className="mt-1 text-sm text-red-500"
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-4"
+      >
+        <div className="flex-col space-y-3 px-1.5 py-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('nameLabel')}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t('namePlaceholder')}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('descriptionLabel')}</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={t('descriptionPlaceholder')}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex space-x-2">
+            <div className="grow">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('priceLabel')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder={t('pricePlaceholder')}
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-
-            <div>
-              <Label htmlFor="description">{t('descriptionLabel')}</Label>
-              <Field
-                name="description"
-                as={Textarea}
-                placeholder={t('descriptionPlaceholder')}
-              />
-              <ErrorMessage
-                name="description"
-                component="div"
-                className="mt-1 text-sm text-red-500"
-              />
-            </div>
-
-            <div className="flex space-x-2">
-              <div className="grow">
-                <Label htmlFor="amount">{t('priceLabel')}</Label>
-                <Field
-                  name="amount"
-                  as={Input}
-                  type="number"
-                  placeholder={t('pricePlaceholder')}
-                />
-                <ErrorMessage
-                  name="amount"
-                  component="div"
-                  className="mt-1 text-sm text-red-500"
-                />
-              </div>
-              <div className="w-1/3">
-                <Label htmlFor="currency">{t('currencyLabel')}</Label>
-                <Select
-                  value={values.currency}
-                  onValueChange={(value) => setFieldValue('currency', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('currencyPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies.map((currency) => (
-                      <SelectItem
-                        key={currency.code}
-                        value={currency.code}
-                      >
-                        {currency.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <ErrorMessage
-                  name="currency"
-                  component="div"
-                  className="mt-1 text-sm text-red-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="benefits">{t('benefitsLabel')}</Label>
-              <Field
-                name="benefits"
-                as={Textarea}
-                placeholder={t('benefitsPlaceholder')}
-              />
-              <ErrorMessage
-                name="benefits"
-                component="div"
-                className="mt-1 text-sm text-red-500"
+            <div className="w-1/3">
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('currencyLabel')}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('currencyPlaceholder')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {currencies.map((currency) => (
+                          <SelectItem
+                            key={currency.code}
+                            value={currency.code}
+                          >
+                            {currency.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-            >
-              {t('cancelButton')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? t('savingButton') : t('saveButton')}
-            </Button>
-          </div>
-        </Form>
-      )}
-    </Formik>
+          <FormField
+            control={form.control}
+            name="benefits"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('benefitsLabel')}</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={t('benefitsPlaceholder')}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="flex justify-end space-x-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
+            {t('cancelButton')}
+          </Button>
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? t('savingButton') : t('saveButton')}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

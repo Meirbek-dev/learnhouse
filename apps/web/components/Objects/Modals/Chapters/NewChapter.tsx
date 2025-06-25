@@ -1,83 +1,91 @@
 'use client';
-import { FormMessage } from '@radix-ui/react-form';
-import * as Form from '@radix-ui/react-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import BarLoader from 'react-spinners/BarLoader';
+import { z } from 'zod';
 
-import FormLayout, {
-  ButtonBlack,
-  Flex,
-  FormField,
-  FormLabel,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
+const validationSchema = z.object({
+  name: z.string().min(1, 'Chapter name is required'),
+  description: z.string().min(1, 'Chapter description is required'),
+});
+
+type FormValues = {
+  name: string;
+  description: string;
+};
 
 function NewChapterModal({ submitChapter, closeModal, course }: any) {
   const t = useTranslations('Components.NewChapterModal');
-  const [chapterName, setChapterName] = useState('');
-  const [chapterDescription, setChapterDescription] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChapterNameChange = (e: any) => {
-    setChapterName(e.target.value);
-  };
+  const form = useForm<FormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+  });
 
-  const handleChapterDescriptionChange = (e: any) => {
-    setChapterDescription(e.target.value);
-  };
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-
-    setIsSubmitting(true);
+  const onSubmit = async (values: FormValues) => {
     const chapter_object = {
-      name: chapterName,
-      description: chapterDescription,
+      name: values.name,
+      description: values.description,
       thumbnail_image: '',
       course_id: course.id,
       org_id: course.org_id,
     };
     await submitChapter(chapter_object);
-    setIsSubmitting(false);
   };
 
   return (
-    <FormLayout onSubmit={handleSubmit}>
-      <FormField name="chapter-name">
-        <Flex className="items-baseline justify-between">
-          <FormLabel>{t('chapterName')}</FormLabel>
-          <FormMessage match="valueMissing">{t('valueMissingName')}</FormMessage>
-        </Flex>
-        <Form.Control asChild>
-          <Input
-            onChange={handleChapterNameChange}
-            type="text"
-            required
-          />
-        </Form.Control>
-      </FormField>
-      <FormField name="chapter-desc">
-        <Flex className="items-baseline justify-between">
-          <FormLabel>{t('chapterDescription')}</FormLabel>
-          <FormMessage match="valueMissing">{t('valueMissingDescription')}</FormMessage>
-        </Flex>
-        <Form.Control asChild>
-          <Textarea
-            onChange={handleChapterDescriptionChange}
-            required
-          />
-        </Form.Control>
-      </FormField>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('chapterName')}</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="text"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Flex className="mt-6 justify-end">
-        <Form.Submit asChild>
-          <ButtonBlack
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('chapterDescription')}</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="mt-6 flex justify-end">
+          <Button
             type="submit"
             className="mt-2.5"
+            disabled={form.formState.isSubmitting}
           >
-            {isSubmitting ? (
+            {form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}
@@ -86,10 +94,10 @@ function NewChapterModal({ submitChapter, closeModal, course }: any) {
             ) : (
               t('createChapter')
             )}
-          </ButtonBlack>
-        </Form.Submit>
-      </Flex>
-    </FormLayout>
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
 

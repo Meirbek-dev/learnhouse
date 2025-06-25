@@ -29,7 +29,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
 
   async function createInviteWithUserGroup() {
     const res = await createInviteCodeWithUserGroup(org.id, usergroup_id, session.data?.tokens?.access_token);
-    if (res.status == 200) {
+    if (res.status === 200) {
       mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
       props.setInvitesModal(false);
     } else {
@@ -43,7 +43,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
 
   async function createInvite() {
     const res = await createInviteCode(org.id, session.data?.tokens?.access_token);
-    if (res.status == 200) {
+    if (res.status === 200) {
       mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
       props.setInvitesModal(false);
     } else {

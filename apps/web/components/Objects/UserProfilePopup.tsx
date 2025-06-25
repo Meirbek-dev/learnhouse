@@ -1,11 +1,14 @@
 'use client';
 import {
+  Award,
+  BookOpen,
   Briefcase,
   Building2,
   Calendar,
   ExternalLink,
   Globe,
   GraduationCap,
+  Laptop2,
   Lightbulb,
   Link,
   Loader2,
@@ -54,6 +57,9 @@ const ICON_MAP = {
   'link': Link,
   'users': Users,
   'calendar': Calendar,
+  'laptop-2': Laptop2,
+  'award': Award,
+  'book-open': BookOpen,
 } as const;
 
 const IconComponent = ({ iconName }: { iconName: string }) => {

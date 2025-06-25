@@ -1,96 +1,113 @@
 'use client';
-import { FormMessage } from '@radix-ui/react-form';
-import * as Form from '@radix-ui/react-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import type { ChangeEvent, FormEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { BarLoader } from 'react-spinners';
 import { mutate } from 'swr';
+import { z } from 'zod';
 
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import FormLayout, { ButtonBlack, Flex, FormField, FormLabel } from '@components/Objects/StyledElements/Form/Form';
 import { getAPIUrl } from '@services/config/config';
 import { updateUserRole } from '@services/organizations/orgs';
 
 interface Props {
   user: any;
   setRolesModal: any;
-  alreadyAssignedRole: any;
+  alreadyAssignedRole: string;
 }
+
+const validationSchema = z.object({
+  role: z.string().min(1, 'Role is required'),
+});
+
+type FormValues = {
+  role: string;
+};
 
 function RolesUpdate(props: Props) {
   const t = useTranslations('Components.RolesUpdate');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [assignedRole, setAssignedRole] = useState(props.alreadyAssignedRole);
-  const [error, setError] = useState<string | null>(null) as any;
 
-  const handleAssignedRole = (event: ChangeEvent<HTMLSelectElement>) => {
-    setError(null);
-    setAssignedRole(event.target.value);
-  };
+  const form = useForm<FormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      role: props.alreadyAssignedRole,
+    },
+  });
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+  const onSubmit = async (values: FormValues) => {
     const toastId = toast.loading(t('toastLoading'));
     try {
-      const res = await updateUserRole(org.id, props.user.user.id, assignedRole, access_token);
+      const res = await updateUserRole(org.id, props.user.user.id, values.role, access_token);
       if (res.status === 200) {
         await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
         props.setRolesModal(false);
         toast.success(t('toastSuccess'), { id: toastId });
       } else {
         const errorDetail = res.data?.detail || 'Unknown error';
-        setError(t('updateErrorDetail', { error: errorDetail }));
+        form.setError('root', { message: t('updateErrorDetail', { error: errorDetail }) });
         toast.error(t('toastError'), { id: toastId });
       }
     } catch (error: any) {
       const errorMessage = error?.message || 'An unexpected error occurred';
-      setError(t('updateErrorDetail', { error: errorMessage }));
+      form.setError('root', { message: t('updateErrorDetail', { error: errorMessage }) });
       toast.error(t('toastError'), { id: toastId });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  useEffect(() => {}, [assignedRole]);
-
   return (
     <div>
-      <FormLayout onSubmit={handleSubmit}>
-        <FormField name="role-select">
-          {error && <div className="mb-2 rounded-md bg-red-100 px-3 py-2 text-xs font-bold text-red-500">{error}</div>}
-          <Flex className="items-baseline justify-between">
-            <FormLabel>{t('rolesLabel')}</FormLabel>
-            <FormMessage match="valueMissing">{t('selectRolePlaceholder')}</FormMessage>
-          </Flex>
-          <Form.Control asChild>
-            <select
-              onChange={handleAssignedRole}
-              value={assignedRole}
-              className="w-full rounded-md border border-gray-300 bg-white p-2"
-              required
-            >
-              <option value="role_global_admin">{t('adminRole')}</option>
-              <option value="role_global_maintainer">{t('maintainerRole')}</option>
-              <option value="role_global_user">{t('userRole')}</option>
-            </select>
-          </Form.Control>
-        </FormField>
-        <Flex className="mt-6 justify-end">
-          <Form.Submit asChild>
-            <ButtonBlack
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4"
+        >
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('rolesLabel')}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectRolePlaceholder')} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="role_global_admin">{t('adminRole')}</SelectItem>
+                    <SelectItem value="role_global_maintainer">{t('maintainerRole')}</SelectItem>
+                    <SelectItem value="role_global_user">{t('userRole')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.formState.errors.root && (
+            <div className="mb-2 rounded-md bg-red-100 px-3 py-2 text-xs font-bold text-red-500">
+              {form.formState.errors.root.message}
+            </div>
+          )}
+
+          <div className="mt-6 flex justify-end">
+            <Button
               type="submit"
               className="mt-2.5"
-              disabled={isSubmitting}
+              disabled={form.formState.isSubmitting}
             >
-              {isSubmitting ? (
+              {form.formState.isSubmitting ? (
                 <BarLoader
                   cssOverride={{ borderRadius: 60 }}
                   width={60}
@@ -99,10 +116,10 @@ function RolesUpdate(props: Props) {
               ) : (
                 t('updateButton')
               )}
-            </ButtonBlack>
-          </Form.Submit>
-        </Flex>
-      </FormLayout>
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }

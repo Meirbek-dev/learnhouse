@@ -1,14 +1,16 @@
 'use client';
-import * as Form from '@radix-ui/react-form';
-import { useFormik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
 import { getAPIUrl } from '@services/config/config';
 import { createUserGroup } from '@services/usergroups/usergroups';
 
@@ -16,81 +18,94 @@ interface AddUserGroupProps {
   setCreateUserGroupModal: any;
 }
 
+const createValidationSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().min(1, t('nameRequiredError')),
+    description: z.string().optional(),
+    org_id: z.string(),
+  });
+
+type UserGroupFormValues = z.infer<ReturnType<typeof createValidationSchema>>;
+
 function AddUserGroup(props: AddUserGroupProps) {
   const t = useTranslations('Components.AddUserGroup');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const validationSchema = createValidationSchema(t);
 
-  const validate = (values: any) => {
-    const errors: any = {};
-    if (!values.name) {
-      errors.name = t('nameRequiredError');
-    }
-    return errors;
-  };
-
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<UserGroupFormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       name: '',
       description: '',
       org_id: org.id,
     },
-    validate,
-    onSubmit: async (values) => {
-      const toastID = toast.loading(t('toastLoading'));
-      setIsSubmitting(true);
-      const res = await createUserGroup(values, access_token);
-      if (res.status == 200) {
-        setIsSubmitting(false);
-        mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
-        props.setCreateUserGroupModal(false);
-        toast.success(t('toastSuccess'), { id: toastID });
-      } else {
-        setIsSubmitting(false);
-        toast.error(t('toastError'), { id: toastID });
-      }
-    },
   });
 
+  const handleSubmit = async (values: UserGroupFormValues) => {
+    const toastID = toast.loading(t('toastLoading'));
+    const res = await createUserGroup(values, access_token);
+    if (res.status === 200) {
+      mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
+      props.setCreateUserGroupModal(false);
+      toast.success(t('toastSuccess'), { id: toastID });
+    } else {
+      toast.error(t('toastError'), { id: toastID });
+    }
+  };
+
   return (
-    <FormLayout onSubmit={formik.handleSubmit}>
-      <FormField name="name">
-        <FormLabelAndMessage
-          label={t('nameLabel')}
-          message={(formik.touched.name && formik.errors.name) || undefined}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('nameLabel')}</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Form.Control asChild>
-          <Input
-            onChange={formik.handleChange}
-            value={formik.values.name}
-            type="name"
-            required
-          />
-        </Form.Control>
-      </FormField>
-      <FormField name="description">
-        <FormLabelAndMessage
-          label={t('descriptionLabel')}
-          message={(formik.touched.description && formik.errors.description) || undefined}
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('descriptionLabel')}</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <Form.Control asChild>
-          <Input
-            onChange={formik.handleChange}
-            value={formik.values.description}
-            type="description"
-          />
-        </Form.Control>
-      </FormField>
-      <div className="flex py-4">
-        <Form.Submit asChild>
-          <button className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md hover:cursor-pointer">
-            {isSubmitting ? t('loadingButton') : t('createButton')}
-          </button>
-        </Form.Submit>
-      </div>
-    </FormLayout>
+
+        <div className="flex py-4">
+          <Button
+            type="submit"
+            className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? t('loadingButton') : t('createButton')}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
 

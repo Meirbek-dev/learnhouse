@@ -1,18 +1,20 @@
 'use client';
-import { Form, Formik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, Code2, PencilLine, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import React from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
-import * as Yup from 'yup';
+import { z } from 'zod';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
 import { Textarea } from '@components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
 import { updateOrganization } from '@services/settings/org';
@@ -28,10 +30,12 @@ interface OrganizationScripts {
 }
 
 const getValidationSchema = (t: (key: string) => string) =>
-  Yup.object().shape({
-    name: Yup.string().required(t('validation.nameRequired')),
-    content: Yup.string().required(t('validation.contentRequired')),
+  z.object({
+    name: z.string().min(1, t('validation.nameRequired')),
+    content: z.string().min(1, t('validation.contentRequired')),
   });
+
+type ScriptFormData = z.infer<ReturnType<typeof getValidationSchema>>;
 
 const OrgEditOther: React.FC = () => {
   const router = useRouter();
@@ -144,7 +148,6 @@ const OrgEditOther: React.FC = () => {
                   setCurrentScript(null);
                   setSelectedView('edit');
                 }}
-                className="bg-black text-white hover:bg-black/90"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addScript')}
@@ -205,69 +208,110 @@ const OrgEditOther: React.FC = () => {
             )}
           </div>
         ) : (
-          <Formik
-            initialValues={currentScript || { name: '', content: '' }}
-            validationSchema={validationSchema}
-            onSubmit={(values, { setSubmitting }) => {
-              setSubmitting(false);
-              updateOrg(values);
+          <ScriptFormComponent
+            currentScript={currentScript}
+            onSuccess={() => {
+              setSelectedView('list');
+              setCurrentScript(null);
             }}
-          >
-            {({ values, handleChange, handleSubmit, errors, touched, isSubmitting }) => (
-              <Form onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">{t('scriptNameLabel')}</Label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={values.name}
-                      onChange={handleChange}
-                      className="mt-1 w-full rounded-md border px-3 py-2"
-                      placeholder={t('scriptNamePlaceholder')}
-                    />
-                    {touched.name && errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="content">{t('scriptContentLabel')}</Label>
-                    <Textarea
-                      id="content"
-                      name="content"
-                      value={values.content}
-                      onChange={handleChange}
-                      className="mt-1 font-mono"
-                      placeholder={t('scriptContentPlaceholder')}
-                      rows={10}
-                    />
-                    {touched.content && errors.content && <p className="mt-1 text-sm text-red-500">{errors.content}</p>}
-                  </div>
-                  <div className="flex justify-end space-x-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedView('list');
-                        setCurrentScript(null);
-                      }}
-                    >
-                      {t('cancel')}
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="bg-black text-white hover:bg-black/90"
-                    >
-                      {isSubmitting ? t('saving') : t('saveScript')}
-                    </Button>
-                  </div>
-                </div>
-              </Form>
-            )}
-          </Formik>
+            onCancel={() => {
+              setSelectedView('list');
+              setCurrentScript(null);
+            }}
+            updateOrg={updateOrg}
+          />
         )}
       </div>
     </div>
+  );
+};
+
+const ScriptFormComponent = ({
+  currentScript,
+  onSuccess,
+  onCancel,
+  updateOrg,
+}: {
+  currentScript: Script | null;
+  onSuccess: () => void;
+  onCancel: () => void;
+  updateOrg: (values: Script) => Promise<void>;
+}) => {
+  const t = useTranslations('DashPage.Other');
+  const validationSchema = getValidationSchema(t);
+
+  const form = useForm<ScriptFormData>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      name: currentScript?.name || '',
+      content: currentScript?.content || '',
+    },
+  });
+
+  const handleSubmit = async (values: ScriptFormData) => {
+    await updateOrg(values);
+    onSuccess();
+  };
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('scriptNameLabel')}</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={t('scriptNamePlaceholder')}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="content"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('scriptContentLabel')}</FormLabel>
+              <FormControl>
+                <Textarea
+                  className="font-mono"
+                  placeholder={t('scriptContentPlaceholder')}
+                  rows={10}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end space-x-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
+            {t('cancel')}
+          </Button>
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? t('saving') : t('saveScript')}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

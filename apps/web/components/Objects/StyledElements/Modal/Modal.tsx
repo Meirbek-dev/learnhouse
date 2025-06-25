@@ -14,8 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@components/ui/dialog';
-
-import { ButtonBlack } from '../Form/Form';
+import { Button } from '@components/ui/button';
 
 interface ModalParams {
   dialogTitle?: string;
@@ -99,7 +98,14 @@ const Modal = (params: ModalParams) => {
         {(params.dialogClose || params.addDefCloseButton) && (
           <DialogFooter>
             {params.dialogClose}
-            {params.addDefCloseButton && <ButtonBlack type="submit">{t('closeButtonDefault')}</ButtonBlack>}
+            {params.addDefCloseButton && (
+              <Button
+                type="submit"
+                className="transition-colors disabled:pointer-events-none disabled:opacity-50"
+              >
+                {t('closeButtonDefault')}
+              </Button>
+            )}
           </DialogFooter>
         )}
       </DialogContent>

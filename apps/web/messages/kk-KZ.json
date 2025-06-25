@@ -2872,7 +2872,8 @@
   },
   "LandingCustom": {
     "loadingCourses": "Курстар жүктелуде...",
-    "noFeaturedCourses": "Таңдалған ұсынылған курстар жоқ"
+    "noFeaturedCourses": "Таңдалған ұсынылған курстар жоқ",
+    "noImage": "No Image"
   },
   "NewCollectionPage": {
     "cancelButton": "Бас тарту",

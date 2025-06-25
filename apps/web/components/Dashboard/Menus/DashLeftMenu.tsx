@@ -1,5 +1,5 @@
 'use client';
-import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, Package2, School, Settings, Users } from 'lucide-react';
+import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
@@ -178,24 +178,6 @@ function DashLeftMenu() {
             </ToolTip>
             <div className="flex flex-col items-center space-y-3">
               <div className="flex flex-col space-y-1 py-1">
-                <ToolTip
-                  content={t('tooltips.userOwnedCourses', {
-                    username: session.data.user.username,
-                  })}
-                  slateBlack
-                  sideOffset={8}
-                  side="right"
-                >
-                  <Link
-                    href={'/dash/user-account/owned'}
-                    className="py-1"
-                  >
-                    <Package2
-                      className="mx-auto cursor-pointer text-neutral-400"
-                      size={18}
-                    />
-                  </Link>
-                </ToolTip>
                 <ToolTip
                   content={t('tooltips.userSettings', {
                     username: session.data.user.username,

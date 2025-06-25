@@ -38,7 +38,7 @@ function OrgUserGroups() {
     const toastId = toast.loading(t('deletingUserGroup'));
     try {
       const res = await deleteUserGroup(usergroup_id, access_token);
-      if (res.status == 200) {
+      if (res.status === 200) {
         mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
         toast.success(t('userGroupDeletedSuccess'), { id: toastId });
       } else {

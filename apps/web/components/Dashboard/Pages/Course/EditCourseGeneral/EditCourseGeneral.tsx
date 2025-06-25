@@ -1,19 +1,17 @@
 'use client';
-import * as Form from '@radix-ui/react-form';
-import { useFormik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form';
 import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
 
 import LearningItemsList from './LearningItemsList';
 import ThumbnailUpdate from './ThumbnailUpdate';
@@ -33,47 +31,39 @@ interface MyCourseFormValues {
   thumbnail_type: 'image' | 'video' | 'both';
 }
 
-const validate = (values: MyCourseFormValues, t: (key: string, values?: any) => string) => {
-  const errors: Partial<Record<keyof MyCourseFormValues, string>> = {};
-
-  if (!values.name) {
-    errors.name = t('errors.required', { fieldName: t('name.label') });
-  } else if (values.name.length > 100) {
-    errors.name = t('errors.maxLength', { count: 100 });
-  }
-
-  if (!values.description) {
-    errors.description = t('errors.required', {
-      fieldName: t('description.label'),
-    });
-  } else if (values.description.length > 1000) {
-    errors.description = t('errors.maxLength', { count: 1000 });
-  }
-
-  if (!values.learnings) {
-    errors.learnings = t('errors.required', {
-      fieldName: t('learnings.label'),
-    });
-  } else {
-    try {
-      const learningItems = JSON.parse(values.learnings);
-      if (!Array.isArray(learningItems)) {
-        errors.learnings = t('errors.invalidFormat');
-      } else if (learningItems.length === 0) {
-        errors.learnings = t('errors.atLeastOneLearningItem');
-      } else {
-        const hasEmptyText = learningItems.some((item: any) => !item.text || item.text.trim() === '');
-        if (hasEmptyText) {
-          errors.learnings = t('errors.allLearningItemsMustHaveText');
+const createValidationSchema = (t: (key: string, values?: any) => string) =>
+  z.object({
+    name: z
+      .string()
+      .min(1, t('errors.required', { fieldName: t('name.label') }))
+      .max(100, t('errors.maxLength', { count: 100 })),
+    description: z
+      .string()
+      .min(1, t('errors.required', { fieldName: t('description.label') }))
+      .max(1000, t('errors.maxLength', { count: 1000 })),
+    about: z.string().optional(),
+    learnings: z
+      .string()
+      .min(1, t('errors.required', { fieldName: t('learnings.label') }))
+      .refine((value) => {
+        try {
+          const learningItems = JSON.parse(value);
+          if (!Array.isArray(learningItems)) {
+            return false;
+          }
+          if (learningItems.length === 0) {
+            return false;
+          }
+          const hasEmptyText = learningItems.some((item: any) => !item.text || item.text.trim() === '');
+          return !hasEmptyText;
+        } catch {
+          return false;
         }
-      }
-    } catch {
-      errors.learnings = t('errors.invalidJsonFormat');
-    }
-  }
-
-  return errors;
-};
+      }, t('errors.invalidJsonFormat')),
+    tags: z.string().optional(),
+    public: z.boolean(),
+    thumbnail_type: z.enum(['image', 'video', 'both']),
+  });
 
 // Initialize learnings as a JSON array if it's not already
 const initializeLearnings = (learnings: any) => {
@@ -124,9 +114,11 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   const { isLoading, courseStructure } = course as any;
   const t = useTranslations('CourseEdit.General');
   const thumbnailType = courseStructure?.thumbnail_type || 'image';
+  const validationSchema = createValidationSchema(t);
 
-  const formik = useFormik<MyCourseFormValues>({
-    initialValues: {
+  const form = useForm<MyCourseFormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       name: courseStructure?.name || '',
       description: courseStructure?.description || '',
       about: courseStructure?.about || '',
@@ -135,16 +127,15 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       public: courseStructure?.public,
       thumbnail_type: thumbnailType,
     },
-    validate: (values) => validate(values, t),
-    onSubmit: async (values) => {
-      try {
-        dispatchCourse({ type: 'setIsSaved' });
-      } catch {
-        setError(t('errors.saveFailed'));
-      }
-    },
-    enableReinitialize: true,
-  }) as any;
+  });
+
+  const handleSubmit = async (values: MyCourseFormValues) => {
+    try {
+      dispatchCourse({ type: 'setIsSaved' });
+    } catch {
+      setError(t('errors.saveFailed'));
+    }
+  };
 
   // Reset form when courseStructure changes
   useEffect(() => {
@@ -158,26 +149,30 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
         public: courseStructure?.public,
         thumbnail_type: thumbnailType,
       };
-      formik.resetForm({ values: newValues });
+      form.reset(newValues);
     }
-  }, [courseStructure, isLoading, thumbnailType, formik]);
+  }, [courseStructure, isLoading, thumbnailType, form]);
+
+  const watchedValues = form.watch();
 
   useEffect(() => {
     if (!isLoading) {
-      const formikValues = formik.values as any;
-      const initialValues = formik.initialValues as any;
-      const valuesChanged = Object.keys(formikValues).some((key) => formikValues[key] !== initialValues[key]);
+      const formValues = form.getValues();
+      const defaultValues = form.formState.defaultValues;
+      const valuesChanged = Object.keys(formValues).some(
+        (key) => formValues[key as keyof MyCourseFormValues] !== defaultValues?.[key as keyof MyCourseFormValues],
+      );
 
       if (valuesChanged) {
         dispatchCourse({ type: 'setIsNotSaved' });
         const updatedCourse = {
           ...courseStructure,
-          ...formikValues,
+          ...formValues,
         };
         dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
       }
     }
-  }, [formik.values, formik.initialValues, isLoading, courseStructure, dispatchCourse]);
+  }, [watchedValues, isLoading, courseStructure, dispatchCourse, form]);
 
   if (isLoading || !courseStructure) {
     return <div>{t('loading')}</div>;
@@ -188,131 +183,149 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       <div className="h-6" />
       <div className="px-10 pb-10">
         <div className="shadow-xs rounded-xl bg-white">
-          <FormLayout
-            onSubmit={formik.handleSubmit}
-            className="p-6"
-          >
-            {error && (
-              <div className="shadow-xs mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
-                <AlertTriangle size={18} />
-                <div className="text-sm font-bold">{error}</div>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="p-6"
+            >
+              {error && (
+                <div className="shadow-xs mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
+                  <AlertTriangle size={18} />
+                  <div className="text-sm font-bold">{error}</div>
+                </div>
+              )}
+
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('name.label')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          style={{ backgroundColor: 'white' }}
+                          type="text"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('description.label')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          style={{ backgroundColor: 'white' }}
+                          type="text"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="about"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('about.label')}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          style={{ backgroundColor: 'white', height: '200px', minHeight: '200px' }}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="learnings"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('learnings.label')}</FormLabel>
+                      <FormControl>
+                        <LearningItemsList
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={form.formState.errors.learnings?.message}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('tags.label')}</FormLabel>
+                      <FormControl>
+                        <FormTagInput
+                          placeholder={t('tags.placeholder')}
+                          onChange={field.onChange}
+                          value={field.value}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="thumbnail_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('thumbnailType')}</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="w-full bg-white">
+                            <SelectValue>
+                              {field.value === 'image'
+                                ? t('image')
+                                : field.value === 'video'
+                                  ? t('video')
+                                  : field.value === 'both'
+                                    ? t('both')
+                                    : t('image')}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="image">{t('image')}</SelectItem>
+                            <SelectItem value="video">{t('video')}</SelectItem>
+                            <SelectItem value="both">{t('both')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div>
+                  <FormLabel>{t('thumbnail.label')}</FormLabel>
+                  <ThumbnailUpdate thumbnailType={form.watch('thumbnail_type')} />
+                </div>
               </div>
-            )}
-
-            <div className="space-y-6">
-              <FormField name="name">
-                <FormLabelAndMessage
-                  label={t('name.label')}
-                  message={formik.errors.name}
-                />
-                <Form.Control asChild>
-                  <Input
-                    style={{ backgroundColor: 'white' }}
-                    onChange={formik.handleChange}
-                    value={formik.values.name}
-                    type="text"
-                    required
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="description">
-                <FormLabelAndMessage
-                  label={t('description.label')}
-                  message={formik.errors.description}
-                />
-                <Form.Control asChild>
-                  <Input
-                    style={{ backgroundColor: 'white' }}
-                    onChange={formik.handleChange}
-                    value={formik.values.description}
-                    type="text"
-                    required
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="about">
-                <FormLabelAndMessage
-                  label={t('about.label')}
-                  message={formik.errors.about}
-                />
-                <Form.Control asChild>
-                  <Textarea
-                    style={{ backgroundColor: 'white', height: '200px', minHeight: '200px' }}
-                    onChange={formik.handleChange}
-                    value={formik.values.about}
-                    required
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="learnings">
-                <FormLabelAndMessage
-                  label={t('learnings.label')}
-                  message={formik.errors.learnings}
-                />
-                <Form.Control asChild>
-                  <LearningItemsList
-                    value={formik.values.learnings}
-                    onChange={(value) => formik.setFieldValue('learnings', value)}
-                    error={formik.errors.learnings}
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="tags">
-                <FormLabelAndMessage
-                  label={t('tags.label')}
-                  message={formik.errors.tags}
-                />
-                <Form.Control asChild>
-                  <FormTagInput
-                    placeholder={t('tags.placeholder')}
-                    onChange={(value) => formik.setFieldValue('tags', value)}
-                    value={formik.values.tags}
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="thumbnail_type">
-                <FormLabelAndMessage label={t('thumbnailType')} />
-                <Form.Control asChild>
-                  <Select
-                    value={formik.values.thumbnail_type}
-                    onValueChange={(value) => {
-                      if (!value) return;
-                      formik.setFieldValue('thumbnail_type', value);
-                    }}
-                  >
-                    <SelectTrigger className="w-full bg-white">
-                      <SelectValue>
-                        {formik.values.thumbnail_type === 'image'
-                          ? t('image')
-                          : formik.values.thumbnail_type === 'video'
-                            ? t('video')
-                            : formik.values.thumbnail_type === 'both'
-                              ? t('both')
-                              : t('image')}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="image">{t('image')}</SelectItem>
-                      <SelectItem value="video">{t('video')}</SelectItem>
-                      <SelectItem value="both">{t('both')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Form.Control>
-              </FormField>
-
-              <FormField name="thumbnail">
-                <FormLabelAndMessage label={t('thumbnail.label')} />
-                <Form.Control asChild>
-                  <ThumbnailUpdate thumbnailType={formik.values.thumbnail_type} />
-                </Form.Control>
-              </FormField>
-            </div>
-          </FormLayout>
+            </form>
+          </Form>
         </div>
       </div>
     </div>

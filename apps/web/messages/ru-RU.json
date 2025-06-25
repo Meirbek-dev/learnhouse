@@ -2872,7 +2872,8 @@
   },
   "LandingCustom": {
     "loadingCourses": "Загрузка курсов...",
-    "noFeaturedCourses": "Нет выбранных рекомендованных курсов"
+    "noFeaturedCourses": "Нет выбранных рекомендованных курсов",
+    "noImage": "Нет изображения"
   },
   "NewCollectionPage": {
     "cancelButton": "Отмена",

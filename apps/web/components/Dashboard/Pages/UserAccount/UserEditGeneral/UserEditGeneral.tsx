@@ -1,5 +1,5 @@
 'use client';
-import { Form, Formik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   AlertTriangle,
   ArrowBigUpDash,
@@ -24,8 +24,9 @@ import { signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as React from 'react';
+import { useForm, type UseFormReturn } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import * as Yup from 'yup';
+import { z } from 'zod';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import type { Locale } from '@/i18n/config';
@@ -34,6 +35,7 @@ import { constructAcceptValue } from '@/lib/constants';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
@@ -45,25 +47,24 @@ import { getUser, updateUserAvatar } from '@services/users/users';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
 
-const AVAILABLE_ICONS = [
-  { name: 'briefcase', label: 'Briefcase', component: Briefcase },
-  { name: 'graduation-cap', label: 'Education', component: GraduationCap },
-  { name: 'map-pin', label: 'Location', component: MapPin },
-  { name: 'building-2', label: 'Organization', component: Building2 },
-  { name: 'speciality', label: 'Speciality', component: Lightbulb },
-  { name: 'globe', label: 'Website', component: Globe },
-  { name: 'laptop-2', label: 'Tech', component: Laptop2 },
-  { name: 'award', label: 'Achievement', component: Award },
-  { name: 'book-open', label: 'Book', component: BookOpen },
-  { name: 'link', label: 'Link', component: Link },
-  { name: 'users', label: 'Community', component: Users },
-  { name: 'calendar', label: 'Calendar', component: Calendar },
-] as const;
+const iconComponentMap = {
+  'briefcase': Briefcase,
+  'graduation-cap': GraduationCap,
+  'map-pin': MapPin,
+  'building-2': Building2,
+  'speciality': Lightbulb,
+  'globe': Globe,
+  'laptop-2': Laptop2,
+  'award': Award,
+  'book-open': BookOpen,
+  'link': Link,
+  'users': Users,
+  'calendar': Calendar,
+};
 
 const IconComponent = ({ iconName }: { iconName: string }) => {
-  const iconConfig = AVAILABLE_ICONS.find((i) => i.name === iconName);
-  if (!iconConfig) return null;
-  const IconElement = iconConfig.component;
+  const IconElement = iconComponentMap[iconName as keyof typeof iconComponentMap];
+  if (!IconElement) return null;
   return <IconElement className="h-4 w-4" />;
 };
 
@@ -79,44 +80,37 @@ interface FormValues {
   first_name: string;
   last_name: string;
   email: string;
-  bio: string;
+  bio?: string;
   details: {
     [key: string]: DetailItem;
   };
 }
 
-const DETAIL_TEMPLATES = {
-  general: [
-    { id: 'title', label: 'Title', icon: 'briefcase', text: '' },
-    { id: 'affiliation', label: 'Affiliation', icon: 'building-2', text: '' },
-    { id: 'location', label: 'Location', icon: 'map-pin', text: '' },
-    { id: 'website', label: 'Website', icon: 'globe', text: '' },
-    { id: 'linkedin', label: 'LinkedIn', icon: 'link', text: '' },
-  ],
-  academic: [
-    { id: 'institution', label: 'Institution', icon: 'building-2', text: '' },
-    { id: 'department', label: 'Department', icon: 'graduation-cap', text: '' },
-    { id: 'research', label: 'Research Area', icon: 'book-open', text: '' },
-    { id: 'academic-title', label: 'Academic Title', icon: 'award', text: '' },
-  ],
-  professional: [
-    { id: 'company', label: 'Company', icon: 'building-2', text: '' },
-    { id: 'industry', label: 'Industry', icon: 'briefcase', text: '' },
-    { id: 'expertise', label: 'Expertise', icon: 'laptop-2', text: '' },
-    { id: 'community', label: 'Community', icon: 'users', text: '' },
-  ],
-} as const;
-
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
-  Yup.object().shape({
-    email: Yup.string()
+  z.object({
+    email: z
+      .string()
       .email(t('Form.invalidEmail'))
-      .required(t('Form.requiredField', { fieldName: 'Email' })),
-    username: Yup.string().required(t('Form.requiredField', { fieldName: 'Username' })),
-    first_name: Yup.string().required(t('Form.requiredField', { fieldName: 'First name' })),
-    last_name: Yup.string().required(t('Form.requiredField', { fieldName: 'Last name' })),
-    bio: Yup.string().max(400, t('Form.maxChars', { count: 400 })),
-    details: Yup.object().shape({}),
+      .min(1, t('Form.requiredField', { fieldName: 'Email' })),
+    username: z.string().min(1, t('Form.requiredField', { fieldName: 'Username' })),
+    first_name: z.string().min(1, t('Form.requiredField', { fieldName: 'First name' })),
+    last_name: z.string().min(1, t('Form.requiredField', { fieldName: 'Last name' })),
+    bio: z
+      .string()
+      .max(400, t('Form.maxChars', { count: 400 }))
+      .optional()
+      .or(z.literal('')),
+    details: z
+      .record(
+        z.object({
+          id: z.string(),
+          label: z.string(),
+          icon: z.string(),
+          text: z.string(),
+        }),
+      )
+      .optional()
+      .default({}),
   });
 
 // Memoized detail card component for better performance
@@ -127,25 +121,32 @@ const DetailCard = React.memo(
     onUpdate,
     onRemove,
     onLabelChange,
+    availableIcons,
   }: {
     id: string;
     detail: DetailItem;
     onUpdate: (id: string, field: keyof DetailItem, value: string) => void;
     onRemove: (id: string) => void;
     onLabelChange: (id: string, newLabel: string) => void;
+    availableIcons: ReadonlyArray<{
+      name: string;
+      label: string;
+      component: React.ElementType;
+    }>;
   }) => {
     // Add local state for label input
     const [localLabel, setLocalLabel] = useState(detail.label);
+    const [isUserInput, setIsUserInput] = useState(false);
     const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
-    // Create a stable callback for label changes
+    // Create a stable callback for label changes - only for user input
     const stableLabelChangeCallback = useCallback(
       (newLabel: string) => {
-        if (newLabel !== detail.label) {
+        if (isUserInput && newLabel !== detail.label) {
           onLabelChange(id, newLabel);
         }
       },
-      [id, onLabelChange, detail.label],
+      [id, onLabelChange, detail.label, isUserInput],
     );
 
     // Debounce the label change handler
@@ -156,6 +157,7 @@ const DetailCard = React.memo(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const newLabel = e.target.value;
         setLocalLabel(newLabel);
+        setIsUserInput(true);
         debouncedLabelChange(newLabel);
       },
       [debouncedLabelChange],
@@ -179,9 +181,10 @@ const DetailCard = React.memo(
       onRemove(id);
     }, [id, onRemove]);
 
-    // Update local label when prop changes
+    // Update local label when prop changes (but don't trigger callbacks)
     useEffect(() => {
       setLocalLabel(detail.label);
+      setIsUserInput(false); // Reset user input flag when prop changes
     }, [detail.label]);
 
     return (
@@ -216,13 +219,13 @@ const DetailCard = React.memo(
                   {detail.icon && (
                     <div className="flex items-center gap-2">
                       <IconComponent iconName={detail.icon} />
-                      <span>{AVAILABLE_ICONS.find((i) => i.name === detail.icon)?.label}</span>
+                      <span>{availableIcons.find((i) => i.name === detail.icon)?.label}</span>
                     </div>
                   )}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {AVAILABLE_ICONS.map((icon) => (
+                {availableIcons.map((icon) => (
                   <SelectItem
                     key={icon.name}
                     value={icon.name}
@@ -253,79 +256,71 @@ const DetailCard = React.memo(
 DetailCard.displayName = 'DetailCard';
 
 interface UserEditFormProps {
-  values: FormValues;
-  setFieldValue: (field: string, value: any) => void;
-  handleChange: (e: React.ChangeEvent<any>) => void;
-  errors: any;
-  touched: any;
-  isSubmitting: boolean;
+  form: UseFormReturn<FormValues>;
   profilePicture: {
     error: string | undefined;
     success: string;
     isLoading: boolean;
     localAvatar: File | null;
-    handleFileChange: (event: any) => Promise<void>;
+    handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   };
 }
 
 // Form component to handle the details section
-const UserEditForm = ({
-  values,
-  setFieldValue,
-  handleChange,
-  errors,
-  touched,
-  isSubmitting,
-  profilePicture,
-}: UserEditFormProps) => {
+const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
   const t = useTranslations('DashPage.UserAccountSettings.generalSection');
-  // Memoize template handlers
-  const _templateHandlers = useMemo(() => {
-    const handlers: { [key: string]: () => void } = {};
-    Object.entries(DETAIL_TEMPLATES).forEach(([key, template]) => {
-      handlers[key] = () => {
-        const currentIds = new Set(Object.keys(values.details));
-        const newDetails = { ...values.details };
+  const tIcons = useTranslations('Components.UserProfilePopup.Icons');
+  const tTemplates = useTranslations('DashPage.UserAccountSettings.generalSection.detailTemplateLabels');
 
-        template.forEach((item) => {
-          if (!currentIds.has(item.id)) {
-            newDetails[item.id] = { ...item };
-          }
-        });
-
-        setFieldValue('details', newDetails);
-      };
-    });
-    return handlers;
-  }, [values.details, setFieldValue]);
-
-  // Memoize detail handlers
-  const _detailHandlers = useMemo(
-    () => ({
-      handleDetailUpdate: (id: string, field: keyof DetailItem, value: string) => {
-        const newDetails = { ...values.details };
-        const existingDetail = newDetails[id];
-        newDetails[id] = {
-          id: existingDetail?.id || id,
-          label: existingDetail?.label || '',
-          icon: existingDetail?.icon || '',
-          text: existingDetail?.text || '',
-          ...existingDetail,
-          [field]: value,
-        };
-        setFieldValue('details', newDetails);
-      },
-      handleDetailRemove: (id: string) => {
-        const newDetails = { ...values.details };
-        delete newDetails[id];
-        setFieldValue('details', newDetails);
-      },
-    }),
-    [values.details, setFieldValue],
+  const AVAILABLE_ICONS = useMemo(
+    () =>
+      [
+        { name: 'briefcase', label: tIcons('briefcase'), component: Briefcase },
+        { name: 'graduation-cap', label: tIcons('graduation-cap'), component: GraduationCap },
+        { name: 'map-pin', label: tIcons('map-pin'), component: MapPin },
+        { name: 'building-2', label: tIcons('building-2'), component: Building2 },
+        { name: 'speciality', label: tIcons('speciality'), component: Lightbulb },
+        { name: 'globe', label: tIcons('globe'), component: Globe },
+        { name: 'laptop-2', label: tIcons('laptop-2'), component: Laptop2 },
+        { name: 'award', label: tIcons('award'), component: Award },
+        { name: 'book-open', label: tIcons('book-open'), component: BookOpen },
+        { name: 'link', label: tIcons('link'), component: Link },
+        { name: 'users', label: tIcons('users'), component: Users },
+        { name: 'calendar', label: tIcons('calendar'), component: Calendar },
+      ] as const,
+    [tIcons],
   );
 
+  const DETAIL_TEMPLATES = useMemo(
+    () =>
+      ({
+        general: [
+          { id: 'title', label: tTemplates('title'), icon: 'briefcase', text: '' },
+          { id: 'affiliation', label: tTemplates('affiliation'), icon: 'building-2', text: '' },
+          { id: 'location', label: tTemplates('location'), icon: 'map-pin', text: '' },
+          { id: 'website', label: tTemplates('website'), icon: 'globe', text: '' },
+          { id: 'linkedin', label: tTemplates('linkedin'), icon: 'link', text: '' },
+        ],
+        academic: [
+          { id: 'institution', label: tTemplates('institution'), icon: 'building-2', text: '' },
+          { id: 'department', label: tTemplates('department'), icon: 'graduation-cap', text: '' },
+          { id: 'research', label: tTemplates('research'), icon: 'book-open', text: '' },
+          { id: 'academic-title', label: tTemplates('academic-title'), icon: 'award', text: '' },
+        ],
+        professional: [
+          { id: 'company', label: tTemplates('company'), icon: 'building-2', text: '' },
+          { id: 'industry', label: tTemplates('industry'), icon: 'briefcase', text: '' },
+          { id: 'expertise', label: tTemplates('expertise'), icon: 'laptop-2', text: '' },
+          { id: 'community', label: tTemplates('community'), icon: 'users', text: '' },
+        ],
+      }) as const,
+    [tTemplates],
+  );
+
+  const details = form.watch('details');
+
   return (
-    <Form>
+    <form>
       <div className="flex flex-col gap-0">
         <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
           <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
@@ -335,83 +330,108 @@ const UserEditForm = ({
         <div className="mx-5 my-5 mt-0 flex flex-col gap-8 lg:flex-row">
           {/* Profile Information Section */}
           <div className="min-w-0 flex-1 space-y-4">
-            <div>
-              <Label htmlFor="email">{t('email')}</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={values.email}
-                onChange={handleChange}
-                placeholder={t('emailPlaceholder')}
-              />
-              {touched.email && errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
-              <div className="mt-2 flex items-center space-x-2 rounded-md bg-amber-50 p-2 text-amber-600">
-                <AlertTriangle size={16} />
-                <span className="text-sm">{t('emailChangeWarning')}</span>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="username">{t('username')}</Label>
-              <Input
-                id="username"
-                name="username"
-                value={values.username}
-                onChange={handleChange}
-                placeholder={t('usernamePlaceholder')}
-              />
-              {touched.username && errors.username && <p className="mt-1 text-sm text-red-500">{errors.username}</p>}
-            </div>
-
-            <div>
-              <Label htmlFor="first_name">{t('firstName')}</Label>
-              <Input
-                id="first_name"
-                name="first_name"
-                value={values.first_name}
-                onChange={handleChange}
-                placeholder={t('firstNamePlaceholder')}
-              />
-              {touched.first_name && errors.first_name && (
-                <p className="mt-1 text-sm text-red-500">{errors.first_name}</p>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('email')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder={t('emailPlaceholder')}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <div className="mt-2 flex items-center space-x-2 rounded-md bg-amber-50 p-2 text-amber-600">
+                    <AlertTriangle size={16} />
+                    <span className="text-sm">{t('emailChangeWarning')}</span>
+                  </div>
+                </FormItem>
               )}
-            </div>
+            />
 
-            <div>
-              <Label htmlFor="last_name">{t('lastName')}</Label>
-              <Input
-                id="last_name"
-                name="last_name"
-                value={values.last_name}
-                onChange={handleChange}
-                placeholder={t('lastNamePlaceholder')}
-              />
-              {touched.last_name && errors.last_name && <p className="mt-1 text-sm text-red-500">{errors.last_name}</p>}
-            </div>
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('username')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={t('usernamePlaceholder')}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            <div>
-              <Label htmlFor="bio">
-                {t('bio')}
-                <span className="text-sm text-gray-500">
-                  ({400 - (values.bio?.length || 0)} {t('charactersLeft')})
-                </span>
-              </Label>
-              <Textarea
-                id="bio"
-                name="bio"
-                value={values.bio}
-                onChange={handleChange}
-                placeholder={t('bioPlaceholder')}
-                className="min-h-[150px]"
-                maxLength={400}
-              />
-              {touched.bio && errors.bio && <p className="mt-1 text-sm text-red-500">{errors.bio}</p>}
-            </div>
+            <FormField
+              control={form.control}
+              name="first_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('firstName')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={t('firstNamePlaceholder')}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('lastName')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={t('lastNamePlaceholder')}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="bio"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {t('bio')}
+                    <span className="text-sm text-gray-500">
+                      ({400 - (field.value?.length || 0)} {t('charactersLeft')})
+                    </span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t('bioPlaceholder')}
+                      className="min-h-[150px]"
+                      maxLength={400}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div>
               <Label className="mb-1.5">{t('language')}</Label>
               <LocaleSwitcher />
             </div>
+
             <div className="space-y-4">
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
@@ -423,7 +443,7 @@ const UserEditForm = ({
                       size="sm"
                       className="text-red-500 hover:bg-red-50 hover:text-red-700"
                       onClick={() => {
-                        setFieldValue('details', {});
+                        form.setValue('details', {});
                       }}
                     >
                       {t('clearAll')}
@@ -433,7 +453,7 @@ const UserEditForm = ({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const newDetails = { ...values.details };
+                        const newDetails = { ...details };
                         const id = `detail-${Date.now()}`;
                         newDetails[id] = {
                           id,
@@ -441,7 +461,7 @@ const UserEditForm = ({
                           icon: '',
                           text: '',
                         };
-                        setFieldValue('details', newDetails);
+                        form.setValue('details', newDetails);
                       }}
                     >
                       {t('addDetail')}
@@ -458,8 +478,8 @@ const UserEditForm = ({
                       size="sm"
                       className="flex items-center gap-2"
                       onClick={() => {
-                        const currentIds = new Set(Object.keys(values.details));
-                        const newDetails = { ...values.details };
+                        const currentIds = new Set(Object.keys(details));
+                        const newDetails = { ...details };
 
                         template.forEach((item) => {
                           if (!currentIds.has(item.id)) {
@@ -467,7 +487,7 @@ const UserEditForm = ({
                           }
                         });
 
-                        setFieldValue('details', newDetails);
+                        form.setValue('details', newDetails);
                       }}
                     >
                       {key === 'general' && <Briefcase className="h-4 w-4" />}
@@ -480,13 +500,13 @@ const UserEditForm = ({
               </div>
 
               <div className="space-y-3">
-                {Object.entries(values.details).map(([id, detail]) => (
+                {Object.entries(details).map(([id, detail]) => (
                   <DetailCard
                     key={id}
                     id={id}
-                    detail={detail}
+                    detail={detail as DetailItem}
                     onUpdate={(id, field, value) => {
-                      const newDetails = { ...values.details };
+                      const newDetails = { ...details };
                       const existingDetail = newDetails[id];
                       newDetails[id] = {
                         id: existingDetail?.id || id,
@@ -496,15 +516,15 @@ const UserEditForm = ({
                         ...existingDetail,
                         [field]: value,
                       };
-                      setFieldValue('details', newDetails);
+                      form.setValue('details', newDetails);
                     }}
                     onRemove={(id) => {
-                      const newDetails = { ...values.details };
+                      const newDetails = { ...details };
                       delete newDetails[id];
-                      setFieldValue('details', newDetails);
+                      form.setValue('details', newDetails);
                     }}
                     onLabelChange={(id, newLabel) => {
-                      const newDetails = { ...values.details };
+                      const newDetails = { ...details };
                       const existingDetail = newDetails[id];
                       newDetails[id] = {
                         id: existingDetail?.id || id,
@@ -513,8 +533,9 @@ const UserEditForm = ({
                         text: existingDetail?.text || '',
                         ...existingDetail,
                       };
-                      setFieldValue('details', newDetails);
+                      form.setValue('details', newDetails);
                     }}
+                    availableIcons={AVAILABLE_ICONS}
                   />
                 ))}
               </div>
@@ -603,14 +624,13 @@ const UserEditForm = ({
         <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
           <Button
             type="submit"
-            disabled={isSubmitting}
-            className="bg-black text-white hover:bg-black/90"
+            disabled={form.formState.isSubmitting}
           >
-            {isSubmitting ? t('saving') : t('saveChanges')}
+            {form.formState.isSubmitting ? t('saving') : t('saveChanges')}
           </Button>
         </div>
       </div>
-    </Form>
+    </form>
   );
 };
 
@@ -627,6 +647,18 @@ function UserEditGeneral() {
   const t = useTranslations('DashPage.Notifications');
   const validationSchema = React.useMemo(() => createValidationSchema(t), [t]);
 
+  const form = useForm<FormValues>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      username: '',
+      first_name: '',
+      last_name: '',
+      email: '',
+      bio: '',
+      details: {},
+    },
+  });
+
   // Add a handler to update the state when locale changes
   const _handleLocaleChange = useCallback((newLocale: Locale) => {
     setCurrentLocale(newLocale);
@@ -642,6 +674,16 @@ function UserEditGeneral() {
           ]);
           setUserData(userDataResponse);
           setCurrentLocale(localeResponse as Locale);
+
+          // Reset form with fetched data
+          form.reset({
+            username: userDataResponse.username || '',
+            first_name: userDataResponse.first_name || '',
+            last_name: userDataResponse.last_name || '',
+            email: userDataResponse.email || '',
+            bio: userDataResponse.bio || '',
+            details: userDataResponse.details || {},
+          });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           console.error('Error fetching initial data:', errorMessage, error);
@@ -655,7 +697,7 @@ function UserEditGeneral() {
     };
 
     fetchData();
-  }, [session?.data?.user?.id, access_token]);
+  }, [session?.data?.user?.id, access_token, form]);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -667,7 +709,6 @@ function UserEditGeneral() {
     setSuccess('');
     try {
       const res = await updateUserAvatar(session.data.user_uuid, file, access_token);
-      // await new Promise((r) => setTimeout(r, 1000));
       if (res.success === false) {
         setError(res.HTTPmessage || t('avatarError'));
       } else {
@@ -707,6 +748,29 @@ function UserEditGeneral() {
     signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') });
   };
 
+  const onSubmit = async (values: FormValues) => {
+    const isEmailChanged = values.email !== userData.email;
+    const loadingToast = toast.loading(t('updating'));
+
+    try {
+      await updateProfile(values, userData.id, access_token);
+      const updatedUserData = await getUser(userData.id, access_token);
+      setUserData(updatedUserData);
+
+      toast.dismiss(loadingToast);
+      if (isEmailChanged) {
+        await handleEmailChange(values.email);
+      } else {
+        toast.success(t('profileUpdateSuccess'));
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      toast.error(t('profileUpdateError'), {
+        id: loadingToast,
+      });
+    }
+  };
+
   if (initialLoading || !userData || !currentLocale) {
     return (
       <div className="nice-shadow mx-0 rounded-xl bg-white p-8 sm:mx-10">
@@ -719,46 +783,10 @@ function UserEditGeneral() {
 
   return (
     <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
-      <Formik<FormValues>
-        enableReinitialize
-        initialValues={{
-          username: userData.username || '',
-          first_name: userData.first_name || '',
-          last_name: userData.last_name || '',
-          email: userData.email || '',
-          bio: userData.bio || '',
-          details: userData.details || {},
-        }}
-        validationSchema={validationSchema}
-        onSubmit={async (values, { setSubmitting }) => {
-          const isEmailChanged = values.email !== userData.email;
-          const loadingToast = toast.loading(t('updating'));
-          setSubmitting(true);
-
-          try {
-            await updateProfile(values, userData.id, access_token);
-            const updatedUserData = await getUser(userData.id, access_token);
-            setUserData(updatedUserData);
-
-            toast.dismiss(loadingToast);
-            if (isEmailChanged) {
-              await handleEmailChange(values.email);
-            } else {
-              toast.success(t('profileUpdateSuccess'));
-            }
-          } catch (error) {
-            console.error('Profile update error:', error);
-            toast.error(t('profileUpdateError'), {
-              id: loadingToast,
-            });
-          } finally {
-            setSubmitting(false);
-          }
-        }}
-      >
-        {(formikProps) => (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <UserEditForm
-            {...formikProps}
+            form={form}
             profilePicture={{
               error,
               success,
@@ -767,8 +795,8 @@ function UserEditGeneral() {
               handleFileChange,
             }}
           />
-        )}
-      </Formik>
+        </form>
+      </Form>
     </div>
   );
 }

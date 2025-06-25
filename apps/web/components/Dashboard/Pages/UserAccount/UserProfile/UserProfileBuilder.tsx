@@ -393,7 +393,6 @@ const UserProfileBuilder = () => {
             variant="default"
             onClick={handleSave}
             disabled={isSaving}
-            className="bg-black hover:bg-black/90"
           >
             {isSaving ? t('savingButton') : t('saveButton')}
           </Button>

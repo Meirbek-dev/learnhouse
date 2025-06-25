@@ -51,7 +51,7 @@ function OrgAccess() {
     const toastId = toast.loading(t('deletingInvite'));
     try {
       const res = await deleteInviteCode(org.id, invite.invite_code_uuid, access_token);
-      if (res.status == 200) {
+      if (res.status === 200) {
         mutate(`${getAPIUrl()}orgs/${org.id}/invites`);
         toast.success(t('inviteDeletedSuccess'), { id: toastId });
       } else {
@@ -66,7 +66,7 @@ function OrgAccess() {
     const toastId = toast.loading(t('changingJoinMethod'));
     try {
       const res = await changeSignupMechanism(org.id, method, access_token);
-      if (res.status == 200) {
+      if (res.status === 200) {
         router.refresh();
         mutate(`${getAPIUrl()}orgs/slug/${org?.slug}`);
         toast.success(t('joinMethodChangedSuccess', { method }), {

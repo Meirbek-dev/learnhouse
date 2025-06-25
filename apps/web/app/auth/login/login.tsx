@@ -1,14 +1,17 @@
 'use client';
-import * as Form from '@radix-ui/react-form';
-import { useFormik } from 'formik';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, UserRoundPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import FormLayout, { FormField, FormLabelAndMessage, Input } from '@components/Objects/StyledElements/Form/Form';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import openuLogoDark from 'public/openu_logo_dark.png';
 
@@ -16,65 +19,48 @@ interface LoginClientProps {
   org: any;
 }
 
+const createValidationSchema = (t: (key: string, values?: any) => string) =>
+  z.object({
+    email: z.string().min(1, t('required')).email(t('invalidEmail')),
+    password: z
+      .string()
+      .min(1, t('required'))
+      .min(8, t('passwordMinLength', { length: 8 })),
+  });
+
+type LoginFormData = z.infer<ReturnType<typeof createValidationSchema>>;
+
 const LoginClient = (props: LoginClientProps) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Login');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const validate = (values: any) => {
-    const errors: any = {};
-
-    if (!values.email) {
-      errors.email = validationT('required');
-    } else if (!/^[\w%+.-]+@[\d.a-z-]+\.[a-z]{2,}$/i.test(values.email)) {
-      errors.email = validationT('invalidEmail');
-    }
-
-    if (!values.password) {
-      errors.password = validationT('required');
-    } else if (values.password.length < 8) {
-      errors.password = validationT('passwordMinLength', { length: 8 });
-    }
-
-    return errors;
-  };
-
   const [error, setError] = useState('');
-  const formik = useFormik({
-    initialValues: {
+  const validationSchema = createValidationSchema(validationT);
+
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
       email: '',
       password: '',
     },
-    validate,
-    validateOnBlur: true,
-    validateOnChange: true,
-    onSubmit: async (values, { validateForm, setErrors, setSubmitting }) => {
-      setIsSubmitting(true);
-      const errors = await validateForm(values);
-      if (Object.keys(errors).length > 0) {
-        setErrors(errors);
-        setSubmitting(false);
-        return;
-      }
+  });
 
-      const res = await signIn('credentials', {
-        redirect: false,
+  const handleSubmit = async (values: LoginFormData) => {
+    const res = await signIn('credentials', {
+      redirect: false,
+      email: values.email,
+      password: values.password,
+      callbackUrl: '/redirect_from_auth',
+    });
+    if (res?.error) {
+      setError(t('wrongCredentials'));
+    } else {
+      await signIn('credentials', {
         email: values.email,
         password: values.password,
         callbackUrl: '/redirect_from_auth',
       });
-      if (res?.error) {
-        setError(t('wrongCredentials'));
-        setIsSubmitting(false);
-      } else {
-        await signIn('credentials', {
-          email: values.email,
-          password: values.password,
-          callbackUrl: '/redirect_from_auth',
-        });
-      }
-    },
-  });
+    }
+  };
 
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
@@ -102,67 +88,74 @@ const LoginClient = (props: LoginClientProps) => {
                   <div className="text-sm font-bold">{t('wrongCredentials')}</div>
                 </div>
               )}
-              <FormLayout onSubmit={formik.handleSubmit}>
-                <FormField name="email">
-                  <FormLabelAndMessage
-                    label={t('email')}
-                    message={formik.errors.email}
-                  />
-                  <Form.Control asChild>
-                    <Input
-                      onChange={formik.handleChange}
-                      value={formik.values.email}
-                      type="email"
-                      placeholder={t('emailPlaceholder')}
-                      disabled={isSubmitting}
-                      autoComplete="email"
-                      aria-describedby={formik.errors.email ? 'email-error' : undefined}
-                    />
-                  </Form.Control>
-                </FormField>
-                {/* for password  */}
-                <FormField name="password">
-                  <FormLabelAndMessage
-                    label={t('password')}
-                    message={formik.errors.password}
+
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(handleSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('email')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder={t('emailPlaceholder')}
+                            autoComplete="email"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
 
-                  <Form.Control asChild>
-                    <Input
-                      onChange={formik.handleChange}
-                      value={formik.values.password}
-                      type="password"
-                      placeholder={t('passwordPlaceholder')}
-                      disabled={isSubmitting}
-                      autoComplete="current-password"
-                      aria-describedby={formik.errors.password ? 'password-error' : undefined}
-                    />
-                  </Form.Control>
-                </FormField>
-                <div>
-                  <Link
-                    href={{
-                      pathname: getUriWithoutOrg('/forgot'),
-                      query: props.org.slug ? { orgslug: props.org.slug } : null,
-                    }}
-                    passHref
-                    className="text-xs text-gray-500 transition-colors hover:text-gray-700 hover:underline"
-                  >
-                    {t('forgotPassword')}
-                  </Link>
-                </div>
-                <div className="flex py-4">
-                  <Form.Submit asChild>
-                    <button
-                      className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md transition-all duration-200 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={isSubmitting}
-                      aria-label={isSubmitting ? t('loading') : t('login')}
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('password')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder={t('passwordPlaceholder')}
+                            autoComplete="current-password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div>
+                    <Link
+                      href={{
+                        pathname: getUriWithoutOrg('/forgot'),
+                        query: props.org.slug ? { orgslug: props.org.slug } : null,
+                      }}
+                      passHref
+                      className="text-xs text-gray-500 transition-colors hover:text-gray-700 hover:underline"
                     >
-                      {isSubmitting ? t('loading') : t('login')}
-                    </button>
-                  </Form.Submit>
-                </div>
-              </FormLayout>
+                      {t('forgotPassword')}
+                    </Link>
+                  </div>
+
+                  <div className="flex py-4">
+                    <Button
+                      type="submit"
+                      className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md transition-all duration-200 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={form.formState.isSubmitting}
+                    >
+                      {form.formState.isSubmitting ? t('loading') : t('login')}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
               <div className="mx-10 mt-5 flex h-0.5 rounded-2xl bg-slate-100" />
               <div className="mx-auto flex justify-center py-5">{t('or')}</div>
               <div className="flex flex-col space-y-4">
@@ -179,7 +172,7 @@ const LoginClient = (props: LoginClientProps) => {
                 <button
                   onClick={() => signIn('google', { callbackUrl: '/redirect_from_auth' })}
                   className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50"
-                  disabled={isSubmitting}
+                  disabled={form.formState.isSubmitting}
                 >
                   <Image
                     src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"
