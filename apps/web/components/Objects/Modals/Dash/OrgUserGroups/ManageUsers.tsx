@@ -6,6 +6,7 @@ import useSWR, { mutate } from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { getAPIUrl } from '@services/config/config';
 import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -55,27 +56,26 @@ function ManageUsers(props: ManageUsersProps) {
 
   return (
     <div className="py-3">
-      <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-        <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
-          <tr className="font-bolder text-sm">
-            <th className="px-4 py-3">{t('userHeader')}</th>
-            <th className="px-4 py-3">{t('linkedHeader')}</th>
-            <th className="px-4 py-3">{t('actionsHeader')}</th>
-          </tr>
-        </thead>
-        <tbody className="mt-5 rounded-md bg-white">
+      <Table className="overflow-hidden rounded-md">
+        <TableHeader className="rounded-md bg-gray-100 uppercase">
+          <TableRow>
+            <TableHead>{t('userHeader')}</TableHead>
+            <TableHead>{t('linkedHeader')}</TableHead>
+            <TableHead>{t('actionsHeader')}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {OrgUsers?.map((user: any) => (
-            <tr
-              key={user.user.id}
-              className="border-b border-dashed border-gray-200 text-sm"
-            >
-              <td className="flex items-center space-x-2 px-4 py-3">
-                <span>{`${user.user.first_name} ${user.user.last_name}`}</span>
-                <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
-                  @{user.user.username}
-                </span>
-              </td>
-              <td className="px-4 py-3">
+            <TableRow key={user.user.id}>
+              <TableCell>
+                <div className="flex items-center space-x-2">
+                  <span>{`${user.user.first_name} ${user.user.last_name}`}</span>
+                  <span className="rounded-full bg-neutral-100 p-1 px-2 text-xs font-semibold text-neutral-400">
+                    @{user.user.username}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell>
                 {isUserPartOfGroup(user.user.id) ? (
                   <div className="flex w-fit items-center space-x-1 rounded-full bg-cyan-100 px-4 py-1 text-cyan-800">
                     <Check size={16} />
@@ -87,27 +87,29 @@ function ManageUsers(props: ManageUsersProps) {
                     <span>{t('notLinkedStatus')}</span>
                   </div>
                 )}
-              </td>
-              <td className="flex items-end space-x-2 px-4 py-3">
-                <button
-                  onClick={() => handleLinkUser(user.user.id)}
-                  className="flex items-center space-x-2 rounded-md bg-cyan-700 p-1 px-3 text-sm font-bold text-cyan-100 hover:cursor-pointer"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>{t('linkButton')}</span>
-                </button>
-                <button
-                  onClick={() => handleUnlinkUser(user.user.id)}
-                  className="flex items-center space-x-2 rounded-md bg-gray-700 p-1 px-3 text-sm font-bold text-gray-100 hover:cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                  <span>{t('unlinkButton')}</span>
-                </button>
-              </td>
-            </tr>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-end space-x-2">
+                  <button
+                    onClick={() => handleLinkUser(user.user.id)}
+                    className="flex items-center space-x-2 rounded-md bg-cyan-700 p-1 px-3 text-sm font-bold text-cyan-100 hover:cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>{t('linkButton')}</span>
+                  </button>
+                  <button
+                    onClick={() => handleUnlinkUser(user.user.id)}
+                    className="flex items-center space-x-2 rounded-md bg-gray-700 p-1 px-3 text-sm font-bold text-gray-100 hover:cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                    <span>{t('unlinkButton')}</span>
+                  </button>
+                </div>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

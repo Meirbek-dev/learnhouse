@@ -12,6 +12,7 @@ import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { getAPIUrl } from '@services/config/config';
 import { inviteBatchUsers } from '@services/organizations/invites';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -84,7 +85,7 @@ function OrgUsersAdd() {
               <Textarea
                 value={invitedUsers}
                 onChange={(e) => setInvitedUsers(e.target.value)}
-                className="h-[200px] w-full"
+                className="h-[200px] w-full italic"
                 placeholder={t('textAreaPlaceholder')}
                 name="invitedUsers"
                 id="invitedUsersTextArea"
@@ -150,22 +151,19 @@ function OrgUsersAdd() {
               <h2 className="text-md text-gray-500">{t('invitedUsersDescription')}</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-                <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
-                  <tr className="font-bolder text-sm">
-                    <th className="px-4 py-3">{t('emailHeader')}</th>
-                    <th className="px-4 py-3">{t('signupStatusHeader')}</th>
-                    <th className="px-4 py-3">{t('emailSentHeader')}</th>
-                  </tr>
-                </thead>
-                <tbody className="mt-5 rounded-md bg-white">
+              <Table className="overflow-hidden rounded-md">
+                <TableHeader className="rounded-md bg-gray-100 uppercase">
+                  <TableRow>
+                    <TableHead>{t('emailHeader')}</TableHead>
+                    <TableHead>{t('signupStatusHeader')}</TableHead>
+                    <TableHead>{t('emailSentHeader')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {invited_users?.map((invited_user: any) => (
-                    <tr
-                      key={invited_user.email}
-                      className="border-b border-gray-100 text-sm"
-                    >
-                      <td className="px-4 py-3">{invited_user.email}</td>
-                      <td className="px-4 py-3">
+                    <TableRow key={invited_user.email}>
+                      <TableCell>{invited_user.email}</TableCell>
+                      <TableCell>
                         {invited_user.pending ? (
                           <div className="py1 w-fit rounded-md bg-orange-400 px-2 text-orange-100">
                             {t('statusPending')}
@@ -175,8 +173,8 @@ function OrgUsersAdd() {
                             {t('statusSigned')}
                           </div>
                         )}
-                      </td>
-                      <td className="px-4 py-3">
+                      </TableCell>
+                      <TableCell>
                         {invited_user.email_sent ? (
                           <div className="py1 w-fit rounded-md bg-green-600 px-2 text-green-100">
                             {t('emailSentYes')}
@@ -184,21 +182,21 @@ function OrgUsersAdd() {
                         ) : (
                           <div className="py1 w-fit rounded-md bg-red-400 px-2 text-red-100">{t('emailSentNo')}</div>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
                   {(!invited_users || invited_users.length === 0) && (
-                    <tr>
-                      <td
+                    <TableRow>
+                      <TableCell
                         colSpan={3}
                         className="py-4 text-center text-gray-500"
                       >
                         {t('noInvitedUsers')}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
         </>

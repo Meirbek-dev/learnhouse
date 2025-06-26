@@ -148,7 +148,7 @@ const LoginClient = (props: LoginClientProps) => {
                   <div className="flex py-4">
                     <Button
                       type="submit"
-                      className="w-full rounded-md bg-black p-2 text-center font-bold text-white shadow-md transition-all duration-200 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full font-bold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={form.formState.isSubmitting}
                     >
                       {form.formState.isSubmitting ? t('loading') : t('login')}

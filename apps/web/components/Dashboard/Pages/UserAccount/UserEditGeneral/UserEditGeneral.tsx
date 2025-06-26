@@ -314,7 +314,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
   const details = form.watch('details');
 
   return (
-    <form>
+    <div>
       <div className="flex flex-col gap-0">
         <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
           <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
@@ -624,7 +624,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
           </Button>
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 

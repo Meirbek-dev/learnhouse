@@ -16,6 +16,7 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import OrgInviteCodeGenerate from '@components/Objects/Modals/Dash/OrgAccess/OrgInviteCodeGenerate';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import { changeSignupMechanism, deleteInviteCode } from '@services/organizations/invites';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -153,24 +154,21 @@ function OrgAccess() {
                 <h2 className="text-md text-gray-500">{t('inviteCodesDescription')}</h2>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-                  <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
-                    <tr className="font-bolder text-sm">
-                      <th className="px-4 py-3">{t('codeHeader')}</th>
-                      <th className="px-4 py-3">{t('signupLinkHeader')}</th>
-                      <th className="px-4 py-3">{t('typeHeader')}</th>
-                      <th className="px-4 py-3">{t('expirationHeader')}</th>
-                      <th className="px-4 py-3">{t('actionsHeader')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="mt-5 rounded-md bg-white">
+                <Table className="overflow-hidden rounded-md">
+                  <TableHeader className="rounded-md bg-gray-100 uppercase">
+                    <TableRow>
+                      <TableHead>{t('codeHeader')}</TableHead>
+                      <TableHead>{t('signupLinkHeader')}</TableHead>
+                      <TableHead>{t('typeHeader')}</TableHead>
+                      <TableHead>{t('expirationHeader')}</TableHead>
+                      <TableHead>{t('actionsHeader')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {invites?.map((invite: any) => (
-                      <tr
-                        key={invite.invite_code_uuid}
-                        className="border-b border-gray-100 text-sm"
-                      >
-                        <td className="px-4 py-3">{invite.invite_code}</td>
-                        <td className="px-4 py-3">
+                      <TableRow key={invite.invite_code_uuid}>
+                        <TableCell>{invite.invite_code}</TableCell>
+                        <TableCell>
                           <Link
                             className="rounded-md bg-gray-50 px-2 py-1 text-gray-600 outline-dashed outline-1 outline-gray-300 transition-colors hover:bg-gray-100"
                             target="_blank"
@@ -178,8 +176,8 @@ function OrgAccess() {
                           >
                             {getUriWithoutOrg(`/signup?inviteCode=${invite.invite_code}&orgslug=${org.slug}`)}
                           </Link>
-                        </td>
-                        <td className="px-4 py-3">
+                        </TableCell>
+                        <TableCell>
                           {invite.usergroup_id ? (
                             <div className="flex items-center space-x-2">
                               <UserSquare className="h-4 w-4" />
@@ -191,11 +189,11 @@ function OrgAccess() {
                               <span>{t('normalType')}</span>
                             </div>
                           )}
-                        </td>
-                        <td className="px-4 py-3">
+                        </TableCell>
+                        <TableCell>
                           {format(addYears(new Date(invite.expiration_date), 1), 'dd/MM/yyyy', { locale })}{' '}
-                        </td>
-                        <td className="px-4 py-3">
+                        </TableCell>
+                        <TableCell>
                           <ConfirmationModal
                             confirmationButtonText={t('deleteCodeButton')}
                             confirmationMessage={t('deleteCodeModalMessage')}
@@ -211,21 +209,21 @@ function OrgAccess() {
                             }}
                             status="warning"
                           />
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
                     {(!invites || invites.length === 0) && (
-                      <tr>
-                        <td
+                      <TableRow>
+                        <TableCell
                           colSpan={5}
                           className="py-4 text-center text-gray-500"
                         >
                           {t('noInviteCodesGenerated')}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     )}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
               <div className="mr-2 mt-3 flex flex-row-reverse">
                 <Modal

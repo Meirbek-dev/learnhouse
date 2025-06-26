@@ -43,7 +43,7 @@ async def signWithGoogle(
         username = (
             google_user["given_name"]
             + google_user["family_name"]
-            + str(random.randint(10, 99))
+            + str(random.randint(10, 999))
         )
         user_object = UserCreate(
             email=google_user["email"],

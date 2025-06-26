@@ -1971,23 +1971,6 @@
         "title": "Әлеуметтік сілтемелер",
         "updatingOrg": "Ұйым жаңартылуда.."
       },
-      "addSection": {
-        "description": "Электрондық пошта арқылы шақыру жіберіңіз, үтірмен бөліңіз",
-        "emailHeader": "Электрондық пошта",
-        "emailSentHeader": "Электрондық хат жіберілді",
-        "emailSentNo": "Жоқ",
-        "emailSentYes": "Жіберілді",
-        "inviteCodeLabel": "Шақыру коды",
-        "inviteCodeTooltip": "Тіркелуге кіру бетінде жасаған шақыру кодтарының бірін қолданыңыз",
-        "invitedUsersDescription": "Ұйымыңызға қосылуға шақырылған пайдаланушылар",
-        "invitedUsersTitle": "Шақырылған пайдаланушылар",
-        "sendInvitesButton": "Электрондық пошта арқылы шақырулар жіберу",
-        "signupStatusHeader": "Тіркелу мәртебесі",
-        "statusPending": "Күтуде",
-        "statusSigned": "Тіркелді",
-        "textAreaPlaceholder": "Мысалы: spike.spiegel@bepop.space, michael.scott@dundermifflin.com",
-        "title": "Пайдаланушыларды ұйымыңызға шақыру"
-      },
       "general": "Жалпы",
       "generalDescription": "Ұйымыңыздың параметрлерін басқару",
       "generalTitle": "Жалпы",
@@ -2000,26 +1983,7 @@
       "previewsTitle": "Алдын ала қарау",
       "socials": "Әлеуметтік желілер",
       "socialsDescription": "Ұйымыңыздың әлеуметтік желі сілтемелерін басқару",
-      "socialsTitle": "Әлеуметтік желілер",
-      "usergroupsSection": {
-        "actionsHeader": "Әрекеттер",
-        "createUserGroupButton": "Пайдаланушы тобын жасау",
-        "createUserGroupModalDescription": "Пайдаланушыларды басқару үшін жаңа пайдаланушы тобын жасаңыз",
-        "createUserGroupModalTitle": "Пайдаланушы тобын жасау",
-        "deleteButton": "Жою",
-        "deleteModalConfirmButton": "Пайдаланушы тобын жою",
-        "deleteModalMessage": "Барлық ресурстарға қол жеткізу осы топтағы барлық пайдаланушылар үшін жойылады. Пайдаланушы тобын жойғыңыз келетініне сенімдісіз бе?",
-        "deleteModalTitle": "Пайдаланушы тобын жою керек пе?",
-        "description": "Пайдаланушы топтары — пайдаланушыларды ұйымыңыздағы ресурстарға (курстарға) қол жеткізуін басқару үшін біріктіру әдісі.",
-        "descriptionHeader": "Сипаттамасы",
-        "editButton": "Өңдеу",
-        "manageUsersButton": "Пайдаланушыларды басқару",
-        "manageUsersHeader": "Пайдаланушыларды басқару",
-        "manageUsersModalDescription": "Пайдаланушы тобын басқару",
-        "manageUsersModalTitle": "Пайдаланушы топтарын басқару",
-        "title": "Пайдаланушы топтарын басқару",
-        "userGroupHeader": "Пайдаланушы тобы"
-      }
+      "socialsTitle": "Әлеуметтік желілер"
     },
     "Other": {
       "addFirstScript": "Бастау үшін алғашқы скриптіңізді қосыңыз.",

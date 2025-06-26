@@ -2021,23 +2021,6 @@
         "title": "Social Links",
         "updatingOrg": "Updating organization.."
       },
-      "addSection": {
-        "description": "Send invite via email, separated by comma",
-        "emailHeader": "Email",
-        "emailSentHeader": "Email sent",
-        "emailSentNo": "No",
-        "emailSentYes": "Sent",
-        "inviteCodeLabel": "Invite Code",
-        "inviteCodeTooltip": "Use one of the invite codes that you generated from the signup access page",
-        "invitedUsersDescription": "Users who have been invited to join your organization",
-        "invitedUsersTitle": "Invited Users",
-        "sendInvitesButton": "Send invites via email",
-        "signupStatusHeader": "Signup Status",
-        "statusPending": "Pending",
-        "statusSigned": "Signed",
-        "textAreaPlaceholder": "Example : spike.spiegel@bepop.space, michael.scott@dundermifflin.com",
-        "title": "Invite users to your Organization"
-      },
       "general": "General",
       "generalDescription": "Manage your organization settings",
       "generalTitle": "General",
@@ -2050,26 +2033,7 @@
       "previewsTitle": "Previews",
       "socials": "Socials",
       "socialsDescription": "Manage your organization social media links",
-      "socialsTitle": "Socials",
-      "usergroupsSection": {
-        "actionsHeader": "Actions",
-        "createUserGroupButton": "Create a UserGroup",
-        "createUserGroupModalDescription": "Create a new UserGroup to manage users",
-        "createUserGroupModalTitle": "Create a UserGroup",
-        "deleteButton": "Delete",
-        "deleteModalConfirmButton": "Delete UserGroup",
-        "deleteModalMessage": "Access to all resources will be removed for all users in this UserGroup. Are you sure you want to delete this UserGroup?",
-        "deleteModalTitle": "Delete UserGroup?",
-        "description": "UserGroups are a way to group users together to manage their access to the resources (Courses) in your organization.",
-        "descriptionHeader": "Description",
-        "editButton": "Edit",
-        "manageUsersButton": "Manage Users",
-        "manageUsersHeader": "Manage Users",
-        "manageUsersModalDescription": "Manage the users in this UserGroup",
-        "manageUsersModalTitle": "Manage UserGroup Users",
-        "title": "Manage UserGroups & Users",
-        "userGroupHeader": "UserGroup"
-      }
+      "socialsTitle": "Socials"
     },
     "Other": {
       "addFirstScript": "Add your first script to get started.",

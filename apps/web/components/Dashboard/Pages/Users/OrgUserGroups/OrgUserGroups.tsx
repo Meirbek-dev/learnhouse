@@ -12,6 +12,7 @@ import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUse
 import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { getAPIUrl } from '@services/config/config';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -91,24 +92,21 @@ function OrgUserGroups() {
           <h2 className="text-sm text-gray-500">{t('description')}</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-            <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
-              <tr className="font-bolder text-sm">
-                <th className="px-4 py-3">{t('userGroupHeader')}</th>
-                <th className="px-4 py-3">{t('descriptionHeader')}</th>
-                <th className="px-4 py-3">{t('manageUsersHeader')}</th>
-                <th className="px-4 py-3">{t('actionsHeader')}</th>
-              </tr>
-            </thead>
-            <tbody className="mt-5 rounded-md bg-white">
+          <Table className="overflow-hidden rounded-md">
+            <TableHeader className="rounded-md bg-gray-100 uppercase">
+              <TableRow>
+                <TableHead>{t('userGroupHeader')}</TableHead>
+                <TableHead>{t('descriptionHeader')}</TableHead>
+                <TableHead>{t('manageUsersHeader')}</TableHead>
+                <TableHead>{t('actionsHeader')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {usergroups?.map((usergroup: any) => (
-                <tr
-                  key={usergroup.id}
-                  className="border-b border-gray-100 text-sm"
-                >
-                  <td className="px-4 py-3">{usergroup.name}</td>
-                  <td className="px-4 py-3">{usergroup.description}</td>
-                  <td className="px-4 py-3">
+                <TableRow key={usergroup.id}>
+                  <TableCell>{usergroup.name}</TableCell>
+                  <TableCell>{usergroup.description}</TableCell>
+                  <TableCell>
                     <Modal
                       isDialogOpen={userGroupManagementModal && selectedUserGroupIdForManage === usergroup.id}
                       onOpenChange={(isOpen) => {
@@ -130,57 +128,59 @@ function OrgUserGroups() {
                         </button>
                       }
                     />
-                  </td>
-                  <td className="flex space-x-2 px-4 py-3">
-                    <Modal
-                      isDialogOpen={editUserGroupModal && selectedUserGroupIdForEdit === usergroup.id}
-                      onOpenChange={(isOpen) => {
-                        if (!isOpen) handleCloseModal('edit');
-                      }}
-                      dialogTrigger={
-                        <button
-                          className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer"
-                          onClick={() => handleOpenModal('edit', usergroup)}
-                          type="button"
-                        >
-                          <Pencil className="size-4" />
-                          <span>{t('editButton')}</span>
-                        </button>
-                      }
-                      minHeight="sm"
-                      minWidth="sm"
-                      dialogContent={selectedUserGroup && <EditUserGroup usergroup={selectedUserGroup} />}
-                    />
-                    <ConfirmationModal
-                      confirmationButtonText={t('deleteModalConfirmButton')}
-                      confirmationMessage={t('deleteModalMessage')}
-                      dialogTitle={t('deleteModalTitle')}
-                      dialogTrigger={
-                        <button className="flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
-                          <X className="h-4 w-4" />
-                          <span>{t('deleteButton')}</span>
-                        </button>
-                      }
-                      functionToExecute={() => {
-                        deleteUserGroupUI(usergroup.id);
-                      }}
-                      status="warning"
-                    />
-                  </td>
-                </tr>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Modal
+                        isDialogOpen={editUserGroupModal && selectedUserGroupIdForEdit === usergroup.id}
+                        onOpenChange={(isOpen) => {
+                          if (!isOpen) handleCloseModal('edit');
+                        }}
+                        dialogTrigger={
+                          <button
+                            className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer"
+                            onClick={() => handleOpenModal('edit', usergroup)}
+                            type="button"
+                          >
+                            <Pencil className="size-4" />
+                            <span>{t('editButton')}</span>
+                          </button>
+                        }
+                        minHeight="sm"
+                        minWidth="sm"
+                        dialogContent={selectedUserGroup && <EditUserGroup usergroup={selectedUserGroup} />}
+                      />
+                      <ConfirmationModal
+                        confirmationButtonText={t('deleteModalConfirmButton')}
+                        confirmationMessage={t('deleteModalMessage')}
+                        dialogTitle={t('deleteModalTitle')}
+                        dialogTrigger={
+                          <button className="flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+                            <X className="h-4 w-4" />
+                            <span>{t('deleteButton')}</span>
+                          </button>
+                        }
+                        functionToExecute={() => {
+                          deleteUserGroupUI(usergroup.id);
+                        }}
+                        status="warning"
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
               ))}
               {(!usergroups || usergroups.length === 0) && (
-                <tr>
-                  <td
+                <TableRow>
+                  <TableCell
                     colSpan={4}
                     className="py-4 text-center text-gray-500"
                   >
                     {t('noUserGroupsFound')}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         <div className="mr-2 mt-3 flex justify-end">
           <Modal

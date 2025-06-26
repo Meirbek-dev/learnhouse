@@ -10,6 +10,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import { getAPIUrl } from '@services/config/config';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -159,21 +160,18 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
         <h2 className="text-xs text-gray-500 sm:text-sm">{t('description')}</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full table-auto overflow-hidden whitespace-nowrap rounded-md text-left">
-          <thead className="rounded-xl bg-gray-100 uppercase text-gray-500">
-            <tr className="font-bolder text-sm">
-              <th className="px-4 py-3">{t('tableHeaderName')}</th>
-              <th className="px-4 py-3">{t('tableHeaderActions')}</th>
-            </tr>
-          </thead>
-          <tbody className="mt-5 rounded-md bg-white">
+        <Table className="overflow-hidden rounded-md">
+          <TableHeader className="rounded-md bg-gray-100 uppercase">
+            <TableRow>
+              <TableHead>{t('tableHeaderName')}</TableHead>
+              <TableHead>{t('tableHeaderActions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {usergroups?.map((usergroup: any) => (
-              <tr
-                key={usergroup.id}
-                className="border-b border-gray-100 text-sm"
-              >
-                <td className="px-4 py-3">{usergroup.name}</td>
-                <td className="px-4 py-3">
+              <TableRow key={usergroup.id}>
+                <TableCell>{usergroup.name}</TableCell>
+                <TableCell>
                   <ConfirmationModal
                     confirmationButtonText={t('deleteLinkButton')}
                     confirmationMessage={t('unlinkConfirmMsg')}
@@ -187,11 +185,11 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
                     functionToExecute={() => removeUserGroupLink(usergroup.id)}
                     status="warning"
                   />
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <div className="mr-2 mt-3 flex flex-row-reverse">
         <Modal

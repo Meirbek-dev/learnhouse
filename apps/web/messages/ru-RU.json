@@ -1971,23 +1971,6 @@
         "title": "Социальные ссылки",
         "updatingOrg": "Обновление организации.."
       },
-      "addSection": {
-        "description": "Отправьте приглашение по электронной почте, разделяя запятыми",
-        "emailHeader": "Электронная почта",
-        "emailSentHeader": "Электронное письмо отправлено",
-        "emailSentNo": "Нет",
-        "emailSentYes": "Отправлено",
-        "inviteCodeLabel": "Код приглашения",
-        "inviteCodeTooltip": "Используйте один из кодов приглашения, которые вы сгенерировали на странице доступа к регистрации",
-        "invitedUsersDescription": "Пользователи, которые были приглашены присоединиться к вашей организации",
-        "invitedUsersTitle": "Приглашенные пользователи",
-        "sendInvitesButton": "Отправить приглашения по электронной почте",
-        "signupStatusHeader": "Статус регистрации",
-        "statusPending": "В ожидании",
-        "statusSigned": "Зарегистрирован",
-        "textAreaPlaceholder": "Пример: spike.spiegel@bepop.space, michael.scott@dundermifflin.com",
-        "title": "Пригласить пользователей в вашу организацию"
-      },
       "general": "Общее",
       "generalDescription": "Управление настройками вашей организации",
       "generalTitle": "Общее",
@@ -2000,26 +1983,7 @@
       "previewsTitle": "Предварительный просмотр",
       "socials": "Социальные сети",
       "socialsDescription": "Управление ссылками на социальные сети вашей организации",
-      "socialsTitle": "Социальные сети",
-      "usergroupsSection": {
-        "actionsHeader": "Действия",
-        "createUserGroupButton": "Создать группу пользователей",
-        "createUserGroupModalDescription": "Создать новую группу пользователей для управления пользователями",
-        "createUserGroupModalTitle": "Создать группу пользователей",
-        "deleteButton": "Удалить",
-        "deleteModalConfirmButton": "Удалить группу пользователей",
-        "deleteModalMessage": "Доступ ко всем ресурсам будет удален для всех пользователей в этой группе. Вы уверены, что хотите удалить группу пользователей?",
-        "deleteModalTitle": "Удалить группу пользователей?",
-        "description": "Группы пользователей — это способ объединить пользователей для управления их доступом к ресурсам (курсам) в вашей организации.",
-        "descriptionHeader": "Описание",
-        "editButton": "Редактировать",
-        "manageUsersButton": "Управление пользователями",
-        "manageUsersHeader": "Управление пользователями",
-        "manageUsersModalDescription": "Управление группой пользователей",
-        "manageUsersModalTitle": "Управление группами пользователей",
-        "title": "Управление группами пользователей",
-        "userGroupHeader": "Группа пользователей"
-      }
+      "socialsTitle": "Социальные сети"
     },
     "Other": {
       "addFirstScript": "Добавьте свой первый скрипт, чтобы начать.",
