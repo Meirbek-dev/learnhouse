@@ -1,9 +1,15 @@
 from typing import Optional
 from functools import lru_cache
+import os
 import chromadb
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from config.config import get_openu_config
+
+# Set telemetry environment variables before importing chromadb
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+os.environ["CHROMA_TELEMETRY"] = "0"
+os.environ["CHROMA_TELEMETRY_ENABLED"] = "False"
+os.environ["POSTHOG_DISABLED"] = "True"
 
 
 @lru_cache()
@@ -38,11 +44,17 @@ def get_embedding_function(model_name: str) -> Optional[OpenAIEmbeddings]:
 
 @lru_cache()
 def get_llm(model_name: str, temperature: float = 0) -> Optional[ChatOpenAI]:
-    """Get cached LLM instance"""
+    """Get cached LLM instance with modern OpenAI configuration"""
     LH_CONFIG = get_openu_config()
     api_key = getattr(LH_CONFIG.ai_config, "openai_api_key", None)
 
     if not api_key:
         return None
 
-    return ChatOpenAI(temperature=temperature, api_key=api_key, model=model_name)
+    return ChatOpenAI(
+        temperature=temperature,
+        api_key=api_key,
+        model="gpt-4.1-nano",
+        max_retries=3,  # Add retry logic
+        request_timeout=60,  # Add timeout
+    )

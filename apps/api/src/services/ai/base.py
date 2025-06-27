@@ -1,37 +1,30 @@
 from typing import Optional, Dict, Any
 from ulid import ULID
-from langchain.agents import AgentExecutor
-from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain.agents.openai_functions_agent.base import OpenAIFunctionsAgent
-from langchain.prompts import MessagesPlaceholder
+from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain_core.messages import SystemMessage
-from langchain.agents.openai_functions_agent.agent_token_buffer_memory import (
-    AgentTokenBufferMemory,
-)
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.tools import create_retriever_tool
 
-from langchain_core.tools import (
-    create_retriever_tool,
-)
-
-import chromadb
+import os
 
 from config.config import get_openu_config
 from src.services.ai.init import get_chromadb_client, get_embedding_function, get_llm
 
-LH_CONFIG = get_openu_config()
-client = (
-    chromadb.HttpClient(host=LH_CONFIG.ai_config.chromadb_config.db_host, port=8000)
-    if LH_CONFIG.ai_config.chromadb_config.isSeparateDatabaseEnabled == True
-    else chromadb.Client()
-)
+# Disable ChromaDB telemetry to prevent the capture() error
+# This fixes: "capture() takes 1 positional argument but 3 were given"
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+# Additional ChromaDB telemetry disabling
+os.environ["CHROMA_TELEMETRY"] = "0"
+os.environ["CHROMA_TELEMETRY_ENABLED"] = "False"
+os.environ["POSTHOG_DISABLED"] = "True"
 
 # Use efficient text splitter settings
-TEXT_SPLITTER = CharacterTextSplitter(
+TEXT_SPLITTER = RecursiveCharacterTextSplitter(
     chunk_size=1000,
     chunk_overlap=100,
-    separator="\n",
     length_function=len,
 )
 
@@ -76,38 +69,44 @@ def ask_ai(
             f"LLM model {openai_model_name} not found or API key not configured"
         )
 
-    # Setup memory with optimized token limit
-    memory = AgentTokenBufferMemory(
-        memory_key="history",
-        llm=llm,
-        chat_memory=message_history,
-        max_token_limit=2000,  # Increased for better context retention
-    )
+    # Create agent prompt template
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", message_for_the_prompt),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("human", "{input}"),
+        MessagesPlaceholder(variable_name="agent_scratchpad"),
+    ])
 
-    # Create agent with system message
-    system_message = SystemMessage(content=message_for_the_prompt)
-    prompt = OpenAIFunctionsAgent.create_prompt(
-        system_message=system_message,
-        extra_prompt_messages=[MessagesPlaceholder(variable_name="history")],
-    )
-
-    agent = OpenAIFunctionsAgent(llm=llm, tools=[retriever_tool], prompt=prompt)
+    # Create agent using modern API
+    agent = create_tool_calling_agent(llm, [retriever_tool], prompt)
 
     # Create and execute agent
     agent_executor = AgentExecutor(
         agent=agent,
         tools=[retriever_tool],
-        memory=memory,
         verbose=True,
         return_intermediate_steps=True,
         handle_parsing_errors=True,
         max_iterations=3,  # Limit maximum iterations for better performance
     )
 
+    # Create runnable with message history for session management
+    agent_with_chat_history = RunnableWithMessageHistory(
+        agent_executor,
+        lambda session_id: message_history,
+        input_messages_key="input",
+        history_messages_key="chat_history",
+    )
+
     try:
-        return agent_executor({"input": question})
+        # Use the agent with chat history and invoke instead of deprecated __call__
+        response = agent_with_chat_history.invoke(
+            {"input": question},
+            config={"configurable": {"session_id": "default"}}
+        )
+        return response
     except Exception as e:
-        raise Exception(f"Error processing AI request: {str(e)}")
+        raise Exception(f"Error processing AI request: {str(e)}") from e
 
 
 def get_chat_session_history(aichat_uuid: Optional[str] = None) -> Dict[str, Any]:

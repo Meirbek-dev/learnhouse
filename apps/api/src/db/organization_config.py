@@ -30,7 +30,7 @@ class StorageOrgConfig(BaseModel):
 class AIOrgConfig(BaseModel):
     enabled: bool = True
     limit: int = 10
-    model: str = "gpt-4o-mini"
+    model: str = "gpt-4.1-nano"
 
 
 class AssignmentOrgConfig(BaseModel):

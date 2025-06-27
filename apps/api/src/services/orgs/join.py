@@ -8,7 +8,6 @@ from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
-from src.security.features_utils.usage import increase_feature_usage
 
 
 class JoinOrg(BaseModel):
