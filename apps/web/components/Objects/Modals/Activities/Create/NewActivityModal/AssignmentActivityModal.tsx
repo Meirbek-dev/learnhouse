@@ -2,12 +2,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { mutate } from 'swr';
 import { z } from 'zod';
+import { enUS, es, fr, de, ja, ko, zhCN, pt, it, ru, ar, he } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -39,8 +40,30 @@ type FormValues = {
 
 function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
   const t = useTranslations('Components.NewAssignmentModal');
+  const locale = useLocale();
   const org = useOrg() as any;
   const session = useLHSession() as any;
+
+  // Get the appropriate date-fns locale
+  const getDateFnsLocale = (locale: string) => {
+    const localeMap: Record<string, any> = {
+      en: enUS,
+      es: es,
+      fr: fr,
+      de: de,
+      ja: ja,
+      ko: ko,
+      zh: zhCN,
+      pt: pt,
+      it: it,
+      ru: ru,
+      ar: ar,
+      he: he,
+    };
+    return localeMap[locale] || enUS;
+  };
+
+  const dateFnsLocale = getDateFnsLocale(locale);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),
@@ -166,7 +189,11 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
                         !field.value && 'text-muted-foreground',
                       )}
                     >
-                      {field.value ? format(new Date(field.value), 'PPP') : <span>{t('selectDeadline')}</span>}
+                      {field.value ? (
+                        format(new Date(field.value), 'PPP', { locale: dateFnsLocale })
+                      ) : (
+                        <span>{t('selectDeadline')}</span>
+                      )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -190,6 +217,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
                       }
                     }}
                     disabled={false}
+                    locale={dateFnsLocale}
                   />
                 </PopoverContent>
               </Popover>

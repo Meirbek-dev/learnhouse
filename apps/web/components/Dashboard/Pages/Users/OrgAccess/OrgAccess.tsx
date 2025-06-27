@@ -1,6 +1,6 @@
 'use client';
 
-import { addYears, format } from 'date-fns';
+import { format } from 'date-fns';
 import { Globe, Ticket, Users, UserSquare, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -191,7 +191,9 @@ function OrgAccess() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {format(addYears(new Date(invite.expiration_date), 1), 'dd/MM/yyyy', { locale })}{' '}
+                          {invite.expiration_date
+                            ? format(new Date(invite.expiration_date), 'dd/MM/yyyy', { locale })
+                            : '-'}
                         </TableCell>
                         <TableCell>
                           <ConfirmationModal

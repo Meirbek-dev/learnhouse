@@ -29,6 +29,7 @@ import { Checkbox } from '@components/ui/checkbox';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Switch } from '@components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { Textarea } from '@components/ui/textarea';
 import { getOrgCourses } from '@services/courses/courses';
@@ -390,14 +391,14 @@ const OrgEditLanding = () => {
             <p className="text-gray-600">{t('description')}</p>
           </div>
           <div className="flex items-center space-x-4">
-            <label className="relative inline-flex cursor-pointer items-center">
-              <Checkbox
-                checked={!!isLandingEnabled}
-                onCheckedChange={() => setIsLandingEnabled(!isLandingEnabled)}
-                className="sr-only"
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={isLandingEnabled}
+                onCheckedChange={setIsLandingEnabled}
+                className="h-6 w-11 [&>span]:h-5 [&>span]:w-5 [&>span]:data-[state=checked]:translate-x-5.5"
               />
-              <div className="peer-focus:outline-hidden peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300" />
-            </label>
+              <Label className="sr-only">{t('enableToggleLabel')}</Label>
+            </div>
             <Button
               variant="default"
               onClick={handleSave}

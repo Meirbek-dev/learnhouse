@@ -39,7 +39,7 @@ function AddUserGroup(props: AddUserGroupProps) {
     defaultValues: {
       name: '',
       description: '',
-      org_id: org.id,
+      org_id: org.id.toString(),
     },
   });
 
@@ -100,6 +100,7 @@ function AddUserGroup(props: AddUserGroupProps) {
             type="submit"
             className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
             disabled={form.formState.isSubmitting}
+            onClick={() => console.log('Submit button clicked')}
           >
             {form.formState.isSubmitting ? t('loadingButton') : t('createButton')}
           </Button>

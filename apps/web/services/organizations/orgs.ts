@@ -109,13 +109,22 @@ export async function removeUserFromOrg(org_id: any, user_id: any, access_token:
 export async function joinOrg(
   args: {
     org_id: number;
-    user_id: string;
-    invite_code?: string;
+    user_id: number;
+    invite_code?: string | null;
   },
   next: any,
   access_token?: string,
 ) {
-  const result = await fetch(`${getAPIUrl()}orgs/join`, RequestBodyWithAuthHeader('POST', args, next, access_token));
+  // Clean up invite_code - send null instead of empty string
+  const cleanArgs = {
+    ...args,
+    invite_code: args.invite_code?.trim() || null,
+  };
+
+  const result = await fetch(
+    `${getAPIUrl()}orgs/join`,
+    RequestBodyWithAuthHeader('POST', cleanArgs, next, access_token),
+  );
   const res = await getResponseMetadata(result);
   return res;
 }

@@ -2,12 +2,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 import { z } from 'zod';
+import { enUS, es, fr, de, ja, ko, zhCN, pt, it, ru, ar, he } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -59,6 +60,29 @@ const validationSchema = z.object({
 
 const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, accessToken }) => {
   const t = useTranslations('Components.EditAssignmentModal');
+  const fullLocale = useLocale();
+  const locale = fullLocale.split('-')[0] ?? 'ru';
+
+  // Get the appropriate date-fns locale
+  const getDateFnsLocale = (locale: string) => {
+    const localeMap: Record<string, any> = {
+      en: enUS,
+      es: es,
+      fr: fr,
+      de: de,
+      ja: ja,
+      ko: ko,
+      zh: zhCN,
+      pt: pt,
+      it: it,
+      ru: ru,
+      ar: ar,
+      he: he,
+    };
+    return localeMap[locale] || enUS;
+  };
+
+  const dateFnsLocale = getDateFnsLocale(locale);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),
@@ -141,7 +165,11 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                         !field.value && 'text-muted-foreground',
                       )}
                     >
-                      {field.value ? format(new Date(field.value), 'PPP') : <span>{t('selectDeadline')}</span>}
+                      {field.value ? (
+                        format(new Date(field.value), 'PPP', { locale: dateFnsLocale })
+                      ) : (
+                        <span>{t('selectDeadline')}</span>
+                      )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -165,6 +193,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                       }
                     }}
                     disabled={false}
+                    locale={dateFnsLocale}
                   />
                 </PopoverContent>
               </Popover>

@@ -17,18 +17,24 @@ import { useTranslations } from 'next-intl';
 import { createElement, useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { toast } from 'react-hot-toast';
+import { useLocale } from 'next-intl';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { Button } from '@components/ui/button';
+import { Calendar } from '@components/ui/calendar';
 import { Checkbox } from '@components/ui/checkbox';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
 import { updateProfile } from '@services/settings/profile';
 import { getUser } from '@services/users/users';
+import { format, type Locale } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import { enUS, es, fr, de, ja, ko, zhCN, pt, it, ru, ar, he } from 'date-fns/locale';
 
-// Define section type keys (mapping to translation keys)
+// Define section type keys
 const SECTION_TYPE_KEYS = {
   'image-gallery': 'imageGallery',
   'text': 'text',
@@ -200,12 +206,34 @@ const UserProfileBuilder = () => {
   const access_token = session?.data?.tokens?.access_token;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.UserProfileBuilder');
+  const locale = useLocale();
   const [profileData, setProfileData] = useState<ProfileData>({
     sections: [],
   });
   const [selectedSection, setSelectedSection] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Get the appropriate date-fns locale
+  const getDateFnsLocale = (locale: string): Locale => {
+    const localeMap: Record<string, Locale> = {
+      en: enUS,
+      es: es,
+      fr: fr,
+      de: de,
+      ja: ja,
+      ko: ko,
+      zh: zhCN,
+      pt: pt,
+      it: it,
+      ru: ru,
+      ar: ar,
+      he: he,
+    };
+    return localeMap[locale] || enUS;
+  };
+
+  const dateFnsLocale = getDateFnsLocale(locale);
 
   // Initialize profile data from user data
   useEffect(() => {
@@ -549,6 +577,50 @@ const UserProfileBuilder = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// DatePicker Component
+const DatePicker: FC<{
+  value: string;
+  onChange: (date: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  locale?: Locale;
+}> = ({ value, onChange, placeholder = 'Pick a date', disabled = false, locale }) => {
+  const [open, setOpen] = useState(false);
+  const selectedDate = value ? new Date(value) : undefined;
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className={`w-full justify-start text-left font-normal ${!value && 'text-muted-foreground'}`}
+          disabled={disabled}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value && selectedDate ? format(selectedDate, 'PPP', { locale }) : <span>{placeholder}</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={(date) => {
+            if (date) {
+              onChange(format(date, 'yyyy-MM-dd'));
+              setOpen(false);
+            }
+          }}
+          autoFocus
+          locale={locale}
+        />
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -977,6 +1049,25 @@ const ExperienceEditor: FC<{
   section: ExperienceSection;
   onChange: (section: ExperienceSection) => void;
 }> = ({ t, section, onChange }) => {
+  const locale = useLocale();
+  const dateFnsLocale = (() => {
+    const localeMap: Record<string, Locale> = {
+      en: enUS,
+      es: es,
+      fr: fr,
+      de: de,
+      ja: ja,
+      ko: ko,
+      zh: zhCN,
+      pt: pt,
+      it: it,
+      ru: ru,
+      ar: ar,
+      he: he,
+    };
+    return localeMap[locale] || enUS;
+  })();
+
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
@@ -1041,33 +1132,35 @@ const ExperienceEditor: FC<{
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-4">
                   <div>
                     <Label>{t('ExperienceEditor.startDateLabel')}</Label>
-                    <Input
-                      type="date"
+                    <DatePicker
                       value={experience.startDate}
-                      onChange={(e) => {
+                      onChange={(date) => {
                         const newExperiences = [...section.experiences];
                         newExperiences[index] = {
                           ...experience,
-                          startDate: e.target.value,
+                          startDate: date,
                         };
                         onChange({ ...section, experiences: newExperiences });
                       }}
+                      placeholder={t('ExperienceEditor.startDatePlaceholder') || 'Select start date'}
+                      locale={dateFnsLocale}
                     />
                   </div>
                   <div>
                     <Label>{t('ExperienceEditor.endDateLabel')}</Label>
-                    <Input
-                      type="date"
+                    <DatePicker
                       value={experience.endDate || ''}
-                      onChange={(e) => {
+                      onChange={(date) => {
                         const newExperiences = [...section.experiences];
                         newExperiences[index] = {
                           ...experience,
-                          endDate: e.target.value,
+                          endDate: date,
                         };
                         onChange({ ...section, experiences: newExperiences });
                       }}
+                      placeholder={t('ExperienceEditor.endDatePlaceholder') || 'Select end date'}
                       disabled={experience.current}
+                      locale={dateFnsLocale}
                     />
                   </div>
                   <div className="flex items-end">
@@ -1156,6 +1249,25 @@ const EducationEditor: FC<{
   section: EducationSection;
   onChange: (section: EducationSection) => void;
 }> = ({ t, section, onChange }) => {
+  const locale = useLocale();
+  const dateFnsLocale = (() => {
+    const localeMap: Record<string, Locale> = {
+      en: enUS,
+      es: es,
+      fr: fr,
+      de: de,
+      ja: ja,
+      ko: ko,
+      zh: zhCN,
+      pt: pt,
+      it: it,
+      ru: ru,
+      ar: ar,
+      he: he,
+    };
+    return localeMap[locale] || enUS;
+  })();
+
   return (
     <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
@@ -1233,33 +1345,35 @@ const EducationEditor: FC<{
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-4">
                   <div>
                     <Label>{t('EducationEditor.startDateLabel')}</Label>
-                    <Input
-                      type="date"
+                    <DatePicker
                       value={edu.startDate}
-                      onChange={(e) => {
+                      onChange={(date) => {
                         const newEducation = [...section.education];
                         newEducation[index] = {
                           ...edu,
-                          startDate: e.target.value,
+                          startDate: date,
                         };
                         onChange({ ...section, education: newEducation });
                       }}
+                      placeholder={t('EducationEditor.startDatePlaceholder') || 'Select start date'}
+                      locale={dateFnsLocale}
                     />
                   </div>
                   <div>
                     <Label>{t('EducationEditor.endDateLabel')}</Label>
-                    <Input
-                      type="date"
+                    <DatePicker
                       value={edu.endDate || ''}
-                      onChange={(e) => {
+                      onChange={(date) => {
                         const newEducation = [...section.education];
                         newEducation[index] = {
                           ...edu,
-                          endDate: e.target.value,
+                          endDate: date,
                         };
                         onChange({ ...section, education: newEducation });
                       }}
+                      placeholder={t('EducationEditor.endDatePlaceholder') || 'Select end date'}
                       disabled={edu.current}
+                      locale={dateFnsLocale}
                     />
                   </div>
                   <div className="flex items-end">

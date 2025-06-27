@@ -97,7 +97,7 @@ function SaveState(props: { orgslug: string }) {
     if (course_structure?.chapters) {
       handleCourseOrder(course_structure);
     }
-  }, [course_structure, handleCourseOrder, dispatchCourse]);
+  }, [course_structure, handleCourseOrder]);
 
   const changeOrderPayload = useCallback(() => {
     if (course_structure?.chapters) {

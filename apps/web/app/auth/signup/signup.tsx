@@ -91,24 +91,38 @@ const LoggedInJoinScreen = (props: any) => {
 
   const join = async () => {
     setIsSubmitting(true);
-    const res = await joinOrg(
-      {
-        org_id: org.id,
-        user_id: session?.data?.user?.id,
-        invite_code: props.inviteCode,
-      },
-      null,
-      session.data?.tokens?.access_token,
-    );
-    // wait for 1.5s
-    if (res.success) {
-      toast.success(res.data + toastT('orgJoinSuccess'));
-      setTimeout(() => {
-        router.push(getUriWithOrg(org.slug, '/'));
-      }, 1500);
-      setIsSubmitting(false);
-    } else {
-      toast.error(res.data?.detail || toastT('errorSomethingWentWrong'));
+    try {
+      const res = await joinOrg(
+        {
+          org_id: org.id,
+          user_id: session?.data?.user?.id,
+          invite_code: props.inviteCode,
+        },
+        null,
+        session.data?.tokens?.access_token,
+      );
+
+      if (res.success) {
+        toast.success(res.data?.message || toastT('orgJoinSuccess'));
+        setTimeout(() => {
+          router.push(getUriWithOrg(org.slug, '/'));
+        }, 1500);
+      } else {
+        // Handle validation errors properly
+        let errorMessage = toastT('errorSomethingWentWrong');
+
+        if (res.data?.detail) {
+          errorMessage = res.data.detail;
+        } else if (Array.isArray(res.data)) {
+          errorMessage = res.data.map((err) => err.msg || err.message).join(', ');
+        }
+
+        toast.error(errorMessage);
+      }
+    } catch (error: any) {
+      console.error('Join org error:', error);
+      toast.error(error.message || toastT('errorSomethingWentWrong'));
+    } finally {
       setIsLoading(false);
       setIsSubmitting(false);
     }

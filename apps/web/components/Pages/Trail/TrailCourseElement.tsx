@@ -63,7 +63,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
           <div className="course_info flex">
             <div className="course_basic flex-end flex flex-col -space-y-2">
               <p className="p-0 pb-1 text-sm font-bold text-gray-700">{t('courseLabel')}</p>
-              <div className="course_progress flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
                 <h2 className="text-xl font-bold">{course.name}</h2>
                 <div className="h-[5px] w-[10px] rounded-full bg-slate-300" />
                 <h2>{course_progress}%</h2>
@@ -79,7 +79,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
             </div>
           </div>
         </div>
-        <div className="course_progress indicator w-full">
+        <div className="indicator w-full">
           <div className="h-1.5 w-full rounded-full bg-gray-200">
             <div
               className={'h-1.5 rounded-full bg-teal-600'}

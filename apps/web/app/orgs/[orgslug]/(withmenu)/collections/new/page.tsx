@@ -127,7 +127,10 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 onValueChange={handleVisibilityChange}
                 defaultValue={isPublic}
               >
-                <SelectTrigger id="collection-visibility" className="mt-1">
+                <SelectTrigger
+                  id="collection-visibility"
+                  className="mt-1"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
