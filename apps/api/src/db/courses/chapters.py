@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 from sqlmodel import Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
 from src.db.courses.activities import ActivityRead
@@ -34,12 +34,12 @@ class ChapterCreate(ChapterBase):
     pass
 
 
-class ChapterUpdate(ChapterBase):
-    name: Optional[str]
-    description: Optional[str] = ""
-    thumbnail_image: Optional[str] = ""
-    course_id: Optional[int]
-    org_id: Optional[int]  # type: ignore
+class ChapterUpdate(SQLModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    thumbnail_image: Optional[str] = None
+    org_id: Optional[int] = None
+    course_id: Optional[int] = None
 
 
 class ChapterRead(ChapterBase):
@@ -48,7 +48,7 @@ class ChapterRead(ChapterBase):
     chapter_uuid: str
     creation_date: str
     update_date: str
-    pass
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class ActivityOrder(BaseModel):

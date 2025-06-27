@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import Literal, Optional
 from fastapi import Depends, APIRouter, HTTPException, Response, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, EmailStr
+from pydantic import ConfigDict, BaseModel, EmailStr
 from sqlmodel import Session
 from src.db.users import AnonymousUser, UserRead
 from src.core.events.database import get_db_session
@@ -25,7 +25,7 @@ def refresh(response: Response, Authorize: AuthJWT = Depends()):
     Authorize.jwt_refresh_token_required()
 
     current_user = Authorize.get_jwt_subject()
-    new_access_token = Authorize.create_access_token(subject=current_user)  # type: ignore
+    new_access_token = Authorize.create_access_token(subject=current_user)
 
     response.set_cookie(
         key="access_token_cookie",
@@ -81,6 +81,7 @@ class ThirdPartyLogin(BaseModel):
     email: EmailStr
     provider: Literal["google"]
     access_token: str
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 @router.post("/oauth")

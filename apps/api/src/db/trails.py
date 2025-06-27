@@ -44,4 +44,12 @@ class TrailRead(BaseModel):
     creation_date: Optional[str] = None
     update_date: Optional[str] = None
     runs: list[TrailRunRead]
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+
+
+def rebuild_trail_models():
+    """Rebuild trail models to resolve forward references"""
+    from src.db.trail_runs import rebuild_trail_run_models
+
+    rebuild_trail_run_models()
+    TrailRead.model_rebuild()

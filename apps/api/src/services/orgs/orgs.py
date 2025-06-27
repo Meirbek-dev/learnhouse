@@ -158,13 +158,12 @@ async def create_org(
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
-
     db_session.add(user_org)
     db_session.commit()
     db_session.refresh(user_org)
 
-    org_config = org_config = OrganizationConfigBase(
-        config_version="1.1å",
+    org_config = OrganizationConfigBase(
+        config_version="1.1",
         general=OrgGeneralConfig(enabled=True, color="normal"),
         features=OrgFeatureConfig(
             courses=CourseOrgConfig(enabled=True, limit=0),
@@ -184,12 +183,12 @@ async def create_org(
         cloud=OrgCloudConfig(plan="free", custom_domain=False),
     )
 
-    org_config = json.loads(org_config.json())
+    org_config_dict = json.loads(org_config.model_dump_json())
 
     # OrgSettings
     org_settings = OrganizationConfig(
         org_id=int(org.id if org.id else 0),
-        config=org_config,
+        config=org_config_dict,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -261,15 +260,14 @@ async def create_org_with_config(
     db_session.add(user_org)
     db_session.commit()
     db_session.refresh(user_org)
-
     org_config = submitted_config
 
-    org_config = json.loads(org_config.json())
+    org_config_dict = json.loads(org_config.model_dump_json())
 
     # OrgSettings
     org_settings = OrganizationConfig(
         org_id=int(org.id if org.id else 0),
-        config=org_config,
+        config=org_config_dict,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -328,9 +326,10 @@ async def update_org(
         )
 
     # Update only the fields that were passed in
-    for var, value in vars(org_object).items():
+    update_data = org_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(org, var, value)
+            setattr(org, field, value)
 
     # Complete the org object
     org.update_date = str(datetime.now())
@@ -377,7 +376,7 @@ async def update_org_with_config_no_auth(
     updated_config = orgconfig
 
     # Update the database
-    org_config.config = json.loads(updated_config.json())
+    org_config.config = json.loads(updated_config.model_dump_json())
     org_config.update_date = str(datetime.now())
 
     db_session.add(org_config)
@@ -639,7 +638,7 @@ async def update_org_signup_mechanism(
     updated_config.features.members.signup_mode = signup_mechanism
 
     # Update the database
-    org_config.config = json.loads(updated_config.json())
+    org_config.config = json.loads(updated_config.model_dump_json())
     org_config.update_date = str(datetime.now())
 
     db_session.add(org_config)
@@ -744,8 +743,8 @@ async def update_org_landing(
     config_model.landing = landing_object
 
     # Convert back to dict and update
-    updated_config = json.loads(config_model.json())
-    org_config.config = updated_config
+    updated_config_dict = json.loads(config_model.model_dump_json())
+    org_config.config = updated_config_dict
     org_config.update_date = str(datetime.now())
 
     db_session.add(org_config)
@@ -801,25 +800,11 @@ async def rbac_check(
         return True
 
     else:
-        isUserAnon = await authorization_verify_if_user_is_anon(current_user.id)
-
-        isAllowedOnOrgAdminStatus = (
-            await authorization_verify_based_on_org_admin_status(
-                request, current_user.id, action, org_uuid, db_session
-            )
+        # Use the authorization functions for other users
+        await authorization_verify_if_user_is_anon(current_user.id)
+        return await authorization_verify_based_on_org_admin_status(
+            request, current_user.id, action, org_uuid, db_session
         )
-
-        if isUserAnon:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="You should be logged in to be able to achieve this action",
-            )
-
-        if not isAllowedOnOrgAdminStatus:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User rights (admin status) : You don't have the right to perform this action",
-            )
 
 
 ## 🔒 RBAC Utils ##

@@ -1,10 +1,10 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
 from enum import Enum
 
-from src.db.trail_steps import TrailStep
+from src.db.trail_steps import TrailStepRead
 
 
 class TrailRunEnum(str, Enum):
@@ -40,8 +40,14 @@ class TrailRun(SQLModel, table=True):
     update_date: str
 
 
-class TrailRunCreate(TrailRun):
-    pass
+class TrailRunCreate(SQLModel):
+    data: dict = Field(default={})
+    status: StatusEnum = StatusEnum.STATUS_IN_PROGRESS
+    # foreign keys
+    trail_id: int
+    course_id: int
+    org_id: int
+    user_id: int
 
 
 # trick because Lists are not supported in SQLModel (runs: list[TrailStep] )
@@ -59,7 +65,16 @@ class TrailRunRead(BaseModel):
     # timestamps
     creation_date: Optional[str] = None
     update_date: Optional[str] = None
+
     # number of activities in course
     course_total_steps: int
-    steps: list[TrailStep]
-    pass
+    steps: list[TrailStepRead]
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+def rebuild_trail_run_models():
+    """Rebuild trail run models to resolve forward references"""
+    from src.db.trail_steps import rebuild_trail_step_models
+
+    rebuild_trail_step_models()
+    TrailRunRead.model_rebuild()

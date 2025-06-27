@@ -11,7 +11,7 @@ def startup_app(app: FastAPI) -> Callable:
     async def start_app() -> None:
         # Get OpenU Config
         openu_config: OpenUConfig = get_openu_config()
-        app.openu_config = openu_config  # type: ignore
+        app.openu_config = openu_config
 
         # Connect to database
         await connect_to_db(app)

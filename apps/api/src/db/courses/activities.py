@@ -58,14 +58,15 @@ class ActivityCreate(ActivityBase):
     pass
 
 
-class ActivityUpdate(ActivityBase):
-    name: Optional[str]
-    content: dict = Field(default={}, sa_column=Column(JSON))
-    activity_type: Optional[ActivityTypeEnum]
-    activity_sub_type: Optional[ActivitySubTypeEnum]
+class ActivityUpdate(SQLModel):
+    name: Optional[str] = None
+    activity_type: Optional[ActivityTypeEnum] = None
+    activity_sub_type: Optional[ActivitySubTypeEnum] = None
+    content: Optional[dict] = Field(default=None, sa_column=Column(JSON))
     details: Optional[dict] = Field(default=None, sa_column=Column(JSON))
-    published_version: Optional[int]
-    version: Optional[int]
+    published: Optional[bool] = None
+    published_version: Optional[int] = None
+    version: Optional[int] = None
 
 
 class ActivityRead(ActivityBase):

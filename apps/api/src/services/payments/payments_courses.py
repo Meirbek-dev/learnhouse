@@ -45,7 +45,7 @@ async def link_course_to_product(
 
     # Create new payment course link
     payment_course = PaymentsCourse(
-        course_id=course.id,  # type: ignore
+        course_id=course.id,
         payment_product_id=product_id,
         org_id=org_id,
     )
@@ -110,7 +110,7 @@ async def get_courses_by_product(
     statement = (
         select(Course)
         .select_from(Course)
-        .join(PaymentsCourse, Course.id == PaymentsCourse.course_id)  # type: ignore
+        .join(PaymentsCourse, Course.id == PaymentsCourse.course_id)
         .where(
             PaymentsCourse.payment_product_id == product_id,
             PaymentsCourse.org_id == org_id,

@@ -67,7 +67,6 @@ async def handle_stripe_webhook(
                     status_code=404,
                     detail="No payments configuration found for this organization",
                 )
-
             config_data = config.model_dump()
             config_data.update(
                 {

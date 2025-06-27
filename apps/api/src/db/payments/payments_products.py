@@ -43,8 +43,14 @@ class PaymentsProductCreate(PaymentsProductBase):
     pass
 
 
-class PaymentsProductUpdate(PaymentsProductBase):
-    pass
+class PaymentsProductUpdate(SQLModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    product_type: Optional[PaymentProductTypeEnum] = None
+    price_type: Optional[PaymentPriceTypeEnum] = None
+    benefits: Optional[str] = None
+    amount: Optional[float] = None
+    currency: Optional[str] = None
 
 
 class PaymentsProductRead(PaymentsProductBase):

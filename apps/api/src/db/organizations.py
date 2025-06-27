@@ -1,9 +1,12 @@
-from typing import Optional
-from pydantic import BaseModel
+from typing import Optional, TYPE_CHECKING
+from pydantic import ConfigDict, BaseModel
 from sqlmodel import Field, SQLModel, JSON, Column
 from src.db.roles import RoleRead
 
 from src.db.organization_config import OrganizationConfig
+
+if TYPE_CHECKING:
+    from src.db.users import UserRead
 
 
 class OrganizationBase(SQLModel):
@@ -32,6 +35,7 @@ class Organization(OrganizationBase, table=True):
 class OrganizationWithConfig(BaseModel):
     org: Organization
     config: OrganizationConfig
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class OrganizationUpdate(SQLModel):
@@ -57,13 +61,19 @@ class OrganizationCreate(OrganizationBase):
 class OrganizationRead(OrganizationBase):
     id: int
     org_uuid: str
-    config: Optional[OrganizationConfig | dict]
+    config: Optional[OrganizationConfig | dict] = None
     creation_date: str
     update_date: str
 
 
 class OrganizationUser(BaseModel):
-    from src.db.users import UserRead
-
-    user: UserRead
+    user: "UserRead"
     role: RoleRead
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+def rebuild_organization_models():
+    """Rebuild organization models to resolve forward references"""
+    from src.db.users import UserRead  # noqa: F401 - needed for forward reference resolution
+
+    OrganizationUser.model_rebuild()

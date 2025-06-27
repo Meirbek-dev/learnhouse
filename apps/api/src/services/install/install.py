@@ -120,11 +120,12 @@ def install_default_elements(db_session: Session):
 
     # First, delete UserOrganization entries that reference the roles
     for role in roles:
-        statement = select(UserOrganization).where(UserOrganization.role_id == role.id)
-        user_orgs = db_session.exec(statement).all()
+        statement_user_orgs = select(UserOrganization).where(
+            UserOrganization.role_id == role.id
+        )
+        user_orgs = db_session.exec(statement_user_orgs).all()
         for user_org in user_orgs:
             db_session.delete(user_org)
-        db_session.commit()
 
     # Now, delete the roles
     for role in roles:
@@ -303,11 +304,10 @@ def install_default_elements(db_session: Session):
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
-
     # Serialize rights to JSON
-    role_global_admin.rights = role_global_admin.rights.dict()  # type: ignore
-    role_global_maintainer.rights = role_global_maintainer.rights.dict()  # type: ignore
-    role_global_user.rights = role_global_user.rights.dict()  # type: ignore
+    role_global_admin.rights = role_global_admin.rights.model_dump()
+    role_global_maintainer.rights = role_global_maintainer.rights.model_dump()
+    role_global_user.rights = role_global_user.rights.model_dump()
 
     # Insert roles in DB
     db_session.add(role_global_admin)
@@ -359,12 +359,12 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
         landing={},
     )
 
-    org_config = json.loads(org_config.json())
+    org_config_dict = json.loads(org_config.model_dump_json())
 
     # OrgSettings
     org_settings = OrganizationConfig(
         org_id=int(org.id if org.id else 0),
-        config=org_config,
+        config=org_config_dict,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )

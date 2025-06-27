@@ -32,7 +32,7 @@ async def get_orgs_for_explore(
 
     # Add label filter if provided
     if label:
-        statement = statement.where(Organization.label == label)  # type: ignore
+        statement = statement.where(Organization.label == label)
 
     # Add deterministic ordering based on salt
     statement = statement.order_by(_get_sort_expression(salt))
@@ -128,16 +128,16 @@ async def search_orgs_for_explore(
     for term in search_terms:
         term_pattern = f"%{term}%"
         search_conditions.append(
-            (Organization.name.ilike(term_pattern))  # type: ignore
-            | (Organization.about.ilike(term_pattern))  # type: ignore
-            | (Organization.description.ilike(term_pattern))  # type: ignore
-            | (Organization.label.ilike(term_pattern))  # type: ignore
+            (Organization.name.ilike(term_pattern))
+            | (Organization.about.ilike(term_pattern))
+            | (Organization.description.ilike(term_pattern))
+            | (Organization.label.ilike(term_pattern))
         )
 
     statement = select(Organization).where(Organization.explore == True)
 
     if label and label != "all":
-        statement = statement.where(Organization.label == label)  # type: ignore
+        statement = statement.where(Organization.label == label)
 
     if search_conditions:
         statement = statement.where(*search_conditions)

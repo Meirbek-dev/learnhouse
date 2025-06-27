@@ -4,10 +4,6 @@ from typing import Literal
 from ulid import ULID
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.features_utils.usage import (
-    check_limits_with_usage,
-    increase_feature_usage,
-)
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_user_is_anon,
@@ -46,9 +42,6 @@ async def create_usergroup(
             detail="Organization does not exist",
         )
 
-    # Usage check
-    check_limits_with_usage("courses", org.id, db_session)
-
     # Complete the object
     usergroup.usergroup_uuid = f"usergroup_{ULID()}"
     usergroup.creation_date = str(datetime.now())
@@ -58,9 +51,6 @@ async def create_usergroup(
     db_session.add(usergroup)
     db_session.commit()
     db_session.refresh(usergroup)
-
-    # Feature usage
-    increase_feature_usage("usergroups", org.id, db_session)
 
     usergroup = UserGroupRead.model_validate(usergroup)
 
@@ -255,9 +245,6 @@ async def delete_usergroup_by_id(
         action="delete",
         db_session=db_session,
     )
-
-    # Feature usage
-    increase_feature_usage("usergroups", usergroup.org_id, db_session)
 
     db_session.delete(usergroup)
     db_session.commit()

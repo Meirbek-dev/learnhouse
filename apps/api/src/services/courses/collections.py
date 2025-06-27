@@ -65,7 +65,6 @@ async def get_collection(
         )
         .distinct()
     )
-
     if current_user.user_uuid == "user_anonymous":
         statement = statement_public
     else:
@@ -73,7 +72,9 @@ async def get_collection(
 
     courses = list(db_session.exec(statement).all())
 
-    collection = CollectionRead(**collection.model_dump(), courses=courses)
+    collection = CollectionRead.model_validate(
+        {**collection.model_dump(), "courses": courses}
+    )
 
     return collection
 
@@ -103,7 +104,7 @@ async def create_collection(
     if collection:
         for course_id in collection_object.courses:
             collection_course = CollectionCourse(
-                collection_id=int(collection.id),  # type: ignore
+                collection_id=int(collection.id),
                 course_id=course_id,
                 org_id=int(collection_object.org_id),
                 creation_date=str(datetime.now()),
@@ -154,16 +155,12 @@ async def update_collection(
     del collection_object.courses
 
     # Update only the fields that were passed in
-    for var, value in vars(collection_object).items():
+    update_data = collection_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(collection, var, value)
+            setattr(collection, field, value)
 
     collection.update_date = str(datetime.now())
-
-    # Update only the fields that were passed in
-    for var, value in vars(collection_object).items():
-        if value is not None:
-            setattr(collection, var, value)
 
     statement = select(CollectionCourse).where(
         CollectionCourse.collection_id == collection.id
@@ -177,7 +174,7 @@ async def update_collection(
     # Add new collection_courses
     for course in courses or []:
         collection_course = CollectionCourse(
-            collection_id=int(collection.id),  # type: ignore
+            collection_id=int(collection.id),
             course_id=int(course),
             org_id=int(collection.org_id),
             creation_date=str(datetime.now()),

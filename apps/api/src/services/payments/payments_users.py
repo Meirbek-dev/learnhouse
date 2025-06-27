@@ -168,7 +168,7 @@ async def list_payment_users(
         select(PaymentsUser)
         .where(PaymentsUser.org_id == org_id)
         .order_by(PaymentsUser.id.desc())
-    )  # type: ignore
+    )
     payment_users = list(db_session.exec(statement).all())  # Convert to list
 
     return payment_users
@@ -217,7 +217,7 @@ async def get_owned_courses(
         PaymentsUser.user_id == current_user.id,
         PaymentsUser.status.in_(
             [PaymentStatusEnum.ACTIVE, PaymentStatusEnum.COMPLETED]
-        ),  # type: ignore
+        ),
     )
     payment_users = db_session.exec(statement).all()
 
@@ -230,7 +230,7 @@ async def get_owned_courses(
         # Get courses linked to this product through PaymentsCourse
         statement = (
             select(Course)
-            .join(PaymentsCourse, Course.id == PaymentsCourse.course_id)  # type: ignore
+            .join(PaymentsCourse, Course.id == PaymentsCourse.course_id)
             .where(PaymentsCourse.payment_product_id == product_id)
         )
         product_courses = db_session.exec(statement).all()

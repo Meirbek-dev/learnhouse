@@ -142,8 +142,8 @@ async def create_video_activity(
 
     # update chapter
     chapter_activity_object = ChapterActivity(
-        chapter_id=chapter.id,  # type: ignore
-        activity_id=activity.id,  # type: ignore
+        chapter_id=chapter.id,
+        activity_id=activity.id,
         course_id=coursechapter.course_id,
         org_id=coursechapter.org_id,
         creation_date=str(datetime.now()),
@@ -232,8 +232,8 @@ async def create_external_video_activity(
 
     # update chapter
     chapter_activity_object = ChapterActivity(
-        chapter_id=coursechapter.chapter_id,  # type: ignore
-        activity_id=activity.id,  # type: ignore
+        chapter_id=coursechapter.chapter_id,
+        activity_id=activity.id,
         course_id=coursechapter.course_id,
         org_id=coursechapter.org_id,
         creation_date=str(datetime.now()),

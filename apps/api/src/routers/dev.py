@@ -8,4 +8,4 @@ router = APIRouter()
 @router.get("/config")
 async def config():
     config = get_openu_config()
-    return config.dict()
+    return config.model_dump()

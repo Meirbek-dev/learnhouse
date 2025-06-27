@@ -100,7 +100,7 @@ async def create_stripe_product(
             for benefit in product_data.benefits.split(",")
             if benefit.strip()
         ],
-        default_price_data=default_price_data,  # type: ignore
+        default_price_data=default_price_data,
         stripe_account=stripe_acc_id,
     )
 

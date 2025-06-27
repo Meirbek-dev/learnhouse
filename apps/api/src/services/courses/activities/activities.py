@@ -73,7 +73,7 @@ async def create_activity(
     statement = (
         select(ChapterActivity)
         .where(ChapterActivity.chapter_id == activity_object.chapter_id)
-        .order_by(ChapterActivity.order)  # type: ignore
+        .order_by(ChapterActivity.order)
     )
     chapter_activities = db_session.exec(statement).all()
 
@@ -193,9 +193,12 @@ async def update_activity(
     await rbac_check(request, course.course_uuid, current_user, "update", db_session)
 
     # Update only the fields that were passed in
-    for var, value in vars(activity_object).items():
+    update_data = activity_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(activity, var, value)
+            setattr(activity, field, value)
+
+    activity.update_date = str(datetime.now())
 
     db_session.add(activity)
     db_session.commit()

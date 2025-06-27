@@ -40,18 +40,39 @@ async def signWithGoogle(
     ).first()
 
     if not user:
-        username = (
-            google_user["given_name"]
-            + google_user["family_name"]
-            + str(random.randint(10, 999))
-        )
+        # Safely extract user data with fallbacks for missing fields
+        given_name = google_user.get("given_name", "")
+        family_name = google_user.get("family_name", "")
+        email = google_user.get("email", "")
+        picture = google_user.get("picture", "")
+
+        # Create a safe username from ASCII chars only, fallback to email prefix
+        safe_given = "".join(c for c in given_name if c.isalnum())
+        safe_family = "".join(c for c in family_name if c.isalnum())
+
+        if safe_given or safe_family:
+            username = safe_given + safe_family + str(random.randint(10, 999))
+        else:
+            # Fallback to email prefix if names contain no ASCII chars
+            email_prefix = email.split("@")[0]
+            safe_prefix = "".join(c for c in email_prefix if c.isalnum())[:10]
+            username = safe_prefix + str(random.randint(10, 999))
+
+        # Ensure username is unique
+        existing_username = db_session.exec(
+            select(User).where(User.username == username)
+        ).first()
+
+        if existing_username:
+            username = username + str(random.randint(1000, 9999))
+
         user_object = UserCreate(
-            email=google_user["email"],
+            email=email,
             username=username,
             password="",
-            first_name=google_user["given_name"],
-            last_name=google_user["family_name"],
-            avatar_image=google_user["picture"],
+            first_name=given_name,
+            last_name=family_name,
+            avatar_image=picture,
         )
 
         if org_id is not None:

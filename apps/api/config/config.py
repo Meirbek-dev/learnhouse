@@ -189,8 +189,8 @@ def get_openu_config() -> OpenUConfig:
     ) or env_endpoint_url
 
     content_delivery = ContentDeliveryConfig(
-        type=content_delivery_type,  # type: ignore
-        s3api=S3ApiConfig(bucket_name=bucket_name, endpoint_url=endpoint_url),  # type: ignore
+        type=content_delivery_type,
+        s3api=S3ApiConfig(bucket_name=bucket_name, endpoint_url=endpoint_url),
     )
 
     # Database config

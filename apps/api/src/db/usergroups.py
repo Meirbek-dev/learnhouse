@@ -23,9 +23,9 @@ class UserGroupCreate(UserGroupBase):
     pass
 
 
-class UserGroupUpdate(UserGroupBase):
-    name: str
-    description: str
+class UserGroupUpdate(SQLModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
 
 
 class UserGroupRead(UserGroupBase):

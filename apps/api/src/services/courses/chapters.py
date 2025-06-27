@@ -161,9 +161,10 @@ async def update_chapter(
     await rbac_check(request, chapter.chapter_uuid, current_user, "update", db_session)
 
     # Update only the fields that were passed in
-    for var, value in vars(chapter_object).items():
+    update_data = chapter_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(chapter, var, value)
+            setattr(chapter, field, value)
 
     chapter.update_date = str(datetime.now())
 
@@ -175,7 +176,7 @@ async def update_chapter(
             request,
             chapter.id,
             current_user,
-            db_session,  # type: ignore
+            db_session,
         )
 
     return chapter
@@ -239,7 +240,7 @@ async def get_course_chapters(
     ]
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)  # type: ignore
+    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
 
     # Get activities for each chapter
     for chapter in chapters:
@@ -252,18 +253,12 @@ async def get_course_chapters(
         chapter_activities = db_session.exec(statement).all()
 
         for chapter_activity in chapter_activities:
-            statement = (
-                select(Activity)
-                .where(
-                    Activity.id == chapter_activity.activity_id,
-                    with_unpublished_activities or Activity.published == True,
-                )
-                .distinct(Activity.id)
+            statement = select(Activity).where(
+                Activity.id == chapter_activity.activity_id
             )
             activity = db_session.exec(statement).first()
-
-            if activity:
-                chapter.activities.append(ActivityRead(**activity.model_dump()))
+            if activity and (with_unpublished_activities or activity.published):
+                chapter.activities.append(ActivityRead.model_validate(activity))
 
     return chapters
 
@@ -289,8 +284,8 @@ async def DEPRECEATED_get_course_chapters(
     await rbac_check(request, course.course_uuid, current_user, "read", db_session)
 
     chapters_in_db = await get_course_chapters(
-        request, course.id, db_session, current_user
-    )  # type: ignore
+        request, course.id, db_session, current_user, True
+    )
 
     # activities
 
@@ -387,21 +382,20 @@ async def reorder_chapters_and_activities(
     # Update or create course chapters based on new order
     for index, chapter_order in enumerate(chapters_order.chapter_order_by_ids):
         if chapter_order.chapter_id in existing_chapter_map:
-            # Update existing chapter order
-            course_chapter = existing_chapter_map[chapter_order.chapter_id]
-            course_chapter.order = index
-            db_session.add(course_chapter)
+            existing_chapter_map[chapter_order.chapter_id].order = index + 1
+            existing_chapter_map[chapter_order.chapter_id].update_date = str(
+                datetime.now()
+            )
         else:
-            # Create new course chapter
-            course_chapter = CourseChapter(
+            new_chapter = CourseChapter(
+                course_id=course.id,
                 chapter_id=chapter_order.chapter_id,
-                course_id=course.id,  # type: ignore
                 org_id=course.org_id,
+                order=index + 1,
                 creation_date=str(datetime.now()),
                 update_date=str(datetime.now()),
-                order=index,
             )
-            db_session.add(course_chapter)
+            db_session.add(new_chapter)
 
         db_session.commit()
 
@@ -433,28 +427,23 @@ async def reorder_chapters_and_activities(
     # Update or create chapter activities based on new order
     for chapter_order in chapters_order.chapter_order_by_ids:
         for index, activity_order in enumerate(chapter_order.activities_order_by_ids):
-            activity_key = (chapter_order.chapter_id, activity_order.activity_id)
-            activities_to_keep.add(activity_key)
+            key = (chapter_order.chapter_id, activity_order.activity_id)
+            activities_to_keep.add(key)
 
-            if activity_key in existing_activity_map:
-                # Update existing activity order
-                chapter_activity = existing_activity_map[activity_key]
-                chapter_activity.order = index
-                db_session.add(chapter_activity)
+            if key in existing_activity_map:
+                existing_activity_map[key].order = index + 1
+                existing_activity_map[key].update_date = str(datetime.now())
             else:
-                # Create new chapter activity
-                chapter_activity = ChapterActivity(
+                new_activity = ChapterActivity(
                     chapter_id=chapter_order.chapter_id,
                     activity_id=activity_order.activity_id,
+                    course_id=course.id,
                     org_id=course.org_id,
-                    course_id=course.id,  # type: ignore
+                    order=index + 1,
                     creation_date=str(datetime.now()),
                     update_date=str(datetime.now()),
-                    order=index,
                 )
-                db_session.add(chapter_activity)
-
-            db_session.commit()
+                db_session.add(new_activity)
 
     # Remove activities that are no longer in any chapter
     for ca in existing_chapter_activities:
@@ -476,19 +465,16 @@ async def rbac_check(
     db_session: Session,
 ):
     if action == "read":
-        if current_user.id == 0:  # Anonymous user
-            res = await authorization_verify_if_element_is_public(
+        if current_user.id == 0:
+            return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-            return res
         else:
-            res = await authorization_verify_based_on_roles_and_authorship(
+            return await authorization_verify_based_on_roles_and_authorship(
                 request, current_user.id, action, course_uuid, db_session
             )
-            return res
     else:
         await authorization_verify_if_user_is_anon(current_user.id)
-
         await authorization_verify_based_on_roles_and_authorship(
             request,
             current_user.id,

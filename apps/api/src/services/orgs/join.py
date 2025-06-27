@@ -1,23 +1,22 @@
 from datetime import datetime
 from typing import Optional
 from fastapi import HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlmodel import Session, select
 from src.db.organizations import Organization
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.features_utils.usage import (
-    check_limits_with_usage,
-    increase_feature_usage,
-)
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
+from src.security.features_utils.usage import increase_feature_usage
 
 
 class JoinOrg(BaseModel):
-    org_id: int
-    user_id: str
-    invite_code: Optional[str] = None
+    org_id: int = Field(gt=0, description="Organization ID must be positive")
+    user_id: int = Field(gt=0, description="User ID must be positive")
+    invite_code: Optional[str] = Field(
+        default=None, description="Invite code for invite-only organizations"
+    )
 
 
 async def join_org(
@@ -36,8 +35,6 @@ async def join_org(
             status_code=404,
             detail="Organization not found",
         )
-
-    check_limits_with_usage("members", org.id, db_session)
 
     join_method = await get_org_join_mechanism(
         request, args.org_id, current_user, db_session
@@ -62,7 +59,19 @@ async def join_org(
             status_code=400, detail="User is already part of that organization"
         )
 
-    if join_method == "inviteOnly" and user and org and args.invite_code:
+    if join_method == "inviteOnly":
+        if not args.invite_code:
+            raise HTTPException(
+                status_code=400,
+                detail="Invite code is required for invite-only organizations",
+            )
+
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found",
+            )
+
         if user.id is not None and org.id is not None:
             # Check if invite code exists
             inviteCode = await get_invite_code(
@@ -86,8 +95,9 @@ async def join_org(
 
             db_session.add(user_organization)
             db_session.commit()
+            db_session.refresh(user_organization)
 
-            return "Добро пожаловать!"
+            return {"message": "Добро пожаловать!", "success": True}
 
         else:
             raise HTTPException(
@@ -95,7 +105,13 @@ async def join_org(
                 detail="Something wrong, try later.",
             )
 
-    if join_method == "open" and user and org:
+    elif join_method == "open":
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found",
+            )
+
         if user.id is not None and org.id is not None:
             # Link user and organization
             user_organization = UserOrganization(
@@ -108,10 +124,9 @@ async def join_org(
 
             db_session.add(user_organization)
             db_session.commit()
+            db_session.refresh(user_organization)
 
-            increase_feature_usage("members", org.id, db_session)
-
-            return "Добро пожаловать!"
+            return {"message": "Добро пожаловать!", "success": True}
 
         else:
             raise HTTPException(
@@ -121,6 +136,6 @@ async def join_org(
 
     else:
         raise HTTPException(
-            status_code=403,
-            detail="Something wrong, try later.",
+            status_code=400,
+            detail=f"Invalid join method: {join_method}",
         )

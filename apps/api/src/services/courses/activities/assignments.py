@@ -28,11 +28,6 @@ from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.features_utils.usage import (
-    check_limits_with_usage,
-    decrease_feature_usage,
-    increase_feature_usage,
-)
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
@@ -54,7 +49,7 @@ async def create_assignment(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
-    # Check if org exists
+    # Check if course exists
     statement = select(Course).where(Course.id == assignment_object.course_id)
     course = db_session.exec(statement).first()
 
@@ -67,24 +62,23 @@ async def create_assignment(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "create", db_session)
 
-    # Usage check
-    check_limits_with_usage("assignments", course.org_id, db_session)
+    # Create Assignment with required fields
+    assignment_data = assignment_object.model_dump()
+    assignment_data.update(
+        {
+            "assignment_uuid": str(f"assignment_{ULID()}"),
+            "creation_date": str(datetime.now()),
+            "update_date": str(datetime.now()),
+            "org_id": course.org_id,
+        }
+    )
 
-    # Create Assignment
-    assignment = Assignment(**assignment_object.model_dump())
-
-    assignment.assignment_uuid = str(f"assignment_{ULID()}")
-    assignment.creation_date = str(datetime.now())
-    assignment.update_date = str(datetime.now())
-    assignment.org_id = course.org_id
+    assignment = Assignment.model_validate(assignment_data)
 
     # Insert Assignment in DB
     db_session.add(assignment)
     db_session.commit()
     db_session.refresh(assignment)
-
-    # Feature usage
-    increase_feature_usage("assignments", course.org_id, db_session)
 
     # return assignment read
     return AssignmentRead.model_validate(assignment)
@@ -197,9 +191,11 @@ async def update_assignment(
     await rbac_check(request, course.course_uuid, current_user, "update", db_session)
 
     # Update only the fields that were passed in
-    for var, value in vars(assignment_object).items():
+    update_data = assignment_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(assignment, var, value)
+            setattr(assignment, field, value)
+
     assignment.update_date = str(datetime.now())
 
     # Insert Assignment in DB
@@ -239,9 +235,6 @@ async def delete_assignment(
 
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
-
-    # Feature usage
-    decrease_feature_usage("assignments", course.org_id, db_session)
 
     # Delete Assignment
     db_session.delete(assignment)
@@ -290,9 +283,6 @@ async def delete_assignment_from_activity_uuid(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
 
-    # Feature usage
-    decrease_feature_usage("assignments", course.org_id, db_session)
-
     # Delete Assignment
     db_session.delete(assignment)
 
@@ -334,17 +324,22 @@ async def create_assignment_task(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "create", db_session)
 
-    # Create Assignment Task
-    assignment_task = AssignmentTask(**assignment_task_object.model_dump())
+    # Create Assignment Task with required fields
+    assignment_task_data = assignment_task_object.model_dump()
+    assignment_task_data.update(
+        {
+            "assignment_task_uuid": str(f"assignmenttask_{ULID()}"),
+            "creation_date": str(datetime.now()),
+            "update_date": str(datetime.now()),
+            "org_id": course.org_id,
+            "chapter_id": assignment.chapter_id,
+            "activity_id": assignment.activity_id,
+            "assignment_id": assignment.id,
+            "course_id": assignment.course_id,
+        }
+    )
 
-    assignment_task.assignment_task_uuid = str(f"assignmenttask_{ULID()}")
-    assignment_task.creation_date = str(datetime.now())
-    assignment_task.update_date = str(datetime.now())
-    assignment_task.org_id = course.org_id
-    assignment_task.chapter_id = assignment.chapter_id
-    assignment_task.activity_id = assignment.activity_id
-    assignment_task.assignment_id = assignment.id  # type: ignore
-    assignment_task.course_id = assignment.course_id
+    assignment_task = AssignmentTask.model_validate(assignment_task_data)
 
     # Insert Assignment Task in DB
     db_session.add(assignment_task)
@@ -411,7 +406,7 @@ async def read_assignment_task(
     if not assignmenttask:
         raise HTTPException(
             status_code=404,
-            detail="Assignment Task not found",
+            detail="Assignment task not found",
         )
 
     # Check if assignment exists
@@ -457,7 +452,7 @@ async def put_assignment_task_reference_file(
     if not assignment_task:
         raise HTTPException(
             status_code=404,
-            detail="Assignment Task not found",
+            detail="Assignment task not found",
         )
 
     # Check if assignment exists
@@ -535,7 +530,7 @@ async def put_assignment_task_submission_file(
     if not assignment_task:
         raise HTTPException(
             status_code=404,
-            detail="Assignment Task not found",
+            detail="Assignment task not found",
         )
 
     # Check if assignment exists
@@ -575,7 +570,7 @@ async def put_assignment_task_submission_file(
     ):
         raise HTTPException(
             status_code=403,
-            detail="You must be enrolled in this course to submit files",
+            detail="User not enrolled in course",
         )
 
     # Upload submission file
@@ -610,7 +605,7 @@ async def update_assignment_task(
     if not assignment_task:
         raise HTTPException(
             status_code=404,
-            detail="Assignment Task not found",
+            detail="Assignment task not found",
         )
 
     # Check if assignment exists
@@ -637,9 +632,10 @@ async def update_assignment_task(
     await rbac_check(request, course.course_uuid, current_user, "update", db_session)
 
     # Update only the fields that were passed in
-    for var, value in vars(assignment_task_object).items():
+    update_data = assignment_task_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(assignment_task, var, value)
+            setattr(assignment_task, field, value)
     assignment_task.update_date = str(datetime.now())
 
     # Insert Assignment Task in DB
@@ -666,7 +662,7 @@ async def delete_assignment_task(
     if not assignment_task:
         raise HTTPException(
             status_code=404,
-            detail="Assignment Task not found",
+            detail="Assignment task not found",
         )
 
     # Check if assignment exists
@@ -721,7 +717,7 @@ async def handle_assignment_task_submission(
     if not assignment_task:
         raise HTTPException(
             status_code=404,
-            detail="Assignment Task not found",
+            detail="Assignment task not found",
         )
 
     # Check if assignment exists
@@ -798,9 +794,10 @@ async def handle_assignment_task_submission(
             )
 
         # Update only the fields that were passed in
-        for var, value in vars(assignment_task_submission_object).items():
+        update_data = assignment_task_submission_object.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
             if value is not None:
-                setattr(assignment_task_submission, var, value)
+                setattr(assignment_task_submission, field, value)
         assignment_task_submission.update_date = str(datetime.now())
 
         # Insert Assignment Task Submission in DB
@@ -821,7 +818,7 @@ async def handle_assignment_task_submission(
             task_submission=model_data["task_submission"],
             grade=0,  # Always start with 0 for new submissions
             task_submission_grade_feedback="",  # Start with empty feedback
-            assignment_task_id=int(assignment_task.id),  # type: ignore
+            assignment_task_id=int(assignment_task.id),
             assignment_type=assignment_task.assignment_type,
             activity_id=assignment.activity_id,
             course_id=assignment.course_id,
@@ -856,7 +853,7 @@ async def read_user_assignment_task_submissions(
     if not assignment_task:
         raise HTTPException(
             status_code=404,
-            detail="Assignment Task not found",
+            detail="Assignment task not found",
         )
 
     # Check if assignment task submission exists
@@ -869,7 +866,7 @@ async def read_user_assignment_task_submissions(
     if not assignment_task_submission:
         raise HTTPException(
             status_code=404,
-            detail="Assignment Task Submission not found",
+            detail="Assignment task submission not found",
         )
 
     # Check if assignment exists
@@ -1028,9 +1025,10 @@ async def update_assignment_task_submission(
     await rbac_check(request, course.course_uuid, current_user, "read", db_session)
 
     # Update only the fields that were passed in
-    for var, value in vars(assignment_task_submission_object).items():
+    update_data = assignment_task_submission_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(assignment_task_submission, var, value)
+            setattr(assignment_task_submission, field, value)
     assignment_task_submission.update_date = str(datetime.now())
 
     # Insert Assignment Task Submission in DB
@@ -1165,7 +1163,7 @@ async def create_assignment_submission(
     # Create Assignment User Submission
     assignment_user_submission = AssignmentUserSubmission(
         user_id=current_user.id,
-        assignment_id=assignment.id,  # type: ignore
+        assignment_id=assignment.id,
         grade=0,
         assignmentusersubmission_uuid=str(f"assignmentusersubmission_{ULID()}"),
         submission_status=AssignmentUserSubmissionStatus.SUBMITTED,
@@ -1200,9 +1198,9 @@ async def create_assignment_submission(
     # Add TrailStep
     trail = await check_trail_presence(
         org_id=course.org_id,
-        user_id=user.id,  # type: ignore
+        user_id=user.id,
         request=request,
-        user=user,  # type: ignore
+        user=user,
         db_session=db_session,
     )
 
@@ -1218,7 +1216,7 @@ async def create_assignment_submission(
             trail_id=trail.id if trail.id is not None else 0,
             course_id=course.id if course.id is not None else 0,
             org_id=course.org_id,
-            user_id=user.id,  # type: ignore
+            user_id=user.id,
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),
         )
@@ -1243,7 +1241,7 @@ async def create_assignment_submission(
             complete=True,
             teacher_verified=False,
             grade="",
-            user_id=user.id,  # type: ignore
+            user_id=user.id,
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),
         )
@@ -1399,9 +1397,10 @@ async def update_assignment_submission(
     await rbac_check(request, course.course_uuid, current_user, "read", db_session)
 
     # Update only the fields that were passed in
-    for var, value in vars(assignment_user_submission_object).items():
+    update_data = assignment_user_submission_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(assignment_user_submission, var, value)
+            setattr(assignment_user_submission, field, value)
     assignment_user_submission.update_date = str(datetime.now())
 
     # Insert Assignment User Submission in DB
@@ -1719,18 +1718,15 @@ async def rbac_check(
 ):
     if action == "read":
         if current_user.id == 0:  # Anonymous user
-            res = await authorization_verify_if_element_is_public(
+            return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-            return res
         else:
-            res = await authorization_verify_based_on_roles_and_authorship(
+            return await authorization_verify_based_on_roles_and_authorship(
                 request, current_user.id, action, course_uuid, db_session
             )
-            return res
     else:
         await authorization_verify_if_user_is_anon(current_user.id)
-
         await authorization_verify_based_on_roles_and_authorship(
             request,
             current_user.id,

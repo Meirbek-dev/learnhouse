@@ -99,9 +99,9 @@ async def update_payments_config(
     config = db_session.exec(statement).first()
     if not config:
         raise HTTPException(status_code=404, detail="Payments config not found")
-
     # Update config
-    for key, value in payments_config.model_dump().items():
+    update_data = payments_config.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(config, key, value)
 
     db_session.add(config)

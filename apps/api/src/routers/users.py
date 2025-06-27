@@ -55,7 +55,7 @@ async def api_get_current_user_session(
     current_user: PublicUser = Depends(get_current_user),
 ) -> UserSession:
     """
-    Get current user
+    Get current user session
     """
     return await get_user_session(request, db_session, current_user)
 
@@ -211,7 +211,7 @@ async def api_update_avatar_user(
     avatar_file: UploadFile | None = None,
 ) -> UserRead:
     """
-    Update User
+    Update User Avatar
     """
     return await update_user_avatar(request, db_session, current_user, avatar_file)
 
@@ -243,7 +243,7 @@ async def api_change_password_with_reset_code(
     reset_code: str,
 ):
     """
-    Update User Password with reset code
+    Change password with reset code
     """
     return await change_password_with_reset_code(
         request, db_session, current_user, new_password, org_id, email, reset_code
@@ -260,7 +260,7 @@ async def api_send_password_reset_email(
     org_id: int,
 ):
     """
-    Update User Password
+    Send password reset email
     """
     return await send_reset_password_code(
         request, db_session, current_user, org_id, email

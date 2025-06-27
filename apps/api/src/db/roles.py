@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Optional, Union
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
 
@@ -27,6 +27,8 @@ class Rights(BaseModel):
 
     def __getitem__(self, item):
         return getattr(self, item)
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 # Database Models
@@ -58,7 +60,7 @@ class Role(RoleBase, table=True):
 
 class RoleRead(RoleBase):
     id: Optional[int] = Field(default=None, primary_key=True)
-    org_id: int = Field(default=None, foreign_key="organization.id")
+    org_id: Optional[int] = Field(default=None, foreign_key="organization.id")
     role_type: RoleTypeEnum = RoleTypeEnum.TYPE_GLOBAL
     role_uuid: str
     creation_date: str
@@ -71,6 +73,6 @@ class RoleCreate(RoleBase):
 
 class RoleUpdate(SQLModel):
     role_id: int = Field(default=None, foreign_key="role.id")
-    name: Optional[str]
-    description: Optional[str]
-    rights: Optional[Union[Rights, dict]] = Field(default={}, sa_column=Column(JSON))
+    name: Optional[str] = None
+    description: Optional[str] = None
+    rights: Optional[Union[Rights, dict]] = Field(default=None, sa_column=Column(JSON))

@@ -51,7 +51,7 @@ def increase_feature_usage(
     if feature_usage is None:
         feature_usage_count = 0
     else:
-        feature_usage_count = int(feature_usage)  # type: ignore
+        feature_usage_count = int(feature_usage)
 
     # Increment the feature usage
     r.set(f"{feature}_usage:{org_id}", feature_usage_count + 1)
@@ -82,7 +82,7 @@ def decrease_feature_usage(
     if feature_usage is None:
         feature_usage_count = 0
     else:
-        feature_usage_count = int(feature_usage)  # type: ignore
+        feature_usage_count = int(feature_usage)
 
     # Increment the feature usage
     r.set(f"{feature}_usage:{org_id}", feature_usage_count - 1)

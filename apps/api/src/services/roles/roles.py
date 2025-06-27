@@ -31,7 +31,7 @@ async def create_role(
     db_session.commit()
     db_session.refresh(role)
 
-    role = RoleRead(**role.model_dump())
+    role = RoleRead.model_validate(role)
 
     return role
 
@@ -53,7 +53,7 @@ async def read_role(
     # RBAC check
     await rbac_check(request, current_user, "read", role.role_uuid, db_session)
 
-    role = RoleRead(**role.model_dump())
+    role = RoleRead.model_validate(role)
 
     return role
 
@@ -85,15 +85,16 @@ async def update_role(
     del role_object.role_id
 
     # Update only the fields that were passed in
-    for var, value in vars(role_object).items():
+    update_data = role_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(role, var, value)
+            setattr(role, field, value)
 
     db_session.add(role)
     db_session.commit()
     db_session.refresh(role)
 
-    role = RoleRead(**role.model_dump())
+    role = RoleRead.model_validate(role)
 
     return role
 

@@ -112,7 +112,7 @@ async def create_documentpdf_activity(
     # Add activity to chapter
     activity_chapter = ChapterActivity(
         chapter_id=(int(chapter_id)),
-        activity_id=activity.id,  # type: ignore
+        activity_id=activity.id,
         course_id=coursechapter.course_id,
         org_id=coursechapter.org_id,
         creation_date=str(datetime.now()),

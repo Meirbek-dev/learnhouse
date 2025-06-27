@@ -60,7 +60,7 @@ async def check_activity_paid_access(
     statement = select(PaymentsUser).where(
         PaymentsUser.user_id == user.id,
         PaymentsUser.payment_product_id == course_payment.payment_product_id,
-        PaymentsUser.status.in_(  # type: ignore
+        PaymentsUser.status.in_(
             [PaymentStatusEnum.ACTIVE, PaymentStatusEnum.COMPLETED]
         ),
     )
@@ -100,7 +100,7 @@ async def check_course_paid_access(
     statement = select(PaymentsUser).where(
         PaymentsUser.user_id == user.id,
         PaymentsUser.payment_product_id == course_payment.payment_product_id,
-        PaymentsUser.status.in_(  # type: ignore
+        PaymentsUser.status.in_(
             [PaymentStatusEnum.ACTIVE, PaymentStatusEnum.COMPLETED]
         ),
     )

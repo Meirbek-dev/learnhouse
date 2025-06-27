@@ -28,6 +28,11 @@ async def create_video_block(
     statement = select(Organization).where(Organization.id == activity.org_id)
     org = db_session.exec(statement).first()
 
+    if not org:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found"
+        )
+
     # get course
     statement = select(Course).where(Course.id == activity.course_id)
     course = db_session.exec(statement).first()
@@ -55,9 +60,10 @@ async def create_video_block(
     block = Block(
         activity_id=activity.id if activity.id else 0,
         block_type=BlockTypeEnum.BLOCK_VIDEO,
-        content=block_data.dict(),
+        content=block_data.model_dump(),
         org_id=org.id if org.id else 0,
         course_id=course.id if course.id else 0,
+        chapter_id=getattr(activity, "chapter_id", 1),
         block_uuid=block_uuid,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),

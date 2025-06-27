@@ -1,4 +1,4 @@
-import uuid
+from ulid import ULID
 from fastapi import HTTPException, Request, UploadFile, status
 from src.services.blocks.schemas.files import BlockFile
 from src.services.utils.upload_content import upload_content
@@ -15,7 +15,7 @@ async def upload_file_and_return_file_object(
     course_uuid: str,
 ):
     # get file id
-    file_id = str(uuid.ULID())
+    file_id = str(ULID())
 
     # get file format
     file_format = file.filename.split(".")[-1]
@@ -30,7 +30,7 @@ async def upload_file_and_return_file_object(
     file_binary = await file.read()
 
     # get file size
-    file_size = len(await file.read())
+    file_size = len(file_binary)
 
     # get file type
     file_type = file.content_type

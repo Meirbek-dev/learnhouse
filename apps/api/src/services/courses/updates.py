@@ -41,7 +41,6 @@ async def create_update(
 
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "update", db_session)
-
     # Generate UUID
     courseupdate_uuid = str(f"courseupdate_{ULID()}")
 
@@ -58,7 +57,7 @@ async def create_update(
     db_session.commit()
     db_session.refresh(update)
 
-    return CourseUpdateRead(**update.model_dump())
+    return CourseUpdateRead.model_validate(update)
 
 
 # Update Course Update
@@ -78,13 +77,12 @@ async def update_update(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Update does not exist"
         )
-
     # RBAC check
     await rbac_check(
         request, update.courseupdate_uuid, current_user, "update", db_session
     )
 
-    for key, value in update_object.model_dump().items():
+    for key, value in update_object.model_dump(exclude_unset=True).items():
         if value is not None:
             setattr(update, key, value)
 
@@ -93,7 +91,7 @@ async def update_update(
     db_session.commit()
     db_session.refresh(update)
 
-    return CourseUpdateRead(**update.model_dump())
+    return CourseUpdateRead.model_validate(update)
 
 
 # Delete Course Update
@@ -147,4 +145,4 @@ async def get_updates_by_course_uuid(
     )  # https://sqlmodel.tiangolo.com/tutorial/where/#type-annotations-and-errors
     updates = db_session.exec(statement).all()
 
-    return [CourseUpdateRead(**update.model_dump()) for update in updates]
+    return [CourseUpdateRead.model_validate(update) for update in updates]

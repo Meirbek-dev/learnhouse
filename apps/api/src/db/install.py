@@ -19,8 +19,9 @@ class InstallCreate(InstallBase):
     pass
 
 
-class InstallUpdate(InstallBase):
-    pass
+class InstallUpdate(SQLModel):
+    step: Optional[int] = None
+    data: Optional[dict] = Field(default=None, sa_column=Column(JSON))
 
 
 class InstallRead(InstallBase):

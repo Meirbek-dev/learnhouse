@@ -1,7 +1,7 @@
 import json
 import random
 import string
-import uuid
+from ulid import ULID
 from pydantic import EmailStr
 import redis
 from datetime import datetime, timedelta
@@ -71,7 +71,7 @@ async def create_invite_code(
         return "".join(random.choice(letters_and_digits) for _ in range(length))
 
     generated_invite_code = generate_code()
-    invite_code_uuid = f"org_invite_code_{uuid.ULID()}"
+    invite_code_uuid = f"org_invite_code_{ULID()}"
 
     # time to live in days to seconds
     ttl = int(timedelta(days=365).total_seconds())
@@ -149,7 +149,7 @@ async def create_invite_code_with_usergroup(
         return "".join(random.choice(letters_and_digits) for _ in range(length))
 
     generated_invite_code = generate_code()
-    invite_code_uuid = f"org_invite_code_{uuid.ULID()}"
+    invite_code_uuid = f"org_invite_code_{ULID()}"
 
     # time to live in days to seconds
     ttl = int(timedelta(days=365).total_seconds())
@@ -217,9 +217,9 @@ async def get_invite_codes(
 
     invite_codes_list = []
 
-    for invite_code in invite_codes:  # type: ignore
+    for invite_code in invite_codes:
         invite_code = r.get(invite_code)
-        invite_code = json.loads(invite_code)  # type: ignore
+        invite_code = json.loads(invite_code)
         invite_codes_list.append(invite_code)
 
     return invite_codes_list
@@ -266,7 +266,7 @@ async def get_invite_code(
         )
 
     # Get invite code
-    invite_code = r.keys(f"org_invite_code_*:org:{org.org_uuid}:code:{invite_code}")  # type: ignore
+    invite_code = r.keys(f"org_invite_code_*:org:{org.org_uuid}:code:{invite_code}")
 
     if not invite_code:
         raise HTTPException(
@@ -274,7 +274,7 @@ async def get_invite_code(
             detail="Invite code not found",
         )
 
-    invite_code = r.get(invite_code[0])  # type: ignore
+    invite_code = r.get(invite_code[0])
     invite_code = json.loads(invite_code)
 
     return invite_code
@@ -359,12 +359,12 @@ def send_invite_email(
         )
 
     # Get invite code
-    invite = r.keys(f"{invite_code_uuid}:org:{org.org_uuid}:code:*")  # type: ignore
+    invite = r.keys(f"{invite_code_uuid}:org:{org.org_uuid}:code:*")
 
     # Send email
     if invite:
         invite = r.get(invite[0])
-        invite = json.loads(invite)  # type: ignore
+        invite = json.loads(invite)
 
         # send email
         send_email(

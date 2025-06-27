@@ -33,11 +33,16 @@ def import_all_models():
 # Import all models before creating engine
 import_all_models()
 
+# Rebuild models to resolve forward references
+from src.db.trails import rebuild_trail_models  # noqa: E402
+
+rebuild_trail_models()
+
 openu_config = get_openu_config()
 engine = create_engine(
-    openu_config.database_config.sql_connection_string,  # type: ignore
+    openu_config.database_config.sql_connection_string,
     echo=False,
-    pool_pre_ping=True,  # type: ignore
+    pool_pre_ping=True,
     pool_size=10,
     max_overflow=0,
     pool_recycle=300,  # Recycle connections after 5 minutes
@@ -51,7 +56,7 @@ logfire.instrument_sqlalchemy(engine=engine)
 
 async def connect_to_db(app: FastAPI):
     try:
-        app.db_engine = engine  # type: ignore
+        app.db_engine = engine
         logging.info("OpenU database has been started.")
         SQLModel.metadata.create_all(engine)
     except Exception as e:

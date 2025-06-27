@@ -1,7 +1,6 @@
 import random
 import string
 from typing import Annotated
-from pydantic import EmailStr
 from sqlalchemy import create_engine
 from sqlmodel import SQLModel, Session
 import typer
@@ -32,7 +31,7 @@ def install(
     engine = create_engine(
         openu_config.database_config.sql_connection_string,
         echo=False,
-        pool_pre_ping=True,  # type: ignore
+        pool_pre_ping=True,
     )
     SQLModel.metadata.create_all(engine)
 
@@ -52,10 +51,12 @@ def install(
         org = OrganizationCreate(
             name="OpenU",
             description="OpenU",
+            about="OpenU - Open Education Platform",
             slug=slug,
             email="meirbek.123@gmail.com",
             logo_image="",
             thumbnail_image="",
+            label="OpenU",
         )
         install_create_organization(org, db_session)
         print("OpenU created ✅")
@@ -65,7 +66,7 @@ def install(
         # Generate random 8 digit password
         email = "meirbek.dev@gmail.com"
         password = generate_password(8)
-        user = UserCreate(username="Meirbek", email=EmailStr(email), password=password)
+        user = UserCreate(username="Meirbek", email=email, password=password)
         install_create_organization_user(user, "openu", db_session)
         print("OpenU user created ✅")
 
@@ -100,7 +101,7 @@ def install(
         username = typer.prompt("What's the username for the user?")
         email = typer.prompt("What's the email for the user?")
         password = typer.prompt("What's the password for the user?", hide_input=True)
-        user = UserCreate(username=username, email=EmailStr(email), password=password)
+        user = UserCreate(username=username, email=email, password=password)
         install_create_organization_user(user, "openu", db_session)
         print(username + " user created ✅")
 

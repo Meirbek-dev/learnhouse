@@ -16,7 +16,11 @@ from src.db.organizations import (
     Organization,
     OrganizationRead,
     OrganizationUser,
+    rebuild_organization_models,
 )
+
+# Rebuild organization models to resolve forward references
+rebuild_organization_models()
 
 
 async def get_organization_users(

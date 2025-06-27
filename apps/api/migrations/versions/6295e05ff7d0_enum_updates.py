@@ -11,7 +11,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa  # noqa: F401
 import sqlmodel  # noqa: F401
-from alembic_postgresql_enum import TableReference  # type: ignore
+from alembic_postgresql_enum import TableReference
 
 # revision identifiers, used by Alembic.
 revision: str = "6295e05ff7d0"

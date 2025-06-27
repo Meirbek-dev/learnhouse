@@ -2,10 +2,6 @@ from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
 from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization
-from src.security.features_utils.usage import (
-    check_limits_with_usage,
-    increase_feature_usage,
-)
 from src.db.courses.courses import Course, CourseRead
 from src.core.events.database import get_db_session
 from src.db.users import PublicUser
@@ -61,10 +57,6 @@ def ai_start_activity_chat_session(
             detail="Organization not found",
         )
 
-    # Check limits and usage
-    check_limits_with_usage("ai", org.id, db_session)
-    increase_feature_usage("ai", org.id, db_session)
-
     if not activity:
         raise HTTPException(
             status_code=404,
@@ -73,7 +65,6 @@ def ai_start_activity_chat_session(
 
     # Get Activity Content Blocks
     content = activity.content
-
     # Serialize Activity Content Blocks to a text comprehensible by the AI
     structured = structure_activity_content_by_type(content)
 
@@ -88,9 +79,7 @@ def ai_start_activity_chat_session(
     org = db_session.exec(statement).first()
 
     # Get Organization Config
-    statement = select(OrganizationConfig).where(
-        OrganizationConfig.org_id == org.id  # type: ignore
-    )
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
     result = db_session.exec(statement)
     org_config = result.first()
 
@@ -155,10 +144,6 @@ def ai_send_activity_chat_message(
     statement = select(Organization).where(Organization.id == course.org_id)
     org = db_session.exec(statement).first()
 
-    # Check limits and usage
-    check_limits_with_usage("ai", course.org_id, db_session)
-    increase_feature_usage("ai", course.org_id, db_session)
-
     if not activity:
         raise HTTPException(
             status_code=404,
@@ -179,9 +164,7 @@ def ai_send_activity_chat_message(
     org = db_session.exec(statement).first()
 
     # Get Organization Config
-    statement = select(OrganizationConfig).where(
-        OrganizationConfig.org_id == org.id  # type: ignore
-    )
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
     result = db_session.exec(statement)
     org_config = result.first()
 

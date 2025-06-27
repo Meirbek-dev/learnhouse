@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from src.services.dev.dev import isDevModeEnabled
 from src.services.users.users import security_verify_password
 from src.security.security import ALGORITHM, SECRET_KEY
-from fastapi_jwt_auth import AuthJWT
+from fastapi_another_jwt_auth import AuthJWT
 from typing import Set
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -30,7 +30,7 @@ class Settings(BaseModel):
     authjwt_cookie_domain: str = get_openu_config().hosting_config.cookie_config.domain
 
 
-@AuthJWT.load_config  # type: ignore
+@AuthJWT.load_config
 def get_config():
     return Settings()
 
@@ -90,11 +90,13 @@ async def get_current_user(
     try:
         Authorize.jwt_optional()
         username = Authorize.get_jwt_subject() or None
-        token_data = TokenData(username=username)  # type: ignore
+        token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
     if username:
-        user = await security_get_user(request, db_session, email=token_data.username)  # type: ignore # treated as an email
+        user = await security_get_user(
+            request, db_session, email=token_data.username
+        )  # treated as an email
         if user is None:
             raise credentials_exception
         return PublicUser(**user.model_dump())

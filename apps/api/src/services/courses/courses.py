@@ -1,14 +1,7 @@
 from typing import Literal, List
 from ulid import ULID
 from sqlmodel import Session, select, or_, and_, text
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
 from src.db.organizations import Organization
-from src.security.features_utils.usage import (
-    check_limits_with_usage,
-    decrease_feature_usage,
-    increase_feature_usage,
-)
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
@@ -52,12 +45,11 @@ async def get_course(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "read", db_session)
 
-    # Get course authors with their roles
+    # Get course authors
     authors_statement = (
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
-        .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(ResourceAuthor.id.asc())
+        .where(ResourceAuthor.resource_uuid == course_uuid)
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -73,9 +65,7 @@ async def get_course(
         for resource_author, user in author_results
     ]
 
-    course = CourseRead(**course.model_dump(), authors=authors)
-
-    return course
+    return CourseRead(**course.model_dump(), authors=authors)
 
 
 async def get_course_by_id(
@@ -101,7 +91,6 @@ async def get_course_by_id(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(ResourceAuthor.id.asc())
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -117,9 +106,7 @@ async def get_course_by_id(
         for resource_author, user in author_results
     ]
 
-    course = CourseRead(**course.model_dump(), authors=authors)
-
-    return course
+    return CourseRead(**course.model_dump(), authors=authors)
 
 
 async def get_course_meta(
@@ -135,10 +122,10 @@ async def get_course_meta(
     # Get course with authors in a single query using joins
     course_statement = (
         select(Course, ResourceAuthor, User)
-        .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)  # type: ignore
-        .outerjoin(User, ResourceAuthor.user_id == User.id)  # type: ignore
+        .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
+        .outerjoin(User, ResourceAuthor.user_id == User.id)
         .where(Course.course_uuid == course_uuid)
-        .order_by(ResourceAuthor.id.asc())  # type: ignore
+        .order_by(ResourceAuthor.id.asc())
     )
     results = db_session.exec(course_statement).all()
 
@@ -198,40 +185,10 @@ async def get_courses_orgslug(
     query = select(Course).join(Organization).where(Organization.slug == org_slug)
 
     if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only show public courses
         query = query.where(Course.public == True)
     else:
-        # For authenticated users, show:
-        # 1. Public courses
-        # 2. Courses not in any UserGroup
-        # 3. Courses in UserGroups where the user is a member
-        # 4. Courses where the user is a resource author
-        query = (
-            query.outerjoin(
-                UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
-            )  # type: ignore
-            .outerjoin(
-                UserGroupUser,
-                and_(
-                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-                    UserGroupUser.user_id == current_user.id,
-                ),
-            )
-            .outerjoin(
-                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
-            )  # type: ignore
-            .where(
-                or_(
-                    Course.public == True,
-                    UserGroupResource.resource_uuid
-                    == None,  # Courses not in any UserGroup # noqa: E711
-                    UserGroupUser.user_id
-                    == current_user.id,  # Courses in UserGroups where user is a member
-                    ResourceAuthor.user_id
-                    == current_user.id,  # Courses where user is a resource author
-                )
-            )
-        )
+        # For authenticated users, show all courses in the org
+        pass
 
     # Apply pagination
     query = query.offset(offset).limit(limit).distinct()
@@ -247,8 +204,8 @@ async def get_courses_orgslug(
     # Fetch all authors for all courses in a single query
     authors_query = (
         select(ResourceAuthor, User)
-        .join(User, ResourceAuthor.user_id == User.id)  # type: ignore
-        .where(ResourceAuthor.resource_uuid.in_(course_uuids))  # type: ignore
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid.in_(course_uuids))
         .order_by(ResourceAuthor.id.asc())
     )
 
@@ -272,25 +229,8 @@ async def get_courses_orgslug(
     # Create CourseRead objects with authors
     course_reads = []
     for course in courses:
-        course_read = CourseRead.model_validate(
-            {
-                "id": course.id or 0,  # Ensure id is never None
-                "org_id": course.org_id,
-                "name": course.name,
-                "description": course.description or "",
-                "about": course.about or "",
-                "learnings": course.learnings or "",
-                "tags": course.tags or "",
-                "thumbnail_image": course.thumbnail_image or "",
-                "public": course.public,
-                "open_to_contributors": course.open_to_contributors,
-                "course_uuid": course.course_uuid,
-                "creation_date": course.creation_date,
-                "update_date": course.update_date,
-                "authors": course_authors.get(course.course_uuid, []),
-            }
-        )
-        course_reads.append(course_read)
+        authors = course_authors.get(course.course_uuid, [])
+        course_reads.append(CourseRead(**course.model_dump(), authors=authors))
 
     return course_reads
 
@@ -323,40 +263,10 @@ async def search_courses(
     )
 
     if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only show public courses
         query = query.where(Course.public == True)
     else:
-        # For authenticated users, show:
-        # 1. Public courses
-        # 2. Courses not in any UserGroup
-        # 3. Courses in UserGroups where the user is a member
-        # 4. Courses where the user is a resource author
-        query = (
-            query.outerjoin(
-                UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
-            )  # type: ignore
-            .outerjoin(
-                UserGroupUser,
-                and_(
-                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-                    UserGroupUser.user_id == current_user.id,
-                ),
-            )
-            .outerjoin(
-                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
-            )  # type: ignore
-            .where(
-                or_(
-                    Course.public == True,
-                    UserGroupResource.resource_uuid
-                    == None,  # Courses not in any UserGroup # noqa: E711
-                    UserGroupUser.user_id
-                    == current_user.id,  # Courses in UserGroups where user is a member
-                    ResourceAuthor.user_id
-                    == current_user.id,  # Courses where user is a resource author
-                )
-            )
-        )
+        # For authenticated users, show all courses in the org
+        pass
 
     # Apply pagination
     query = query.offset(offset).limit(limit).distinct()
@@ -371,7 +281,6 @@ async def search_courses(
             select(ResourceAuthor, User)
             .join(User, ResourceAuthor.user_id == User.id)
             .where(ResourceAuthor.resource_uuid == course.course_uuid)
-            .order_by(ResourceAuthor.id.asc())
         )
         author_results = db_session.exec(authors_statement).all()
 
@@ -387,25 +296,7 @@ async def search_courses(
             for resource_author, user in author_results
         ]
 
-        course_read = CourseRead.model_validate(
-            {
-                "id": course.id or 0,  # Ensure id is never None
-                "org_id": course.org_id,
-                "name": course.name,
-                "description": course.description or "",
-                "about": course.about or "",
-                "learnings": course.learnings or "",
-                "tags": course.tags or "",
-                "thumbnail_image": course.thumbnail_image or "",
-                "public": course.public,
-                "open_to_contributors": course.open_to_contributors,
-                "course_uuid": course.course_uuid,
-                "creation_date": course.creation_date,
-                "update_date": course.update_date,
-                "authors": authors,
-            }
-        )
-        course_reads.append(course_read)
+        course_reads.append(CourseRead(**course.model_dump(), authors=authors))
 
     return course_reads
 
@@ -424,9 +315,6 @@ async def create_course(
     # RBAC check
     await rbac_check(request, "course_x", current_user, "create", db_session)
 
-    # Usage check
-    check_limits_with_usage("courses", org_id, db_session)
-
     # Complete course object
     course.org_id = course.org_id
 
@@ -440,23 +328,15 @@ async def create_course(
 
     # Upload thumbnail
     if thumbnail_file and thumbnail_file.filename:
-        name_in_disk = f"{course.course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
-        await upload_thumbnail(
+        name_in_disk = await upload_thumbnail(
             thumbnail_file,
-            name_in_disk,
+            course.course_uuid,
             org.org_uuid,
-            course.course_uuid,  # type: ignore
+            thumbnail_type,
         )
-        if thumbnail_type == ThumbnailType.IMAGE:
-            course.thumbnail_image = name_in_disk
-            course.thumbnail_type = ThumbnailType.IMAGE
-        elif thumbnail_type == ThumbnailType.VIDEO:
-            course.thumbnail_video = name_in_disk
-            course.thumbnail_type = ThumbnailType.VIDEO
+        course.thumbnail_image = name_in_disk
     else:
-        course.thumbnail_image = ""
-        course.thumbnail_video = ""
-        course.thumbnail_type = ThumbnailType.IMAGE
+        course.thumbnail_image = None
 
     # Insert course
     db_session.add(course)
@@ -499,12 +379,7 @@ async def create_course(
         for resource_author, user in author_results
     ]
 
-    # Feature usage
-    increase_feature_usage("courses", course.org_id, db_session)
-
-    course = CourseRead(**course.model_dump(), authors=authors)
-
-    return CourseRead.model_validate(course)
+    return CourseRead(**course.model_dump(), authors=authors)
 
 
 async def update_course_thumbnail(
@@ -535,37 +410,18 @@ async def update_course_thumbnail(
 
     # Upload thumbnail
     if thumbnail_file and thumbnail_file.filename:
-        name_in_disk = (
-            f"{course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
-        )
-        await upload_thumbnail(
+        name_in_disk = await upload_thumbnail(
             thumbnail_file,
-            name_in_disk,
+            course.course_uuid,
             org.org_uuid,
-            course.course_uuid,  # type: ignore
+            thumbnail_type,
         )
 
     # Update course
     if name_in_disk:
-        if thumbnail_type == ThumbnailType.IMAGE:
-            course.thumbnail_image = name_in_disk
-            course.thumbnail_type = (
-                ThumbnailType.IMAGE
-                if not course.thumbnail_video
-                else ThumbnailType.BOTH
-            )
-        elif thumbnail_type == ThumbnailType.VIDEO:
-            course.thumbnail_video = name_in_disk
-            course.thumbnail_type = (
-                ThumbnailType.VIDEO
-                if not course.thumbnail_image
-                else ThumbnailType.BOTH
-            )
+        course.thumbnail_image = name_in_disk
     else:
-        raise HTTPException(
-            status_code=500,
-            detail="Issue with thumbnail upload",
-        )
+        course.thumbnail_image = None
 
     # Complete the course object
     course.update_date = str(datetime.now())
@@ -620,9 +476,10 @@ async def update_course(
     await rbac_check(request, course.course_uuid, current_user, "update", db_session)
 
     # Update only the fields that were passed in
-    for var, value in vars(course_object).items():
+    update_data = course_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
         if value is not None:
-            setattr(course, var, value)
+            setattr(course, field, value)
 
     # Complete the course object
     course.update_date = str(datetime.now())
@@ -675,9 +532,6 @@ async def delete_course(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
 
-    # Feature usage
-    decrease_feature_usage("courses", course.org_id, db_session)
-
     db_session.delete(course)
     db_session.commit()
 
@@ -711,63 +565,39 @@ async def get_user_courses(
         return []
 
     # Get courses with the extracted UUIDs
-    statement = select(Course).where(Course.course_uuid.in_(course_uuids))
+    offset = (page - 1) * limit
+    query = (
+        select(Course)
+        .where(Course.course_uuid.in_(course_uuids))
+        .offset(offset)
+        .limit(limit)
+    )
+    courses = db_session.exec(query).all()
 
-    # Apply pagination
-    statement = statement.offset((page - 1) * limit).limit(limit)
-
-    courses = db_session.exec(statement).all()
-
-    # Convert to CourseRead objects
-    result = []
+    # Get authors for each course
+    course_reads = []
     for course in courses:
-        # Get authors for the course
-        authors_statement = select(ResourceAuthor).where(
-            ResourceAuthor.resource_uuid == course.course_uuid
+        authors_statement = (
+            select(ResourceAuthor, User)
+            .join(User, ResourceAuthor.user_id == User.id)
+            .where(ResourceAuthor.resource_uuid == course.course_uuid)
         )
-        authors = db_session.exec(authors_statement).all()
+        author_results = db_session.exec(authors_statement).all()
 
-        # Convert authors to AuthorWithRole objects
-        authors_with_role = []
-        for author in authors:
-            # Get user for the author
-            user_statement = select(User).where(User.id == author.user_id)
-            user = db_session.exec(user_statement).first()
+        authors = [
+            AuthorWithRole(
+                user=UserRead.model_validate(user),
+                authorship=resource_author.authorship,
+                authorship_status=resource_author.authorship_status,
+                creation_date=resource_author.creation_date,
+                update_date=resource_author.update_date,
+            )
+            for resource_author, user in author_results
+        ]
 
-            if user:
-                authors_with_role.append(
-                    AuthorWithRole(
-                        user=UserRead.model_validate(user),
-                        authorship=author.authorship,
-                        authorship_status=author.authorship_status,
-                        creation_date=author.creation_date,
-                        update_date=author.update_date,
-                    )
-                )
+        course_reads.append(CourseRead(**course.model_dump(), authors=authors))
 
-        # Create CourseRead object
-        course_read = CourseRead.model_validate(
-            {
-                "id": course.id or 0,  # Ensure id is never None
-                "org_id": course.org_id,
-                "name": course.name,
-                "description": course.description or "",
-                "about": course.about or "",
-                "learnings": course.learnings or "",
-                "tags": course.tags or "",
-                "thumbnail_image": course.thumbnail_image or "",
-                "public": course.public,
-                "open_to_contributors": course.open_to_contributors,
-                "course_uuid": course.course_uuid,
-                "creation_date": course.creation_date,
-                "update_date": course.update_date,
-                "authors": authors_with_role,
-            }
-        )
-
-        result.append(course_read)
-
-    return result
+    return course_reads
 
 
 ## 🔒 RBAC Utils ##
@@ -782,18 +612,15 @@ async def rbac_check(
 ):
     if action == "read":
         if current_user.id == 0:  # Anonymous user
-            res = await authorization_verify_if_element_is_public(
+            return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-            return res
         else:
-            res = await authorization_verify_based_on_roles_and_authorship(
+            return await authorization_verify_based_on_roles_and_authorship(
                 request, current_user.id, action, course_uuid, db_session
             )
-            return res
     else:
         await authorization_verify_if_user_is_anon(current_user.id)
-
         await authorization_verify_based_on_roles_and_authorship(
             request,
             current_user.id,

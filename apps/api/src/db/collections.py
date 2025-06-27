@@ -26,11 +26,11 @@ class CollectionCreate(CollectionBase):
     pass
 
 
-class CollectionUpdate(CollectionBase):
-    courses: Optional[list]
-    name: Optional[str]
-    public: Optional[bool]
-    description: Optional[str] = ""
+class CollectionUpdate(SQLModel):
+    courses: Optional[list] = None
+    name: Optional[str] = None
+    public: Optional[bool] = None
+    description: Optional[str] = None
 
 
 class CollectionRead(CollectionBase):

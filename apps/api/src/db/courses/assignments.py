@@ -44,16 +44,16 @@ class AssignmentRead(AssignmentBase):
 class AssignmentUpdate(SQLModel):
     """Model for updating an assignment."""
 
-    title: Optional[str]
-    description: Optional[str]
-    due_date: Optional[str]
-    published: Optional[bool]
-    grading_type: Optional[GradingTypeEnum]
-    org_id: Optional[int]
-    course_id: Optional[int]
-    chapter_id: Optional[int]
-    activity_id: Optional[int]
-    update_date: Optional[str]
+    title: Optional[str] = None
+    description: Optional[str] = None
+    due_date: Optional[str] = None
+    published: Optional[bool] = None
+    grading_type: Optional[GradingTypeEnum] = None
+    org_id: Optional[int] = None
+    course_id: Optional[int] = None
+    chapter_id: Optional[int] = None
+    activity_id: Optional[int] = None
+    update_date: Optional[str] = None
 
 
 class Assignment(AssignmentBase, table=True):
@@ -118,12 +118,13 @@ class AssignmentTaskRead(AssignmentTaskBase):
 class AssignmentTaskUpdate(SQLModel):
     """Model for updating an assignment task."""
 
-    title: Optional[str]
-    description: Optional[str]
-    hint: Optional[str]
-    assignment_type: Optional[AssignmentTaskTypeEnum]
+    title: Optional[str] = None
+    description: Optional[str] = None
+    hint: Optional[str] = None
+    reference_file: Optional[str] = None
+    assignment_type: Optional[AssignmentTaskTypeEnum] = None
     contents: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
-    max_grade_value: Optional[int]
+    max_grade_value: Optional[int] = None
 
 
 class AssignmentTask(AssignmentTaskBase, table=True):
@@ -193,12 +194,12 @@ class AssignmentTaskSubmissionRead(AssignmentTaskSubmissionBase):
 class AssignmentTaskSubmissionUpdate(SQLModel):
     """Model for updating an assignment task submission."""
 
-    assignment_task_id: Optional[int]
-    assignment_task_submission_uuid: Optional[str]
+    assignment_task_id: Optional[int] = None
+    assignment_task_submission_uuid: Optional[str] = None
     task_submission: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
-    grade: Optional[int]
-    task_submission_grade_feedback: Optional[str]
-    assignment_type: Optional[AssignmentTaskTypeEnum]
+    grade: Optional[int] = None
+    task_submission_grade_feedback: Optional[str] = None
+    assignment_type: Optional[AssignmentTaskTypeEnum] = None
 
 
 class AssignmentTaskSubmission(AssignmentTaskSubmissionBase, table=True):
@@ -281,10 +282,10 @@ class AssignmentUserSubmissionRead(AssignmentUserSubmissionBase):
 class AssignmentUserSubmissionUpdate(SQLModel):
     """Model for updating an assignment user submission."""
 
-    submission_status: Optional[AssignmentUserSubmissionStatus]
-    grade: Optional[str]
-    user_id: Optional[int]
-    assignment_id: Optional[int]
+    submission_status: Optional[AssignmentUserSubmissionStatus] = None
+    grade: Optional[int] = None
+    user_id: Optional[int] = None
+    assignment_id: Optional[int] = None
 
 
 class AssignmentUserSubmission(AssignmentUserSubmissionBase, table=True):

@@ -121,7 +121,8 @@ async def update_payments_product(
         raise HTTPException(status_code=404, detail="Payments product not found")
 
     # Update product
-    for key, value in payments_product.model_dump().items():
+    update_data = payments_product.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(product, key, value)
 
     product.update_date = datetime.now()
@@ -167,7 +168,7 @@ async def delete_payments_product(
         PaymentsUser.payment_product_id == product_id,
         PaymentsUser.status.in_(
             [PaymentStatusEnum.ACTIVE, PaymentStatusEnum.COMPLETED]
-        ),  # type: ignore
+        ),
     )
     payment_users = db_session.exec(statement).all()
     if payment_users:
@@ -206,7 +207,7 @@ async def list_payments_products(
         select(PaymentsProduct)
         .where(PaymentsProduct.org_id == org_id)
         .order_by(PaymentsProduct.id.desc())
-    )  # type: ignore
+    )
     products = db_session.exec(statement).all()
 
     return [PaymentsProductRead.model_validate(product) for product in products]
@@ -233,7 +234,7 @@ async def get_products_by_course(
     statement = (
         select(PaymentsProduct)
         .select_from(PaymentsProduct)
-        .join(PaymentsCourse, PaymentsProduct.id == PaymentsCourse.payment_product_id)  # type: ignore
+        .join(PaymentsCourse, PaymentsProduct.id == PaymentsCourse.payment_product_id)
         .where(PaymentsCourse.course_id == course_id, PaymentsCourse.org_id == org_id)
     )
     products = db_session.exec(statement).all()

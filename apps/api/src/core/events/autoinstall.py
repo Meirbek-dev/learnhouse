@@ -12,7 +12,7 @@ def auto_install():
     engine = create_engine(
         openu_config.database_config.sql_connection_string,
         echo=False,
-        pool_pre_ping=True,  # type: ignore
+        pool_pre_ping=True,
     )
     SQLModel.metadata.create_all(engine)
 

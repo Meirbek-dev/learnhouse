@@ -13,7 +13,6 @@ class BlockTypeEnum(str, Enum):
 
 
 class BlockBase(SQLModel):
-    id: Optional[int] = Field(default=None, primary_key=True)
     block_type: BlockTypeEnum = BlockTypeEnum.BLOCK_CUSTOM
     content: dict = Field(default={}, sa_column=Column(JSON))
 
@@ -43,12 +42,11 @@ class BlockCreate(BlockBase):
 
 
 class BlockRead(BlockBase):
-    id: int = Field(default=None, primary_key=True)
-    org_id: int = Field(default=None, foreign_key="organization.id")
-    course_id: int = Field(default=None, foreign_key="course.id")
-    chapter_id: int = Field(default=None, foreign_key="chapter.id")
-    activity_id: int = Field(default=None, foreign_key="activity.id")
+    id: int
+    org_id: int
+    course_id: int
+    chapter_id: int
+    activity_id: int
     block_uuid: str
     creation_date: str
     update_date: str
-    pass

@@ -113,8 +113,8 @@ async def search_across_org(
             .distinct()
         )
         collection_courses = list(db_session.exec(statement).all())
-        collection_read = CollectionRead(
-            **collection.model_dump(), courses=collection_courses
+        collection_read = CollectionRead.model_validate(
+            {**collection.model_dump(), "courses": collection_courses}
         )
         collection_reads.append(collection_read)
 

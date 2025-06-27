@@ -3,10 +3,6 @@ from typing import Literal
 from ulid import ULID
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
-from src.security.features_utils.usage import (
-    check_limits_with_usage,
-    increase_feature_usage,
-)
 from src.services.users.usergroups import add_users_to_usergroup
 from src.services.users.emails import (
     send_account_creation_email,
@@ -30,9 +26,13 @@ from src.db.users import (
     UserSession,
     UserUpdate,
     UserUpdatePassword,
+    rebuild_user_models,
 )
 from src.db.user_organizations import UserOrganization
 from src.security.security import security_hash_password, security_verify_password
+
+# Rebuild user models to resolve forward references after all imports
+rebuild_user_models()
 
 
 async def create_user(
@@ -66,9 +66,6 @@ async def create_user(
             detail="Organization does not exist",
         )
 
-    # Usage check
-    check_limits_with_usage("members", org_id, db_session)
-
     # Username
     statement = select(User).where(User.username == user.username)
     result = db_session.exec(statement)
@@ -88,9 +85,8 @@ async def create_user(
             status_code=400,
             detail="Email already exists",
         )
-
     # Exclude unset values
-    user_data = user.dict(exclude_unset=True)
+    user_data = user.model_dump(exclude_unset=True)
     for key, value in user_data.items():
         setattr(user, key, value)
 
@@ -113,8 +109,6 @@ async def create_user(
     db_session.refresh(user_organization)
 
     user = UserRead.model_validate(user)
-
-    increase_feature_usage("members", org_id, db_session)
 
     # Send Account creation email
     send_account_creation_email(
@@ -144,13 +138,10 @@ async def create_user_with_invite(
             detail="Invite code is incorrect",
         )
 
-    # Usage check
-    check_limits_with_usage("members", org_id, db_session)
-
     user = await create_user(request, db_session, current_user, user_object, org_id)
 
     # Check if invite code contains UserGroup
-    if inviteCode.get("usergroup_id"):  # type: ignore
+    if inviteCode.get("usergroup_id"):
         # Add user to UserGroup
         await add_users_to_usergroup(
             request,
@@ -159,8 +150,6 @@ async def create_user_with_invite(
             int(inviteCode.get("usergroup_id")),  # type: ignore / Convert to int since usergroup_id is expected to be int
             str(user.id),
         )
-
-    increase_feature_usage("members", org_id, db_session)
 
     return user
 
@@ -195,18 +184,19 @@ async def create_user_without_org(
             detail="Username already exists",
         )
 
-    # Email
+    # Email - check for existing user
     statement = select(User).where(User.email == user.email)
     result = db_session.exec(statement)
 
-    if result.first():
+    existing_user = result.first()
+    if existing_user:
         raise HTTPException(
             status_code=400,
             detail="Email already exists",
         )
 
     # Exclude unset values
-    user_data = user.dict(exclude_unset=True)
+    user_data = user.model_dump(exclude_unset=True)
     for key, value in user_data.items():
         setattr(user, key, value)
 
@@ -273,7 +263,7 @@ async def update_user(
             )
 
     # Update user
-    user_data = user_object.dict(exclude_unset=True)
+    user_data = user_object.model_dump(exclude_unset=True)
     for key, value in user_data.items():
         setattr(user, key, value)
 
