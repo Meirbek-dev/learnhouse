@@ -1,30 +1,32 @@
-from typing import Literal, List
+from datetime import datetime
+from typing import Literal
+
+from fastapi import HTTPException, Request, UploadFile
+from sqlmodel import Session, and_, or_, select, text
 from ulid import ULID
-from sqlmodel import Session, select, or_, and_, text
+
+from src.db.courses.courses import (
+    AuthorWithRole,
+    Course,
+    CourseCreate,
+    CourseRead,
+    CourseUpdate,
+    FullCourseRead,
+    ThumbnailType,
+)
 from src.db.organizations import Organization
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
-from src.db.users import PublicUser, AnonymousUser, User, UserRead
-from src.db.courses.courses import (
-    Course,
-    CourseCreate,
-    CourseRead,
-    CourseUpdate,
-    FullCourseRead,
-    AuthorWithRole,
-    ThumbnailType,
-)
+from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
     authorization_verify_if_user_is_anon,
 )
 from src.services.courses.thumbnails import upload_thumbnail
-from fastapi import HTTPException, Request, UploadFile
-from datetime import datetime
 
 
 async def get_course(
@@ -164,11 +166,7 @@ async def get_course_meta(
     ]
 
     # Create course read model with chapters
-    course_read = FullCourseRead(
-        **course.model_dump(), authors=authors, chapters=chapters
-    )
-
-    return course_read
+    return FullCourseRead(**course.model_dump(), authors=authors, chapters=chapters)
 
 
 async def get_courses_orgslug(
@@ -178,14 +176,14 @@ async def get_courses_orgslug(
     db_session: Session,
     page: int = 1,
     limit: int = 20,
-) -> List[CourseRead]:
+) -> list[CourseRead]:
     offset = (page - 1) * limit
 
     # Base query
     query = select(Course).join(Organization).where(Organization.slug == org_slug)
 
     if isinstance(current_user, AnonymousUser):
-        query = query.where(Course.public == True)
+        query = query.where(Course.public)
     else:
         # For authenticated users, show all courses in the org
         pass
@@ -243,7 +241,7 @@ async def search_courses(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
-) -> List[CourseRead]:
+) -> list[CourseRead]:
     offset = (page - 1) * limit
 
     # Base query
@@ -263,7 +261,7 @@ async def search_courses(
     )
 
     if isinstance(current_user, AnonymousUser):
-        query = query.where(Course.public == True)
+        query = query.where(Course.public)
     else:
         # For authenticated users, show all courses in the org
         pass
@@ -451,9 +449,7 @@ async def update_course_thumbnail(
         for resource_author, user in author_results
     ]
 
-    course = CourseRead(**course.model_dump(), authors=authors)
-
-    return course
+    return CourseRead(**course.model_dump(), authors=authors)
 
 
 async def update_course(
@@ -509,9 +505,7 @@ async def update_course(
         for resource_author, user in author_results
     ]
 
-    course = CourseRead(**course.model_dump(), authors=authors)
-
-    return course
+    return CourseRead(**course.model_dump(), authors=authors)
 
 
 async def delete_course(
@@ -545,7 +539,7 @@ async def get_user_courses(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
-) -> List[CourseRead]:
+) -> list[CourseRead]:
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
 
@@ -615,19 +609,18 @@ async def rbac_check(
             return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-        else:
-            return await authorization_verify_based_on_roles_and_authorship(
-                request, current_user.id, action, course_uuid, db_session
-            )
-    else:
-        await authorization_verify_if_user_is_anon(current_user.id)
-        await authorization_verify_based_on_roles_and_authorship(
-            request,
-            current_user.id,
-            action,
-            course_uuid,
-            db_session,
+        return await authorization_verify_based_on_roles_and_authorship(
+            request, current_user.id, action, course_uuid, db_session
         )
+    await authorization_verify_if_user_is_anon(current_user.id)
+    await authorization_verify_based_on_roles_and_authorship(
+        request,
+        current_user.id,
+        action,
+        course_uuid,
+        db_session,
+    )
+    return None
 
 
 ## 🔒 RBAC Utils ##

@@ -1,10 +1,12 @@
+from typing import Literal
+
 import redis
-from config.config import get_openu_config
-from typing import Literal, TypeAlias
 from fastapi import HTTPException
 from sqlmodel import Session
 
-FeatureSet: TypeAlias = Literal[
+from config.config import get_openu_config
+
+type FeatureSet = Literal[
     "ai",
     "analytics",
     "api",
@@ -23,7 +25,7 @@ def check_limits_with_usage(
     feature: FeatureSet,
     org_id: int,
     db_session: Session,
-):
+) -> bool:
     return True
 
 
@@ -31,7 +33,7 @@ def increase_feature_usage(
     feature: FeatureSet,
     org_id: int,
     db_session: Session,
-):
+) -> bool:
     LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
@@ -48,10 +50,7 @@ def increase_feature_usage(
     feature_usage = r.get(f"{feature}_usage:{org_id}")
 
     # Get a number of feature asks
-    if feature_usage is None:
-        feature_usage_count = 0
-    else:
-        feature_usage_count = int(feature_usage)
+    feature_usage_count = 0 if feature_usage is None else int(feature_usage)
 
     # Increment the feature usage
     r.set(f"{feature}_usage:{org_id}", feature_usage_count + 1)
@@ -62,7 +61,7 @@ def decrease_feature_usage(
     feature: FeatureSet,
     org_id: int,
     db_session: Session,
-):
+) -> bool:
     LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
@@ -79,10 +78,7 @@ def decrease_feature_usage(
     feature_usage = r.get(f"{feature}_usage:{org_id}")
 
     # Get a number of feature asks
-    if feature_usage is None:
-        feature_usage_count = 0
-    else:
-        feature_usage_count = int(feature_usage)
+    feature_usage_count = 0 if feature_usage is None else int(feature_usage)
 
     # Increment the feature usage
     r.set(f"{feature}_usage:{org_id}", feature_usage_count - 1)

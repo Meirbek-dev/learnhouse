@@ -1,9 +1,11 @@
 import random
 import string
 from typing import Annotated
-from sqlalchemy import create_engine
-from sqlmodel import SQLModel, Session
+
 import typer
+from sqlalchemy import create_engine
+from sqlmodel import Session, SQLModel
+
 from config.config import get_openu_config
 from src.db.organizations import OrganizationCreate
 from src.db.users import UserCreate
@@ -18,14 +20,13 @@ cli = typer.Typer()
 
 def generate_password(length):
     characters = string.ascii_uppercase + string.ascii_lowercase + string.digits
-    password = "".join(random.choice(characters) for _ in range(length))
-    return password
+    return "".join(random.choice(characters) for _ in range(length))
 
 
 @cli.command()
 def install(
     short: Annotated[bool, typer.Option(help="Install with predefined values")] = False,
-):
+) -> None:
     # Get the database session
     openu_config = get_openu_config()
     engine = create_engine(
@@ -72,7 +73,7 @@ def install(
 
         # Show the user how to login
         print("Installation completed ✅")
-        print("")
+        print()
         print("Login with the following credentials:")
         print("email: " + email)
         print("password: " + password)
@@ -113,7 +114,7 @@ def install(
 
 
 @cli.command()
-def main():
+def main() -> None:
     cli()
 
 

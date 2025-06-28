@@ -1,7 +1,9 @@
-from typing import Optional, TYPE_CHECKING
-from pydantic import ConfigDict, BaseModel, EmailStr
-from sqlmodel import Field, SQLModel
+from typing import TYPE_CHECKING
+
+from pydantic import BaseModel, ConfigDict, EmailStr
 from sqlalchemy import JSON, Column
+from sqlmodel import Field, SQLModel
+
 from src.db.roles import RoleRead
 
 if TYPE_CHECKING:
@@ -13,10 +15,10 @@ class UserBase(SQLModel):
     first_name: str
     last_name: str
     email: EmailStr
-    avatar_image: Optional[str] = ""
-    bio: Optional[str] = ""
-    details: Optional[dict] = Field(default={}, sa_column=Column(JSON))
-    profile: Optional[dict] = Field(default={}, sa_column=Column(JSON))
+    avatar_image: str | None = ""
+    bio: str | None = ""
+    details: dict | None = Field(default={}, sa_column=Column(JSON))
+    profile: dict | None = Field(default={}, sa_column=Column(JSON))
 
 
 class UserCreate(UserBase):
@@ -26,14 +28,14 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(SQLModel):
-    username: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[str] = None
-    avatar_image: Optional[str] = None
-    bio: Optional[str] = None
-    details: Optional[dict] = None
-    profile: Optional[dict] = None
+    username: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    email: str | None = None
+    avatar_image: str | None = None
+    bio: str | None = None
+    details: dict | None = None
+    profile: dict | None = None
 
 
 class UserUpdatePassword(SQLModel):
@@ -66,7 +68,7 @@ class AnonymousUser(SQLModel):
     id: int = 0
     user_uuid: str = "user_anonymous"
     username: str = "anonymous"
-    email: Optional[str] = "anonymous@example.com"
+    email: str | None = "anonymous@example.com"
 
 
 class InternalUser(SQLModel):
@@ -76,7 +78,7 @@ class InternalUser(SQLModel):
 
 
 class User(UserBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     password: str = ""
     user_uuid: str = ""
     email_verified: bool = False
@@ -84,7 +86,7 @@ class User(UserBase, table=True):
     update_date: str = ""
 
 
-def rebuild_user_models():
+def rebuild_user_models() -> None:
     """Rebuild user models to resolve forward references"""
     from src.db.organizations import OrganizationRead  # noqa: F401
 

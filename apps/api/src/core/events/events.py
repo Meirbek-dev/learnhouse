@@ -1,5 +1,7 @@
-from typing import Callable
+from collections.abc import Callable
+
 from fastapi import FastAPI
+
 from config.config import OpenUConfig, get_openu_config
 from src.core.events.autoinstall import auto_install
 from src.core.events.content import check_content_directory

@@ -1,7 +1,12 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
+
+from src.core.events.database import get_db_session
 from src.db.usergroups import UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import PublicUser, UserRead
+from src.security.auth import get_current_user
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
     add_users_to_usergroup,
@@ -15,19 +20,16 @@ from src.services.users.usergroups import (
     remove_users_from_usergroup,
     update_usergroup_by_id,
 )
-from src.security.auth import get_current_user
-from src.core.events.database import get_db_session
-
 
 router = APIRouter()
 
 
-@router.post("/", response_model=UserGroupRead, tags=["usergroups"])
+@router.post("/", tags=["usergroups"])
 async def api_create_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_object: UserGroupCreate,
 ) -> UserGroupRead:
     """
@@ -36,12 +38,12 @@ async def api_create_usergroup(
     return await create_usergroup(request, db_session, current_user, usergroup_object)
 
 
-@router.get("/{usergroup_id}", response_model=UserGroupRead, tags=["usergroups"])
+@router.get("/{usergroup_id}", tags=["usergroups"])
 async def api_get_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_id: int,
 ) -> UserGroupRead:
     """
@@ -50,12 +52,12 @@ async def api_get_usergroup(
     return await read_usergroup_by_id(request, db_session, current_user, usergroup_id)
 
 
-@router.get("/{usergroup_id}/users", response_model=list[UserRead], tags=["usergroups"])
+@router.get("/{usergroup_id}/users", tags=["usergroups"])
 async def api_get_users_linked_to_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_id: int,
 ) -> list[UserRead]:
     """
@@ -66,12 +68,12 @@ async def api_get_users_linked_to_usergroup(
     )
 
 
-@router.get("/org/{org_id}", response_model=list[UserGroupRead], tags=["usergroups"])
+@router.get("/org/{org_id}", tags=["usergroups"])
 async def api_get_usergroups(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     org_id: int,
 ) -> list[UserGroupRead]:
     """
@@ -80,14 +82,12 @@ async def api_get_usergroups(
     return await read_usergroups_by_org_id(request, db_session, current_user, org_id)
 
 
-@router.get(
-    "/resource/{resource_uuid}", response_model=list[UserGroupRead], tags=["usergroups"]
-)
+@router.get("/resource/{resource_uuid}", tags=["usergroups"])
 async def api_get_usergroupsby_resource(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     resource_uuid: str,
 ) -> list[UserGroupRead]:
     """
@@ -98,12 +98,12 @@ async def api_get_usergroupsby_resource(
     )
 
 
-@router.put("/{usergroup_id}", response_model=UserGroupRead, tags=["usergroups"])
+@router.put("/{usergroup_id}", tags=["usergroups"])
 async def api_update_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_id: int,
     usergroup_object: UserGroupUpdate,
 ) -> UserGroupRead:
@@ -119,8 +119,8 @@ async def api_update_usergroup(
 async def api_delete_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_id: int,
 ) -> str:
     """
@@ -133,8 +133,8 @@ async def api_delete_usergroup(
 async def api_add_users_to_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_id: int,
     user_ids: str,
 ) -> str:
@@ -150,8 +150,8 @@ async def api_add_users_to_usergroup(
 async def api_delete_users_from_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_id: int,
     user_ids: str,
 ) -> str:
@@ -167,8 +167,8 @@ async def api_delete_users_from_usergroup(
 async def api_add_resources_to_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_id: int,
     resource_uuids: str,
 ) -> str:
@@ -184,8 +184,8 @@ async def api_add_resources_to_usergroup(
 async def api_delete_resources_from_usergroup(
     *,
     request: Request,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     usergroup_id: int,
     resource_uuids: str,
 ) -> str:

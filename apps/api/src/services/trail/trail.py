@@ -1,9 +1,11 @@
 from datetime import datetime
-from ulid import ULID
-from src.db.courses.chapter_activities import ChapterActivity
+
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
+from ulid import ULID
+
 from src.db.courses.activities import Activity
+from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
 from src.db.trail_runs import TrailRun, TrailRunRead
 from src.db.trail_steps import TrailStep, TrailStepRead
@@ -96,12 +98,10 @@ async def get_user_trails(
             if activity:
                 trail_step.activity = activity
 
-    trail_read = TrailRead(
+    return TrailRead(
         **trail.model_dump(),
         runs=trail_runs,
     )
-
-    return trail_read
 
 
 async def check_trail_presence(
@@ -115,7 +115,7 @@ async def check_trail_presence(
     trail = db_session.exec(statement).first()
 
     if not trail:
-        trail = await create_user_trail(
+        return await create_user_trail(
             request,
             user,
             TrailCreate(
@@ -124,7 +124,6 @@ async def check_trail_presence(
             ),
             db_session,
         )
-        return trail
 
     return trail
 
@@ -186,12 +185,10 @@ async def get_user_trail_with_orgid(
             if activity:
                 trail_step.activity = activity
 
-    trail_read = TrailRead(
+    return TrailRead(
         **trail.model_dump(),
         runs=trail_runs,
     )
-
-    return trail_read
 
 
 async def add_activity_to_trail(
@@ -300,12 +297,10 @@ async def add_activity_to_trail(
             if activity:
                 trail_step.activity = activity
 
-    trail_read = TrailRead(
+    return TrailRead(
         **trail.model_dump(),
         runs=trail_runs,
     )
-
-    return trail_read
 
 
 async def remove_activity_from_trail(
@@ -384,12 +379,10 @@ async def remove_activity_from_trail(
             if activity:
                 trail_step.activity = activity
 
-    trail_read = TrailRead(
+    return TrailRead(
         **trail.model_dump(),
         runs=trail_runs,
     )
-
-    return trail_read
 
 
 async def add_course_to_trail(
@@ -477,12 +470,10 @@ async def add_course_to_trail(
             if activity:
                 trail_step.activity = activity
 
-    trail_read = TrailRead(
+    return TrailRead(
         **trail.model_dump(),
         runs=trail_runs,
     )
-
-    return trail_read
 
 
 async def remove_course_from_trail(
@@ -558,9 +549,7 @@ async def remove_course_from_trail(
             if activity:
                 trail_step.activity = activity
 
-    trail_read = TrailRead(
+    return TrailRead(
         **trail.model_dump(),
         runs=trail_runs,
     )
-
-    return trail_read

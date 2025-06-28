@@ -1,10 +1,12 @@
 import logging
 from typing import Literal
-from fastapi import HTTPException, Request
-from sqlmodel import Session
+
 import stripe
+from fastapi import HTTPException, Request
+from sqlmodel import Session, select
+
 from config.config import get_openu_config
-from src.db.payments.payments import PaymentsConfigUpdate, PaymentsConfig
+from src.db.payments.payments import PaymentsConfig, PaymentsConfigUpdate
 from src.db.payments.payments_products import (
     PaymentPriceTypeEnum,
     PaymentProductTypeEnum,
@@ -16,8 +18,6 @@ from src.services.payments.payments_config import (
     get_payments_config,
     update_payments_config,
 )
-from sqlmodel import select
-
 from src.services.payments.payments_users import (
     create_payment_user,
     delete_payment_user,
@@ -92,7 +92,7 @@ async def create_stripe_product(
         request, org_id, current_user, db_session
     )
 
-    product = stripe.Product.create(
+    return stripe.Product.create(
         name=product_data.name,
         description=product_data.description or "",
         marketing_features=[
@@ -103,8 +103,6 @@ async def create_stripe_product(
         default_price_data=default_price_data,
         stripe_account=stripe_acc_id,
     )
-
-    return product
 
 
 async def archive_stripe_product(
@@ -125,15 +123,14 @@ async def archive_stripe_product(
 
     try:
         # Archive the product in Stripe
-        archived_product = stripe.Product.modify(
+        return stripe.Product.modify(
             product_id, active=False, stripe_account=stripe_acc_id
         )
 
-        return archived_product
     except stripe.StripeError as e:
-        print(f"Error archiving Stripe product: {str(e)}")
+        print(f"Error archiving Stripe product: {e!s}")
         raise HTTPException(
-            status_code=400, detail=f"Error archiving Stripe product: {str(e)}"
+            status_code=400, detail=f"Error archiving Stripe product: {e!s}"
         )
 
 
@@ -206,7 +203,7 @@ async def update_stripe_product(
         return updated_product
     except stripe.StripeError as e:
         raise HTTPException(
-            status_code=400, detail=f"Error updating Stripe product: {str(e)}"
+            status_code=400, detail=f"Error updating Stripe product: {e!s}"
         )
 
 
@@ -283,7 +280,7 @@ async def create_checkout_session(
                 request, org_id, payment_user.id, InternalUser(), db_session
             )
         raise HTTPException(
-            status_code=400, detail=f"Error creating/retrieving customer: {str(e)}"
+            status_code=400, detail=f"Error creating/retrieving customer: {e!s}"
         )
 
     # Create checkout session with customer
@@ -333,7 +330,7 @@ async def create_checkout_session(
             await delete_payment_user(
                 request, org_id, payment_user.id, InternalUser(), db_session
             )
-        logging.error(f"Error creating checkout session: {str(e)}")
+        logging.exception(f"Error creating checkout session: {e!s}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -493,7 +490,7 @@ async def handle_stripe_oauth_callback(
         return {"success": True, "account_id": connected_account_id}
 
     except stripe.StripeError as e:
-        logging.error(f"Error connecting Stripe account: {str(e)}")
+        logging.exception(f"Error connecting Stripe account: {e!s}")
         raise HTTPException(
-            status_code=400, detail=f"Error connecting Stripe account: {str(e)}"
+            status_code=400, detail=f"Error connecting Stripe account: {e!s}"
         )

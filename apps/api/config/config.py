@@ -1,8 +1,9 @@
 import os
+from typing import Literal
+
 import yaml
-from typing import Literal, Optional
-from pydantic import BaseModel
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 
 class CookieConfig(BaseModel):
@@ -57,11 +58,11 @@ class MailingConfig(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
-    sql_connection_string: Optional[str] = None
+    sql_connection_string: str | None = None
 
 
 class RedisConfig(BaseModel):
-    redis_connection_string: Optional[str] = None
+    redis_connection_string: str | None = None
 
 
 class InternalStripeConfig(BaseModel):
@@ -97,7 +98,7 @@ def get_openu_config() -> OpenUConfig:
     yaml_path = os.path.join(os.path.dirname(__file__), "config.yaml")
 
     # Load the YAML file
-    with open(yaml_path, "r") as f:
+    with open(yaml_path) as f:
         yaml_config = yaml.safe_load(f)
 
     # General Config
@@ -296,7 +297,7 @@ def get_openu_config() -> OpenUConfig:
     )
 
     # Create OpenUConfig object
-    config = OpenUConfig(
+    return OpenUConfig(
         site_name=site_name,
         site_description=site_description,
         contact_email=contact_email,
@@ -321,5 +322,3 @@ def get_openu_config() -> OpenUConfig:
             )
         ),
     )
-
-    return config

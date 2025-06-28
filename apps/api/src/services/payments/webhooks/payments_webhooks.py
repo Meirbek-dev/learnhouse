@@ -1,14 +1,16 @@
+import logging
 from typing import Literal
+
+import stripe
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-import stripe
-import logging
+
+from src.db.payments.payments import PaymentsConfig, PaymentsConfigUpdate
 from src.db.payments.payments_users import PaymentStatusEnum
 from src.db.users import InternalUser
-from src.services.payments.payments_users import update_payment_user_status
-from src.services.payments.payments_stripe import get_stripe_internal_credentials
-from src.db.payments.payments import PaymentsConfig, PaymentsConfigUpdate
 from src.services.payments.payments_config import update_payments_config
+from src.services.payments.payments_stripe import get_stripe_internal_credentials
+from src.services.payments.payments_users import update_payment_user_status
 from src.services.payments.utils.stripe_utils import get_org_id_from_stripe_account
 
 logger = logging.getLogger(__name__)
@@ -38,10 +40,10 @@ async def handle_stripe_webhook(
         # Verify webhook signature
         event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
     except ValueError:
-        logger.error(ValueError)
+        logger.exception(ValueError)
         raise HTTPException(status_code=400, detail="Invalid payload")
     except stripe.SignatureVerificationError:
-        logger.error(stripe.SignatureVerificationError)
+        logger.exception(stripe.SignatureVerificationError)
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     try:
@@ -89,7 +91,7 @@ async def handle_stripe_webhook(
             logger.info(f"Account authorized for organization {org_id}")
             return {"status": "success", "message": "Account authorized successfully"}
 
-        elif event_type == "account.application.deauthorized":
+        if event_type == "account.application.deauthorized":
             statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
             config = db_session.exec(statement).first()
 
@@ -122,7 +124,7 @@ async def handle_stripe_webhook(
             return {"status": "success", "message": "Account deauthorized successfully"}
 
         # Handle payment-related events
-        elif event_type == "checkout.session.completed":
+        if event_type == "checkout.session.completed":
             session = event_data
             payment_user_id = int(session.get("metadata", {}).get("payment_user_id"))
 
@@ -136,16 +138,15 @@ async def handle_stripe_webhook(
                         current_user=InternalUser(),
                         db_session=db_session,
                     )
-            else:
-                if session.get("payment_status") == "paid":
-                    await update_payment_user_status(
-                        request=request,
-                        org_id=org_id,
-                        payment_user_id=payment_user_id,
-                        status=PaymentStatusEnum.COMPLETED,
-                        current_user=InternalUser(),
-                        db_session=db_session,
-                    )
+            elif session.get("payment_status") == "paid":
+                await update_payment_user_status(
+                    request=request,
+                    org_id=org_id,
+                    payment_user_id=payment_user_id,
+                    status=PaymentStatusEnum.COMPLETED,
+                    current_user=InternalUser(),
+                    db_session=db_session,
+                )
 
         elif event_type == "customer.subscription.deleted":
             subscription = event_data
@@ -187,7 +188,5 @@ async def handle_stripe_webhook(
         return {"status": "success"}
 
     except Exception as e:
-        logger.error(f"Error processing webhook: {str(e)}")
-        raise HTTPException(
-            status_code=400, detail=f"Error processing webhook: {str(e)}"
-        )
+        logger.exception(f"Error processing webhook: {e!s}")
+        raise HTTPException(status_code=400, detail=f"Error processing webhook: {e!s}")

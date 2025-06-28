@@ -1,6 +1,7 @@
 from sqlmodel import Session, select
-from src.db.user_organizations import UserOrganization
+
 from src.db.organizations import OrganizationCreate
+from src.db.user_organizations import UserOrganization
 from src.db.users import User, UserCreate
 from src.services.install.install import (
     install_create_organization,
@@ -10,7 +11,7 @@ from src.services.install.install import (
 
 
 # TODO: Depreceated and need to be removed and remade
-async def create_initial_data_for_tests(db_session: Session):
+async def create_initial_data_for_tests(db_session: Session) -> bool:
     # Install default elements
     install_default_elements(db_session)
 

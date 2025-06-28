@@ -1,12 +1,11 @@
-from typing import Optional
 from fastapi import HTTPException, Request
-from sqlmodel import Session, select
 from sqlalchemy import text
+from sqlmodel import Session, select
 
-from src.db.courses.courses import Course, CourseRead, AuthorWithRole
+from src.db.courses.courses import AuthorWithRole, Course, CourseRead
 from src.db.organizations import Organization, OrganizationRead
-from src.db.users import User, UserRead
 from src.db.resource_authors import ResourceAuthor
+from src.db.users import User, UserRead
 
 
 def _get_sort_expression(salt: str):
@@ -27,7 +26,7 @@ async def get_orgs_for_explore(
     salt: str = "",
 ) -> list[OrganizationRead]:
     statement = select(Organization).where(
-        Organization.explore == True,
+        Organization.explore,
     )
 
     # Add label filter if provided
@@ -61,7 +60,7 @@ async def get_courses_for_an_org_explore(
             detail="Organization not found",
         )
 
-    statement = select(Course).where(Course.org_id == org.id, Course.public == True)
+    statement = select(Course).where(Course.org_id == org.id, Course.public)
     result = db_session.exec(statement)
     courses = result.all()
 
@@ -116,7 +115,7 @@ async def search_orgs_for_explore(
     request: Request,
     db_session: Session,
     search_query: str,
-    label: Optional[str] = None,
+    label: str | None = None,
     page: int = 1,
     limit: int = 10,
     salt: str = "",
@@ -134,7 +133,7 @@ async def search_orgs_for_explore(
             | (Organization.label.ilike(term_pattern))
         )
 
-    statement = select(Organization).where(Organization.explore == True)
+    statement = select(Organization).where(Organization.explore)
 
     if label and label != "all":
         statement = statement.where(Organization.label == label)

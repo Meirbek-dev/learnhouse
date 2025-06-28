@@ -9,7 +9,7 @@ async def upload_submission_file(
     course_uuid,
     assignment_uuid,
     assignment_task_uuid,
-):
+) -> None:
     contents = file.file.read()
     file.filename.split(".")[-1]
 

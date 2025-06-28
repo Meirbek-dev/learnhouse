@@ -2,13 +2,13 @@ import logging
 import os
 
 
-async def create_logs_dir():
+async def create_logs_dir() -> None:
     if not os.path.exists("logs"):
         os.mkdir("logs")
 
 
 # Initiate logging
-async def init_logging():
+async def init_logging() -> None:
     await create_logs_dir()
 
     # Logging

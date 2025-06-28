@@ -1,14 +1,10 @@
 from datetime import datetime
-from typing import List, Literal
-from ulid import ULID
+from typing import Literal
+
+from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-from src.db.users import AnonymousUser
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_element_is_public,
-    authorization_verify_if_user_is_anon,
-)
-from src.db.courses.course_chapters import CourseChapter
+from ulid import ULID
+
 from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import (
@@ -18,10 +14,15 @@ from src.db.courses.chapters import (
     ChapterUpdate,
     ChapterUpdateOrder,
 )
+from src.db.courses.course_chapters import CourseChapter
+from src.db.users import AnonymousUser
+from src.security.rbac.rbac import (
+    authorization_verify_based_on_roles_and_authorship,
+    authorization_verify_if_element_is_public,
+    authorization_verify_if_user_is_anon,
+)
 from src.services.courses.courses import Course
 from src.services.users.users import PublicUser
-from fastapi import HTTPException, status, Request
-
 
 ####################################################
 # CRUD
@@ -134,12 +135,10 @@ async def get_chapter(
 
     activities = db_session.exec(statement).all()
 
-    chapter = ChapterRead(
+    return ChapterRead(
         **chapter.model_dump(),
         activities=[ActivityRead(**activity.model_dump()) for activity in activities],
     )
-
-    return chapter
 
 
 async def update_chapter(
@@ -221,7 +220,7 @@ async def get_course_chapters(
     with_unpublished_activities: bool,
     page: int = 1,
     limit: int = 10,
-) -> List[ChapterRead]:
+) -> list[ChapterRead]:
     statement = select(Course).where(Course.id == course_id)
     course = db_session.exec(statement).first()
 
@@ -339,13 +338,11 @@ async def DEPRECEATED_get_course_chapters(
     for chapter in chapters_in_db:
         chapterOrder.append(chapter.chapter_uuid)
 
-    final = {
+    return {
         "chapters": chapters,
         "chapterOrder": chapterOrder,
         "activities": activities_list,
     }
-
-    return final
 
 
 async def reorder_chapters_and_activities(
@@ -469,19 +466,18 @@ async def rbac_check(
             return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-        else:
-            return await authorization_verify_based_on_roles_and_authorship(
-                request, current_user.id, action, course_uuid, db_session
-            )
-    else:
-        await authorization_verify_if_user_is_anon(current_user.id)
-        await authorization_verify_based_on_roles_and_authorship(
-            request,
-            current_user.id,
-            action,
-            course_uuid,
-            db_session,
+        return await authorization_verify_based_on_roles_and_authorship(
+            request, current_user.id, action, course_uuid, db_session
         )
+    await authorization_verify_if_user_is_anon(current_user.id)
+    await authorization_verify_based_on_roles_and_authorship(
+        request,
+        current_user.id,
+        action,
+        course_uuid,
+        db_session,
+    )
+    return None
 
 
 ## 🔒 RBAC Utils ##

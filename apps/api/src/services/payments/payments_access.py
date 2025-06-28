@@ -1,11 +1,12 @@
+from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.security.rbac.rbac import authorization_verify_if_user_is_author
-from src.db.payments.payments_users import PaymentStatusEnum, PaymentsUser
-from src.db.users import PublicUser, AnonymousUser
-from src.db.payments.payments_courses import PaymentsCourse
+
 from src.db.courses.activities import Activity
 from src.db.courses.courses import Course
-from fastapi import HTTPException, Request
+from src.db.payments.payments_courses import PaymentsCourse
+from src.db.payments.payments_users import PaymentStatusEnum, PaymentsUser
+from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac.rbac import authorization_verify_if_user_is_author
 
 
 async def check_activity_paid_access(
@@ -21,7 +22,6 @@ async def check_activity_paid_access(
     - Activity is in a free course
     - User has a valid subscription for the course
     """
-
     # Get activity and associated course
     statement = select(Activity).where(Activity.id == activity_id)
     activity = db_session.exec(statement).first()

@@ -1,7 +1,7 @@
-from typing import Optional
+from enum import Enum
+
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
-from enum import Enum
 
 
 class ActivityTypeEnum(str, Enum):
@@ -32,12 +32,12 @@ class ActivityBase(SQLModel):
     activity_type: ActivityTypeEnum
     activity_sub_type: ActivitySubTypeEnum
     content: dict = Field(default={}, sa_column=Column(JSON))
-    details: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    details: dict | None = Field(default=None, sa_column=Column(JSON))
     published: bool = False
 
 
 class Activity(ActivityBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
     )
@@ -55,18 +55,17 @@ class ActivityCreate(ActivityBase):
     activity_type: ActivityTypeEnum = ActivityTypeEnum.TYPE_CUSTOM
     activity_sub_type: ActivitySubTypeEnum = ActivitySubTypeEnum.SUBTYPE_CUSTOM
     details: dict = Field(default={}, sa_column=Column(JSON))
-    pass
 
 
 class ActivityUpdate(SQLModel):
-    name: Optional[str] = None
-    activity_type: Optional[ActivityTypeEnum] = None
-    activity_sub_type: Optional[ActivitySubTypeEnum] = None
-    content: Optional[dict] = Field(default=None, sa_column=Column(JSON))
-    details: Optional[dict] = Field(default=None, sa_column=Column(JSON))
-    published: Optional[bool] = None
-    published_version: Optional[int] = None
-    version: Optional[int] = None
+    name: str | None = None
+    activity_type: ActivityTypeEnum | None = None
+    activity_sub_type: ActivitySubTypeEnum | None = None
+    content: dict | None = Field(default=None, sa_column=Column(JSON))
+    details: dict | None = Field(default=None, sa_column=Column(JSON))
+    published: bool | None = None
+    published_version: int | None = None
+    version: int | None = None
 
 
 class ActivityRead(ActivityBase):
@@ -76,5 +75,4 @@ class ActivityRead(ActivityBase):
     activity_uuid: str
     creation_date: str
     update_date: str
-    details: Optional[dict] = Field(default=None, sa_column=Column(JSON))
-    pass
+    details: dict | None = Field(default=None, sa_column=Column(JSON))

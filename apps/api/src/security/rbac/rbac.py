@@ -1,7 +1,9 @@
 from typing import Literal
-from fastapi import HTTPException, status, Request
+
+from fastapi import HTTPException, Request, status
 from sqlalchemy import null
 from sqlmodel import Session, select
+
 from src.db.collections import Collection
 from src.db.courses.courses import Course
 from src.db.resource_authors import (
@@ -20,40 +22,37 @@ async def authorization_verify_if_element_is_public(
     element_uuid: str,
     action: Literal["read"],
     db_session: Session,
-):
+) -> bool:
     element_nature = await check_element_type(element_uuid)
     # Verifies if the element is public
     if element_nature == ("courses") and action == "read":
         if element_nature == "courses":
             statement = select(Course).where(
-                Course.public == True, Course.course_uuid == element_uuid
+                Course.public, Course.course_uuid == element_uuid
             )
             course = db_session.exec(statement).first()
             if course:
                 return True
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="User rights : You don't have the right to perform this action",
-                )
-
-    if element_nature == "collections" and action == "read":
-        statement = select(Collection).where(
-            Collection.public == True, Collection.collection_uuid == element_uuid
-        )
-        collection = db_session.exec(statement).first()
-        if collection:
-            return True
-        else:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User rights : You don't have the right to perform this action",
             )
-    else:
+
+    if element_nature == "collections" and action == "read":
+        statement = select(Collection).where(
+            Collection.public, Collection.collection_uuid == element_uuid
+        )
+        collection = db_session.exec(statement).first()
+        if collection:
+            return True
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User rights : You don't have the right to perform this action",
         )
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="User rights : You don't have the right to perform this action",
+    )
 
 
 # Tested and working
@@ -76,28 +75,20 @@ async def authorization_verify_if_user_is_author(
 
         if resource_author:
             if resource_author.user_id == int(user_id):
-                if (
+                return bool(
                     (
-                        (resource_author.authorship == ResourceAuthorshipEnum.CREATOR)
-                        or (
-                            resource_author.authorship
-                            == ResourceAuthorshipEnum.MAINTAINER
-                        )
-                        or (
-                            resource_author.authorship
-                            == ResourceAuthorshipEnum.CONTRIBUTOR
+                        resource_author.authorship
+                        in (
+                            ResourceAuthorshipEnum.CREATOR,
+                            ResourceAuthorshipEnum.MAINTAINER,
+                            ResourceAuthorshipEnum.CONTRIBUTOR,
                         )
                     )
                     and resource_author.authorship_status
                     == ResourceAuthorshipStatusEnum.ACTIVE
-                ):
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        else:
+                )
             return False
+        return False
     return False
 
 
@@ -108,7 +99,7 @@ async def authorization_verify_based_on_roles(
     action: Literal["read", "update", "delete", "create"],
     element_uuid: str,
     db_session: Session,
-):
+) -> bool:
     element_type = await check_element_type(element_uuid)
 
     # Get user roles bound to an organization and standard roles
@@ -140,7 +131,7 @@ async def authorization_verify_based_on_org_admin_status(
     action: Literal["read", "update", "delete", "create"],
     element_uuid: str,
     db_session: Session,
-):
+) -> bool:
     await check_element_type(element_uuid)
 
     # Get user roles bound to an organization and standard roles
@@ -169,7 +160,7 @@ async def authorization_verify_based_on_roles_and_authorship(
     action: Literal["read", "update", "delete", "create"],
     element_uuid: str,
     db_session: Session,
-):
+) -> bool:
     isAuthor = await authorization_verify_if_user_is_author(
         request, user_id, action, element_uuid, db_session
     )
@@ -180,14 +171,13 @@ async def authorization_verify_based_on_roles_and_authorship(
 
     if isAuthor or isRole:
         return True
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User rights (roles & authorship) : You don't have the right to perform this action",
-        )
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="User rights (roles & authorship) : You don't have the right to perform this action",
+    )
 
 
-async def authorization_verify_if_user_is_anon(user_id: int):
+async def authorization_verify_if_user_is_anon(user_id: int) -> None:
     if user_id == 0:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

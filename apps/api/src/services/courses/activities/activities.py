@@ -1,26 +1,26 @@
+from datetime import datetime
 from typing import Literal
+
+from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from src.db.courses.courses import Course
+from ulid import ULID
+
+from src.db.courses.activities import (
+    Activity,
+    ActivityCreate,
+    ActivityRead,
+    ActivityUpdate,
+)
+from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
+from src.db.courses.courses import Course
+from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
     authorization_verify_if_user_is_anon,
 )
-from src.db.courses.activities import (
-    ActivityCreate,
-    Activity,
-    ActivityRead,
-    ActivityUpdate,
-)
-from src.db.courses.chapter_activities import ChapterActivity
-from src.db.users import AnonymousUser, PublicUser
-from fastapi import HTTPException, Request
-from ulid import ULID
-from datetime import datetime
-
 from src.services.payments.payments_access import check_activity_paid_access
-
 
 ####################################################
 # CRUD
@@ -204,9 +204,7 @@ async def update_activity(
     db_session.commit()
     db_session.refresh(activity)
 
-    activity = ActivityRead.model_validate(activity)
-
-    return activity
+    return ActivityRead.model_validate(activity)
 
 
 async def delete_activity(
@@ -270,9 +268,7 @@ async def get_activities(
     statement = (
         select(Activity)
         .join(ChapterActivity)
-        .where(
-            ChapterActivity.chapter_id == coursechapter_id, Activity.published == True
-        )
+        .where(ChapterActivity.chapter_id == coursechapter_id, Activity.published)
     )
     activities = db_session.exec(statement).all()
 
@@ -303,9 +299,7 @@ async def get_activities(
 
     await rbac_check(request, course.course_uuid, current_user, "read", db_session)
 
-    activities = [ActivityRead.model_validate(activity) for activity in activities]
-
-    return activities
+    return [ActivityRead.model_validate(activity) for activity in activities]
 
 
 ## 🔒 RBAC Utils ##
@@ -323,20 +317,19 @@ async def rbac_check(
             return await authorization_verify_if_element_is_public(
                 request, element_uuid, action, db_session
             )
-        else:
-            return await authorization_verify_based_on_roles_and_authorship(
-                request, current_user.id, action, element_uuid, db_session
-            )
-    else:
-        # For non-read actions, proceed with regular RBAC checks
-        await authorization_verify_if_user_is_anon(current_user.id)
-        await authorization_verify_based_on_roles_and_authorship(
-            request,
-            current_user.id,
-            action,
-            element_uuid,
-            db_session,
+        return await authorization_verify_based_on_roles_and_authorship(
+            request, current_user.id, action, element_uuid, db_session
         )
+    # For non-read actions, proceed with regular RBAC checks
+    await authorization_verify_if_user_is_anon(current_user.id)
+    await authorization_verify_based_on_roles_and_authorship(
+        request,
+        current_user.id,
+        action,
+        element_uuid,
+        db_session,
+    )
+    return None
 
 
 ## 🔒 RBAC Utils ##

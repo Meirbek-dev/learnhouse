@@ -1,20 +1,22 @@
 import json
 import random
 import string
-from ulid import ULID
-from pydantic import EmailStr
-import redis
 from datetime import datetime, timedelta
+
+import redis
+from fastapi import HTTPException, Request
+from pydantic import EmailStr
 from sqlmodel import Session, select
-from src.services.email.utils import send_email
+from ulid import ULID
+
 from config.config import get_openu_config
-from src.services.orgs.orgs import rbac_check
-from src.db.users import AnonymousUser, PublicUser, UserRead
 from src.db.organizations import (
     Organization,
     OrganizationRead,
 )
-from fastapi import HTTPException, Request
+from src.db.users import AnonymousUser, PublicUser, UserRead
+from src.services.email.utils import send_email
+from src.services.orgs.orgs import rbac_check
 
 
 async def create_invite_code(
@@ -275,9 +277,7 @@ async def get_invite_code(
         )
 
     invite_code = r.get(invite_code[0])
-    invite_code = json.loads(invite_code)
-
-    return invite_code
+    return json.loads(invite_code)
 
 
 async def delete_invite_code(
@@ -339,7 +339,7 @@ def send_invite_email(
     invite_code_uuid: str,
     user: UserRead,
     email: EmailStr,
-):
+) -> bool:
     LH_CONFIG = get_openu_config()
     redis_conn_string = LH_CONFIG.redis_config.redis_connection_string
 
@@ -384,5 +384,4 @@ def send_invite_email(
 
         return True
 
-    else:
-        return False
+    return False

@@ -1,11 +1,12 @@
-from fastapi import HTTPException
-from sqlmodel import Session, select
-import stripe
 import logging
 
+import stripe
+from fastapi import HTTPException
+from sqlmodel import Session, select
+
+from src.db.payments.payments import PaymentsConfig
 from src.db.payments.payments_products import PaymentsProduct
 from src.db.users import User
-from src.db.payments.payments import PaymentsConfig
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ async def get_user_from_customer(customer_id: str, db_session: Session) -> User:
             )
         return user
     except stripe.StripeError as e:
-        logger.error(f"Stripe error retrieving customer {customer_id}: {str(e)}")
+        logger.exception(f"Stripe error retrieving customer {customer_id}: {e!s}")
         raise HTTPException(
             status_code=400, detail="Error retrieving customer information"
         )

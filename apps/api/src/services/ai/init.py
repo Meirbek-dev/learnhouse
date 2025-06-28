@@ -1,8 +1,9 @@
-from typing import Optional
-from functools import lru_cache
 import os
+from functools import lru_cache
+
 import chromadb
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
 from config.config import get_openu_config
 
 # Set telemetry environment variables before importing chromadb
@@ -12,7 +13,7 @@ os.environ["CHROMA_TELEMETRY_ENABLED"] = "False"
 os.environ["POSTHOG_DISABLED"] = "True"
 
 
-@lru_cache()
+@lru_cache
 def get_chromadb_client():
     """Get cached ChromaDB client instance"""
     LH_CONFIG = get_openu_config()
@@ -28,8 +29,8 @@ def get_chromadb_client():
     return chromadb.Client()
 
 
-@lru_cache()
-def get_embedding_function(model_name: str) -> Optional[OpenAIEmbeddings]:
+@lru_cache
+def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
     """Get cached embedding function"""
     LH_CONFIG = get_openu_config()
     api_key = getattr(LH_CONFIG.ai_config, "openai_api_key", None)
@@ -42,8 +43,8 @@ def get_embedding_function(model_name: str) -> Optional[OpenAIEmbeddings]:
     return None
 
 
-@lru_cache()
-def get_llm(model_name: str, temperature: float = 0) -> Optional[ChatOpenAI]:
+@lru_cache
+def get_llm(model_name: str, temperature: float = 0) -> ChatOpenAI | None:
     """Get cached LLM instance with modern OpenAI configuration"""
     LH_CONFIG = get_openu_config()
     api_key = getattr(LH_CONFIG.ai_config, "openai_api_key", None)

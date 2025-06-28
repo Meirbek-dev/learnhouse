@@ -1,8 +1,9 @@
 import random
-from typing import Optional
-from fastapi import Depends, HTTPException, Request
+
 import httpx
+from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
+
 from src.core.events.database import get_db_session
 from src.db.users import User, UserCreate, UserRead
 from src.security.auth import get_current_user
@@ -28,7 +29,7 @@ async def signWithGoogle(
     request: Request,
     access_token: str,
     email: str,
-    org_id: Optional[int] = None,
+    org_id: int | None = None,
     current_user=Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
@@ -76,16 +77,12 @@ async def signWithGoogle(
         )
 
         if org_id is not None:
-            user = await create_user(
+            return await create_user(
                 request, db_session, current_user, user_object, org_id
             )
 
-            return user
-        else:
-            user = await create_user_without_org(
-                request, db_session, current_user, user_object
-            )
-
-            return user
+        return await create_user_without_org(
+            request, db_session, current_user, user_object
+        )
 
     return UserRead.model_validate(user)

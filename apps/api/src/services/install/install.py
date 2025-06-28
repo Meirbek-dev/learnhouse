@@ -1,24 +1,27 @@
-from datetime import datetime
 import json
-from ulid import ULID
+from datetime import datetime
+
 from fastapi import HTTPException, Request
 from sqlalchemy import desc
 from sqlmodel import Session, select
+from ulid import ULID
+
+from config.config import get_openu_config
 from src.db.install import Install, InstallRead
 from src.db.organization_config import (
     AIOrgConfig,
-    APIOrgConfig,
     AnalyticsOrgConfig,
+    APIOrgConfig,
     AssignmentOrgConfig,
     CollaborationOrgConfig,
     CourseOrgConfig,
     DiscussionOrgConfig,
     MemberOrgConfig,
+    OrganizationConfig,
+    OrganizationConfigBase,
     OrgCloudConfig,
     OrgFeatureConfig,
     OrgGeneralConfig,
-    OrganizationConfig,
-    OrganizationConfigBase,
     PaymentOrgConfig,
     StorageOrgConfig,
     UserGroupOrgConfig,
@@ -27,20 +30,18 @@ from src.db.organizations import Organization, OrganizationCreate
 from src.db.roles import Permission, Rights, Role, RoleTypeEnum
 from src.db.user_organizations import UserOrganization
 from src.db.users import User, UserCreate, UserRead
-from config.config import get_openu_config
 from src.security.security import security_hash_password
 
 
-async def isInstallModeEnabled():
+async def isInstallModeEnabled() -> bool:
     config = get_openu_config()
 
     if config.general_config.install_mode:
         return True
-    else:
-        raise HTTPException(
-            status_code=403,
-            detail="Install mode is not enabled",
-        )
+    raise HTTPException(
+        status_code=403,
+        detail="Install mode is not enabled",
+    )
 
 
 async def create_install_instance(request: Request, data: dict, db_session: Session):
@@ -60,9 +61,7 @@ async def create_install_instance(request: Request, data: dict, db_session: Sess
     # refresh install instance
     db_session.refresh(install)
 
-    install = InstallRead.model_validate(install)
-
-    return install
+    return InstallRead.model_validate(install)
 
 
 async def get_latest_install_instance(request: Request, db_session: Session):
@@ -75,9 +74,7 @@ async def get_latest_install_instance(request: Request, db_session: Session):
             detail="No install instance found",
         )
 
-    install = InstallRead.model_validate(install)
-
-    return install
+    return InstallRead.model_validate(install)
 
 
 async def update_install_instance(
@@ -101,9 +98,7 @@ async def update_install_instance(
     # refresh install instance
     db_session.refresh(install)
 
-    install = InstallRead.model_validate(install)
-
-    return install
+    return InstallRead.model_validate(install)
 
 
 ############################################################################################################
@@ -112,7 +107,7 @@ async def update_install_instance(
 
 
 # Install Default roles
-def install_default_elements(db_session: Session):
+def install_default_elements(db_session: Session) -> bool:
     """ """
     # remove all default roles
     statement = select(Role).where(Role.role_type == RoleTypeEnum.TYPE_GLOBAL)
@@ -449,6 +444,4 @@ def install_create_organization_user(
     db_session.commit()
     db_session.refresh(user_organization)
 
-    user = UserRead.model_validate(user)
-
-    return user
+    return UserRead.model_validate(user)

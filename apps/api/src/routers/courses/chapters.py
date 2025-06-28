@@ -1,5 +1,7 @@
-from typing import List
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Request
+
 from src.core.events.database import get_db_session
 from src.db.courses.chapters import (
     ChapterCreate,
@@ -7,6 +9,7 @@ from src.db.courses.chapters import (
     ChapterUpdate,
     ChapterUpdateOrder,
 )
+from src.security.auth import get_current_user
 from src.services.courses.chapters import (
     DEPRECEATED_get_course_chapters,
     create_chapter,
@@ -16,9 +19,7 @@ from src.services.courses.chapters import (
     reorder_chapters_and_activities,
     update_chapter,
 )
-
 from src.services.users.users import PublicUser
-from src.security.auth import get_current_user
 
 router = APIRouter()
 
@@ -27,7 +28,7 @@ router = APIRouter()
 async def api_create_coursechapter(
     request: Request,
     coursechapter_object: ChapterCreate,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ChapterRead:
     """
@@ -40,7 +41,7 @@ async def api_create_coursechapter(
 async def api_get_coursechapter(
     request: Request,
     chapter_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ChapterRead:
     """
@@ -53,7 +54,7 @@ async def api_get_coursechapter(
 async def api_get_chapter_meta(
     request: Request,
     course_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -69,7 +70,7 @@ async def api_update_chapter_meta(
     request: Request,
     course_uuid: str,
     order: ChapterUpdateOrder,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -86,9 +87,9 @@ async def api_get_chapter_by(
     course_id: int,
     page: int,
     limit: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
-) -> List[ChapterRead]:
+) -> list[ChapterRead]:
     """
     Get Course Chapters by page and limit
     """
@@ -102,7 +103,7 @@ async def api_update_coursechapter(
     request: Request,
     coursechapter_object: ChapterUpdate,
     chapter_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ChapterRead:
     """
@@ -117,11 +118,10 @@ async def api_update_coursechapter(
 async def api_delete_coursechapter(
     request: Request,
     chapter_id: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
     Delete CourseChapters by ID
     """
-
     return await delete_chapter(request, chapter_id, current_user, db_session)

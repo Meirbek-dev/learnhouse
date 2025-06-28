@@ -1,18 +1,18 @@
-from sqlmodel import Session
-from src.core.events.database import get_db_session
-from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.services.users.users import security_get_user
-from config.config import get_openu_config
-from pydantic import BaseModel
+from datetime import datetime, timedelta
+
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
-from src.services.dev.dev import isDevModeEnabled
-from src.services.users.users import security_verify_password
-from src.security.security import ALGORITHM, SECRET_KEY
 from fastapi_another_jwt_auth import AuthJWT
-from typing import Set
+from jose import JWTError, jwt
+from pydantic import BaseModel
+from sqlmodel import Session
+
+from config.config import get_openu_config
+from src.core.events.database import get_db_session
+from src.db.users import AnonymousUser, PublicUser, User, UserRead
+from src.security.security import ALGORITHM, SECRET_KEY
+from src.services.dev.dev import isDevModeEnabled
+from src.services.users.users import security_get_user, security_verify_password
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -20,7 +20,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 #### JWT Auth ####################################################
 class Settings(BaseModel):
     authjwt_secret_key: str = "secret" if isDevModeEnabled() else SECRET_KEY
-    authjwt_token_location: Set[str] = {"cookies", "headers"}
+    authjwt_token_location: set[str] = {"cookies", "headers"}
     authjwt_cookie_csrf_protect: bool = False
     authjwt_access_token_expires: float | bool = (
         False if isDevModeEnabled() else timedelta(hours=8).total_seconds()
@@ -72,8 +72,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 async def get_current_user(
@@ -100,10 +99,9 @@ async def get_current_user(
         if user is None:
             raise credentials_exception
         return PublicUser(**user.model_dump())
-    else:
-        return AnonymousUser()
+    return AnonymousUser()
 
 
-async def non_public_endpoint(current_user: UserRead | AnonymousUser):
+async def non_public_endpoint(current_user: UserRead | AnonymousUser) -> None:
     if isinstance(current_user, AnonymousUser):
         raise HTTPException(status_code=401, detail="Not authenticated")

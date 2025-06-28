@@ -1,13 +1,10 @@
 from datetime import datetime
-from typing import List, Literal
-from ulid import ULID
+from typing import Literal
+
+from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
-from src.db.users import AnonymousUser
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_element_is_public,
-    authorization_verify_if_user_is_anon,
-)
+from ulid import ULID
+
 from src.db.collections import (
     Collection,
     CollectionCreate,
@@ -16,9 +13,13 @@ from src.db.collections import (
 )
 from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course
+from src.db.users import AnonymousUser
+from src.security.rbac.rbac import (
+    authorization_verify_based_on_roles_and_authorship,
+    authorization_verify_if_element_is_public,
+    authorization_verify_if_user_is_anon,
+)
 from src.services.users.users import PublicUser
-from fastapi import HTTPException, status, Request
-
 
 ####################################################
 # CRUD
@@ -61,7 +62,7 @@ async def get_collection(
         .where(
             CollectionCourse.collection_id == collection.id,
             CollectionCourse.org_id == collection.org_id,
-            Course.public == True,
+            Course.public,
         )
         .distinct()
     )
@@ -72,11 +73,9 @@ async def get_collection(
 
     courses = list(db_session.exec(statement).all())
 
-    collection = CollectionRead.model_validate(
+    return CollectionRead.model_validate(
         {**collection.model_dump(), "courses": courses}
     )
-
-    return collection
 
 
 async def create_collection(
@@ -195,9 +194,7 @@ async def update_collection(
     )
     courses = list(db_session.exec(statement).all())
 
-    collection = CollectionRead(**collection.model_dump(), courses=courses)
-
-    return collection
+    return CollectionRead(**collection.model_dump(), courses=courses)
 
 
 async def delete_collection(
@@ -239,18 +236,15 @@ async def get_collections(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
-) -> List[CollectionRead]:
+) -> list[CollectionRead]:
     statement_public = select(Collection).where(
-        Collection.org_id == org_id, Collection.public == True
+        Collection.org_id == org_id, Collection.public
     )
     statement_all = (
         select(Collection).where(Collection.org_id == org_id).distinct(Collection.id)
     )
 
-    if current_user.id == 0:
-        statement = statement_public
-    else:
-        statement = statement_all
+    statement = statement_public if current_user.id == 0 else statement_all
 
     collections = db_session.exec(statement).all()
 
@@ -272,7 +266,7 @@ async def get_collections(
             .where(
                 CollectionCourse.collection_id == collection.id,
                 CollectionCourse.org_id == org_id,
-                Course.public == True,
+                Course.public,
             )
             .distinct()
         )
@@ -305,16 +299,15 @@ async def rbac_check(
             res = await authorization_verify_if_element_is_public(
                 request, collection_uuid, action, db_session
             )
-            if res == False:
+            if not res:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="User rights : You are not allowed to read this collection",
                 )
         else:
-            res = await authorization_verify_based_on_roles_and_authorship(
+            return await authorization_verify_based_on_roles_and_authorship(
                 request, current_user.id, action, collection_uuid, db_session
             )
-            return res
     else:
         await authorization_verify_if_user_is_anon(current_user.id)
 
@@ -325,6 +318,7 @@ async def rbac_check(
             collection_uuid,
             db_session,
         )
+    return None
 
 
 ## 🔒 RBAC Utils ##

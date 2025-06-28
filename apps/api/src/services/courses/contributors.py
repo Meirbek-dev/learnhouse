@@ -1,18 +1,19 @@
 from datetime import datetime
+
 from fastapi import HTTPException, Request, status
-from sqlmodel import Session, select, and_
-from src.db.users import PublicUser, AnonymousUser, User, UserRead
+from sqlmodel import Session, and_, select
+
 from src.db.courses.courses import Course
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
+from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac.rbac import (
-    authorization_verify_if_user_is_anon,
     authorization_verify_based_on_roles_and_authorship,
+    authorization_verify_if_user_is_anon,
 )
-from typing import List
 
 
 async def apply_course_contributor(
@@ -147,7 +148,7 @@ async def get_course_contributors(
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-) -> List[dict]:
+) -> list[dict]:
     """
     Get all contributors for a course with their user information
     """
@@ -185,7 +186,7 @@ async def get_course_contributors(
 async def add_bulk_course_contributors(
     request: Request,
     course_uuid: str,
-    usernames: List[str],
+    usernames: list[str],
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
@@ -278,7 +279,7 @@ async def add_bulk_course_contributors(
 async def remove_bulk_course_contributors(
     request: Request,
     course_uuid: str,
-    usernames: List[str],
+    usernames: list[str],
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):

@@ -1,23 +1,25 @@
-from datetime import datetime
 import json
 import random
-import redis
 import string
-from ulid import ULID
+from datetime import datetime
+
+import redis
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
 from sqlmodel import Session, select
-from src.db.organizations import Organization, OrganizationRead
-from src.security.security import security_hash_password
+from ulid import ULID
+
 from config.config import get_openu_config
-from src.services.users.emails import (
-    send_password_reset_email,
-)
+from src.db.organizations import Organization, OrganizationRead
 from src.db.users import (
     AnonymousUser,
     PublicUser,
     User,
     UserRead,
+)
+from src.security.security import security_hash_password
+from src.services.users.emails import (
+    send_password_reset_email,
 )
 
 
@@ -27,7 +29,7 @@ async def send_reset_password_code(
     current_user: PublicUser | AnonymousUser,
     org_id: int,
     email: EmailStr,
-):
+) -> str:
     # Get user
     statement = select(User).where(User.email == email)
     user = db_session.exec(statement).first()
@@ -122,7 +124,7 @@ async def change_password_with_reset_code(
     org_id: int,
     email: EmailStr,
     reset_code: str,
-):
+) -> str:
     # Get user
     statement = select(User).where(User.email == email)
     user = db_session.exec(statement).first()

@@ -1,4 +1,5 @@
-from typing import Literal, Optional
+from typing import Literal
+
 from pydantic import BaseModel
 from sqlalchemy import JSON, BigInteger, Column, ForeignKey
 from sqlmodel import Field, SQLModel
@@ -98,10 +99,10 @@ class OrganizationConfigBase(BaseModel):
 
 
 class OrganizationConfig(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
     )
     config: dict = Field(default={}, sa_column=Column(JSON))
-    creation_date: Optional[str]
-    update_date: Optional[str]
+    creation_date: str | None
+    update_date: str | None

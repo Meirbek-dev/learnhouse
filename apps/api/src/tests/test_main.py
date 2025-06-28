@@ -1,17 +1,19 @@
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+import asyncio
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
-from sqlmodel import SQLModel, Session
-from src.tests.utils.init_data_for_tests import create_initial_data_for_tests
-from src.core.events.database import get_db_session
-import pytest
-import asyncio
+from sqlmodel import Session, SQLModel
+
 from app import app
+from src.core.events.database import get_db_session
+from src.tests.utils.init_data_for_tests import create_initial_data_for_tests
 
 client = TestClient(app)
 
@@ -41,12 +43,12 @@ def client_fixture(session: Session):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def execute_before_all_tests(session: Session):
+def execute_before_all_tests(session: Session) -> None:
     # This function will run once before all tests.
     asyncio.run(create_initial_data_for_tests(session))
 
 
-def test_create_default_elements(client: TestClient, session: Session):
+def test_create_default_elements(client: TestClient, session: Session) -> None:
     response = client.get(
         "/api/v1/orgs/slug/openu",
     )

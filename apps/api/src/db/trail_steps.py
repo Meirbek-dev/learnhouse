@@ -1,8 +1,9 @@
 from enum import Enum
-from typing import Optional, TYPE_CHECKING
-from sqlmodel import Field, SQLModel
-from sqlalchemy import ForeignKey, JSON, Column, Integer
+from typing import TYPE_CHECKING, Optional
+
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy import JSON, Column, ForeignKey, Integer
+from sqlmodel import Field, SQLModel
 
 if TYPE_CHECKING:
     from src.db.courses.activities import Activity
@@ -15,7 +16,7 @@ class TrailStepTypeEnum(str, Enum):
 
 
 class TrailStep(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     complete: bool
     teacher_verified: bool
     grade: str
@@ -45,7 +46,7 @@ class TrailStep(SQLModel, table=True):
 
 
 class TrailStepRead(BaseModel):
-    id: Optional[int] = None
+    id: int | None = None
     complete: bool
     teacher_verified: bool
     grade: str
@@ -67,7 +68,7 @@ class TrailStepRead(BaseModel):
 # an assignment object will be linked to a trail step object in the future
 
 
-def rebuild_trail_step_models():
+def rebuild_trail_step_models() -> None:
     """Rebuild trail step models to resolve forward references"""
     from src.db.courses.activities import Activity  # noqa: F401
 

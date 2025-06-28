@@ -1,7 +1,7 @@
-from typing import Optional
+from enum import Enum
+
 from sqlalchemy import JSON, Column, ForeignKey
 from sqlmodel import Field, SQLModel
-from enum import Enum
 
 
 class BlockTypeEnum(str, Enum):
@@ -18,7 +18,7 @@ class BlockBase(SQLModel):
 
 
 class Block(BlockBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     content: dict = Field(default={}, sa_column=Column(JSON))
     org_id: int = Field(
         sa_column=Column("org_id", ForeignKey("organization.id", ondelete="CASCADE"))

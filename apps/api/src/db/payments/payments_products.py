@@ -1,7 +1,7 @@
-from enum import Enum
-from sqlmodel import SQLModel, Field, Column, BigInteger, ForeignKey, String
-from typing import Optional
 from datetime import datetime
+from enum import Enum
+
+from sqlmodel import BigInteger, Column, Field, ForeignKey, SQLModel, String
 
 
 class PaymentProductTypeEnum(str, Enum):
@@ -16,7 +16,7 @@ class PaymentPriceTypeEnum(str, Enum):
 
 class PaymentsProductBase(SQLModel):
     name: str = ""
-    description: Optional[str] = ""
+    description: str | None = ""
     product_type: PaymentProductTypeEnum = PaymentProductTypeEnum.ONE_TIME
     price_type: PaymentPriceTypeEnum = PaymentPriceTypeEnum.FIXED_PRICE
     benefits: str = ""
@@ -25,7 +25,7 @@ class PaymentsProductBase(SQLModel):
 
 
 class PaymentsProduct(PaymentsProductBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
     )
@@ -44,13 +44,13 @@ class PaymentsProductCreate(PaymentsProductBase):
 
 
 class PaymentsProductUpdate(SQLModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    product_type: Optional[PaymentProductTypeEnum] = None
-    price_type: Optional[PaymentPriceTypeEnum] = None
-    benefits: Optional[str] = None
-    amount: Optional[float] = None
-    currency: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
+    product_type: PaymentProductTypeEnum | None = None
+    price_type: PaymentPriceTypeEnum | None = None
+    benefits: str | None = None
+    amount: float | None = None
+    currency: str | None = None
 
 
 class PaymentsProductRead(PaymentsProductBase):

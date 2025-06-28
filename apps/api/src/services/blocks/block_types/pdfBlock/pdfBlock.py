@@ -1,13 +1,14 @@
 from datetime import datetime
-from ulid import ULID
-from src.db.organizations import Organization
-from fastapi import HTTPException, status, UploadFile, Request
+
+from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
+from ulid import ULID
+
 from src.db.courses.activities import Activity
 from src.db.courses.blocks import Block, BlockRead, BlockTypeEnum
 from src.db.courses.courses import Course
+from src.db.organizations import Organization
 from src.services.blocks.utils.upload_files import upload_file_and_return_file_object
-
 from src.services.users.users import PublicUser
 
 
@@ -74,9 +75,7 @@ async def create_pdf_block(
     db_session.commit()
     db_session.refresh(block)
 
-    block = BlockRead.model_validate(block)
-
-    return block
+    return BlockRead.model_validate(block)
 
 
 async def get_pdf_block(
@@ -90,6 +89,4 @@ async def get_pdf_block(
             status_code=status.HTTP_404_NOT_FOUND, detail="Video file does not exist"
         )
 
-    block = BlockRead.model_validate(block)
-
-    return block
+    return BlockRead.model_validate(block)

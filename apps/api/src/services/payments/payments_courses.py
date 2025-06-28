@@ -1,9 +1,10 @@
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+
+from src.db.courses.courses import Course
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import PaymentsProduct
-from src.db.courses.courses import Course
-from src.db.users import PublicUser, AnonymousUser
+from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.courses import rbac_check
 
 
@@ -116,6 +117,4 @@ async def get_courses_by_product(
             PaymentsCourse.org_id == org_id,
         )
     )
-    courses = db_session.exec(statement).all()
-
-    return courses
+    return db_session.exec(statement).all()

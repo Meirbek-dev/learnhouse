@@ -1,20 +1,22 @@
-from fastapi import APIRouter, Depends, UploadFile, Form, Request
-from src.db.courses.blocks import BlockRead
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Form, Request, UploadFile
+
 from src.core.events.database import get_db_session
+from src.db.courses.blocks import BlockRead
 from src.security.auth import get_current_user
 from src.services.blocks.block_types.imageBlock.imageBlock import (
     create_image_block,
     get_image_block,
 )
-from src.services.blocks.block_types.videoBlock.videoBlock import (
-    create_video_block,
-    get_video_block,
-)
 from src.services.blocks.block_types.pdfBlock.pdfBlock import (
     create_pdf_block,
     get_pdf_block,
 )
-
+from src.services.blocks.block_types.videoBlock.videoBlock import (
+    create_video_block,
+    get_video_block,
+)
 from src.services.users.users import PublicUser
 
 router = APIRouter()
@@ -28,7 +30,7 @@ router = APIRouter()
 async def api_create_image_file_block(
     request: Request,
     file_object: UploadFile,
-    activity_uuid: str = Form(),
+    activity_uuid: Annotated[str, Form()],
     db_session=Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> BlockRead:
@@ -60,7 +62,7 @@ async def api_get_image_file_block(
 async def api_create_video_file_block(
     request: Request,
     file_object: UploadFile,
-    activity_uuid: str = Form(),
+    activity_uuid: Annotated[str, Form()],
     db_session=Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> BlockRead:
@@ -92,7 +94,7 @@ async def api_get_video_file_block(
 async def api_create_pdf_file_block(
     request: Request,
     file_object: UploadFile,
-    activity_uuid: str = Form(),
+    activity_uuid: Annotated[str, Form()],
     db_session=Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> BlockRead:

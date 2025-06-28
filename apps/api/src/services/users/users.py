@@ -1,20 +1,13 @@
 from datetime import datetime
 from typing import Literal
-from ulid import ULID
+
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
-from src.services.users.usergroups import add_users_to_usergroup
-from src.services.users.emails import (
-    send_account_creation_email,
-)
-from src.services.orgs.invites import get_invite_code
-from src.services.users.avatars import upload_avatar
-from src.db.roles import Role, RoleRead
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_user_is_anon,
-)
+from ulid import ULID
+
 from src.db.organizations import Organization, OrganizationRead
+from src.db.roles import Role, RoleRead
+from src.db.user_organizations import UserOrganization
 from src.db.users import (
     AnonymousUser,
     InternalUser,
@@ -28,8 +21,17 @@ from src.db.users import (
     UserUpdatePassword,
     rebuild_user_models,
 )
-from src.db.user_organizations import UserOrganization
+from src.security.rbac.rbac import (
+    authorization_verify_based_on_roles_and_authorship,
+    authorization_verify_if_user_is_anon,
+)
 from src.security.security import security_hash_password, security_verify_password
+from src.services.orgs.invites import get_invite_code
+from src.services.users.avatars import upload_avatar
+from src.services.users.emails import (
+    send_account_creation_email,
+)
+from src.services.users.usergroups import add_users_to_usergroup
 
 # Rebuild user models to resolve forward references after all imports
 rebuild_user_models()
@@ -274,9 +276,7 @@ async def update_user(
     db_session.commit()
     db_session.refresh(user)
 
-    user = UserRead.model_validate(user)
-
-    return user
+    return UserRead.model_validate(user)
 
 
 async def update_user_avatar(
@@ -319,9 +319,7 @@ async def update_user_avatar(
     db_session.commit()
     db_session.refresh(user)
 
-    user = UserRead.model_validate(user)
-
-    return user
+    return UserRead.model_validate(user)
 
 
 async def update_user_password(
@@ -358,9 +356,7 @@ async def update_user_password(
     db_session.commit()
     db_session.refresh(user)
 
-    user = UserRead.model_validate(user)
-
-    return user
+    return UserRead.model_validate(user)
 
 
 async def read_user_by_id(
@@ -379,9 +375,7 @@ async def read_user_by_id(
             detail="User does not exist",
         )
 
-    user = UserRead.model_validate(user)
-
-    return user
+    return UserRead.model_validate(user)
 
 
 async def read_user_by_uuid(
@@ -400,9 +394,7 @@ async def read_user_by_uuid(
             detail="User does not exist",
         )
 
-    user = UserRead.model_validate(user)
-
-    return user
+    return UserRead.model_validate(user)
 
 
 async def read_user_by_username(
@@ -421,9 +413,7 @@ async def read_user_by_username(
             detail="User does not exist",
         )
 
-    user = UserRead.model_validate(user)
-
-    return user
+    return UserRead.model_validate(user)
 
 
 async def get_user_session(
@@ -469,12 +459,10 @@ async def get_user_session(
             )
         )
 
-    user_session = UserSession(
+    return UserSession(
         user=user,
         roles=roles,
     )
-
-    return user_session
 
 
 async def authorize_user_action(
@@ -483,7 +471,7 @@ async def authorize_user_action(
     current_user: PublicUser | AnonymousUser,
     resource_uuid: str,
     action: Literal["create", "read", "update", "delete"],
-):
+) -> bool:
     # Get user
     statement = select(User).where(User.user_uuid == current_user.user_uuid)
     user = db_session.exec(statement).first()
@@ -501,11 +489,10 @@ async def authorize_user_action(
 
     if authorized:
         return True
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to perform this action",
-        )
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="You are not authorized to perform this action",
+    )
 
 
 async def delete_user_by_id(
@@ -513,7 +500,7 @@ async def delete_user_by_id(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     user_id: int,
-):
+) -> str:
     # Get user
     statement = select(User).where(User.id == user_id)
     user = db_session.exec(statement).first()
@@ -548,9 +535,7 @@ async def security_get_user(request: Request, db_session: Session, email: str) -
             detail="User with Email does not exist",
         )
 
-    user = User(**user.model_dump())
-
-    return user
+    return User(**user.model_dump())
 
 
 ## 🔒 RBAC Utils ##
@@ -562,14 +547,13 @@ async def rbac_check(
     action: Literal["create", "read", "update", "delete"],
     user_uuid: str,
     db_session: Session,
-):
-    if action == "create" or action == "read":
+) -> bool | None:
+    if action in {"create", "read"}:
         if current_user.id == 0:  # if user is anonymous
             return True
-        else:
-            await authorization_verify_based_on_roles_and_authorship(
-                request, current_user.id, "create", "user_x", db_session
-            )
+        await authorization_verify_based_on_roles_and_authorship(
+            request, current_user.id, "create", "user_x", db_session
+        )
 
     else:
         await authorization_verify_if_user_is_anon(current_user.id)
@@ -581,6 +565,7 @@ async def rbac_check(
         await authorization_verify_based_on_roles_and_authorship(
             request, current_user.id, action, user_uuid, db_session
         )
+    return None
 
 
 ## 🔒 RBAC Utils ##

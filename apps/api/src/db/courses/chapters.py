@@ -1,14 +1,13 @@
-from typing import List, Optional
-from pydantic import ConfigDict, BaseModel
-from sqlmodel import Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from pydantic import BaseModel, ConfigDict
+from sqlmodel import Column, Field, ForeignKey, Integer, SQLModel
+
 from src.db.courses.activities import ActivityRead
 
 
 class ChapterBase(SQLModel):
     name: str
-    description: Optional[str] = ""
-    thumbnail_image: Optional[str] = ""
+    description: str | None = ""
+    thumbnail_image: str | None = ""
     org_id: int = Field(
         sa_column=Column(
             "org_id", Integer, ForeignKey("organization.id", ondelete="CASCADE")
@@ -22,7 +21,7 @@ class ChapterBase(SQLModel):
 
 
 class Chapter(ChapterBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     chapter_uuid: str = ""
     creation_date: str = ""
     update_date: str = ""
@@ -35,16 +34,16 @@ class ChapterCreate(ChapterBase):
 
 
 class ChapterUpdate(SQLModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    thumbnail_image: Optional[str] = None
-    org_id: Optional[int] = None
-    course_id: Optional[int] = None
+    name: str | None = None
+    description: str | None = None
+    thumbnail_image: str | None = None
+    org_id: int | None = None
+    course_id: int | None = None
 
 
 class ChapterRead(ChapterBase):
     id: int
-    activities: List[ActivityRead]
+    activities: list[ActivityRead]
     chapter_uuid: str
     creation_date: str
     update_date: str
@@ -57,8 +56,8 @@ class ActivityOrder(BaseModel):
 
 class ChapterOrder(BaseModel):
     chapter_id: int
-    activities_order_by_ids: List[ActivityOrder]
+    activities_order_by_ids: list[ActivityOrder]
 
 
 class ChapterUpdateOrder(BaseModel):
-    chapter_order_by_ids: List[ChapterOrder]
+    chapter_order_by_ids: list[ChapterOrder]

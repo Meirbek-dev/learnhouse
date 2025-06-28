@@ -50,9 +50,9 @@ def serialize_activity_text_to_ai_comprehensible_text(
     isActivityEmpty: bool = False,
 ):
     if isActivityEmpty:
-        text = (
+        return (
             "Use this as a context "
-            + 'This is a course about "'
+            'This is a course about "'
             + course.name
             + '". '
             + 'This is a lecture about "'
@@ -60,8 +60,6 @@ def serialize_activity_text_to_ai_comprehensible_text(
             + '". '
             + "There is no content yet in this lecture."
         )
-
-        return text
 
     # Serialize Headings
     serialized_headings = ""
@@ -79,9 +77,9 @@ def serialize_activity_text_to_ai_comprehensible_text(
         serialized_paragraphs += paragraph + " "
 
     # Get a text that is comprehensible by the AI
-    text = (
+    return (
         "Use this as a context "
-        + 'This is a course about "'
+        'This is a course about "'
         + course.name
         + '". '
         + 'This is a lecture about "'
@@ -95,5 +93,3 @@ def serialize_activity_text_to_ai_comprehensible_text(
         + serialized_paragraphs
         + '"'
     )
-
-    return text

@@ -1,11 +1,11 @@
 import importlib
-from logging.config import fileConfig
 import os
+from logging.config import fileConfig
+
 import alembic_postgresql_enum  # noqa: F401
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from sqlmodel import SQLModel
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+from sqlmodel import SQLModel
 
 from config.config import get_openu_config
 
@@ -32,7 +32,7 @@ base_dir = "src/db"
 base_module_path = "src.db"
 
 # Recursively walk through the base directory
-for root, dirs, files in os.walk(base_dir):
+for root, _dirs, files in os.walk(base_dir):
     # Filter out __init__.py and non-Python files
     module_files = [f for f in files if f.endswith(".py") and f != "__init__.py"]
     # Calculate the module's base path from its directory structure

@@ -1,7 +1,9 @@
 import os
-from typing import Optional
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import Session
+
 from src.core.events.database import get_db_session
 from src.db.organization_config import OrganizationConfigBase
 from src.services.explore.explore import (
@@ -17,7 +19,7 @@ router = APIRouter()
 
 
 # Utils
-def check_internal_cloud_key(request: Request):
+def check_internal_cloud_key(request: Request) -> None:
     if request.headers.get("CloudInternalKey") != os.environ.get("CLOUD_INTERNAL_KEY"):
         raise HTTPException(status_code=403, detail="Unauthorized")
 
@@ -38,7 +40,7 @@ async def api_get_orgs_for_explore(
 async def api_search_orgs_for_explore(
     request: Request,
     search_query: str,
-    label: Optional[str] = None,
+    label: str | None = None,
     db_session: Session = Depends(get_db_session),
 ):
     return await search_orgs_for_explore(request, db_session, search_query, label)
@@ -48,7 +50,7 @@ async def api_search_orgs_for_explore(
 async def api_get_courses_for_explore(
     request: Request,
     org_uuid: str,
-    db_session: Session = Depends(get_db_session),
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     return await get_courses_for_an_org_explore(request, db_session, org_uuid)
 
@@ -57,7 +59,7 @@ async def api_get_courses_for_explore(
 async def api_get_course_for_explore(
     request: Request,
     course_id: str,
-    db_session: Session = Depends(get_db_session),
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     return await get_course_for_explore(request, course_id, db_session)
 
@@ -66,7 +68,7 @@ async def api_get_course_for_explore(
 async def api_get_org_for_explore(
     request: Request,
     org_slug: str,
-    db_session: Session = Depends(get_db_session),
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     return await get_org_for_explore(request, org_slug, db_session)
 
@@ -76,9 +78,8 @@ async def update_org_Config(
     request: Request,
     org_id: int,
     config_object: OrganizationConfigBase,
-    db_session: Session = Depends(get_db_session),
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    res = await update_org_with_config_no_auth(
+    return await update_org_with_config_no_auth(
         request, config_object, org_id, db_session
     )
-    return res

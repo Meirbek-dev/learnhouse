@@ -1,19 +1,21 @@
+from datetime import datetime
+from typing import Any
+
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
-from typing import Any
-from src.db.courses.courses import Course, CourseRead, AuthorWithRole
+
+from src.db.courses.courses import AuthorWithRole, Course, CourseRead
+from src.db.organizations import Organization
 from src.db.payments.payments_courses import PaymentsCourse
+from src.db.payments.payments_products import PaymentsProduct
 from src.db.payments.payments_users import (
-    PaymentsUser,
     PaymentStatusEnum,
+    PaymentsUser,
     ProviderSpecificData,
 )
-from src.db.payments.payments_products import PaymentsProduct
 from src.db.resource_authors import ResourceAuthor
-from src.db.users import InternalUser, PublicUser, AnonymousUser, User, UserRead
-from src.db.organizations import Organization
+from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
 from src.services.orgs.orgs import rbac_check
-from datetime import datetime
 
 
 async def create_payment_user(
@@ -169,9 +171,7 @@ async def list_payment_users(
         .where(PaymentsUser.org_id == org_id)
         .order_by(PaymentsUser.id.desc())
     )
-    payment_users = list(db_session.exec(statement).all())  # Convert to list
-
-    return payment_users
+    return list(db_session.exec(statement).all())  # Convert to list
 
 
 async def delete_payment_user(

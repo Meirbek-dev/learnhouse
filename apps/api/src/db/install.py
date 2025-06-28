@@ -1,4 +1,3 @@
-from typing import Optional
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
@@ -9,7 +8,7 @@ class InstallBase(SQLModel):
 
 
 class Install(InstallBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     install_uuid: str = Field(default=None)
     creation_date: str = ""
     update_date: str = ""
@@ -20,13 +19,12 @@ class InstallCreate(InstallBase):
 
 
 class InstallUpdate(SQLModel):
-    step: Optional[int] = None
-    data: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    step: int | None = None
+    data: dict | None = Field(default=None, sa_column=Column(JSON))
 
 
 class InstallRead(InstallBase):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     install_uuid: str = Field(default=None)
     creation_date: str
     update_date: str
-    pass

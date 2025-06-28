@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha256
-from config.config import get_openu_config
 
+from config.config import get_openu_config
 
 ### 🔒 JWT ##############################################################
 

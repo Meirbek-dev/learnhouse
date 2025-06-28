@@ -1,6 +1,5 @@
+from fastapi import HTTPException, UploadFile
 from ulid import ULID
-from fastapi import UploadFile
-from fastapi import HTTPException
 
 from src.services.utils.upload_content import upload_content
 

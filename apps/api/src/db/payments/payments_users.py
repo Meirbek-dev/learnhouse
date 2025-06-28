@@ -1,8 +1,8 @@
-from pydantic import BaseModel
-from sqlmodel import SQLModel, Field, Column, BigInteger, ForeignKey, JSON
-from typing import Optional
 from datetime import datetime
 from enum import Enum
+
+from pydantic import BaseModel
+from sqlmodel import JSON, BigInteger, Column, Field, ForeignKey, SQLModel
 
 
 class PaymentStatusEnum(str, Enum):
@@ -25,7 +25,7 @@ class PaymentsUserBase(SQLModel):
 
 
 class PaymentsUser(PaymentsUserBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="CASCADE"))
     )

@@ -1,4 +1,5 @@
 from pydantic import EmailStr
+
 from src.db.organizations import OrganizationRead
 from src.db.users import UserRead
 from src.services.email.utils import send_email

@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Literal
-from ulid import ULID
+
 from fastapi import HTTPException, Request, UploadFile
 from sqlmodel import Session, select
+from ulid import ULID
 
 from src.db.courses.activities import Activity
 from src.db.courses.assignments import (
@@ -29,10 +30,10 @@ from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.rbac.rbac import (
+    authorization_verify_based_on_roles,
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
     authorization_verify_if_user_is_anon,
-    authorization_verify_based_on_roles,
 )
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
 from src.services.courses.activities.uploads.tasks_ref_files import (
@@ -587,6 +588,7 @@ async def put_assignment_task_submission_file(
         )
 
         return {"file_uuid": name_in_disk}
+    return None
 
 
 async def update_assignment_task(
@@ -1721,19 +1723,18 @@ async def rbac_check(
             return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-        else:
-            return await authorization_verify_based_on_roles_and_authorship(
-                request, current_user.id, action, course_uuid, db_session
-            )
-    else:
-        await authorization_verify_if_user_is_anon(current_user.id)
-        await authorization_verify_based_on_roles_and_authorship(
-            request,
-            current_user.id,
-            action,
-            course_uuid,
-            db_session,
+        return await authorization_verify_based_on_roles_and_authorship(
+            request, current_user.id, action, course_uuid, db_session
         )
+    await authorization_verify_if_user_is_anon(current_user.id)
+    await authorization_verify_based_on_roles_and_authorship(
+        request,
+        current_user.id,
+        action,
+        course_uuid,
+        db_session,
+    )
+    return None
 
 
 ## 🔒 RBAC Utils ##

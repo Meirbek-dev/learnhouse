@@ -1,6 +1,18 @@
-from typing import List, Literal
+from typing import Annotated, Literal
+
 from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlmodel import Session
+
+from src.core.events.database import get_db_session
+from src.db.organization_config import OrganizationConfigBase
+from src.db.organizations import (
+    OrganizationCreate,
+    OrganizationRead,
+    OrganizationUpdate,
+    OrganizationUser,
+)
+from src.db.users import PublicUser
+from src.security.auth import get_current_user
 from src.services.orgs.invites import (
     create_invite_code,
     create_invite_code_with_usergroup,
@@ -9,24 +21,6 @@ from src.services.orgs.invites import (
     get_invite_codes,
 )
 from src.services.orgs.join import JoinOrg, join_org
-from src.services.orgs.users import (
-    get_list_of_invited_users,
-    get_organization_users,
-    invite_batch_users,
-    remove_invited_user,
-    remove_user_from_org,
-    update_user_role,
-)
-from src.db.organization_config import OrganizationConfigBase
-from src.db.users import PublicUser
-from src.db.organizations import (
-    OrganizationCreate,
-    OrganizationRead,
-    OrganizationUpdate,
-    OrganizationUser,
-)
-from src.core.events.database import get_db_session
-from src.security.auth import get_current_user
 from src.services.orgs.orgs import (
     create_org,
     create_org_with_config,
@@ -36,14 +30,21 @@ from src.services.orgs.orgs import (
     get_orgs_by_user,
     get_orgs_by_user_admin,
     update_org,
+    update_org_landing,
     update_org_logo,
     update_org_preview,
     update_org_signup_mechanism,
     update_org_thumbnail,
-    update_org_landing,
     upload_org_landing_content_service,
 )
-
+from src.services.orgs.users import (
+    get_list_of_invited_users,
+    get_organization_users,
+    invite_batch_users,
+    remove_invited_user,
+    remove_user_from_org,
+    update_user_role,
+)
 
 router = APIRouter()
 
@@ -52,8 +53,8 @@ router = APIRouter()
 async def api_create_org(
     request: Request,
     org_object: OrganizationCreate,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """
     Create new organization
@@ -67,8 +68,8 @@ async def api_create_org_withconfig(
     request: Request,
     org_object: OrganizationCreate,
     config_object: OrganizationConfigBase,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """
     Create new organization
@@ -82,8 +83,8 @@ async def api_create_org_withconfig(
 async def api_get_org(
     request: Request,
     org_id: str,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """
     Get single Org by ID
@@ -95,8 +96,8 @@ async def api_get_org(
 async def api_get_org_users(
     request: Request,
     org_id: str,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> list[OrganizationUser]:
     """
     Get single Org by ID
@@ -108,8 +109,8 @@ async def api_get_org_users(
 async def api_join_an_org(
     request: Request,
     args: JoinOrg,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Get single Org by ID
@@ -123,8 +124,8 @@ async def api_update_user_role(
     org_id: str,
     user_id: str,
     role_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update user role
@@ -139,8 +140,8 @@ async def api_remove_user_from_org(
     request: Request,
     org_id: int,
     user_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Remove user from org
@@ -156,8 +157,8 @@ async def api_get_org_signup_mechanism(
     request: Request,
     org_id: int,
     signup_mechanism: Literal["open", "inviteOnly"],
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Get org signup mechanism
@@ -172,8 +173,8 @@ async def api_get_org_signup_mechanism(
 async def api_create_invite_code(
     request: Request,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Create invite code
@@ -186,8 +187,8 @@ async def api_create_invite_code_with_ug(
     request: Request,
     org_id: int,
     usergroup_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Create invite code
@@ -201,8 +202,8 @@ async def api_create_invite_code_with_ug(
 async def api_get_invite_codes(
     request: Request,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Get invite codes
@@ -215,8 +216,8 @@ async def api_get_invite_code(
     request: Request,
     org_id: int,
     invite_code: str,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Get invite code
@@ -230,8 +231,8 @@ async def api_delete_invite_code(
     request: Request,
     org_id: int,
     org_invite_code_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Delete invite code
@@ -247,8 +248,8 @@ async def api_invite_batch_users(
     org_id: int,
     emails: str,
     invite_code_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Invite batch users by emails
@@ -262,8 +263,8 @@ async def api_invite_batch_users(
 async def api_get_org_users_invites(
     request: Request,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Get org users invites
@@ -276,8 +277,8 @@ async def api_delete_org_users_invites(
     request: Request,
     org_id: int,
     email: str,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Delete org users invites
@@ -289,8 +290,8 @@ async def api_delete_org_users_invites(
 async def api_get_org_by_slug(
     request: Request,
     org_slug: str,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """
     Get single Org by Slug
@@ -303,8 +304,8 @@ async def api_update_org_logo(
     request: Request,
     org_id: str,
     logo_file: UploadFile,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update org logo
@@ -323,8 +324,8 @@ async def api_update_org_thumbnail(
     request: Request,
     org_id: str,
     thumbnail_file: UploadFile,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update org thumbnail
@@ -343,8 +344,8 @@ async def api_update_org_preview(
     request: Request,
     org_id: str,
     preview_file: UploadFile,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update org thumbnail
@@ -363,9 +364,9 @@ async def api_user_orgs(
     request: Request,
     page: int,
     limit: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
-) -> List[OrganizationRead]:
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> list[OrganizationRead]:
     """
     Get orgs by page and limit by current user
     """
@@ -379,9 +380,9 @@ async def api_user_orgs_admin(
     request: Request,
     page: int,
     limit: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
-) -> List[OrganizationRead]:
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> list[OrganizationRead]:
     """
     Get orgs by page and limit by current user
     """
@@ -395,8 +396,8 @@ async def api_update_org(
     request: Request,
     org_object: OrganizationUpdate,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
     """
     Update Org by ID
@@ -408,13 +409,12 @@ async def api_update_org(
 async def api_delete_org(
     request: Request,
     org_id: int,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Delete Org by ID
     """
-
     return await delete_org(request, org_id, current_user, db_session)
 
 
@@ -423,8 +423,8 @@ async def api_update_org_landing(
     request: Request,
     org_id: int,
     landing_object: dict,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Update organization landing object
@@ -439,8 +439,8 @@ async def api_upload_org_landing_content(
     request: Request,
     org_id: int,
     content_file: UploadFile,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """
     Upload content for organization landing page

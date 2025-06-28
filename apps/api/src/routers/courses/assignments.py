@@ -1,4 +1,8 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Request, UploadFile
+
+from src.core.events.database import get_db_session
 from src.db.courses.assignments import (
     AssignmentCreate,
     AssignmentRead,
@@ -9,7 +13,6 @@ from src.db.courses.assignments import (
     AssignmentUserSubmissionCreate,
 )
 from src.db.users import PublicUser
-from src.core.events.database import get_db_session
 from src.security.auth import get_current_user
 from src.services.courses.activities.assignments import (
     create_assignment,
@@ -51,7 +54,7 @@ router = APIRouter()
 async def api_create_assignments(
     request: Request,
     assignment_object: AssignmentCreate,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> AssignmentRead:
     """
@@ -64,7 +67,7 @@ async def api_create_assignments(
 async def api_read_assignment(
     request: Request,
     assignment_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> AssignmentRead:
     """
@@ -77,7 +80,7 @@ async def api_read_assignment(
 async def api_read_assignment_from_activity(
     request: Request,
     activity_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> AssignmentRead:
     """
@@ -93,7 +96,7 @@ async def api_update_assignment(
     request: Request,
     assignment_uuid: str,
     assignment_object: AssignmentUpdate,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> AssignmentRead:
     """
@@ -108,7 +111,7 @@ async def api_update_assignment(
 async def api_delete_assignment(
     request: Request,
     assignment_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -121,7 +124,7 @@ async def api_delete_assignment(
 async def api_delete_assignment_from_activity(
     request: Request,
     activity_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -140,7 +143,7 @@ async def api_create_assignment_tasks(
     request: Request,
     assignment_uuid: str,
     assignment_task_object: AssignmentTaskCreate,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -155,7 +158,7 @@ async def api_create_assignment_tasks(
 async def api_read_assignment_tasks(
     request: Request,
     assignment_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -170,7 +173,7 @@ async def api_read_assignment_tasks(
 async def api_read_assignment_task(
     request: Request,
     assignment_task_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -186,7 +189,7 @@ async def api_update_assignment_tasks(
     request: Request,
     assignment_task_uuid: str,
     assignment_task_object: AssignmentTaskUpdate,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -233,7 +236,7 @@ async def api_put_assignment_task_sub_file(
 async def api_delete_assignment_tasks(
     request: Request,
     assignment_task_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -252,7 +255,7 @@ async def api_handle_assignment_task_submissions(
     request: Request,
     assignment_task_submission_object: AssignmentTaskSubmissionUpdate,
     assignment_task_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -274,7 +277,7 @@ async def api_read_user_assignment_task_submissions(
     request: Request,
     assignment_task_uuid: str,
     user_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -289,7 +292,7 @@ async def api_read_user_assignment_task_submissions(
 async def api_read_user_assignment_task_submissions_me(
     request: Request,
     assignment_task_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -304,7 +307,7 @@ async def api_read_user_assignment_task_submissions_me(
 async def api_read_assignment_task_submissions(
     request: Request,
     assignment_task_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -321,7 +324,7 @@ async def api_read_assignment_task_submissions(
 async def api_delete_assignment_task_submissions(
     request: Request,
     assignment_task_submission_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -339,7 +342,7 @@ async def api_delete_assignment_task_submissions(
 async def api_create_assignment_submissions(
     request: Request,
     assignment_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -354,7 +357,7 @@ async def api_create_assignment_submissions(
 async def api_read_assignment_submissions(
     request: Request,
     assignment_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -369,7 +372,7 @@ async def api_read_assignment_submissions(
 async def api_read_user_assignment_submission_me(
     request: Request,
     assignment_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -385,7 +388,7 @@ async def api_read_user_assignment_submissions(
     request: Request,
     assignment_uuid: str,
     user_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -402,7 +405,7 @@ async def api_update_user_assignment_submissions(
     assignment_uuid: str,
     user_id: str,
     assignment_submission: AssignmentUserSubmissionCreate,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -418,7 +421,7 @@ async def api_delete_user_assignment_submissions(
     request: Request,
     assignment_uuid: str,
     user_id: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -434,13 +437,12 @@ async def api_get_submission_grade(
     request: Request,
     assignment_uuid: str,
     user_id: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
     Grade submissions for an assignment from a user
     """
-
     return await get_grade_assignment_submission(
         request, user_id, assignment_uuid, current_user, db_session
     )
@@ -451,13 +453,12 @@ async def api_final_grade_submission(
     request: Request,
     assignment_uuid: str,
     user_id: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
     Grade submissions for an assignment from a user
     """
-
     return await grade_assignment_submission(
         request, user_id, assignment_uuid, current_user, db_session
     )
@@ -468,13 +469,12 @@ async def api_submission_mark_as_done(
     request: Request,
     assignment_uuid: str,
     user_id: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
     Grade submissions for an assignment from a user
     """
-
     return await mark_activity_as_done_for_user(
         request, user_id, assignment_uuid, current_user, db_session
     )
@@ -484,7 +484,7 @@ async def api_submission_mark_as_done(
 async def api_get_assignments(
     request: Request,
     course_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """

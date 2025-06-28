@@ -4,8 +4,8 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.2"
 dependencies = [
-  "boto3>=1.38.45",
-  "botocore>=1.38.45",
+  "boto3>=1.38.46",
+  "botocore>=1.38.46",
   "faker>=37.4.0",
   "fastapi==0.115.14",
   "fastapi-another-jwt-auth>=0.1.11",
@@ -16,7 +16,7 @@ dependencies = [
   "langchain-core>=0.3.66",
   "langchain-openai>=0.3.27",
   "langchain-text-splitters>=0.3.8",
-  "openai>=1.92.3",
+  "openai>=1.93.0",
   "passlib>=1.7.4",
   "psycopg2-binary>=2.9.10",
   "pydantic[email]>=2.11.7",
@@ -28,7 +28,7 @@ dependencies = [
   "resend>=2.10.0",
   "sqlmodel>=0.0.24",
   "tiktoken>=0.9.0",
-  "uvicorn>=0.34.3",
+  "uvicorn>=0.35.0",
   "typer>=0.16.0",
   "chromadb>=1.0.13",
   "alembic>=1.16.2",
@@ -43,7 +43,46 @@ dependencies = [
 ]
 
 [tool.ruff]
-lint.ignore = ["E501", "E712"]
+target-version = "py313"
+lint.select = ["E", "W", "F", "I", "N", "UP", "B"]
+lint.ignore = [
+  "DTZ005",
+  "INP001",
+  "E501",   # line too long
+  "E712",   # comparison to True should be 'if cond is True:' or 'if cond:'
+  "S101",   # use of assert detected
+  "ANN202", # missing return type annotation for private function
+  "ANN001", # missing type annotation for function argument
+  "S106",   # possible hardcoded password
+  "ANN201", # missing return type annotation for public function
+  "N806",   # variable in function should be lowercase
+  "N803",   # argument name should be lowercase
+  "B904",   # within an except clause, raise exceptions with raise ... from err
+  "B008",   # do not perform function calls in argument defaults
+  "T20",    # flake8-print (if you want to allow print statements)
+  "ERA001", # found commented-out code
+  "TD002",  # missing author in TODO
+  "TD003",  # missing issue link on the line following this TODO
+  # "FIX002", # line contains TODO, consider resolving the issue
+  "PLR0913", # too many arguments to function call
+  "PLR2004", # magic value used in comparison
+  "TC002",
+  "TC001",
+  "ARG001",
+  "PTH120",
+  "PTH118",
+  "PTH118",
+  "G004",
+  "PTH100",
+  "LOG015",
+  "N802",
+  "PLR0915",
+  "N815",
+  "BLE001",
+  "PLC0415",
+]
+
+format.quote-style = "double"
 
 [tool.logfire]
 ignore_no_config = true

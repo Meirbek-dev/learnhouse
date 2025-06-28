@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from config.config import get_openu_config
 
+from config.config import get_openu_config
 
 router = APIRouter()
 

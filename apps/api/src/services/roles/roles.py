@@ -1,14 +1,16 @@
+from datetime import datetime
 from typing import Literal
-from ulid import ULID
+
+from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from ulid import ULID
+
+from src.db.roles import Role, RoleCreate, RoleRead, RoleUpdate
+from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_user_is_anon,
 )
-from src.db.users import AnonymousUser, PublicUser
-from src.db.roles import Role, RoleCreate, RoleRead, RoleUpdate
-from fastapi import HTTPException, Request
-from datetime import datetime
 
 
 async def create_role(
@@ -31,9 +33,7 @@ async def create_role(
     db_session.commit()
     db_session.refresh(role)
 
-    role = RoleRead.model_validate(role)
-
-    return role
+    return RoleRead.model_validate(role)
 
 
 async def read_role(
@@ -53,9 +53,7 @@ async def read_role(
     # RBAC check
     await rbac_check(request, current_user, "read", role.role_uuid, db_session)
 
-    role = RoleRead.model_validate(role)
-
-    return role
+    return RoleRead.model_validate(role)
 
 
 async def update_role(
@@ -94,14 +92,12 @@ async def update_role(
     db_session.commit()
     db_session.refresh(role)
 
-    role = RoleRead.model_validate(role)
-
-    return role
+    return RoleRead.model_validate(role)
 
 
 async def delete_role(
     request: Request, db_session: Session, role_id: str, current_user: PublicUser
-):
+) -> str:
     # RBAC check
     await rbac_check(request, current_user, "delete", role_id, db_session)
 
@@ -131,7 +127,7 @@ async def rbac_check(
     action: Literal["create", "read", "update", "delete"],
     role_uuid: str,
     db_session: Session,
-):
+) -> None:
     await authorization_verify_if_user_is_anon(current_user.id)
 
     await authorization_verify_based_on_roles_and_authorship(

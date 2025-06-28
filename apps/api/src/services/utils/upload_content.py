@@ -1,14 +1,14 @@
-from typing import Literal, Optional
+import os
+from typing import Literal
+
 import boto3
 from botocore.exceptions import ClientError
-import os
-
 from fastapi import HTTPException
 
 from config.config import get_openu_config
 
 
-def ensure_directory_exists(directory: str):
+def ensure_directory_exists(directory: str) -> None:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
@@ -19,8 +19,8 @@ async def upload_content(
     uuid: str,  # org_uuid or user_uuid
     file_binary: bytes,
     file_and_format: str,
-    allowed_formats: Optional[list[str]] = None,
-):
+    allowed_formats: list[str] | None = None,
+) -> None:
     # Get OpenU Config
     openu_config = get_openu_config()
 
@@ -30,12 +30,11 @@ async def upload_content(
     content_delivery = openu_config.hosting_config.content_delivery.type
 
     # Check if format file is allowed
-    if allowed_formats:
-        if file_format not in allowed_formats:
-            raise HTTPException(
-                status_code=400,
-                detail=f"File format {file_format} not allowed",
-            )
+    if allowed_formats and file_format not in allowed_formats:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File format {file_format} not allowed",
+        )
 
     ensure_directory_exists(f"content/{type_of_dir}/{uuid}/{directory}")
 
@@ -83,4 +82,4 @@ async def upload_content(
             )
             print("File upload successful!")
         except Exception as e:
-            print(f"An error occurred: {str(e)}")
+            print(f"An error occurred: {e!s}")

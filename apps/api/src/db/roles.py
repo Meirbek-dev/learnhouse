@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import Optional, Union
-from pydantic import ConfigDict, BaseModel
+
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
 
@@ -42,13 +42,13 @@ class RoleTypeEnum(str, Enum):
 
 class RoleBase(SQLModel):
     name: str
-    description: Optional[str]
-    rights: Optional[Union[Rights, dict]] = Field(default={}, sa_column=Column(JSON))
+    description: str | None
+    rights: Rights | dict | None = Field(default={}, sa_column=Column(JSON))
 
 
 class Role(RoleBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    org_id: Optional[int] = Field(
+    id: int | None = Field(default=None, primary_key=True)
+    org_id: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE")),
     )
@@ -59,8 +59,8 @@ class Role(RoleBase, table=True):
 
 
 class RoleRead(RoleBase):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    org_id: Optional[int] = Field(default=None, foreign_key="organization.id")
+    id: int | None = Field(default=None, primary_key=True)
+    org_id: int | None = Field(default=None, foreign_key="organization.id")
     role_type: RoleTypeEnum = RoleTypeEnum.TYPE_GLOBAL
     role_uuid: str
     creation_date: str
@@ -68,11 +68,11 @@ class RoleRead(RoleBase):
 
 
 class RoleCreate(RoleBase):
-    org_id: Optional[int] = Field(default=None, foreign_key="organization.id")
+    org_id: int | None = Field(default=None, foreign_key="organization.id")
 
 
 class RoleUpdate(SQLModel):
     role_id: int = Field(default=None, foreign_key="role.id")
-    name: Optional[str] = None
-    description: Optional[str] = None
-    rights: Optional[Union[Rights, dict]] = Field(default=None, sa_column=Column(JSON))
+    name: str | None = None
+    description: str | None = None
+    rights: Rights | dict | None = Field(default=None, sa_column=Column(JSON))

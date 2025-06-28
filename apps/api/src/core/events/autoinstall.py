@@ -1,12 +1,12 @@
 from sqlalchemy import create_engine
-from sqlmodel import SQLModel, Session, select
+from sqlmodel import Session, SQLModel, select
 
 from cli import install
 from config.config import get_openu_config
 from src.db.organizations import Organization
 
 
-def auto_install():
+def auto_install() -> None:
     # Get the database session
     openu_config = get_openu_config()
     engine = create_engine(
@@ -25,7 +25,7 @@ def auto_install():
         install(short=True)
 
     if orgs:
-        for org in orgs:
+        for _org in orgs:
             default_org = db_session.exec(
                 select(Organization).where(Organization.slug == "openu")
             ).first()

@@ -1,18 +1,20 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Literal
-from ulid import ULID
+
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+from ulid import ULID
+
+from src.db.organizations import Organization
+from src.db.usergroup_resources import UserGroupResource
+from src.db.usergroup_user import UserGroupUser
+from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
+from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_user_is_anon,
 )
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
-from src.db.organizations import Organization
-from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
-from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
 
 
 async def create_usergroup(
@@ -52,9 +54,7 @@ async def create_usergroup(
     db_session.commit()
     db_session.refresh(usergroup)
 
-    usergroup = UserGroupRead.model_validate(usergroup)
-
-    return usergroup
+    return UserGroupRead.model_validate(usergroup)
 
 
 async def read_usergroup_by_id(
@@ -81,9 +81,7 @@ async def read_usergroup_by_id(
         db_session=db_session,
     )
 
-    usergroup = UserGroupRead.model_validate(usergroup)
-
-    return usergroup
+    return UserGroupRead.model_validate(usergroup)
 
 
 async def get_users_linked_to_usergroup(
@@ -122,9 +120,7 @@ async def get_users_linked_to_usergroup(
         user = db_session.exec(statement).first()
         users.append(user)
 
-    users = [UserRead.model_validate(user) for user in users]
-
-    return users
+    return [UserRead.model_validate(user) for user in users]
 
 
 async def read_usergroups_by_org_id(
@@ -145,9 +141,7 @@ async def read_usergroups_by_org_id(
         db_session=db_session,
     )
 
-    usergroups = [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
-
-    return usergroups
+    return [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
 
 
 async def get_usergroups_by_resource(
@@ -179,9 +173,7 @@ async def get_usergroups_by_resource(
         usergroup = db_session.exec(statement).first()
         usergroups.append(usergroup)
 
-    usergroups = [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
-
-    return usergroups
+    return [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
 
 
 async def update_usergroup_by_id(
@@ -217,9 +209,7 @@ async def update_usergroup_by_id(
     db_session.commit()
     db_session.refresh(usergroup)
 
-    usergroup = UserGroupRead.model_validate(usergroup)
-
-    return usergroup
+    return UserGroupRead.model_validate(usergroup)
 
 
 async def delete_usergroup_by_id(
@@ -465,7 +455,7 @@ async def rbac_check(
     current_user: PublicUser | AnonymousUser | InternalUser,
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,
-):
+) -> bool | None:
     if isinstance(current_user, InternalUser):
         return True
 
@@ -478,6 +468,7 @@ async def rbac_check(
         usergroup_uuid,
         db_session,
     )
+    return None
 
 
 ## 🔒 RBAC Utils ##

@@ -1,17 +1,19 @@
-from typing import List
-from fastapi import APIRouter, Depends, UploadFile, Form, Request
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Form, Request, UploadFile
+
+from src.core.events.database import get_db_session
 from src.db.courses.activities import ActivityCreate, ActivityRead, ActivityUpdate
 from src.db.users import PublicUser
-from src.core.events.database import get_db_session
+from src.security.auth import get_current_user
 from src.services.courses.activities.activities import (
     create_activity,
-    get_activity,
+    delete_activity,
     get_activities,
+    get_activity,
     get_activityby_id,
     update_activity,
-    delete_activity,
 )
-from src.security.auth import get_current_user
 from src.services.courses.activities.pdf import create_documentpdf_activity
 from src.services.courses.activities.video import (
     ExternalVideo,
@@ -26,7 +28,7 @@ router = APIRouter()
 async def api_create_activity(
     request: Request,
     activity_object: ActivityCreate,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
     """
@@ -39,7 +41,7 @@ async def api_create_activity(
 async def api_get_activity(
     request: Request,
     activity_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
     """
@@ -54,7 +56,7 @@ async def api_get_activity(
 async def api_get_activityby_id(
     request: Request,
     activity_id: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
     """
@@ -69,9 +71,9 @@ async def api_get_activityby_id(
 async def api_get_chapter_activities(
     request: Request,
     chapter_id: int,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
-) -> List[ActivityRead]:
+) -> list[ActivityRead]:
     """
     Get Activities for a chapter
     """
@@ -83,7 +85,7 @@ async def api_update_activity(
     request: Request,
     activity_object: ActivityUpdate,
     activity_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
     """
@@ -98,7 +100,7 @@ async def api_update_activity(
 async def api_delete_activity(
     request: Request,
     activity_uuid: str,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ):
     """
@@ -113,9 +115,9 @@ async def api_delete_activity(
 @router.post("/video")
 async def api_create_video_activity(
     request: Request,
-    name: str = Form(),
-    chapter_id: str = Form(),
-    details: str = Form(default="{}"),
+    name: Annotated[str, Form()],
+    chapter_id: Annotated[str, Form()],
+    details: Annotated[str, Form()] = "{}",
     current_user: PublicUser = Depends(get_current_user),
     video_file: UploadFile | None = None,
     db_session=Depends(get_db_session),
@@ -138,7 +140,7 @@ async def api_create_video_activity(
 async def api_create_external_video_activity(
     request: Request,
     external_video: ExternalVideo,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
     """
@@ -152,9 +154,9 @@ async def api_create_external_video_activity(
 @router.post("/documentpdf")
 async def api_create_documentpdf_activity(
     request: Request,
-    name: str = Form(),
-    chapter_id: str = Form(),
-    current_user: PublicUser = Depends(get_current_user),
+    name: Annotated[str, Form()],
+    chapter_id: Annotated[str, Form()],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
     pdf_file: UploadFile | None = None,
     db_session=Depends(get_db_session),
 ) -> ActivityRead:

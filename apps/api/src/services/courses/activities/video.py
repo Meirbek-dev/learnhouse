@@ -1,15 +1,12 @@
-from typing import Literal
 import json
-from src.db.courses.courses import Course
-from src.db.organizations import Organization
+from datetime import datetime
+from typing import Literal
 
+from fastapi import HTTPException, Request, UploadFile, status
 from pydantic import BaseModel
 from sqlmodel import Session, select
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_user_is_anon,
-)
-from src.db.courses.chapters import Chapter
+from ulid import ULID
+
 from src.db.courses.activities import (
     Activity,
     ActivityRead,
@@ -17,12 +14,16 @@ from src.db.courses.activities import (
     ActivityTypeEnum,
 )
 from src.db.courses.chapter_activities import ChapterActivity
+from src.db.courses.chapters import Chapter
 from src.db.courses.course_chapters import CourseChapter
+from src.db.courses.courses import Course
+from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser
+from src.security.rbac.rbac import (
+    authorization_verify_based_on_roles_and_authorship,
+    authorization_verify_if_user_is_anon,
+)
 from src.services.courses.activities.uploads.videos import upload_video
-from fastapi import HTTPException, status, UploadFile, Request
-from ulid import ULID
-from datetime import datetime
 
 
 def validate_video_file(video_file: UploadFile | None) -> str:
@@ -254,7 +255,7 @@ async def rbac_check(
     current_user: PublicUser | AnonymousUser,
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,
-):
+) -> None:
     await authorization_verify_if_user_is_anon(current_user.id)
 
     await authorization_verify_based_on_roles_and_authorship(

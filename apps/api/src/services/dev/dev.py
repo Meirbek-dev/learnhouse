@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+
 from config.config import get_openu_config
 
 
@@ -7,9 +8,8 @@ def isDevModeEnabled():
     return config.general_config.development_mode
 
 
-def isDevModeEnabledOrRaise():
+def isDevModeEnabledOrRaise() -> bool:
     config = get_openu_config()
     if config.general_config.development_mode:
         return True
-    else:
-        raise HTTPException(status_code=403, detail="Development mode is disabled")
+    raise HTTPException(status_code=403, detail="Development mode is disabled")

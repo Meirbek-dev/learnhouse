@@ -1,18 +1,20 @@
-import logging
-import logfire
-import os
 import importlib
-from config.config import get_openu_config
+import logging
+import os
+
+import logfire
 from fastapi import FastAPI
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
+
+from config.config import get_openu_config
 
 
-def import_all_models():
+def import_all_models() -> None:
     base_dir = "src/db"
     base_module_path = "src.db"
 
     # Recursively walk through the base directory
-    for root, dirs, files in os.walk(base_dir):
+    for root, _dirs, files in os.walk(base_dir):
         # Filter out __init__.py and non-Python files
         module_files = [f for f in files if f.endswith(".py") and f != "__init__.py"]
 
@@ -54,13 +56,15 @@ SQLModel.metadata.create_all(engine)
 logfire.instrument_sqlalchemy(engine=engine)
 
 
-async def connect_to_db(app: FastAPI):
+async def connect_to_db(app: FastAPI) -> None:
     try:
         app.db_engine = engine
         logging.info("OpenU database has been started.")
         SQLModel.metadata.create_all(engine)
     except Exception as e:
-        logging.error("Make sure you have a database running and accessible. " + str(e))
+        logging.exception(
+            "Make sure you have a database running and accessible. " + str(e)
+        )
 
 
 def get_db_session():

@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
+
 from src.core.events.database import get_db_session
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.services.search.search import search_across_org, SearchResult
+from src.services.search.search import SearchResult, search_across_org
 
 router = APIRouter()
 
 
-@router.get("/org_slug/{org_slug}", response_model=SearchResult)
+@router.get("/org_slug/{org_slug}")
 async def api_search_across_org(
     request: Request,
     org_slug: str,

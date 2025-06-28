@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Optional
+
 from fastapi import HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlmodel import Session, select
+
 from src.db.organizations import Organization
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
@@ -13,7 +14,7 @@ from src.services.orgs.orgs import get_org_join_mechanism
 class JoinOrg(BaseModel):
     org_id: int = Field(gt=0, description="Organization ID must be positive")
     user_id: int = Field(gt=0, description="User ID must be positive")
-    invite_code: Optional[str] = Field(
+    invite_code: str | None = Field(
         default=None, description="Invite code for invite-only organizations"
     )
 
@@ -98,13 +99,12 @@ async def join_org(
 
             return {"message": "Добро пожаловать!", "success": True}
 
-        else:
-            raise HTTPException(
-                status_code=403,
-                detail="Something wrong, try later.",
-            )
+        raise HTTPException(
+            status_code=403,
+            detail="Something wrong, try later.",
+        )
 
-    elif join_method == "open":
+    if join_method == "open":
         if not user:
             raise HTTPException(
                 status_code=404,
@@ -127,14 +127,12 @@ async def join_org(
 
             return {"message": "Добро пожаловать!", "success": True}
 
-        else:
-            raise HTTPException(
-                status_code=403,
-                detail="Something wrong, try later.",
-            )
-
-    else:
         raise HTTPException(
-            status_code=400,
-            detail=f"Invalid join method: {join_method}",
+            status_code=403,
+            detail="Something wrong, try later.",
         )
+
+    raise HTTPException(
+        status_code=400,
+        detail=f"Invalid join method: {join_method}",
+    )

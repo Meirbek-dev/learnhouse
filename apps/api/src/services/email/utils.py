@@ -1,5 +1,6 @@
-from pydantic import EmailStr
 import resend
+from pydantic import EmailStr
+
 from config.config import get_openu_config
 
 
@@ -13,6 +14,4 @@ def send_email(to: EmailStr, subject: str, body: str):
     }
 
     resend.api_key = lh_config.mailing_config.resend_api_key
-    email = resend.Emails.send(params)
-
-    return email
+    return resend.Emails.send(params)

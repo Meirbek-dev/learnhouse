@@ -1,15 +1,15 @@
-import uvicorn
 import logfire
+import uvicorn
 from fastapi import FastAPI, Request
-from config.config import OpenUConfig, get_openu_config
-from src.core.events.events import shutdown_app, startup_app
-from src.router import v1_router
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_another_jwt_auth.exceptions import AuthJWTException
-from fastapi.middleware.gzip import GZipMiddleware
 
+from config.config import OpenUConfig, get_openu_config
+from src.core.events.events import shutdown_app, startup_app
+from src.router import v1_router
 
 # from src.services.mocks.initial import create_initial_data
 

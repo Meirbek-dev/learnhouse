@@ -1,11 +1,12 @@
-from typing import List, Optional
+from enum import Enum
+
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
-from enum import Enum
-from src.db.users import UserRead
-from src.db.trails import TrailRead
+
 from src.db.courses.chapters import ChapterRead
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
+from src.db.trails import TrailRead
+from src.db.users import UserRead
 
 
 class ThumbnailType(str, Enum):
@@ -24,19 +25,19 @@ class AuthorWithRole(SQLModel):
 
 class CourseBase(SQLModel):
     name: str
-    description: Optional[str]
-    about: Optional[str]
-    learnings: Optional[str]
-    tags: Optional[str]
-    thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = Field(default="")
-    thumbnail_video: Optional[str] = Field(default="")
+    description: str | None
+    about: str | None
+    learnings: str | None
+    tags: str | None
+    thumbnail_type: ThumbnailType | None = Field(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = Field(default="")
+    thumbnail_video: str | None = Field(default="")
     public: bool
     open_to_contributors: bool
 
 
 class Course(CourseBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
     )
@@ -47,62 +48,58 @@ class Course(CourseBase, table=True):
 
 class CourseCreate(CourseBase):
     org_id: int = Field(default=None, foreign_key="organization.id")
-    thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = Field(default="")
-    thumbnail_video: Optional[str] = Field(default="")
-    pass
+    thumbnail_type: ThumbnailType | None = Field(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = Field(default="")
+    thumbnail_video: str | None = Field(default="")
 
 
 class CourseUpdate(SQLModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    about: Optional[str] = None
-    learnings: Optional[str] = None
-    tags: Optional[str] = None
-    thumbnail_type: Optional[ThumbnailType] = None
-    thumbnail_image: Optional[str] = None
-    thumbnail_video: Optional[str] = None
-    public: Optional[bool] = None
-    open_to_contributors: Optional[bool] = None
+    name: str | None = None
+    description: str | None = None
+    about: str | None = None
+    learnings: str | None = None
+    tags: str | None = None
+    thumbnail_type: ThumbnailType | None = None
+    thumbnail_image: str | None = None
+    thumbnail_video: str | None = None
+    public: bool | None = None
+    open_to_contributors: bool | None = None
 
 
 class CourseRead(CourseBase):
     id: int
     org_id: int = Field(default=None, foreign_key="organization.id")
-    authors: List[AuthorWithRole] = []
+    authors: list[AuthorWithRole] = []
     course_uuid: str
     creation_date: str
     update_date: str
-    thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = Field(default="")
-    thumbnail_video: Optional[str] = Field(default="")
-    pass
+    thumbnail_type: ThumbnailType | None = Field(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = Field(default="")
+    thumbnail_video: str | None = Field(default="")
 
 
 class FullCourseRead(CourseBase):
     id: int
     org_id: int
-    course_uuid: Optional[str]
-    creation_date: Optional[str]
-    update_date: Optional[str]
-    thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = Field(default="")
-    thumbnail_video: Optional[str] = Field(default="")
+    course_uuid: str | None
+    creation_date: str | None
+    update_date: str | None
+    thumbnail_type: ThumbnailType | None = Field(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = Field(default="")
+    thumbnail_video: str | None = Field(default="")
     # Chapters, Activities
-    chapters: List[ChapterRead]
-    authors: List[AuthorWithRole]
-    pass
+    chapters: list[ChapterRead]
+    authors: list[AuthorWithRole]
 
 
 class FullCourseReadWithTrail(CourseBase):
     id: int
-    course_uuid: Optional[str]
-    creation_date: Optional[str]
-    update_date: Optional[str]
+    course_uuid: str | None
+    creation_date: str | None
+    update_date: str | None
     org_id: int = Field(default=None, foreign_key="organization.id")
-    authors: List[AuthorWithRole]
+    authors: list[AuthorWithRole]
     # Chapters, Activities
-    chapters: List[ChapterRead]
+    chapters: list[ChapterRead]
     # Trail
     trail: TrailRead | None
-    pass

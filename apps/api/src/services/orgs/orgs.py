@@ -2,45 +2,46 @@ import json
 import logging
 from datetime import datetime
 from typing import Literal
-from ulid import ULID
+
+from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
+from ulid import ULID
+
 from src.db.organization_config import (
     AIOrgConfig,
-    APIOrgConfig,
     AnalyticsOrgConfig,
+    APIOrgConfig,
     AssignmentOrgConfig,
     CollaborationOrgConfig,
     CourseOrgConfig,
     DiscussionOrgConfig,
     MemberOrgConfig,
+    OrganizationConfig,
+    OrganizationConfigBase,
     OrgCloudConfig,
     OrgFeatureConfig,
     OrgGeneralConfig,
-    OrganizationConfig,
-    OrganizationConfigBase,
     PaymentOrgConfig,
     StorageOrgConfig,
     UserGroupOrgConfig,
 )
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_org_admin_status,
-    authorization_verify_if_user_is_anon,
-)
-from src.db.users import AnonymousUser, InternalUser, PublicUser
-from src.db.user_organizations import UserOrganization
 from src.db.organizations import (
     Organization,
     OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
 )
-from fastapi import HTTPException, UploadFile, status, Request
-
+from src.db.user_organizations import UserOrganization
+from src.db.users import AnonymousUser, InternalUser, PublicUser
+from src.security.rbac.rbac import (
+    authorization_verify_based_on_org_admin_status,
+    authorization_verify_if_user_is_anon,
+)
 from src.services.orgs.uploads import (
+    upload_org_landing_content,
     upload_org_logo,
     upload_org_preview,
     upload_org_thumbnail,
-    upload_org_landing_content,
 )
 
 
@@ -75,9 +76,7 @@ async def get_organization(
 
     config = OrganizationConfig.model_validate(org_config) if org_config else {}
 
-    org = OrganizationRead(**org.model_dump(), config=config)
-
-    return org
+    return OrganizationRead(**org.model_dump(), config=config)
 
 
 async def get_organization_by_slug(
@@ -111,9 +110,7 @@ async def get_organization_by_slug(
 
     config = OrganizationConfig.model_validate(org_config) if org_config else {}
 
-    org = OrganizationRead(**org.model_dump(), config=config)
-
-    return org
+    return OrganizationRead(**org.model_dump(), config=config)
 
 
 async def create_org(
@@ -208,9 +205,7 @@ async def create_org(
 
     config = OrganizationConfig.model_validate(org_config)
 
-    org = OrganizationRead(**org.model_dump(), config=config)
-
-    return org
+    return OrganizationRead(**org.model_dump(), config=config)
 
 
 async def create_org_with_config(
@@ -287,9 +282,7 @@ async def create_org_with_config(
 
     config = OrganizationConfig.model_validate(org_config)
 
-    org = OrganizationRead(**org.model_dump(), config=config)
-
-    return org
+    return OrganizationRead(**org.model_dump(), config=config)
 
 
 async def update_org(
@@ -338,9 +331,7 @@ async def update_org(
     db_session.commit()
     db_session.refresh(org)
 
-    org = OrganizationRead.model_validate(org)
-
-    return org
+    return OrganizationRead.model_validate(org)
 
 
 async def update_org_with_config_no_auth(
@@ -685,9 +676,7 @@ async def get_org_join_mechanism(
 
     # Get the signup mechanism
     config = OrganizationConfigBase(**config)
-    signup_mechanism = config.features.members.signup_mode
-
-    return signup_mechanism
+    return config.features.members.signup_mode
 
 
 async def upload_org_preview_service(
@@ -799,12 +788,11 @@ async def rbac_check(
     if isinstance(current_user, InternalUser):
         return True
 
-    else:
-        # Use the authorization functions for other users
-        await authorization_verify_if_user_is_anon(current_user.id)
-        return await authorization_verify_based_on_org_admin_status(
-            request, current_user.id, action, org_uuid, db_session
-        )
+    # Use the authorization functions for other users
+    await authorization_verify_if_user_is_anon(current_user.id)
+    return await authorization_verify_based_on_org_admin_status(
+        request, current_user.id, action, org_uuid, db_session
+    )
 
 
 ## 🔒 RBAC Utils ##

@@ -1,21 +1,22 @@
 from datetime import timedelta
-from typing import Literal, Optional
-from fastapi import Depends, APIRouter, HTTPException, Response, status, Request
+from typing import Annotated, Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import ConfigDict, BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from sqlmodel import Session
-from src.db.users import AnonymousUser, UserRead
-from src.core.events.database import get_db_session
+
 from config.config import get_openu_config
+from src.core.events.database import get_db_session
+from src.db.users import AnonymousUser, UserRead
 from src.security.auth import AuthJWT, authenticate_user, get_current_user
 from src.services.auth.utils import signWithGoogle
-
 
 router = APIRouter()
 
 
 @router.get("/refresh")
-def refresh(response: Response, Authorize: AuthJWT = Depends()):
+def refresh(response: Response, Authorize: Annotated[AuthJWT, Depends()]):
     """
     The jwt_refresh_token_required() function insures a valid refresh
     token is present in the request before running any code below that function.
@@ -41,9 +42,9 @@ def refresh(response: Response, Authorize: AuthJWT = Depends()):
 async def login(
     request: Request,
     response: Response,
-    Authorize: AuthJWT = Depends(),
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db_session: Session = Depends(get_db_session),
+    Authorize: Annotated[AuthJWT, Depends()],
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ):
     user = await authenticate_user(
         request, form_data.username, form_data.password, db_session
@@ -70,11 +71,10 @@ async def login(
 
     user = UserRead.model_validate(user)
 
-    result = {
+    return {
         "user": user,
         "tokens": {"access_token": access_token, "refresh_token": refresh_token},
     }
-    return result
 
 
 class ThirdPartyLogin(BaseModel):
@@ -89,7 +89,7 @@ async def third_party_login(
     request: Request,
     response: Response,
     body: ThirdPartyLogin,
-    org_id: Optional[int] = None,
+    org_id: int | None = None,
     current_user: AnonymousUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
     Authorize: AuthJWT = Depends(),
@@ -122,15 +122,14 @@ async def third_party_login(
 
     user = UserRead.model_validate(user)
 
-    result = {
+    return {
         "user": user,
         "tokens": {"access_token": access_token, "refresh_token": refresh_token},
     }
-    return result
 
 
 @router.delete("/logout")
-def logout(Authorize: AuthJWT = Depends()):
+def logout(Authorize: Annotated[AuthJWT, Depends()]):
     """
     Because the JWT are stored in an httponly cookie now, we cannot
     log the user out by simply deleting the cookies in the frontend.
