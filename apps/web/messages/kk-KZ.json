@@ -828,6 +828,7 @@
     "document": "Құжат",
     "general": "Жалпы",
     "image": "Сурет",
+    "learningMaterial": "Оқу материалы",
     "linkTo": "{learningText} сілтеме",
     "markAsComplete": "Аяқталды деп белгілеу",
     "next": "Келесі",
@@ -1959,8 +1960,8 @@
           "newCustomLinkDefaultLabel": "Сілтеме",
           "saveButton": "Өзгерістерді сақтау",
           "savingButton": "Сақталуда...",
-          "xPlaceholder": "X профилінің URL мекенжайы",
           "tiktokPlaceholder": "TikTok профилінің URL мекенжайы",
+          "xPlaceholder": "X профилінің URL мекенжайы",
           "youtubePlaceholder": "YouTube арнасының URL мекенжайы"
         },
         "customLinksTitle": "Арнайы сілтемелер",

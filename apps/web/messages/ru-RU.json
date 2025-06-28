@@ -828,6 +828,7 @@
     "document": "Документ",
     "general": "Общие",
     "image": "Изображение",
+    "learningMaterial": "Учебный материал",
     "linkTo": "Ссылка на {learningText}",
     "markAsComplete": "Отметить как завершенное",
     "next": "Далее",

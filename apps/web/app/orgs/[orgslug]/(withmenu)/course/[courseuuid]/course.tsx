@@ -1,5 +1,16 @@
 'use client';
-import { ArrowRight, Backpack, Check, ChevronUp, File, ImageIcon, Square, StickyNote, Video } from 'lucide-react';
+import {
+  ArrowRight,
+  Backpack,
+  Check,
+  ChevronUp,
+  File,
+  ImageIcon,
+  Layers,
+  Square,
+  StickyNote,
+  Video,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -80,25 +91,26 @@ const CourseClient = (props: any) => {
         0,
       );
       const defaultExpanded: { [key: string]: boolean } = {};
-      course.chapters.forEach((chapter: any) => {
-        defaultExpanded[chapter.chapter_uuid] = totalActivities <= 5;
+      course.chapters.forEach((chapter: any, idx: number) => {
+        // Always expand the first chapter
+        defaultExpanded[chapter.chapter_uuid] = idx === 0 ? true : totalActivities <= 5;
       });
       setExpandedChapters(defaultExpanded);
     }
-  }, [org, course, getLearningTags]);
+  }, [org, course]);
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return 'Video';
+        return t('video');
       case 'TYPE_DOCUMENT':
-        return 'Document';
+        return t('document');
       case 'TYPE_DYNAMIC':
-        return 'Page';
+        return t('page');
       case 'TYPE_ASSIGNMENT':
-        return 'Assignment';
+        return t('assignment');
       default:
-        return 'Learning Material';
+        return t('learningMaterial');
     }
   };
 
@@ -369,15 +381,12 @@ const CourseClient = (props: any) => {
             <div className="my-5 mb-10 w-full">
               <h2 className="py-5 text-xl font-bold md:text-2xl">{t('courseLessons')}</h2>
               <div className="overflow-hidden rounded-lg bg-white shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
-                {course.chapters.map((chapter: any) => {
-                  const isExpanded = expandedChapters[chapter.chapter_uuid] ?? true; // Default to expanded
+                {course.chapters.map((chapter: any, idx: number) => {
+                  const isExpanded = expandedChapters[chapter.chapter_uuid] ?? idx === 0; // Default to expanded for first chapter
                   return (
-                    <div
-                      key={chapter.chapter_uuid || `chapter-${chapter.name}`}
-                      className=""
-                    >
+                    <div key={chapter.chapter_uuid || `chapter-${chapter.name}`}>
                       <div
-                        className="flex cursor-pointer items-center bg-neutral-50 px-4 py-4 text-lg font-bold text-neutral-600 outline-1 outline-neutral-200/40 transition-colors hover:bg-neutral-100"
+                        className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-bold text-neutral-600 outline-1 outline-neutral-200/40 transition-colors hover:bg-neutral-100"
                         onClick={() =>
                           setExpandedChapters((prev) => ({
                             ...prev,
@@ -385,14 +394,47 @@ const CourseClient = (props: any) => {
                           }))
                         }
                       >
-                        <h3 className="mr-3 grow break-words">{chapter.name}</h3>
-                        <div className="flex items-center space-x-3">
-                          <p className="shrink-0 whitespace-nowrap rounded-full px-3 py-[2px] text-sm font-normal text-neutral-400 outline-1 outline-neutral-200">
-                            {t('activities', {
-                              activitiesLength: chapter.activities.length,
-                            })}
-                          </p>
-                          <ChevronUp size={16} />
+                        {/* Chevron on the far left, vertically centered with the title */}
+                        <div className="mr-3 flex flex-col justify-center pt-1">
+                          <svg
+                            className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </div>
+                        {/* Title and badge column */}
+                        <div className="flex w-full flex-col items-start">
+                          <div className="mb-1 flex w-full min-w-0 flex-wrap items-center">
+                            {/* Numbered badge */}
+                            <span className="mr-2 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-neutral-200 text-xs font-semibold text-neutral-600">
+                              {idx + 1}
+                            </span>
+                            <h3
+                              className="min-w-0 truncate text-lg font-bold leading-tight sm:text-base md:text-lg"
+                              style={{ lineHeight: '1.2' }}
+                            >
+                              {chapter.name}
+                            </h3>
+                          </div>
+                          <div className="flex items-center space-x-1 text-sm font-normal text-neutral-400">
+                            <Layers
+                              size={16}
+                              className="mr-1"
+                            />
+                            <span>
+                              {t('activities', {
+                                activitiesLength: chapter.activities.length,
+                              })}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <div className={`transition-all duration-200 ${isExpanded ? 'block' : 'hidden'}`}>

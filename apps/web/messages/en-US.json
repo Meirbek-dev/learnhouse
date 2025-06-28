@@ -878,6 +878,7 @@
     "document": "Document",
     "general": "General",
     "image": "Image",
+    "learningMaterial": "Learning Material",
     "linkTo": "Link to {learningText}",
     "markAsComplete": "Mark as complete",
     "next": "Next",

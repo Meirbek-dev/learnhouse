@@ -395,7 +395,7 @@ const OrgEditLanding = () => {
               <Switch
                 checked={isLandingEnabled}
                 onCheckedChange={setIsLandingEnabled}
-                className="h-6 w-11 [&>span]:h-5 [&>span]:w-5 [&>span]:data-[state=checked]:translate-x-5.5"
+                className="[&>span]:data-[state=checked]:translate-x-5.5 h-6 w-11 [&>span]:h-5 [&>span]:w-5"
               />
               <Label className="sr-only">{t('enableToggleLabel')}</Label>
             </div>
