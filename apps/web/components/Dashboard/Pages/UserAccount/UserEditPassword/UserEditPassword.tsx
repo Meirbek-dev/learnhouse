@@ -37,7 +37,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 type PasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
 function UserEditPassword() {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.Notifications');
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
@@ -58,7 +58,12 @@ function UserEditPassword() {
   const onSubmit = async (values: PasswordFormData) => {
     const loadingToast = toast.loading(t('updating'));
     try {
-      const user_id = session.data.user.id;
+      const user_id = session?.data?.user?.id;
+      if (!user_id) {
+        toast.error(t('passwordUpdateError'), { id: loadingToast });
+        return;
+      }
+
       const response = await updatePassword(user_id, values, access_token);
 
       if (response.success) {

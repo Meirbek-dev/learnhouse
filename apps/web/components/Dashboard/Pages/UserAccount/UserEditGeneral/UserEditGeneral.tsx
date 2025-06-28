@@ -629,7 +629,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 };
 
 function UserEditGeneral() {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const [localAvatar, setLocalAvatar] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -701,8 +701,15 @@ function UserEditGeneral() {
     setIsLoading(true);
     setError(undefined);
     setSuccess('');
+
+    if (!session?.data?.user?.id || !access_token) {
+      setError(t('avatarError'));
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const res = await updateUserAvatar(session.data.user_uuid, file, access_token);
+      const res = await updateUserAvatar(session.data.user.id, file, access_token);
       if (res.success === false) {
         setError(res.HTTPmessage || t('avatarError'));
       } else {
@@ -743,6 +750,11 @@ function UserEditGeneral() {
   };
 
   const onSubmit = async (values: FormValues) => {
+    if (!userData?.id || !access_token) {
+      toast.error(t('profileUpdateError'));
+      return;
+    }
+
     const isEmailChanged = values.email !== userData.email;
     const loadingToast = toast.loading(t('updating'));
 

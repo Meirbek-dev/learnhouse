@@ -26,12 +26,14 @@ function setOrgslugCookie(response: NextResponse, orgslug: string) {
   response.cookies.set({
     name: 'openu_current_orgslug',
     value: orgslug,
-    domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+    domain: OPENU_TOP_DOMAIN === 'localhost' ? undefined : OPENU_TOP_DOMAIN,
     path: '/',
+    secure: OPENU_TOP_DOMAIN !== 'localhost',
+    sameSite: 'lax',
   });
 }
 
-export default auth(async (req: NextRequest) => {
+export default auth(async (req) => {
   // Get initial data
   const default_org = getDefaultOrg() as string;
   const { pathname, search } = req.nextUrl;

@@ -1,4 +1,5 @@
 'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, Check, User } from 'lucide-react';
 import Image from 'next/image';
@@ -209,7 +210,7 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
       <div>
         <div className="mx-10 mb-5 mt-5 flex h-0.5 rounded-2xl bg-slate-100" />
         <button
-          onClick={() => signIn('google')}
+          onClick={() => signIn('google', { callbackUrl: '/redirect_from_auth' })}
           className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={form.formState.isSubmitting}
         >

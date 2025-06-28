@@ -18,7 +18,7 @@ import UserAvatar from '../../Objects/UserAvatar';
 
 function DashLeftMenu() {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const [loading, setLoading] = useState(true);
   const isPaymentsEnabled = useFeatureFlag({
     path: ['features', 'payments', 'enabled'],
@@ -27,8 +27,8 @@ function DashLeftMenu() {
   const t = useTranslations('DashboardMenu');
 
   const waitForEverythingToLoad = useCallback(() => {
-    return org && session;
-  }, [org, session]);
+    return org && session.data;
+  }, [org, session.data]);
 
   async function logOutUI() {
     await signOut({
@@ -42,6 +42,10 @@ function DashLeftMenu() {
       setLoading(false);
     }
   }, [waitForEverythingToLoad]);
+
+  if (loading || !session.data?.user) {
+    return null;
+  }
 
   return (
     <div

@@ -11,23 +11,53 @@ import {
 import { getUriWithOrg, OPENU_TOP_DOMAIN } from '@/services/config/config';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 
-// Add type declarations for session cache
+// Improved type declarations for session cache - Edge Runtime compatible
 declare global {
-  var sessionCache: {
-    [key: string]: {
-      data: any;
-      timestamp: number;
-    };
+  var sessionCache: Map<string, {
+    data: SessionData;
+    timestamp: number;
+  }> | undefined;
+}
+
+// Edge Runtime compatible cache implementation
+const getSessionCache = () => {
+  if (typeof globalThis !== 'undefined') {
+    if (!globalThis.sessionCache || !(globalThis.sessionCache instanceof Map)) {
+      globalThis.sessionCache = new Map();
+    }
+    return globalThis.sessionCache;
+  }
+  // Fallback for environments without globalThis
+  return new Map();
+};
+
+interface SessionData {
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    first_name?: string;
+    last_name?: string;
+    [key: string]: any;
+  };
+  roles: string[];
+  tokens: {
+    access_token: string;
+    refresh_token: string;
+    expiry: number;
   };
 }
 
 interface UserWithTokens {
-  id?: string;
-  email?: string;
-  tokens?: {
-    access_token?: string;
-    refresh_token?: string;
-    expiry?: number;
+  id: string;
+  email: string;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  tokens: {
+    access_token: string;
+    refresh_token: string;
+    expiry: number;
   };
   [key: string]: any;
 }
@@ -35,7 +65,7 @@ interface UserWithTokens {
 export const isDevEnv = OPENU_TOP_DOMAIN === 'localhost';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  debug: true,
+  debug: isDevEnv,
   providers: [
     Credentials({
       name: 'Credentials',
@@ -46,18 +76,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const unsanitized_req = await loginAndGetToken(credentials.email, credentials.password);
-        const res = await getResponseMetadata(unsanitized_req);
+        try {
+          const unsanitized_req = await loginAndGetToken(credentials.email, credentials.password);
+          const res = await getResponseMetadata(unsanitized_req);
 
-        if (res.success) {
-          return res.data;
+          if (res.success && res.data) {
+            return res.data as UserWithTokens;
+          }
+          return null;
+        } catch (error) {
+          console.error('Authorization error:', error);
+          return null;
         }
-        return null;
       },
     }),
     Google({
-      clientId: process.env.OPENU_GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.OPENU_GOOGLE_CLIENT_SECRET || '',
+      clientId: process.env.OPENU_GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.OPENU_GOOGLE_CLIENT_SECRET!,
     }),
   ],
   pages: {
@@ -77,18 +112,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     },
   },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
+  trustHost: true, // Required for NextAuth v5
   callbacks: {
     async jwt({ token, user, account }) {
       // First sign in with Credentials provider
       if (account?.provider === 'credentials' && user) {
         token.user = user as UserWithTokens;
+        return token;
       }
 
       // Sign up with Google
-      if (account?.provider === 'google' && user?.email) {
-        const unsanitized_req = await loginWithOAuthToken(user.email, 'google', account.access_token || '');
-        const userFromOAuth = await getResponseMetadata(unsanitized_req);
-        token.user = userFromOAuth.data as UserWithTokens;
+      if (account?.provider === 'google' && user?.email && account.access_token) {
+        try {
+          const unsanitized_req = await loginWithOAuthToken(user.email, 'google', account.access_token);
+          const userFromOAuth = await getResponseMetadata(unsanitized_req);
+          if (userFromOAuth.success && userFromOAuth.data) {
+            token.user = userFromOAuth.data as UserWithTokens;
+          }
+        } catch (error) {
+          console.error('OAuth authentication error:', error);
+          return null;
+        }
       }
 
       // Refresh token only if it's close to expiring (5 minutes before expiry)
@@ -102,57 +151,88 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             const refreshToken = userWithTokens.tokens.refresh_token;
             if (refreshToken) {
               const refreshedToken = await getNewAccessTokenUsingRefreshTokenServer(refreshToken);
-              token.user = {
-                ...userWithTokens,
-                tokens: {
-                  ...userWithTokens.tokens,
-                  access_token: refreshedToken.access_token,
-                  expiry: Date.now() + 60 * 60 * 1000, // 1 hour from now
-                },
-              } as UserWithTokens;
+              if (refreshedToken.access_token) {
+                token.user = {
+                  ...userWithTokens,
+                  tokens: {
+                    ...userWithTokens.tokens,
+                    access_token: refreshedToken.access_token,
+                    expiry: Date.now() + 60 * 60 * 1000, // 1 hour from now
+                  },
+                } as UserWithTokens;
+              }
             }
           } catch (error) {
             console.error('Token refresh failed:', error);
-            // Optionally return null to force re-authentication
+            // Return null to force re-authentication
+            return null;
           }
         }
       }
       return token;
     },
     async session({ session, token }) {
-      // Include user information in the session
       const userWithTokens = token.user as UserWithTokens;
-      if (userWithTokens) {
-        // Cache the session for 5 minutes to avoid frequent API calls
-        const cacheKey = `user_session_${userWithTokens.tokens?.access_token}`;
-        const cachedSession = global.sessionCache?.[cacheKey];
-
-        if (cachedSession && Date.now() - cachedSession.timestamp < 5 * 60 * 1000) {
-          return cachedSession.data;
-        }
-
-        try {
-          const accessToken = userWithTokens.tokens?.access_token;
-          if (accessToken) {
-            const api_SESSION = await getUserSession(accessToken);
-            session.user = api_SESSION.user;
-            session.roles = api_SESSION.roles;
-            session.tokens = userWithTokens.tokens;
-
-            // Cache the session
-            if (!global.sessionCache) {
-              global.sessionCache = {};
-            }
-            global.sessionCache[cacheKey] = {
-              data: session,
-              timestamp: Date.now(),
-            };
-          }
-        } catch (error) {
-          console.error('Failed to fetch user session:', error);
-        }
+      if (!userWithTokens) {
+        return session;
       }
+
+      // Cache the session for 5 minutes to avoid frequent API calls
+      const cacheKey = `user_session_${userWithTokens.tokens?.access_token}`;
+
+      // Use Edge Runtime compatible cache
+      const cache = getSessionCache();
+      const cachedSession = cache.get(cacheKey);
+
+      if (cachedSession && Date.now() - cachedSession.timestamp < 5 * 60 * 1000) {
+        return {
+          ...session,
+          user: cachedSession.data.user,
+          roles: cachedSession.data.roles,
+          tokens: cachedSession.data.tokens,
+        };
+      }
+
+      try {
+        const accessToken = userWithTokens.tokens?.access_token;
+        if (accessToken) {
+          const api_SESSION = await getUserSession(accessToken);
+
+          const updatedSession = {
+            ...session,
+            user: api_SESSION.user,
+            roles: api_SESSION.roles,
+            tokens: userWithTokens.tokens,
+          };
+
+          // Cache the session data using Edge Runtime compatible cache
+          cache.set(cacheKey, {
+            data: {
+              user: api_SESSION.user,
+              roles: api_SESSION.roles,
+              tokens: userWithTokens.tokens,
+            },
+            timestamp: Date.now(),
+          });
+
+          return updatedSession;
+        }
+      } catch (error) {
+        console.error('Failed to fetch user session:', error);
+      }
+
       return session;
+    },
+    async authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isAuthPage = nextUrl.pathname.startsWith('/auth');
+
+      if (isAuthPage) {
+        if (isLoggedIn) return Response.redirect(new URL('/redirect_from_auth', nextUrl));
+        return true;
+      }
+
+      return isLoggedIn;
     },
   },
 });

@@ -45,20 +45,25 @@ const LoginClient = (props: LoginClientProps) => {
   });
 
   const handleSubmit = async (values: LoginFormData) => {
-    const res = await signIn('credentials', {
-      redirect: false,
-      email: values.email,
-      password: values.password,
-      callbackUrl: '/redirect_from_auth',
-    });
-    if (res?.error) {
-      setError(t('wrongCredentials'));
-    } else {
-      await signIn('credentials', {
+    try {
+      const res = await signIn('credentials', {
+        redirect: false,
         email: values.email,
         password: values.password,
-        callbackUrl: '/redirect_from_auth',
       });
+
+      if (res?.error) {
+        setError(t('wrongCredentials'));
+        return;
+      }
+
+      if (res?.ok) {
+        // Successful login, redirect
+        window.location.href = '/redirect_from_auth';
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(t('wrongCredentials'));
     }
   };
 

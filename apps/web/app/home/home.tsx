@@ -15,7 +15,7 @@ import openuLogoDark from 'public/openu_logo_dark.png';
 
 function HomeClient() {
   const t = useTranslations('HomeClient');
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const { data: orgs } = useSWR(`${getAPIUrl()}orgs/user/page/1/limit/10`, (url) => swrFetcher(url, access_token), {
     revalidateOnFocus: false,

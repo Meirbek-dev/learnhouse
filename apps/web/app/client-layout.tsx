@@ -25,18 +25,18 @@ const pageTransition = {
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
     <SessionProvider
-      refetchInterval={0} // Disable auto-refetch to reduce noise
-      refetchOnWindowFocus={false}
+      refetchInterval={5 * 60} // Refetch every 5 minutes
+      refetchOnWindowFocus={true}
       refetchWhenOffline={false}
     >
       <LHSessionProvider>
         <StyledComponentsRegistry>
           <motion.main
-            variants={variants} // Pass the variant object into Framer Motion
-            initial="hidden" // Set the initial state to variants.hidden
-            animate="enter" // Animated state to variants.enter
-            exit="exit" // Exit state (used later) to variants.exit
-            transition={pageTransition} // Set the transition to linear
+            variants={variants}
+            initial="hidden"
+            animate="enter"
+            exit="exit"
+            transition={pageTransition}
           >
             {children}
           </motion.main>
