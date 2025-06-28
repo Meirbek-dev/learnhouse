@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
+import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_another_jwt_auth import AuthJWT
-from jose import JWTError, jwt
 from pydantic import BaseModel
 from sqlmodel import Session
 
@@ -90,7 +90,7 @@ async def get_current_user(
         Authorize.jwt_optional()
         username = Authorize.get_jwt_subject() or None
         token_data = TokenData(username=username)
-    except JWTError:
+    except jwt.PyJWTError:
         raise credentials_exception
     if username:
         user = await security_get_user(
