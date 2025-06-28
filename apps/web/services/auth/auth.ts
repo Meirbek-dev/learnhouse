@@ -21,7 +21,7 @@ export async function loginAndGetToken(username: any, password: any): Promise<an
     password,
   });
 
-  const requestOptions: any = {
+  const requestOptions: RequestInit = {
     method: 'POST',
     headers: HeadersConfig,
     body: urlencoded,
@@ -29,36 +29,29 @@ export async function loginAndGetToken(username: any, password: any): Promise<an
     credentials: 'include',
   };
 
-  // fetch using await and async
-  const response = await fetch(`${getAPIUrl()}auth/login`, requestOptions);
-  return response;
+  return await fetch(`${getAPIUrl()}auth/login`, requestOptions);
 }
 
-export async function loginWithOAuthToken(email: any, provider: any, accessToken: string): Promise<any> {
-  // Request Config
-
-  // get origin
+export async function loginWithOAuthToken(email: string, provider: string, accessToken: string): Promise<Response> {
   const HeadersConfig = new Headers({
     'Content-Type': 'application/json',
   });
+
   const body = {
     email,
     provider,
     access_token: accessToken,
   };
-  const jsonBody = JSON.stringify(body);
 
-  const requestOptions: any = {
+  const requestOptions: RequestInit = {
     method: 'POST',
     headers: HeadersConfig,
-    body: jsonBody,
+    body: JSON.stringify(body),
     redirect: 'follow',
     credentials: 'include',
   };
 
-  // fetch using await and async
-  const response = await fetch(`${getAPIUrl()}auth/oauth`, requestOptions);
-  return response;
+  return await fetch(`${getAPIUrl()}auth/oauth`, requestOptions);
 }
 
 export async function sendResetLink(email: string, org_id: number) {
@@ -79,16 +72,14 @@ export async function resetPassword(email: string, new_password: string, org_id:
   return res;
 }
 
-export async function logout(): Promise<any> {
-  // Request Config
-
-  // get origin
+export async function logout(): Promise<Response> {
   const HeadersConfig = new Headers({
     'Content-Type': 'application/x-www-form-urlencoded',
   });
+
   const urlencoded = new URLSearchParams();
 
-  const requestOptions: any = {
+  const requestOptions: RequestInit = {
     method: 'DELETE',
     headers: HeadersConfig,
     body: urlencoded,
@@ -96,79 +87,134 @@ export async function logout(): Promise<any> {
     credentials: 'include',
   };
 
-  // fetch using await and async
-  const response = await fetch(`${getAPIUrl()}auth/logout`, requestOptions);
-  return response;
+  return await fetch(`${getAPIUrl()}auth/logout`, requestOptions);
 }
 
 export async function getUserInfo(token: string): Promise<any> {
+  if (typeof window === 'undefined') {
+    throw new Error('getUserInfo can only be called on the client side');
+  }
+
   const { origin } = window.location;
   const HeadersConfig = new Headers({
     Authorization: `Bearer ${token}`,
     Origin: origin,
   });
 
-  const requestOptions: any = {
+  const requestOptions: RequestInit = {
     method: 'GET',
     headers: HeadersConfig,
     redirect: 'follow',
     credentials: 'include',
   };
 
-  return fetch(`${getAPIUrl()}users/profile`, requestOptions)
-    .then((result) => result.json())
-    .catch((error) => console.log('error', error));
+  try {
+    const response = await fetch(`${getAPIUrl()}users/profile`, requestOptions);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch user info:', error);
+    throw error;
+  }
 }
 
 export async function getUserSession(token: string): Promise<any> {
+  if (!token) {
+    throw new Error('Access token is required');
+  }
+
   const HeadersConfig = new Headers({
-    Authorization: `Bearer ${token}`,
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
   });
 
-  const requestOptions: any = {
+  const requestOptions: RequestInit = {
     method: 'GET',
     headers: HeadersConfig,
     redirect: 'follow',
     credentials: 'include',
+    cache: 'no-cache',
   };
 
-  return fetch(`${getAPIUrl()}users/session`, requestOptions)
-    .then((result) => result.json())
-    .catch((error) => console.log('error', error));
+  try {
+    const response = await fetch(`${getAPIUrl()}users/session`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch user session:', error);
+    throw error;
+  }
 }
 
 export async function getNewAccessTokenUsingRefreshToken(): Promise<any> {
-  const requestOptions: any = {
+  const requestOptions: RequestInit = {
     method: 'GET',
     redirect: 'follow',
     credentials: 'include',
   };
 
-  return fetch(`${getAPIUrl()}auth/refresh`, requestOptions)
-    .then((result) => result.json())
-    .catch((error) => console.log('error', error));
+  try {
+    const response = await fetch(`${getAPIUrl()}auth/refresh`, requestOptions);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to refresh token:', error);
+    throw error;
+  }
 }
 
-export async function getNewAccessTokenUsingRefreshTokenServer(refresh_token_cookie: any): Promise<any> {
-  const requestOptions: any = {
+export async function getNewAccessTokenUsingRefreshTokenServer(refresh_token: string): Promise<any> {
+  if (!refresh_token) {
+    throw new Error('Refresh token is required');
+  }
+
+  const requestOptions: RequestInit = {
     method: 'GET',
     redirect: 'follow',
     headers: {
-      Cookie: `refresh_token_cookie=${refresh_token_cookie}`,
+      'Cookie': `refresh_token_cookie=${refresh_token}`,
+      'Content-Type': 'application/json',
     },
     credentials: 'include',
+    cache: 'no-cache',
   };
-  return fetch(`${getAPIUrl()}auth/refresh`, requestOptions)
-    .then((result) => result.json())
-    .catch((error) => console.log('error', error));
+
+  try {
+    const response = await fetch(`${getAPIUrl()}auth/refresh`, requestOptions);
+
+    if (!response.ok) {
+      throw new Error(`Failed to refresh token: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+    throw error;
+  }
 }
 
 // cookies
-
 export async function getAccessTokenFromRefreshTokenCookie(cookieStore: any) {
-  const refresh_token_cookie: any = cookieStore.get('refresh_token_cookie');
-  const access_token_cookie: any = await getNewAccessTokenUsingRefreshTokenServer(refresh_token_cookie?.value);
-  return access_token_cookie && refresh_token_cookie ? access_token_cookie.access_token : null;
+  try {
+    const refresh_token_cookie: any = cookieStore.get('refresh_token_cookie');
+    if (!refresh_token_cookie?.value) {
+      return null;
+    }
+
+    const access_token_cookie: any = await getNewAccessTokenUsingRefreshTokenServer(refresh_token_cookie.value);
+    return access_token_cookie?.access_token || null;
+  } catch (error) {
+    console.error('Failed to get access token from refresh token cookie:', error);
+    return null;
+  }
 }
 
 // signup
@@ -181,32 +227,28 @@ interface NewAccountBody {
   org_id: string;
 }
 
-export async function signup(body: NewAccountBody): Promise<any> {
+export async function signup(body: NewAccountBody): Promise<Response> {
   const HeadersConfig = new Headers({ 'Content-Type': 'application/json' });
 
-  const requestOptions: any = {
+  const requestOptions: RequestInit = {
     method: 'POST',
     headers: HeadersConfig,
     body: JSON.stringify(body),
     redirect: 'follow',
   };
 
-  const res = await fetch(`${getAPIUrl()}users/${body.org_id}`, requestOptions);
-
-  return res;
+  return await fetch(`${getAPIUrl()}users/${body.org_id}`, requestOptions);
 }
 
-export async function signUpWithInviteCode(body: NewAccountBody, invite_code: string): Promise<any> {
+export async function signUpWithInviteCode(body: NewAccountBody, invite_code: string): Promise<Response> {
   const HeadersConfig = new Headers({ 'Content-Type': 'application/json' });
 
-  const requestOptions: any = {
+  const requestOptions: RequestInit = {
     method: 'POST',
     headers: HeadersConfig,
     body: JSON.stringify(body),
     redirect: 'follow',
   };
 
-  const res = await fetch(`${getAPIUrl()}users/${body.org_id}/invite/${invite_code}`, requestOptions);
-
-  return res;
+  return await fetch(`${getAPIUrl()}users/${body.org_id}/invite/${invite_code}`, requestOptions);
 }

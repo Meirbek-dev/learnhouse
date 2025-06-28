@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getServerSession } from 'next-auth/next';
 import { getTranslations } from 'next-intl/server';
 
+import { auth } from '@/auth';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import { getUriWithOrg } from '@services/config/config';
 import { getCollectionById } from '@services/courses/collections';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { nextAuthOptions } from 'app/auth/options';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string; collectionid: string }>;
@@ -17,8 +16,8 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const session = await getServerSession(nextAuthOptions);
-  const access_token = session?.tokens?.access_token;
+  const session = await auth();
+  const access_token = session?.tokens?.access_token || null;
   const t = await getTranslations('General');
 
   // Get Org context information
@@ -26,7 +25,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     revalidate: 1800,
     tags: ['organizations'],
   });
-  const col = await getCollectionById(params.collectionid, access_token || null, {
+  const col = await getCollectionById(params.collectionid, access_token || '', {
     revalidate: 0,
     tags: ['collections'],
   });
@@ -55,14 +54,15 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 const CollectionPage = async (params: any) => {
   const t = await getTranslations('General');
-  const session = await getServerSession(nextAuthOptions);
+  const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const org = await getOrganizationContextInfo((await params.params).orgslug, {
+  const resolvedParams = await params.params;
+  const org = await getOrganizationContextInfo(resolvedParams.orgslug, {
     revalidate: 1800,
     tags: ['organizations'],
   });
-  const { orgslug } = await params.params;
-  const col = await getCollectionById((await params.params).collectionid, access_token || null, {
+  const { orgslug } = resolvedParams;
+  const col = await getCollectionById(resolvedParams.collectionid, access_token || '', {
     revalidate: 0,
     tags: ['collections'],
   });

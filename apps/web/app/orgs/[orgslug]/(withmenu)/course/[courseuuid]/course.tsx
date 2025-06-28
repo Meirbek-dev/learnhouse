@@ -1,16 +1,5 @@
 'use client';
-import {
-  ArrowRight,
-  Backpack,
-  Check,
-  ChevronUp,
-  File,
-  ImageIcon,
-  Layers,
-  Square,
-  StickyNote,
-  Video,
-} from 'lucide-react';
+import { ArrowRight, Backpack, Check, File, ImageIcon, Layers, Square, StickyNote, Video } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';

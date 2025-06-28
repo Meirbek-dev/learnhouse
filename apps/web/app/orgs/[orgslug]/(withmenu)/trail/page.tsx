@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { getServerSession } from 'next-auth/next';
 import { getTranslations } from 'next-intl/server';
 
+import { auth } from '@/auth';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { nextAuthOptions } from 'app/auth/options';
 
 import Trail from './trail';
 
@@ -14,7 +13,7 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const session = await getServerSession(nextAuthOptions);
+  const session = await auth();
   const access_token = session?.tokens?.access_token;
   const t = await getTranslations('TrailPage');
 

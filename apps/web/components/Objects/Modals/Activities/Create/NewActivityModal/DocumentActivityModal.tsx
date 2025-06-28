@@ -17,10 +17,10 @@ const validationSchema = z.object({
   file: z.instanceof(File, { message: 'Please select a PDF file' }),
 });
 
-type FormValues = {
+interface FormValues {
   name: string;
   file: File;
-};
+}
 
 function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
   const t = useTranslations('Components.DocumentPdfModal');

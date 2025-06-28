@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getServerSession } from 'next-auth/next';
 import { getTranslations } from 'next-intl/server';
 
+import { auth } from '@/auth';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
@@ -13,7 +13,6 @@ import { getUriWithOrg } from '@services/config/config';
 import { getOrgCollections } from '@services/courses/collections';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { nextAuthOptions } from 'app/auth/options';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string }>;
@@ -60,7 +59,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 const CollectionsPage = async (params: any) => {
   const t = await getTranslations('HomePage.Collections');
-  const session = await getServerSession(nextAuthOptions);
+  const session = await auth();
   const access_token = session?.tokens?.access_token;
   const { orgslug } = await params.params;
   const org = await getOrganizationContextInfo(orgslug, {
@@ -68,7 +67,7 @@ const CollectionsPage = async (params: any) => {
     tags: ['organizations'],
   });
   const org_id = org.id;
-  const collections = await getOrgCollections(org_id, access_token || null, {
+  const collections = await getOrgCollections(org_id, access_token, {
     revalidate: 0,
     tags: ['collections'],
   });

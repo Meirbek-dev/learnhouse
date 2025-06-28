@@ -31,13 +31,10 @@ function DashLeftMenu() {
   }, [org, session]);
 
   async function logOutUI() {
-    const res = await signOut({
+    await signOut({
       redirect: true,
       callbackUrl: getUriWithoutOrg(`/login?orgslug=${org.slug}`),
     });
-    if (res) {
-      getUriWithOrg(org.slug, '/');
-    }
   }
 
   useEffect(() => {

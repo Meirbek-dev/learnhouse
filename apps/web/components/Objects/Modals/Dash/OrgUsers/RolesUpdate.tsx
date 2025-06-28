@@ -25,9 +25,9 @@ const validationSchema = z.object({
   role: z.string().min(1, 'Role is required'),
 });
 
-type FormValues = {
+interface FormValues {
   role: string;
-};
+}
 
 function RolesUpdate(props: Props) {
   const t = useTranslations('Components.RolesUpdate');

@@ -15,10 +15,10 @@ const validationSchema = z.object({
   description: z.string().min(1, 'Activity description is required'),
 });
 
-type FormValues = {
+interface FormValues {
   name: string;
   description: string;
-};
+}
 
 function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
   const t = useTranslations('Components.DynamicCanvaModal');

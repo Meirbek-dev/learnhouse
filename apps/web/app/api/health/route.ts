@@ -3,37 +3,26 @@ export const revalidate = 0;
 
 import { NextResponse } from 'next/server';
 
-import { checkHealth } from '@services/utils/health';
-
 export async function GET() {
-  const health = await checkHealth();
-  if (health.success === true) {
+  try {
     return NextResponse.json(
       {
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        health: health.data,
+        version: process.env.npm_package_version || 'unknown',
+        node: process.version,
+        environment: process.env.NODE_ENV,
       },
+      { status: 200 },
+    );
+  } catch (error) {
+    return NextResponse.json(
       {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
       },
+      { status: 500 },
     );
   }
-  return NextResponse.json(
-    {
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      health: null,
-      error: health.HTTPmessage,
-    },
-    {
-      status: 503,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  );
 }

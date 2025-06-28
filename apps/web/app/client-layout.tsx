@@ -4,7 +4,6 @@ import { SessionProvider } from 'next-auth/react';
 import type { ReactNode } from 'react';
 
 import LHSessionProvider from '@components/Contexts/LHSessionContext';
-
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 
 interface ClientLayoutProps {
@@ -12,14 +11,24 @@ interface ClientLayoutProps {
 }
 
 const variants = {
-  hidden: { opacity: 0, x: 0, y: 0 },
-  enter: { opacity: 1, x: 0, y: 0 },
-  exit: { opacity: 0, x: 0, y: 0 },
-};
+  hidden: { opacity: 0 },
+  enter: { opacity: 1 },
+  exit: { opacity: 0 },
+} as const;
+
+const pageTransition = {
+  type: 'tween' as const,
+  ease: 'linear' as const,
+  duration: 0.3,
+} as const;
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
-    <SessionProvider key="session-provider">
+    <SessionProvider
+      refetchInterval={0} // Disable auto-refetch to reduce noise
+      refetchOnWindowFocus={false}
+      refetchWhenOffline={false}
+    >
       <LHSessionProvider>
         <StyledComponentsRegistry>
           <motion.main
@@ -27,8 +36,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             initial="hidden" // Set the initial state to variants.hidden
             animate="enter" // Animated state to variants.enter
             exit="exit" // Exit state (used later) to variants.exit
-            transition={{ type: 'tween', ease: 'linear', duration: 0.5 }} // Set the transition to linear
-            className=""
+            transition={pageTransition} // Set the transition to linear
           >
             {children}
           </motion.main>

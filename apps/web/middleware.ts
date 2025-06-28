@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { auth } from '@/auth';
 import { getDefaultOrg, getUriWithOrg, OPENU_TOP_DOMAIN } from './services/config/config';
 
 export const config = {
@@ -11,8 +12,8 @@ export const config = {
      * 2. /_next (Next.js internals)
      * 3. /fonts (inside /public)
      * 4. Umami Analytics
-     * 4. /examples (inside /public)
-     * 5. all root files inside /public (e.g. /favicon.ico)
+     * 5. /examples (inside /public)
+     * 6. all root files inside /public (e.g. /favicon.ico)
      */
     '/((?!api|_next|fonts|umami|examples|[\\w-]+\\.\\w+).*)',
     '/sitemap.xml',
@@ -30,7 +31,7 @@ function setOrgslugCookie(response: NextResponse, orgslug: string) {
   });
 }
 
-export default async function middleware(req: NextRequest) {
+export default auth(async (req: NextRequest) => {
   // Get initial data
   const default_org = getDefaultOrg() as string;
   const { pathname, search } = req.nextUrl;
@@ -39,6 +40,7 @@ export default async function middleware(req: NextRequest) {
   // Out of orgslug paths & rewrite
   const standard_paths = ['/home'];
   const auth_paths = ['/login', '/signup', '/reset', '/forgot'];
+
   if (standard_paths.includes(pathname)) {
     // Redirect to the same pathname with the original search params
     return NextResponse.rewrite(new URL(`${pathname}${search}`, req.url));
@@ -75,7 +77,7 @@ export default async function middleware(req: NextRequest) {
       }
       return NextResponse.redirect(redirectUrl);
     }
-    return 'Did not find the orgslug in the cookie';
+    return NextResponse.json({ error: 'Did not find the orgslug in the cookie' }, { status: 400 });
   }
 
   // Sitemap
@@ -90,4 +92,4 @@ export default async function middleware(req: NextRequest) {
   const response = NextResponse.rewrite(new URL(`/orgs/${default_org}${pathname}`, req.url));
   setOrgslugCookie(response, default_org);
   return response;
-}
+});

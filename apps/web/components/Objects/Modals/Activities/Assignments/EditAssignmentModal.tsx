@@ -65,7 +65,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
 
   // Get the appropriate date-fns locale
   const getDateFnsLocale = (locale: string) => {
-    const localeMap: Record<string, any> = {
+    const localeMap: { [key: string]: any } = {
       en: enUS,
       es: es,
       fr: fr,

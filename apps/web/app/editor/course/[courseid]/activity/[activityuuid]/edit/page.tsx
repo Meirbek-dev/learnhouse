@@ -1,15 +1,14 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
-import { getServerSession } from 'next-auth/next';
 import { getTranslations } from 'next-intl/server';
 
+import { auth } from '@/auth';
 import AIEditorProvider from '@components/Contexts/AI/AIEditorContext';
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper';
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getOrganizationContextInfoWithId } from '@services/organizations/orgs';
-import { nextAuthOptions } from 'app/auth/options';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string; activityid: string }>;
@@ -18,7 +17,7 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const session = await getServerSession(nextAuthOptions);
+  const session = await auth();
   const access_token = session?.tokens?.access_token;
   const t = await getTranslations('DashPage.Editor');
 
@@ -45,14 +44,14 @@ const jetbrainsMono = JetBrains_Mono({
 
 const EditActivity = async (props: { params: Promise<{ courseid: string; activityuuid: string }> }) => {
   const params = await props.params;
-  const session = await getServerSession(nextAuthOptions);
-  const access_token = session?.tokens?.access_token;
+  const session = await auth();
+  const access_token = session?.tokens?.access_token ?? null;
   const { activityuuid, courseid } = params;
 
   // This Promise.all() is correct as it handles two promises
   const [courseInfo, activity] = await Promise.all([
-    getCourseMetadata(courseid, { revalidate: 0, tags: ['courses'] }, access_token ?? null),
-    getActivityWithAuthHeader(activityuuid, { revalidate: 0, tags: ['activities'] }, access_token ?? null),
+    getCourseMetadata(courseid, { revalidate: 0, tags: ['courses'] }, access_token),
+    getActivityWithAuthHeader(activityuuid, { revalidate: 0, tags: ['activities'] }, access_token),
   ]);
 
   const org = await getOrganizationContextInfoWithId(
@@ -61,7 +60,7 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
       revalidate: 180,
       tags: ['organizations'],
     },
-    access_token,
+    access_token || '',
   );
 
   return (

@@ -216,7 +216,7 @@ const UserProfileBuilder = () => {
 
   // Get the appropriate date-fns locale
   const getDateFnsLocale = (locale: string): Locale => {
-    const localeMap: Record<string, Locale> = {
+    const localeMap: { [key: string]: Locale } = {
       en: enUS,
       es: es,
       fr: fr,
@@ -616,7 +616,6 @@ const DatePicker: FC<{
               setOpen(false);
             }
           }}
-          autoFocus
           locale={locale}
         />
       </PopoverContent>
@@ -1051,7 +1050,7 @@ const ExperienceEditor: FC<{
 }> = ({ t, section, onChange }) => {
   const locale = useLocale();
   const dateFnsLocale = (() => {
-    const localeMap: Record<string, Locale> = {
+    const localeMap: { [key: string]: Locale } = {
       en: enUS,
       es: es,
       fr: fr,
@@ -1251,7 +1250,7 @@ const EducationEditor: FC<{
 }> = ({ t, section, onChange }) => {
   const locale = useLocale();
   const dateFnsLocale = (() => {
-    const localeMap: Record<string, Locale> = {
+    const localeMap: { [key: string]: Locale } = {
       en: enUS,
       es: es,
       fr: fr,

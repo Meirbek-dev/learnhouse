@@ -13,11 +13,12 @@ function LHSessionProvider({ children }: { children: ReactNode }) {
   if (session && session.status === 'loading') {
     return <PageLoading />;
   }
+
   if (session) {
     return <SessionContext value={session}>{children}</SessionContext>;
   }
 
-  return;
+  return <>{children}</>;
 }
 
 export function useLHSession() {

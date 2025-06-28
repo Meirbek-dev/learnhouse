@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
-import { getServerSession } from 'next-auth/next';
 import { getTranslations } from 'next-intl/server';
 
+import { auth } from '@/auth';
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { nextAuthOptions } from 'app/auth/options';
 
 import ActivityClient from './activity';
 
@@ -37,7 +36,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const { orgslug, courseuuid, activityid } = await props.params;
-  const session = (await getServerSession(nextAuthOptions as any)) as Session;
+  const session = await auth();
   const access_token = session?.tokens?.access_token || null;
   const t = await getTranslations('General');
 
@@ -80,7 +79,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 const ActivityPage = async (params: any) => {
   // Destructure params directly
   const { orgslug, courseuuid, activityid } = await params.params;
-  const session = (await getServerSession(nextAuthOptions as any)) as Session;
+  const session = await auth();
   const access_token = session?.tokens?.access_token || null;
 
   const [course_meta, activity] = await Promise.all([

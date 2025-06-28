@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
-import { getServerSession } from 'next-auth/next';
 import { getTranslations } from 'next-intl/server';
 
+import { auth } from '@/auth';
 import { getOrgCourses } from '@services/courses/courses';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { nextAuthOptions } from 'app/auth/options';
 
 import Courses from './courses';
 
@@ -60,7 +59,7 @@ const CoursesPage = async (params: any) => {
     revalidate: 1800,
     tags: ['organizations'],
   });
-  const session = await getServerSession(nextAuthOptions);
+  const session = await auth();
   const access_token = session?.tokens?.access_token;
 
   const courses = await getOrgCourses(orgslug, { revalidate: 0, tags: ['courses'] }, access_token || null);

@@ -15,10 +15,10 @@ const validationSchema = z.object({
   description: z.string().min(1, 'Chapter description is required'),
 });
 
-type FormValues = {
+interface FormValues {
   name: string;
   description: string;
-};
+}
 
 function NewChapterModal({ submitChapter, closeModal, course }: any) {
   const t = useTranslations('Components.NewChapterModal');

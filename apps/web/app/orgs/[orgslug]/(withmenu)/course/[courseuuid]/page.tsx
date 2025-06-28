@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import { getServerSession } from 'next-auth/next';
 
+import { auth } from '@/auth';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { nextAuthOptions } from 'app/auth/options';
 
 import CourseClient from './course';
 
@@ -15,7 +14,7 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const session = await getServerSession(nextAuthOptions);
+  const session = await auth();
   const access_token = session?.tokens?.access_token;
 
   // Get Org context information
@@ -63,7 +62,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const CoursePage = async (params: any) => {
-  const session = await getServerSession(nextAuthOptions);
+  const session = await auth();
   const access_token = session?.tokens?.access_token;
 
   // Await params before using them
