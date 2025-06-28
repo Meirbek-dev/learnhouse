@@ -32,7 +32,7 @@ mailing_config:
   system_email_adress: ""
 
 database_config:
-  sql_connection_string: postgresql://openu:openu@localhost:5432/openu
+  sql_connection_string: postgresql+psycopg2://openu:openu@localhost:5432/openu
 
 redis_config:
   redis_connection_string: redis://localhost:6379/openu
