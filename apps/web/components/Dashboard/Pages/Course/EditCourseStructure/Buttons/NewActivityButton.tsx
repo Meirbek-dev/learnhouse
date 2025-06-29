@@ -111,7 +111,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
             onClick={() => {
               openNewActivityModal(props.chapterId);
             }}
-            className="max-w-auto my-3 flex h-10 items-center justify-center rounded-xl bg-black px-4 py-2 text-white hover:cursor-pointer"
+            className="max-w-auto text-primary-foreground bg-primary my-3 flex h-10 items-center justify-center rounded-xl px-4 py-2 hover:cursor-pointer"
           >
             <Layers size={17} />
             <div className="ml-2 text-sm font-semibold">{t('title')}</div>

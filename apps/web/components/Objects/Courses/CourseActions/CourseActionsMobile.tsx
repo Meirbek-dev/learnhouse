@@ -285,7 +285,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                 className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                   isStarted
                     ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                    : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+                    : 'bg-primary hover:bg-primary text-white disabled:bg-neutral-700'
                 }`}
               >
                 {isActionLoading ? (
@@ -315,7 +315,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                 <button
                   onClick={() => setIsModalOpen(true)}
                   disabled={isActionLoading}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-neutral-800 disabled:bg-neutral-700"
+                  className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
                 >
                   {isActionLoading ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -336,7 +336,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
             className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
               isStarted
                 ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+                : 'bg-primary hover:bg-primary/90 text-white disabled:bg-neutral-700'
             }`}
           >
             {isActionLoading ? (

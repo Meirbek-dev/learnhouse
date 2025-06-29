@@ -16,7 +16,13 @@ function DashMobileMenu() {
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/90 text-white shadow-xl backdrop-blur-lg">
+    <div
+      style={{
+        background:
+          'linear-gradient(160deg, #0c1222 0%, #1a2332 30%, #2d3748 60%, #4a5568 100%), radial-gradient(ellipse at top left, rgba(99, 179, 237, 0.12) 0%, transparent 60%), radial-gradient(ellipse at bottom right, rgba(167, 139, 250, 0.08) 0%, transparent 60%)',
+      }}
+      className="fixed bottom-0 left-0 right-0 text-white shadow-xl backdrop-blur-lg"
+    >
       <div className="flex h-16 items-center justify-around px-2">
         <AdminAuthorization authorizationMode="component">
           <ToolTip

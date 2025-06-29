@@ -83,7 +83,7 @@ function AssignmentsHome() {
                       query: { subpage: 'editor' },
                     }}
                     prefetch
-                    className="nice-shadow flex items-center space-x-1.5 rounded-md bg-black px-3 py-1 text-sm font-semibold text-zinc-100"
+                    className="nice-shadow bg-primary flex items-center space-x-1.5 rounded-md px-3 py-1 text-sm font-semibold text-zinc-100"
                   >
                     <GalleryVerticalEnd size={15} />
                     <p>{t('courseEditor')}</p>

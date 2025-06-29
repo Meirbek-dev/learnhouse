@@ -515,8 +515,8 @@ const OrgEditLanding = () => {
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full border-0 bg-black p-0">
-                      <div className="hover:bg-primary/90 inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-black text-sm font-medium text-white outline-none transition-all">
+                    <SelectTrigger className="hover:bg-primary/90 bg-primary w-full border-0 p-0">
+                      <div className="inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-white outline-none transition-all">
                         <Plus
                           size="8"
                           color="white"
@@ -1901,7 +1901,6 @@ const FeaturedCoursesEditor: FC<{
                           : [...section.courses, course.course_uuid];
                         onChange({ ...section, courses: newCourses });
                       }}
-                      className={section.courses.includes(course.course_uuid) ? 'bg-black hover:bg-black/90' : ''}
                     >
                       {section.courses.includes(course.course_uuid)
                         ? t('FeaturedCoursesEditor.selectedButton')

@@ -54,7 +54,7 @@ const SettingsNavigation = ({
           href={getUriWithOrg(orgslug, `/dash/user-account/settings/${item.id}`)}
         >
           <div
-            className={`w-fit border-black py-2 text-center transition-all ease-linear ${
+            className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
               currentPage === item.id ? 'border-b-4' : 'opacity-50'
             } cursor-pointer`}
           >

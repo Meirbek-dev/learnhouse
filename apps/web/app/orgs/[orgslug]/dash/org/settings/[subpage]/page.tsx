@@ -37,7 +37,7 @@ function TabLink({ tab, isActive, orgslug }: { tab: TabItem; isActive: boolean; 
   return (
     <Link href={`${getUriWithOrg(orgslug, '')}/dash/org/settings/${tab.id}`}>
       <div
-        className={`w-fit border-black py-2 text-center transition-all ease-linear ${
+        className={`w-fit border-primary py-2 text-center transition-all ease-linear ${
           isActive ? 'border-b-4' : 'opacity-50'
         } cursor-pointer`}
       >

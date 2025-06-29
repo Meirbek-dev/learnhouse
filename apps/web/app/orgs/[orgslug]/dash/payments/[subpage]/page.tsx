@@ -131,7 +131,7 @@ const TabLink = ({
 }) => (
   <Link href={href}>
     <div
-      className={`w-fit border-black py-2 text-center transition-all ease-linear ${isActive ? 'border-b-4' : 'opacity-50'} cursor-pointer`}
+      className={`border-primary w-fit py-2 text-center transition-all ease-linear ${isActive ? 'border-b-4' : 'opacity-50'} cursor-pointer`}
     >
       <div className="mx-2 flex items-center space-x-2.5">
         {icon}

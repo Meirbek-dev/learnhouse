@@ -531,8 +531,8 @@ const UserProfileBuilder = () => {
                   }
                 }}
               >
-                <SelectTrigger className="w-full border-0 bg-black p-0">
-                  <div className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-black text-sm font-medium text-white">
+                <SelectTrigger className="bg-primary w-full border-0 p-0">
+                  <div className="text-primary-foreground inline-flex w-full items-center justify-center gap-2 rounded-md text-sm font-medium">
                     <Plus color="white" />
                     {t('SectionsPanel.addSectionButton')}
                   </div>

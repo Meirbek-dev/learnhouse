@@ -1,13 +1,14 @@
 'use client';
+import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 
 function NewCollectionButton() {
   const t = useTranslations('Components.Button');
   return (
-    <button className="font my-auto flex items-center space-x-2 rounded-lg bg-black p-2 px-5 text-xs font-bold text-white antialiased ring-offset-purple-800 drop-shadow-lg transition-all duration-100 ease-linear hover:scale-105">
+    <Button className="my-auto space-x-1 rounded-lg px-5 py-2 font-bold antialiased shadow-md transition-all duration-100 ease-out hover:scale-105 hover:shadow-lg focus:outline-none active:scale-95">
       <div>{t('newCollection')}</div>
-      <div className="text-md rounded-full bg-neutral-800 px-1">+</div>
-    </button>
+      <div className="bg-primary-foreground/20 rounded-full px-1 text-sm font-medium">+</div>
+    </Button>
   );
 }
 

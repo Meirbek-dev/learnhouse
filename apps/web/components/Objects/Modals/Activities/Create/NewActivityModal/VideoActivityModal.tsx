@@ -258,7 +258,7 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
             onClick={() => setSelectedView('file')}
             className={`flex items-center justify-center gap-2 p-4 ${
               selectedView === 'file'
-                ? 'border-b-2 border-black bg-gray-100'
+                ? 'border-primary border-b-2 bg-gray-100'
                 : 'border-b border-gray-200 hover:bg-gray-50'
             }`}
           >
@@ -270,7 +270,7 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
             onClick={() => setSelectedView('youtube')}
             className={`flex items-center justify-center gap-2 p-4 ${
               selectedView === 'youtube'
-                ? 'border-b-2 border-black bg-gray-100'
+                ? 'border-primary border-b-2 bg-gray-100'
                 : 'border-b border-gray-200 hover:bg-gray-50'
             }`}
           >
@@ -296,7 +296,7 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
                 <div className="flex flex-row items-center">
                   <Label
                     htmlFor="video-activity-file"
-                    className="inline-block cursor-pointer rounded-full bg-black px-4 py-2 font-semibold text-white hover:bg-gray-800"
+                    className="bg-primary hover:bg-primary/90 inline-block cursor-pointer rounded-full px-4 py-2 font-semibold text-white"
                   >
                     {t('chooseVideoFile')}
                   </Label>

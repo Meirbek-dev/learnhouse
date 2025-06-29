@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import openuLogoDark from 'public/openu_logo_dark.png';
+import { Button } from '@components/ui/button';
 
 export default async function NotFound() {
   const t = await getTranslations('NotFoundPage');
@@ -24,15 +25,16 @@ export default async function NotFound() {
         <p className="pt-8 text-lg font-medium leading-normal tracking-tight text-black">{t('message')}</p>
       </div>
       <div className="flex flex-col items-center pt-8">
-        <button className="text-md flex h-[50px] w-fit items-center space-x-2 rounded-lg bg-black px-6 py-2 text-xl font-bold text-white shadow-md">
+        <Button className="flex h-[50px] items-center rounded-lg px-6 py-2 text-xl font-bold shadow-md">
           <Link
-            className="flex gap-2"
+            className="flex items-center gap-2"
             href="/"
+            prefetch
           >
             {t('button')}
             <ArrowRight className="ml-1 tracking-tight transition-transform duration-150 ease-in-out group-hover:translate-x-0.5" />
           </Link>
-        </button>
+        </Button>
       </div>
     </div>
   );

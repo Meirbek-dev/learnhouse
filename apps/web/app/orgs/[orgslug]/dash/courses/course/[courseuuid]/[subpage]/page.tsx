@@ -38,7 +38,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
           <div className="flex space-x-3 text-sm font-black">
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/general`}>
               <div
-                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
+                className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   params.subpage.toString() === 'general' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >
@@ -51,7 +51,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
 
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/content`}>
               <div
-                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
+                className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   params.subpage.toString() === 'content' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >
@@ -63,7 +63,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
             </Link>
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/access`}>
               <div
-                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
+                className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   params.subpage.toString() === 'access' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >
@@ -75,7 +75,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
             </Link>
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/contributors`}>
               <div
-                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
+                className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   params.subpage.toString() === 'contributors' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >

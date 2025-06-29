@@ -82,7 +82,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
         <div className="flex space-x-5 text-sm font-black">
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/users`}>
             <div
-              className={`w-fit border-black py-2 text-center transition-all ease-linear ${
+              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
                 params.subpage.toString() === 'users' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
@@ -94,7 +94,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
           </Link>
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/usergroups`}>
             <div
-              className={`w-fit border-black py-2 text-center transition-all ease-linear ${
+              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
                 params.subpage.toString() === 'usergroups' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
@@ -106,7 +106,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
           </Link>
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/signups`}>
             <div
-              className={`w-fit border-black py-2 text-center transition-all ease-linear ${
+              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
                 params.subpage.toString() === 'signups' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
@@ -118,7 +118,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
           </Link>
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/add`}>
             <div
-              className={`w-fit border-black py-2 text-center transition-all ease-linear ${
+              className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
                 params.subpage.toString() === 'add' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >

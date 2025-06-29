@@ -21,6 +21,7 @@ import openuLogoDark from 'public/openu_logo_dark.png';
 
 import InviteOnlySignUpComponent from './InviteOnlySignUp';
 import OpenSignUpComponent from './OpenSignup';
+import { Button } from '@components/ui/button';
 
 interface SignUpClientProps {
   org: any;
@@ -225,13 +226,13 @@ const NoTokenScreen = (_props: any) => {
             placeholder={t('enterInviteCode')}
             type="text"
           />
-          <button
+          <Button
             onClick={validateCode}
-            className="text-md flex h-fit w-fit items-center space-x-2 rounded-lg bg-black px-6 py-2 font-semibold text-white shadow-md"
+            className="text-md flex h-fit items-center rounded-lg px-6 py-2 font-semibold shadow-md"
           >
             <Ticket size={18} />
             <p>{t('submit')}</p>
-          </button>
+          </Button>
         </div>
       )}
     </div>

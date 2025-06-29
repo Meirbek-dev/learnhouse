@@ -68,7 +68,7 @@ function AssignmentEdit() {
           <div className="mr-10 flex space-x-2 pl-10 pt-2 text-sm font-semibold tracking-tight">
             <div
               onClick={() => setSelectedSubPage('editor')}
-              className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
+              className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                 selectedSubPage === 'editor' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
@@ -79,7 +79,7 @@ function AssignmentEdit() {
             </div>
             <div
               onClick={() => setSelectedSubPage('submissions')}
-              className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
+              className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                 selectedSubPage === 'submissions' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >

@@ -413,7 +413,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
                 className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
                   isStarted
                     ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                    : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+                    : 'bg-primary hover:bg-primary/90 text-white disabled:bg-neutral-700'
                 }`}
               >
                 {isActionLoading ? (
@@ -442,7 +442,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
                 minWidth="sm"
               />
               <button
-                className="nice-shadow flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-900 py-3 font-semibold text-white transition-colors hover:bg-neutral-800"
+                className="nice-shadow bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors"
                 onClick={() => setIsModalOpen(true)}
               >
                 <ShoppingCart className="h-5 w-5" />
@@ -469,7 +469,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
             isStarted
               ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-              : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+              : 'bg-primary hover:bg-primary/70 text-white disabled:bg-neutral-700'
           }`}
         >
           {isActionLoading ? (

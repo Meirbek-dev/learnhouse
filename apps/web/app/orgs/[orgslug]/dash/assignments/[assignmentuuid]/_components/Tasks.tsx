@@ -45,7 +45,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
             dialogTitle={t('addTaskModalTitle')}
             dialogDescription={t('addTaskModalDescription')}
             dialogTrigger={
-              <div className="flex cursor-pointer items-center justify-center space-x-1.5 rounded-md bg-black px-2 py-2 text-xs font-semibold text-white antialiased">
+              <div className="bg-primary flex cursor-pointer items-center justify-center space-x-1 rounded-md px-3 py-2 text-xs font-semibold text-white antialiased">
                 <Plus size={17} />
                 <p>{t('addTask')}</p>
               </div>
