@@ -13,10 +13,15 @@ import { getResponseMetadata } from '@/services/utils/ts/requests';
 
 // Improved type declarations for session cache - Edge Runtime compatible
 declare global {
-  var sessionCache: Map<string, {
-    data: SessionData;
-    timestamp: number;
-  }> | undefined;
+  var sessionCache:
+    | Map<
+        string,
+        {
+          data: SessionData;
+          timestamp: number;
+        }
+      >
+    | undefined;
 }
 
 // Edge Runtime compatible cache implementation

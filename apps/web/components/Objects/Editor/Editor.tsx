@@ -30,7 +30,7 @@ import { Eye, Monitor } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { styled } from 'styled-components';
 
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -85,23 +85,25 @@ function Editor(props: EditorProps) {
     }
   }, [is_ai_feature_enabled]);
 
-  // remove course_ from course_uuid
-  const course_uuid = props.course.course_uuid.slice(7);
+  // Memoize course and activity IDs
+  const courseUuid = useMemo(() => props.course.course_uuid.slice(7), [props.course.course_uuid]);
+  const activityUuid = useMemo(() => props.activity.activity_uuid.slice(9), [props.activity.activity_uuid]);
 
-  // remove activity_ from activity_uuid
-  const activity_uuid = props.activity.activity_uuid.slice(9);
+  // Memoize lowlight configuration
+  const lowlightConfig = useMemo(() => {
+    const lowlight = createLowlight(common);
+    lowlight.register('html', html);
+    lowlight.register('css', css);
+    lowlight.register('js', js);
+    lowlight.register('ts', ts);
+    lowlight.register('python', python);
+    lowlight.register('java', java);
+    return lowlight;
+  }, []);
 
-  // Code Block Languages for Lowlight
-  lowlight.register('html', html);
-  lowlight.register('css', css);
-  lowlight.register('js', js);
-  lowlight.register('ts', ts);
-  lowlight.register('python', python);
-  lowlight.register('java', java);
-
-  const editor: any = useEditor({
-    editable: true,
-    extensions: [
+  // Memoize editor extensions
+  const extensions = useMemo(
+    () => [
       StarterKit.configure({
         codeBlock: false,
         bulletList: {
@@ -146,7 +148,7 @@ function Editor(props: EditorProps) {
         modestBranding: true,
       }),
       CodeBlockLowlight.configure({
-        lowlight,
+        lowlight: lowlightConfig,
       }),
       EmbedObjects.configure({
         editable: true,
@@ -176,9 +178,21 @@ function Editor(props: EditorProps) {
         activity: props.activity,
       }),
     ],
+    [props.activity, lowlightConfig],
+  );
+
+  const editor: any = useEditor({
+    editable: true,
+    extensions,
     content: props.content,
     immediatelyRender: false,
   });
+  // Memoize content update handler
+  const handleContentSave = useCallback(() => {
+    if (editor) {
+      props.setContent(editor.getJSON());
+    }
+  }, [editor, props.setContent]);
 
   const isMobile = useIsMobile();
   if (isMobile) {
@@ -226,7 +240,7 @@ function Editor(props: EditorProps) {
                 </Link>
                 <Link
                   target="_blank"
-                  href={`/course/${course_uuid}`}
+                  href={`/course/${courseUuid}`}
                 >
                   <EditorInfoThumbnail
                     src={`${
@@ -291,7 +305,7 @@ function Editor(props: EditorProps) {
               <EditorLeftOptionsSection className="space-x-2">
                 <div
                   className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-black text-teal-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-sky-700"
-                  onClick={() => props.setContent(editor.getJSON())}
+                  onClick={handleContentSave}
                 >
                   {' '}
                   {t('save')}{' '}
@@ -299,7 +313,7 @@ function Editor(props: EditorProps) {
                 <ToolTip content={t('preview')}>
                   <Link
                     target="_blank"
-                    href={`/course/${course_uuid}/activity/${activity_uuid}`}
+                    href={`/course/${courseUuid}/activity/${activityUuid}`}
                   >
                     <div className="flex h-9 items-center justify-center rounded-lg bg-neutral-600 px-3 py-2 text-sm font-black text-neutral-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-neutral-700">
                       <Eye

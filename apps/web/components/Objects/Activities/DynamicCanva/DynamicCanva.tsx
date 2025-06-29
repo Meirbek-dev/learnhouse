@@ -8,6 +8,7 @@ import ts from 'highlight.js/lib/languages/typescript';
 import html from 'highlight.js/lib/languages/xml';
 import { common, createLowlight } from 'lowlight';
 import { styled } from 'styled-components';
+import { useMemo } from 'react';
 
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import InfoCallout from '@components/Objects/Editor/Extensions/Callout/Info/InfoCallout';
@@ -19,10 +20,6 @@ import PDFBlock from '@components/Objects/Editor/Extensions/PDF/PDFBlock';
 import QuizBlock from '@components/Objects/Editor/Extensions/Quiz/QuizBlock';
 import UserBlock from '@components/Objects/Editor/Extensions/Users/UserBlock';
 import VideoBlock from '@components/Objects/Editor/Extensions/Video/VideoBlock';
-
-// Lowlight
-
-const lowlight = createLowlight(common);
 import { NoTextInput } from '@components/Objects/Editor/Extensions/NoTextInput/NoTextInput';
 import EmbedObjects from '@components/Objects/Editor/Extensions/EmbedObjects/EmbedObjects';
 import WebPreview from '@components/Objects/Editor/Extensions/WebPreview/WebPreview';
@@ -60,18 +57,21 @@ function Canva(props: Editor) {
   const isEditable = true;
   const isMobile = useIsMobile();
 
-  // Code Block Languages for Lowlight
-  lowlight.register('html', html);
-  lowlight.register('css', css);
-  lowlight.register('js', js);
-  lowlight.register('ts', ts);
-  lowlight.register('python', python);
-  lowlight.register('java', java);
+  // Memoize lowlight configuration
+  const lowlightConfig = useMemo(() => {
+    const lowlight = createLowlight(common);
+    lowlight.register('html', html);
+    lowlight.register('css', css);
+    lowlight.register('js', js);
+    lowlight.register('ts', ts);
+    lowlight.register('python', python);
+    lowlight.register('java', java);
+    return lowlight;
+  }, []);
 
-  const editor: any = useEditor({
-    editable: isEditable,
-    immediatelyRender: false,
-    extensions: [
+  // Memoize editor extensions
+  const extensions = useMemo(
+    () => [
       StarterKit.configure({
         heading: false,
         codeBlock: false,
@@ -120,7 +120,7 @@ function Canva(props: Editor) {
         modestBranding: true,
       }),
       CodeBlockLowlight.configure({
-        lowlight,
+        lowlight: lowlightConfig,
       }),
       EmbedObjects.configure({
         editable: isEditable,
@@ -150,7 +150,13 @@ function Canva(props: Editor) {
       TableHeader,
       TableCell,
     ],
+    [props.activity, lowlightConfig, isEditable],
+  );
 
+  const editor: any = useEditor({
+    editable: isEditable,
+    immediatelyRender: false,
+    extensions,
     content: props.content,
   });
 

@@ -1,8 +1,7 @@
 import { NodeViewWrapper } from '@tiptap/react';
 import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type React from 'react';
+import { useCallback, useEffect, useRef, useState, memo, useMemo } from 'react';
 
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -30,7 +29,70 @@ const ALIGNMENTS = [
   { value: 'right', label: <AlignRight size={16} /> },
 ];
 
-const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes, deleteNode }) => {
+// Memoized sub-components for better performance
+const PreviewImage = memo(({ src, alt }: { src: string; alt: string }) => (
+  <div className="-mx-6 -mt-6 mb-0 overflow-hidden rounded-t-xl">
+    <img
+      src={src}
+      alt={alt}
+      className="block h-40 w-full object-cover"
+    />
+  </div>
+));
+PreviewImage.displayName = 'PreviewImage';
+
+const FaviconDisplay = memo(({ favicon, url, faviconAlt }: { favicon?: string; url: string; faviconAlt: string }) => (
+  <div className="mt-0 flex items-center border-t border-gray-100 pt-2">
+    {favicon && (
+      <img
+        src={favicon}
+        alt={faviconAlt}
+        className="mr-2 h-[18px] w-[18px] rounded bg-gray-100"
+      />
+    )}
+    <span className="truncate text-xs text-gray-500">{url}</span>
+  </div>
+));
+FaviconDisplay.displayName = 'FaviconDisplay';
+
+const AlignmentControls = memo(
+  ({
+    alignment,
+    onAlignmentChange,
+    alignments,
+    t,
+  }: {
+    alignment: string;
+    onAlignmentChange: (value: string) => void;
+    alignments: typeof ALIGNMENTS;
+    t: any;
+  }) => (
+    <div className="mt-4 flex flex-col items-center">
+      <div className="flex items-center gap-1">
+        <span className="mr-1 text-xs text-gray-500">{t('align')}:</span>
+        {alignments.map((opt) => (
+          <button
+            key={opt.value}
+            aria-pressed={alignment === opt.value}
+            onClick={() => onAlignmentChange(opt.value)}
+            title={t('alignOption', { value: t(opt.value) })}
+            type="button"
+            className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+              alignment === opt.value
+                ? 'border-gray-600 bg-gray-600 text-white hover:bg-gray-700'
+                : 'border-gray-200 bg-white hover:bg-gray-100'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  ),
+);
+AlignmentControls.displayName = 'AlignmentControls';
+
+const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttributes, deleteNode }) => {
   const t = useTranslations('Components.WebPreview');
   const [inputUrl, setInputUrl] = useState(node.attrs.url || '');
   const [loading, setLoading] = useState(false);
@@ -40,15 +102,18 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
   const editorContext = useEditorProvider() as EditorContext;
   const isEditable = editorContext?.isEditable ?? true;
 
-  const previewData = {
-    title: node.attrs.title,
-    description: node.attrs.description,
-    og_image: node.attrs.og_image,
-    favicon: node.attrs.favicon,
-    og_type: node.attrs.og_type,
-    og_url: node.attrs.og_url,
-    url: node.attrs.url,
-  };
+  const previewData = useMemo(
+    () => ({
+      title: node.attrs.title,
+      description: node.attrs.description,
+      og_image: node.attrs.og_image,
+      favicon: node.attrs.favicon,
+      og_type: node.attrs.og_type,
+      og_url: node.attrs.og_url,
+      url: node.attrs.url,
+    }),
+    [node.attrs],
+  );
 
   const alignment = node.attrs.alignment || 'left';
   const hasPreview = !!previewData.title;
@@ -102,9 +167,12 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
     }
   }, [node.attrs.url]);
 
-  const handleAlignmentChange = (value: string) => {
-    updateAttributes({ alignment: value });
-  };
+  const handleAlignmentChange = useCallback(
+    (value: string) => {
+      updateAttributes({ alignment: value });
+    },
+    [updateAttributes],
+  );
 
   const handleEdit = () => {
     setEditing(true);
@@ -146,10 +214,12 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
     }
   };
 
-  // Compute alignment class for CardWrapper
-  let alignClass = 'justify-start';
-  if (alignment === 'center') alignClass = 'justify-center';
-  else if (alignment === 'right') alignClass = 'justify-end';
+  const alignClass = useMemo(() => {
+    const alignment = node.attrs.alignment || 'left';
+    if (alignment === 'center') return 'justify-center';
+    if (alignment === 'right') return 'justify-end';
+    return 'justify-start';
+  }, [node.attrs.alignment]);
 
   return (
     <NodeViewWrapper className="web-preview-block relative">
@@ -336,13 +406,10 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                 style={{ textDecoration: 'none', borderBottom: 'none' }}
               >
                 {previewData.og_image && (
-                  <div className="-mx-6 -mt-6 mb-0 overflow-hidden rounded-t-xl">
-                    <img
-                      src={previewData.og_image}
-                      alt={t('previewImageAlt')}
-                      className="block h-40 w-full object-cover"
-                    />
-                  </div>
+                  <PreviewImage
+                    src={previewData.og_image}
+                    alt={t('previewImageAlt')}
+                  />
                 )}
                 <div className="pb-2 pt-4">
                   <span
@@ -359,16 +426,11 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                   </span>
                 </div>
               </a>
-              <div className="mt-0 flex items-center border-t border-gray-100 pt-2">
-                {previewData.favicon && (
-                  <img
-                    src={previewData.favicon}
-                    alt={t('faviconAlt')}
-                    className="mr-2 h-[18px] w-[18px] rounded bg-gray-100"
-                  />
-                )}
-                <span className="truncate text-xs text-gray-500">{previewData.url}</span>
-              </div>
+              <FaviconDisplay
+                favicon={previewData.favicon}
+                url={previewData.url}
+                faviconAlt={t('faviconAlt')}
+              />
               {showButton &&
                 previewData.url &&
                 (openInPopup ? (
@@ -393,28 +455,12 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                 ))}
               {/* Alignment bar in view mode */}
               {isEditable && (
-                <div className="mt-4 flex flex-col items-center">
-                  <div className="flex items-center gap-1">
-                    {/* AlignmentBar */}
-                    <span className="mr-1 text-xs text-gray-500">{t('align')}:</span>
-                    {ALIGNMENTS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        aria-pressed={alignment === opt.value}
-                        onClick={() => handleAlignmentChange(opt.value)}
-                        title={t('alignOption', { value: t(opt.value) })}
-                        type="button"
-                        className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                          alignment === opt.value
-                            ? 'border-gray-600 bg-gray-600 text-white hover:bg-gray-700'
-                            : 'border-gray-200 bg-white hover:bg-gray-100'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <AlignmentControls
+                  alignment={alignment}
+                  onAlignmentChange={handleAlignmentChange}
+                  alignments={ALIGNMENTS}
+                  t={t}
+                />
               )}
             </>
           )}
@@ -422,6 +468,8 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
       </div>
     </NodeViewWrapper>
   );
-};
+});
+
+WebPreviewComponent.displayName = 'WebPreviewComponent';
 
 export default WebPreviewComponent;
