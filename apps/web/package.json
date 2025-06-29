@@ -77,7 +77,6 @@
     "react-hot-toast": "^2.5.2",
     "react-katex": "^3.1.0",
     "react-youtube": "^10.1.0",
-    "require-in-the-middle": "^7.5.2",
     "sharp": "^0.34.2",
     "styled-components": "^6.1.19",
     "swr": "^2.3.3",
