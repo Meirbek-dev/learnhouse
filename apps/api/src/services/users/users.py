@@ -149,7 +149,7 @@ async def create_user_with_invite(
             request,
             db_session,
             InternalUser(id=0),
-            int(inviteCode.get("usergroup_id")),  # type: ignore / Convert to int since usergroup_id is expected to be int
+            int(inviteCode.get("usergroup_id")),  # type: ignore  # Convert to int since usergroup_id is expected to be int
             str(user.id),
         )
 

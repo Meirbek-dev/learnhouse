@@ -1,7 +1,7 @@
 import os
 from typing import Literal
 
-import yaml
+import yaml  # type: ignore  # PyYAML types not available
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
