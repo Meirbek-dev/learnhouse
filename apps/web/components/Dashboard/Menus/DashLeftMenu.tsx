@@ -12,7 +12,7 @@ import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import openuLogoLight from '@public/openu_logo_light.png';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getUriWithoutOrg } from '@services/config/config';
 
 import UserAvatar from '../../Objects/UserAvatar';
 

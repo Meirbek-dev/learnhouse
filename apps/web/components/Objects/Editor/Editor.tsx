@@ -187,12 +187,16 @@ function Editor(props: EditorProps) {
     content: props.content,
     immediatelyRender: false,
   });
+
+  // Destructure setContent for stable reference
+  const { setContent } = props;
+
   // Memoize content update handler
   const handleContentSave = useCallback(() => {
     if (editor) {
-      props.setContent(editor.getJSON());
+      setContent(editor.getJSON());
     }
-  }, [editor, props.setContent]);
+  }, [editor, setContent]);
 
   const isMobile = useIsMobile();
   if (isMobile) {

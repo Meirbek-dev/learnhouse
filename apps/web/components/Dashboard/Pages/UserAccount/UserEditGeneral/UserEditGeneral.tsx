@@ -702,7 +702,7 @@ function UserEditGeneral() {
     setError(undefined);
     setSuccess('');
 
-    if (!session?.data?.user?.id || !access_token) {
+    if (!(session?.data?.user?.id && access_token)) {
       setError(t('avatarError'));
       setIsLoading(false);
       return;
@@ -750,7 +750,7 @@ function UserEditGeneral() {
   };
 
   const onSubmit = async (values: FormValues) => {
-    if (!userData?.id || !access_token) {
+    if (!(userData?.id && access_token)) {
       toast.error(t('profileUpdateError'));
       return;
     }

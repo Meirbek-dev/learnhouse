@@ -27,7 +27,7 @@ declare global {
 // Edge Runtime compatible cache implementation
 const getSessionCache = () => {
   if (typeof globalThis !== 'undefined') {
-    if (!globalThis.sessionCache || !(globalThis.sessionCache instanceof Map)) {
+    if (!(globalThis.sessionCache && globalThis.sessionCache instanceof Map)) {
       globalThis.sessionCache = new Map();
     }
     return globalThis.sessionCache;
@@ -79,7 +79,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!(credentials?.email && credentials?.password)) return null;
 
         try {
           const unsanitized_req = await loginAndGetToken(credentials.email, credentials.password);
@@ -96,8 +96,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
     Google({
-      clientId: process.env.OPENU_GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.OPENU_GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.OPENU_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.OPENU_GOOGLE_CLIENT_SECRET,
     }),
   ],
   pages: {

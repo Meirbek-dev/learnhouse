@@ -26,7 +26,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
     <SessionProvider
       refetchInterval={5 * 60} // Refetch every 5 minutes
-      refetchOnWindowFocus={true}
+      refetchOnWindowFocus
       refetchWhenOffline={false}
     >
       <LHSessionProvider>

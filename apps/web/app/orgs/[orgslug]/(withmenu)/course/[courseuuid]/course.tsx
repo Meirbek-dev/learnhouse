@@ -86,7 +86,7 @@ const CourseClient = (props: any) => {
       });
       setExpandedChapters(defaultExpanded);
     }
-  }, [org, course]);
+  }, [org, course, getLearningTags]);
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {

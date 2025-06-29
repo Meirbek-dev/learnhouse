@@ -31,12 +31,12 @@ const validationSchema = z.object({
   gradingType: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
 });
 
-type FormValues = {
+interface FormValues {
   name: string;
   description: string;
   dueDate?: string;
   gradingType: 'ALPHABET' | 'NUMERIC' | 'PERCENTAGE';
-};
+}
 
 function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
   const t = useTranslations('Components.NewAssignmentModal');
@@ -46,7 +46,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
 
   // Get the appropriate date-fns locale
   const getDateFnsLocale = (locale: string) => {
-    const localeMap: Record<string, any> = {
+    const localeMap: { [key: string]: any } = {
       en: enUS,
       es: es,
       fr: fr,
