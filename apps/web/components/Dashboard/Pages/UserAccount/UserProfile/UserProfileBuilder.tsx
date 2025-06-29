@@ -401,7 +401,7 @@ const UserProfileBuilder = () => {
 
   if (isLoading) {
     return (
-      <div className="nice-shadow mx-0 rounded-xl bg-white p-6 sm:mx-10">
+      <div className="soft-shadow mx-0 rounded-xl bg-white p-6 sm:mx-10">
         <div className="flex items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
         </div>
@@ -410,7 +410,7 @@ const UserProfileBuilder = () => {
   }
 
   return (
-    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-4">
@@ -706,7 +706,7 @@ const ImageGalleryEditor: FC<{
   onChange: (section: ImageGallerySection) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <ImageIcon className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">{t('ImageGalleryEditor.title')}</h3>
@@ -812,7 +812,7 @@ const TextEditor: FC<{
   onChange: (section: TextSection) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <TextIcon className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">{t('TextEditor.title')}</h3>
@@ -852,7 +852,7 @@ const LinksEditor: FC<{
   onChange: (section: LinksSection) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <LinkIcon className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">{t('LinksEditor.title')}</h3>
@@ -940,7 +940,7 @@ const SkillsEditor: FC<{
   onChange: (section: SkillsSection) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <Award className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">{t('SkillsEditor.title')}</h3>
@@ -1068,7 +1068,7 @@ const ExperienceEditor: FC<{
   })();
 
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <Briefcase className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">{t('ExperienceEditor.title')}</h3>
@@ -1268,7 +1268,7 @@ const EducationEditor: FC<{
   })();
 
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <GraduationCap className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">{t('EducationEditor.title')}</h3>
@@ -1462,7 +1462,7 @@ const AffiliationEditor: FC<{
   onChange: (section: AffiliationSection) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <MapPin className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">{t('AffiliationEditor.title')}</h3>
@@ -1585,7 +1585,7 @@ const CoursesEditor: FC<{
   onChange: (section: CoursesSection) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-2">
         <BookOpen className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">{t('CoursesEditor.title')}</h3>

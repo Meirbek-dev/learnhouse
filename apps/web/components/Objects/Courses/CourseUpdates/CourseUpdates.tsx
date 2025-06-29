@@ -53,7 +53,7 @@ function CourseUpdates() {
   return (
     <div
       style={{ position: 'relative' }}
-      className="nice-shadow z-20 rounded-full bg-white px-5 py-1 transition-all ease-linear hover:bg-neutral-50"
+      className="soft-shadow z-20 rounded-full bg-white px-5 py-1 transition-all ease-linear hover:bg-neutral-50"
     >
       <div
         onClick={handleModelOpen}
@@ -94,7 +94,7 @@ const UpdatesSection = () => {
   const adminStatus = useAdminStatus();
   const t = useTranslations('Courses.CourseUpdates');
   return (
-    <div className="nice-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
+    <div className="soft-shadow w-[700px] overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
       <div className="flex justify-between rounded-lg bg-gray-50/70 outline-1 outline-neutral-200/40">
         <div className="flex items-center space-x-2 px-4 py-2 font-bold text-gray-500">
           <Rss size={16} />
@@ -162,7 +162,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
   useEffect(() => {}, [course, org]);
 
   return (
-    <div className="nice-shadow flex w-[700px] flex-col -space-y-2 overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
+    <div className="soft-shadow flex w-[700px] flex-col -space-y-2 overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
       <div className="flex flex-col -space-y-2 px-4 pt-4">
         <div className="rounded-full px-3 py-0.5 text-xs font-semibold text-gray-500">{t('testCourse')}</div>
         <div className="rounded-full px-3 py-0.5 text-lg font-bold text-black">{t('addNewCourseUpdate')}</div>

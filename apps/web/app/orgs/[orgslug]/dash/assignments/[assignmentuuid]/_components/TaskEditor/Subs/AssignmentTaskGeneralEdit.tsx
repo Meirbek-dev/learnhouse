@@ -263,7 +263,7 @@ function UpdateTaskRef() {
             )}
           </div>
           {assignmentTaskState.assignmentTask.reference_file && !isLoading && (
-            <div className="nice-shadow relative flex flex-col items-center space-y-1 rounded-lg bg-white px-5 py-3 text-gray-400 shadow-lg">
+            <div className="soft-shadow relative flex flex-col items-center space-y-1 rounded-lg bg-white px-5 py-3 text-gray-400 shadow-lg">
               <div className="absolute right-0 top-0 flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
                 <Cloud size={15} />
               </div>

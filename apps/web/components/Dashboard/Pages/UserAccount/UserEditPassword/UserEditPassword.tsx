@@ -102,7 +102,7 @@ function UserEditPassword() {
   useEffect(() => {}, [session]);
 
   return (
-    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <div className="flex flex-col">
         <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
           <h1 className="text-xl font-bold text-gray-800">{tPassword('title')}</h1>

@@ -75,8 +75,16 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                 <div
                   style={{
                     pointerEvents: 'auto',
-                    background:
-                      'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
+                    background: `radial-gradient(ellipse at center top,
+                    oklch(0.35 0.08 260) 0%,
+                    oklch(0.25 0.05 262) 50%,
+                    oklch(0.15 0.02 264) 100%
+                ),
+                linear-gradient(45deg,
+                    oklch(0.2 0.03 258) 0%,
+                    oklch(0.3 0.06 261) 100%
+                ),
+                radial-gradient(circle at 75% 25%, oklch(0.6231 0.188 259.8145 / 0.12) 0%, transparent 40%)`,
                   }}
                   className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10"
                 >
@@ -427,8 +435,16 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
       <div
         style={{
           pointerEvents: 'auto',
-          background:
-            'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 95%)',
+          background: `radial-gradient(ellipse at center bottom,
+                    oklch(0.35 0.08 260) 0%,
+                    oklch(0.25 0.05 262) 50%,
+                    oklch(0.15 0.02 264) 100%
+                ),
+                linear-gradient(45deg,
+                    oklch(0.2 0.03 258) 0%,
+                    oklch(0.3 0.06 261) 100%
+                ),
+                radial-gradient(circle at 75% 25%, oklch(0.6231 0.188 259.8145 / 0.12) 0%, transparent 40%)`,
         }}
         className="max-w-(--breakpoint-2xl) fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
       >

@@ -70,7 +70,7 @@ function ChapterElement(props: ChapterElementProps) {
     >
       {(provided, snapshot) => (
         <div
-          className={`nice-shadow mx-2 rounded-xl bg-white px-3 pt-4 sm:mx-4 sm:px-4 sm:pt-6 md:mx-6 md:px-6 lg:mx-10 ${
+          className={`soft-shadow mx-2 rounded-xl bg-white px-3 pt-4 sm:mx-4 sm:px-4 sm:pt-6 md:mx-6 md:px-6 lg:mx-10 ${
             snapshot.isDragging ? 'rotate-1 shadow-xl ring-2 ring-blue-500/20' : ''
           }`}
           key={props.chapter.chapter_uuid}

@@ -299,7 +299,7 @@ function MathEquationBlockComponent(props: any) {
             <span className="font-medium">{t('title')}</span>
           </div>
 
-          <div className="nice-shadow rounded-md bg-white p-4">
+          <div className="soft-shadow rounded-md bg-white p-4">
             <BlockMath>{equation}</BlockMath>
           </div>
 

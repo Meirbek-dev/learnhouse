@@ -87,7 +87,7 @@ function EvaluateAssignment({ user_id }: any) {
                 <div className="flex space-x-2">
                   {task.hint && (
                     <Popover>
-                      <PopoverTrigger className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
+                      <PopoverTrigger className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
                         <Info size={13} />
                         <p className="text-xs font-semibold">{t('hint')}</p>
                       </PopoverTrigger>
@@ -105,7 +105,7 @@ function EvaluateAssignment({ user_id }: any) {
                     )}
                     target="_blank"
                     download
-                    className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900"
+                    className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900"
                   >
                     <Download size={13} />
                     <div className="flex items-center space-x-2">
@@ -143,7 +143,7 @@ function EvaluateAssignment({ user_id }: any) {
       <div className="flex items-center justify-between space-x-4 font-semibold">
         <button
           onClick={rejectAssignment}
-          className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-lg bg-rose-600/80 px-4 py-2 text-sm text-white"
+          className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-lg bg-rose-600/80 px-4 py-2 text-sm text-white"
         >
           <X size={18} />
           <span>{t('rejectAssignment')}</span>
@@ -151,7 +151,7 @@ function EvaluateAssignment({ user_id }: any) {
         <div className="flex items-center space-x-3">
           <button
             onClick={gradeAssignment}
-            className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-lg bg-violet-600/80 px-4 py-2 text-sm text-white"
+            className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-lg bg-violet-600/80 px-4 py-2 text-sm text-white"
           >
             <BookOpenCheck size={18} />
             <span>{t('setFinalGrade')}</span>
@@ -162,7 +162,7 @@ function EvaluateAssignment({ user_id }: any) {
           />
           <button
             onClick={markActivityAsDone}
-            className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-lg bg-teal-600/80 px-4 py-2 text-sm text-white"
+            className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-lg bg-teal-600/80 px-4 py-2 text-sm text-white"
           >
             <Check size={18} />
             <span>{t('markAsDone')}</span>

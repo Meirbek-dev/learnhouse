@@ -10,7 +10,7 @@ function UnconfiguredPaymentsDisclaimer() {
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
       <div className="mx-auto ml-10 mr-10">
-        <Alert className="light-shadow mb-3 border-2 border-yellow-200 bg-yellow-100/50 p-6">
+        <Alert className="subtle-shadow mb-3 border-2 border-yellow-200 bg-yellow-100/50 p-6">
           <AlertTitle className="mb-2 flex items-center space-x-2 text-lg font-semibold">
             <AlertTriangle className="h-5 w-5" />
             <span>{t('unconfiguredAlertTitle')}</span>

@@ -24,7 +24,7 @@ export default function MiniInfoTooltip({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className={`nice-shadow absolute -top-20 left-1/2 -translate-x-1/2 transform rounded-lg bg-white p-3 ${width}`}
+      className={`soft-shadow absolute -top-20 left-1/2 -translate-x-1/2 transform rounded-lg bg-white p-3 ${width}`}
     >
       <div className="flex items-center space-x-3">
         {icon && (

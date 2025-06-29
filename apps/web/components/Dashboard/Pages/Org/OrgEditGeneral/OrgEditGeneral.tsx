@@ -124,7 +124,7 @@ const OrgEditGeneral: FC = () => {
   };
 
   return (
-    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(updateOrg)}>
           <div className="flex flex-col gap-0">

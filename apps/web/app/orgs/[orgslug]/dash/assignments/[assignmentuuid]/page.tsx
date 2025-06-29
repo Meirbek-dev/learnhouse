@@ -51,7 +51,7 @@ function AssignmentEdit() {
   return (
     <div className="flex w-full flex-col">
       <AssignmentProvider assignment_uuid={`assignment_${params.assignmentuuid}`}>
-        <div className="nice-shadow z-50 flex flex-col bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="soft-shadow z-50 flex flex-col bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
           <div className="mr-10 flex h-full justify-between">
             <div className="mr-10 pl-10 tracking-tighter">
               <BrdCmpx />

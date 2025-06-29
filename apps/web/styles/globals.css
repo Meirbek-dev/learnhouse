@@ -41,12 +41,20 @@
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 
+  --radius-xs: calc(var(--radius) - 6px);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fade-out: fade-out 0.2s ease-in;
+  --animate-scale-in: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-out: scale-out 0.2s ease-in;
+
   --radius: 0.5rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
@@ -73,6 +81,7 @@
   --color-shadow-color: var(--shadow-color);
   --color-destructive-foreground: var(--destructive-foreground);
 
+  /* Keyframes */
   @keyframes accordion-down {
     from {
       height: 0;
@@ -92,64 +101,136 @@
       height: 0;
     }
   }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes scale-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+  }
 }
 
 @layer base {
+
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--color-border, currentColor);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-variant-ligatures: common-ligatures contextual;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
     letter-spacing: var(--tracking-normal);
+    font-feature-settings:
+      'kern' 1,
+      'liga' 1,
+      'clig' 1,
+      'calt' 1,
+      'ss01' 1,
+      'ss02' 1;
   }
+
 }
 
 @layer utilities {
-  .nice-shadow {
-    @apply shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40;
+
+  /* Shadow utilities */
+  .soft-shadow {
+    @apply shadow-md shadow-black/[0.08] outline-1 outline-black/[0.06];
   }
 
-  .light-shadow {
-    @apply shadow-lg shadow-gray-300/15 outline-1 outline-neutral-200/30;
+  .subtle-shadow {
+    @apply shadow-sm shadow-black/[0.04] outline-1 outline-black/[0.02];
   }
 
+  /* Background patterns */
   .custom-dots-bg {
     @apply bg-fixed;
-    background-image: radial-gradient(#4744446b 1px, transparent 1px), radial-gradient(#4744446b 1px, transparent 1px);
-    background-position:
-      0 0,
-      25px 25px;
-    background-size: 50px 50px;
+    background-image: radial-gradient(circle at 2px 2px, var(--color-muted-foreground) 1px, transparent 0);
+    background-size: 32px 32px;
     background-repeat: repeat;
+    opacity: 0.4;
   }
 
+  /* Layout utilities */
   html,
   body {
     padding: 0;
     margin: 0;
-    transition: all 0.1s ease;
+    transition:
+      background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family:
       var(--font-inter),
       Inter,
-      system-ui,
       -apple-system,
       BlinkMacSystemFont,
       'Segoe UI',
       Roboto,
+      'Helvetica Neue',
+      Arial,
       sans-serif;
+    font-synthesis: none;
+    min-height: 100vh;
   }
 
   a {
     color: inherit;
     text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   button {
     @apply cursor-pointer;
+    font-synthesis: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   * {
@@ -163,18 +244,61 @@
     }
   }
 
-  /* Basic editor styles */
-  .ProseMirror > * + * {
-    margin-top: 0.75em;
+  @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
-  /* Placeholder (at the top) */
+  /* Editor styles */
+  .ProseMirror>*+* {
+    margin-top: 1em;
+  }
+
   .ProseMirror p.is-editor-empty:first-child::before {
-    color: #adb5bd;
+    color: var(--color-muted-foreground);
     content: attr(data-placeholder);
     float: left;
     height: 0;
     pointer-events: none;
+    opacity: 0.6;
+  }
+
+  /* Ccustom scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-background);
+    border-radius: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-muted-foreground);
+    border-radius: 6px;
+    border: 2px solid var(--color-background);
+    transition: background-color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-foreground);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: var(--color-background);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-muted-foreground) var(--color-background);
   }
 }
 
@@ -211,9 +335,10 @@
   --sidebar-accent-foreground: oklch(0.3791 0.1378 265.5222);
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
   --sidebar-ring: oklch(0.6231 0.188 259.8145);
-  --font-sans: var(--font-inter), Inter, sans-serif;
-  --font-serif: Source Serif 4, serif;
-  --font-mono: JetBrains Mono, monospace;
+  /* Typography */
+  --font-sans: var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Source Serif Pro', 'Source Serif 4', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --radius: 0.5rem;
   --shadow-color: oklch(0 0 0);
   --shadow-opacity: 0.1;
@@ -291,10 +416,10 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/30;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }

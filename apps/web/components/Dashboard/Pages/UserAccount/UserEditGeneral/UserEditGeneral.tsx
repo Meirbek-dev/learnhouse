@@ -538,7 +538,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 
           {/* Profile Picture Section */}
           <div className="w-full lg:w-80">
-            <div className="nice-shadow h-full rounded-lg bg-gray-50/50 p-6">
+            <div className="soft-shadow h-full rounded-lg bg-gray-50/50 p-6">
               <div className="flex flex-col items-center space-y-6">
                 <Label className="font-bold">{t('profilePicture')}</Label>
                 {profilePicture.error && (
@@ -779,7 +779,7 @@ function UserEditGeneral() {
 
   if (initialLoading || !userData || !currentLocale) {
     return (
-      <div className="nice-shadow mx-0 rounded-xl bg-white p-8 sm:mx-10">
+      <div className="soft-shadow mx-0 rounded-xl bg-white p-8 sm:mx-10">
         <div className="flex items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
         </div>
@@ -788,7 +788,7 @@ function UserEditGeneral() {
   }
 
   return (
-    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <UserEditForm

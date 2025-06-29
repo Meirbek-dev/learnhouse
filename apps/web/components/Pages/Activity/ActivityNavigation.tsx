@@ -82,7 +82,7 @@ const NavigationButtons = ({
           <button
             onClick={() => navigateToActivity(prevActivity)}
             className={`flex cursor-pointer items-center space-x-1.5 rounded-md px-3.5 py-2 transition-all duration-200 ${
-              prevActivity ? 'nice-shadow bg-white text-gray-700' : 'cursor-not-allowed bg-gray-100 text-gray-400'
+              prevActivity ? 'soft-shadow bg-white text-gray-700' : 'cursor-not-allowed bg-gray-100 text-gray-400'
             }`}
             disabled={!prevActivity}
             title={prevActivity ? t('prevActivityTitle', { name: prevActivity.name }) : t('noPrevActivity')}
@@ -109,7 +109,7 @@ const NavigationButtons = ({
           <button
             onClick={() => navigateToActivity(nextActivity)}
             className={`flex cursor-pointer items-center space-x-1.5 rounded-md px-3.5 py-2 transition-all duration-200 ${
-              nextActivity ? 'nice-shadow bg-white text-gray-700' : 'cursor-not-allowed bg-gray-100 text-gray-400'
+              nextActivity ? 'soft-shadow bg-white text-gray-700' : 'cursor-not-allowed bg-gray-100 text-gray-400'
             }`}
             disabled={!nextActivity}
             title={nextActivity ? t('nextActivityTitle', { name: nextActivity.name }) : t('noNextActivity')}

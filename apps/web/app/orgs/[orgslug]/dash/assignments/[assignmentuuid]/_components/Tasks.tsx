@@ -56,7 +56,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
           return (
             <div
               key={task.id}
-              className="nice-shadow flex w-[250px] flex-col rounded-md bg-white p-3 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]"
+              className="soft-shadow flex w-[250px] flex-col rounded-md bg-white p-3 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]"
               onClick={() => setSelectTask(task.assignment_task_uuid)}
             >
               <div className="flex items-center justify-between px-2">

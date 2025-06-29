@@ -77,7 +77,7 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
     : '../empty_thumbnail.png';
 
   return (
-    <div className="nice-shadow relative flex w-full min-w-[280px] max-w-sm shrink-0 flex-col overflow-hidden rounded-xl bg-white">
+    <div className="soft-shadow relative flex w-full min-w-[280px] max-w-sm shrink-0 flex-col overflow-hidden rounded-xl bg-white">
       <AdminEditOptions
         course={course}
         orgSlug={orgslug}

@@ -56,7 +56,7 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
         onClick={() => createTask('QUIZ')}
         className="flex flex-col justify-center space-y-2 pt-10 text-center"
       >
-        <div className="nice-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
+        <div className="soft-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <ListTodo size={30} />
         </div>
         <p className="text-xl font-semibold text-gray-700">{t('quizTitle')}</p>
@@ -66,7 +66,7 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
         onClick={() => createTask('FILE_SUBMISSION')}
         className="flex flex-col justify-center space-y-2 pt-10 text-center"
       >
-        <div className="nice-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
+        <div className="soft-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <FileUp size={30} />
         </div>
         <p className="text-xl font-semibold text-gray-700">{t('fileSubmissionTitle')}</p>
@@ -76,7 +76,7 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
         onClick={() => toast.error(t('formNotSupported'))}
         className="flex flex-col justify-center space-y-2 pt-10 text-center opacity-25"
       >
-        <div className="nice-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
+        <div className="soft-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <AArrowUp size={30} />
         </div>
         <p className="text-xl font-semibold text-gray-700">{t('formTitle')}</p>

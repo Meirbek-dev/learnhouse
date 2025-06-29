@@ -144,7 +144,7 @@ const CourseThumbnailLanding: FC<PropsType> = ({ course, orgslug, customLink }) 
     : '../empty_thumbnail.png';
 
   return (
-    <div className="nice-shadow relative m-2 flex w-full min-w-[280px] max-w-sm shrink-0 flex-col overflow-hidden rounded-xl bg-white">
+    <div className="soft-shadow relative m-2 flex w-full min-w-[280px] max-w-sm shrink-0 flex-col overflow-hidden rounded-xl bg-white">
       <AdminEditOptions
         course={course}
         orgslug={orgslug}

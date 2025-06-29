@@ -83,7 +83,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
       {linkedProducts.data.map((product: any) => (
         <div
           key={product.id}
-          className="nice-shadow flex flex-col rounded-lg bg-slate-50/30 p-4"
+          className="soft-shadow flex flex-col rounded-lg bg-slate-50/30 p-4"
         >
           <div className="mb-2 flex items-start justify-between">
             <div className="flex flex-col items-start space-y-1">

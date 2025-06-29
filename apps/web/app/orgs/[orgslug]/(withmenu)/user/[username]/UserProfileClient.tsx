@@ -119,7 +119,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
       </div>
 
       {/* Profile Content */}
-      <div className="nice-shadow relative rounded-b-xl bg-white p-8">
+      <div className="soft-shadow relative rounded-b-xl bg-white p-8">
         {/* Avatar Positioned on the banner */}
         <div className="absolute -top-24 left-8">
           <div className="overflow-hidden rounded-xl border-4 border-white shadow-lg">

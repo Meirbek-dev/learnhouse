@@ -463,7 +463,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                   >
                     <div
                       onClick={() => view === 'student' && chooseOption(qIndex, oIndex)}
-                      className={`answer nice-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md ${
+                      className={`answer soft-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md ${
                         view === 'student'
                           ? `active:scale-110 ${
                               userSubmissions.submissions.some(
@@ -625,7 +625,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                       (questions[qIndex]?.options.length ?? 0) <= 5 && (
                         <div className="mx-auto flex justify-center px-2">
                           <div
-                            className="nice-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md"
+                            className="soft-shadow outline-3 flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md"
                             onClick={() => addOption(qIndex)}
                           >
                             <Plus
@@ -644,7 +644,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         {view === 'teacher' && questions.length <= 10 && (
           <div className="mx-auto flex justify-center px-2">
             <div
-              className="text-slate nice-shadow hover:shadow-xs my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear"
+              className="text-slate soft-shadow hover:shadow-xs my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear"
               onClick={addQuestion}
             >
               <PlusCircle

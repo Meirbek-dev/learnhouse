@@ -63,7 +63,7 @@ function AssignmentsHome() {
           {courseAssignments.map((assignments: any, index: number) => (
             <div
               key={index}
-              className="nice-shadow flex w-full flex-col space-y-2 rounded-xl bg-white p-3 sm:p-4"
+              className="soft-shadow flex w-full flex-col space-y-2 rounded-xl bg-white p-3 sm:p-4"
             >
               <div>
                 <div className="flex w-full flex-col items-start justify-between space-y-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0">
@@ -83,7 +83,7 @@ function AssignmentsHome() {
                       query: { subpage: 'editor' },
                     }}
                     prefetch
-                    className="nice-shadow bg-primary flex items-center space-x-1.5 rounded-md px-3 py-1 text-sm font-semibold text-zinc-100"
+                    className="soft-shadow bg-primary flex items-center space-x-1.5 rounded-md px-3 py-1 text-sm font-semibold text-zinc-100"
                   >
                     <GalleryVerticalEnd size={15} />
                     <p>{t('courseEditor')}</p>
@@ -93,7 +93,7 @@ function AssignmentsHome() {
                 {assignments?.map((assignment: any) => (
                   <div
                     key={assignment.assignment_uuid}
-                    className="light-shadow mt-3 flex w-full flex-col items-start justify-between space-y-2 rounded bg-gray-50 p-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0 sm:p-3"
+                    className="subtle-shadow mt-3 flex w-full flex-col items-start justify-between space-y-2 rounded bg-gray-50 p-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0 sm:p-3"
                   >
                     <div className="flex flex-col items-start space-y-1 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0">
                       <div className="flex h-fit rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold text-gray-700">
@@ -118,7 +118,7 @@ function AssignmentsHome() {
                           query: { subpage: 'editor' },
                         }}
                         prefetch
-                        className="nice-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
+                        className="soft-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
                       >
                         <Layers2 size={15} />
                         <p>{t('editor')}</p>
@@ -132,7 +132,7 @@ function AssignmentsHome() {
                           query: { subpage: 'submissions' },
                         }}
                         prefetch
-                        className="nice-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
+                        className="soft-shadow flex items-center space-x-2 rounded-full bg-white px-3 py-0.5"
                       >
                         <UserRoundPen size={15} />
                         <p>{t('submissions')}</p>

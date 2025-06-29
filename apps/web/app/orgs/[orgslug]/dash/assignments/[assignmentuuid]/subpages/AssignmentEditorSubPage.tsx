@@ -22,7 +22,7 @@ function AssignmentEditorSubPage({ assignmentuuid }: { assignmentuuid: string })
         </div>
         <AssignmentTasks assignment_uuid={`assignment_${assignmentuuid}`} />
       </div>
-      <div className="nice-shadow flex h-full w-full grow bg-[#fefcfe]">
+      <div className="soft-shadow flex h-full w-full grow bg-[#fefcfe]">
         <AssignmentProvider assignment_uuid={`assignment_${assignmentuuid}`}>
           <AssignmentTaskEditor page="general" />
         </AssignmentProvider>

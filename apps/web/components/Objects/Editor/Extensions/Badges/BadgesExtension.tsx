@@ -156,7 +156,7 @@ const BadgesExtension: FC = (props: any) => {
       <div className="relative flex items-center space-x-2">
         <div
           className={twMerge(
-            'nice-shadow my-2 flex w-fit items-center space-x-1 rounded-full px-3.5 py-1.5 text-sm font-semibold outline-2 outline-white/20',
+            'soft-shadow my-2 flex w-fit items-center space-x-1 rounded-full px-3.5 py-1.5 text-sm font-semibold outline-2 outline-white/20',
             getBadgeColor(color),
           )}
         >
@@ -177,7 +177,7 @@ const BadgesExtension: FC = (props: any) => {
               {showColorPicker && (
                 <div
                   ref={colorPickerRef}
-                  className="nice-shadow absolute left-full ml-2 rounded-full bg-white p-2"
+                  className="soft-shadow absolute left-full ml-2 rounded-full bg-white p-2"
                 >
                   <div className="flex space-x-2">
                     {colors.map((c) => (
@@ -204,12 +204,12 @@ const BadgesExtension: FC = (props: any) => {
         )}
 
         {isEditable && showPredefinedCallouts && (
-          <div className="nice-shadow absolute left-0 top-full z-10 mt-2 flex flex-wrap gap-2 rounded-lg bg-white/90 p-2 backdrop-blur-md">
+          <div className="soft-shadow absolute left-0 top-full z-10 mt-2 flex flex-wrap gap-2 rounded-lg bg-white/90 p-2 backdrop-blur-md">
             {predefinedBadges.map((badge, index) => (
               <button
                 key={index}
                 onClick={() => handlePredefinedBadgeSelect(badge)}
-                className={`flex items-center space-x-2 rounded-xl px-3 py-1 text-xs ${getBadgeColor(badge.color)} light-shadow font-bold text-gray-600 transition-all duration-100 ease-linear hover:opacity-80`}
+                className={`flex items-center space-x-2 rounded-xl px-3 py-1 text-xs ${getBadgeColor(badge.color)} subtle-shadow font-bold text-gray-600 transition-all duration-100 ease-linear hover:opacity-80`}
               >
                 <span className="text-xs">{badge.emoji}</span>
                 <span className="content capitalize">{badge.content}</span>

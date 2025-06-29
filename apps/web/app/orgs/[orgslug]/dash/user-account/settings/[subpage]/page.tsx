@@ -101,7 +101,7 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="nice-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
+      <div className="soft-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
         <BreadCrumbs
           type="user"
           last_breadcrumb={session?.user?.username}

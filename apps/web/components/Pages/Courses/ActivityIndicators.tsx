@@ -96,7 +96,7 @@ const ActivityTooltipContent = memo(
   ({ activity, isDone, isCurrent }: { activity: any; isDone: boolean; isCurrent: boolean }) => {
     const t = useTranslations('ActivityIndicators');
     return (
-      <div className="nice-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
+      <div className="soft-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
         <div className="flex items-center gap-2">
           <ActivityTypeIcon activityType={activity.activity_type} />
           <span className="text-sm text-gray-700">{activity.name}</span>
@@ -136,7 +136,7 @@ const ChapterTooltipContent = memo(
   }) => {
     const t = useTranslations('ActivityIndicators');
     return (
-      <div className="nice-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
+      <div className="soft-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-900">
             {t('chapter')} {chapterNumber}

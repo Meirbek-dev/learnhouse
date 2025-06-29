@@ -211,7 +211,7 @@ function UserBlockComponent(props: any) {
 
   return (
     <NodeViewWrapper className="block-user">
-      <div className="nice-shadow overflow-hidden rounded-lg bg-white">
+      <div className="soft-shadow overflow-hidden rounded-lg bg-white">
         {/* Header with Avatar and Name */}
         <div className="relative">
           {/* Background gradient */}

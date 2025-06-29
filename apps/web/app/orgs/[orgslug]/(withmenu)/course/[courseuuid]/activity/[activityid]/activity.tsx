@@ -317,13 +317,13 @@ function ActivityClient(props: ActivityClientProps) {
 
   useEffect(() => {
     if (activity.activity_type === 'TYPE_DYNAMIC') {
-      setBgColor(isFocusMode ? 'bg-white' : 'bg-white nice-shadow');
+      setBgColor(isFocusMode ? 'bg-white' : 'bg-white soft-shadow');
     } else if (activity.activity_type === 'TYPE_ASSIGNMENT') {
       setMarkStatusButtonActive(false);
-      setBgColor(isFocusMode ? 'bg-white' : 'bg-white nice-shadow');
+      setBgColor(isFocusMode ? 'bg-white' : 'bg-white soft-shadow');
       getAssignmentUI();
     } else {
-      setBgColor(isFocusMode ? 'bg-zinc-950' : 'bg-zinc-950 nice-shadow');
+      setBgColor(isFocusMode ? 'bg-zinc-950' : 'bg-zinc-950 soft-shadow');
     }
   }, [activity, pathname, isFocusMode, getAssignmentUI]);
 
@@ -468,7 +468,7 @@ function ActivityClient(props: ActivityClientProps) {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => setIsFocusMode(false)}
-                          className="nice-shadow cursor-pointer rounded-full bg-white p-2 hover:bg-gray-50"
+                          className="soft-shadow cursor-pointer rounded-full bg-white p-2 hover:bg-gray-50"
                           title={t('exitFocusMode')}
                         >
                           <Minimize2
@@ -795,7 +795,7 @@ function ActivityClient(props: ActivityClientProps) {
                         <div className={`drop-shadow-xs rounded-lg p-7 ${bgColor} relative`}>
                           <button
                             onClick={() => setIsFocusMode(true)}
-                            className="nice-shadow group pointer-events-auto absolute right-4 top-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
+                            className="soft-shadow group pointer-events-auto absolute right-4 top-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
                             title={t('enterFocusMode')}
                           >
                             <div className="flex items-center">
@@ -1023,7 +1023,7 @@ export function MarkStatus(props: {
               confirmationMessage={t('unmarkConfirmation')}
               dialogTitle={t('unmarkDialogTitle')}
               dialogTrigger={
-                <div className="nice-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
+                <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
                   <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
                   <div className="flex items-center space-x-2">
                     <svg
@@ -1068,7 +1068,7 @@ export function MarkStatus(props: {
         <div className="flex items-center space-x-2">
           <div className="relative">
             <div
-              className={`${isLoading ? 'opacity-90' : ''} nice-shadow flex flex-col rounded-md bg-gray-800 p-2.5 px-4 text-white transition-all duration-200 hover:cursor-pointer ${isLoading ? 'cursor-not-allowed' : 'hover:bg-gray-700'}`}
+              className={`${isLoading ? 'opacity-90' : ''} soft-shadow flex flex-col rounded-md bg-gray-800 p-2.5 px-4 text-white transition-all duration-200 hover:cursor-pointer ${isLoading ? 'cursor-not-allowed' : 'hover:bg-gray-700'}`}
               onClick={!isLoading ? markActivityAsCompleteFront : undefined}
             >
               <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
@@ -1239,7 +1239,7 @@ function PreviousActivityButton({
   return (
     <div
       onClick={navigateToActivity}
-      className="nice-shadow flex flex-col rounded-md bg-white p-2.5 px-4 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
+      className="soft-shadow flex flex-col rounded-md bg-white p-2.5 px-4 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
     >
       <span className="mb-1 text-[10px] font-bold uppercase text-gray-500">{t('previous')}</span>
       <div className="flex items-center space-x-1">
@@ -1332,7 +1332,7 @@ function AssignmentTools(props: {
         confirmationMessage={t('assignmentActions.submitConfirm')}
         dialogTitle={t('assignmentActions.submitYourAssingmentForGrading')}
         dialogTrigger={
-          <div className="nice-shadow flex flex-col rounded-md bg-cyan-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
+          <div className="soft-shadow flex flex-col rounded-md bg-cyan-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
             <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
             <div className="flex items-center space-x-2">
               <BookOpenCheck size={17} />
@@ -1348,7 +1348,7 @@ function AssignmentTools(props: {
 
   if (submission[0].submission_status === 'SUBMITTED') {
     return (
-      <div className="nice-shadow flex flex-col rounded-md bg-amber-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
+      <div className="soft-shadow flex flex-col rounded-md bg-amber-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
         <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
         <div className="flex items-center space-x-2">
           <UserRoundPen size={17} />
@@ -1360,7 +1360,7 @@ function AssignmentTools(props: {
 
   if (submission[0].submission_status === 'GRADED') {
     return (
-      <div className="nice-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
+      <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
         <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
         <div className="flex items-center space-x-2">
           <CheckCircle size={17} />

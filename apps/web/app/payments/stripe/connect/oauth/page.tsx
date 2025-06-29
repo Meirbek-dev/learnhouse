@@ -74,7 +74,7 @@ function StripeConnectCallback() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="nice-shadow mx-4 w-full max-w-md rounded-xl bg-white p-8"
+          className="soft-shadow mx-4 w-full max-w-md rounded-xl bg-white p-8"
         >
           <div className="flex flex-col items-center space-y-4 text-center">
             {status === 'processing' && (

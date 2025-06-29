@@ -87,7 +87,7 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
   );
 
   return (
-    <div className="nice-shadow mx-auto flex w-[350px] flex-row rounded-lg bg-white p-4 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+    <div className="soft-shadow mx-auto flex w-[350px] flex-row rounded-lg bg-white p-4 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
       <div className="flex w-full flex-col space-y-2">
         <div className="flex w-full justify-between">
           <h2 className="text-xs font-semibold uppercase tracking-tight text-slate-400">{t('submission')}</h2>

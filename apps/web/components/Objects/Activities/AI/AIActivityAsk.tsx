@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertTriangle, BadgeInfo, FlaskConical, MessageCircle, NotebookTabs, X } from 'lucide-react';
+import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import type { ChangeEvent, KeyboardEvent } from 'react';
@@ -40,7 +40,7 @@ function AIActivityAsk(props: AIActivityAskProps) {
             onClick={() => dispatchAIChatBot({ type: 'setIsModalOpen' })}
             style={{
               background:
-                'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(66, 35, 202, 0.88) 281deg)',
+                'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgb(62, 73, 218) 281deg)',
             }}
             className="flex items-center space-x-1 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
           >
@@ -195,8 +195,9 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
           <div
             style={{
               pointerEvents: 'auto',
-              background:
-                'linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.18) 0%, rgba(0, 0, 0, 0) 100%), rgb(2 1 25 / 98%)',
+              background: `linear-gradient(160deg, #0c1222 0%, #1a2332 30%, #2d3748 60%, #4a5568 100%),
+                       radial-gradient(ellipse at top left, rgba(99, 179, 237, 0.12) 0%, transparent 60%),
+                       radial-gradient(ellipse at bottom right, rgba(167, 139, 250, 0.08) 0%, transparent 60%)`,
             }}
             className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-inset ring-white/10 backdrop-blur-md"
           >
@@ -223,16 +224,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                 />
                 <span className="text-sm font-bold text-white"> {t('AI')}</span>
               </div>
-              <div className="flex items-center space-x-1 rounded-full bg-white/5 px-3 py-0.5 text-white/40">
-                <FlaskConical size={14} />
-                <span className="text-xs font-semibold antialiased">{t('experimental')}</span>
-              </div>
             </div>
-            <div
-              className={`w-100 mx-auto mb-3 h-0.5 rounded-full bg-white/5 ${
-                aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
-              }`}
-            />
             {aiChatBotState.messages.length > 0 && !aiChatBotState.error.isError ? (
               <div className="scrollbar-w-2 scrollbar scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full h-[237px] w-full flex-col space-y-4 overflow-scroll">
                 {aiChatBotState.messages.map((message: AIMessage, index: number) => {

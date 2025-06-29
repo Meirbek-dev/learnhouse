@@ -6,7 +6,6 @@
       "askAI": "Спросить ИИ",
       "errorTitle": "Что-то пошло не так",
       "examplesAbbr": "пр. ",
-      "experimental": "Экспериментальный",
       "hello": "Здравствуйте",
       "howCanWeHelp": "чем могу помочь?",
       "logoAlt": "Логотип OpenU AI",
@@ -178,8 +177,8 @@
       "title": "Забыли пароль"
     },
     "Layout": {
-      "accessFromOrg": "Пожалуйста, получите доступ к этой странице через организацию",
-      "orgNotSpecified": "Организация не указана"
+      "accessFromOrg": "Получите доступ к этой странице",
+      "orgNotSpecified": "Платформа не указана"
     },
     "Login": {
       "email": "Электронная почта",
@@ -627,10 +626,9 @@
       "loadError": "Не удалось загрузить структуру курса"
     },
     "Org": {
-      "fetchError": "Произошла ошибка при загрузке данных организации",
+      "fetchError": "Произошла ошибка при загрузке данных OpenU",
       "joinOrgCTA": "Присоединиться к {orgName}",
-      "notMemberInfo": "Вы еще не являетесь членом этой Организации",
-      "orgInactiveError": "Эта Организация больше не активна"
+      "notMemberInfo": "Вы еще не являетесь членом OpenU"
     }
   },
   "CourseBreadcrumbs": {
@@ -1171,7 +1169,7 @@
       },
       "Organization": {
         "description": "Настройте общие параметры",
-        "title": "Организация"
+        "title": "Платформа"
       },
       "Users": {
         "description": "Управляйте пользователями и ролями",
@@ -1606,7 +1604,7 @@
       "landingPageSavedSuccess": "Домашняя страница успешно сохранена",
       "loading": "Загрузка...",
       "newPasswordLabel": "Новый пароль",
-      "orgIdNotFound": "Идентификатор организации не найден",
+      "orgIdNotFound": "Идентификатор платформы не найден",
       "passwordUpdateError": "Не удалось обновить пароль. Пожалуйста, попробуйте еще раз.",
       "passwordUpdateSuccess": "Пароль успешно обновлен",
       "productArchivedSuccess": "Продукт успешно заархивирован.",
@@ -1631,7 +1629,7 @@
       "uploadingAndCreating": "Загрузка файла и создание активности...",
       "uploadingImage": "Загрузка изображения...",
       "userGroupDeletedSuccess": "Группа пользователей удалена.",
-      "userRemovedSuccess": "Пользователь удален из организации."
+      "userRemovedSuccess": "Пользователь удален из OpenU."
     },
     "OrgScripts": {
       "failedToLoadExternalScript": "Не удалось загрузить внешний скрипт \"{scriptName}\":",
@@ -1648,10 +1646,10 @@
       },
       "General": {
         "Form": {
-          "aboutLabel": "Об организации",
+          "aboutLabel": "О платформе",
           "aboutMax": " ",
           "aboutPlaceholder": "Подробное описание",
-          "charsLeft": "символов осталось)",
+          "charsLeft": "символов осталось",
           "descriptionLabel": "Краткое описание",
           "descriptionMax": " ",
           "descriptionPlaceholder": "Краткое описание",
@@ -1659,12 +1657,12 @@
           "exploreDescription": "Поделитесь курсами и контентом с сообществом OpenU.<br/>Включите эту функцию, чтобы помочь учащимся найти ваши ценные образовательные ресурсы.",
           "exploreLabel": "ИССЛЕДОВАТЬ",
           "exploreTitle": "Показать в OpenU Explore",
-          "labelLabel": "Метка организации",
-          "labelPlaceholder": "Выберите метку организации",
+          "labelLabel": "Метка платформы",
+          "labelPlaceholder": "Выберите метку платформы",
           "labelRequired": "Требуется метка",
-          "nameLabel": "Название организации",
+          "nameLabel": "Название платформы",
           "nameMax": " ",
-          "namePlaceholder": "Название организации",
+          "namePlaceholder": "Название платформы",
           "nameRequired": "Требуется название",
           "saveButton": "Сохранить изменения",
           "savingButton": "Сохранение..."
@@ -1700,11 +1698,11 @@
           "travel": "✈️ Путешествия",
           "vocational": "🔧 Профессиональное обучение"
         },
-        "description": "Управление профилем и настройками организации",
-        "orgUpdateFailed": "Не удалось обновить организацию",
-        "orgUpdatedSuccess": "Организация обновлена",
-        "title": "Настройки организации",
-        "updatingOrg": "Обновление организации..."
+        "description": "Управление профилем и настройками платформы",
+        "orgUpdateFailed": "Не удалось обновить данные платформы",
+        "orgUpdatedSuccess": "Платформа успешно обновлена",
+        "title": "Настройки платформы",
+        "updatingOrg": "Обновление данных платформы..."
       },
       "Images": {
         "Buttons": {
@@ -1771,7 +1769,7 @@
           "previews": "Предварительный просмотр",
           "thumbnail": "Эскиз"
         },
-        "description": "Управление логотипом, эскизом и изображениями предварительного просмотра организации.",
+        "description": "Управление логотипом, эскизом и изображениями предварительного просмотра OpenU.",
         "title": "Изображения и предварительный просмотр"
       },
       "Landing": {
@@ -1948,7 +1946,7 @@
         "savingButton": "Сохранение...",
         "title": "Домашняя страница"
       },
-      "Manage additional organization settings": "Управление дополнительными настройками организации",
+      "Manage additional organization settings": "Управление дополнительными настройками OpenU",
       "Socials": {
         "Form": {
           "addCustomLinkButton": "Добавить ссылку",
@@ -1966,11 +1964,11 @@
         },
         "customLinksTitle": "Пользовательские ссылки",
         "description": "Управляйте присутствием в социальных сетях",
-        "orgUpdateFailed": "Не удалось обновить организацию",
-        "orgUpdatedSuccess": "Организация обновлена",
+        "orgUpdateFailed": "Не удалось обновить платформу",
+        "orgUpdatedSuccess": "Данные OpenU обновлены",
         "socialLinksTitle": "Социальные ссылки",
         "title": "Социальные ссылки",
-        "updatingOrg": "Обновление организации.."
+        "updatingOrg": "Обновление данных OpenU."
       },
       "general": "Общее",
       "generalDescription": "Управление настройками",
@@ -2008,7 +2006,7 @@
       "scriptsDescription": "Управляйте пользовательскими скриптами. Используйте с осторожностью.",
       "scriptsWarning": "Для безопасности, пожалуйста, убедитесь, что вы доверяете и понимаете любые скрипты, прежде чем добавлять их. Скрипты могут взаимодействовать со страницами.",
       "tooltipWarning": "Скрипты мощные и могут влиять на безопасность и производительность сайта. Добавляйте скрипты только из надежных источников. Убедитесь, что скрипты соответствуют правилам конфиденциальности и ответственно обрабатывают пользовательские данные. Неправильно реализованные скрипты могут нарушить функциональность или создать уязвимости.",
-      "updatingOrganization": "Обновление организации...",
+      "updatingOrganization": "Обновление данных OpenU...",
       "validation": {
         "contentRequired": "Содержимое скрипта обязательно",
         "nameRequired": "Название скрипта обязательно"
@@ -2129,9 +2127,9 @@
         "archiveConfirmationMessage": "Вы уверены, что хотите архивировать этот продукт?",
         "archiveConfirmationTitle": "Архивировать {productName}?",
         "benefitsLabel": "Преимущества:",
-        "createModalDescription": "Добавьте новый продукт в вашу организацию",
-        "createModalTitle": "Создать новый продукт",
-        "createProductButton": "Создать новый продукт",
+        "createModalDescription": "Создайте платный курс",
+        "createModalTitle": "Создать новый платный курс",
+        "createProductButton": "Создать новый платный курс",
         "editButton": "Редактировать",
         "editForm": {
           "benefitsLabel": "Преимущества",
@@ -2172,7 +2170,7 @@
       "customers": "Клиенты",
       "goToConfiguration": "Перейти к конфигурации",
       "notAvailable": "Платежи недоступны",
-      "notEnabledMessage": "Функция платежей не включена для этой организации.",
+      "notEnabledMessage": "Функция платежей находится в разработке.",
       "overview": "Обзор",
       "paidProducts": "Платные продукты",
       "paidProductsInfo": "Управление платными продуктами и ценами",
@@ -2532,7 +2530,7 @@
     },
     "UserSettings": {
       "add": "Пригласить участников",
-      "addDescription": "Пригласите участников присоединиться к платформе",
+      "addDescription": "Пригласите участников присоединиться к OpenU",
       "addSection": {
         "description": "Отправить приглашение по электронной почте, через запятую",
         "emailHeader": "Электронная почта",
@@ -2546,7 +2544,7 @@
         "inviteCodeLabel": "Код приглашения",
         "inviteCodeTooltip": "Используйте один из кодов приглашения, которые вы сгенерировали на странице доступа к регистрации",
         "inviteSentSuccess": "Приглашение отправлено",
-        "invitedUsersDescription": "Пользователи, которые были приглашены присоединиться к платформе",
+        "invitedUsersDescription": "Пользователи, которые были приглашены присоединиться к OpenU",
         "invitedUsersTitle": "Приглашенные пользователи",
         "noInviteCodesAvailable": "Нет доступных кодов приглашения",
         "noInvitedUsers": "Приглашенных пользователей нет.",
@@ -2556,24 +2554,24 @@
         "signupStatusHeader": "Статус регистрации",
         "statusPending": "В ожидании",
         "statusSigned": "Зарегистрирован",
-        "textAreaPlaceholder": "Пример: spike.spiegel@bepop.space, michael.scott@dundermifflin.com",
-        "title": "Пригласить пользователей в вашу организацию"
+        "textAreaPlaceholder": "Пример: spike.spiegel@teachers.tou.edu.kz, michael.scott@students.tou.edu.kz",
+        "title": "Пригласить пользователей в OpenU"
       },
       "addTitle": "Пригласить участников",
       "desktopOnlyMessage1": "Эта страница доступна только с настольного устройства.",
       "desktopOnlyMessage2": "Пожалуйста, переключитесь на настольное устройство, чтобы просматривать и управлять настройками пользователя.",
       "desktopOnlyTitle": "Только для ПК",
       "signups": "Регистрация и коды приглашения",
-      "signupsDescription": "Выберите, откуда пользователи могут присоединиться к платформе",
+      "signupsDescription": "Выберите, откуда пользователи могут присоединиться к OpenU",
       "signupsSection": {
         "actionsHeader": "Действия",
         "activeLabel": "Активно",
         "changeJoinMethodFailed": "Ошибка изменения метода присоединения.",
         "changeToClosedButton": "Изменить на закрытый",
-        "changeToClosedConfirmation": "Вы уверены, что хотите изменить механизм регистрации на закрытый? Это позволит пользователям присоединяться к платформе только по приглашению.",
+        "changeToClosedConfirmation": "Вы уверены, что хотите изменить механизм регистрации на закрытый? Это позволит пользователям присоединяться к OpenU только по приглашению.",
         "changeToClosedModalTitle": "Изменить на закрытый?",
         "changeToOpenButton": "Изменить на открытый",
-        "changeToOpenConfirmation": "Вы уверены, что хотите изменить механизм регистрации на открытый? Это позволит пользователям свободно присоединяться к платформе.",
+        "changeToOpenConfirmation": "Вы уверены, что хотите изменить механизм регистрации на открытый? Это позволит пользователям свободно присоединяться к OpenU.",
         "changeToOpenModalTitle": "Изменить на открытый?",
         "changingJoinMethod": "Изменение метода присоединения...",
         "closedDescription": "Пользователи могут присоединиться только по приглашению",
@@ -2584,12 +2582,12 @@
         "deleteCodeModalTitle": "Удалить код?",
         "deleteInviteFailed": "Ошибка удаления кода приглашения.",
         "deletingInvite": "Удаление кода приглашения...",
-        "description": "Выберите, как пользователи могут присоединиться к платформе",
+        "description": "Выберите, как пользователи могут присоединиться к OpenU",
         "expirationHeader": "Дата истечения срока действия",
         "generateCodeButton": "Сгенерировать код приглашения",
-        "generateCodeModalDescription": "Сгенерировать новый код приглашения для платформы",
+        "generateCodeModalDescription": "Сгенерировать новый код приглашения к OpenU",
         "generateCodeModalTitle": "Сгенерировать код приглашения",
-        "inviteCodesDescription": "Коды приглашения можно скопировать и использовать для присоединения к платформе",
+        "inviteCodesDescription": "Коды приглашения можно скопировать и использовать для присоединения к OpenU",
         "inviteCodesTitle": "Коды приглашения",
         "inviteDeletedSuccess": "Код приглашения удален.",
         "joinMethodChangedSuccess": "Метод присоединения изменен на {method}.",
@@ -2643,17 +2641,17 @@
           "removeUserFailed": "Ошибка удаления пользователя"
         },
         "noActionsForAdministrators": "Нет действий для администратора",
-        "noUsersFound": "Пользователи в этой организации не найдены.",
-        "removeFromOrgButton": "Удалить из организации",
+        "noUsersFound": "Пользователи не найдены.",
+        "removeFromOrgButton": "Удалить из OpenU",
         "removeUserButton": "Удалить пользователя",
-        "removeUserModalMessage": "Вы уверены, что хотите удалить этого пользователя из организации?",
+        "removeUserModalMessage": "Вы уверены, что хотите удалить этого пользователя из OpenU?",
         "removeUserModalTitle": "Удалить {username}?",
         "removingUser": "Удаление...",
         "roleHeader": "Роль",
         "updateRoleModalDescription": "Обновить роль @{username}",
         "updateRoleModalTitle": "Обновить роль",
         "userHeader": "Пользователь",
-        "userRemovedSuccess": "Пользователь удален из организации"
+        "userRemovedSuccess": "Пользователь удален из OpenU"
       },
       "usersTitle": "Пользователи"
     }
@@ -2674,12 +2672,12 @@
       "courses": "Курсы",
       "home": "Главная панель управления",
       "logout": "Выйти",
-      "organization": "Настройки организации",
+      "organization": "Настройки OpenU",
       "payments": "Платежи",
       "userOwnedCourses": "Курсы @{username}",
       "userSettings": "Настройки @{username}",
       "users": "Пользователи",
-      "yourOrganization": "Ваша организация"
+      "yourOrganization": "OpenU"
     }
   },
   "FixedActivitySecondaryBar": {
@@ -2813,9 +2811,9 @@
   },
   "HomeClient": {
     "hello": "Привет",
-    "noOrganizations": "Вы еще не являетесь членом каких-либо организаций. Присоединитесь к одной, чтобы увидеть ее здесь.",
+    "noOrganizations": "Вы еще не являетесь членом OpenU.",
     "signOut": "Выйти",
-    "yourOrganizations": "Ваши организации"
+    "yourOrganizations": "OpenU"
   },
   "HomePage": {
     "Collections": {
@@ -2863,7 +2861,7 @@
       "success": "Коллекция успешно создана!"
     },
     "visibilityLabel": "Видимость",
-    "visibilityPrivate": "Приватная коллекция — видна только членам организации",
+    "visibilityPrivate": "Приватная коллекция — видна только пользователям OpenU",
     "visibilityPublic": "Публичная коллекция — видна всем"
   },
   "NotFoundPage": {
@@ -2907,7 +2905,7 @@
     "inviteCodeValid": "Код приглашения действителен, вы будете перенаправлены на страницу регистрации через секунду!",
     "join": "Присоединиться ",
     "joinQuestion": "присоединиться к {orgname}?",
-    "orgJoinSuccess": " успешно присоединился к организации.",
+    "orgJoinSuccess": " успешно присоединился к OpenU.",
     "submit": "Отправить "
   },
   "Trail": {

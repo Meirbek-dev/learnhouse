@@ -242,7 +242,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
       />
       <div className={`flex w-full ${alignClass}`}>
         {/* CardWrapper */}
-        <div className="nice-shadow relative my-2 min-w-[260px] max-w-[420px] rounded-xl bg-white px-6 pb-4 pt-6">
+        <div className="soft-shadow relative my-2 min-w-[260px] max-w-[420px] rounded-xl bg-white px-6 pb-4 pt-6">
           {/* PreviewCard */}
           {/* Floating edit and delete buttons (only if not editing and isEditable) */}
           {isEditable && !editing && (
@@ -436,7 +436,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                 (openInPopup ? (
                   <button
                     type="button"
-                    className="nice-shadow mt-4 block w-full rounded-xl bg-black px-4 py-2.5 text-center text-[16px] font-semibold text-white no-underline transition-all hover:bg-gray-900 hover:shadow-lg"
+                    className="soft-shadow mt-4 block w-full rounded-xl bg-black px-4 py-2.5 text-center text-[16px] font-semibold text-white no-underline transition-all hover:bg-gray-900 hover:shadow-lg"
                     style={{ textDecoration: 'none', color: 'white' }}
                     onClick={() => setPopupOpen(true)}
                   >
@@ -447,7 +447,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                     href={previewData.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="nice-shadow mt-4 block w-full rounded-xl bg-black px-4 py-2.5 text-center text-[16px] font-semibold text-white no-underline transition-all hover:bg-gray-900 hover:shadow-lg"
+                    className="soft-shadow mt-4 block w-full rounded-xl bg-black px-4 py-2.5 text-center text-[16px] font-semibold text-white no-underline transition-all hover:bg-gray-900 hover:shadow-lg"
                     style={{ textDecoration: 'none', color: 'white' }}
                   >
                     {buttonLabel || t('visitSite')}

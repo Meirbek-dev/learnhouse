@@ -33,7 +33,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
         courseuuid={getEntireCourseUUID(params.courseuuid)}
         withUnpublishedActivities
       >
-        <div className="nice-shadow z-10 bg-[#fcfbfc] pl-10 pr-10 text-sm tracking-tight">
+        <div className="soft-shadow z-10 bg-[#fcfbfc] pl-10 pr-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
           <div className="flex space-x-3 text-sm font-black">
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/general`}>

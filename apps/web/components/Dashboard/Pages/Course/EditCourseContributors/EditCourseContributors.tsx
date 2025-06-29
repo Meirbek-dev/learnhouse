@@ -486,7 +486,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 />
               </div>
               {searchQuery && (
-                <div className="nice-shadow divide-y rounded-xl bg-white">
+                <div className="soft-shadow divide-y rounded-xl bg-white">
                   {isSearching ? (
                     <div className="p-4 text-center text-sm text-gray-500">{t('searchingMessage')}</div>
                   ) : searchResults && searchResults.length > 0 ? (
@@ -575,7 +575,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                   )}
                 </div>
               )}
-              <div className="nice-shadow rounded-xl bg-white">
+              <div className="soft-shadow rounded-xl bg-white">
                 {selectedContributors.length > 0 && (
                   <div className="rounded-t-xl border-b bg-gray-100 p-3">
                     <div className="flex items-center justify-between">

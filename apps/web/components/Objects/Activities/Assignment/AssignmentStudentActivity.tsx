@@ -25,7 +25,7 @@ function AssignmentStudentActivity() {
     <div className="flex flex-col space-y-4 md:space-y-6">
       <div className="flex flex-col items-center justify-center space-y-3 md:flex-row md:space-x-3 md:space-y-0">
         <div className="flex h-fit items-center space-x-3 text-xs">
-          <div className="nice-shadow flex h-fit items-center gap-2 rounded-full bg-slate-100/5 px-4 py-2 text-sm text-slate-700 md:px-5">
+          <div className="soft-shadow flex h-fit items-center gap-2 rounded-full bg-slate-100/5 px-4 py-2 text-sm text-slate-700 md:px-5">
             <Backpack
               size={14}
               className="md:size-[14px]"
@@ -51,7 +51,7 @@ function AssignmentStudentActivity() {
       </div>
 
       {assignments?.assignment_object?.description && (
-        <div className="nice-shadow flex flex-col space-y-2 rounded-md bg-slate-100/30 p-4 md:p-6">
+        <div className="soft-shadow flex flex-col space-y-2 rounded-md bg-slate-100/30 p-4 md:p-6">
           <div className="flex flex-col space-y-3">
             <div className="flex items-center gap-2 text-slate-700">
               <Info
@@ -83,7 +83,7 @@ function AssignmentStudentActivity() {
                 <div className="flex flex-wrap gap-2">
                   {task.hint && (
                     <Popover>
-                      <PopoverTrigger className="nice-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
+                      <PopoverTrigger className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
                         <Info size={13} />
                         <p className="text-xs font-semibold">{t('hint')}</p>
                       </PopoverTrigger>
@@ -101,7 +101,7 @@ function AssignmentStudentActivity() {
                     )}
                     target="_blank"
                     download
-                    className="nice-shadow flex cursor-pointer items-center space-x-1 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900 md:space-x-2"
+                    className="soft-shadow flex cursor-pointer items-center space-x-1 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900 md:space-x-2"
                   >
                     <Download size={13} />
                     <div className="flex items-center space-x-1 md:space-x-2">

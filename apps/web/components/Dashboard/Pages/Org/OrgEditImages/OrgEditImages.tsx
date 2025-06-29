@@ -394,7 +394,7 @@ export default function OrgEditImages() {
   };
 
   return (
-    <div className="nice-shadow mx-0 mb-16 rounded-xl bg-white px-3 py-3 sm:mx-10 sm:mb-0">
+    <div className="soft-shadow mx-0 mb-16 rounded-xl bg-white px-3 py-3 sm:mx-10 sm:mb-0">
       <div className="mb-2 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
         <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
         <h2 className="text-md text-gray-500">{t('description')}</h2>

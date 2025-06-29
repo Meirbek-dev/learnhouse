@@ -381,7 +381,7 @@ const OrgEditLanding = () => {
   };
 
   return (
-    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <div className="space-y-6 p-6">
         {/* Enable/Disable Landing Page */}
         <div className="flex items-center justify-between border-b pb-4">
@@ -647,7 +647,7 @@ const HeroSectionEditor: FC<{
   };
 
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-1">
         <LayoutTemplate className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
@@ -1453,7 +1453,7 @@ const TextAndImageSectionEditor: FC<{
   onChange: (section: LandingTextAndImageSection) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-1">
         <ImageIcon className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
@@ -1563,7 +1563,7 @@ const LogosSectionEditor: FC<{
   onChange: (section: LandingLogos) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-1">
         <Award className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
@@ -1673,7 +1673,7 @@ const PeopleSectionEditor: FC<{
   onChange: (section: LandingPeople) => void;
 }> = ({ t, section, onChange }) => {
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-1">
         <Users className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">
@@ -1847,7 +1847,7 @@ const FeaturedCoursesEditor: FC<{
   );
 
   return (
-    <div className="nice-shadow space-y-6 rounded-lg bg-white p-6">
+    <div className="soft-shadow space-y-6 rounded-lg bg-white p-6">
       <div className="flex items-center space-x-1">
         <BookOpen className="h-5 w-5 text-gray-500" />
         <h3 className="text-lg font-medium">

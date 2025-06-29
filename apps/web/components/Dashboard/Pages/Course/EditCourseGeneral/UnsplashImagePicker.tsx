@@ -161,7 +161,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
               <button
                 key={label.key}
                 onClick={() => handleLabelClick(label.key)}
-                className="nice-shadow flex items-center gap-1 space-x-1 rounded-lg bg-neutral-100 px-3 py-1 transition-colors hover:bg-neutral-200"
+                className="soft-shadow flex items-center gap-1 space-x-1 rounded-lg bg-neutral-100 px-3 py-1 transition-colors hover:bg-neutral-200"
               >
                 <label.icon size={16} />
                 <span>{label.name}</span>

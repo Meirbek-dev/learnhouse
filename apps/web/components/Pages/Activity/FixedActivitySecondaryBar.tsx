@@ -202,7 +202,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
   return (
     <div
       className={`animate-in fade-in slide-in-from-top fixed left-0 right-0 top-[60px] z-40 bg-white/90 backdrop-blur-xl transition-all duration-300 ${
-        isScrolled ? 'nice-shadow' : ''
+        isScrolled ? 'soft-shadow' : ''
       }`}
     >
       <div className="container mx-auto px-4">

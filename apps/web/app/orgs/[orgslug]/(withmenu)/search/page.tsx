@@ -137,7 +137,7 @@ const LoadingState = () => (
     {[1, 2, 3, 4, 5, 6].map((i) => (
       <div
         key={i}
-        className="nice-shadow animate-pulse rounded-xl bg-white p-4"
+        className="soft-shadow animate-pulse rounded-xl bg-white p-4"
       >
         <div className="mb-4 h-32 w-full rounded-lg bg-black/5" />
         <div className="space-y-2">
@@ -287,7 +287,7 @@ function SearchPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('searchInputPlaceholder')}
-                className="nice-shadow h-12 w-full rounded-xl bg-white pl-12 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
+                className="soft-shadow h-12 w-full rounded-xl bg-white pl-12 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
               />
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <Search
@@ -397,7 +397,7 @@ function SearchPage() {
                       <Link
                         key={course.course_uuid}
                         href={getUriWithOrg(org?.slug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
-                        className="nice-shadow group overflow-hidden rounded-xl bg-white transition-all hover:shadow-md"
+                        className="soft-shadow group overflow-hidden rounded-xl bg-white transition-all hover:shadow-md"
                       >
                         <div className="relative h-48">
                           {course.thumbnail_image ? (
@@ -470,7 +470,7 @@ function SearchPage() {
                           org?.slug,
                           `/collection/${collection.collection_uuid.replace('collection_', '')}`,
                         )}
-                        className="nice-shadow flex items-start gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
+                        className="soft-shadow flex items-start gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                       >
                         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-black/5">
                           <Book
@@ -503,7 +503,7 @@ function SearchPage() {
                       <Link
                         key={user.user_uuid}
                         href={getUriWithOrg(org?.slug, `/user/${user.username}`)}
-                        className="nice-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
+                        className="soft-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                       >
                         <UserAvatar
                           width={48}

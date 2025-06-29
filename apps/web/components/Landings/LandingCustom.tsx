@@ -125,7 +125,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
             <div
-              className={`nice-shadow flex flex-col items-center gap-8 rounded-xl bg-white p-6 md:flex-row md:gap-12 md:p-8 lg:p-12 ${
+              className={`soft-shadow flex flex-col items-center gap-8 rounded-xl bg-white p-6 md:flex-row md:gap-12 md:p-8 lg:p-12 ${
                 section.flow === 'right' ? 'md:flex-row-reverse' : ''
               }`}
             >
@@ -223,10 +223,10 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                       <img
                         src={person.image_url}
                         alt={person.name}
-                        className="nice-shadow h-full w-full rounded-full border-4 border-white object-cover"
+                        className="soft-shadow h-full w-full rounded-full border-4 border-white object-cover"
                       />
                     ) : (
-                      <div className="nice-shadow flex h-full w-full items-center justify-center rounded-full border-4 border-white bg-gray-200">
+                      <div className="soft-shadow flex h-full w-full items-center justify-center rounded-full border-4 border-white bg-gray-200">
                         <span className="text-xs text-gray-400">{t('noImage')}</span>
                       </div>
                     )}

@@ -116,8 +116,8 @@ function ActivityElement(props: ActivitiyElementProps) {
         <div
           className={`my-2 grid w-full grid-cols-[auto_1fr_auto] gap-2 rounded-md px-3 py-2 text-gray-500 ${
             snapshot.isDragging
-              ? 'nice-shadow z-50 rotate-1 scale-[1.04] bg-white ring-2 ring-blue-500/20'
-              : 'nice-shadow bg-gray-50 hover:bg-gray-100'
+              ? 'soft-shadow z-50 rotate-1 scale-[1.04] bg-white ring-2 ring-blue-500/20'
+              : 'soft-shadow bg-gray-50 hover:bg-gray-100'
           } border-1 items-center border-gray-200`}
           key={props.activity.id}
           {...provided.draggableProps}

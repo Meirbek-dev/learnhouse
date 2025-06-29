@@ -28,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang={locale}
     >
       <head />
-      <body className="antialiased">
+      <body>
         {isDevEnv ? (
           ''
         ) : (

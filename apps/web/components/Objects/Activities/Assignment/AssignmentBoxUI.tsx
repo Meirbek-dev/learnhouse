@@ -46,7 +46,7 @@ function AssignmentBoxUI({
   const isAuthenticated = session?.status === 'authenticated';
 
   return (
-    <div className="nice-shadow flex flex-col rounded-md bg-slate-100/30 px-3 py-4 sm:px-6">
+    <div className="soft-shadow flex flex-col rounded-md bg-slate-100/30 px-3 py-4 sm:px-6">
       <div className="flex flex-col pb-2 text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:space-x-2">
         {/* Left side with type and badges */}
         <div className="mb-2 flex flex-wrap items-center gap-2 sm:mb-0">
@@ -139,7 +139,7 @@ function AssignmentBoxUI({
                 <input
                   onChange={(e) => setCustomGrade(Number.parseInt(e.target.value, 10))}
                   placeholder={maxPoints.toString()}
-                  className="light-shadow w-full rounded-lg px-2 py-0.5 text-sm outline outline-gray-200 sm:w-[100px]"
+                  className="subtle-shadow w-full rounded-lg px-2 py-0.5 text-sm outline outline-gray-200 sm:w-[100px]"
                   type="number"
                 />
                 <div

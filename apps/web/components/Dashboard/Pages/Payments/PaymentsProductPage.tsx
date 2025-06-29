@@ -129,7 +129,7 @@ function PaymentsProductPage() {
           {products.data.map((product: any) => (
             <div
               key={product.id}
-              className="nice-shadow flex h-full flex-col rounded-lg bg-white p-4"
+              className="soft-shadow flex h-full flex-col rounded-lg bg-white p-4"
             >
               {editingProductId === product.id ? (
                 <EditProductForm
@@ -236,7 +236,7 @@ function PaymentsProductPage() {
         <div className="flex items-center justify-center py-10">
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className={`nice-shadow bg-linear-to-bl mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
+            className={`soft-shadow bg-linear-to-bl mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
               isStripeEnabled ? 'hover:from-gray-600 hover:to-gray-800' : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}

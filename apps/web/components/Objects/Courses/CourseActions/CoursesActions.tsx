@@ -227,7 +227,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
       return (
         <button
           onClick={() => router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))}
-          className="nice-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+          className="soft-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
         >
           <UserPen className="h-5 w-5" />
           {t('authenticateToContribute')}
@@ -237,7 +237,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (contributorStatus === 'ACTIVE') {
       return (
-        <div className="nice-shadow mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 py-3 font-semibold text-green-700">
+        <div className="soft-shadow mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 py-3 font-semibold text-green-700">
           <UserPen className="h-5 w-5" />
           {t('youAreAContributor')}
         </div>
@@ -246,7 +246,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (contributorStatus === 'PENDING') {
       return (
-        <div className="nice-shadow mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 py-3 font-semibold text-amber-700">
+        <div className="soft-shadow mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 py-3 font-semibold text-amber-700">
           <ClockIcon className="h-5 w-5" />
           {t('contributorApplicationPending')}
         </div>
@@ -257,7 +257,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
       <button
         onClick={handleApplyToContribute}
         disabled={isContributeLoading}
-        className="nice-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed"
+        className="soft-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed"
       >
         {isContributeLoading ? (
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-700 border-t-transparent" />
@@ -287,7 +287,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (!isStarted) {
       return (
-        <div className="nice-shadow relative overflow-hidden rounded-lg bg-white">
+        <div className="soft-shadow relative overflow-hidden rounded-lg bg-white">
           <div
             className="absolute inset-0 opacity-[0.05]"
             style={{
@@ -329,7 +329,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     }
 
     return (
-      <div className="nice-shadow relative overflow-hidden rounded-lg bg-white">
+      <div className="soft-shadow relative overflow-hidden rounded-lg bg-white">
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
@@ -391,7 +391,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
   };
 
   if (isLoading) {
-    return <div className="nice-shadow h-20 animate-pulse rounded-lg bg-gray-100" />;
+    return <div className="soft-shadow h-20 animate-pulse rounded-lg bg-gray-100" />;
   }
 
   if (linkedProducts.length > 0) {
@@ -400,7 +400,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
         <div className="space-y-4">
           {hasAccess ? (
             <>
-              <div className="nice-shadow rounded-lg border border-green-200 bg-green-50 p-4">
+              <div className="soft-shadow rounded-lg border border-green-200 bg-green-50 p-4">
                 <div className="flex items-center gap-3">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
                   <h3 className="font-semibold text-green-800">{t('youOwnThisCourse')}</h3>
@@ -410,7 +410,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
               <button
                 onClick={handleCourseAction}
                 disabled={isActionLoading}
-                className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
+                className={`soft-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
                   isStarted
                     ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
                     : 'bg-primary hover:bg-primary/90 text-white disabled:bg-neutral-700'
@@ -426,7 +426,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
             </>
           ) : (
             <>
-              <div className="nice-shadow rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <div className="soft-shadow rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="h-5 w-5 text-amber-800" />
                   <h3 className="font-semibold text-amber-800">{t('paidCourse')}</h3>
@@ -442,7 +442,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
                 minWidth="sm"
               />
               <button
-                className="nice-shadow bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors"
+                className="soft-shadow bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors"
                 onClick={() => setIsModalOpen(true)}
               >
                 <ShoppingCart className="h-5 w-5" />
@@ -466,7 +466,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
         <button
           onClick={handleCourseAction}
           disabled={isActionLoading}
-          className={`nice-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
+          className={`soft-shadow flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-3 font-semibold transition-colors ${
             isStarted
               ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
               : 'bg-primary hover:bg-primary/70 text-white disabled:bg-neutral-700'

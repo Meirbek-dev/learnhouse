@@ -86,7 +86,7 @@ export default function OrgEditSocials() {
   };
 
   return (
-    <div className="nice-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(updateOrg)}>
           <div className="flex flex-col gap-0">
@@ -99,7 +99,7 @@ export default function OrgEditSocials() {
               <div className="w-full space-y-6">
                 <div>
                   <FormLabel className="text-lg font-semibold">{t('socialLinksTitle')}</FormLabel>
-                  <div className="nice-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
+                  <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
                     <div className="grid gap-3">
                       <FormField
                         control={form.control}
@@ -227,7 +227,7 @@ export default function OrgEditSocials() {
               <div className="w-full space-y-6">
                 <div>
                   <FormLabel className="text-lg font-semibold">{t('customLinksTitle')}</FormLabel>
-                  <div className="nice-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
+                  <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
                     {Object.entries(links).map(([linkKey, linkValue], index) => (
                       <div
                         key={index}
