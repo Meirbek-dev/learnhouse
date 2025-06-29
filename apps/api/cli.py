@@ -1,5 +1,3 @@
-import random
-import string
 from typing import Annotated
 
 import typer
@@ -9,6 +7,7 @@ from sqlmodel import Session, SQLModel
 from config.config import get_openu_config
 from src.db.organizations import OrganizationCreate
 from src.db.users import UserCreate
+from src.security.security import generate_secure_password
 from src.services.install.install import (
     install_create_organization,
     install_create_organization_user,
@@ -16,11 +15,6 @@ from src.services.install.install import (
 )
 
 cli = typer.Typer()
-
-
-def generate_password(length):
-    characters = string.ascii_uppercase + string.ascii_lowercase + string.digits
-    return "".join(random.choice(characters) for _ in range(length))
 
 
 @cli.command()
@@ -63,10 +57,10 @@ def install(
         print("OpenU created ✅")
 
         # Create Organization User
-        print("Creating OpenU user...")
+        # print("Creating OpenU user...")
         # Generate random 8 digit password
         email = "meirbek.dev@gmail.com"
-        password = generate_password(8)
+        password = generate_secure_password(8)
         user = UserCreate(username="Meirbek", email=email, password=password)
         install_create_organization_user(user, "openu", db_session)
         print("OpenU user created ✅")

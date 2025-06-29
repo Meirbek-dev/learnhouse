@@ -1,6 +1,4 @@
 import json
-import random
-import string
 from datetime import datetime
 
 import redis
@@ -17,7 +15,7 @@ from src.db.users import (
     User,
     UserRead,
 )
-from src.security.security import security_hash_password
+from src.security.security import security_hash_password, generate_secure_code
 from src.services.users.emails import (
     send_password_reset_email,
 )
@@ -68,13 +66,8 @@ async def send_reset_password_code(
             status_code=500,
             detail="Could not connect to Redis",
         )
-
     # Generate reset code
-    def generate_code(length=5):
-        letters_and_digits = string.ascii_letters + string.digits
-        return "".join(random.choice(letters_and_digits) for _ in range(length))
-
-    generated_reset_code = generate_code()
+    generated_reset_code = generate_secure_code()
     reset_email_invite_uuid = f"reset_email_invite_code_{ULID()}"
 
     ttl = int(datetime.now().timestamp()) + 60 * 60 * 1  # 1 hour

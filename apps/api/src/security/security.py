@@ -1,11 +1,11 @@
-from passlib.context import CryptContext
-from passlib.hash import pbkdf2_sha256
+import secrets
+import string
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
 from config.config import get_openu_config
 
 ### 🔒 JWT ##############################################################
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 SECRET_KEY = get_openu_config().security_config.auth_jwt_secret_key
@@ -14,15 +14,42 @@ ALGORITHM = "HS256"
 ### 🔒 JWT ##############################################################
 
 
+### 🔒 Secure Random Generation ##############################################################
+
+
+def generate_secure_password(length: int = 12) -> str:
+    """Generate a cryptographically secure random password."""
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+    return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def generate_secure_code(length: int = 5) -> str:
+    """Generate a cryptographically secure random code."""
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+### 🔒 Secure Random Generation ##############################################################
+
+
 ### 🔒 Passwords Hashing ##############################################################
 
+# Initialize Argon2 password hasher with secure defaults
+pwd_hasher = PasswordHasher()
 
-def security_hash_password(password: str):
-    return pbkdf2_sha256.hash(password)
+
+def security_hash_password(password: str) -> str:
+    """Hash a password using Argon2."""
+    return pwd_hasher.hash(password)
 
 
-def security_verify_password(plain_password: str, hashed_password: str):
-    return pbkdf2_sha256.verify(plain_password, hashed_password)
+def security_verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its Argon2 hash."""
+    try:
+        pwd_hasher.verify(hashed_password, plain_password)
+        return True
+    except VerifyMismatchError:
+        return False
 
 
 ### 🔒 Passwords Hashing ##############################################################

@@ -1,6 +1,4 @@
 import json
-import random
-import string
 from datetime import datetime, timedelta
 
 import redis
@@ -15,6 +13,7 @@ from src.db.organizations import (
     OrganizationRead,
 )
 from src.db.users import AnonymousUser, PublicUser, UserRead
+from src.security.security import generate_secure_code
 from src.services.email.utils import send_email
 from src.services.orgs.orgs import rbac_check
 
@@ -57,7 +56,6 @@ async def create_invite_code(
             status_code=500,
             detail="Could not connect to Redis",
         )
-
     # Check if this org has more than 6 invite codes
     invite_codes = r.keys(f"*:org:{org.org_uuid}:code:*")
 
@@ -68,11 +66,7 @@ async def create_invite_code(
         )
 
     # Generate invite code
-    def generate_code(length=5):
-        letters_and_digits = string.ascii_letters + string.digits
-        return "".join(random.choice(letters_and_digits) for _ in range(length))
-
-    generated_invite_code = generate_code()
+    generated_invite_code = generate_secure_code()
     invite_code_uuid = f"org_invite_code_{ULID()}"
 
     # time to live in days to seconds
@@ -135,7 +129,6 @@ async def create_invite_code_with_usergroup(
             status_code=500,
             detail="Could not connect to Redis",
         )
-
     # Check if this org has more than 6 invite codes
     invite_codes = r.keys(f"*:org:{org.org_uuid}:code:*")
 
@@ -146,11 +139,7 @@ async def create_invite_code_with_usergroup(
         )
 
     # Generate invite code
-    def generate_code(length=5):
-        letters_and_digits = string.ascii_letters + string.digits
-        return "".join(random.choice(letters_and_digits) for _ in range(length))
-
-    generated_invite_code = generate_code()
+    generated_invite_code = generate_secure_code()
     invite_code_uuid = f"org_invite_code_{ULID()}"
 
     # time to live in days to seconds

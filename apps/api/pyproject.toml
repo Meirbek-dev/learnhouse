@@ -17,7 +17,6 @@ dependencies = [
   "langchain-openai>=0.3.27",
   "langchain-text-splitters>=0.3.8",
   "openai>=1.93.0",
-  "passlib>=1.7.4",
   "psycopg2-binary>=2.9.10",
   "pydantic[email]>=2.11.7",
   "pytest>=8.4.1",
@@ -39,6 +38,7 @@ dependencies = [
   "beautifulsoup4>=4.13.4",
   "opentelemetry-instrumentation-fastapi>=0.55b1",
   "python-ulid>=3.0.0",
+  "argon2-cffi>=25.1.0",
 ]
 
 [tool.ruff]
@@ -47,25 +47,8 @@ lint.ignore = ["E501", "E712"]
 
 format.quote-style = "double"
 
-[tool.mypy]
-python_version = "3.13"
-check_untyped_defs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-disallow_untyped_calls = true
-strict_optional = true
-warn_unused_ignores = true
-warn_return_any = true
-warn_redundant_casts = true
-warn_unreachable = true
-exclude = ["migrations", "tests"]
-
-
 [tool.logfire]
 ignore_no_config = true
 
 [dependency-groups]
-dev = [
-    "mypy>=1.16.1",
-    "ruff>=0.11.12",
-]
+dev = ["ruff>=0.11.12"]
