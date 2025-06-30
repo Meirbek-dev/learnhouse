@@ -30,6 +30,23 @@ function CoursesHome(params: CourseProps) {
     setNewCourseModal(false);
   }
 
+  // Single modal instance, trigger can be used in multiple places
+  const modal = (
+    <Modal
+      isDialogOpen={newCourseModal}
+      onOpenChange={setNewCourseModal}
+      minHeight="md"
+      dialogContent={
+        <CreateCourseModal
+          closeModal={closeNewCourseModal}
+          orgslug={orgslug}
+        />
+      }
+      dialogTitle={t('createCourse')}
+      dialogDescription={t('createCourseDescription')}
+    />
+  );
+
   return (
     <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
       <div className="mb-6">
@@ -42,20 +59,7 @@ function CoursesHome(params: CourseProps) {
             ressourceType="courses"
             orgId={params.org_id}
           >
-            <Modal
-              isDialogOpen={newCourseModal}
-              onOpenChange={setNewCourseModal}
-              minHeight="md"
-              dialogContent={
-                <CreateCourseModal
-                  closeModal={closeNewCourseModal}
-                  orgslug={orgslug}
-                />
-              }
-              dialogTitle={t('createCourse')}
-              dialogDescription={t('createCourseDescription')}
-              dialogTrigger={<NewCourseButton />}
-            />
+            <NewCourseButton onClick={() => setNewCourseModal(true)} />
           </AuthenticatedClientElement>
         </div>
       </div>
@@ -83,20 +87,7 @@ function CoursesHome(params: CourseProps) {
                     checkMethod="roles"
                     orgId={params.org_id}
                   >
-                    <Modal
-                      isDialogOpen={newCourseModal}
-                      onOpenChange={setNewCourseModal}
-                      minHeight="md"
-                      dialogContent={
-                        <CreateCourseModal
-                          closeModal={closeNewCourseModal}
-                          orgslug={orgslug}
-                        />
-                      }
-                      dialogTitle={t('createCourse')}
-                      dialogDescription={t('createCourseDescription')}
-                      dialogTrigger={<NewCourseButton />}
-                    />
+                    <NewCourseButton onClick={() => setNewCourseModal(true)} />
                   </AuthenticatedClientElement>
                 </div>
               )}
@@ -104,6 +95,7 @@ function CoursesHome(params: CourseProps) {
           </div>
         )}
       </div>
+      {modal}
     </div>
   );
 }

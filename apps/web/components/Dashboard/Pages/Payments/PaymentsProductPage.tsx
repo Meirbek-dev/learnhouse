@@ -168,12 +168,14 @@ function PaymentsProductPage() {
                           productName: product.name,
                         })}
                         dialogTrigger={
-                          <button
-                            className="text-red-500 hover:text-red-700"
-                            title={t('archiveButton')}
-                          >
-                            <Archive size={16} />
-                          </button>
+                          <span>
+                            <button
+                              className="text-red-500 hover:text-red-700"
+                              title={t('archiveButton')}
+                            >
+                              <Archive size={16} />
+                            </button>
+                          </span>
                         }
                         functionToExecute={() => handleArchiveProduct(product.id)}
                         status="warning"

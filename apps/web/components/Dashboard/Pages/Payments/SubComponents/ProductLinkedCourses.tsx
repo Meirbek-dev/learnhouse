@@ -78,14 +78,16 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
             />
           }
           dialogTrigger={
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Plus size={16} />
-              <span>{t('linkCourseButton')}</span>
-            </Button>
+            <span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Plus size={16} />
+                <span>{t('linkCourseButton')}</span>
+              </Button>
+            </span>
           }
         />
       </div>

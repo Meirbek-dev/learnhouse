@@ -100,12 +100,14 @@ const CollectionAdminEditsArea = (props: any) => {
             collectionName: props.collection.name,
           })}
           dialogTrigger={
-            <button
-              className="absolute right-2 top-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
-              rel="noopener noreferrer"
-            >
-              <X size={14} />
-            </button>
+            <span>
+              <button
+                className="absolute right-2 top-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
+                rel="noopener noreferrer"
+              >
+                <X size={14} />
+              </button>
+            </span>
           }
           functionToExecute={() => deleteCollectionUI(props.collection_uuid)}
           status="warning"

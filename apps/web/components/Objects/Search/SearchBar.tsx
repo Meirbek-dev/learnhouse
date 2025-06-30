@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FC } from 'react';
 
-import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -421,7 +420,7 @@ export const SearchBar: FC<SearchBarProps> = ({
       className={`relative ${className}`}
     >
       <div className="group relative">
-        <Input
+        <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}

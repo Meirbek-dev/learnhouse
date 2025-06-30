@@ -131,15 +131,17 @@ function ChapterElement(props: ChapterElementProps) {
                   name: props.chapter.name,
                 })}
                 dialogTrigger={
-                  <button
-                    className="flex items-center rounded-md bg-red-600 p-1 px-2 text-sm text-rose-100 shadow-sm hover:cursor-pointer sm:px-3"
-                    rel="noopener noreferrer"
-                  >
-                    <Trash2
-                      size={15}
-                      className="text-rose-200"
-                    />
-                  </button>
+                  <span>
+                    <button
+                      className="flex items-center rounded-md bg-red-600 p-1 px-2 text-sm text-rose-100 shadow-sm hover:cursor-pointer sm:px-3"
+                      rel="noopener noreferrer"
+                    >
+                      <Trash2
+                        size={15}
+                        className="text-rose-200"
+                      />
+                    </button>
+                  </span>
                 }
                 functionToExecute={() => deleteChapterUI()}
                 status="warning"

@@ -99,9 +99,11 @@ const AdminEditOptions: FC<{
                   courseName: course.name,
                 })}
                 dialogTrigger={
-                  <button className="flex w-full items-center rounded-md bg-rose-500/10 px-2 py-1 text-left text-sm text-red-600 transition-colors hover:bg-rose-500/20">
-                    <BookMinus className="mr-2 h-4 w-4" /> {t('delete')}
-                  </button>
+                  <span>
+                    <button className="flex w-full items-center rounded-md bg-rose-500/10 px-2 py-1 text-left text-sm text-red-600 transition-colors hover:bg-rose-500/20">
+                      <BookMinus className="mr-2 h-4 w-4" /> {t('delete')}
+                    </button>
+                  </span>
                 }
                 functionToExecute={deleteCourse}
                 status="warning"

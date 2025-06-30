@@ -118,14 +118,16 @@ function OrgUserGroups() {
                       dialogTitle={t('manageUsersModalTitle')}
                       dialogDescription={t('manageUsersModalDescription')}
                       dialogTrigger={
-                        <button
-                          className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
-                          onClick={() => handleOpenModal('manage', usergroup)}
-                          type="button"
-                        >
-                          <Users className="h-4 w-4" />
-                          <span>{t('manageUsersButton')}</span>
-                        </button>
+                        <span>
+                          <button
+                            className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
+                            onClick={() => handleOpenModal('manage', usergroup)}
+                            type="button"
+                          >
+                            <Users className="h-4 w-4" />
+                            <span>{t('manageUsersButton')}</span>
+                          </button>
+                        </span>
                       }
                     />
                   </TableCell>
@@ -137,14 +139,16 @@ function OrgUserGroups() {
                           if (!isOpen) handleCloseModal('edit');
                         }}
                         dialogTrigger={
-                          <button
-                            className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer"
-                            onClick={() => handleOpenModal('edit', usergroup)}
-                            type="button"
-                          >
-                            <Pencil className="size-4" />
-                            <span>{t('editButton')}</span>
-                          </button>
+                          <span>
+                            <button
+                              className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer"
+                              onClick={() => handleOpenModal('edit', usergroup)}
+                              type="button"
+                            >
+                              <Pencil className="size-4" />
+                              <span>{t('editButton')}</span>
+                            </button>
+                          </span>
                         }
                         minHeight="sm"
                         minWidth="sm"
@@ -155,10 +159,12 @@ function OrgUserGroups() {
                         confirmationMessage={t('deleteModalMessage')}
                         dialogTitle={t('deleteModalTitle')}
                         dialogTrigger={
-                          <button className="flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
-                            <X className="h-4 w-4" />
-                            <span>{t('deleteButton')}</span>
-                          </button>
+                          <span>
+                            <button className="flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+                              <X className="h-4 w-4" />
+                              <span>{t('deleteButton')}</span>
+                            </button>
+                          </span>
                         }
                         functionToExecute={() => {
                           deleteUserGroupUI(usergroup.id);
@@ -194,10 +200,12 @@ function OrgUserGroups() {
             dialogTitle={t('createUserGroupModalTitle')}
             dialogDescription={t('createUserGroupModalDescription')}
             dialogTrigger={
-              <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer">
-                <SquareUserRound className="h-4 w-4" />
-                <span>{t('createUserGroupButton')}</span>
-              </button>
+              <span>
+                <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer">
+                  <SquareUserRound className="h-4 w-4" />
+                  <span>{t('createUserGroupButton')}</span>
+                </button>
+              </span>
             }
           />
         </div>

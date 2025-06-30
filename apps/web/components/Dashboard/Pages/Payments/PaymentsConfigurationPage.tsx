@@ -217,10 +217,12 @@ const PaymentsConfigurationPage: FC = () => {
                   confirmationMessage={t('removeConnectionConfirmation')}
                   dialogTitle={t('removeConnectionTitle')}
                   dialogTrigger={
-                    <Button className="flex items-center space-x-2 rounded-full bg-red-500 text-sm text-white transition duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
-                      <Trash2 size={16} />
-                      <span>{t('removeConnectionButton')}</span>
-                    </Button>
+                    <span>
+                      <Button className="flex items-center space-x-2 rounded-full bg-red-500 text-sm text-white transition duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
+                        <Trash2 size={16} />
+                        <span>{t('removeConnectionButton')}</span>
+                      </Button>
+                    </span>
                   }
                   functionToExecute={deleteConfig}
                   status="warning"

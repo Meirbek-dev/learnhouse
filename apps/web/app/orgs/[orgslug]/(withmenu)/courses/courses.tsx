@@ -31,6 +31,18 @@ function Courses(props: CourseProps) {
     setNewCourseModal(false);
   }
 
+  // Single trigger for opening the modal
+  const newCourseButtonTrigger = (
+    <AuthenticatedClientElement
+      checkMethod="roles"
+      action="create"
+      ressourceType="courses"
+      orgId={props.org_id}
+    >
+      <NewCourseButton onClick={() => setNewCourseModal(true)} />
+    </AuthenticatedClientElement>
+  );
+
   return (
     <div className="w-full">
       <GeneralWrapperStyled>
@@ -40,28 +52,23 @@ function Courses(props: CourseProps) {
               title={t('title')}
               type="cou"
             />
-            <AuthenticatedClientElement
-              checkMethod="roles"
-              action="create"
-              ressourceType="courses"
-              orgId={props.org_id}
-            >
-              <Modal
-                isDialogOpen={newCourseModal}
-                onOpenChange={setNewCourseModal}
-                minHeight="md"
-                dialogContent={
-                  <CreateCourseModal
-                    closeModal={closeNewCourseModal}
-                    orgslug={orgslug}
-                  />
-                }
-                dialogTitle={t('createCourse')}
-                dialogDescription={t('createCourseDescription')}
-                dialogTrigger={<NewCourseButton />}
-              />
-            </AuthenticatedClientElement>
+            {newCourseButtonTrigger}
           </div>
+
+          {/* Single Modal instance rendered here */}
+          <Modal
+            isDialogOpen={newCourseModal}
+            onOpenChange={setNewCourseModal}
+            minHeight="md"
+            dialogContent={
+              <CreateCourseModal
+                closeModal={closeNewCourseModal}
+                orgslug={orgslug}
+              />
+            }
+            dialogTitle={t('createCourse')}
+            dialogDescription={t('createCourseDescription')}
+          />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {courses.map((course: any) => (
@@ -80,31 +87,7 @@ function Courses(props: CourseProps) {
                 <div className="text-center">
                   <h1 className="mb-2 text-xl font-bold text-gray-600">{t('noCourses')}</h1>
                   <p className="text-md text-gray-400">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
-                  {isUserAdmin && (
-                    <div className="mt-4 flex justify-center">
-                      <AuthenticatedClientElement
-                        action="create"
-                        ressourceType="courses"
-                        checkMethod="roles"
-                        orgId={props.org_id}
-                      >
-                        <Modal
-                          isDialogOpen={newCourseModal}
-                          onOpenChange={setNewCourseModal}
-                          minHeight="md"
-                          dialogContent={
-                            <CreateCourseModal
-                              closeModal={closeNewCourseModal}
-                              orgslug={orgslug}
-                            />
-                          }
-                          dialogTitle={t('createCourse')}
-                          dialogDescription={t('createCourseDescription')}
-                          dialogTrigger={<NewCourseButton />}
-                        />
-                      </AuthenticatedClientElement>
-                    </div>
-                  )}
+                  {isUserAdmin && <div className="mt-4 flex justify-center">{newCourseButtonTrigger}</div>}
                 </div>
               </div>
             )}

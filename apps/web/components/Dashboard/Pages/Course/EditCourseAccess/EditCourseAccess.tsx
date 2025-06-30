@@ -177,10 +177,12 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
                     confirmationMessage={t('unlinkConfirmMsg')}
                     dialogTitle={t('unlinkConfirmTitle')}
                     dialogTrigger={
-                      <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
-                        <X className="h-4 w-4" />
-                        <span>{t('deleteLinkButton')}</span>
-                      </button>
+                      <span>
+                        <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+                          <X className="h-4 w-4" />
+                          <span>{t('deleteLinkButton')}</span>
+                        </button>
+                      </span>
                     }
                     functionToExecute={() => removeUserGroupLink(usergroup.id)}
                     status="warning"
@@ -201,10 +203,12 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
           dialogTitle={t('linkModalTitle')}
           dialogDescription={t('linkModalDescription')}
           dialogTrigger={
-            <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-xs font-bold text-green-100 hover:cursor-pointer sm:text-sm">
-              <SquareUserRound className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>{t('linkToUserGroupButton')}</span>
-            </button>
+            <span>
+              <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-xs font-bold text-green-100 hover:cursor-pointer sm:text-sm">
+                <SquareUserRound className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>{t('linkToUserGroupButton')}</span>
+              </button>
+            </span>
           }
         />
       </div>

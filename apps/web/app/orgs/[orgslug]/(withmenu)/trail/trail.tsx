@@ -73,16 +73,18 @@ function Trail(params: any) {
             confirmationMessage={t('quitAllCoursesConfirmation')}
             dialogTitle={t('quitAllCoursesDialogTitle')}
             dialogTrigger={
-              <button
-                disabled={isQuittingAll}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                  isQuittingAll
-                    ? 'cursor-not-allowed bg-gray-100 text-gray-500'
-                    : 'bg-red-100 text-red-700 hover:bg-red-200'
-                }`}
-              >
-                {isQuittingAll ? t('quittingProgress', { progress: quittingProgress }) : t('quitAllCourses')}
-              </button>
+              <span>
+                <button
+                  disabled={isQuittingAll}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                    isQuittingAll
+                      ? 'cursor-not-allowed bg-gray-100 text-gray-500'
+                      : 'bg-red-100 text-red-700 hover:bg-red-200'
+                  }`}
+                >
+                  {isQuittingAll ? t('quittingProgress', { progress: quittingProgress }) : t('quitAllCourses')}
+                </button>
+              </span>
             }
             functionToExecute={handleQuitAllCourses}
             status="warning"

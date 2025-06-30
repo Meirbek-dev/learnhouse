@@ -5,6 +5,7 @@ import styled, { keyframes } from 'styled-components';
 import { AlertTriangle, Info } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
+import { isValidElement, cloneElement } from 'react';
 
 interface ModalParams {
   confirmationMessage: string;
@@ -25,12 +26,27 @@ const ConfirmationModal = (params: ModalParams) => {
 
   const onOpenChange = useCallback((open: boolean) => setIsDialogOpen(open), []);
 
+  // Helper: wrap button in span if needed
+  const getSafeDialogTrigger = (trigger: ReactNode) => {
+    if (!trigger) return null;
+    if (isValidElement(trigger)) {
+      const type = (trigger.type as any)?.toString?.() || '';
+      // If already span/div, return as is
+      if (type.includes('span') || type.includes('div')) return trigger;
+      // If button, wrap in span
+      if (type.includes('button')) return <span>{trigger}</span>;
+    }
+    return trigger;
+  };
+
   return (
     <Dialog.Root
       open={isDialogOpen}
       onOpenChange={onOpenChange}
     >
-      {params.dialogTrigger ? <Dialog.Trigger asChild>{params.dialogTrigger}</Dialog.Trigger> : null}
+      {params.dialogTrigger ? (
+        <Dialog.Trigger asChild>{getSafeDialogTrigger(params.dialogTrigger)}</Dialog.Trigger>
+      ) : null}
       <Dialog.Portal>
         <DialogOverlay />
         <DialogContent>

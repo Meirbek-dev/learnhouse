@@ -201,10 +201,12 @@ function OrgAccess() {
                             confirmationMessage={t('deleteCodeModalMessage')}
                             dialogTitle={t('deleteCodeModalTitle')}
                             dialogTrigger={
-                              <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
-                                <X className="h-4 w-4" />
-                                <span>{t('deleteCodeButton')}</span>
-                              </button>
+                              <span>
+                                <button className="mr-2 flex items-center space-x-2 rounded-md bg-rose-700 p-1 px-3 text-sm font-bold text-rose-100 hover:cursor-pointer">
+                                  <X className="h-4 w-4" />
+                                  <span>{t('deleteCodeButton')}</span>
+                                </button>
+                              </span>
                             }
                             functionToExecute={() => {
                               deleteInvite(invite);
@@ -237,10 +239,12 @@ function OrgAccess() {
                   dialogTitle={t('generateCodeModalTitle')}
                   dialogDescription={t('generateCodeModalDescription')}
                   dialogTrigger={
-                    <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer">
-                      <Ticket className="h-4 w-4" />
-                      <span>{t('generateCodeButton')}</span>
-                    </button>
+                    <span>
+                      <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer">
+                        <Ticket className="h-4 w-4" />
+                        <span>{t('generateCodeButton')}</span>
+                      </button>
+                    </span>
                   }
                 />
               </div>

@@ -236,17 +236,19 @@ function ActivityElement(props: ActivitiyElementProps) {
               confirmationButtonText={t('deleteButton')}
               dialogTitle={t('deleteTitle', { name: props.activity.name })}
               dialogTrigger={
-                <button
-                  className="flex items-center space-x-1 rounded-md bg-red-600 p-1 px-2 shadow-md transition-colors duration-200 hover:bg-red-700 sm:px-3"
-                  rel="noopener noreferrer"
-                  aria-label={t('deleteButton')}
-                  title={t('deleteButton')}
-                >
-                  <X
-                    size={15}
-                    className="font-bold text-rose-200"
-                  />
-                </button>
+                <span>
+                  <button
+                    className="flex items-center space-x-1 rounded-md bg-red-600 p-1 px-2 shadow-md transition-colors duration-200 hover:bg-red-700 sm:px-3"
+                    rel="noopener noreferrer"
+                    aria-label={t('deleteButton')}
+                    title={t('deleteButton')}
+                  >
+                    <X
+                      size={15}
+                      className="font-bold text-rose-200"
+                    />
+                  </button>
+                </span>
               }
               functionToExecute={() => deleteActivityUI()}
               status="warning"
