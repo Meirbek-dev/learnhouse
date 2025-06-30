@@ -31,7 +31,7 @@ async def upload_file_and_return_file_object(
     file_binary = await file.read()
 
     # get file size
-    file_size = len(file_binary)
+    file_size = len(await file.read())
 
     # get file type
     file_type = file.content_type

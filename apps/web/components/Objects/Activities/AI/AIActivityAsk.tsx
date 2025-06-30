@@ -12,6 +12,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
 import touEmblemLight from 'public/tou_emblem_light.png';
+import { ScrollArea } from '@components/ui/scroll-area';
 
 import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
 
@@ -40,7 +41,7 @@ function AIActivityAsk(props: AIActivityAskProps) {
             onClick={() => dispatchAIChatBot({ type: 'setIsModalOpen' })}
             style={{
               background:
-                'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgb(62, 73, 218) 281deg)',
+                'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
             }}
             className="flex items-center space-x-1 rounded-full p-2.5 px-5 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
           >
@@ -226,18 +227,20 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
               </div>
             </div>
             {aiChatBotState.messages.length > 0 && !aiChatBotState.error.isError ? (
-              <div className="scrollbar-w-2 scrollbar scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full h-[237px] w-full flex-col space-y-4 overflow-scroll">
-                {aiChatBotState.messages.map((message: AIMessage, index: number) => {
-                  return (
-                    <AIMessage
-                      key={index}
-                      message={message}
-                      animated={message.sender == 'ai'}
-                    />
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </div>
+              <ScrollArea className="h-[237px] w-full">
+                <div className="flex-col space-y-4">
+                  {aiChatBotState.messages.map((message: AIMessage, index: number) => {
+                    return (
+                      <AIMessage
+                        key={index}
+                        message={message}
+                        animated={message.sender == 'ai'}
+                      />
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
             ) : (
               <AIMessagePlaceHolder
                 sendMessage={sendMessage}

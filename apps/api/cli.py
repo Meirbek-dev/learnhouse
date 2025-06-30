@@ -46,7 +46,7 @@ def install(
         org = OrganizationCreate(
             name="OpenU",
             description="OpenU",
-            about="OpenU - Open Education Platform",
+            about="OpenU - Образовательная платформа для онлайн-обучения",
             slug=slug,
             email="meirbek.123@gmail.com",
             logo_image="",
@@ -57,7 +57,7 @@ def install(
         print("OpenU created ✅")
 
         # Create Organization User
-        # print("Creating OpenU user...")
+        print("Creating OpenU user...")
         # Generate random 8 digit password
         email = "meirbek.dev@gmail.com"
         password = generate_secure_password(8)

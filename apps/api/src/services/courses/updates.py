@@ -58,7 +58,7 @@ async def create_update(
     db_session.commit()
     db_session.refresh(update)
 
-    return CourseUpdateRead.model_validate(update)
+    return CourseUpdateRead(**update.model_dump())
 
 
 # Update Course Update
@@ -92,7 +92,7 @@ async def update_update(
     db_session.commit()
     db_session.refresh(update)
 
-    return CourseUpdateRead.model_validate(update)
+    return CourseUpdateRead(**update.model_dump())
 
 
 # Delete Course Update
@@ -146,4 +146,4 @@ async def get_updates_by_course_uuid(
     )  # https://sqlmodel.tiangolo.com/tutorial/where/#type-annotations-and-errors
     updates = db_session.exec(statement).all()
 
-    return [CourseUpdateRead.model_validate(update) for update in updates]
+    return [CourseUpdateRead(**update.model_dump()) for update in updates]

@@ -10,7 +10,7 @@ export default async function NotFound() {
   const t = await getTranslations('NotFoundPage');
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-200 to-slate-300">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center">
       <div className="nx-flex nx-items-center hover:nx-opacity-75 ltr:nx-mr-auto rtl:nx-ml-auto pb-20">
         <Image
           quality={100}

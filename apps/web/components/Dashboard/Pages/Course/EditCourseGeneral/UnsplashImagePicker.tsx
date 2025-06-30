@@ -27,6 +27,7 @@ import { createApi } from 'unsplash-js';
 
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Input } from '@components/ui/input';
+import { ScrollArea } from '@components/ui/scroll-area';
 
 const unsplash = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
@@ -156,18 +157,20 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
           />
         </div>
         {!query && (
-          <div className="scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent flex max-h-[150px] flex-wrap gap-2 overflow-y-auto pr-2">
-            {predefinedLabels.map((label) => (
-              <button
-                key={label.key}
-                onClick={() => handleLabelClick(label.key)}
-                className="soft-shadow flex items-center gap-1 space-x-1 rounded-lg bg-neutral-100 px-3 py-1 transition-colors hover:bg-neutral-200"
-              >
-                <label.icon size={16} />
-                <span>{label.name}</span>
-              </button>
-            ))}
-          </div>
+          <ScrollArea className="max-h-[150px] pr-2">
+            <div className="flex flex-wrap gap-2">
+              {predefinedLabels.map((label) => (
+                <button
+                  key={label.key}
+                  onClick={() => handleLabelClick(label.key)}
+                  className="soft-shadow flex items-center gap-1 space-x-1 rounded-lg bg-neutral-100 px-3 py-1 transition-colors hover:bg-neutral-200"
+                >
+                  <label.icon size={16} />
+                  <span>{label.name}</span>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
         )}
       </div>
 

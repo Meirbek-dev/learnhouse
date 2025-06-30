@@ -28,7 +28,7 @@ function CollectionThumbnail(props: PropsType) {
   const org = useOrg() as any;
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
-      <div className="flex h-full w-full items-center justify-between bg-blue-500 p-4">
+      <div className="bg-primary flex h-full w-full items-center justify-between p-4">
         <div className="flex items-center space-x-2">
           <div className="flex -space-x-3">
             {props.collection.courses.slice(0, 3).map(

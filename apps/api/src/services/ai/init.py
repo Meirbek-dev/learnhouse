@@ -1,16 +1,9 @@
-import os
 from functools import lru_cache
 
 import chromadb
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 from config.config import get_openu_config
-
-# Set telemetry environment variables before importing chromadb
-os.environ["ANONYMIZED_TELEMETRY"] = "False"
-os.environ["CHROMA_TELEMETRY"] = "0"
-os.environ["CHROMA_TELEMETRY_ENABLED"] = "False"
-os.environ["POSTHOG_DISABLED"] = "True"
 
 
 @lru_cache
@@ -56,6 +49,6 @@ def get_llm(model_name: str, temperature: float = 0) -> ChatOpenAI | None:
         temperature=temperature,
         api_key=api_key,
         model="gpt-4.1-nano",
-        max_retries=3,  # Add retry logic
-        request_timeout=60,  # Add timeout
+        max_retries=2,  # Add retry logic
+        request_timeout=30,  # Add timeout
     )

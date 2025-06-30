@@ -73,7 +73,7 @@ export const OrgMenu = (props: any) => {
           <div className="flex w-full items-center space-x-5 md:w-auto">
             <div className="logo flex w-full justify-center md:w-auto">
               <Link href={getUriWithOrg(orgslug, '/')}>
-                <div className="m-auto flex h-auto w-auto items-center justify-center rounded-md py-1">
+                <div className="m-auto flex h-auto w-auto items-center justify-center rounded-md">
                   <OpenULogoSVG />
                 </div>
               </Link>

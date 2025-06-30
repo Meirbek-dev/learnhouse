@@ -8,7 +8,7 @@ import { toast } from 'react-hot-toast';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { mutate } from 'swr';
 import { z } from 'zod';
-import { enUS, es, fr, de, ja, ko, zhCN, pt, it, ru, ar, he } from 'date-fns/locale';
+import { enUS, es, fr, de, ru } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -40,7 +40,8 @@ interface FormValues {
 
 function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
   const t = useTranslations('Components.NewAssignmentModal');
-  const locale = useLocale();
+  const fullLocale = useLocale();
+  const locale = fullLocale.split('-')[0] ?? 'ru';
   const org = useOrg() as any;
   const session = useLHSession() as any;
 
@@ -51,14 +52,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
       es: es,
       fr: fr,
       de: de,
-      ja: ja,
-      ko: ko,
-      zh: zhCN,
-      pt: pt,
-      it: it,
       ru: ru,
-      ar: ar,
-      he: he,
     };
     return localeMap[locale] || enUS;
   };

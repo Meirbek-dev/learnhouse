@@ -12,6 +12,7 @@ import { Textarea } from '@components/ui/textarea';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { Checkbox } from '@components/ui/checkbox';
+import { ScrollArea } from '@components/ui/scroll-area';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -163,7 +164,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 <p className="py-4 text-sm text-gray-500">{t('noCoursesAvailable')}</p>
               ) : (
                 <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50">
-                  <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 max-h-[400px] space-y-3 overflow-y-auto p-4">
+                  <ScrollArea className="max-h-[400px] space-y-3 overflow-y-auto p-4">
                     {courses?.map((course: any) => (
                       <Label
                         key={course.id}
@@ -204,7 +205,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                         </div>
                       </Label>
                     ))}
-                  </div>
+                  </ScrollArea>
                   <div className="border-t border-gray-200 bg-gray-50 px-4 py-3">
                     <p className="text-xs text-gray-500">{t('selectedCount', { count: selectedCourses.length })}</p>
                   </div>

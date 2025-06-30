@@ -221,14 +221,7 @@ const UserProfileBuilder = () => {
       es: es,
       fr: fr,
       de: de,
-      ja: ja,
-      ko: ko,
-      zh: zhCN,
-      pt: pt,
-      it: it,
       ru: ru,
-      ar: ar,
-      he: he,
     };
     return localeMap[locale] || enUS;
   };
@@ -1048,21 +1041,15 @@ const ExperienceEditor: FC<{
   section: ExperienceSection;
   onChange: (section: ExperienceSection) => void;
 }> = ({ t, section, onChange }) => {
-  const locale = useLocale();
+  const fullLocale = useLocale();
+  const locale = fullLocale.split('-')[0] ?? 'ru';
   const dateFnsLocale = (() => {
     const localeMap: { [key: string]: Locale } = {
       en: enUS,
       es: es,
       fr: fr,
       de: de,
-      ja: ja,
-      ko: ko,
-      zh: zhCN,
-      pt: pt,
-      it: it,
       ru: ru,
-      ar: ar,
-      he: he,
     };
     return localeMap[locale] || enUS;
   })();
@@ -1255,14 +1242,7 @@ const EducationEditor: FC<{
       es: es,
       fr: fr,
       de: de,
-      ja: ja,
-      ko: ko,
-      zh: zhCN,
-      pt: pt,
-      it: it,
       ru: ru,
-      ar: ar,
-      he: he,
     };
     return localeMap[locale] || enUS;
   })();

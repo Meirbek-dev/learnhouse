@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 import { z } from 'zod';
-import { enUS, es, fr, de, ja, ko, zhCN, pt, it, ru, ar, he } from 'date-fns/locale';
+import { enUS, es, fr, de, ru } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -70,14 +70,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
       es: es,
       fr: fr,
       de: de,
-      ja: ja,
-      ko: ko,
-      zh: zhCN,
-      pt: pt,
-      it: it,
       ru: ru,
-      ar: ar,
-      he: he,
     };
     return localeMap[locale] || enUS;
   };
