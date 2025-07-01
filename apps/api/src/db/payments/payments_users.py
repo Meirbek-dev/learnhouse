@@ -21,7 +21,7 @@ class ProviderSpecificData(BaseModel):
 
 class PaymentsUserBase(SQLModel):
     status: PaymentStatusEnum = PaymentStatusEnum.PENDING
-    provider_specific_data: dict = Field(default={}, sa_column=Column(JSON))
+    provider_specific_data: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class PaymentsUser(PaymentsUserBase, table=True):

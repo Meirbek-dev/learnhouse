@@ -87,8 +87,8 @@ const FormTagInput = ({ value, onChange, separator = ' | ', error, placeholder }
       <div className="space-y-2">
         <div
           className={cn(
-            "flex min-h-9 cursor-text flex-wrap items-center gap-1 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/50",
-            error && "border-destructive focus-within:ring-destructive/40",
+            'border-input bg-background focus-within:border-primary focus-within:ring-ring/50 flex min-h-9 cursor-text flex-wrap items-center gap-1 rounded-md border px-3 py-2 text-sm shadow-sm transition-colors focus-within:ring-2',
+            error && 'border-destructive focus-within:ring-destructive/40',
           )}
           onClick={handleContainerClick}
           tabIndex={0}
@@ -98,8 +98,8 @@ const FormTagInput = ({ value, onChange, separator = ' | ', error, placeholder }
             <span
               key={tag.id}
               className={cn(
-                "inline-flex items-center rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground mr-1 gap-1 border border-muted-foreground/10",
-                activeTagIndex === index && "ring-2 ring-primary/60"
+                'bg-muted text-muted-foreground border-muted-foreground/10 mr-1 inline-flex items-center gap-1 rounded border px-2 py-0.5 text-xs font-medium',
+                activeTagIndex === index && 'ring-primary/60 ring-2',
               )}
             >
               {tag.text}
@@ -107,13 +107,16 @@ const FormTagInput = ({ value, onChange, separator = ' | ', error, placeholder }
                 type="button"
                 tabIndex={-1}
                 aria-label={t('removeTag', { tag: tag.text })}
-                className="ml-1 rounded hover:bg-muted-foreground/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-colors"
+                className="hover:bg-muted-foreground/10 focus-visible:ring-primary/60 ml-1 rounded transition-colors focus:outline-none focus-visible:ring-2"
                 onClick={(e) => {
                   e.stopPropagation();
                   removeTag(index);
                 }}
               >
-                <X size={12} className="text-muted-foreground" />
+                <X
+                  size={12}
+                  className="text-muted-foreground"
+                />
               </button>
             </span>
           ))}
@@ -125,13 +128,13 @@ const FormTagInput = ({ value, onChange, separator = ' | ', error, placeholder }
             onKeyDown={handleInputKeyDown}
             placeholder={tags.length === 0 ? placeholder || t('placeholderTags') : ''}
             className={cn(
-              "flex-1 bg-transparent outline-none border-none p-0 m-0 min-w-[60px] text-sm text-foreground placeholder:text-muted-foreground",
-              "focus-visible:ring-0 focus-visible:outline-none"
+              'text-foreground placeholder:text-muted-foreground m-0 min-w-[60px] flex-1 border-none bg-transparent p-0 text-sm outline-none',
+              'focus-visible:outline-none focus-visible:ring-0',
             )}
             aria-label={t('addTag')}
           />
         </div>
-        {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+        {error && <p className="text-destructive mt-1 text-xs">{error}</p>}
       </div>
     </div>
   );

@@ -49,6 +49,6 @@ def get_llm(model_name: str, temperature: float = 0) -> ChatOpenAI | None:
         temperature=temperature,
         api_key=api_key,
         model="gpt-4.1-nano",
-        max_retries=2,  # Add retry logic
-        request_timeout=30,  # Add timeout
+        max_retries=2,  # Add retries
+        request_timeout=20,  # Add timeout
     )

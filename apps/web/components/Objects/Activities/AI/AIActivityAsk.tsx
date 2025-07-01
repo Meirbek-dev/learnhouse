@@ -200,7 +200,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                        radial-gradient(ellipse at top left, rgba(99, 179, 237, 0.12) 0%, transparent 60%),
                        radial-gradient(ellipse at bottom right, rgba(167, 139, 250, 0.08) 0%, transparent 60%)`,
             }}
-            className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-inset ring-white/10 backdrop-blur-md"
+            className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-inset ring-white/10"
           >
             <div className="flex flex-row-reverse items-center justify-between pb-3">
               <div className="flex items-center space-x-2">

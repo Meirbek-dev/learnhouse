@@ -21,6 +21,13 @@ from src.db.resource_authors import (
     ResourceAuthorshipStatusEnum,
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
+from src.db.usergroup_resources import UserGroupResource
+from src.db.usergroup_user import UserGroupUser
+from src.security.features_utils.usage import (
+    check_limits_with_usage,
+    decrease_feature_usage,
+    increase_feature_usage,
+)
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
@@ -52,6 +59,7 @@ async def get_course(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course_uuid)
+        .order_by(ResourceAuthor.id.asc())
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -67,7 +75,7 @@ async def get_course(
         for resource_author, user in author_results
     ]
 
-    return CourseRead(**course.model_dump(), authors=authors)
+    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
 
 
 async def get_course_by_id(
@@ -93,6 +101,7 @@ async def get_course_by_id(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
+        .order_by(ResourceAuthor.id.asc())
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -108,7 +117,7 @@ async def get_course_by_id(
         for resource_author, user in author_results
     ]
 
-    return CourseRead(**course.model_dump(), authors=authors)
+    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
 
 
 async def get_course_meta(
@@ -166,7 +175,9 @@ async def get_course_meta(
     ]
 
     # Create course read model with chapters
-    return FullCourseRead(**course.model_dump(), authors=authors, chapters=chapters)
+    return FullCourseRead.model_validate(
+        {**course.model_dump(), "authors": authors, "chapters": chapters}
+    )
 
 
 async def get_courses_orgslug(
@@ -183,10 +194,40 @@ async def get_courses_orgslug(
     query = select(Course).join(Organization).where(Organization.slug == org_slug)
 
     if isinstance(current_user, AnonymousUser):
-        query = query.where(Course.public)
+        # For anonymous users, only show public courses
+        query = query.where(Course.public == True)
     else:
-        # For authenticated users, show all courses in the org
-        pass
+        # For authenticated users, show:
+        # 1. Public courses
+        # 2. Courses not in any UserGroup
+        # 3. Courses in UserGroups where the user is a member
+        # 4. Courses where the user is a resource author
+        query = (
+            query.outerjoin(
+                UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
+            )
+            .outerjoin(
+                UserGroupUser,
+                and_(
+                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+                    UserGroupUser.user_id == current_user.id,
+                ),
+            )
+            .outerjoin(
+                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
+            )
+            .where(
+                or_(
+                    Course.public == True,
+                    UserGroupResource.resource_uuid
+                    == None,  # Courses not in any UserGroup # noqa: E711
+                    UserGroupUser.user_id
+                    == current_user.id,  # Courses in UserGroups where user is a member
+                    ResourceAuthor.user_id
+                    == current_user.id,  # Courses where user is a resource author
+                )
+            )
+        )
 
     # Apply pagination
     query = query.offset(offset).limit(limit).distinct()
@@ -228,7 +269,18 @@ async def get_courses_orgslug(
     course_reads = []
     for course in courses:
         authors = course_authors.get(course.course_uuid, [])
-        course_reads.append(CourseRead(**course.model_dump(), authors=authors))
+        course_data = {
+            **course.model_dump(),
+            "authors": authors,
+            # Ensure backwards compatibility by providing defaults for None values
+            "id": course.id or 0,
+            "description": course.description or "",
+            "about": course.about or "",
+            "learnings": course.learnings or "",
+            "tags": course.tags or "",
+            "thumbnail_image": course.thumbnail_image or "",
+        }
+        course_reads.append(CourseRead.model_validate(course_data))
 
     return course_reads
 
@@ -261,10 +313,40 @@ async def search_courses(
     )
 
     if isinstance(current_user, AnonymousUser):
-        query = query.where(Course.public)
+        # For anonymous users, only show public courses
+        query = query.where(Course.public == True)
     else:
-        # For authenticated users, show all courses in the org
-        pass
+        # For authenticated users, show:
+        # 1. Public courses
+        # 2. Courses not in any UserGroup
+        # 3. Courses in UserGroups where the user is a member
+        # 4. Courses where the user is a resource author
+        query = (
+            query.outerjoin(
+                UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
+            )
+            .outerjoin(
+                UserGroupUser,
+                and_(
+                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+                    UserGroupUser.user_id == current_user.id,
+                ),
+            )
+            .outerjoin(
+                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
+            )
+            .where(
+                or_(
+                    Course.public == True,
+                    UserGroupResource.resource_uuid
+                    == None,  # Courses not in any UserGroup # noqa: E711
+                    UserGroupUser.user_id
+                    == current_user.id,  # Courses in UserGroups where user is a member
+                    ResourceAuthor.user_id
+                    == current_user.id,  # Courses where user is a resource author
+                )
+            )
+        )
 
     # Apply pagination
     query = query.offset(offset).limit(limit).distinct()
@@ -279,6 +361,7 @@ async def search_courses(
             select(ResourceAuthor, User)
             .join(User, ResourceAuthor.user_id == User.id)
             .where(ResourceAuthor.resource_uuid == course.course_uuid)
+            .order_by(ResourceAuthor.id.asc())
         )
         author_results = db_session.exec(authors_statement).all()
 
@@ -294,7 +377,18 @@ async def search_courses(
             for resource_author, user in author_results
         ]
 
-        course_reads.append(CourseRead(**course.model_dump(), authors=authors))
+        course_data = {
+            **course.model_dump(),
+            "authors": authors,
+            # Ensure backwards compatibility by providing defaults for None values
+            "id": course.id or 0,
+            "description": course.description or "",
+            "about": course.about or "",
+            "learnings": course.learnings or "",
+            "tags": course.tags or "",
+            "thumbnail_image": course.thumbnail_image or "",
+        }
+        course_reads.append(CourseRead.model_validate(course_data))
 
     return course_reads
 
@@ -313,12 +407,21 @@ async def create_course(
     # RBAC check
     await rbac_check(request, "course_x", current_user, "create", db_session)
 
+    # Usage check
+    check_limits_with_usage("courses", org_id, db_session)
+
     # Complete course object
-    course.org_id = course.org_id
+    course.org_id = org_id
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == org_id)
     org = db_session.exec(org_statement).first()
+
+    if not org:
+        raise HTTPException(
+            status_code=404,
+            detail="Organization not found",
+        )
 
     course.course_uuid = str(f"course_{ULID()}")
     course.creation_date = str(datetime.now())
@@ -326,15 +429,23 @@ async def create_course(
 
     # Upload thumbnail
     if thumbnail_file and thumbnail_file.filename:
-        name_in_disk = await upload_thumbnail(
+        name_in_disk = f"{course.course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
+        await upload_thumbnail(
             thumbnail_file,
-            course.course_uuid,
+            name_in_disk,
             org.org_uuid,
-            thumbnail_type,
+            course.course_uuid,
         )
-        course.thumbnail_image = name_in_disk
+        if thumbnail_type == ThumbnailType.IMAGE:
+            course.thumbnail_image = name_in_disk
+            course.thumbnail_type = ThumbnailType.IMAGE
+        elif thumbnail_type == ThumbnailType.VIDEO:
+            course.thumbnail_video = name_in_disk
+            course.thumbnail_type = ThumbnailType.VIDEO
     else:
-        course.thumbnail_image = None
+        course.thumbnail_image = ""
+        course.thumbnail_video = ""
+        course.thumbnail_type = ThumbnailType.IMAGE
 
     # Insert course
     db_session.add(course)
@@ -377,7 +488,10 @@ async def create_course(
         for resource_author, user in author_results
     ]
 
-    return CourseRead(**course.model_dump(), authors=authors)
+    # Feature usage
+    increase_feature_usage("courses", course.org_id, db_session)
+
+    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
 
 
 async def update_course_thumbnail(
@@ -390,8 +504,6 @@ async def update_course_thumbnail(
 ):
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
-
-    name_in_disk = None
 
     if not course:
         raise HTTPException(
@@ -406,20 +518,46 @@ async def update_course_thumbnail(
     org_statement = select(Organization).where(Organization.id == course.org_id)
     org = db_session.exec(org_statement).first()
 
+    if not org:
+        raise HTTPException(
+            status_code=404,
+            detail="Organization not found",
+        )
+
     # Upload thumbnail
+    name_in_disk = None
     if thumbnail_file and thumbnail_file.filename:
-        name_in_disk = await upload_thumbnail(
+        name_in_disk = (
+            f"{course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
+        )
+        await upload_thumbnail(
             thumbnail_file,
-            course.course_uuid,
+            name_in_disk,
             org.org_uuid,
-            thumbnail_type,
+            course.course_uuid,
         )
 
     # Update course
     if name_in_disk:
-        course.thumbnail_image = name_in_disk
+        if thumbnail_type == ThumbnailType.IMAGE:
+            course.thumbnail_image = name_in_disk
+            course.thumbnail_type = (
+                ThumbnailType.IMAGE
+                if not course.thumbnail_video
+                else ThumbnailType.BOTH
+            )
+        elif thumbnail_type == ThumbnailType.VIDEO:
+            course.thumbnail_video = name_in_disk
+            course.thumbnail_type = (
+                ThumbnailType.VIDEO
+                if not course.thumbnail_image
+                else ThumbnailType.BOTH
+            )
     else:
-        course.thumbnail_image = None
+        raise HTTPException(
+            status_code=400,
+            detail="No thumbnail file provided",
+        )
 
     # Complete the course object
     course.update_date = str(datetime.now())
@@ -449,7 +587,7 @@ async def update_course_thumbnail(
         for resource_author, user in author_results
     ]
 
-    return CourseRead(**course.model_dump(), authors=authors)
+    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
 
 
 async def update_course(
@@ -471,11 +609,10 @@ async def update_course(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "update", db_session)
 
-    # Update only the fields that were passed in
+    # Update only the fields that were passed in using exclude_unset for better performance
     update_data = course_object.model_dump(exclude_unset=True)
     for field, value in update_data.items():
-        if value is not None:
-            setattr(course, field, value)
+        setattr(course, field, value)
 
     # Complete the course object
     course.update_date = str(datetime.now())
@@ -505,7 +642,7 @@ async def update_course(
         for resource_author, user in author_results
     ]
 
-    return CourseRead(**course.model_dump(), authors=authors)
+    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
 
 
 async def delete_course(
@@ -525,6 +662,9 @@ async def delete_course(
 
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
+
+    # Feature usage
+    decrease_feature_usage("courses", course.org_id, db_session)
 
     db_session.delete(course)
     db_session.commit()
@@ -575,6 +715,7 @@ async def get_user_courses(
             select(ResourceAuthor, User)
             .join(User, ResourceAuthor.user_id == User.id)
             .where(ResourceAuthor.resource_uuid == course.course_uuid)
+            .order_by(ResourceAuthor.id.asc())
         )
         author_results = db_session.exec(authors_statement).all()
 
@@ -589,7 +730,18 @@ async def get_user_courses(
             for resource_author, user in author_results
         ]
 
-        course_reads.append(CourseRead(**course.model_dump(), authors=authors))
+        course_data = {
+            **course.model_dump(),
+            "authors": authors,
+            # Ensure backwards compatibility by providing defaults for None values
+            "id": course.id or 0,
+            "description": course.description or "",
+            "about": course.about or "",
+            "learnings": course.learnings or "",
+            "tags": course.tags or "",
+            "thumbnail_image": course.thumbnail_image or "",
+        }
+        course_reads.append(CourseRead.model_validate(course_data))
 
     return course_reads
 
@@ -612,6 +764,7 @@ async def rbac_check(
         return await authorization_verify_based_on_roles_and_authorship(
             request, current_user.id, action, course_uuid, db_session
         )
+
     await authorization_verify_if_user_is_anon(current_user.id)
     await authorization_verify_based_on_roles_and_authorship(
         request,
@@ -620,7 +773,6 @@ async def rbac_check(
         course_uuid,
         db_session,
     )
-    return None
 
 
 ## 🔒 RBAC Utils ##

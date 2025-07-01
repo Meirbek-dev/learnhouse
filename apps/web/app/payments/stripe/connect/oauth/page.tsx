@@ -31,7 +31,7 @@ function StripeConnectCallback() {
         }
 
         const _response = await verifyStripeConnection(
-          Number.parseInt(orgId, 10),
+          Number.parseInt(orgId, 10), // TODO: why parsing orgId as int?
           code,
           session?.data?.tokens?.access_token,
         );

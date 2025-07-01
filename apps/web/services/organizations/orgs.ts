@@ -109,7 +109,7 @@ export async function removeUserFromOrg(org_id: any, user_id: any, access_token:
 export async function joinOrg(
   args: {
     org_id: number;
-    user_id: number;
+    user_id: number; // TODO: maybe this should be a string?
     invite_code?: string | null;
   },
   next: any,

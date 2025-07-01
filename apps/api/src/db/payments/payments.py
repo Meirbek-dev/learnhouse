@@ -15,7 +15,7 @@ class PaymentsConfigBase(SQLModel):
     active: bool = False
     provider: PaymentProviderEnum = PaymentProviderEnum.STRIPE
     provider_specific_id: str | None = None
-    provider_config: dict = Field(default={}, sa_column=Column(JSON))
+    provider_config: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class PaymentsConfig(PaymentsConfigBase, table=True):

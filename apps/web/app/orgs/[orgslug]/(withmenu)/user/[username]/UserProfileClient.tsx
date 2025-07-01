@@ -343,11 +343,11 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
                             </div>
                           ) : userCourses.length > 0 ? (
-                            <div className="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-8 pb-8">
                               {userCourses.map((course) => (
                                 <div
                                   key={course.id}
-                                  className="flex"
+                                  className="mx-auto w-full max-w-[400px]"
                                 >
                                   <CourseThumbnailLanding
                                     course={course}

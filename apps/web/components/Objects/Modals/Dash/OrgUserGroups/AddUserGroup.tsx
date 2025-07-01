@@ -39,7 +39,7 @@ function AddUserGroup(props: AddUserGroupProps) {
     defaultValues: {
       name: '',
       description: '',
-      org_id: org.id.toString(),
+      org_id: org.id.toString(), // TODO: that's weird, fix this
     },
   });
 

@@ -99,7 +99,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
       if (!session.data?.user) return;
       try {
         const response = await checkPaidAccess(
-          Number.parseInt(course.id, 10),
+          Number.parseInt(course.id, 10), // TODO: why parsing course id as int?
           course.org_id,
           session.data?.tokens?.access_token,
         );

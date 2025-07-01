@@ -20,6 +20,7 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { createCollection } from '@services/courses/collections';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
+import { Button } from '@components/ui/button';
 
 function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
   const t = useTranslations('NewCollectionPage');
@@ -37,10 +38,10 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
     error,
     isLoading,
   } = useSWR(`${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/10`, (url) => swrFetcher(url, access_token));
-  const [isPublic, setIsPublic] = useState('true');
+  const [isPublic, setIsPublic] = useState(true);
 
   const handleVisibilityChange = (value: string) => {
-    setIsPublic(value);
+    setIsPublic(value === 'true');
   };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +77,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
         description: description.trim(),
         courses: selectedCourses,
         public: isPublic,
-        org_id: org.id,
+        org_id: Number(org.id),
       };
       await createCollection(collection, session.data?.tokens?.access_token);
       await revalidateTags(['collections'], org.slug);
@@ -126,7 +127,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
               <Label htmlFor="collection-visibility">{t('visibilityLabel')}</Label>
               <Select
                 onValueChange={handleVisibilityChange}
-                defaultValue={isPublic}
+                defaultValue={String(isPublic)}
               >
                 <SelectTrigger
                   id="collection-visibility"
@@ -222,14 +223,14 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
             >
               {t('cancelButton')}
             </button>
-            <button
+            <Button
               type="submit"
               disabled={isSubmitting}
-              className="shadow-xs focus:outline-hidden flex items-center space-x-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center space-x-2 px-6 py-2"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               <span>{isSubmitting ? t('creatingButton') : t('createButton')}</span>
-            </button>
+            </Button>
           </div>
         </form>
       </div>

@@ -32,7 +32,7 @@ import { updateProfile } from '@services/settings/profile';
 import { getUser } from '@services/users/users';
 import { format, type Locale } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { enUS, es, fr, de, ja, ko, zhCN, pt, it, ru, ar, he } from 'date-fns/locale';
+import { enUS, es, fr, de, ru } from 'date-fns/locale';
 
 // Define section type keys
 const SECTION_TYPE_KEYS = {

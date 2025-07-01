@@ -39,11 +39,11 @@ function OwnedCoursesPage() {
         </div>
       </div>
 
-      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6 pb-12">
         {ownedCourses?.map((course: any) => (
           <div
             key={course.course_uuid}
-            className="p-3"
+            className="mx-auto w-full max-w-[300px]"
           >
             <CourseThumbnail
               course={course}

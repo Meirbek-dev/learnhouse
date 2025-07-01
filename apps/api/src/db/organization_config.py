@@ -103,6 +103,6 @@ class OrganizationConfig(SQLModel, table=True):
     org_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
     )
-    config: dict = Field(default={}, sa_column=Column(JSON))
+    config: dict = Field(default_factory=dict, sa_column=Column(JSON))
     creation_date: str | None
     update_date: str | None

@@ -414,6 +414,16 @@ export const SearchBar: FC<SearchBarProps> = ({
     setShowResults(true);
   }, []);
 
+  // handler for Enter key press
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && searchQuery.trim().length > 0) {
+        window.location.href = getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`);
+      }
+    },
+    [searchQuery, orgslug],
+  );
+
   return (
     <div
       ref={searchRef}
@@ -425,6 +435,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           value={searchQuery}
           onChange={handleSearchChange}
           onFocus={() => setShowResults(true)}
+          onKeyDown={handleKeyDown}
           placeholder={t('placeholder')}
           className="soft-shadow h-9 w-full rounded-xl bg-white pl-11 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
         />

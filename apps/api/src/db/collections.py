@@ -27,7 +27,7 @@ class CollectionUpdate(SQLModel):
     courses: list | None = None
     name: str | None = None
     public: bool | None = None
-    description: str | None = None
+    description: str | None = ""
 
 
 class CollectionRead(CollectionBase):

@@ -21,7 +21,7 @@ class PaymentsProductBase(SQLModel):
     price_type: PaymentPriceTypeEnum = PaymentPriceTypeEnum.FIXED_PRICE
     benefits: str = ""
     amount: float = 0.0
-    currency: str = "USD"
+    currency: str = "KZT"
 
 
 class PaymentsProduct(PaymentsProductBase, table=True):

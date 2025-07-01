@@ -77,7 +77,10 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
     : '../empty_thumbnail.png';
 
   return (
-    <div className="soft-shadow relative flex w-full min-w-[280px] max-w-sm shrink-0 flex-col overflow-hidden rounded-xl bg-white">
+    <div
+      className="soft-shadow relative flex h-auto w-full max-w-sm shrink-0 flex-col overflow-hidden rounded-xl bg-white"
+      style={{ minWidth: '280px', maxWidth: '400px' }}
+    >
       <AdminEditOptions
         course={course}
         orgSlug={orgslug}
@@ -87,11 +90,16 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
         prefetch
         href={customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
       >
-        <img
-          className="inset-0 aspect-video w-full rounded-t-xl bg-cover bg-center ring-1 ring-inset ring-black/10"
-          src={thumbnailImage}
-          alt={course.name}
-        />
+        <div
+          className="relative w-full"
+          style={{ aspectRatio: '16/9' }}
+        >
+          <img
+            className="absolute inset-0 h-full w-full rounded-t-xl bg-cover bg-center object-cover ring-1 ring-inset ring-black/10"
+            src={thumbnailImage}
+            alt={course.name}
+          />
+        </div>
       </Link>
       <div className="flex w-full flex-col space-y-3 p-4">
         <div className="space-y-2">

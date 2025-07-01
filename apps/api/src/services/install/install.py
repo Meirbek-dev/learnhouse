@@ -121,6 +121,7 @@ def install_default_elements(db_session: Session) -> bool:
         user_orgs = db_session.exec(statement_user_orgs).all()
         for user_org in user_orgs:
             db_session.delete(user_org)
+        db_session.commit()
 
     # Now, delete the roles
     for role in roles:

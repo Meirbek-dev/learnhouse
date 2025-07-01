@@ -17,8 +17,8 @@ class UserBase(SQLModel):
     email: EmailStr
     avatar_image: str | None = ""
     bio: str | None = ""
-    details: dict | None = Field(default={}, sa_column=Column(JSON))
-    profile: dict | None = Field(default={}, sa_column=Column(JSON))
+    details: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
+    profile: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class UserCreate(UserBase):

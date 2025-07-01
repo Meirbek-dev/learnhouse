@@ -4,7 +4,7 @@ from sqlmodel import Field, SQLModel
 
 class InstallBase(SQLModel):
     step: int = Field(default=0)
-    data: dict = Field(default={}, sa_column=Column(JSON))
+    data: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class Install(InstallBase, table=True):
@@ -18,9 +18,8 @@ class InstallCreate(InstallBase):
     pass
 
 
-class InstallUpdate(SQLModel):
-    step: int | None = None
-    data: dict | None = Field(default=None, sa_column=Column(JSON))
+class InstallUpdate(InstallBase):
+    pass
 
 
 class InstallRead(InstallBase):

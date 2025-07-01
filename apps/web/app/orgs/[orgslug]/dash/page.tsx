@@ -19,7 +19,7 @@ async function DashboardHome() {
           alt={t('openuLogo')}
           width={210}
           src={openuLogoDark}
-          className="w-48 pb-24 sm:w-auto"
+          className="w-48 pb-24 pt-16 sm:w-auto"
         />
       </div>
       <AdminAuthorization authorizationMode="component">
