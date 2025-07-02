@@ -89,7 +89,7 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
             <div className="text-md flex font-medium text-gray-400">{H2Label}</div>
           </div>
         </div>
-        <div className="flex space-x-0.5 text-sm font-black">
+        <div className="flex space-x-0.5 text-sm font-bold">
           {SETTING_TABS.map((tab) => (
             <TabLink
               key={tab.id}

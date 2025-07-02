@@ -2757,6 +2757,7 @@
   "General": {
     "actions": "Actions",
     "active": "Active",
+    "addTag": "Add tag",
     "alreadyLinked": "Already Linked",
     "amount": "Amount",
     "back": "Back",
@@ -2802,6 +2803,7 @@
     "preview": "Preview",
     "purchaseDate": "Purchase Date",
     "remove": "Remove",
+    "removeTag": "Remove Tag",
     "retry": "Retry",
     "role": "Role",
     "save": "Save",

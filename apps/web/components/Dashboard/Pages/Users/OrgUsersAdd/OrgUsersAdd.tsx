@@ -137,7 +137,7 @@ function OrgUsersAdd() {
               <div className="flex flex-row-reverse">
                 <button
                   onClick={sendInvites}
-                  className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-semibold text-green-100 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={!(selectedInviteCode && invitedUsers.trim())}
                 >
                   <UserPlus className="h-4 w-4" />

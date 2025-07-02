@@ -47,7 +47,7 @@ const SettingsNavigation = ({
   const t = useTranslations('DashPage.UserAccountSettings');
 
   return (
-    <div className="flex space-x-5 text-sm font-black">
+    <div className="flex space-x-5 text-sm font-bold">
       {items.map((item) => (
         <Link
           key={item.id}

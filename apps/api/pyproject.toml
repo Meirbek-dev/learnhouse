@@ -48,22 +48,22 @@ lint.ignore = [
   "COM812",
   "DTZ005",
   "INP001",
-  "E501",   # line too long
-  "E712",   # comparison to True should be 'if cond is True:' or 'if cond:'
-  "S101",   # use of assert detected
-  "ANN202", # missing return type annotation for private function
-  "ANN001", # missing type annotation for function argument
-  "S106",   # possible hardcoded password
-  "ANN201", # missing return type annotation for public function
-  "N806",   # variable in function should be lowercase
-  "N803",   # argument name should be lowercase
-  "B904",   # within an except clause, raise exceptions with raise ... from err
-  "B008",   # do not perform function calls in argument defaults
-  "T20",    # flake8-print (if you want to allow print statements)
-  "ERA001", # found commented-out code
-  "TD002",  # missing author in TODO
-  "TD003",  # missing issue link on the line following this TODO
-  "FIX002", # line contains TODO, consider resolving the issue
+  "E501",    # line too long
+  "E712",    # comparison to True should be 'if cond is True:' or 'if cond:'
+  "S101",    # use of assert detected
+  "ANN202",  # missing return type annotation for private function
+  "ANN001",  # missing type annotation for function argument
+  "S106",    # possible hardcoded password
+  "ANN201",  # missing return type annotation for public function
+  "N806",    # variable in function should be lowercase
+  "N803",    # argument name should be lowercase
+  "B904",    # within an except clause, raise exceptions with raise ... from err
+  "B008",    # do not perform function calls in argument defaults
+  "T20",     # flake8-print (if you want to allow print statements)
+  "ERA001",  # found commented-out code
+  "TD002",   # missing author in TODO
+  "TD003",   # missing issue link on the line following this TODO
+  "FIX002",  # line contains TODO, consider resolving the issue
   "PLR0913", # too many arguments to function call
   "PLR2004", # magic value used in comparison
   "TC002",
@@ -92,6 +92,7 @@ lint.ignore = [
   "ANN206",
   "PLW",
   "S311",
+  "RUF012",
 ]
 
 format.quote-style = "double"

@@ -36,7 +36,7 @@ export const HeaderProfileBox = () => {
                 {t('login')}
               </Link>
             </li>
-            <li className="rounded-lg bg-black p-2 px-3 text-white shadow-md">
+            <li className="rounded-lg bg-primary p-2 px-3 text-white shadow-md">
               <Link
                 href={{
                   pathname: getUriWithoutOrg('/signup'),

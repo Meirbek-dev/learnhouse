@@ -201,7 +201,7 @@ function OrgUserGroups() {
             dialogDescription={t('createUserGroupModalDescription')}
             dialogTrigger={
               <span>
-                <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer">
+                <button className="flex items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-semibold text-green-100 hover:cursor-pointer">
                   <SquareUserRound className="h-4 w-4" />
                   <span>{t('createUserGroupButton')}</span>
                 </button>

@@ -183,7 +183,7 @@ function ActivityElement(props: ActivitiyElementProps) {
             />
             {/*   Publishing  */}
             <button
-              className={`flex items-center space-x-1 rounded-md border p-1 px-2 text-xs font-bold shadow-md transition-colors duration-200 sm:px-3 ${
+              className={`flex items-center space-x-1 rounded-md border p-1 px-2 text-xs font-semibold shadow-md transition-colors duration-200 sm:px-3 ${
                 !props.activity.published
                   ? 'bg-linear-to-bl border-green-600/10 from-green-400/50 to-lime-200/80 text-green-800 hover:from-green-500/50 hover:to-lime-300/80'
                   : 'bg-linear-to-bl border-gray-600/10 from-gray-400/50 to-gray-200/80 text-gray-800 hover:from-gray-500/50 hover:to-gray-300/80'
@@ -217,7 +217,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                   'course_',
                   '',
                 )}/activity/${props.activity.activity_uuid.replace('activity_', '')}`}
-                className="bg-linear-to-bl flex items-center space-x-1 rounded-md border border-cyan-600/10 from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-bold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
+                className="bg-linear-to-bl flex items-center space-x-1 rounded-md border border-cyan-600/10 from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-semibold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
                 rel="noopener noreferrer"
                 aria-label={t('previewTooltip')}
                 title={t('previewTooltip')}
@@ -300,7 +300,7 @@ const ActivityTypeIndicator = ({
     <div className={`flex w-28 space-x-1 text-gray-300 ${isMobile ? 'flex-col' : ''}`}>
       <div className="flex items-center space-x-2">
         <Icon className="size-4" />
-        <div className="mx-auto justify-center rounded-full bg-gray-200 px-2 py-1 align-middle text-xs font-bold text-gray-400">
+        <div className="mx-auto justify-center rounded-full bg-gray-200 px-2 py-1 align-middle text-xs font-semibold text-gray-400">
           {translatedTypeName}
         </div>
       </div>
@@ -356,7 +356,7 @@ const ActivityElementOptions = ({
           className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-sky-700`}
           target="_blank"
         >
-          <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
+          <div className="flex items-center space-x-1 text-xs font-semibold text-sky-100">
             <FilePenLine size={12} />
             <span>{t('editPageButton')}</span>
           </div>
@@ -367,7 +367,7 @@ const ActivityElementOptions = ({
           href={`${getUriWithOrg(org.slug, '')}/dash/assignments/${assignmentUUID}`}
           className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-teal-700`}
         >
-          <div className="flex items-center space-x-1 text-xs font-bold text-sky-100">
+          <div className="flex items-center space-x-1 text-xs font-semibold text-sky-100">
             <FilePenLine size={12} /> {!isMobile && <span>{t('editAssignmentButton')}</span>}
           </div>
         </Link>

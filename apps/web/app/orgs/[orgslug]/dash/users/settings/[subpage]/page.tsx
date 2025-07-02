@@ -78,7 +78,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             <div className="text-md flex font-medium text-gray-400">{H2Label} </div>
           </div>
         </div>
-        <div className="flex space-x-5 text-sm font-black">
+        <div className="flex space-x-5 text-sm font-bold">
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/users`}>
             <div
               className={`border-primary w-fit py-2 text-center transition-all ease-linear ${

@@ -318,7 +318,7 @@ const CourseClient = (props: any) => {
 
             {learnings.length > 0 && learnings[0]?.text !== 'null' && (
               <div className="w-full">
-                <h2 className="py-5 text-xl font-bold md:text-2xl">{t('whatYouWillLearn')}</h2>
+                <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('whatYouWillLearn')}</h2>
                 <div className="space-y-2 overflow-hidden rounded-lg bg-white px-5 py-5 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
                   {learnings.map((learning: any) => {
                     // Handle both new format (object with text and emoji) and legacy format (string)
@@ -367,14 +367,14 @@ const CourseClient = (props: any) => {
             )}
 
             <div className="my-5 mb-10 w-full">
-              <h2 className="py-5 text-xl font-bold md:text-2xl">{t('courseLessons')}</h2>
+              <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('courseLessons')}</h2>
               <div className="overflow-hidden rounded-lg bg-white shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
                 {course.chapters.map((chapter: any, idx: number) => {
                   const isExpanded = expandedChapters[chapter.chapter_uuid] ?? idx === 0; // Default to expanded for first chapter
                   return (
                     <div key={chapter.chapter_uuid || `chapter-${chapter.name}`}>
                       <div
-                        className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-bold text-neutral-600 outline-1 outline-neutral-200/40 transition-colors hover:bg-neutral-100"
+                        className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-semibold text-neutral-600 outline-1 outline-neutral-200/40 transition-colors hover:bg-neutral-100"
                         onClick={() =>
                           setExpandedChapters((prev) => ({
                             ...prev,
@@ -406,7 +406,7 @@ const CourseClient = (props: any) => {
                               {idx + 1}
                             </span>
                             <h3
-                              className="min-w-0 truncate text-lg font-bold leading-tight sm:text-base md:text-lg"
+                              className="min-w-0 truncate text-lg font-semibold leading-tight sm:text-base md:text-lg"
                               style={{ lineHeight: '1.2' }}
                             >
                               {chapter.name}

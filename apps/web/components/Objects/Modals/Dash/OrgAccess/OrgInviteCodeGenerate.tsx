@@ -92,7 +92,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
                 <div className="">
                   <button
                     onClick={createInviteWithUserGroup}
-                    className="flex w-fit items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-bold text-green-100 hover:cursor-pointer"
+                    className="flex w-fit items-center space-x-2 rounded-md bg-green-700 p-1 px-3 text-sm font-semibold text-green-100 hover:cursor-pointer"
                   >
                     <Ticket className="size-4" />
                     <span>{t('generateButton')}</span>

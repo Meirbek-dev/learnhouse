@@ -209,13 +209,13 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
               <button
                 type="button"
                 onClick={() => setSelectedView('list')}
-                className="rounded-md px-4 py-2 text-sm font-bold text-gray-500 antialiased"
+                className="rounded-md px-4 py-2 text-sm font-semibold text-gray-500 antialiased"
               >
                 {t('cancel')}
               </button>
               <Button
                 type="submit"
-                className="rounded-md px-4 py-2 text-sm font-bold antialiased"
+                className="rounded-md px-4 py-2 text-sm font-semibold antialiased"
                 disabled={form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting ? t('adding') : t('addUpdate')}
@@ -251,7 +251,7 @@ const UpdatesListView = () => {
             key={update.id}
             className="border-b border-neutral-200 py-2 antialiased"
           >
-            <div className="flex items-center justify-between space-x-2 font-bold text-gray-500">
+            <div className="flex items-center justify-between space-x-2 font-semibold text-gray-500">
               <div className="flex items-center space-x-2">
                 <span> {update.title}</span>{' '}
                 <span

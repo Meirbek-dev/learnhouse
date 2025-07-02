@@ -315,7 +315,7 @@ function UpdateTaskRef() {
                 onChange={handleFileChange}
               />
               <button
-                className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-bold antialiased"
+                className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-semibold antialiased"
                 onClick={() => document.getElementById('fileInput')?.click()}
               >
                 <UploadCloud

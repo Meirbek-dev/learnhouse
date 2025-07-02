@@ -35,7 +35,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
       >
         <div className="soft-shadow z-10 bg-[#fcfbfc] pl-10 pr-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
-          <div className="flex space-x-3 text-sm font-black">
+          <div className="flex space-x-3 text-sm font-bold">
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/general`}>
               <div
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${

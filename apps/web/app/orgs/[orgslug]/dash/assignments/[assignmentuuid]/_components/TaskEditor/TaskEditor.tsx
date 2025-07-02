@@ -64,7 +64,7 @@ function AssignmentTaskEditor({ page }: any) {
   }, [assignmentTaskState, assignmentTaskStateHook, selectedSubPage, assignment]);
 
   return (
-    <div className="z-20 flex w-full flex-col text-sm font-black">
+    <div className="z-20 flex w-full flex-col text-sm font-bold">
       {assignmentTaskState.assignmentTask && Object.keys(assignmentTaskState.assignmentTask).length > 0 && (
         <div className="flex flex-col space-y-3">
           <div className="soft-shadow z-10 mb-3 flex flex-col bg-white pl-10 pr-10 pt-5 text-sm tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">

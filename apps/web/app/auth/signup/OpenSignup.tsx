@@ -92,14 +92,14 @@ function OpenSignUpComponent() {
       {error && (
         <div className="shadow-xs mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
           <AlertTriangle size={18} />
-          <div className="text-sm font-bold">{error}</div>
+          <div className="text-sm font-semibold">{error}</div>
         </div>
       )}
       {message && (
         <div className="shadow-xs mb-4 flex flex-col items-center justify-center space-x-2 space-y-4 rounded-md bg-green-200 p-4 text-green-950 transition-all">
           <div className="flex space-x-2">
             <Check size={18} />
-            <div className="text-sm font-bold">{message}</div>
+            <div className="text-sm font-semibold">{message}</div>
           </div>
           <hr className="w-40 border border-green-900/20" />
           <Link

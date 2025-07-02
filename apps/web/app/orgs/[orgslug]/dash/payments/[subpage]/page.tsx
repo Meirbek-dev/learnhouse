@@ -81,7 +81,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
             <div className="text-md flex font-medium text-gray-400">{h2}</div>
           </div>
         </div>
-        <div className="flex space-x-0.5 text-sm font-black">
+        <div className="flex space-x-0.5 text-sm font-bold">
           <TabLink
             href={getUriWithOrg(params.orgslug, '/dash/payments/customers')}
             icon={<Users size={16} />}

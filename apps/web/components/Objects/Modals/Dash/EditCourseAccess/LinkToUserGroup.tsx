@@ -84,9 +84,9 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
         )}
         {usergroups?.length == 0 && (
           <div className="flex items-center space-x-3">
-            <span className="mx-3 rounded-full px-3 py-1 font-bold text-yellow-700">{t('noUserGroupsAvailable')}</span>
+            <span className="mx-3 rounded-full px-3 py-1 font-semibold text-yellow-700">{t('noUserGroupsAvailable')}</span>
             <Link
-              className="mx-1 rounded-full bg-blue-100 px-3 py-1 font-bold text-blue-700"
+              className="mx-1 rounded-full bg-blue-100 px-3 py-1 font-semibold text-blue-700"
               target="_blank"
               href={getUriWithOrg(org.slug, '/dash/users/settings/usergroups')}
             >

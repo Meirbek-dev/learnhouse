@@ -125,7 +125,7 @@ function SaveState(props: { orgslug: string }) {
         </div>
       )}
       <div
-        className={`flex cursor-pointer items-center space-x-2 rounded-lg px-4 py-2 font-bold antialiased drop-shadow-md transition-all ease-linear ${
+        className={`flex cursor-pointer items-center space-x-2 rounded-lg px-4 py-2 font-semibold antialiased drop-shadow-md transition-all ease-linear ${
           saved ? 'bg-gray-600 text-white' : 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 border'
         }${isLoading ? 'cursor-not-allowed opacity-50' : ''}`}
         onClick={saveCourseState}

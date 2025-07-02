@@ -402,16 +402,16 @@ async def create_course(
     thumbnail_file: UploadFile | None = None,
     thumbnail_type: ThumbnailType = ThumbnailType.IMAGE,
 ):
-    course = Course.model_validate(course_object)
+    # Create Course object from CourseCreate data and add org_id
+    course_data = course_object.model_dump()
+    course_data["org_id"] = org_id
+    course = Course.model_validate(course_data)
 
     # RBAC check
     await rbac_check(request, "course_x", current_user, "create", db_session)
 
     # Usage check
     check_limits_with_usage("courses", org_id, db_session)
-
-    # Complete course object
-    course.org_id = org_id
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == org_id)

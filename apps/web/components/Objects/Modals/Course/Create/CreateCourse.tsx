@@ -140,7 +140,6 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
               <FormControl>
                 <Input
                   type="text"
-                  placeholder={t('placeholderName')}
                   {...field}
                 />
               </FormControl>
@@ -157,7 +156,6 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
               <FormLabel>{t('labelDescription')}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder={t('placeholderDescription')}
                   {...field}
                 />
               </FormControl>

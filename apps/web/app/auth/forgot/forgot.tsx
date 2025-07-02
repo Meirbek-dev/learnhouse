@@ -65,7 +65,7 @@ function ForgotPasswordClient() {
               />
             </Link>
           </div>
-          <div className="left-login-part flex flex-row bg-white">
+          <div className="flex flex-row bg-white">
             <div className="m-auto w-72">
               <h1 className="mb-4 text-2xl font-bold">{t('title')}</h1>
               <p className="mb-4 text-sm">{t('enterEmailMessage')}</p>

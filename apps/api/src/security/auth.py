@@ -21,7 +21,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 #### JWT Auth ####################################################
 class Settings(PydanticStrictBaseModel):
     authjwt_secret_key: str = "secret" if isDevModeEnabled() else SECRET_KEY
-    authjwt_token_location: ClassVar[set[str]] = {"cookies", "headers"}
+    authjwt_token_location: set[str] = {"cookies", "headers"}
     authjwt_cookie_csrf_protect: bool = False
     authjwt_access_token_expires: float | bool = (
         False if isDevModeEnabled() else timedelta(hours=8).total_seconds()

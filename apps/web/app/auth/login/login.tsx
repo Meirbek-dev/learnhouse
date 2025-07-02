@@ -85,12 +85,12 @@ const LoginClient = (props: LoginClientProps) => {
               />
             </Link>
           </div>
-          <div className="left-login-part flex flex-row bg-white">
+          <div className=" flex flex-row bg-white">
             <div className="m-auto w-72">
               {error && (
                 <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
                   <AlertTriangle size={18} />
-                  <div className="text-sm font-bold">{t('wrongCredentials')}</div>
+                  <div className="text-sm font-semibold">{t('wrongCredentials')}</div>
                 </div>
               )}
 
@@ -153,7 +153,7 @@ const LoginClient = (props: LoginClientProps) => {
                   <div className="flex py-4">
                     <Button
                       type="submit"
-                      className="w-full font-bold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full font-semibold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={form.formState.isSubmitting}
                     >
                       {form.formState.isSubmitting ? t('loading') : t('login')}

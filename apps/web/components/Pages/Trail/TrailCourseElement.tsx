@@ -72,7 +72,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
             <div className="course_actions flex grow flex-row-reverse">
               <button
                 onClick={() => quitCourse(course.course_uuid)}
-                className="h-5 rounded-full bg-red-200 px-2 text-xs font-bold text-red-700 hover:bg-red-300"
+                className="h-5 rounded-full bg-red-200 px-2 text-xs font-semibold text-red-700 hover:bg-red-300"
               >
                 {t('quitCourseButton')}
               </button>

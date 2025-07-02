@@ -72,8 +72,8 @@ const CollectionPage = async (params: any) => {
 
   return (
     <GeneralWrapperStyled>
-      <h2 className="text-sm font-bold text-gray-400">{t('collection')}</h2>
-      <h1 className="text-3xl font-bold">{col.name}</h1>
+      <h2 className="text-sm font-semibold text-gray-400">{t('collection')}</h2>
+      <h1 className="text-3xl font-semibold">{col.name}</h1>
       <br />
       <div className="home_courses flex flex-wrap">
         {col.courses.map((course: any) => (
@@ -95,7 +95,7 @@ const CollectionPage = async (params: any) => {
                 }}
               />
             </Link>
-            <h2 className="w-[250px] py-2 text-lg font-bold">{course.name}</h2>
+            <h2 className="w-[250px] py-2 text-lg font-semibold">{course.name}</h2>
           </div>
         ))}
       </div>

@@ -487,7 +487,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                             value={option.text}
                             onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
                             placeholder={t('optionPlaceholder')}
-                            className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600"
+                            className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-semibold text-neutral-600"
                           />
                           <div
                             className={`flex h-fit w-fit flex-none items-center space-x-1 rounded-lg px-2 py-0.5 text-xs ${
@@ -503,7 +503,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                   size={12}
                                   className="mx-auto"
                                 />
-                                <p className="mx-auto text-xs font-bold">{t('true')}</p>
+                                <p className="mx-auto text-xs font-semibold">{t('true')}</p>
                               </>
                             ) : (
                               <>
@@ -511,7 +511,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                   size={12}
                                   className="mx-auto"
                                 />
-                                <p className="mx-auto text-xs font-bold">{t('false')}</p>
+                                <p className="mx-auto text-xs font-semibold">{t('false')}</p>
                               </>
                             )}
                           </div>
@@ -526,7 +526,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                           </div>
                         </>
                       ) : (
-                        <p className="mx-2 w-full bg-[#00008b00] px-3 pr-6 text-sm font-bold text-neutral-600">
+                        <p className="mx-2 w-full bg-[#00008b00] px-3 pr-6 text-sm font-semibold text-neutral-600">
                           {option.text}
                         </p>
                       )}
@@ -542,7 +542,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                 size={12}
                                 className="mx-auto"
                               />
-                              <p className="mx-auto text-xs font-bold">{t('markedAsTrue')}</p>
+                              <p className="mx-auto text-xs font-semibold">{t('markedAsTrue')}</p>
                             </>
                           ) : (
                             <>
@@ -550,7 +550,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                 size={12}
                                 className="mx-auto"
                               />
-                              <p className="mx-auto text-xs font-bold">{t('markedAsFalse')}</p>
+                              <p className="mx-auto text-xs font-semibold">{t('markedAsFalse')}</p>
                             </>
                           )}
                         </div>

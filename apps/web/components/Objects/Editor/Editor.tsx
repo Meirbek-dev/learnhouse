@@ -306,7 +306,7 @@ function Editor(props: EditorProps) {
               />
               <EditorLeftOptionsSection className="space-x-2">
                 <div
-                  className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-black text-teal-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-sky-700"
+                  className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-teal-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-sky-700"
                   onClick={handleContentSave}
                 >
                   {' '}
@@ -317,7 +317,7 @@ function Editor(props: EditorProps) {
                     target="_blank"
                     href={`/course/${courseUuid}/activity/${activityUuid}`}
                   >
-                    <div className="flex h-9 items-center justify-center rounded-lg bg-neutral-600 px-3 py-2 text-sm font-black text-neutral-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-neutral-700">
+                    <div className="flex h-9 items-center justify-center rounded-lg bg-neutral-600 px-3 py-2 text-sm font-bold text-neutral-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-neutral-700">
                       <Eye
                         className="mx-auto items-center"
                         size={15}

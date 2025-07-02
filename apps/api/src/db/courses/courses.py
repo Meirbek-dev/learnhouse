@@ -50,7 +50,7 @@ class CourseBase(SQLModelStrictBaseModel):
     thumbnail_image: str | None = Field(default="")
     thumbnail_video: str | None = Field(default="")
     public: bool
-    open_to_contributors: bool
+    open_to_contributors: bool = False
 
     @field_validator("thumbnail_type", mode="before")
     @classmethod
@@ -71,7 +71,6 @@ class Course(CourseBase, table=True):
 
 
 class CourseCreate(CourseBase):
-    org_id: int = Field(default=None, foreign_key="organization.id")
     thumbnail_type: ThumbnailType | None = Field(default=ThumbnailType.IMAGE)
     thumbnail_image: str | None = Field(default="")
     thumbnail_video: str | None = Field(default="")

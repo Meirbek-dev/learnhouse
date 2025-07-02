@@ -63,7 +63,7 @@ const ConfirmationModal = (params: ModalParams) => {
               <div className="mt-4 flex flex-row-reverse">
                 <div
                   id={params.buttonid}
-                  className={`flex items-center justify-center rounded-md px-3 py-2 text-sm font-bold hover:cursor-pointer ${params.status === 'warning' ? warningButtonColors : infoButtonColors} transition duration-300 ease-in-out hover:shadow-lg`}
+                  className={`flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold hover:cursor-pointer ${params.status === 'warning' ? warningButtonColors : infoButtonColors} transition duration-300 ease-in-out hover:shadow-lg`}
                   onClick={() => {
                     params.functionToExecute();
                     setIsDialogOpen(false);
