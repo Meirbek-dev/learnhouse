@@ -64,7 +64,7 @@ async def create_video_block(
         content=block_data.model_dump(),
         org_id=org.id if org.id else 0,
         course_id=course.id if course.id else 0,
-        chapter_id=getattr(activity, "chapter_id", 1),
+        # chapter_id=getattr(activity, "chapter_id", 1),  # TODO: fix this
         block_uuid=block_uuid,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),

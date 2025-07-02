@@ -1,10 +1,11 @@
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import ConfigDict
 from sqlalchemy import JSON, Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
 
 from src.db.trail_steps import TrailStepRead
+from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 
 class TrailRunEnum(str, Enum):
@@ -18,9 +19,9 @@ class StatusEnum(str, Enum):
     STATUS_CANCELLED = "STATUS_CANCELLED"
 
 
-class TrailRun(SQLModel, table=True):
+class TrailRun(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    data: dict = Field(default={}, sa_column=Column(JSON))
+    data: dict = Field(default_factory=dict, sa_column=Column(JSON))
     status: StatusEnum = StatusEnum.STATUS_IN_PROGRESS
     # foreign keys
     trail_id: int = Field(
@@ -40,8 +41,8 @@ class TrailRun(SQLModel, table=True):
     update_date: str
 
 
-class TrailRunCreate(SQLModel):
-    data: dict = Field(default={})
+class TrailRunCreate(SQLModelStrictBaseModel):
+    data: dict = Field(default_factory=dict)
     status: StatusEnum = StatusEnum.STATUS_IN_PROGRESS
     # foreign keys
     trail_id: int
@@ -51,9 +52,9 @@ class TrailRunCreate(SQLModel):
 
 
 # trick because Lists are not supported in SQLModel (runs: list[TrailStep] )
-class TrailRunRead(BaseModel):
+class TrailRunRead(PydanticStrictBaseModel):
     id: int | None = Field(default=None, primary_key=True)
-    data: dict = Field(default={}, sa_column=Column(JSON))
+    data: dict = Field(default_factory=dict, sa_column=Column(JSON))
     status: StatusEnum = StatusEnum.STATUS_IN_PROGRESS
     # foreign keys
     trail_id: int = Field(default=None, foreign_key="trail.id")

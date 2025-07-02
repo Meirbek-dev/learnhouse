@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import ConfigDict, EmailStr
 from sqlmodel import Session
 
 from config.config import get_openu_config
@@ -11,6 +11,8 @@ from src.core.events.database import get_db_session
 from src.db.users import AnonymousUser, UserRead
 from src.security.auth import AuthJWT, authenticate_user, get_current_user
 from src.services.auth.utils import signWithGoogle
+
+from src.db.strict_base_model import PydanticStrictBaseModel
 
 router = APIRouter()
 
@@ -77,7 +79,7 @@ async def login(
     }
 
 
-class ThirdPartyLogin(BaseModel):
+class ThirdPartyLogin(PydanticStrictBaseModel):
     email: EmailStr
     provider: Literal["google"]
     access_token: str

@@ -1,8 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class CourseUpdate(SQLModel, table=True):
+class CourseUpdate(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     courseupdate_uuid: str
     title: str
@@ -18,14 +19,14 @@ class CourseUpdate(SQLModel, table=True):
     update_date: str
 
 
-class CourseUpdateCreate(SQLModel):
+class CourseUpdateCreate(SQLModelStrictBaseModel):
     title: str
     content: str
     linked_activity_uuids: str | None = Field(default=None)
     org_id: int
 
 
-class CourseUpdateRead(SQLModel):
+class CourseUpdateRead(SQLModelStrictBaseModel):
     id: int
     title: str
     content: str
@@ -37,7 +38,7 @@ class CourseUpdateRead(SQLModel):
     update_date: str
 
 
-class CourseUpdateUpdate(SQLModel):
+class CourseUpdateUpdate(SQLModelStrictBaseModel):
     title: str | None = None
     content: str | None = None
     linked_activity_uuids: str | None = Field(default=None)

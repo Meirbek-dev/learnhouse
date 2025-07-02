@@ -64,7 +64,7 @@ async def create_pdf_block(
         content=block_data.model_dump(),
         org_id=org.id if org.id else 0,
         course_id=course.id if course.id else 0,
-        chapter_id=getattr(activity, "chapter_id", 1),
+        # chapter_id=getattr(activity, "chapter_id", 1), # TODO: fix this
         block_uuid=block_uuid,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
@@ -86,7 +86,7 @@ async def get_pdf_block(
 
     if not block:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Video file does not exist"
+            status_code=status.HTTP_404_NOT_FOUND, detail="PDF file does not exist"
         )
 
     return BlockRead.model_validate(block)

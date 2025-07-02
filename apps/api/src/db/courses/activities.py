@@ -1,7 +1,9 @@
 from enum import Enum
 
+from pydantic import ConfigDict
 from sqlalchemy import JSON, Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
 class ActivityTypeEnum(str, Enum):
@@ -27,16 +29,18 @@ class ActivitySubTypeEnum(str, Enum):
     SUBTYPE_CUSTOM = "SUBTYPE_CUSTOM"
 
 
-class ActivityBase(SQLModel):
+class ActivityBase(SQLModelStrictBaseModel):
     name: str
     activity_type: ActivityTypeEnum
     activity_sub_type: ActivitySubTypeEnum
-    content: dict = Field(default={}, sa_column=Column(JSON))
+    content: dict = Field(default_factory=dict, sa_column=Column(JSON))
     details: dict | None = Field(default=None, sa_column=Column(JSON))
     published: bool = False
 
 
 class Activity(ActivityBase, table=True):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int | None = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
@@ -54,25 +58,26 @@ class ActivityCreate(ActivityBase):
     chapter_id: int
     activity_type: ActivityTypeEnum = ActivityTypeEnum.TYPE_CUSTOM
     activity_sub_type: ActivitySubTypeEnum = ActivitySubTypeEnum.SUBTYPE_CUSTOM
-    details: dict = Field(default={}, sa_column=Column(JSON))
+    details: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
 
-class ActivityUpdate(SQLModel):
+class ActivityUpdate(ActivityBase):
     name: str | None = None
     activity_type: ActivityTypeEnum | None = None
     activity_sub_type: ActivitySubTypeEnum | None = None
-    content: dict | None = Field(default=None, sa_column=Column(JSON))
-    details: dict | None = Field(default=None, sa_column=Column(JSON))
+    content: dict | None = None
+    details: dict | None = None
     published: bool | None = None
     published_version: int | None = None
     version: int | None = None
 
 
 class ActivityRead(ActivityBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     org_id: int
     course_id: int
     activity_uuid: str
     creation_date: str
     update_date: str
-    details: dict | None = Field(default=None, sa_column=Column(JSON))

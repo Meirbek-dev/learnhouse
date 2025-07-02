@@ -1,8 +1,9 @@
 from sqlalchemy import JSON, Column
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class InstallBase(SQLModel):
+class InstallBase(SQLModelStrictBaseModel):
     step: int = Field(default=0)
     data: dict = Field(default_factory=dict, sa_column=Column(JSON))
 

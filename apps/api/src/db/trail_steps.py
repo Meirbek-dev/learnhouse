@@ -1,13 +1,10 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Optional
+from typing import Optional, Dict, Any
+from pydantic import Field as PydanticField
 
-from pydantic import BaseModel, ConfigDict
 from sqlalchemy import JSON, Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
-
-if TYPE_CHECKING:
-    from src.db.courses.activities import Activity
-
+from sqlmodel import Field
+from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 class TrailStepTypeEnum(str, Enum):
     STEP_TYPE_READABLE_ACTIVITY = "STEP_TYPE_READABLE_ACTIVITY"
@@ -15,13 +12,24 @@ class TrailStepTypeEnum(str, Enum):
     STEP_TYPE_CUSTOM_ACTIVITY = "STEP_TYPE_CUSTOM_ACTIVITY"
 
 
-class TrailStep(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    complete: bool
-    teacher_verified: bool
-    grade: str
-    data: dict = Field(default={}, sa_column=Column(JSON))
-    # foreign keys
+class TrailStep(SQLModelStrictBaseModel, table=True):
+    """
+    TrailStep database model representing a step in a learning trail.
+
+    This model tracks completion status, verification, grading, and metadata
+    for individual steps within a learning trail.
+    """
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    complete: bool = Field()
+    teacher_verified: bool = Field()
+    grade: str = Field()
+    data: Dict[str, Any] = Field(
+        default_factory=dict,
+        sa_column=Column(JSON),
+    )
+
+    # Foreign key relationships
     trailrun_id: int = Field(
         sa_column=Column(Integer, ForeignKey("trailrun.id", ondelete="CASCADE"))
     )
@@ -40,36 +48,28 @@ class TrailStep(SQLModel, table=True):
     user_id: int = Field(
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     )
-    # timestamps
-    creation_date: str
-    update_date: str
+
+    # Timestamps
+    creation_date: str = Field()
+    update_date: str = Field()
 
 
-class TrailStepRead(BaseModel):
-    id: int | None = None
+class TrailStepRead(PydanticStrictBaseModel):
+    id: Optional[int] = PydanticField(default=None)
     complete: bool
     teacher_verified: bool
     grade: str
-    data: dict = {}
+    data: Dict[str, Any] = PydanticField(default_factory=dict)
     trailrun_id: int
     trail_id: int
     activity_id: int
     course_id: int
     org_id: int
     user_id: int
-    creation_date: str
-    update_date: str
-    # Related activity object (not persisted to database)
-    activity: Optional["Activity"] = None
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    creation_date: Optional[str] = None
+    update_date: Optional[str] = None
+    activity: Optional[Dict[str, Any]] = None
 
 
 # note : prepare assignments support
-# an assignment object will be linked to a trail step object in the future
-
-
-def rebuild_trail_step_models() -> None:
-    """Rebuild trail step models to resolve forward references"""
-    from src.db.courses.activities import Activity  # noqa: F401
-
-    TrailStepRead.model_rebuild()
+# An assignment object will be linked to a trail step object in the future

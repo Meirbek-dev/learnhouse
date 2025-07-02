@@ -1,8 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class UserGroupBase(SQLModel):
+class UserGroupBase(SQLModelStrictBaseModel):
     name: str
     description: str
 
@@ -21,7 +22,7 @@ class UserGroupCreate(UserGroupBase):
     org_id: int = Field(default=None, foreign_key="organization.id")
 
 
-class UserGroupUpdate(SQLModel):
+class UserGroupUpdate(SQLModelStrictBaseModel):
     name: str | None = None
     description: str | None = None
 

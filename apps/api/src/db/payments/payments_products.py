@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlmodel import BigInteger, Column, Field, ForeignKey, SQLModel, String
+from sqlmodel import BigInteger, Column, Field, ForeignKey, String
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
 class PaymentProductTypeEnum(str, Enum):
@@ -14,7 +15,7 @@ class PaymentPriceTypeEnum(str, Enum):
     FIXED_PRICE = "fixed_price"
 
 
-class PaymentsProductBase(SQLModel):
+class PaymentsProductBase(SQLModelStrictBaseModel):
     name: str = ""
     description: str | None = ""
     product_type: PaymentProductTypeEnum = PaymentProductTypeEnum.ONE_TIME
@@ -43,7 +44,7 @@ class PaymentsProductCreate(PaymentsProductBase):
     pass
 
 
-class PaymentsProductUpdate(SQLModel):
+class PaymentsProductUpdate(SQLModelStrictBaseModel):
     name: str | None = None
     description: str | None = None
     product_type: PaymentProductTypeEnum | None = None

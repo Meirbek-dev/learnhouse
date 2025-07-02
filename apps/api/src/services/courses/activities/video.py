@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Literal
 
 from fastapi import HTTPException, Request, UploadFile, status
-from pydantic import BaseModel
 from sqlmodel import Session, select
 from ulid import ULID
 
@@ -24,6 +23,7 @@ from src.security.rbac.rbac import (
     authorization_verify_if_user_is_anon,
 )
 from src.services.courses.activities.uploads.videos import upload_video
+from src.db.strict_base_model import PydanticStrictBaseModel
 
 
 def validate_video_file(video_file: UploadFile | None) -> str:
@@ -160,7 +160,7 @@ async def create_video_activity(
     return ActivityRead.model_validate(activity)
 
 
-class ExternalVideo(BaseModel):
+class ExternalVideo(PydanticStrictBaseModel):
     name: str
     uri: str
     type: Literal["youtube", "vimeo"]
@@ -168,11 +168,11 @@ class ExternalVideo(BaseModel):
     details: str = "{}"
 
 
-class ExternalVideoInDB(BaseModel):
+class ExternalVideoInDB(PydanticStrictBaseModel):
     activity_id: str
 
 
-async def create_external_video_activity(
+async def create_external_video_activity(  # TODO: Broken, fix this
     request: Request,
     current_user: PublicUser | AnonymousUser,
     data: ExternalVideo,

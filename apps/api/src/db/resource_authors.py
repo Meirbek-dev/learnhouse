@@ -1,7 +1,8 @@
 from enum import Enum
 
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
 class ResourceAuthorshipEnum(str, Enum):
@@ -17,7 +18,7 @@ class ResourceAuthorshipStatusEnum(str, Enum):
     INACTIVE = "INACTIVE"
 
 
-class ResourceAuthor(SQLModel, table=True):
+class ResourceAuthor(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     resource_uuid: str
     user_id: int = Field(

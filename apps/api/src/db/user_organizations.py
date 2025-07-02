@@ -1,8 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class UserOrganization(SQLModel, table=True):
+class UserOrganization(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(default=None, foreign_key="user.id")
     org_id: int = Field(

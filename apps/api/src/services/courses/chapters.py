@@ -37,15 +37,14 @@ async def create_chapter(
 ) -> ChapterRead:
     chapter = Chapter.model_validate(chapter_object)
 
-    # Get COurse
+    # Get Course
     statement = select(Course).where(Course.id == chapter_object.course_id)
-
     course = db_session.exec(statement).one()
 
     # RBAC check
     await rbac_check(request, "chapter_x", current_user, "create", db_session)
 
-    # complete chapter object
+    # Complete chapter object
     chapter.course_id = chapter_object.course_id
     chapter.chapter_uuid = f"chapter_{ULID()}"
     chapter.creation_date = str(datetime.now())
@@ -60,7 +59,7 @@ async def create_chapter(
     )
     course_chapters = db_session.exec(statement).all()
 
-    # get last chapter order
+    # Get last chapter order
     last_order = course_chapters[-1].order if course_chapters else 0
     to_be_used_order = last_order + 1
 
@@ -69,10 +68,9 @@ async def create_chapter(
     db_session.commit()
     db_session.refresh(chapter)
 
-    chapter = ChapterRead(**chapter.model_dump(), activities=[])
+    chapter_read = ChapterRead.model_validate(chapter, update={"activities": []})
 
-    # Check if COurseChapter link exists
-
+    # Check if CourseChapter link exists
     statement = (
         select(CourseChapter)
         .where(CourseChapter.chapter_id == chapter.id)
@@ -96,7 +94,7 @@ async def create_chapter(
         db_session.add(course_chapter)
         db_session.commit()
 
-    return chapter
+    return chapter_read
 
 
 async def get_chapter(
@@ -110,16 +108,16 @@ async def get_chapter(
 
     if not chapter:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Chapter does not exist"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
         )
 
-    # get COurse
+    # Get Course
     statement = select(Course).where(Course.id == chapter.course_id)
     course = db_session.exec(statement).first()
 
     if not course:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Course does not exist"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
         )
 
     # RBAC check
@@ -135,9 +133,13 @@ async def get_chapter(
 
     activities = db_session.exec(statement).all()
 
-    return ChapterRead(
-        **chapter.model_dump(),
-        activities=[ActivityRead(**activity.model_dump()) for activity in activities],
+    return ChapterRead.model_validate(
+        chapter,
+        update={
+            "activities": [
+                ActivityRead.model_validate(activity) for activity in activities
+            ]
+        },
     )
 
 
@@ -153,7 +155,7 @@ async def update_chapter(
 
     if not chapter:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Chapter does not exist"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
         )
 
     # RBAC check
@@ -162,23 +164,14 @@ async def update_chapter(
     # Update only the fields that were passed in
     update_data = chapter_object.model_dump(exclude_unset=True)
     for field, value in update_data.items():
-        if value is not None:
-            setattr(chapter, field, value)
+        setattr(chapter, field, value)
 
     chapter.update_date = str(datetime.now())
 
     db_session.commit()
     db_session.refresh(chapter)
 
-    if chapter:
-        chapter = await get_chapter(
-            request,
-            chapter.id,
-            current_user,
-            db_session,
-        )
-
-    return chapter
+    return await get_chapter(request, chapter.id, current_user, db_session)
 
 
 async def delete_chapter(
@@ -192,7 +185,7 @@ async def delete_chapter(
 
     if not chapter:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Chapter does not exist"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
         )
 
     # RBAC check
@@ -224,6 +217,14 @@ async def get_course_chapters(
     statement = select(Course).where(Course.id == course_id)
     course = db_session.exec(statement).first()
 
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
+        )
+
+    # RBAC check
+    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+
     statement = (
         select(Chapter)
         .join(CourseChapter, Chapter.id == CourseChapter.chapter_id)
@@ -234,15 +235,13 @@ async def get_course_chapters(
     )
     chapters = db_session.exec(statement).all()
 
-    chapters = [
-        ChapterRead(**chapter.model_dump(), activities=[]) for chapter in chapters
+    chapter_reads = [
+        ChapterRead.model_validate(chapter, update={"activities": []})
+        for chapter in chapters
     ]
 
-    # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
-
     # Get activities for each chapter
-    for chapter in chapters:
+    for chapter in chapter_reads:
         statement = (
             select(ChapterActivity)
             .where(ChapterActivity.chapter_id == chapter.id)
@@ -259,13 +258,13 @@ async def get_course_chapters(
             if activity and (with_unpublished_activities or activity.published):
                 chapter.activities.append(ActivityRead.model_validate(activity))
 
-    return chapters
+    return chapter_reads
 
 
 # Important Note : this is legacy code that has been used because
 # the frontend is still not adapted for the new data structure, this implementation is absolutely not the best one
 # and should not be used for future features
-async def DEPRECEATED_get_course_chapters(
+async def DEPRECATED_get_course_chapters(
     request: Request,
     course_uuid: str,
     current_user: PublicUser,
@@ -357,7 +356,7 @@ async def reorder_chapters_and_activities(
 
     if not course:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Course does not exist"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
         )
 
     # RBAC check
@@ -378,29 +377,35 @@ async def reorder_chapters_and_activities(
 
     # Update or create course chapters based on new order
     for index, chapter_order in enumerate(chapters_order.chapter_order_by_ids):
+        new_order = index + 1
+
         if chapter_order.chapter_id in existing_chapter_map:
-            existing_chapter_map[chapter_order.chapter_id].order = index + 1
-            existing_chapter_map[chapter_order.chapter_id].update_date = str(
-                datetime.now()
-            )
+            # Update existing chapter order
+            existing_cc = existing_chapter_map[chapter_order.chapter_id]
+            existing_cc.order = new_order
+            existing_cc.update_date = str(datetime.now())
         else:
+            # Create new course chapter
             new_chapter = CourseChapter(
                 course_id=course.id,
                 chapter_id=chapter_order.chapter_id,
                 org_id=course.org_id,
-                order=index + 1,
+                order=new_order,
                 creation_date=str(datetime.now()),
                 update_date=str(datetime.now()),
             )
             db_session.add(new_chapter)
 
-        db_session.commit()
-
     # Remove chapters that are no longer in the order
     chapter_ids_to_keep = {co.chapter_id for co in chapters_order.chapter_order_by_ids}
-    for cc in existing_course_chapters:
-        if cc.chapter_id not in chapter_ids_to_keep:
-            db_session.delete(cc)
+    chapters_to_remove = [
+        cc
+        for cc in existing_course_chapters
+        if cc.chapter_id not in chapter_ids_to_keep
+    ]
+    for cc in chapters_to_remove:
+        db_session.delete(cc)
+
     db_session.commit()
 
     ###########
@@ -424,28 +429,37 @@ async def reorder_chapters_and_activities(
     # Update or create chapter activities based on new order
     for chapter_order in chapters_order.chapter_order_by_ids:
         for index, activity_order in enumerate(chapter_order.activities_order_by_ids):
-            key = (chapter_order.chapter_id, activity_order.activity_id)
-            activities_to_keep.add(key)
+            activity_key = (chapter_order.chapter_id, activity_order.activity_id)
+            activities_to_keep.add(activity_key)
+            new_order = index + 1
 
-            if key in existing_activity_map:
-                existing_activity_map[key].order = index + 1
-                existing_activity_map[key].update_date = str(datetime.now())
+            if activity_key in existing_activity_map:
+                # Update existing activity order
+                existing_ca = existing_activity_map[activity_key]
+                existing_ca.order = new_order
+                existing_ca.update_date = str(datetime.now())
             else:
+                # Create new chapter activity
                 new_activity = ChapterActivity(
                     chapter_id=chapter_order.chapter_id,
                     activity_id=activity_order.activity_id,
                     course_id=course.id,
                     org_id=course.org_id,
-                    order=index + 1,
+                    order=new_order,
                     creation_date=str(datetime.now()),
                     update_date=str(datetime.now()),
                 )
                 db_session.add(new_activity)
 
     # Remove activities that are no longer in any chapter
-    for ca in existing_chapter_activities:
-        if (ca.chapter_id, ca.activity_id) not in activities_to_keep:
-            db_session.delete(ca)
+    activities_to_remove = [
+        ca
+        for ca in existing_chapter_activities
+        if (ca.chapter_id, ca.activity_id) not in activities_to_keep
+    ]
+    for ca in activities_to_remove:
+        db_session.delete(ca)
+
     db_session.commit()
 
     return {"detail": "Chapters and activities reordered successfully"}
@@ -460,24 +474,23 @@ async def rbac_check(
     current_user: PublicUser | AnonymousUser,
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,
-):
+) -> None:
+    """Perform RBAC authorization check based on user type and action."""
     if action == "read":
-        if current_user.id == 0:
+        if current_user.id == 0:  # Anonymous user
             return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-        return await authorization_verify_based_on_roles_and_authorship(
+        else:
+            return await authorization_verify_based_on_roles_and_authorship(
+                request, current_user.id, action, course_uuid, db_session
+            )
+    else:
+        # For non-read operations, check if user is anonymous first
+        await authorization_verify_if_user_is_anon(current_user.id)
+        await authorization_verify_based_on_roles_and_authorship(
             request, current_user.id, action, course_uuid, db_session
         )
-    await authorization_verify_if_user_is_anon(current_user.id)
-    await authorization_verify_based_on_roles_and_authorship(
-        request,
-        current_user.id,
-        action,
-        course_uuid,
-        db_session,
-    )
-    return None
 
 
 ## 🔒 RBAC Utils ##

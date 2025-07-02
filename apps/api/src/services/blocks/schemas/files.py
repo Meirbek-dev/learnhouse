@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from src.db.strict_base_model import PydanticStrictBaseModel
 
 
-class BlockFile(BaseModel):
+class BlockFile(PydanticStrictBaseModel):
     file_id: str
     file_format: str
     file_name: str

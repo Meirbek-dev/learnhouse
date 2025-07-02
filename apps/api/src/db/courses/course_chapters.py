@@ -1,8 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class CourseChapter(SQLModel, table=True):
+class CourseChapter(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     order: int
     course_id: int = Field(

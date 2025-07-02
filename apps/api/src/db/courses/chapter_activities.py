@@ -1,8 +1,9 @@
 from sqlalchemy import BigInteger, Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class ChapterActivity(SQLModel, table=True):
+class ChapterActivity(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     order: int
     chapter_id: int = Field(

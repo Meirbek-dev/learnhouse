@@ -1,7 +1,7 @@
 from typing import TypeVar
 
 from fastapi import Request
-from pydantic import BaseModel, ConfigDict
+from pydantic import ConfigDict
 from sqlalchemy import true as sa_true
 from sqlmodel import Session, and_, or_, select, text
 
@@ -12,15 +12,15 @@ from src.db.organizations import Organization
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.courses.courses import search_courses
+from src.db.strict_base_model import PydanticStrictBaseModel
 
 T = TypeVar("T")
 
 
-class SearchResult(BaseModel):
+class SearchResult(PydanticStrictBaseModel):
     courses: list[CourseRead]
     collections: list[CollectionRead]
     users: list[UserRead]
-    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 async def search_across_org(

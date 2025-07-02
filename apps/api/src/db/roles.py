@@ -1,12 +1,13 @@
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import ConfigDict
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
 
+from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 # Rights
-class Permission(BaseModel):
+class Permission(PydanticStrictBaseModel):
     action_create: bool
     action_read: bool
     action_update: bool
@@ -16,7 +17,7 @@ class Permission(BaseModel):
         return getattr(self, item)
 
 
-class Rights(BaseModel):
+class Rights(PydanticStrictBaseModel):
     courses: Permission
     users: Permission
     usergroups: Permission
@@ -40,7 +41,7 @@ class RoleTypeEnum(str, Enum):
     TYPE_GLOBAL = "TYPE_GLOBAL"  # Global roles are not associated with an organization, they are used to define the default rights of a user
 
 
-class RoleBase(SQLModel):
+class RoleBase(SQLModelStrictBaseModel):
     name: str
     description: str | None
     rights: Rights | dict | None = Field(default_factory=dict, sa_column=Column(JSON))
@@ -71,7 +72,7 @@ class RoleCreate(RoleBase):
     org_id: int | None = Field(default=None, foreign_key="organization.id")
 
 
-class RoleUpdate(SQLModel):
+class RoleUpdate(SQLModelStrictBaseModel):
     role_id: int = Field(default=None, foreign_key="role.id")
     name: str | None = None
     description: str | None = None

@@ -1,8 +1,9 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel
-from sqlmodel import JSON, BigInteger, Column, Field, ForeignKey, SQLModel
+from sqlmodel import JSON, BigInteger, Column, Field, ForeignKey
+
+from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 
 class PaymentStatusEnum(str, Enum):
@@ -14,12 +15,12 @@ class PaymentStatusEnum(str, Enum):
     REFUNDED = "refunded"
 
 
-class ProviderSpecificData(BaseModel):
+class ProviderSpecificData(PydanticStrictBaseModel):
     stripe_customer: dict | None = None
     custom_customer: dict | None = None
 
 
-class PaymentsUserBase(SQLModel):
+class PaymentsUserBase(SQLModelStrictBaseModel):
     status: PaymentStatusEnum = PaymentStatusEnum.PENDING
     provider_specific_data: dict = Field(default_factory=dict, sa_column=Column(JSON))
 

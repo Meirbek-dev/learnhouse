@@ -1,16 +1,17 @@
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import ConfigDict, EmailStr
 from sqlalchemy import JSON, Column
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
 
 from src.db.roles import RoleRead
+from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 if TYPE_CHECKING:
     from src.db.organizations import OrganizationRead
 
 
-class UserBase(SQLModel):
+class UserBase(SQLModelStrictBaseModel):
     username: str
     first_name: str
     last_name: str
@@ -27,7 +28,7 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserUpdate(SQLModel):
+class UserUpdate(SQLModelStrictBaseModel):
     username: str | None = None
     first_name: str | None = None
     last_name: str | None = None
@@ -38,7 +39,7 @@ class UserUpdate(SQLModel):
     profile: dict | None = None
 
 
-class UserUpdatePassword(SQLModel):
+class UserUpdatePassword(SQLModelStrictBaseModel):
     old_password: str
     new_password: str
 
@@ -52,26 +53,26 @@ class PublicUser(UserRead):
     pass
 
 
-class UserRoleWithOrg(BaseModel):
+class UserRoleWithOrg(PydanticStrictBaseModel):
     role: RoleRead
     org: "OrganizationRead"
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class UserSession(BaseModel):
+class UserSession(PydanticStrictBaseModel):
     user: UserRead
     roles: list[UserRoleWithOrg]
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class AnonymousUser(SQLModel):
+class AnonymousUser(SQLModelStrictBaseModel):
     id: int = 0
     user_uuid: str = "user_anonymous"
     username: str = "anonymous"
     email: str | None = "anonymous@example.com"
 
 
-class InternalUser(SQLModel):
+class InternalUser(SQLModelStrictBaseModel):
     id: int = 0
     user_uuid: str = "user_internal"
     username: str = "internal"

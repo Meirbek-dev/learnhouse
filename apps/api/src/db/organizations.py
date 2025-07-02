@@ -1,16 +1,18 @@
 from typing import Optional, TYPE_CHECKING
 
-from pydantic import BaseModel, ConfigDict
-from sqlmodel import JSON, Column, Field, SQLModel
+from pydantic import ConfigDict
+from sqlmodel import JSON, Column, Field
 
 from src.db.organization_config import OrganizationConfig
 from src.db.roles import RoleRead
+
+from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 if TYPE_CHECKING:
     from src.db.users import UserRead
 
 
-class OrganizationBase(SQLModel):
+class OrganizationBase(SQLModelStrictBaseModel):
     """Base model for Organization with common fields."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -39,7 +41,7 @@ class Organization(OrganizationBase, table=True):
     update_date: str = ""
 
 
-class OrganizationWithConfig(BaseModel):
+class OrganizationWithConfig(PydanticStrictBaseModel):
     """Organization model with associated configuration."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -48,7 +50,7 @@ class OrganizationWithConfig(BaseModel):
     config: OrganizationConfig
 
 
-class OrganizationUpdate(SQLModel):
+class OrganizationUpdate(SQLModelStrictBaseModel):
     """Model for updating an organization."""
 
     name: Optional[str] = None
@@ -83,7 +85,7 @@ class OrganizationRead(OrganizationBase):
     update_date: str
 
 
-class OrganizationUser(BaseModel):
+class OrganizationUser(PydanticStrictBaseModel):
     """Model representing a user's role within an organization."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)

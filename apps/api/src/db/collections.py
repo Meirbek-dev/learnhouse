@@ -1,8 +1,9 @@
 from sqlalchemy import BigInteger, Column, ForeignKey
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class CollectionBase(SQLModel):
+class CollectionBase(SQLModelStrictBaseModel):
     name: str
     public: bool
     description: str | None = ""
@@ -23,7 +24,7 @@ class CollectionCreate(CollectionBase):
     org_id: int = Field(default=None, foreign_key="organization.id")
 
 
-class CollectionUpdate(SQLModel):
+class CollectionUpdate(SQLModelStrictBaseModel):
     courses: list | None = None
     name: str | None = None
     public: bool | None = None

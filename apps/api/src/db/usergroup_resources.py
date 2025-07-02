@@ -1,8 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class UserGroupResource(SQLModel, table=True):
+class UserGroupResource(SQLModelStrictBaseModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     usergroup_id: int = Field(
         sa_column=Column(Integer, ForeignKey("usergroup.id", ondelete="CASCADE"))

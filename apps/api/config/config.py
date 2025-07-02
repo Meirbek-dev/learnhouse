@@ -3,44 +3,44 @@ from typing import Literal
 
 import yaml  # type: ignore  # PyYAML types not available
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from src.db.strict_base_model import PydanticStrictBaseModel
 
 
-class CookieConfig(BaseModel):
+class CookieConfig(PydanticStrictBaseModel):
     domain: str
 
 
-class GeneralConfig(BaseModel):
+class GeneralConfig(PydanticStrictBaseModel):
     development_mode: bool
     install_mode: bool
 
 
-class SecurityConfig(BaseModel):
+class SecurityConfig(PydanticStrictBaseModel):
     auth_jwt_secret_key: str
 
 
-class ChromaDBConfig(BaseModel):
+class ChromaDBConfig(PydanticStrictBaseModel):
     isSeparateDatabaseEnabled: bool | None = None
     db_host: str | None = None
 
 
-class AIConfig(BaseModel):
+class AIConfig(PydanticStrictBaseModel):
     openai_api_key: str | None = None
     is_ai_enabled: bool | None = None
     chromadb_config: ChromaDBConfig | None = None
 
 
-class S3ApiConfig(BaseModel):
+class S3ApiConfig(PydanticStrictBaseModel):
     bucket_name: str | None = None
     endpoint_url: str | None = None
 
 
-class ContentDeliveryConfig(BaseModel):
+class ContentDeliveryConfig(PydanticStrictBaseModel):
     type: Literal["filesystem", "s3api"]
     s3api: S3ApiConfig
 
 
-class HostingConfig(BaseModel):
+class HostingConfig(PydanticStrictBaseModel):
     domain: str
     ssl: bool
     port: int
@@ -52,20 +52,20 @@ class HostingConfig(BaseModel):
     content_delivery: ContentDeliveryConfig
 
 
-class MailingConfig(BaseModel):
+class MailingConfig(PydanticStrictBaseModel):
     resend_api_key: str
     system_email_address: str
 
 
-class DatabaseConfig(BaseModel):
+class DatabaseConfig(PydanticStrictBaseModel):
     sql_connection_string: str | None = None
 
 
-class RedisConfig(BaseModel):
+class RedisConfig(PydanticStrictBaseModel):
     redis_connection_string: str | None = None
 
 
-class InternalStripeConfig(BaseModel):
+class InternalStripeConfig(PydanticStrictBaseModel):
     stripe_secret_key: str | None = None
     stripe_publishable_key: str | None = None
     stripe_webhook_standard_secret: str | None = None
@@ -73,11 +73,11 @@ class InternalStripeConfig(BaseModel):
     stripe_client_id: str | None = None
 
 
-class InternalPaymentsConfig(BaseModel):
+class InternalPaymentsConfig(PydanticStrictBaseModel):
     stripe: InternalStripeConfig
 
 
-class OpenUConfig(BaseModel):
+class OpenUConfig(PydanticStrictBaseModel):
     site_name: str
     site_description: str
     contact_email: str

@@ -1,12 +1,12 @@
-from typing import Any, Literal
+from typing import Literal
+from src.db.strict_base_model import PydanticStrictBaseModel
 
-from pydantic import BaseModel
+BlockType = Literal["quizBlock", "videoBlock", "pdfBlock", "imageBlock"]
 
 
-class Block(BaseModel):
+class Block(PydanticStrictBaseModel):
     block_id: str
     activity_id: str
     course_id: str
     org_id: str
-    block_type: Literal["quizBlock", "videoBlock", "pdfBlock", "imageBlock"]
-    block_data: Any = None
+    block_type: BlockType

@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from sqlmodel import BigInteger, Column, Field, ForeignKey, SQLModel
+from sqlmodel import BigInteger, Column, Field, ForeignKey
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class PaymentsCourseBase(SQLModel):
+class PaymentsCourseBase(SQLModelStrictBaseModel):
     course_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("course.id", ondelete="CASCADE"))
     )

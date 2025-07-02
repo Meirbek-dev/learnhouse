@@ -4,7 +4,6 @@ import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_another_jwt_auth import AuthJWT
-from pydantic import BaseModel
 from sqlmodel import Session
 
 from config.config import get_openu_config
@@ -13,12 +12,13 @@ from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import ALGORITHM, SECRET_KEY
 from src.services.dev.dev import isDevModeEnabled
 from src.services.users.users import security_get_user, security_verify_password
+from src.db.strict_base_model import PydanticStrictBaseModel
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 #### JWT Auth ####################################################
-class Settings(BaseModel):
+class Settings(PydanticStrictBaseModel):
     authjwt_secret_key: str = "secret" if isDevModeEnabled() else SECRET_KEY
     authjwt_token_location: set[str] = {"cookies", "headers"}
     authjwt_cookie_csrf_protect: bool = False
@@ -41,12 +41,12 @@ def get_config():
 #### Classes ####################################################
 
 
-class Token(BaseModel):
+class Token(PydanticStrictBaseModel):
     access_token: str
     token_type: str
 
 
-class TokenData(BaseModel):
+class TokenData(PydanticStrictBaseModel):
     username: str | None = None
 
 

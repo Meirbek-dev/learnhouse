@@ -2,15 +2,15 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import JSON
-from sqlmodel import BigInteger, Column, Field, ForeignKey, SQLModel
-
+from sqlmodel import BigInteger, Column, Field, ForeignKey
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 # PaymentsConfig
 class PaymentProviderEnum(str, Enum):
     STRIPE = "stripe"
 
 
-class PaymentsConfigBase(SQLModel):
+class PaymentsConfigBase(SQLModelStrictBaseModel):
     enabled: bool = True
     active: bool = False
     provider: PaymentProviderEnum = PaymentProviderEnum.STRIPE
@@ -44,5 +44,5 @@ class PaymentsConfigRead(PaymentsConfigBase):
     update_date: datetime
 
 
-class PaymentsConfigDelete(SQLModel):
+class PaymentsConfigDelete(SQLModelStrictBaseModel):
     id: int
