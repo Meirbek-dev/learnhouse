@@ -145,8 +145,8 @@ function ActivityActions({
               t={t}
             />
           )}
-          {activity.activity_type === 'TYPE_ASSIGNMENT' && (
-            <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
+          {activity.activity_type === 'TYPE_ASSIGNMENT' && assignment?.assignment_uuid && (
+            <AssignmentSubmissionProvider assignment_uuid={assignment.assignment_uuid}>
               <AssignmentTools
                 assignment={assignment}
                 activity={activity}
@@ -252,11 +252,11 @@ function ActivityClient(props: ActivityClientProps) {
           </Suspense>
         );
       case 'TYPE_ASSIGNMENT':
-        return assignment ? (
+        return assignment?.assignment_uuid ? (
           <Suspense fallback={<LoadingFallback />}>
-            <AssignmentProvider assignment_uuid={assignment?.assignment_uuid}>
+            <AssignmentProvider assignment_uuid={assignment.assignment_uuid}>
               <AssignmentsTaskProvider>
-                <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
+                <AssignmentSubmissionProvider assignment_uuid={assignment.assignment_uuid}>
                   <AssignmentStudentActivity />
                 </AssignmentSubmissionProvider>
               </AssignmentsTaskProvider>

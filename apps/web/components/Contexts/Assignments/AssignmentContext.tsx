@@ -12,7 +12,13 @@ import { swrFetcher } from '@services/utils/ts/requests';
 
 export const AssignmentContext = createContext({});
 
-export function AssignmentProvider({ children, assignment_uuid }: { children: ReactNode; assignment_uuid: string }) {
+export function AssignmentProvider({
+  children,
+  assignment_uuid,
+}: {
+  children: ReactNode;
+  assignment_uuid: string | undefined;
+}) {
   const session = useLHSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Assignment');
@@ -23,12 +29,13 @@ export function AssignmentProvider({ children, assignment_uuid }: { children: Re
     activity_object: null,
   });
 
-  const { data: assignment, error: assignmentError } = useSWR(`${getAPIUrl()}assignments/${assignment_uuid}`, (url) =>
-    swrFetcher(url, accessToken),
+  const { data: assignment, error: assignmentError } = useSWR(
+    assignment_uuid && assignment_uuid !== 'undefined' ? `${getAPIUrl()}assignments/${assignment_uuid}` : null,
+    (url) => swrFetcher(url, accessToken),
   );
 
   const { data: assignment_tasks, error: assignmentTasksError } = useSWR(
-    `${getAPIUrl()}assignments/${assignment_uuid}/tasks`,
+    assignment_uuid && assignment_uuid !== 'undefined' ? `${getAPIUrl()}assignments/${assignment_uuid}/tasks` : null,
     (url) => swrFetcher(url, accessToken),
   );
 

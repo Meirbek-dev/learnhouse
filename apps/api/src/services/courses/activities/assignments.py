@@ -853,7 +853,7 @@ async def read_user_assignment_task_submissions(
     user_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-) -> AssignmentTaskSubmissionRead:
+) -> AssignmentTaskSubmissionRead | None:
     # Check if assignment task exists
     statement = select(AssignmentTask).where(
         AssignmentTask.assignment_task_uuid == assignment_task_uuid
@@ -864,19 +864,6 @@ async def read_user_assignment_task_submissions(
         raise HTTPException(
             status_code=404,
             detail="Assignment Task not found",
-        )
-
-    # Check if assignment task submission exists
-    statement = select(AssignmentTaskSubmission).where(
-        AssignmentTaskSubmission.assignment_task_id == assignment_task.id,
-        AssignmentTaskSubmission.user_id == user_id,
-    )
-    assignment_task_submission = db_session.exec(statement).first()
-
-    if not assignment_task_submission:
-        raise HTTPException(
-            status_code=404,
-            detail="Assignment Task Submission not found",
         )
 
     # Check if assignment exists
@@ -902,6 +889,17 @@ async def read_user_assignment_task_submissions(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "read", db_session)
 
+    # Check if assignment task submission exists
+    statement = select(AssignmentTaskSubmission).where(
+        AssignmentTaskSubmission.assignment_task_id == assignment_task.id,
+        AssignmentTaskSubmission.user_id == user_id,
+    )
+    assignment_task_submission = db_session.exec(statement).first()
+
+    if not assignment_task_submission:
+        # Return None instead of raising 404 for non-existent submissions
+        return None
+
     # return assignment task submission read
     return AssignmentTaskSubmissionRead.model_validate(assignment_task_submission)
 
@@ -911,7 +909,7 @@ async def read_user_assignment_task_submissions_me(
     assignment_task_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-) -> AssignmentTaskSubmissionRead:
+) -> AssignmentTaskSubmissionRead | None:
     return await read_user_assignment_task_submissions(
         request,
         assignment_task_uuid,

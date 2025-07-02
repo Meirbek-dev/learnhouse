@@ -10,12 +10,18 @@ import { useLHSession } from '../LHSessionContext';
 
 export const AssignmentSubmissionContext = createContext({});
 
-function AssignmentSubmissionProvider({ children, assignment_uuid }: { children: ReactNode; assignment_uuid: string }) {
+function AssignmentSubmissionProvider({
+  children,
+  assignment_uuid
+}: {
+  children: ReactNode;
+  assignment_uuid: string | undefined;
+}) {
   const session = useLHSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
 
   const { data: assignmentSubmission, error: assignmentError } = useSWR(
-    `${getAPIUrl()}assignments/${assignment_uuid}/submissions/me`,
+    assignment_uuid && assignment_uuid !== 'undefined' ? `${getAPIUrl()}assignments/${assignment_uuid}/submissions/me` : null,
     (url) => swrFetcher(url, accessToken),
   );
 

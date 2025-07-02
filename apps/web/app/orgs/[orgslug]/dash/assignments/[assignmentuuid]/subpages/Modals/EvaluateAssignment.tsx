@@ -94,29 +94,31 @@ function EvaluateAssignment({ user_id }: any) {
                       <PopoverContent className="max-h-[200px] overflow-y-auto">{task.hint}</PopoverContent>
                     </Popover>
                   )}
-                  <Link
-                    href={getTaskRefFileDir(
-                      org?.org_uuid,
-                      assignments?.course_object.course_uuid,
-                      assignments?.activity_object.activity_uuid,
-                      assignments?.assignment_object.assignment_uuid,
-                      task.assignment_task_uuid,
-                      task.reference_file,
-                    )}
-                    target="_blank"
-                    download
-                    className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900"
-                  >
-                    <Download size={13} />
-                    <div className="flex items-center space-x-2">
-                      {task.reference_file && (
-                        <span className="relative">
-                          <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
-                        </span>
+                  {task.reference_file && (
+                    <Link
+                      href={getTaskRefFileDir(
+                        org?.org_uuid,
+                        assignments?.course_object.course_uuid,
+                        assignments?.activity_object.activity_uuid,
+                        assignments?.assignment_object.assignment_uuid,
+                        task.assignment_task_uuid,
+                        task.reference_file,
                       )}
-                      <p className="text-xs font-semibold">{t('refDoc')}</p>
-                    </div>
-                  </Link>
+                      target="_blank"
+                      download
+                      className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-cyan-50/40 px-3 py-1 text-cyan-900"
+                    >
+                      <Download size={13} />
+                      <div className="flex items-center space-x-2">
+                        {task.reference_file && (
+                          <span className="relative">
+                            <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
+                          </span>
+                        )}
+                        <p className="text-xs font-semibold">{t('refDoc')}</p>
+                      </div>
+                    </Link>
+                  )}
                 </div>
               </div>
               <div className="min-h-full">
