@@ -4,8 +4,8 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.2"
 dependencies = [
-  "boto3>=1.39.0",
-  "botocore>=1.39.0",
+  "boto3>=1.39.1",
+  "botocore>=1.39.1",
   "faker>=37.4.0",
   "fastapi==0.115.14",
   "fastapi-another-jwt-auth>=0.1.11",
@@ -17,8 +17,7 @@ dependencies = [
   "langchain-openai>=0.3.27",
   "langchain-text-splitters>=0.3.8",
   "openai>=1.93.0",
-  "psycopg2-binary>=2.9.10",
-  "psycopg2-pool>=1.2",
+  "psycopg[binary,pool]>=3.2.9",
   "pydantic[email]>=2.11.7",
   "pytest>=8.4.1",
   "python-dotenv>=1.1.1",
@@ -33,10 +32,9 @@ dependencies = [
   "chromadb>=1.0.13",
   "alembic>=1.16.2",
   "alembic-postgresql-enum>=1.7.0",
-  "stripe>=12.2.0",
-  "logfire[sqlalchemy]>=3.21.2",
+  "stripe>=12.3.0",
+  "logfire[fastapi,sqlalchemy]>=3.21.2",
   "beautifulsoup4>=4.13.4",
-  "opentelemetry-instrumentation-fastapi>=0.55b1",
   "python-ulid>=3.0.0",
   "argon2-cffi>=25.1.0",
 ]

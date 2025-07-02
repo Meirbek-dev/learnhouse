@@ -118,7 +118,7 @@ async def api_get_course(
 @router.get("/id/{course_id}")
 async def api_get_course_by_id(
     request: Request,
-    course_id: str,
+    course_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
 ) -> CourseRead:

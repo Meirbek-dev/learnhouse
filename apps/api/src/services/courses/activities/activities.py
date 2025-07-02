@@ -142,7 +142,7 @@ async def get_activity(
 
 async def get_activityby_id(
     request: Request,
-    activity_id: str,
+    activity_id: int,
     current_user: PublicUser,
     db_session: Session,
 ):

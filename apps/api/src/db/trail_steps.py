@@ -6,6 +6,7 @@ from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
+
 class TrailStepTypeEnum(str, Enum):
     STEP_TYPE_READABLE_ACTIVITY = "STEP_TYPE_READABLE_ACTIVITY"
     STEP_TYPE_ASSIGNMENT_ACTIVITY = "STEP_TYPE_ASSIGNMENT_ACTIVITY"

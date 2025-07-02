@@ -1,5 +1,6 @@
 from enum import Enum
 
+from pydantic import field_validator
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field
 from src.db.strict_base_model import SQLModelStrictBaseModel
@@ -28,3 +29,17 @@ class ResourceAuthor(SQLModelStrictBaseModel, table=True):
     authorship_status: ResourceAuthorshipStatusEnum
     creation_date: str = ""
     update_date: str = ""
+
+    @field_validator("authorship", mode="before")
+    @classmethod
+    def validate_authorship(cls, v):
+        if isinstance(v, str):
+            return ResourceAuthorshipEnum(v)
+        return v
+
+    @field_validator("authorship_status", mode="before")
+    @classmethod
+    def validate_authorship_status(cls, v):
+        if isinstance(v, str):
+            return ResourceAuthorshipStatusEnum(v)
+        return v

@@ -1,7 +1,7 @@
 from typing import Optional
 from enum import Enum
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey
 from sqlmodel import Field
 from src.db.strict_base_model import SQLModelStrictBaseModel
@@ -23,6 +23,13 @@ class BlockBase(SQLModelStrictBaseModel):
     block_type: BlockTypeEnum = BlockTypeEnum.BLOCK_CUSTOM
     content: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
+    @field_validator("block_type", mode="before")
+    @classmethod
+    def validate_block_type(cls, v):
+        if isinstance(v, str):
+            return BlockTypeEnum(v)
+        return v
+
 
 class Block(BlockBase, table=True):
     """Database table model for Block."""
@@ -35,7 +42,8 @@ class Block(BlockBase, table=True):
         sa_column=Column("course_id", ForeignKey("course.id", ondelete="CASCADE"))
     )
     chapter_id: Optional[int] = Field(
-        default=None, sa_column=Column("chapter_id", ForeignKey("chapter.id", ondelete="CASCADE"))
+        default=None,
+        sa_column=Column("chapter_id", ForeignKey("chapter.id", ondelete="CASCADE")),
     )
     activity_id: int = Field(
         sa_column=Column("activity_id", ForeignKey("activity.id", ondelete="CASCADE"))

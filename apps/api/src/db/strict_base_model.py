@@ -59,7 +59,7 @@ class SQLModelStrictBaseModel(SQLModel):
         validate_default=True,
         validate_return=True,
         # Use enum values, not names
-        # use_enum_values=True,
+        use_enum_values=True,
         # Prevent arbitrary types
         arbitrary_types_allowed=False,
         # String constraints

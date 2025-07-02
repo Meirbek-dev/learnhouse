@@ -47,11 +47,14 @@ from src.services.orgs.uploads import (
 
 async def get_organization(
     request: Request,
-    org_id: str,
+    org_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
 ) -> OrganizationRead:
-    statement = select(Organization).where(Organization.id == org_id)
+    # Convert org_id to int for proper type matching with database
+    org_id_int = int(org_id)
+
+    statement = select(Organization).where(Organization.id == org_id_int)
     result = db_session.exec(statement)
 
     org = result.first()
@@ -380,11 +383,14 @@ async def update_org_with_config_no_auth(
 async def update_org_logo(
     request: Request,
     logo_file: UploadFile,
-    org_id: str,
+    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
-    statement = select(Organization).where(Organization.id == org_id)
+    # Convert org_id to int for proper type matching with database
+    org_id_int = int(org_id)
+
+    statement = select(Organization).where(Organization.id == org_id_int)
     result = db_session.exec(statement)
 
     org = result.first()
@@ -417,11 +423,14 @@ async def update_org_logo(
 async def update_org_thumbnail(
     request: Request,
     thumbnail_file: UploadFile,
-    org_id: str,
+    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
-    statement = select(Organization).where(Organization.id == org_id)
+    # Convert org_id to int for proper type matching with database
+    org_id_int = int(org_id)
+
+    statement = select(Organization).where(Organization.id == org_id_int)
     result = db_session.exec(statement)
 
     org = result.first()
@@ -454,11 +463,14 @@ async def update_org_thumbnail(
 async def update_org_preview(
     request: Request,
     preview_file: UploadFile,
-    org_id: str,
+    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
-    statement = select(Organization).where(Organization.id == org_id)
+    # Convert org_id to int for proper type matching with database
+    org_id_int = int(org_id)
+
+    statement = select(Organization).where(Organization.id == org_id_int)
     result = db_session.exec(statement)
 
     org = result.first()
@@ -519,17 +531,20 @@ async def delete_org(
 async def get_orgs_by_user_admin(
     request: Request,
     db_session: Session,
-    user_id: str,
+    user_id: int,
     page: int = 1,
     limit: int = 10,
 ) -> list[OrganizationRead]:
+    # Convert user_id to int for proper type matching with database
+    user_id_int = int(user_id)
+
     # Join Organization, UserOrganization and OrganizationConfig in a single query
     statement = (
         select(Organization, OrganizationConfig)
         .join(UserOrganization)
         .outerjoin(OrganizationConfig)
         .where(
-            UserOrganization.user_id == user_id,
+            UserOrganization.user_id == user_id_int,
             UserOrganization.role_id == 1,  # Only where the user is admin
             UserOrganization.org_id == Organization.id,
             OrganizationConfig.org_id == Organization.id,
@@ -555,17 +570,20 @@ async def get_orgs_by_user_admin(
 async def get_orgs_by_user(
     request: Request,
     db_session: Session,
-    user_id: str,
+    user_id: int,
     page: int = 1,
     limit: int = 10,
 ) -> list[OrganizationRead]:
+    # Convert user_id to int for proper type matching with database
+    user_id_int = int(user_id)
+
     # Join Organization, UserOrganization and OrganizationConfig in a single query
     statement = (
         select(Organization, OrganizationConfig)
         .join(UserOrganization)
         .outerjoin(OrganizationConfig)
         .where(
-            UserOrganization.user_id == user_id,
+            UserOrganization.user_id == user_id_int,
             UserOrganization.org_id == Organization.id,
             OrganizationConfig.org_id == Organization.id,
         )

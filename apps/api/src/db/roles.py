@@ -1,10 +1,32 @@
 from enum import Enum
+from typing import Any
 
-from pydantic import ConfigDict
-from sqlalchemy import JSON, Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
+from pydantic import ConfigDict, field_validator
+from sqlalchemy import Column, ForeignKey, Integer, TypeDecorator
+from sqlalchemy.dialects.postgresql import JSON as PGJSON
+from sqlmodel import Field
 
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
+
+
+class RightsJSON(TypeDecorator):
+    """Custom JSON type that handles Rights object serialization for psycopg3"""
+
+    impl = PGJSON
+    cache_ok = True
+
+    def process_bind_param(self, value: Any, dialect) -> dict | None:
+        """Convert Rights object to dict before storing in database"""
+        if value is None:
+            return None
+        if hasattr(value, "model_dump"):
+            return value.model_dump()
+        return value
+
+    def process_result_value(self, value: Any, dialect) -> dict | None:
+        """Return the dict value as-is from database"""
+        return value
+
 
 # Rights
 class Permission(PydanticStrictBaseModel):
@@ -15,6 +37,14 @@ class Permission(PydanticStrictBaseModel):
 
     def __getitem__(self, item):
         return getattr(self, item)
+
+    def __json__(self):
+        """Custom JSON serialization for psycopg3 compatibility"""
+        return self.model_dump()
+
+    @classmethod
+    def __get_pydantic_json_schema__(cls, core_schema, handler):
+        return handler(core_schema)
 
 
 class Rights(PydanticStrictBaseModel):
@@ -28,6 +58,14 @@ class Rights(PydanticStrictBaseModel):
 
     def __getitem__(self, item):
         return getattr(self, item)
+
+    def __json__(self):
+        """Custom JSON serialization for psycopg3 compatibility"""
+        return self.model_dump()
+
+    @classmethod
+    def __get_pydantic_json_schema__(cls, core_schema, handler):
+        return handler(core_schema)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -44,7 +82,9 @@ class RoleTypeEnum(str, Enum):
 class RoleBase(SQLModelStrictBaseModel):
     name: str
     description: str | None
-    rights: Rights | dict | None = Field(default_factory=dict, sa_column=Column(JSON))
+    rights: Rights | dict | None = Field(
+        default_factory=dict, sa_column=Column(RightsJSON)
+    )
 
 
 class Role(RoleBase, table=True):
@@ -58,6 +98,13 @@ class Role(RoleBase, table=True):
     creation_date: str = ""
     update_date: str = ""
 
+    @field_validator("role_type", mode="before")
+    @classmethod
+    def validate_role_type(cls, v):
+        if isinstance(v, str):
+            return RoleTypeEnum(v)
+        return v
+
 
 class RoleRead(RoleBase):
     id: int | None = Field(default=None, primary_key=True)
@@ -66,6 +113,13 @@ class RoleRead(RoleBase):
     role_uuid: str
     creation_date: str
     update_date: str
+
+    @field_validator("role_type", mode="before")
+    @classmethod
+    def validate_role_type(cls, v):
+        if isinstance(v, str):
+            return RoleTypeEnum(v)
+        return v
 
 
 class RoleCreate(RoleBase):
@@ -76,4 +130,4 @@ class RoleUpdate(SQLModelStrictBaseModel):
     role_id: int = Field(default=None, foreign_key="role.id")
     name: str | None = None
     description: str | None = None
-    rights: Rights | dict | None = Field(default=None, sa_column=Column(JSON))
+    rights: Rights | dict | None = Field(default=None, sa_column=Column(RightsJSON))

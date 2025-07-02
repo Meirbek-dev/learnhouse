@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field
 
@@ -38,6 +38,14 @@ class TrailRun(SQLModelStrictBaseModel, table=True):
     )
     # timestamps
     creation_date: str
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def validate_status(cls, v):
+        if isinstance(v, str):
+            return StatusEnum(v)
+        return v
+
     update_date: str
 
 
@@ -49,6 +57,13 @@ class TrailRunCreate(SQLModelStrictBaseModel):
     course_id: int
     org_id: int
     user_id: int
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def validate_status(cls, v):
+        if isinstance(v, str):
+            return StatusEnum(v)
+        return v
 
 
 # trick because Lists are not supported in SQLModel (runs: list[TrailStep] )
@@ -71,6 +86,13 @@ class TrailRunRead(PydanticStrictBaseModel):
     course_total_steps: int
     steps: list[TrailStepRead]
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def validate_status(cls, v):
+        if isinstance(v, str):
+            return StatusEnum(v)
+        return v
 
 
 def rebuild_trail_run_models() -> None:

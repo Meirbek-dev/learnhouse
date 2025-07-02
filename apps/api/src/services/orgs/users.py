@@ -25,11 +25,14 @@ rebuild_organization_models()
 
 async def get_organization_users(
     request: Request,
-    org_id: str,
+    org_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
 ) -> list[OrganizationUser]:
-    statement = select(Organization).where(Organization.id == org_id)
+    # Convert org_id to int for proper type matching with database
+    org_id_int = int(org_id)
+
+    statement = select(Organization).where(Organization.id == org_id_int)
     result = db_session.exec(statement)
 
     org = result.first()
@@ -47,7 +50,7 @@ async def get_organization_users(
         select(User)
         .join(UserOrganization)
         .join(Organization)
-        .where(Organization.id == org_id)
+        .where(Organization.id == org_id_int)
     )
     users = db_session.exec(statement)
     users = users.all()
@@ -56,7 +59,7 @@ async def get_organization_users(
 
     for user in users:
         statement = select(UserOrganization).where(
-            UserOrganization.user_id == user.id, UserOrganization.org_id == org_id
+            UserOrganization.user_id == user.id, UserOrganization.org_id == org_id_int
         )
         result = db_session.exec(statement)
         user_org = result.first()
@@ -157,12 +160,16 @@ async def remove_user_from_org(
 
 async def update_user_role(
     request: Request,
-    org_id: str,
-    user_id: str,
+    org_id: int,
+    user_id: int,
     role_uuid: str,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
 ):
+    # Convert org_id and user_id to int for proper type matching with database
+    org_id_int = int(org_id)
+    user_id_int = int(user_id)
+
     # find role
     statement = select(Role).where(Role.role_uuid == role_uuid)
     result = db_session.exec(statement)
@@ -177,7 +184,7 @@ async def update_user_role(
 
     role_id = role.id
 
-    statement = select(Organization).where(Organization.id == org_id)
+    statement = select(Organization).where(Organization.id == org_id_int)
     result = db_session.exec(statement)
 
     org = result.first()
@@ -206,7 +213,7 @@ async def update_user_role(
 
     if (
         len(admins) == 1
-        and int(admins[0].user_id) == int(user_id)
+        and int(admins[0].user_id) == user_id_int
         and str(role_uuid) != "role_global_admin"
     ):
         raise HTTPException(
@@ -215,7 +222,7 @@ async def update_user_role(
         )
 
     statement = select(UserOrganization).where(
-        UserOrganization.user_id == user_id, UserOrganization.org_id == org.id
+        UserOrganization.user_id == user_id_int, UserOrganization.org_id == org.id
     )
     result = db_session.exec(statement)
 

@@ -128,6 +128,8 @@ def install_default_elements(db_session: Session) -> bool:
         db_session.delete(role)
 
     db_session.commit()
+    db_session.expire_all()  # <-- clear session state
+
     # Check if default roles already exist
     statement = select(Role).where(Role.role_type == RoleTypeEnum.TYPE_GLOBAL)
     roles = db_session.exec(statement).all()
@@ -138,57 +140,150 @@ def install_default_elements(db_session: Session) -> bool:
             detail="Default roles already exist",
         )
 
-    # Create default roles
+    # Create rights as dictionaries directly to avoid JSON serialization issues with psycopg3
+    admin_rights = Rights(
+        courses=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        users=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        usergroups=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        collections=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        organizations=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        coursechapters=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        activities=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+    ).model_dump()
+
+    maintainer_rights = Rights(
+        courses=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        users=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        usergroups=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        collections=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        organizations=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        coursechapters=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+        activities=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=True,
+            action_delete=True,
+        ),
+    ).model_dump()
+
+    user_rights = Rights(
+        courses=Permission(
+            action_create=False,
+            action_read=True,
+            action_update=False,
+            action_delete=False,
+        ),
+        users=Permission(
+            action_create=True,
+            action_read=True,
+            action_update=False,
+            action_delete=False,
+        ),
+        usergroups=Permission(
+            action_create=False,
+            action_read=True,
+            action_update=False,
+            action_delete=False,
+        ),
+        collections=Permission(
+            action_create=False,
+            action_read=True,
+            action_update=False,
+            action_delete=False,
+        ),
+        organizations=Permission(
+            action_create=False,
+            action_read=True,
+            action_update=False,
+            action_delete=False,
+        ),
+        coursechapters=Permission(
+            action_create=False,
+            action_read=True,
+            action_update=False,
+            action_delete=False,
+        ),
+        activities=Permission(
+            action_create=False,
+            action_read=True,
+            action_update=False,
+            action_delete=False,
+        ),
+    ).model_dump()
+
+    # Create default roles with pre-serialized rights
     role_global_admin = Role(
         name="Admin",
         description="Standard Admin Role",
         id=1,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_admin",
-        rights=Rights(
-            courses=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            users=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            usergroups=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            collections=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            organizations=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            coursechapters=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            activities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-        ),
+        rights=admin_rights,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -199,50 +294,7 @@ def install_default_elements(db_session: Session) -> bool:
         id=2,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_maintainer",
-        rights=Rights(
-            courses=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            users=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            usergroups=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            collections=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            organizations=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            coursechapters=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-            activities=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=True,
-                action_delete=True,
-            ),
-        ),
+        rights=maintainer_rights,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -253,57 +305,10 @@ def install_default_elements(db_session: Session) -> bool:
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_user",
         id=3,
-        rights=Rights(
-            courses=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            users=Permission(
-                action_create=True,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            usergroups=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            collections=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            organizations=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            coursechapters=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-            activities=Permission(
-                action_create=False,
-                action_read=True,
-                action_update=False,
-                action_delete=False,
-            ),
-        ),
+        rights=user_rights,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
-    # Serialize rights to JSON
-    role_global_admin.rights = role_global_admin.rights.model_dump()
-    role_global_maintainer.rights = role_global_maintainer.rights.model_dump()
-    role_global_user.rights = role_global_user.rights.model_dump()
 
     # Insert roles in DB
     db_session.add(role_global_admin)

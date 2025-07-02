@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field
 from src.db.strict_base_model import SQLModelStrictBaseModel
@@ -37,6 +37,20 @@ class ActivityBase(SQLModelStrictBaseModel):
     details: dict | None = Field(default=None, sa_column=Column(JSON))
     published: bool = False
 
+    @field_validator("activity_type", mode="before")
+    @classmethod
+    def validate_activity_type(cls, v):
+        if isinstance(v, str):
+            return ActivityTypeEnum(v)
+        return v
+
+    @field_validator("activity_sub_type", mode="before")
+    @classmethod
+    def validate_activity_sub_type(cls, v):
+        if isinstance(v, str):
+            return ActivitySubTypeEnum(v)
+        return v
+
 
 class Activity(ActivityBase, table=True):
     model_config = ConfigDict(from_attributes=True)
@@ -45,7 +59,7 @@ class Activity(ActivityBase, table=True):
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
     )
-    course_id: int = Field(
+    course_id: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE")),
     )
@@ -77,7 +91,7 @@ class ActivityRead(ActivityBase):
 
     id: int
     org_id: int
-    course_id: int
+    course_id: int | None
     activity_uuid: str
     creation_date: str
     update_date: str

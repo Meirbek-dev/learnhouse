@@ -1,7 +1,6 @@
 from typing import TypeVar
 
 from fastapi import Request
-from pydantic import ConfigDict
 from sqlalchemy import true as sa_true
 from sqlmodel import Session, and_, or_, select, text
 

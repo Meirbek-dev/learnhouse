@@ -231,17 +231,22 @@ async def delete_collection(
 
 async def get_collections(
     request: Request,
-    org_id: str,
+    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     page: int = 1,
     limit: int = 10,
 ) -> list[CollectionRead]:
+    # Convert org_id to int for proper type matching with database
+    org_id_int = int(org_id)
+
     statement_public = select(Collection).where(
-        Collection.org_id == org_id, Collection.public
+        Collection.org_id == org_id_int, Collection.public
     )
     statement_all = (
-        select(Collection).where(Collection.org_id == org_id).distinct(Collection.id)
+        select(Collection)
+        .where(Collection.org_id == org_id_int)
+        .distinct(Collection.id)
     )
 
     statement = statement_public if current_user.id == 0 else statement_all

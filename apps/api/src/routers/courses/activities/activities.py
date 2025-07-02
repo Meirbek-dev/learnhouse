@@ -55,7 +55,7 @@ async def api_get_activity(
 @router.get("/id/{activity_id}")
 async def api_get_activityby_id(
     request: Request,
-    activity_id: str,
+    activity_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
@@ -63,7 +63,10 @@ async def api_get_activityby_id(
     Get single activity by activity_id
     """
     return await get_activityby_id(
-        request, activity_id, current_user=current_user, db_session=db_session
+        request,
+        int(activity_id),
+        current_user=current_user,
+        db_session=db_session,  # Convert string to int
     )
 
 
@@ -128,7 +131,7 @@ async def api_create_video_activity(
     return await create_video_activity(
         request,
         name,
-        chapter_id,
+        int(chapter_id),  # Convert string to int
         current_user,
         db_session,
         video_file,
@@ -164,5 +167,10 @@ async def api_create_documentpdf_activity(
     Create new activity
     """
     return await create_documentpdf_activity(
-        request, name, chapter_id, current_user, db_session, pdf_file
+        request,
+        name,
+        int(chapter_id),
+        current_user,
+        db_session,
+        pdf_file,  # Convert string to int
     )

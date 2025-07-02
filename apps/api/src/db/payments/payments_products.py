@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
+from pydantic import field_validator
 from sqlmodel import BigInteger, Column, Field, ForeignKey, String
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
@@ -23,6 +24,20 @@ class PaymentsProductBase(SQLModelStrictBaseModel):
     benefits: str = ""
     amount: float = 0.0
     currency: str = "KZT"
+
+    @field_validator("product_type", mode="before")
+    @classmethod
+    def validate_product_type(cls, v):
+        if isinstance(v, str):
+            return PaymentProductTypeEnum(v)
+        return v
+
+    @field_validator("price_type", mode="before")
+    @classmethod
+    def validate_price_type(cls, v):
+        if isinstance(v, str):
+            return PaymentPriceTypeEnum(v)
+        return v
 
 
 class PaymentsProduct(PaymentsProductBase, table=True):
@@ -52,6 +67,20 @@ class PaymentsProductUpdate(SQLModelStrictBaseModel):
     benefits: str | None = None
     amount: float | None = None
     currency: str | None = None
+
+    @field_validator("product_type", mode="before")
+    @classmethod
+    def validate_product_type(cls, v):
+        if v is not None and isinstance(v, str):
+            return PaymentProductTypeEnum(v)
+        return v
+
+    @field_validator("price_type", mode="before")
+    @classmethod
+    def validate_price_type(cls, v):
+        if v is not None and isinstance(v, str):
+            return PaymentPriceTypeEnum(v)
+        return v
 
 
 class PaymentsProductRead(PaymentsProductBase):

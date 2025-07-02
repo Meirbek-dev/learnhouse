@@ -58,7 +58,7 @@ async def api_get_courses_for_explore(
 @router.get("/explore/courses/{course_id}")
 async def api_get_course_for_explore(
     request: Request,
-    course_id: str,
+    course_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     return await get_course_for_explore(request, course_id, db_session)

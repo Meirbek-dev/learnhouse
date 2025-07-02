@@ -80,7 +80,7 @@ async def get_course(
 
 async def get_course_by_id(
     request: Request,
-    course_id: str,
+    course_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):

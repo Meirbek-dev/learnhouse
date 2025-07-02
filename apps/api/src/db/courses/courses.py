@@ -1,6 +1,6 @@
 from typing import List, Optional
 from enum import Enum
-from pydantic import Field as PydanticField, ConfigDict
+from pydantic import Field as PydanticField, ConfigDict, field_validator
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field
 
@@ -24,6 +24,20 @@ class AuthorWithRole(SQLModelStrictBaseModel):
     creation_date: str
     update_date: str
 
+    @field_validator("authorship", mode="before")
+    @classmethod
+    def validate_authorship(cls, v):
+        if isinstance(v, str):
+            return ResourceAuthorshipEnum(v)
+        return v
+
+    @field_validator("authorship_status", mode="before")
+    @classmethod
+    def validate_authorship_status(cls, v):
+        if isinstance(v, str):
+            return ResourceAuthorshipStatusEnum(v)
+        return v
+
 
 class CourseBase(SQLModelStrictBaseModel):
     name: str
@@ -36,6 +50,13 @@ class CourseBase(SQLModelStrictBaseModel):
     thumbnail_video: Optional[str] = Field(default="")
     public: bool
     open_to_contributors: bool
+
+    @field_validator("thumbnail_type", mode="before")
+    @classmethod
+    def validate_thumbnail_type(cls, v):
+        if isinstance(v, str):
+            return ThumbnailType(v)
+        return v
 
 
 class Course(CourseBase, table=True):
@@ -54,6 +75,13 @@ class CourseCreate(CourseBase):
     thumbnail_image: Optional[str] = Field(default="")
     thumbnail_video: Optional[str] = Field(default="")
 
+    @field_validator("thumbnail_type", mode="before")
+    @classmethod
+    def validate_thumbnail_type(cls, v):
+        if isinstance(v, str):
+            return ThumbnailType(v)
+        return v
+
 
 class CourseUpdate(CourseBase):
     name: str
@@ -66,6 +94,13 @@ class CourseUpdate(CourseBase):
     thumbnail_video: Optional[str] = Field(default="")
     public: Optional[bool] = None
     open_to_contributors: Optional[bool] = None
+
+    @field_validator("thumbnail_type", mode="before")
+    @classmethod
+    def validate_thumbnail_type(cls, v):
+        if isinstance(v, str):
+            return ThumbnailType(v)
+        return v
 
 
 class CourseRead(PydanticStrictBaseModel):
@@ -88,6 +123,13 @@ class CourseRead(PydanticStrictBaseModel):
     open_to_contributors: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("thumbnail_type", mode="before")
+    @classmethod
+    def validate_thumbnail_type(cls, v):
+        if isinstance(v, str):
+            return ThumbnailType(v)
+        return v
 
 
 class FullCourseRead(PydanticStrictBaseModel):
@@ -112,6 +154,13 @@ class FullCourseRead(PydanticStrictBaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("thumbnail_type", mode="before")
+    @classmethod
+    def validate_thumbnail_type(cls, v):
+        if isinstance(v, str):
+            return ThumbnailType(v)
+        return v
+
 
 class FullCourseReadWithTrail(PydanticStrictBaseModel):
     id: int
@@ -135,3 +184,10 @@ class FullCourseReadWithTrail(PydanticStrictBaseModel):
     open_to_contributors: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("thumbnail_type", mode="before")
+    @classmethod
+    def validate_thumbnail_type(cls, v):
+        if isinstance(v, str):
+            return ThumbnailType(v)
+        return v

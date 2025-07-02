@@ -82,7 +82,7 @@ async def api_create_org_withconfig(
 @router.get("/{org_id}")
 async def api_get_org(
     request: Request,
-    org_id: str,
+    org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> OrganizationRead:
@@ -95,7 +95,7 @@ async def api_get_org(
 @router.get("/{org_id}/users")
 async def api_get_org_users(
     request: Request,
-    org_id: str,
+    org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> list[OrganizationUser]:
@@ -121,8 +121,8 @@ async def api_join_an_org(
 @router.put("/{org_id}/users/{user_id}/role/{role_uuid}")
 async def api_update_user_role(
     request: Request,
-    org_id: str,
-    user_id: str,
+    org_id: int,
+    user_id: int,
     role_uuid: str,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -302,7 +302,7 @@ async def api_get_org_by_slug(
 @router.put("/{org_id}/logo")
 async def api_update_org_logo(
     request: Request,
-    org_id: str,
+    org_id: int,
     logo_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -322,7 +322,7 @@ async def api_update_org_logo(
 @router.put("/{org_id}/thumbnail")
 async def api_update_org_thumbnail(
     request: Request,
-    org_id: str,
+    org_id: int,
     thumbnail_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -342,7 +342,7 @@ async def api_update_org_thumbnail(
 @router.put("/{org_id}/preview")
 async def api_update_org_preview(
     request: Request,
-    org_id: str,
+    org_id: int,
     preview_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],

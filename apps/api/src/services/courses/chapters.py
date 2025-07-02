@@ -176,7 +176,7 @@ async def update_chapter(
 
 async def delete_chapter(
     request: Request,
-    chapter_id: str,
+    chapter_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):

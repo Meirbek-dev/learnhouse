@@ -1,9 +1,11 @@
 from datetime import datetime
 from enum import Enum
 
+from pydantic import field_validator
 from sqlalchemy import JSON
 from sqlmodel import BigInteger, Column, Field, ForeignKey
 from src.db.strict_base_model import SQLModelStrictBaseModel
+
 
 # PaymentsConfig
 class PaymentProviderEnum(str, Enum):
@@ -16,6 +18,13 @@ class PaymentsConfigBase(SQLModelStrictBaseModel):
     provider: PaymentProviderEnum = PaymentProviderEnum.STRIPE
     provider_specific_id: str | None = None
     provider_config: dict = Field(default_factory=dict, sa_column=Column(JSON))
+
+    @field_validator("provider", mode="before")
+    @classmethod
+    def validate_provider(cls, v):
+        if isinstance(v, str):
+            return PaymentProviderEnum(v)
+        return v
 
 
 class PaymentsConfig(PaymentsConfigBase, table=True):

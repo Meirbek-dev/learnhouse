@@ -1314,7 +1314,7 @@ async def read_user_assignment_submissions(
     # Find assignment
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
     assignment = db_session.exec(statement).first()
-
+    print(assignment_uuid)
     if not assignment:
         raise HTTPException(
             status_code=404,
@@ -1364,7 +1364,7 @@ async def read_user_assignment_submissions_me(
 
 async def update_assignment_submission(
     request: Request,
-    user_id: str,
+    user_id: int,
     assignment_user_submission_object: AssignmentUserSubmissionCreate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
@@ -1424,7 +1424,7 @@ async def update_assignment_submission(
 
 async def delete_assignment_submission(
     request: Request,
-    user_id: str,
+    user_id: int,
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
@@ -1475,7 +1475,7 @@ async def delete_assignment_submission(
 ## > Assignments Submissions Grading
 async def grade_assignment_submission(
     request: Request,
-    user_id: str,
+    user_id: int,
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
@@ -1548,7 +1548,7 @@ async def grade_assignment_submission(
 
 async def get_grade_assignment_submission(
     request: Request,
-    user_id: str,
+    user_id: int,
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
@@ -1609,7 +1609,7 @@ async def get_grade_assignment_submission(
 
 async def mark_activity_as_done_for_user(
     request: Request,
-    user_id: str,
+    user_id: int,
     assignment_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,

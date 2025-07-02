@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, Optional
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey
 from sqlmodel import Field
 from src.db.strict_base_model import SQLModelStrictBaseModel
@@ -29,6 +29,13 @@ class AssignmentBase(SQLModelStrictBaseModel):
     course_id: int
     chapter_id: int
     activity_id: int
+
+    @field_validator("grading_type", mode="before")
+    @classmethod
+    def validate_grading_type(cls, v):
+        if isinstance(v, str):
+            return GradingTypeEnum(v)
+        return v
 
 
 class AssignmentCreate(AssignmentBase):
@@ -62,6 +69,13 @@ class AssignmentUpdate(SQLModelStrictBaseModel):
     chapter_id: Optional[int] = None
     activity_id: Optional[int] = None
     update_date: Optional[str] = None
+
+    @field_validator("grading_type", mode="before")
+    @classmethod
+    def validate_grading_type(cls, v):
+        if v is not None and isinstance(v, str):
+            return GradingTypeEnum(v)
+        return v
 
 
 class Assignment(AssignmentBase, table=True):
@@ -111,6 +125,13 @@ class AssignmentTaskBase(SQLModelStrictBaseModel):
     contents: Dict = Field(default_factory=dict, sa_column=Column(JSON))
     max_grade_value: int = 0  # Value is always between 0-100
 
+    @field_validator("assignment_type", mode="before")
+    @classmethod
+    def validate_assignment_type(cls, v):
+        if isinstance(v, str):
+            return AssignmentTaskTypeEnum(v)
+        return v
+
 
 class AssignmentTaskCreate(AssignmentTaskBase):
     """Model for creating a new assignment task."""
@@ -138,6 +159,13 @@ class AssignmentTaskUpdate(SQLModelStrictBaseModel):
     assignment_type: Optional[AssignmentTaskTypeEnum] = None
     contents: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
     max_grade_value: Optional[int] = None
+
+    @field_validator("assignment_type", mode="before")
+    @classmethod
+    def validate_assignment_type(cls, v):
+        if v is not None and isinstance(v, str):
+            return AssignmentTaskTypeEnum(v)
+        return v
 
 
 class AssignmentTask(AssignmentTaskBase, table=True):
@@ -191,6 +219,13 @@ class AssignmentTaskSubmissionBase(SQLModelStrictBaseModel):
     chapter_id: int
     assignment_task_id: int
 
+    @field_validator("assignment_type", mode="before")
+    @classmethod
+    def validate_assignment_type(cls, v):
+        if isinstance(v, str):
+            return AssignmentTaskTypeEnum(v)
+        return v
+
 
 class AssignmentTaskSubmissionCreate(AssignmentTaskSubmissionBase):
     """Model for creating a new assignment task submission."""
@@ -218,6 +253,13 @@ class AssignmentTaskSubmissionUpdate(SQLModelStrictBaseModel):
     grade: Optional[int] = None
     task_submission_grade_feedback: Optional[str] = None
     assignment_type: Optional[AssignmentTaskTypeEnum] = None
+
+    @field_validator("assignment_type", mode="before")
+    @classmethod
+    def validate_assignment_type(cls, v):
+        if v is not None and isinstance(v, str):
+            return AssignmentTaskTypeEnum(v)
+        return v
 
 
 class AssignmentTaskSubmission(AssignmentTaskSubmissionBase, table=True):

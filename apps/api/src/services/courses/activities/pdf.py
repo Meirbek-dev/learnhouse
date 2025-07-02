@@ -27,7 +27,7 @@ from src.services.courses.activities.uploads.pdfs import upload_pdf
 async def create_documentpdf_activity(
     request: Request,
     name: str,
-    chapter_id: str,
+    chapter_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     pdf_file: UploadFile | None = None,
@@ -145,7 +145,7 @@ async def create_documentpdf_activity(
 
 async def rbac_check(
     request: Request,
-    course_id: str,
+    course_id: int,
     current_user: PublicUser | AnonymousUser,
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,

@@ -62,7 +62,7 @@ def validate_video_file(video_file: UploadFile | None) -> str:
 async def create_video_activity(
     request: Request,
     name: str,
-    chapter_id: str,
+    chapter_id: int,
     current_user: PublicUser,
     db_session: Session,
     video_file: UploadFile | None = None,
@@ -164,12 +164,12 @@ class ExternalVideo(PydanticStrictBaseModel):
     name: str
     uri: str
     type: Literal["youtube", "vimeo"]
-    chapter_id: str
+    chapter_id: int
     details: str = "{}"
 
 
 class ExternalVideoInDB(PydanticStrictBaseModel):
-    activity_id: str
+    activity_id: int
 
 
 async def create_external_video_activity(  # TODO: Broken, fix this
@@ -251,7 +251,7 @@ async def create_external_video_activity(  # TODO: Broken, fix this
 
 async def rbac_check(
     request: Request,
-    course_id: str,
+    course_id: int,
     current_user: PublicUser | AnonymousUser,
     action: Literal["create", "read", "update", "delete"],
     db_session: Session,
