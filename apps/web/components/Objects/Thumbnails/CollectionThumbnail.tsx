@@ -1,8 +1,4 @@
 'use client';
-import { X } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -12,6 +8,10 @@ import { getUriWithOrg } from '@services/config/config';
 import { deleteCollection } from '@services/courses/collections';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { X } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface PropsType {
   collection: any;

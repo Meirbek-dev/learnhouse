@@ -20,9 +20,9 @@ from src.db.resource_authors import (
     ResourceAuthorshipEnum,
     ResourceAuthorshipStatusEnum,
 )
-from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
+from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.features_utils.usage import (
     check_limits_with_usage,
     decrease_feature_usage,
@@ -220,7 +220,7 @@ async def get_courses_orgslug(
                 or_(
                     Course.public == True,
                     UserGroupResource.resource_uuid
-                    == None,  # Courses not in any UserGroup # noqa: E711
+                    == None,  # Courses not in any UserGroup
                     UserGroupUser.user_id
                     == current_user.id,  # Courses in UserGroups where user is a member
                     ResourceAuthor.user_id
@@ -339,7 +339,7 @@ async def search_courses(
                 or_(
                     Course.public == True,
                     UserGroupResource.resource_uuid
-                    == None,  # Courses not in any UserGroup # noqa: E711
+                    == None,  # Courses not in any UserGroup
                     UserGroupUser.user_id
                     == current_user.id,  # Courses in UserGroups where user is a member
                     ResourceAuthor.user_id
@@ -773,6 +773,7 @@ async def rbac_check(
         course_uuid,
         db_session,
     )
+    return None
 
 
 ## 🔒 RBAC Utils ##

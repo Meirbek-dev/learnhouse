@@ -1,14 +1,15 @@
-from typing import List, Optional
 from enum import Enum
-from pydantic import Field as PydanticField, ConfigDict, field_validator
+
+from pydantic import ConfigDict, field_validator
+from pydantic import Field as PydanticField
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field
 
-from src.db.users import UserRead
-from src.db.trails import TrailRead
 from src.db.courses.chapters import ChapterRead
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
+from src.db.trails import TrailRead
+from src.db.users import UserRead
 
 
 class ThumbnailType(str, Enum):
@@ -41,13 +42,13 @@ class AuthorWithRole(SQLModelStrictBaseModel):
 
 class CourseBase(SQLModelStrictBaseModel):
     name: str
-    description: Optional[str] = None
-    about: Optional[str] = None
-    learnings: Optional[str] = None
-    tags: Optional[str] = None
-    thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = Field(default="")
-    thumbnail_video: Optional[str] = Field(default="")
+    description: str | None = None
+    about: str | None = None
+    learnings: str | None = None
+    tags: str | None = None
+    thumbnail_type: ThumbnailType | None = Field(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = Field(default="")
+    thumbnail_video: str | None = Field(default="")
     public: bool
     open_to_contributors: bool
 
@@ -60,7 +61,7 @@ class CourseBase(SQLModelStrictBaseModel):
 
 
 class Course(CourseBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
     )
@@ -71,9 +72,9 @@ class Course(CourseBase, table=True):
 
 class CourseCreate(CourseBase):
     org_id: int = Field(default=None, foreign_key="organization.id")
-    thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = Field(default="")
-    thumbnail_video: Optional[str] = Field(default="")
+    thumbnail_type: ThumbnailType | None = Field(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = Field(default="")
+    thumbnail_video: str | None = Field(default="")
 
     @field_validator("thumbnail_type", mode="before")
     @classmethod
@@ -85,15 +86,15 @@ class CourseCreate(CourseBase):
 
 class CourseUpdate(CourseBase):
     name: str
-    description: Optional[str] = None
-    about: Optional[str] = None
-    learnings: Optional[str] = None
-    tags: Optional[str] = None
-    thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = Field(default="")
-    thumbnail_video: Optional[str] = Field(default="")
-    public: Optional[bool] = None
-    open_to_contributors: Optional[bool] = None
+    description: str | None = None
+    about: str | None = None
+    learnings: str | None = None
+    tags: str | None = None
+    thumbnail_type: ThumbnailType | None = Field(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = Field(default="")
+    thumbnail_video: str | None = Field(default="")
+    public: bool | None = None
+    open_to_contributors: bool | None = None
 
     @field_validator("thumbnail_type", mode="before")
     @classmethod
@@ -106,19 +107,19 @@ class CourseUpdate(CourseBase):
 class CourseRead(PydanticStrictBaseModel):
     id: int
     org_id: int = PydanticField(default=None)
-    authors: List[AuthorWithRole] = PydanticField(default_factory=list)
+    authors: list[AuthorWithRole] = PydanticField(default_factory=list)
     course_uuid: str
     creation_date: str
     update_date: str
-    thumbnail_type: Optional[ThumbnailType] = PydanticField(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = PydanticField(default="")
-    thumbnail_video: Optional[str] = PydanticField(default="")
+    thumbnail_type: ThumbnailType | None = PydanticField(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = PydanticField(default="")
+    thumbnail_video: str | None = PydanticField(default="")
 
     name: str
-    description: Optional[str] = None
-    about: Optional[str] = None
-    learnings: Optional[str] = None
-    tags: Optional[str] = None
+    description: str | None = None
+    about: str | None = None
+    learnings: str | None = None
+    tags: str | None = None
     public: bool
     open_to_contributors: bool
 
@@ -135,20 +136,20 @@ class CourseRead(PydanticStrictBaseModel):
 class FullCourseRead(PydanticStrictBaseModel):
     id: int
     org_id: int
-    course_uuid: Optional[str] = None
-    creation_date: Optional[str] = None
-    update_date: Optional[str] = None
-    thumbnail_type: Optional[ThumbnailType] = PydanticField(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = PydanticField(default="")
-    thumbnail_video: Optional[str] = PydanticField(default="")
-    chapters: List[ChapterRead]
-    authors: List[AuthorWithRole]
+    course_uuid: str | None = None
+    creation_date: str | None = None
+    update_date: str | None = None
+    thumbnail_type: ThumbnailType | None = PydanticField(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = PydanticField(default="")
+    thumbnail_video: str | None = PydanticField(default="")
+    chapters: list[ChapterRead]
+    authors: list[AuthorWithRole]
 
     name: str
-    description: Optional[str] = None
-    about: Optional[str] = None
-    learnings: Optional[str] = None
-    tags: Optional[str] = None
+    description: str | None = None
+    about: str | None = None
+    learnings: str | None = None
+    tags: str | None = None
     public: bool
     open_to_contributors: bool
 
@@ -164,22 +165,22 @@ class FullCourseRead(PydanticStrictBaseModel):
 
 class FullCourseReadWithTrail(PydanticStrictBaseModel):
     id: int
-    course_uuid: Optional[str] = None
-    creation_date: Optional[str] = None
-    update_date: Optional[str] = None
+    course_uuid: str | None = None
+    creation_date: str | None = None
+    update_date: str | None = None
     org_id: int = PydanticField(default=None)
-    authors: List[AuthorWithRole]
-    chapters: List[ChapterRead]
-    trail: Optional[TrailRead]
+    authors: list[AuthorWithRole]
+    chapters: list[ChapterRead]
+    trail: TrailRead | None
 
     name: str
-    description: Optional[str] = None
-    about: Optional[str] = None
-    learnings: Optional[str] = None
-    tags: Optional[str] = None
-    thumbnail_type: Optional[ThumbnailType] = PydanticField(default=ThumbnailType.IMAGE)
-    thumbnail_image: Optional[str] = PydanticField(default="")
-    thumbnail_video: Optional[str] = PydanticField(default="")
+    description: str | None = None
+    about: str | None = None
+    learnings: str | None = None
+    tags: str | None = None
+    thumbnail_type: ThumbnailType | None = PydanticField(default=ThumbnailType.IMAGE)
+    thumbnail_image: str | None = PydanticField(default="")
+    thumbnail_video: str | None = PydanticField(default="")
     public: bool
     open_to_contributors: bool
 

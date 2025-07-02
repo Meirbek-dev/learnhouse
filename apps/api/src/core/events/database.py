@@ -1,7 +1,7 @@
 import importlib
 import logging
 import os
-from typing import Iterator
+from collections.abc import Iterator
 
 import logfire
 from fastapi import FastAPI
@@ -43,7 +43,7 @@ def import_all_models() -> None:
                 importlib.import_module(full_module_path)
                 logger.debug(f"Successfully imported module: {full_module_path}")
             except ImportError as e:
-                logger.error(f"Failed to import module {full_module_path}: {e}")
+                logger.exception(f"Failed to import module {full_module_path}: {e}")
 
 
 # --- Database Initialization ---
@@ -58,7 +58,7 @@ import_all_models()
 # Ensure 'rebuild_trail_models' is correctly implemented in 'src.db.trails'
 # to call .model_rebuild() on relevant models without altering the JSON schema.
 try:
-    from src.db.trails import rebuild_trail_models  # type: ignore # noqa: E402
+    from src.db.trails import rebuild_trail_models  # type: ignore
 
     rebuild_trail_models()
 except ImportError:

@@ -1,13 +1,12 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import useSWR from 'swr';
-
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types';
 import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getOrgCourses } from '@services/courses/courses';
+import { useTranslations } from 'next-intl';
+import useSWR from 'swr';
 
 interface LandingCustomProps {
   landing: {

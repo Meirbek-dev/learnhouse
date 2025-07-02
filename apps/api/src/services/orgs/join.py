@@ -1,14 +1,15 @@
 from datetime import datetime
+
 from fastapi import HTTPException, Request
 from pydantic import Field
 from sqlmodel import Session, select
 
 from src.db.organizations import Organization
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.orgs.invites import get_invite_code
 from src.services.orgs.orgs import get_org_join_mechanism
-from src.db.strict_base_model import PydanticStrictBaseModel
 
 
 class JoinOrg(PydanticStrictBaseModel):
@@ -91,7 +92,7 @@ async def join_org(
 
         return "Добро пожаловать!"
 
-    elif join_method == "open":
+    if join_method == "open":
         # Link user and organization
         user_organization = UserOrganization(
             user_id=user.id,
@@ -105,8 +106,7 @@ async def join_org(
 
         return "Добро пожаловать!"
 
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid join method: {join_method}",
-        )
+    raise HTTPException(
+        status_code=400,
+        detail=f"Invalid join method: {join_method}",
+    )

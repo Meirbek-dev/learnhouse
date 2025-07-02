@@ -1,10 +1,4 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
@@ -12,6 +6,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import LearningItemsList from './LearningItemsList';
 import ThumbnailUpdate from './ThumbnailUpdate';

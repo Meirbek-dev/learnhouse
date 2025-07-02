@@ -24,7 +24,7 @@ def ai_start_activity_chat_session(
     request: Request,
     chat_session_object: StartActivityAIChatSession,
     current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    db_session=Depends(get_db_session),
 ) -> ActivityAIChatSessionResponse:
     """
     Start a new AI Chat session with a Course Activity
@@ -117,7 +117,7 @@ def ai_send_activity_chat_message(
     request: Request,
     chat_session_object: SendActivityAIChatMessage,
     current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    db_session=Depends(get_db_session),
 ) -> ActivityAIChatSessionResponse:
     """
     Start a new AI Chat session with a Course Activity

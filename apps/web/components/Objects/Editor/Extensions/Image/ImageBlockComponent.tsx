@@ -1,14 +1,13 @@
-import { NodeViewWrapper } from '@tiptap/react';
-import { AlertTriangle, AlignCenter, AlignLeft, AlignRight, Download, Image } from 'lucide-react';
-import { Resizable } from 're-resizable';
-import { useEffect, useState } from 'react';
-
-import { constructAcceptValue } from '@/lib/constants';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
+import { NodeViewWrapper } from '@tiptap/react';
+import { AlertTriangle, AlignCenter, AlignLeft, AlignRight, Download, Image } from 'lucide-react';
+import { Resizable } from 're-resizable';
+import { useEffect, useState } from 'react';
+import { constructAcceptValue } from '@/lib/constants';
 
 import { uploadNewImageFile } from '../../../../../services/blocks/Image/images';
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';

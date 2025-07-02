@@ -1,9 +1,4 @@
 'use client';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useEffect, useMemo } from 'react';
-import { mutate } from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -11,6 +6,11 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { removeCourse } from '@services/courses/activity';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { revalidateTags } from '@services/utils/ts/requests';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo } from 'react';
+import { mutate } from 'swr';
 
 interface TrailCourseElementProps {
   course: any;

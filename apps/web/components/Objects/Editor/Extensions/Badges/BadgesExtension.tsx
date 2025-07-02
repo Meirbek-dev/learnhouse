@@ -1,12 +1,11 @@
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { ChevronDown, ChevronRight, Palette } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 
 const BadgesExtension: FC = (props: any) => {
   const t = useTranslations('DashPage.Editor.BadgesExtension');

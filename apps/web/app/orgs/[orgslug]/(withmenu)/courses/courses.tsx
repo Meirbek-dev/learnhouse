@@ -1,7 +1,4 @@
 'use client';
-import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
@@ -11,6 +8,9 @@ import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOf
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 interface CourseProps {
   orgslug: string;

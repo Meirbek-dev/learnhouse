@@ -1,11 +1,20 @@
 'use client';
 
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { getAPIUrl } from '@services/config/config';
+import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { searchOrgContent } from '@services/search/search';
+import { swrFetcher } from '@services/utils/ts/requests';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
-
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -18,16 +27,6 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { Locale } from '@/i18n/config';
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { getAPIUrl } from '@services/config/config';
-import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { searchOrgContent } from '@services/search/search';
-import { swrFetcher } from '@services/utils/ts/requests';
 
 interface EditCourseContributorsProps {
   orgslug: string;

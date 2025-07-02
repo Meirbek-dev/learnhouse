@@ -1,17 +1,16 @@
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { getAPIUrl } from '@services/config/config';
+import { updateCourseThumbnail } from '@services/courses/courses';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
-
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getAPIUrl } from '@services/config/config';
-import { updateCourseThumbnail } from '@services/courses/courses';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-
 import UnsplashImagePicker from './UnsplashImagePicker';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB for images
@@ -274,22 +273,24 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
             accept=".jpg,.jpeg,.png"
             onChange={(e) => handleFileChange(e, 'image')}
           />
-          <button
+          <Button
             type="button"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            variant={'outline'}
+            className="flex items-center gap-2 px-4 py-2"
             onClick={() => imageInputRef.current?.click()}
           >
             <UploadCloud size={16} />
             {t('uploadImageButton')}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            variant={'outline'}
+            className="flex items-center gap-2 px-4 py-2"
             onClick={() => setShowUnsplashPicker(true)}
           >
             <ImageIcon size={16} />
             {t('gallery')}
-          </button>
+          </Button>
         </div>
       );
     }

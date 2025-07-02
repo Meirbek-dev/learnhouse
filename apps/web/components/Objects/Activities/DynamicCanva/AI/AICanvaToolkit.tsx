@@ -1,15 +1,14 @@
+import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
 import type { Editor } from '@tiptap/core';
 import { BubbleMenu } from '@tiptap/react';
 import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-
-import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
 import touEmblemDark from 'public/tou_emblem_dark.png';
+import { useEffect, useState } from 'react';
 
 import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures';
 

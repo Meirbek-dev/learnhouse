@@ -1,9 +1,8 @@
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import { Info, X } from 'lucide-react';
 import { useState } from 'react';
 import { styled } from 'styled-components';
-
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 
 interface CalloutOptions {
   dismissible?: boolean;

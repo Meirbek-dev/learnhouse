@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Literal
-from ulid import ULID
+
 from fastapi import HTTPException, Request, UploadFile
 from sqlmodel import Session, select
+from ulid import ULID
 
 from src.db.courses.activities import Activity
 from src.db.courses.assignments import (
@@ -34,10 +35,10 @@ from src.security.features_utils.usage import (
     increase_feature_usage,
 )
 from src.security.rbac.rbac import (
+    authorization_verify_based_on_roles,
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
     authorization_verify_if_user_is_anon,
-    authorization_verify_based_on_roles,
 )
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
 from src.services.courses.activities.uploads.tasks_ref_files import (
@@ -1726,25 +1727,22 @@ async def rbac_check(
 ):
     if action == "read":
         if current_user.id == 0:  # Anonymous user
-            res = await authorization_verify_if_element_is_public(
+            return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-            return res
-        else:
-            res = await authorization_verify_based_on_roles_and_authorship(
-                request, current_user.id, action, course_uuid, db_session
-            )
-            return res
-    else:
-        await authorization_verify_if_user_is_anon(current_user.id)
-
-        await authorization_verify_based_on_roles_and_authorship(
-            request,
-            current_user.id,
-            action,
-            course_uuid,
-            db_session,
+        return await authorization_verify_based_on_roles_and_authorship(
+            request, current_user.id, action, course_uuid, db_session
         )
+    await authorization_verify_if_user_is_anon(current_user.id)
+
+    await authorization_verify_based_on_roles_and_authorship(
+        request,
+        current_user.id,
+        action,
+        course_uuid,
+        db_session,
+    )
+    return None
 
 
 ## 🔒 RBAC Utils ##

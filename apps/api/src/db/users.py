@@ -89,7 +89,7 @@ class User(UserBase, table=True):
 
 def rebuild_user_models() -> None:
     """Rebuild user models to resolve forward references"""
-    from src.db.organizations import OrganizationRead  # noqa: F401
+    from src.db.organizations import OrganizationRead
 
     UserRoleWithOrg.model_rebuild()
     UserSession.model_rebuild()

@@ -1,14 +1,4 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Cloud, File, Info, Loader, UploadCloud } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import { z } from 'zod';
-
-import { constructAcceptValue } from '@/lib/constants';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import {
   useAssignmentsTask,
@@ -20,9 +10,18 @@ import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 import { Textarea } from '@components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { getActivityByID } from '@services/courses/activities';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { getTaskRefFileDir } from '@services/media/media';
+import { Cloud, File, Info, Loader, UploadCloud } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import { z } from 'zod';
+import { constructAcceptValue } from '@/lib/constants';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);
 

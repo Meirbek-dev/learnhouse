@@ -2,14 +2,18 @@
 import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 
 import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons';
-
-import { ToolbarButtons } from './Toolbar/ToolbarButtons';
-
 // Extensions
 import QuizBlock from './Extensions/Quiz/QuizBlock';
+import { ToolbarButtons } from './Toolbar/ToolbarButtons';
 
 // Lowlight
 const lowlight = createLowlight(common);
+
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { getUriWithOrg } from '@services/config/config';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
@@ -30,16 +34,10 @@ import { Eye, Monitor } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import touEmblemLight from 'public/tou_emblem_light.png';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { styled } from 'styled-components';
-
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { CourseProvider } from '@components/Contexts/CourseContext';
-import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { getUriWithOrg } from '@services/config/config';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import touEmblemLight from 'public/tou_emblem_light.png';
 
 import UserAvatar from '../UserAvatar';
 
@@ -279,7 +277,8 @@ function Editor(props: EditorProps) {
                         })
                       }
                       style={{
-                        background: `linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)`,
+                        background:
+                          'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
                       }}
                       className="flex items-center space-x-1 rounded-md px-3 py-2 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
                       title={t('aiEditor')}

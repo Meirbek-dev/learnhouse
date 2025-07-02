@@ -121,8 +121,8 @@ async def api_create_video_activity(
     name: Annotated[str, Form()],
     chapter_id: Annotated[str, Form()],
     details: Annotated[str, Form()] = "{}",
-    current_user: PublicUser = Depends(get_current_user),
     video_file: UploadFile | None = None,
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
     """

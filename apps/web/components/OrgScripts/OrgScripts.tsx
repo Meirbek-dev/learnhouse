@@ -2,8 +2,8 @@
 
 import DOMPurify from 'dompurify';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect } from 'react';
 import type React from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { useOrg } from '@/components/Contexts/OrgContext';
 

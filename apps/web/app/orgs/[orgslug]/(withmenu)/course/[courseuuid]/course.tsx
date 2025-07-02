@@ -1,12 +1,4 @@
 'use client';
-import { ArrowRight, Backpack, Check, File, ImageIcon, Layers, Square, StickyNote, Video } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import useSWR from 'swr';
-
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -20,6 +12,13 @@ import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { ArrowRight, Backpack, Check, File, ImageIcon, Layers, Square, StickyNote, Video } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import useSWR from 'swr';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');

@@ -1,6 +1,6 @@
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
-import { useEffect, useState } from 'react';
 import type React from 'react';
+import { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
 
 interface LinkInputTooltipProps {

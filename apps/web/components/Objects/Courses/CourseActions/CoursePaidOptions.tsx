@@ -1,18 +1,17 @@
 'use client';
 
-import { ChevronDown, ChevronUp, RefreshCcw, SquareCheck } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR from 'swr';
-
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Badge } from '@components/ui/badge';
 import { Button } from '@components/ui/button';
 import { getUriWithOrg } from '@services/config/config';
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
+import { ChevronDown, ChevronUp, RefreshCcw, SquareCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR from 'swr';
 
 interface CoursePaidOptionsProps {
   course: {

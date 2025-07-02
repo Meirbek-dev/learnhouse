@@ -1,9 +1,4 @@
 'use client';
-import { Globe, SquareUserRound, Users, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -14,6 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getAPIUrl } from '@services/config/config';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { Globe, SquareUserRound, Users, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
 
 interface EditCourseAccessProps {
   orgslug: string;

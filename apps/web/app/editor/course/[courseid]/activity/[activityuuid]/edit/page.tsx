@@ -1,14 +1,13 @@
-import type { Metadata } from 'next';
-import { JetBrains_Mono } from 'next/font/google';
-import { getTranslations } from 'next-intl/server';
-
-import { auth } from '@/auth';
 import AIEditorProvider from '@components/Contexts/AI/AIEditorContext';
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper';
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getOrganizationContextInfoWithId } from '@services/organizations/orgs';
+import type { Metadata } from 'next';
+import { JetBrains_Mono } from 'next/font/google';
+import { getTranslations } from 'next-intl/server';
+import { auth } from '@/auth';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string; activityid: string }>;

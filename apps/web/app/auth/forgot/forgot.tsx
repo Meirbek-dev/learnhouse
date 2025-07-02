@@ -1,20 +1,20 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, Info } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { sendResetLink } from '@services/auth/auth';
 import { getUriWithOrg } from '@services/config/config';
+import { AlertTriangle, Info } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import openuLogoDark from 'public/openu_logo_dark.png';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string) => string) =>
   z.object({

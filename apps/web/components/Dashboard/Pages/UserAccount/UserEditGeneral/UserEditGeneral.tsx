@@ -1,5 +1,17 @@
 'use client';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { LocaleSwitcher } from '@components/Utils/LocaleSwitcher';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { getUriWithoutOrg } from '@services/config/config';
+import { updateProfile } from '@services/settings/profile';
+import { getUser, updateUserAvatar } from '@services/users/users';
 import {
   AlertTriangle,
   ArrowBigUpDash,
@@ -22,28 +34,15 @@ import {
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as React from 'react';
-import { useForm, type UseFormReturn } from 'react-hook-form';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type UseFormReturn, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { z } from 'zod';
-
 import { useDebounce } from '@/hooks/useDebounce';
 import type { Locale } from '@/i18n/config';
 import { getUserLocale } from '@/i18n/locale';
 import { constructAcceptValue } from '@/lib/constants';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { Button } from '@components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Textarea } from '@components/ui/textarea';
-import { LocaleSwitcher } from '@components/Utils/LocaleSwitcher';
-import { getUriWithoutOrg } from '@services/config/config';
-import { updateProfile } from '@services/settings/profile';
-import { getUser, updateUserAvatar } from '@services/users/users';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
 

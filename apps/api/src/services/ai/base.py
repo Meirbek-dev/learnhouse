@@ -31,7 +31,7 @@ TEXT_SPLITTER = RecursiveCharacterTextSplitter(
 
 def ask_ai(
     question: str,
-    message_history: Any,
+    message_history: RedisChatMessageHistory | list,
     text_reference: str,
     message_for_the_prompt: str,
     embedding_model_name: str,

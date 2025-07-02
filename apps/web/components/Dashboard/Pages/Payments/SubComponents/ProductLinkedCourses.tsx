@@ -1,15 +1,15 @@
 'use client';
-import { BookOpen, Plus, Trash2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Button } from '@components/ui/button';
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
+import { BookOpen, Plus, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { mutate } from 'swr';
 
 import LinkCourseModal from './LinkCourseModal';
 

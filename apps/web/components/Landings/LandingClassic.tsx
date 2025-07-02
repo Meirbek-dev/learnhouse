@@ -1,6 +1,3 @@
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
@@ -10,6 +7,8 @@ import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbn
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { getUriWithOrg } from '@services/config/config';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface LandingClassicProps {
   courses: any[];

@@ -15,7 +15,7 @@ from src.db.users import (
     User,
     UserRead,
 )
-from src.security.security import security_hash_password, generate_secure_code
+from src.security.security import generate_secure_code, security_hash_password
 from src.services.users.emails import (
     send_password_reset_email,
 )

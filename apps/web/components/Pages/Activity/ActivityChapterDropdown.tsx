@@ -1,12 +1,11 @@
 'use client';
+import { getUriWithOrg } from '@services/config/config';
 import { ArrowRight, Backpack, Check, FileText, Folder, ListTree, StickyNote, Video, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-
+import { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { getUriWithOrg } from '@services/config/config';
 
 interface ActivityChapterDropdownProps {
   course: any;

@@ -1,12 +1,12 @@
 'use client';
-import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUriWithOrg } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getUserByUsername } from '@services/users/users';
+import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 import UserProfilePopup from './UserProfilePopup';
 

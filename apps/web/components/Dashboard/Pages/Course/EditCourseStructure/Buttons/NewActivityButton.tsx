@@ -1,10 +1,4 @@
 'use client';
-import { Layers } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
 
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -14,6 +8,12 @@ import { getAPIUrl } from '@services/config/config';
 import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { Layers } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { mutate } from 'swr';
 
 interface NewActivityButtonProps {
   chapterId: string;

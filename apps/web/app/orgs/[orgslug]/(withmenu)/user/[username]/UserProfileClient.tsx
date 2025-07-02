@@ -1,5 +1,10 @@
 'use client';
 
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { getCoursesByUser } from '@services/users/users';
 import {
   Award,
   BookOpen,
@@ -17,14 +22,8 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import type { FC } from 'react';
-
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { getCoursesByUser } from '@services/users/users';
+import { useEffect, useState } from 'react';
 
 interface UserProfileClientProps {
   userData: any;

@@ -17,13 +17,13 @@ from src.db.courses.chapters import Chapter
 from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_user_is_anon,
 )
 from src.services.courses.activities.uploads.videos import upload_video
-from src.db.strict_base_model import PydanticStrictBaseModel
 
 
 def validate_video_file(video_file: UploadFile | None) -> str:

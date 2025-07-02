@@ -64,10 +64,7 @@ async def get_courses_for_an_org_explore(
     result = db_session.exec(statement)
     courses = result.all()
 
-    courses_list = []
-
-    for course in courses:
-        courses_list.append(course)
+    courses_list = list(courses)
 
     return courses_list
 

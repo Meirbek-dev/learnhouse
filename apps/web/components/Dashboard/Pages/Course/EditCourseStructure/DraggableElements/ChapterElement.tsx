@@ -1,16 +1,15 @@
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
+import { getAPIUrl } from '@services/config/config';
+import { deleteChapter, updateChapter } from '@services/courses/chapters';
+import { revalidateTags } from '@services/utils/ts/requests';
 import { Hexagon, MoreHorizontal, MoreVertical, Pencil, Save, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { mutate } from 'swr';
-
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { getAPIUrl } from '@services/config/config';
-import { deleteChapter, updateChapter } from '@services/courses/chapters';
-import { revalidateTags } from '@services/utils/ts/requests';
 
 import NewActivityButton from '../Buttons/NewActivityButton';
 

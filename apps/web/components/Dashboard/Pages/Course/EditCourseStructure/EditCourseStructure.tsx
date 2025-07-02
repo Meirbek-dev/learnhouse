@@ -1,20 +1,20 @@
 'use client';
-import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import { Hexagon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
 import { createChapter } from '@services/courses/chapters';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { Hexagon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { mutate } from 'swr';
 
 import ChapterElement from './DraggableElements/ChapterElement';
 

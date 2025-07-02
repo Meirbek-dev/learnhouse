@@ -1,8 +1,22 @@
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { Button } from '@components/ui/button';
+import { Calendar } from '@components/ui/calendar';
+import { Checkbox } from '@components/ui/checkbox';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
+import { updateProfile } from '@services/settings/profile';
+import { getUser } from '@services/users/users';
+import { format, type Locale } from 'date-fns';
+import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import {
   Award,
   BookOpen,
   Briefcase,
+  CalendarIcon,
   Edit,
   GraduationCap,
   GripVertical,
@@ -13,26 +27,10 @@ import {
   TextIcon,
   Trash2,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { createElement, useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import type { FC } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useLocale } from 'next-intl';
-
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Button } from '@components/ui/button';
-import { Calendar } from '@components/ui/calendar';
-import { Checkbox } from '@components/ui/checkbox';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Textarea } from '@components/ui/textarea';
-import { updateProfile } from '@services/settings/profile';
-import { getUser } from '@services/users/users';
-import { format, type Locale } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { enUS, es, fr, de, ru } from 'date-fns/locale';
 
 // Define section type keys
 const SECTION_TYPE_KEYS = {

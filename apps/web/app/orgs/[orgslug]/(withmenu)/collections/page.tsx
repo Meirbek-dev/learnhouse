@@ -1,8 +1,3 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
-
-import { auth } from '@/auth';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
@@ -13,6 +8,10 @@ import { getUriWithOrg } from '@services/config/config';
 import { getOrgCollections } from '@services/courses/collections';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
+import { auth } from '@/auth';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: string }>;

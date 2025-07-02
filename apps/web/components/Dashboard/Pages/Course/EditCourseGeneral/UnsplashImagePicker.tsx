@@ -1,3 +1,7 @@
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { ScrollArea } from '@components/ui/scroll-area';
 import {
   Bike,
   Book,
@@ -21,13 +25,9 @@ import {
   Utensils,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
 import type { ChangeEvent, FC } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createApi } from 'unsplash-js';
-
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { Input } from '@components/ui/input';
-import { ScrollArea } from '@components/ui/scroll-area';
 
 const unsplash = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY as string,
@@ -192,12 +192,12 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
         </div>
         {loading && <p className="mt-4 text-center">{t('loading')}</p>}
         {!loading && images.length > 0 && (
-          <button
+          <Button
             onClick={handleLoadMore}
-            className="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
+            className="mt-4 w-full px-4 py-2"
           >
             {t('loadMoreButton')}
-          </button>
+          </Button>
         )}
         {!loading && images.length === 0 && query && <p className="mt-4 text-center">{t('noResults')}</p>}
       </div>

@@ -1,10 +1,9 @@
-import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
-
-import { auth } from '@/auth';
 import { getOrgCourses } from '@services/courses/courses';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { auth } from '@/auth';
 
 import Courses from './courses';
 

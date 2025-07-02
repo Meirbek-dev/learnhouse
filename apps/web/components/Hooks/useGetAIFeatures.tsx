@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-
 import { useOrg } from '@components/Contexts/OrgContext';
+import { useCallback, useEffect, useState } from 'react';
 
 interface UseGetAIFeatures {
   feature: 'editor' | 'activity_ask' | 'course_ask' | 'global_ai_ask';

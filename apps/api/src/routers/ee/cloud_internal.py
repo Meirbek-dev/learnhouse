@@ -31,7 +31,7 @@ async def api_get_orgs_for_explore(
     limit: int = 10,
     label: str = "",
     salt: str = "",
-    db_session: Session = Depends(get_db_session),
+    db_session=Depends(get_db_session),
 ):
     return await get_orgs_for_explore(request, db_session, page, limit, label, salt)
 
@@ -41,7 +41,7 @@ async def api_search_orgs_for_explore(
     request: Request,
     search_query: str,
     label: str | None = None,
-    db_session: Session = Depends(get_db_session),
+    db_session=Depends(get_db_session),
 ):
     return await search_orgs_for_explore(request, db_session, search_query, label)
 

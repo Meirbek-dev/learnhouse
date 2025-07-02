@@ -1,13 +1,13 @@
 'use client';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import type React from 'react';
 
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import type React from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 
 interface FixedActivitySecondaryBarProps {
   course: any;

@@ -1,26 +1,26 @@
 'use client';
-import { Image as ImageIcon, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import * as React from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR from 'swr';
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Textarea } from '@components/ui/textarea';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
-import { Checkbox } from '@components/ui/checkbox';
-import { ScrollArea } from '@components/ui/scroll-area';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { Checkbox } from '@components/ui/checkbox';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { ScrollArea } from '@components/ui/scroll-area';
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { createCollection } from '@services/courses/collections';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
-import { Button } from '@components/ui/button';
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import * as React from 'react';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR from 'swr';
 
 function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
   const t = useTranslations('NewCollectionPage');
@@ -216,13 +216,13 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
           </div>
 
           <div className="flex items-center justify-end space-x-4">
-            <button
+            <Button
               type="button"
               onClick={() => router.back()}
-              className="focus:outline-hidden rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              variant={'outline'}
             >
               {t('cancelButton')}
-            </button>
+            </Button>
             <Button
               type="submit"
               disabled={isSubmitting}

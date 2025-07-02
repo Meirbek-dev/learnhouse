@@ -1,7 +1,4 @@
 'use client';
-import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
@@ -10,6 +7,9 @@ import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCours
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 interface CourseProps {
   orgslug: string;

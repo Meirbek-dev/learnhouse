@@ -1,7 +1,4 @@
 'use client';
-import { RefreshCcw, SquareCheck } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-import useSWR from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -13,6 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getOrgCustomers } from '@services/payments/payments';
+import { RefreshCcw, SquareCheck } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import useSWR from 'swr';
 
 interface PaymentUserData {
   payment_user_id: number;

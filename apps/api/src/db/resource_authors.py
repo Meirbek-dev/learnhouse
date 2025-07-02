@@ -3,6 +3,7 @@ from enum import Enum
 from pydantic import field_validator
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field
+
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
 

@@ -1,10 +1,3 @@
-import { AlertCircle, ArrowRight, BookOpen, ClockIcon, ShoppingCart, UserPen } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
-
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -15,6 +8,12 @@ import { applyForContributor } from '@services/courses/courses';
 import { checkPaidAccess } from '@services/payments/payments';
 import { getProductsByCourse } from '@services/payments/products';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { AlertCircle, ArrowRight, BookOpen, ClockIcon, ShoppingCart, UserPen } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { mutate } from 'swr';
 
 import { useContributorStatus } from '../../../../hooks/useContributorStatus';
 import CourseProgress from '../CourseProgress/CourseProgress';

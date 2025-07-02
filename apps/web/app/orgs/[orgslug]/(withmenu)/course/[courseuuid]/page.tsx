@@ -1,9 +1,8 @@
-import type { Metadata } from 'next';
-
-import { auth } from '@/auth';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import type { Metadata } from 'next';
+import { auth } from '@/auth';
 
 import CourseClient from './course';
 

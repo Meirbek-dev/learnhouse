@@ -1,7 +1,7 @@
 'use client';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
-import styled, { keyframes, css } from 'styled-components';
 import type { ReactNode } from 'react';
+import styled, { css, keyframes } from 'styled-components';
 
 interface TooltipProps {
   sideOffset?: number;

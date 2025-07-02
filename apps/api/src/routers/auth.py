@@ -8,11 +8,10 @@ from sqlmodel import Session
 
 from config.config import get_openu_config
 from src.core.events.database import get_db_session
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, UserRead
 from src.security.auth import AuthJWT, authenticate_user, get_current_user
 from src.services.auth.utils import signWithGoogle
-
-from src.db.strict_base_model import PydanticStrictBaseModel
 
 router = APIRouter()
 
@@ -92,9 +91,9 @@ async def third_party_login(
     response: Response,
     body: ThirdPartyLogin,
     org_id: int | None = None,
-    current_user: AnonymousUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
-    Authorize: AuthJWT = Depends(),
+    current_user: Annotated[AnonymousUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
+    Authorize: Annotated[AuthJWT, Depends()] = None,
 ):
     # Google
     if body.provider == "google":

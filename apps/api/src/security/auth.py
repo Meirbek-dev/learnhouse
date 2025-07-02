@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import ClassVar
 
 import jwt
 from fastapi import Depends, HTTPException, Request, status
@@ -8,11 +9,11 @@ from sqlmodel import Session
 
 from config.config import get_openu_config
 from src.core.events.database import get_db_session
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import ALGORITHM, SECRET_KEY
 from src.services.dev.dev import isDevModeEnabled
 from src.services.users.users import security_get_user, security_verify_password
-from src.db.strict_base_model import PydanticStrictBaseModel
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -20,7 +21,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 #### JWT Auth ####################################################
 class Settings(PydanticStrictBaseModel):
     authjwt_secret_key: str = "secret" if isDevModeEnabled() else SECRET_KEY
-    authjwt_token_location: set[str] = {"cookies", "headers"}
+    authjwt_token_location: ClassVar[set[str]] = {"cookies", "headers"}
     authjwt_cookie_csrf_protect: bool = False
     authjwt_access_token_expires: float | bool = (
         False if isDevModeEnabled() else timedelta(hours=8).total_seconds()
@@ -78,7 +79,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 async def get_current_user(
     request: Request,
     Authorize: AuthJWT = Depends(),
-    db_session: Session = Depends(get_db_session),
+    db_session=Depends(get_db_session),
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

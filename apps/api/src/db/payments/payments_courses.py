@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlmodel import BigInteger, Column, Field, ForeignKey
+
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
 

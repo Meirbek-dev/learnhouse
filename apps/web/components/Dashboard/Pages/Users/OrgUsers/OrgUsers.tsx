@@ -1,11 +1,5 @@
 'use client';
 
-import { KeyRound, LogOut } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
-
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -17,6 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getAPIUrl } from '@services/config/config';
 import { removeUserFromOrg } from '@services/organizations/orgs';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { KeyRound, LogOut } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
 
 function OrgUsers() {
   const org = useOrg() as any;

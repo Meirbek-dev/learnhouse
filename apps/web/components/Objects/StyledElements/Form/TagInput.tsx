@@ -1,7 +1,7 @@
 'use client';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface FormTagInputProps {

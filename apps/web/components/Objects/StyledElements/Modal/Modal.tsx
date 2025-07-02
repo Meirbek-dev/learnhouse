@@ -1,10 +1,6 @@
 'use client';
 
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
-import { useTranslations } from 'next-intl';
-import type { ReactNode } from 'react';
-
-import { cn } from '@/lib/utils';
+import { Button } from '@components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -14,7 +10,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@components/ui/dialog';
-import { Button } from '@components/ui/button';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface ModalParams {
   dialogTitle?: string;

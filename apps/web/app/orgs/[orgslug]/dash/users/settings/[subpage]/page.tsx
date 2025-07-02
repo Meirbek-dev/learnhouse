@@ -1,11 +1,4 @@
 'use client';
-import { motion } from 'framer-motion';
-import { Monitor, ScanEye, SquareUserRound, UserPlus, Users } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { use, useEffect, useState } from 'react';
-
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
@@ -14,6 +7,12 @@ import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUs
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd';
 import { getUriWithOrg } from '@services/config/config';
+import { motion } from 'framer-motion';
+import { Monitor, ScanEye, SquareUserRound, UserPlus, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { use, useEffect, useState } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 export interface SettingsParams {
   subpage: string;

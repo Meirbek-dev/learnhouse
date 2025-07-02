@@ -1,5 +1,11 @@
 'use client';
 
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
+import { getActivityBlockMediaDirectory } from '@services/media/media';
 import type { Node } from '@tiptap/core';
 import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
 import type ArtplayerType from 'artplayer';
@@ -9,15 +15,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { ChangeEvent, DragEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { styled } from 'styled-components';
-
 import { constructAcceptValue } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
-import { getActivityBlockMediaDirectory } from '@services/media/media';
 
 import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video';
 

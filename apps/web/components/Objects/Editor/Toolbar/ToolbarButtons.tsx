@@ -1,5 +1,6 @@
 'use client';
 
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { SiYoutube } from '@icons-pack/react-simple-icons';
 import {
   ArrowLeftIcon,
@@ -37,8 +38,6 @@ import {
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { styled } from 'styled-components';
-
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 
 import LinkInputTooltip from './LinkInputTooltip';
 

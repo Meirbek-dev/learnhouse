@@ -1,10 +1,4 @@
 'use client';
-import { motion } from 'framer-motion';
-import { Gem, Settings, Users } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import type { ReactNode } from 'react';
-import { use } from 'react';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -14,6 +8,12 @@ import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/Payments
 import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import { getUriWithOrg } from '@services/config/config';
+import { motion } from 'framer-motion';
+import { Gem, Settings, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
+import { use } from 'react';
 
 export interface PaymentsParams {
   subpage: string;

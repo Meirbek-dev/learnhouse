@@ -1,5 +1,7 @@
 'use client';
 
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { Textarea } from '@components/ui/textarea';
 import {
   SiCanva,
   SiCodepen,
@@ -20,12 +22,9 @@ import DOMPurify from 'dompurify';
 import { AlignCenter, Code, GripHorizontal, GripVertical, Link as LinkIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useRef, useState } from 'react';
 import * as React from 'react';
-
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { Textarea } from '@components/ui/textarea';
 
 // Add new type for script-based embeds
 const SCRIPT_BASED_EMBEDS = {

@@ -1,28 +1,9 @@
 'use client';
-import { AnimatePresence, motion } from 'framer-motion';
-import {
-  BookOpenCheck,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Edit2,
-  Maximize2,
-  Minimize2,
-  UserRoundPen,
-} from 'lucide-react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useFormatter, useLocale, useTranslations } from 'next-intl';
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
-
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentSubmissionProvider, {
   useAssignmentSubmission,
 } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -47,6 +28,24 @@ import {
 } from '@services/courses/assignments';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  BookOpenCheck,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  Maximize2,
+  Minimize2,
+  UserRoundPen,
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus';
 

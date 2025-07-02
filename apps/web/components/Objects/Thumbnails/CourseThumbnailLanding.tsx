@@ -1,10 +1,4 @@
 'use client';
-import { BookMinus, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import type { FC } from 'react';
-import { toast } from 'react-hot-toast';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -17,6 +11,12 @@ import { getUriWithOrg } from '@services/config/config';
 import { deleteCourseFromBackend } from '@services/courses/courses';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { BookMinus, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import type { FC } from 'react';
+import { toast } from 'react-hot-toast';
 
 // Utility types and functions
 export interface Course {

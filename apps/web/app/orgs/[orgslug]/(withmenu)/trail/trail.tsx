@@ -1,8 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import useSWR from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -14,6 +10,10 @@ import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
 import { getAPIUrl } from '@services/config/config';
 import { removeCourse } from '@services/courses/activity';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 
 function Trail(params: any) {
   const { orgslug } = params;

@@ -1,23 +1,22 @@
-import { Draggable } from '@hello-pangea/dnd';
-import { Backpack, Eye, File, FilePenLine, Globe, Loader2, Lock, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import * as React from 'react';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
-
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { Draggable } from '@hello-pangea/dnd';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { Backpack, Eye, File, FilePenLine, Globe, Loader2, Lock, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { mutate } from 'swr';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface ActivitiyElementProps {
   orgslug: string;

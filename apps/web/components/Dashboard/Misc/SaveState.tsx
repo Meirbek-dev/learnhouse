@@ -1,9 +1,4 @@
 'use client';
-import { Check, Loader2, SaveAllIcon, Timer } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { mutate } from 'swr';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -11,6 +6,11 @@ import { getAPIUrl } from '@services/config/config';
 import { updateCourseOrderStructure } from '@services/courses/chapters';
 import { updateCourse } from '@services/courses/courses';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { Check, Loader2, SaveAllIcon, Timer } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { mutate } from 'swr';
 
 function SaveState(props: { orgslug: string }) {
   const [isLoading, setIsLoading] = useState(false);

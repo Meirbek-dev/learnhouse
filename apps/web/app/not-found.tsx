@@ -1,10 +1,9 @@
+import { Button } from '@components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-
 import openuLogoDark from 'public/openu_logo_dark.png';
-import { Button } from '@components/ui/button';
 
 export default async function NotFound() {
   const t = await getTranslations('NotFoundPage');

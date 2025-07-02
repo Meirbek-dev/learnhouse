@@ -1,4 +1,6 @@
 'use client';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUser } from '@services/users/users';
 import {
   Award,
   BookOpen,
@@ -17,14 +19,11 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getUser } from '@services/users/users';
 
 interface UserProfilePopupProps {
   children: ReactNode;

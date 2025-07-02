@@ -1,11 +1,10 @@
+import AdminAuthorization from '@components/Security/AdminAuthorization';
 import { BookCopy, School, Settings, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import type { ReactNode } from 'react';
-
-import AdminAuthorization from '@components/Security/AdminAuthorization';
 import touEmblemLight from 'public/tou_emblem_light.png';
+import type { ReactNode } from 'react';
 
 import openuLogoDark from '../../../../public/openu_logo_dark.png';
 

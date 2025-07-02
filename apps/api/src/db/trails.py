@@ -1,9 +1,10 @@
-from typing import Optional, List
-from pydantic import Field as PydanticField, ConfigDict
+from pydantic import ConfigDict
+from pydantic import Field as PydanticField
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field
-from src.db.trail_runs import TrailRunRead
+
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
+from src.db.trail_runs import TrailRunRead
 
 
 class TrailBase(SQLModelStrictBaseModel):
@@ -16,7 +17,7 @@ class TrailBase(SQLModelStrictBaseModel):
 
 
 class Trail(TrailBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
     )
@@ -33,13 +34,13 @@ class TrailCreate(TrailBase):
 
 
 class TrailRead(PydanticStrictBaseModel):
-    id: Optional[int] = PydanticField(default=None)
-    trail_uuid: Optional[str] = None
+    id: int | None = PydanticField(default=None)
+    trail_uuid: str | None = None
     org_id: int
     user_id: int
-    creation_date: Optional[str] = None
-    update_date: Optional[str] = None
-    runs: List[TrailRunRead]
+    creation_date: str | None = None
+    update_date: str | None = None
+    runs: list[TrailRunRead]
 
     model_config = ConfigDict(from_attributes=True)
 

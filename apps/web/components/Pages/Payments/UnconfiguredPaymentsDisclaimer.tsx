@@ -1,8 +1,7 @@
+import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { AlertTriangle, ChevronRight, CreditCard, Settings, ShoppingCart, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-
-import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 
 function UnconfiguredPaymentsDisclaimer() {
   const t = useTranslations('DashPage.Payments');

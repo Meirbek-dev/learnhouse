@@ -31,7 +31,7 @@ async def signWithGoogle(
     email: str,
     org_id: int | None = None,
     current_user=Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
+    db_session=Depends(get_db_session),
 ):
     # Google
     google_user = await get_google_user_info(access_token)

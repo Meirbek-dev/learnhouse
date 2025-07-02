@@ -1,8 +1,3 @@
-import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import {
   useAssignmentsTask,
@@ -17,6 +12,10 @@ import {
   handleAssignmentTaskSubmission,
   updateAssignmentTask,
 } from '@services/courses/assignments';
+import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 interface QuizSchema {
   questionText: string;

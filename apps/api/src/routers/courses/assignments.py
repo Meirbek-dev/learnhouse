@@ -205,7 +205,7 @@ async def api_put_assignment_task_ref_file(
     request: Request,
     assignment_task_uuid: str,
     reference_file: UploadFile | None = None,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ):
     """
@@ -221,7 +221,7 @@ async def api_put_assignment_task_sub_file(
     request: Request,
     assignment_task_uuid: str,
     sub_file: UploadFile | None = None,
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ):
     """

@@ -1,12 +1,12 @@
 'use client';
-import { useTranslations } from 'next-intl';
-import { type JSX, useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { OrgProvider } from '@components/Contexts/OrgContext';
 import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import { updateActivity } from '@services/courses/activities';
+import { useTranslations } from 'next-intl';
+import { type JSX, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import Editor from './Editor';
 

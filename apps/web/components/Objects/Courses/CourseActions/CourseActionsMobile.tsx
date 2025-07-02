@@ -1,10 +1,5 @@
 'use client';
 
-import { AlertCircle, LogIn, LogOut, ShoppingCart } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
@@ -13,6 +8,10 @@ import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { checkPaidAccess } from '@services/payments/payments';
 import { getProductsByCourse } from '@services/payments/products';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { AlertCircle, LogIn, LogOut, ShoppingCart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 import UserAvatar from '../../UserAvatar';
 

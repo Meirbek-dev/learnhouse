@@ -1,14 +1,14 @@
 export const dynamic = 'force-dynamic';
-import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
 
-import { auth } from '@/auth';
 import LandingClassic from '@components/Landings/LandingClassic';
 import LandingCustom from '@components/Landings/LandingCustom';
 import { getOrgCollections } from '@services/courses/collections';
 import { getOrgCourses } from '@services/courses/courses';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { auth } from '@/auth';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string }>;

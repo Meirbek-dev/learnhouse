@@ -4,6 +4,7 @@ from enum import Enum
 from pydantic import field_validator
 from sqlalchemy import JSON
 from sqlmodel import BigInteger, Column, Field, ForeignKey
+
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
 

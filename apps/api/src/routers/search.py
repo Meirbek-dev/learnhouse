@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
+from typing import Annotated
 
 from src.core.events.database import get_db_session
 from src.db.users import PublicUser
@@ -16,8 +17,8 @@ async def api_search_across_org(
     query: str,
     page: int = 1,
     limit: int = 10,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
 ) -> SearchResult:
     """
     Search across courses, collections and users within an organization

@@ -1,4 +1,18 @@
 'use client';
+import { useOrg } from '@components/Contexts/OrgContext';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import OnBoardAccess from '@public/onboarding/OnBoardAccess.png';
+import OnBoardActivities from '@public/onboarding/OnBoardActivities.png';
+import OnBoardAI from '@public/onboarding/OnBoardAI.png';
+import OnBoardAssignments from '@public/onboarding/OnBoardAssignments.png';
+import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
+import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';
+import OnBoardMore from '@public/onboarding/OnBoardMore.png';
+import OnBoardPayments from '@public/onboarding/OnBoardPayments.png';
+import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
+import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
+import { getUriWithOrg } from '@services/config/config';
 import {
   ArrowRight,
   Book,
@@ -14,24 +28,9 @@ import {
 import Image, { type StaticImageData } from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
-
+import { useEffect, useState } from 'react';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { useOrg } from '@components/Contexts/OrgContext';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import OnBoardAccess from '@public/onboarding/OnBoardAccess.png';
-import OnBoardActivities from '@public/onboarding/OnBoardActivities.png';
-import OnBoardAI from '@public/onboarding/OnBoardAI.png';
-import OnBoardAssignments from '@public/onboarding/OnBoardAssignments.png';
-import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
-import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';
-import OnBoardMore from '@public/onboarding/OnBoardMore.png';
-import OnBoardPayments from '@public/onboarding/OnBoardPayments.png';
-import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
-import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
-import { getUriWithOrg } from '@services/config/config';
 
 interface OnboardingStep {
   imageSrc: StaticImageData;

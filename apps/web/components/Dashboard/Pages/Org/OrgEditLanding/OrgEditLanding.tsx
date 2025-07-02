@@ -1,6 +1,19 @@
 'use client';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Switch } from '@components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { Textarea } from '@components/ui/textarea';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { ButtonIcon } from '@radix-ui/react-icons';
+import { getOrgCourses } from '@services/courses/courses';
+import { getOrgLandingMediaDirectory } from '@services/media/media';
+import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
 import {
   Award,
   BookOpen,
@@ -21,19 +34,6 @@ import type { ChangeEvent, FC } from 'react';
 import { createElement, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR from 'swr';
-
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Switch } from '@components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { Textarea } from '@components/ui/textarea';
-import { getOrgCourses } from '@services/courses/courses';
-import { getOrgLandingMediaDirectory } from '@services/media/media';
-import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
 
 import type {
   LandingBackground,

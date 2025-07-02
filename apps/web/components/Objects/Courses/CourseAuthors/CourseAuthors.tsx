@@ -1,16 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { format, formatDistanceToNow } from 'date-fns';
-import { motion } from 'framer-motion';
-import { PencilLine, Rss, TentTree } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
-import { z } from 'zod';
-
-import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -20,10 +7,22 @@ import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 import { Textarea } from '@components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { format, formatDistanceToNow } from 'date-fns';
+import { motion } from 'framer-motion';
+import { PencilLine, Rss, TentTree } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+import { z } from 'zod';
+import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 import UserAvatar from '../../UserAvatar';
 

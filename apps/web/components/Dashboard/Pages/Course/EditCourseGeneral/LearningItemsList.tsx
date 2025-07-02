@@ -1,10 +1,10 @@
 'use client';
+
+import { Input } from '@components/ui/input'; // Assuming this path is correct
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { Link as LinkIcon, Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-
-import { Input } from '@components/ui/input'; // Assuming this path is correct
 
 interface LearningItem {
   id: string;
@@ -392,7 +392,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       >
         <Plus
           size={16}
-          className="text-blue-500"
+          className="text-primary"
         />
         <span>{t('addItemButton')}</span>
       </button>

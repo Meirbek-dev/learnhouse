@@ -1,4 +1,9 @@
 'use client';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { searchOrgContent } from '@services/search/search';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -12,15 +17,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FC } from 'react';
-
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { searchOrgContent } from '@services/search/search';
 
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import UserAvatar from '../UserAvatar';

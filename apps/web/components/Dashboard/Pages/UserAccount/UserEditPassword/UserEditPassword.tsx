@@ -1,5 +1,12 @@
 'use client';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { getUriWithoutOrg } from '@services/config/config';
+import { updatePassword } from '@services/settings/password';
 import { AlertTriangle } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -7,13 +14,6 @@ import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { z } from 'zod';
-
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import { getUriWithoutOrg } from '@services/config/config';
-import { updatePassword } from '@services/settings/password';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({

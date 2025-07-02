@@ -1,11 +1,4 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslations } from 'next-intl';
-import { useMemo, type FC } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
-import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -14,9 +7,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { updateOrganization } from '@services/settings/org';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { useTranslations } from 'next-intl';
+import { type FC, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import { mutate } from 'swr';
+import { z } from 'zod';
 
 const ORG_LABELS = [
   { value: 'languages', label: '🌐 Languages' },

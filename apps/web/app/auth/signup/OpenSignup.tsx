@@ -1,5 +1,12 @@
 'use client';
+
+import { useOrg } from '@components/Contexts/OrgContext';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
+import { Textarea } from '@components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { signup } from '@services/auth/auth';
 import { AlertTriangle, Check, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,13 +15,6 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { Textarea } from '@components/ui/textarea';
-import { signup } from '@services/auth/auth';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({

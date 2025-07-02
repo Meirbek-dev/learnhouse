@@ -1,10 +1,4 @@
 'use client';
-import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { signOut } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -13,6 +7,12 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import openuLogoLight from '@public/openu_logo_light.png';
 import { getUriWithoutOrg } from '@services/config/config';
+import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { signOut } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
 
 import UserAvatar from '../../Objects/UserAvatar';
 

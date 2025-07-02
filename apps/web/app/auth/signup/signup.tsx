@@ -1,27 +1,26 @@
 'use client';
+
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import Toast from '@components/Objects/StyledElements/Toast/Toast';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { validateInviteCode } from '@services/organizations/invites';
+import { joinOrg } from '@services/organizations/orgs';
 import { MailWarning, Ticket, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import openuLogoDark from 'public/openu_logo_dark.png';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import Toast from '@components/Objects/StyledElements/Toast/Toast';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { Input } from '@components/ui/input';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { validateInviteCode } from '@services/organizations/invites';
-import { joinOrg } from '@services/organizations/orgs';
-import openuLogoDark from 'public/openu_logo_dark.png';
-
 import InviteOnlySignUpComponent from './InviteOnlySignUp';
 import OpenSignUpComponent from './OpenSignup';
-import { Button } from '@components/ui/button';
 
 interface SignUpClientProps {
   org: any;

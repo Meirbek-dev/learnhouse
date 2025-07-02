@@ -1,11 +1,10 @@
 'use client';
 import { blackA } from '@radix-ui/colors';
 import * as Dialog from '@radix-ui/react-dialog';
-import styled, { keyframes } from 'styled-components';
 import { AlertTriangle, Info } from 'lucide-react';
-import { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
-import { isValidElement, cloneElement } from 'react';
+import { cloneElement, isValidElement, useCallback, useState } from 'react';
+import styled, { keyframes } from 'styled-components';
 
 interface ModalParams {
   confirmationMessage: string;

@@ -1,9 +1,10 @@
 from enum import Enum
-from typing import Optional, Dict, Any
-from pydantic import Field as PydanticField
+from typing import Any
 
+from pydantic import Field as PydanticField
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field
+
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 
@@ -21,11 +22,11 @@ class TrailStep(SQLModelStrictBaseModel, table=True):
     for individual steps within a learning trail.
     """
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     complete: bool = Field()
     teacher_verified: bool = Field()
     grade: str = Field()
-    data: Dict[str, Any] = Field(
+    data: dict[str, Any] = Field(
         default_factory=dict,
         sa_column=Column(JSON),
     )
@@ -56,20 +57,20 @@ class TrailStep(SQLModelStrictBaseModel, table=True):
 
 
 class TrailStepRead(PydanticStrictBaseModel):
-    id: Optional[int] = PydanticField(default=None)
+    id: int | None = PydanticField(default=None)
     complete: bool
     teacher_verified: bool
     grade: str
-    data: Dict[str, Any] = PydanticField(default_factory=dict)
+    data: dict[str, Any] = PydanticField(default_factory=dict)
     trailrun_id: int
     trail_id: int
     activity_id: int
     course_id: int
     org_id: int
     user_id: int
-    creation_date: Optional[str] = None
-    update_date: Optional[str] = None
-    activity: Optional[Dict[str, Any]] = None
+    creation_date: str | None = None
+    update_date: str | None = None
+    activity: dict[str, Any] | None = None
 
 
 # note : prepare assignments support

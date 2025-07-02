@@ -9,7 +9,7 @@ Create Date: 2025-03-20 11:05:24.951129
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-import sqlmodel  # noqa: F401
+import sqlmodel
 from alembic import op
 from alembic_postgresql_enum import TableReference
 from sqlalchemy.dialects import postgresql

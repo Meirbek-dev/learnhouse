@@ -1,10 +1,10 @@
 'use client';
+
+import { getUriWithoutOrg } from '@services/config/config';
 import { AlertTriangle, HomeIcon, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-
-import { getUriWithoutOrg } from '@services/config/config';
 
 function ErrorUI({ message, submessage }: { message?: string; submessage?: string }) {
   const t = useTranslations('Components.ErrorUI');

@@ -1,5 +1,6 @@
 import secrets
 import string
+
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 

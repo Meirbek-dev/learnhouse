@@ -1,14 +1,4 @@
 'use client';
-import { BookOpen, BookX, EllipsisVertical, Eye, Layers2, Monitor, Pencil, UserRoundPen } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
-
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
@@ -17,6 +7,15 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { getAPIUrl } from '@services/config/config';
 import { updateActivity } from '@services/courses/activities';
 import { updateAssignment } from '@services/courses/assignments';
+import { BookOpen, BookX, EllipsisVertical, Eye, Layers2, Monitor, Pencil, UserRoundPen } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { mutate } from 'swr';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';
 

@@ -1,14 +1,13 @@
 'use client';
 
-import { BookOpen, Package2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import useSWR from 'swr';
-
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { getOwnedCourses } from '@services/payments/payments';
+import { BookOpen, Package2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import useSWR from 'swr';
 
 function OwnedCoursesPage() {
   const t = useTranslations('DashPage.Courses');

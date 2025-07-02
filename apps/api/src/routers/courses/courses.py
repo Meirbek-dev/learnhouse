@@ -56,11 +56,11 @@ async def api_create_course(
     public: Annotated[bool, Form()],
     learnings: Annotated[str | None, Form()] = None,
     tags: Annotated[str | None, Form()] = None,
-    about: str = Form(),
+    about: Annotated[str | None, Form()] = None,
     thumbnail_type: Annotated[ThumbnailType, Form()] = ThumbnailType.IMAGE,
-    current_user: PublicUser = Depends(get_current_user),
-    db_session: Session = Depends(get_db_session),
     thumbnail: UploadFile | None = None,
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
 ) -> CourseRead:
     """
     Create new Course
@@ -68,18 +68,19 @@ async def api_create_course(
     course = CourseCreate(
         name=name,
         description=description,
-        org_id=org_id,
         public=public,
-        thumbnail_type=thumbnail_type,
-        thumbnail_image="",
-        thumbnail_video="",
-        about=about,
         learnings=learnings,
         tags=tags,
-        open_to_contributors=False,
+        about=about,
+        thumbnail_type=thumbnail_type,
     )
     return await create_course(
-        request, org_id, course, current_user, db_session, thumbnail, thumbnail_type
+        request,
+        org_id,
+        course,
+        current_user,
+        db_session,
+        thumbnail,
     )
 
 
@@ -89,8 +90,8 @@ async def api_create_course_thumbnail(
     course_uuid: str,
     thumbnail_type: Annotated[ThumbnailType, Form()] = ThumbnailType.IMAGE,
     thumbnail: UploadFile | None = None,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
 ) -> CourseRead:
     """
     Update Course Thumbnail (Image or Video)
@@ -135,8 +136,8 @@ async def api_get_course_meta(
     request: Request,
     course_uuid: str,
     with_unpublished_activities: bool = False,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
 ) -> FullCourseRead:
     """
     Get single Course Metadata (chapters, activities) by course_uuid
@@ -156,11 +157,11 @@ async def api_get_course_by_orgslug(
     page: int,
     limit: int,
     org_slug: str,
-    db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
 ) -> list[CourseRead]:
     """
-    Get courses by page and limit
+    Get courses by org slug with pagination
     """
     return await get_courses_orgslug(
         request, current_user, org_slug, db_session, page, limit
@@ -174,8 +175,8 @@ async def api_search_courses(
     query: str,
     page: int = 1,
     limit: int = 10,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser = Depends(get_current_user),
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
 ) -> list[CourseRead]:
     """
     Search courses by title and description

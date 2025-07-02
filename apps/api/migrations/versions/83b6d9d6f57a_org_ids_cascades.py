@@ -8,8 +8,8 @@ Create Date: 2024-08-29 19:38:10.022100
 
 from collections.abc import Sequence
 
-import sqlalchemy as sa  # noqa: F401
-import sqlmodel  # noqa: F401
+import sqlalchemy as sa
+import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.

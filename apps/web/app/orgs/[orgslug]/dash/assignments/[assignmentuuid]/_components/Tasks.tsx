@@ -1,13 +1,12 @@
-import { FileUp, ListTodo, PanelLeftOpen, Plus } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import {
   useAssignmentsTask,
   useAssignmentsTaskDispatch,
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { FileUp, ListTodo, PanelLeftOpen, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 import NewTaskModal from './Modals/NewTaskModal';
 

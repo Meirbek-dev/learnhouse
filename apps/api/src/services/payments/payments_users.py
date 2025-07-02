@@ -24,7 +24,7 @@ async def create_payment_user(
     user_id: int,
     product_id: int,
     status: PaymentStatusEnum,
-    provider_data: Any,
+    provider_data: object,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsUser:

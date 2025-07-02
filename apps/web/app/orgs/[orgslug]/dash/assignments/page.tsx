@@ -1,9 +1,4 @@
 'use client';
-import { EllipsisVertical, GalleryVerticalEnd, Info, Layers2, UserRoundPen } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import useSWR from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -12,6 +7,11 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { getAssignmentsFromACourse } from '@services/courses/assignments';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { EllipsisVertical, GalleryVerticalEnd, Info, Layers2, UserRoundPen } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import useSWR from 'swr';
 
 function AssignmentsHome() {
   const t = useTranslations('DashPage.Assignments.HomePage');

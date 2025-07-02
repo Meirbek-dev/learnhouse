@@ -1,6 +1,11 @@
 'use client';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { getAPIUrl } from '@services/config/config';
+import { updateAssignment } from '@services/courses/assignments';
 import { format } from 'date-fns';
+import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { FC } from 'react';
@@ -8,8 +13,6 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 import { z } from 'zod';
-import { enUS, es, fr, de, ru } from 'date-fns/locale';
-
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -18,10 +21,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { getAPIUrl } from '@services/config/config';
-import { updateAssignment } from '@services/courses/assignments';
-import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 
 interface Assignment {
   assignment_uuid: string;

@@ -1,8 +1,3 @@
-import { NodeViewWrapper } from '@tiptap/react';
-import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState, memo, useMemo } from 'react';
-
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Button } from '@components/ui/button';
@@ -10,6 +5,10 @@ import { Checkbox } from '@components/ui/checkbox';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import { getUrlPreview } from '@services/courses/activities';
+import { NodeViewWrapper } from '@tiptap/react';
+import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface EditorContext {
   isEditable: boolean;

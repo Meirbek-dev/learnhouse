@@ -291,10 +291,9 @@ async def DEPRECATED_get_course_chapters(
     chapters = {}
 
     for chapter in chapters_in_db:
-        chapter_activityIds = []
-
-        for activity in chapter.activities:
-            chapter_activityIds.append(activity.activity_uuid)
+        chapter_activityIds = [
+            activity.activity_uuid for activity in chapter.activities
+        ]
 
         chapters[chapter.chapter_uuid] = {
             "uuid": chapter.chapter_uuid,
@@ -332,10 +331,7 @@ async def DEPRECATED_get_course_chapters(
     )
     chapters_in_db = db_session.exec(statement).all()
 
-    chapterOrder = []
-
-    for chapter in chapters_in_db:
-        chapterOrder.append(chapter.chapter_uuid)
+    chapterOrder = [chapter.chapter_uuid for chapter in chapters_in_db]
 
     return {
         "chapters": chapters,
@@ -481,16 +477,15 @@ async def rbac_check(
             return await authorization_verify_if_element_is_public(
                 request, course_uuid, action, db_session
             )
-        else:
-            return await authorization_verify_based_on_roles_and_authorship(
-                request, current_user.id, action, course_uuid, db_session
-            )
-    else:
-        # For non-read operations, check if user is anonymous first
-        await authorization_verify_if_user_is_anon(current_user.id)
-        await authorization_verify_based_on_roles_and_authorship(
+        return await authorization_verify_based_on_roles_and_authorship(
             request, current_user.id, action, course_uuid, db_session
         )
+    # For non-read operations, check if user is anonymous first
+    await authorization_verify_if_user_is_anon(current_user.id)
+    await authorization_verify_based_on_roles_and_authorship(
+        request, current_user.id, action, course_uuid, db_session
+    )
+    return None
 
 
 ## 🔒 RBAC Utils ##

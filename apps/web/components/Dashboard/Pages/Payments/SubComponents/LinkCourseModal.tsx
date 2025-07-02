@@ -1,9 +1,4 @@
 'use client';
-import { Search } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -12,6 +7,11 @@ import { Input } from '@components/ui/input';
 import { getOrgCourses } from '@services/courses/courses';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
+import { Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
 
 interface LinkCourseModalProps {
   productId: string;

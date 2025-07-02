@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any
+from typing import Any, ClassVar, cast
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import Column, ForeignKey, Integer, TypeDecorator
@@ -15,7 +15,7 @@ class RightsJSON(TypeDecorator):
     impl = PGJSON
     cache_ok = True
 
-    def process_bind_param(self, value: Any, dialect) -> dict | None:
+    def process_bind_param(self, value: object, dialect) -> dict | None:
         """Convert Rights object to dict before storing in database"""
         if value is None:
             return None
@@ -23,7 +23,7 @@ class RightsJSON(TypeDecorator):
             return value.model_dump()
         return value
 
-    def process_result_value(self, value: Any, dialect) -> dict | None:
+    def process_result_value(self, value: object, dialect) -> dict | None:
         """Return the dict value as-is from database"""
         return value
 
@@ -35,10 +35,10 @@ class Permission(PydanticStrictBaseModel):
     action_update: bool
     action_delete: bool
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> object:
         return getattr(self, item)
 
-    def __json__(self):
+    def __json__(self) -> dict:
         """Custom JSON serialization for psycopg3 compatibility"""
         return self.model_dump()
 
@@ -56,10 +56,10 @@ class Rights(PydanticStrictBaseModel):
     coursechapters: Permission
     activities: Permission
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> object:
         return getattr(self, item)
 
-    def __json__(self):
+    def __json__(self) -> dict:
         """Custom JSON serialization for psycopg3 compatibility"""
         return self.model_dump()
 

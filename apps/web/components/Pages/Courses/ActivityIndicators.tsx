@@ -1,12 +1,12 @@
 'use client';
+
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { getUriWithOrg } from '@services/config/config';
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Video } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Fragment, memo, useMemo, useState } from 'react';
-
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { getUriWithOrg } from '@services/config/config';
 
 interface Props {
   course: any;

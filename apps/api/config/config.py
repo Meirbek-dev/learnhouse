@@ -3,6 +3,7 @@ from typing import Literal
 
 import yaml  # type: ignore  # PyYAML types not available
 from dotenv import load_dotenv
+
 from src.db.strict_base_model import PydanticStrictBaseModel
 
 

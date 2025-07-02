@@ -1,9 +1,8 @@
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getCourseContributors } from '@services/courses/courses';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getCourseContributors } from '@services/courses/courses';
 
 export type ContributorStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'INACTIVE';
 

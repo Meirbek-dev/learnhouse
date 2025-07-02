@@ -1,9 +1,4 @@
 'use client';
-import { motion } from 'framer-motion';
-import { GalleryVerticalEnd, Globe, Info, UserPen } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { use } from 'react';
 
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
@@ -11,6 +6,11 @@ import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCours
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
 import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
 import { getUriWithOrg } from '@services/config/config';
+import { motion } from 'framer-motion';
+import { GalleryVerticalEnd, Globe, Info, UserPen } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { use } from 'react';
 
 import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 

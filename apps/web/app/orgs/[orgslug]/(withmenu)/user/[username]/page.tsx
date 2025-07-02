@@ -1,7 +1,6 @@
+import { getUserByUsername } from '@services/users/users';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-
-import { getUserByUsername } from '@services/users/users';
 
 import UserProfileClient from './UserProfileClient';
 

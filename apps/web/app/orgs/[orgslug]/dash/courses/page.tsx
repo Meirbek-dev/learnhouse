@@ -1,9 +1,8 @@
-import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
-
-import { auth } from '@/auth';
 import { getOrgCourses } from '@services/courses/courses';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { auth } from '@/auth';
 
 import CoursesHome from './client';
 

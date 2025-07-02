@@ -4,8 +4,8 @@ from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey, Integer
 from sqlmodel import Field
 
-from src.db.trail_steps import TrailStepRead
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
+from src.db.trail_steps import TrailStepRead
 
 
 class TrailRunEnum(str, Enum):

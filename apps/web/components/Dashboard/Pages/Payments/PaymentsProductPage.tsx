@@ -1,13 +1,4 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import currencyCodes from 'currency-codes';
-import { Archive, ChevronDown, ChevronUp, Info, Pencil, Plus, RefreshCcw, SquareCheck } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
-import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -20,9 +11,18 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
+import currencyCodes from 'currency-codes';
+import { Archive, ChevronDown, ChevronUp, Info, Pencil, Plus, RefreshCcw, SquareCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+import { z } from 'zod';
 
 import CreateProductForm from './SubComponents/CreateProductForm';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';

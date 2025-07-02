@@ -1,10 +1,4 @@
 'use client';
-import { Info } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
 
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -13,6 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { Info } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
 
 interface LinkToUserGroupProps {
   // React function, todo: fix types

@@ -1,11 +1,10 @@
+import { useOrg } from '@components/Contexts/OrgContext';
+import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
+import { getActivityMediaDirectory } from '@services/media/media';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
 import { useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
-
-import { useOrg } from '@components/Contexts/OrgContext';
-import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
-import { getActivityMediaDirectory } from '@services/media/media';
 
 // Function to extract YouTube video ID from various YouTube URL formats
 function getYouTubeID(url: string): string | null {

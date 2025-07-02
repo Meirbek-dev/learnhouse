@@ -1,12 +1,11 @@
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { AlignCenter, AlignLeft, AlignRight, ArrowRight, ChevronDown, Link, Palette } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, FC } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 
 const ButtonsExtension: FC = (props: any) => {
   const t = useTranslations('DashPage.Editor.ButtonsExtension');

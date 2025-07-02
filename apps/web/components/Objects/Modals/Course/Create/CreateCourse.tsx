@@ -1,26 +1,26 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Image as ImageIcon, UploadCloud } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import type { ChangeEvent } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { z } from 'zod';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
 import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { createNewCourse } from '@services/courses/courses';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { Image as ImageIcon, UploadCloud } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import type { ChangeEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import { z } from 'zod';
 
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   const t = useTranslations('Components.CreateCourseModal');

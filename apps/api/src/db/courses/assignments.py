@@ -1,9 +1,9 @@
 from enum import Enum
-from typing import Dict, Optional
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import JSON, Column, ForeignKey
 from sqlmodel import Field
+
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
@@ -22,7 +22,7 @@ class AssignmentBase(SQLModelStrictBaseModel):
     title: str
     description: str
     due_date: str
-    published: Optional[bool] = False
+    published: bool | None = False
     grading_type: GradingTypeEnum
 
     org_id: int
@@ -42,7 +42,6 @@ class AssignmentCreate(AssignmentBase):
     """Model for creating a new assignment."""
 
     # Inherits all fields from AssignmentBase
-    pass
 
 
 class AssignmentRead(AssignmentBase):
@@ -50,8 +49,8 @@ class AssignmentRead(AssignmentBase):
 
     id: int
     assignment_uuid: str
-    creation_date: Optional[str] = None
-    update_date: Optional[str] = None
+    creation_date: str | None = None
+    update_date: str | None = None
 
 
 class AssignmentUpdate(SQLModelStrictBaseModel):
@@ -59,16 +58,16 @@ class AssignmentUpdate(SQLModelStrictBaseModel):
 
     model_config = ConfigDict(use_enum_values=True)
 
-    title: Optional[str] = None
-    description: Optional[str] = None
-    due_date: Optional[str] = None
-    published: Optional[bool] = None
-    grading_type: Optional[GradingTypeEnum] = None
-    org_id: Optional[int] = None
-    course_id: Optional[int] = None
-    chapter_id: Optional[int] = None
-    activity_id: Optional[int] = None
-    update_date: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
+    due_date: str | None = None
+    published: bool | None = None
+    grading_type: GradingTypeEnum | None = None
+    org_id: int | None = None
+    course_id: int | None = None
+    chapter_id: int | None = None
+    activity_id: int | None = None
+    update_date: str | None = None
 
     @field_validator("grading_type", mode="before")
     @classmethod
@@ -81,9 +80,9 @@ class AssignmentUpdate(SQLModelStrictBaseModel):
 class Assignment(AssignmentBase, table=True):
     """Represents an assignment with relevant details and foreign keys."""
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    creation_date: Optional[str] = None
-    update_date: Optional[str] = None
+    id: int | None = Field(default=None, primary_key=True)
+    creation_date: str | None = None
+    update_date: str | None = None
     assignment_uuid: str
 
     org_id: int = Field(
@@ -120,9 +119,9 @@ class AssignmentTaskBase(SQLModelStrictBaseModel):
     title: str
     description: str
     hint: str
-    reference_file: Optional[str] = None
+    reference_file: str | None = None
     assignment_type: AssignmentTaskTypeEnum
-    contents: Dict = Field(default_factory=dict, sa_column=Column(JSON))
+    contents: dict = Field(default_factory=dict, sa_column=Column(JSON))
     max_grade_value: int = 0  # Value is always between 0-100
 
     @field_validator("assignment_type", mode="before")
@@ -137,7 +136,6 @@ class AssignmentTaskCreate(AssignmentTaskBase):
     """Model for creating a new assignment task."""
 
     # Inherits all fields from AssignmentTaskBase
-    pass
 
 
 class AssignmentTaskRead(AssignmentTaskBase):
@@ -152,13 +150,13 @@ class AssignmentTaskUpdate(SQLModelStrictBaseModel):
 
     model_config = ConfigDict(use_enum_values=True)
 
-    title: Optional[str] = None
-    description: Optional[str] = None
-    hint: Optional[str] = None
-    reference_file: Optional[str] = None
-    assignment_type: Optional[AssignmentTaskTypeEnum] = None
-    contents: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
-    max_grade_value: Optional[int] = None
+    title: str | None = None
+    description: str | None = None
+    hint: str | None = None
+    reference_file: str | None = None
+    assignment_type: AssignmentTaskTypeEnum | None = None
+    contents: dict | None = Field(default=None, sa_column=Column(JSON))
+    max_grade_value: int | None = None
 
     @field_validator("assignment_type", mode="before")
     @classmethod
@@ -171,7 +169,7 @@ class AssignmentTaskUpdate(SQLModelStrictBaseModel):
 class AssignmentTask(AssignmentTaskBase, table=True):
     """Represents a task within an assignment with various attributes and foreign keys."""
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
 
     assignment_task_uuid: str
     creation_date: str
@@ -208,7 +206,7 @@ class AssignmentTaskSubmissionBase(SQLModelStrictBaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
     assignment_task_submission_uuid: str
-    task_submission: Dict = Field(default_factory=dict, sa_column=Column(JSON))
+    task_submission: dict = Field(default_factory=dict, sa_column=Column(JSON))
     grade: int = 0  # Value is always between 0-100
     task_submission_grade_feedback: str
     assignment_type: AssignmentTaskTypeEnum
@@ -231,7 +229,6 @@ class AssignmentTaskSubmissionCreate(AssignmentTaskSubmissionBase):
     """Model for creating a new assignment task submission."""
 
     # Inherits all fields from AssignmentTaskSubmissionBase
-    pass
 
 
 class AssignmentTaskSubmissionRead(AssignmentTaskSubmissionBase):
@@ -247,12 +244,12 @@ class AssignmentTaskSubmissionUpdate(SQLModelStrictBaseModel):
 
     model_config = ConfigDict(use_enum_values=True)
 
-    assignment_task_id: Optional[int] = None
-    assignment_task_submission_uuid: Optional[str] = None
-    task_submission: Optional[Dict] = Field(default=None, sa_column=Column(JSON))
-    grade: Optional[int] = None
-    task_submission_grade_feedback: Optional[str] = None
-    assignment_type: Optional[AssignmentTaskTypeEnum] = None
+    assignment_task_id: int | None = None
+    assignment_task_submission_uuid: str | None = None
+    task_submission: dict | None = Field(default=None, sa_column=Column(JSON))
+    grade: int | None = None
+    task_submission_grade_feedback: str | None = None
+    assignment_type: AssignmentTaskTypeEnum | None = None
 
     @field_validator("assignment_type", mode="before")
     @classmethod
@@ -265,9 +262,9 @@ class AssignmentTaskSubmissionUpdate(SQLModelStrictBaseModel):
 class AssignmentTaskSubmission(AssignmentTaskSubmissionBase, table=True):
     """Represents a submission for a specific assignment task with grade and feedback."""
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     assignment_task_submission_uuid: str
-    task_submission: Dict = Field(default_factory=dict, sa_column=Column(JSON))
+    task_submission: dict = Field(default_factory=dict, sa_column=Column(JSON))
     grade: int = 0  # Value is always between 0-100
     task_submission_grade_feedback: str
     assignment_type: AssignmentTaskTypeEnum
@@ -348,16 +345,16 @@ class AssignmentUserSubmissionUpdate(SQLModelStrictBaseModel):
 
     model_config = ConfigDict(use_enum_values=True)
 
-    submission_status: Optional[AssignmentUserSubmissionStatus] = None
-    grade: Optional[str] = None  # TODO: Should be string or int?
-    user_id: Optional[int] = None
-    assignment_id: Optional[int] = None
+    submission_status: AssignmentUserSubmissionStatus | None = None
+    grade: str | None = None  # TODO: Should be string or int?
+    user_id: int | None = None
+    assignment_id: int | None = None
 
 
 class AssignmentUserSubmission(AssignmentUserSubmissionBase, table=True):
     """Represents the submission status of an assignment for a user."""
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     creation_date: str
     update_date: str
     assignmentusersubmission_uuid: str

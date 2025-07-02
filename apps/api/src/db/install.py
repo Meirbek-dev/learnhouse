@@ -1,5 +1,6 @@
 from sqlalchemy import JSON, Column
 from sqlmodel import Field
+
 from src.db.strict_base_model import SQLModelStrictBaseModel
 
 

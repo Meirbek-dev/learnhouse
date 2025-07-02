@@ -1,9 +1,9 @@
 'use client';
+
+import { getUriWithoutOrg } from '@services/config/config';
 import { Diamond, Home, PersonStanding } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-
-import { getUriWithoutOrg } from '@services/config/config';
 
 function InfoUI({
   message,

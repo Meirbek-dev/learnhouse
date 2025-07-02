@@ -1,9 +1,4 @@
 'use client';
-import { Loader, Pencil, SquareUserRound, Users, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -16,6 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getAPIUrl } from '@services/config/config';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { Loader, Pencil, SquareUserRound, Users, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
 
 function OrgUserGroups() {
   const org = useOrg() as any;
