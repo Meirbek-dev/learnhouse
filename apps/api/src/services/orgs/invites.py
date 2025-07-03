@@ -1,6 +1,6 @@
-import json
 from datetime import datetime, timedelta
 
+import orjson
 import redis
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
@@ -83,7 +83,7 @@ async def create_invite_code(
 
     r.set(
         f"{invite_code_uuid}:org:{org.org_uuid}:code:{generated_invite_code}",
-        json.dumps(inviteCodeObject),
+        orjson.dumps(inviteCodeObject),
         ex=ttl,
     )
 
@@ -157,7 +157,7 @@ async def create_invite_code_with_usergroup(
 
     r.set(
         f"{invite_code_uuid}:org:{org.org_uuid}:code:{generated_invite_code}",
-        json.dumps(inviteCodeObject),
+        orjson.dumps(inviteCodeObject),
         ex=ttl,
     )
 
@@ -210,7 +210,7 @@ async def get_invite_codes(
 
     for invite_code in invite_codes:
         invite_code = r.get(invite_code)
-        invite_code = json.loads(invite_code)
+        invite_code = orjson.loads(invite_code)
         invite_codes_list.append(invite_code)
 
     return invite_codes_list
@@ -266,7 +266,7 @@ async def get_invite_code(
         )
 
     invite_code = r.get(invite_code[0])
-    return json.loads(invite_code)
+    return orjson.loads(invite_code)
 
 
 async def delete_invite_code(
@@ -353,7 +353,7 @@ def send_invite_email(
     # Send email
     if invite:
         invite = r.get(invite[0])
-        invite = json.loads(invite)
+        invite = orjson.loads(invite)
 
         # send email
         send_email(

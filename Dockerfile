@@ -1,6 +1,12 @@
 # Base image
 FROM python:3.13.5-slim-bookworm AS base
 
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=1
+
 # Install Nginx, curl, and build-essential
 RUN apt update && apt install -y nginx curl build-essential libomp-dev \
   && apt-get clean \

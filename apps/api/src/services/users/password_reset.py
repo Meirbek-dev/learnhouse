@@ -1,6 +1,6 @@
-import json
 from datetime import datetime
 
+import orjson
 import redis
 from fastapi import HTTPException, Request
 from pydantic import EmailStr
@@ -84,7 +84,7 @@ async def send_reset_password_code(
 
     r.set(
         f"{reset_email_invite_uuid}:user:{user.user_uuid}:org:{org.org_uuid}:code:{generated_reset_code}",
-        json.dumps(resetCodeObject),
+        orjson.dumps(resetCodeObject),
         ex=ttl,
     )
 
@@ -175,7 +175,7 @@ async def change_password_with_reset_code(
             status_code=400,
             detail="Reset code value not found",
         )
-    reset_code_object = json.loads(reset_code_value)
+    reset_code_object = orjson.loads(reset_code_value)
 
     # Check if reset code is expired
     if reset_code_object["reset_code_expires"] < int(datetime.now().timestamp()):

@@ -4,6 +4,8 @@ from sqlmodel import SQLModel
 
 class PydanticStrictBaseModel(BaseModel):
     model_config = ConfigDict(
+        compiled=True,
+        slots=True,
         # Core strictness settings
         strict=True,
         # Prevent extra fields completely
@@ -26,7 +28,7 @@ class PydanticStrictBaseModel(BaseModel):
         # Serialization settings
         # ser_json_timedelta="float",
         ser_json_bytes="base64",
-        # loc_by_alias=False,
+        loc_by_alias=False,
         # Prevent model mutation after creation for maximum stability
         # frozen=True,
         # Error handling
@@ -49,6 +51,7 @@ class PydanticStrictBaseModel(BaseModel):
 
 class SQLModelStrictBaseModel(SQLModel):
     model_config = ConfigDict(
+        compiled=True,
         # Core strictness settings
         strict=True,
         # Prevent extra fields completely
@@ -71,7 +74,7 @@ class SQLModelStrictBaseModel(SQLModel):
         # Serialization settings
         # ser_json_timedelta="float",
         ser_json_bytes="base64",
-        # loc_by_alias=False,
+        loc_by_alias=False,
         # Prevent model mutation after creation for maximum stability
         # frozen=True,
         # Error handling

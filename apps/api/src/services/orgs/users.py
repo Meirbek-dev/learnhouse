@@ -1,7 +1,7 @@
-import json
 import logging
 from datetime import datetime, timedelta
 
+import orjson
 import redis
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
@@ -328,7 +328,7 @@ async def invite_batch_users(
 
         invited_user = r.set(
             f"invited_user:{email}:org:{org.org_uuid}",
-            json.dumps(invited_user_object),
+            orjson.dumps(invited_user_object),
             ex=ttl,
         )
 
@@ -381,7 +381,7 @@ async def get_list_of_invited_users(
     for user in invited_users:
         invited_user = r.get(user)
         if invited_user:
-            invited_user = json.loads(invited_user.decode("utf-8"))
+            invited_user = orjson.loads(invited_user.decode("utf-8"))
             invited_users_list.append(invited_user)
 
     return invited_users_list

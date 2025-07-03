@@ -64,9 +64,7 @@ async def get_courses_for_an_org_explore(
     result = db_session.exec(statement)
     courses = result.all()
 
-    courses_list = list(courses)
-
-    return courses_list
+    return list(courses)
 
 
 async def get_course_for_explore(

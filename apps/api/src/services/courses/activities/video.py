@@ -1,7 +1,7 @@
-import json
 from datetime import datetime
 from typing import Literal
 
+import orjson
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
 from ulid import ULID
@@ -76,7 +76,7 @@ async def create_video_activity(
     chapter = db_session.exec(statement).first()
 
     # convert details to dict
-    details = json.loads(details)
+    details = orjson.loads(details)
 
     if not chapter:
         raise HTTPException(
@@ -204,7 +204,7 @@ async def create_external_video_activity(  # TODO: Broken, fix this
     activity_uuid = str(f"activity_{ULID()}")
 
     # convert details to dict
-    details = json.loads(data.details)
+    details = orjson.loads(data.details)
 
     activity_object = Activity(
         name=data.name,

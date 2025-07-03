@@ -85,7 +85,7 @@ const LoginClient = (props: LoginClientProps) => {
               />
             </Link>
           </div>
-          <div className=" flex flex-row bg-white">
+          <div className="flex flex-row bg-white">
             <div className="m-auto w-72">
               {error && (
                 <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">

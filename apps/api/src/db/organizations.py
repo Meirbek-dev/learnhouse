@@ -87,7 +87,7 @@ class OrganizationUser(PydanticStrictBaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    user: "UserRead"
+    user: "UserRead"  # noqa: UP037
     role: RoleRead
 
 

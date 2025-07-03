@@ -1,6 +1,6 @@
-import json
 from datetime import datetime
 
+import orjson
 from fastapi import HTTPException, Request
 from sqlalchemy import desc
 from sqlmodel import Session, select
@@ -360,7 +360,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
         landing={},
     )
 
-    org_config_dict = json.loads(org_config.model_dump_json())
+    org_config_dict = orjson.loads(org_config.model_dump_json())
 
     # OrgSettings
     org_settings = OrganizationConfig(

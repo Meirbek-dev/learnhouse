@@ -220,7 +220,7 @@ async def get_courses_orgslug(
                 or_(
                     Course.public == True,
                     UserGroupResource.resource_uuid
-                    == None,  # Courses not in any UserGroup
+                    is None,  # Courses not in any UserGroup
                     UserGroupUser.user_id
                     == current_user.id,  # Courses in UserGroups where user is a member
                     ResourceAuthor.user_id
@@ -339,7 +339,7 @@ async def search_courses(
                 or_(
                     Course.public == True,
                     UserGroupResource.resource_uuid
-                    == None,  # Courses not in any UserGroup
+                    is None,  # Courses not in any UserGroup
                     UserGroupUser.user_id
                     == current_user.id,  # Courses in UserGroups where user is a member
                     ResourceAuthor.user_id

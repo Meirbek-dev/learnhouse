@@ -155,9 +155,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             <FormItem>
               <FormLabel>{t('labelDescription')}</FormLabel>
               <FormControl>
-                <Textarea
-                  {...field}
-                />
+                <Textarea {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -4,22 +4,20 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.2"
 dependencies = [
-  "boto3>=1.39.1",
-  "botocore>=1.39.1",
-  "faker>=37.4.0",
+  "boto3>=1.39.2",
+  "botocore>=1.39.2",
   "fastapi==0.115.14",
   "fastapi-another-jwt-auth>=0.1.11",
   "httpx>=0.28.1",
   "langchain>=0.3.26",
   "langchain-chroma>=0.2.4",
-  "langchain-community>=0.3.26",
+  "langchain-community>=0.3.27",
   "langchain-core>=0.3.67",
   "langchain-openai>=0.3.27",
   "langchain-text-splitters>=0.3.8",
   "openai>=1.93.0",
   "psycopg[binary,pool]>=3.2.9",
   "pydantic[email]>=2.11.7",
-  "pytest>=8.4.1",
   "python-dotenv>=1.1.1",
   "python-multipart>=0.0.20",
   "pyyaml>=6.0.2",
@@ -27,21 +25,30 @@ dependencies = [
   "resend>=2.10.0",
   "sqlmodel>=0.0.24",
   "tiktoken>=0.9.0",
-  "uvicorn>=0.35.0",
+  "uvicorn[standard]>=0.35.0",
   "typer>=0.16.0",
-  "chromadb>=1.0.13",
+  "chromadb>=1.0.15",
   "alembic>=1.16.2",
   "alembic-postgresql-enum>=1.7.0",
   "stripe>=12.3.0",
-  "logfire[fastapi,sqlalchemy]>=3.21.2",
+  "logfire[fastapi,sqlalchemy]>=3.22.0",
   "beautifulsoup4>=4.13.4",
   "python-ulid>=3.0.0",
   "argon2-cffi>=25.1.0",
+  "orjson>=3.10.18",
+  "httptools>=0.6.4",
+  "brotli>=1.1.0",
+  "cachetools>=6.1.0",
 ]
+
+[dependency-groups]
+
+dev = ["faker>=37.4.0", "pytest>=8.4.1", "ruff>=0.11.12"]
+
 
 [tool.ruff]
 target-version = "py314"
-lint.select = ["ANN", "PERF", "FAST", "RUF"]
+lint.select = []
 lint.fixable = ["ALL"]
 lint.ignore = [
   "F401",
@@ -99,6 +106,3 @@ format.quote-style = "double"
 
 [tool.logfire]
 ignore_no_config = true
-
-[dependency-groups]
-dev = ["ruff>=0.11.12"]

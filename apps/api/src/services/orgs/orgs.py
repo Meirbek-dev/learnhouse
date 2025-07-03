@@ -1,8 +1,8 @@
-import json
 import logging
 from datetime import datetime
 from typing import Literal
 
+import orjson
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
 from ulid import ULID
@@ -183,7 +183,7 @@ async def create_org(
         cloud=OrgCloudConfig(plan="free", custom_domain=False),
     )
 
-    org_config_dict = json.loads(org_config.model_dump_json())
+    org_config_dict = orjson.loads(org_config.model_dump_json())
 
     # OrgSettings
     org_settings = OrganizationConfig(
@@ -260,7 +260,7 @@ async def create_org_with_config(
     db_session.refresh(user_org)
     org_config = submitted_config
 
-    org_config_dict = json.loads(org_config.model_dump_json())
+    org_config_dict = orjson.loads(org_config.model_dump_json())
 
     # OrgSettings
     org_settings = OrganizationConfig(
@@ -370,7 +370,7 @@ async def update_org_with_config_no_auth(
     updated_config = orgconfig
 
     # Update the database
-    org_config.config = json.loads(updated_config.model_dump_json())
+    org_config.config = orjson.loads(updated_config.model_dump_json())
     org_config.update_date = str(datetime.now())
 
     db_session.add(org_config)
@@ -647,7 +647,7 @@ async def update_org_signup_mechanism(
     updated_config.features.members.signup_mode = signup_mechanism
 
     # Update the database
-    org_config.config = json.loads(updated_config.model_dump_json())
+    org_config.config = orjson.loads(updated_config.model_dump_json())
     org_config.update_date = str(datetime.now())
 
     db_session.add(org_config)
@@ -750,7 +750,7 @@ async def update_org_landing(
     config_model.landing = landing_object
 
     # Convert back to dict and update
-    updated_config_dict = json.loads(config_model.model_dump_json())
+    updated_config_dict = orjson.loads(config_model.model_dump_json())
     org_config.config = updated_config_dict
     org_config.update_date = str(datetime.now())
 

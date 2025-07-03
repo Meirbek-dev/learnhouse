@@ -55,7 +55,7 @@ class PublicUser(UserRead):
 
 class UserRoleWithOrg(PydanticStrictBaseModel):
     role: RoleRead
-    org: "OrganizationRead"
+    org: "OrganizationRead"  # noqa: UP037
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 

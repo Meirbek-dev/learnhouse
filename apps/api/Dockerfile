@@ -16,9 +16,9 @@ ENV UV_LINK_MODE=copy
 # We're also binding pyproject.toml and uv.lock to leverage Docker's caching,
 # so changes to the project's dependencies will invalidate this layer.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    uv sync --locked --no-install-project --no-editable
+  --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+  --mount=type=bind,source=uv.lock,target=uv.lock \
+  uv sync --locked --no-install-project --no-editable
 
 # Copy the project into the intermediate image.
 # This step is intentionally separate from the dependency installation to allow for better caching
@@ -27,12 +27,18 @@ COPY . /app
 
 # Re-sync the project to install the project itself (non-editable mode for production).
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-editable
+  uv sync --locked --no-editable
 
 # Stage 2: Production
 # Use a lean Python-only image for the final production image.
 # This reduces the final image size as uv is not needed at runtime.
 FROM python:3.13.5-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=1
 
 # Set the working directory
 WORKDIR /app
