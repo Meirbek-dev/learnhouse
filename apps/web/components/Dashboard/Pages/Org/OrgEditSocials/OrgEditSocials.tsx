@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+import { useCallback, useMemo } from 'react';
 
 interface OrganizationValues {
   socials: {
@@ -35,55 +36,118 @@ export default function OrgEditSocials() {
   const org = useOrg() as any;
   const t = useTranslations('DashPage.OrgSettings.Socials');
 
-  const form = useForm<OrganizationValues>({
-    defaultValues: {
+  const defaultValues = useMemo(
+    () => ({
       socials: org?.socials || {},
       links: org?.links || {},
-    },
+    }),
+    [org?.socials, org?.links],
+  );
+
+  const form = useForm<OrganizationValues>({
+    defaultValues,
   });
 
   const socials = form.watch('socials');
   const links = form.watch('links');
 
-  const updateOrg = async (values: OrganizationValues) => {
-    const loadingToast = toast.loading(t('updatingOrg'));
-    try {
-      await updateOrganization(org.id, values, access_token);
-      await revalidateTags(['organizations'], org.slug);
-      mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
-      toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
-    } catch {
-      toast.error(t('orgUpdateFailed'), { id: loadingToast });
-    }
-  };
+  const updateOrg = useCallback(
+    async (values: OrganizationValues) => {
+      const loadingToast = toast.loading(t('updatingOrg'));
+      try {
+        await updateOrganization(org.id, values, access_token);
+        await revalidateTags(['organizations'], org.slug);
+        mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
+        toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
+      } catch {
+        toast.error(t('orgUpdateFailed'), { id: loadingToast });
+      }
+    },
+    [org.id, org.slug, access_token, t],
+  );
 
-  const handleSocialChange = (field: keyof OrganizationValues['socials'], value: string) => {
-    form.setValue(`socials.${field}`, value);
-  };
+  const handleLinkChange = useCallback(
+    (oldKey: string, newKey: string, value: string) => {
+      const currentLinks = form.getValues('links');
+      const newLinks = { ...currentLinks };
+      if (oldKey !== newKey) {
+        delete newLinks[oldKey];
+      }
+      newLinks[newKey] = value;
+      form.setValue('links', newLinks);
+    },
+    [form],
+  );
 
-  const handleLinkChange = (oldKey: string, newKey: string, value: string) => {
-    const currentLinks = form.getValues('links');
-    const newLinks = { ...currentLinks };
-    if (oldKey !== newKey) {
-      delete newLinks[oldKey];
-    }
-    newLinks[newKey] = value;
-    form.setValue('links', newLinks);
-  };
+  const removeLink = useCallback(
+    (key: string) => {
+      const currentLinks = form.getValues('links');
+      const newLinks = { ...currentLinks };
+      delete newLinks[key];
+      form.setValue('links', newLinks);
+    },
+    [form],
+  );
 
-  const removeLink = (key: string) => {
-    const currentLinks = form.getValues('links');
-    const newLinks = { ...currentLinks };
-    delete newLinks[key];
-    form.setValue('links', newLinks);
-  };
-
-  const addNewLink = () => {
+  const addNewLink = useCallback(() => {
     const currentLinks = form.getValues('links');
     const newLinks = { ...currentLinks };
     newLinks[`${t('Form.newCustomLinkDefaultLabel')} ${Object.keys(newLinks).length + 1}`] = '';
     form.setValue('links', newLinks);
-  };
+  }, [form, t]);
+
+  const linksEntries = useMemo(() => Object.entries(links), [links]);
+
+  const socialFields = useMemo(
+    () => [
+      {
+        name: 'socials.instagram' as const,
+        placeholder: t('Form.instagramPlaceholder'),
+        icon: (
+          <SiInstagram
+            size={16}
+            color="#E4405F"
+          />
+        ),
+        bgColor: 'bg-[#E4405F]/10',
+      },
+      {
+        name: 'socials.facebook' as const,
+        placeholder: t('Form.facebookPlaceholder'),
+        icon: (
+          <SiFacebook
+            size={16}
+            color="#1877F2"
+          />
+        ),
+        bgColor: 'bg-[#1877F2]/10',
+      },
+      {
+        name: 'socials.youtube' as const,
+        placeholder: t('Form.youtubePlaceholder'),
+        icon: (
+          <SiYoutube
+            size={16}
+            color="#FF0000"
+          />
+        ),
+        bgColor: 'bg-[#FF0000]/10',
+      },
+      {
+        name: 'socials.tiktok' as const,
+        placeholder: t('Form.tiktokPlaceholder'),
+        icon: <SiTiktok size={16} />,
+        bgColor: 'bg-[#82878a]/10',
+      },
+      {
+        name: 'socials.twitter' as const,
+        placeholder: t('Form.xPlaceholder'),
+        icon: <SiX size={16} />,
+        bgColor: 'bg-[#707577]/10',
+      },
+    ],
+    [t],
+  );
 
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
@@ -101,124 +165,30 @@ export default function OrgEditSocials() {
                   <FormLabel className="text-lg font-semibold">{t('socialLinksTitle')}</FormLabel>
                   <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
                     <div className="grid gap-3">
-                      <FormField
-                        control={form.control}
-                        name="socials.instagram"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center space-x-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#E4405F]/10">
-                                <SiInstagram
-                                  size={16}
-                                  color="#E4405F"
-                                />
+                      {socialFields.map((field) => (
+                        <FormField
+                          key={field.name}
+                          control={form.control}
+                          name={field.name}
+                          render={({ field: formField }) => (
+                            <FormItem>
+                              <div className="flex items-center space-x-3">
+                                <div className={`flex h-8 w-8 items-center justify-center rounded-md ${field.bgColor}`}>
+                                  {field.icon}
+                                </div>
+                                <FormControl>
+                                  <Input
+                                    placeholder={field.placeholder}
+                                    className="h-9 bg-white"
+                                    {...formField}
+                                  />
+                                </FormControl>
                               </div>
-                              <FormControl>
-                                <Input
-                                  placeholder={t('Form.instagramPlaceholder')}
-                                  className="h-9 bg-white"
-                                  {...field}
-                                />
-                              </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="socials.facebook"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center space-x-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#1877F2]/10">
-                                <SiFacebook
-                                  size={16}
-                                  color="#1877F2"
-                                />
-                              </div>
-                              <FormControl>
-                                <Input
-                                  placeholder={t('Form.facebookPlaceholder')}
-                                  className="h-9 bg-white"
-                                  {...field}
-                                />
-                              </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="socials.youtube"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center space-x-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#FF0000]/10">
-                                <SiYoutube
-                                  size={16}
-                                  color="#FF0000"
-                                />
-                              </div>
-                              <FormControl>
-                                <Input
-                                  placeholder={t('Form.youtubePlaceholder')}
-                                  className="h-9 bg-white"
-                                  {...field}
-                                />
-                              </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="socials.tiktok"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center space-x-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#82878a]/10">
-                                <SiTiktok size={16} />
-                              </div>
-                              <FormControl>
-                                <Input
-                                  placeholder={t('Form.tiktokPlaceholder')}
-                                  className="h-9 bg-white"
-                                  {...field}
-                                />
-                              </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="socials.twitter"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-center space-x-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#707577]/10">
-                                <SiX size={16} />
-                              </div>
-                              <FormControl>
-                                <Input
-                                  placeholder={t('Form.xPlaceholder')}
-                                  className="h-9 bg-white"
-                                  {...field}
-                                />
-                              </FormControl>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -228,7 +198,7 @@ export default function OrgEditSocials() {
                 <div>
                   <FormLabel className="text-lg font-semibold">{t('customLinksTitle')}</FormLabel>
                   <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
-                    {Object.entries(links).map(([linkKey, linkValue], index) => (
+                    {linksEntries.map(([linkKey, linkValue], index) => (
                       <div
                         key={index}
                         className="flex items-center gap-3"
@@ -261,7 +231,7 @@ export default function OrgEditSocials() {
                       </div>
                     ))}
 
-                    {Object.keys(links).length < 3 && (
+                    {linksEntries.length < 3 && (
                       <Button
                         type="button"
                         variant="outline"

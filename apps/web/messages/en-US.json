@@ -1999,6 +1999,7 @@
           "uploadImageButton": "Upload New Image"
         },
         "description": "Customize your organization's landing page",
+        "enableToggleLabel": "Enable custom landing page",
         "saveButton": "Save Changes",
         "savingButton": "Saving...",
         "title": "Landing Page"

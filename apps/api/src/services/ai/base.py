@@ -113,6 +113,7 @@ class AIService:
                 # Try to create a new local client as fallback
                 try:
                     import chromadb
+
                     fallback_client = chromadb.Client()
                     logger.info("Using fallback local ChromaDB client")
                     return Chroma.from_texts(
@@ -122,7 +123,9 @@ class AIService:
                         collection_name=collection_name or f"doc_collection_{ULID()}",
                     )
                 except Exception as fallback_error:
-                    logger.error(f"Fallback ChromaDB client also failed: {fallback_error}")
+                    logger.error(
+                        f"Fallback ChromaDB client also failed: {fallback_error}"
+                    )
                     return None
 
         except Exception as e:

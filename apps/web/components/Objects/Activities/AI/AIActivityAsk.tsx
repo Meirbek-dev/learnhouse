@@ -79,7 +79,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
   // TODO : come up with a better way to handle this
   const inputClass = clsx(
     'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30',
-    { 'opacity-30': aiChatBotState.isWaitingForResponse }
+    { 'opacity-30': aiChatBotState.isWaitingForResponse },
   );
 
   useEffect(() => {
