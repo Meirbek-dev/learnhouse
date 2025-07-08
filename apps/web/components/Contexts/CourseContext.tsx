@@ -71,11 +71,19 @@ export function CourseProvider({ children, courseuuid, withUnpublishedActivities
 }
 
 export function useCourse() {
-  return use(CourseContext);
+  const context = use(CourseContext);
+  if (!context) {
+    throw new Error('useCourse must be used within a CourseProvider');
+  }
+  return context;
 }
 
 export function useCourseDispatch() {
-  return use(CourseDispatchContext);
+  const context = use(CourseDispatchContext);
+  if (!context) {
+    throw new Error('useCourseDispatch must be used within a CourseProvider');
+  }
+  return context;
 }
 
 function courseReducer(state: any, action: any) {

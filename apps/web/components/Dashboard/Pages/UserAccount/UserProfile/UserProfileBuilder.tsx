@@ -224,8 +224,6 @@ const UserProfileBuilder = () => {
     return localeMap[locale] || enUS;
   };
 
-  const dateFnsLocale = getDateFnsLocale(locale);
-
   // Initialize profile data from user data
   useEffect(() => {
     const fetchUserData = async () => {
@@ -1233,7 +1231,8 @@ const EducationEditor: FC<{
   section: EducationSection;
   onChange: (section: EducationSection) => void;
 }> = ({ t, section, onChange }) => {
-  const locale = useLocale();
+  const fullLocale = useLocale();
+  const locale = fullLocale.split('-')[0] ?? 'ru';
   const dateFnsLocale = (() => {
     const localeMap: { [key: string]: Locale } = {
       en: enUS,
