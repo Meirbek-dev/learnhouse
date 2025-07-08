@@ -101,12 +101,29 @@ class AIService:
 
             # Create vector store
             chroma_client = get_chromadb_client()
-            return Chroma.from_texts(
-                texts=all_chunks,
-                embedding=embedding_function,
-                client=chroma_client,
-                collection_name=collection_name or f"doc_collection_{ULID()}",
-            )
+            try:
+                return Chroma.from_texts(
+                    texts=all_chunks,
+                    embedding=embedding_function,
+                    client=chroma_client,
+                    collection_name=collection_name or f"doc_collection_{ULID()}",
+                )
+            except Exception as chroma_error:
+                logger.error(f"ChromaDB connection failed: {chroma_error}")
+                # Try to create a new local client as fallback
+                try:
+                    import chromadb
+                    fallback_client = chromadb.Client()
+                    logger.info("Using fallback local ChromaDB client")
+                    return Chroma.from_texts(
+                        texts=all_chunks,
+                        embedding=embedding_function,
+                        client=fallback_client,
+                        collection_name=collection_name or f"doc_collection_{ULID()}",
+                    )
+                except Exception as fallback_error:
+                    logger.error(f"Fallback ChromaDB client also failed: {fallback_error}")
+                    return None
 
         except Exception as e:
             logger.error(f"Failed to create vector store: {e}")
@@ -133,7 +150,7 @@ class AIService:
             retriever_tool = create_retriever_tool(
                 retriever=vector_store.as_retriever(
                     search_type="similarity",
-                    search_kwargs={"k": 3, "score_threshold": 0.5},
+                    search_kwargs={"k": 3},
                 ),
                 name="find_context_text",
                 description="Find relevant context from the knowledge base to answer questions",

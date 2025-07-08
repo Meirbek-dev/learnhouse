@@ -27,12 +27,18 @@ def get_chromadb_client() -> chromadb.Client:
             and getattr(chromadb_config, "isSeparateDatabaseEnabled", False)
         ):
             logger.info(f"Using remote ChromaDB at {chromadb_config.db_host}")
-            return chromadb.HttpClient(
-                host=chromadb_config.db_host,
-                port=getattr(chromadb_config, "db_port", 8000),
-                # Add connection timeout and retries
-                timeout=30,
-            )
+            try:
+                client = chromadb.HttpClient(
+                    host=chromadb_config.db_host,
+                    port=getattr(chromadb_config, "db_port", 8000),
+                )
+                # Test the connection
+                client.heartbeat()
+                return client
+            except Exception as remote_error:
+                logger.warning(f"Remote ChromaDB connection failed: {remote_error}")
+                logger.info("Falling back to local ChromaDB client")
+                return chromadb.Client()
         logger.info("Using local ChromaDB client")
         return chromadb.Client()
 
@@ -106,12 +112,10 @@ def get_llm(model_name: str, temperature: float = 0.0) -> ChatOpenAI | None:
             request_timeout=20,
             # Streaming for better user experience
             streaming=True,
-            # Model-specific optimizations
-            model_kwargs={
-                "frequency_penalty": 0.0,
-                "presence_penalty": 0.0,
-                "top_p": 1.0,
-            },
+            # Move parameters from model_kwargs to explicit parameters
+            frequency_penalty=0.0,
+            presence_penalty=0.0,
+            top_p=1.0,
         )
 
     except Exception as e:

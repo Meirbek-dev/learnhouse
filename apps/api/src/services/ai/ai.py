@@ -104,12 +104,28 @@ def ai_start_activity_chat_session(
         message,
         embeddings,
         ai_model,
+        session_id=chat_session["aichat_uuid"],
     )
+
+    # Handle both success and error responses
+    if "error" in response:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI processing failed: {response['error']}",
+        )
+
+    # Extract the output from the response
+    ai_message = response.get("output", "")
+    if not ai_message:
+        raise HTTPException(
+            status_code=500,
+            detail="AI response is empty",
+        )
 
     return ActivityAIChatSessionResponse(
         aichat_uuid=chat_session["aichat_uuid"],
         activity_uuid=activity.activity_uuid,
-        message=response["output"],
+        message=ai_message,
     )
 
 
@@ -189,10 +205,26 @@ def ai_send_activity_chat_message(
         message,
         embeddings,
         ai_model,
+        session_id=chat_session["aichat_uuid"],
     )
+
+    # Handle both success and error responses
+    if "error" in response:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI processing failed: {response['error']}",
+        )
+
+    # Extract the output from the response
+    ai_message = response.get("output", "")
+    if not ai_message:
+        raise HTTPException(
+            status_code=500,
+            detail="AI response is empty",
+        )
 
     return ActivityAIChatSessionResponse(
         aichat_uuid=chat_session["aichat_uuid"],
         activity_uuid=activity.activity_uuid,
-        message=response["output"],
+        message=ai_message,
     )
