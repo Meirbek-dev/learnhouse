@@ -434,16 +434,21 @@ export default function OrgEditImages() {
             <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
-                  <div
+                  <img
+                    src={
+                      org?.logo_image
+                        ? localLogo || getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)
+                        : '/empty_thumbnail.png'
+                    }
+                    alt="Лого организации"
                     className={cn(
-                      'h-[100px] w-[200px] rounded-lg bg-white bg-contain bg-center bg-no-repeat shadow-md sm:h-[125px] sm:w-[250px]',
+                      'max-h-[125px] min-h-[100px] min-w-[200px] max-w-[250px] rounded-lg bg-white object-contain shadow-md',
                       'border-2 border-gray-100 transition-all duration-300 hover:border-blue-200',
                       isLogoUploading && 'opacity-50',
                     )}
                     style={{
-                      backgroundImage: org?.logo_image
-                        ? `url(${localLogo || getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)})`
-                        : 'url(/empty_thumbnail.png)',
+                      width: 'auto',
+                      height: 'auto',
                     }}
                   />
                 </div>
@@ -497,16 +502,21 @@ export default function OrgEditImages() {
             <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
-                  <div
+                  <img
+                    src={
+                      org?.thumbnail_image
+                        ? localThumbnail || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
+                        : '/empty_thumbnail.png'
+                    }
+                    alt="Organization thumbnail"
                     className={cn(
-                      'h-[100px] w-[200px] rounded-lg bg-white bg-contain bg-center bg-no-repeat shadow-md sm:h-[125px] sm:w-[250px]',
+                      'max-h-[125px] min-h-[100px] min-w-[200px] max-w-[250px] rounded-lg bg-white object-contain shadow-md',
                       'border-2 border-gray-100 transition-all duration-300 hover:border-purple-200',
                       isThumbnailUploading && 'opacity-50',
                     )}
                     style={{
-                      backgroundImage: org?.thumbnail_image
-                        ? `url(${localThumbnail || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)})`
-                        : 'url(/empty_thumbnail.png)',
+                      width: 'auto',
+                      height: 'auto',
                     }}
                   />
                 </div>
@@ -587,7 +597,7 @@ export default function OrgEditImages() {
                                 {...provided.draggableProps}
                                 className={cn(
                                   'group relative shrink-0',
-                                  'w-48',
+                                  'inline-block w-auto',
                                   snapshot.isDragging ? 'z-50 scale-105' : 'hover:scale-102',
                                 )}
                               >
@@ -612,21 +622,24 @@ export default function OrgEditImages() {
                                   <GripVertical size={14} />
                                 </div>
                                 {preview.type === 'image' ? (
-                                  <div
+                                  <img
+                                    src={getOrgPreviewMediaDirectory(org?.org_uuid, preview.id)}
+                                    alt={`Preview ${preview.id}`}
                                     className={cn(
-                                      `w-full ${PREVIEW_HEIGHT} rounded-xl bg-white bg-contain bg-center bg-no-repeat`,
+                                      'max-h-28 max-w-48 rounded-xl bg-white object-contain',
                                       'border border-gray-200 hover:border-gray-300',
                                       'transition-colors duration-200',
                                       snapshot.isDragging ? 'shadow-lg' : 'shadow-xs hover:shadow-md',
                                     )}
                                     style={{
-                                      backgroundImage: `url(${getOrgPreviewMediaDirectory(org?.org_uuid, preview.id)})`,
+                                      width: 'auto',
+                                      height: 'auto',
                                     }}
                                   />
                                 ) : (
                                   <div
                                     className={cn(
-                                      `w-full ${PREVIEW_HEIGHT} relative overflow-hidden rounded-xl`,
+                                      `w-48 ${PREVIEW_HEIGHT} relative overflow-hidden rounded-xl`,
                                       'border border-gray-200 transition-colors duration-200 hover:border-gray-300',
                                       snapshot.isDragging ? 'shadow-lg' : 'shadow-xs hover:shadow-md',
                                     )}
