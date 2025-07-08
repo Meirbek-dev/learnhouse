@@ -12,6 +12,7 @@ import { useTranslations } from 'next-intl';
 import touEmblemLight from 'public/tou_emblem_light.png';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 
 import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
 
@@ -76,9 +77,10 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
   const dispatchAIChatBot = useAIChatBotDispatch() as any;
 
   // TODO : come up with a better way to handle this
-  const inputClass = aiChatBotState.isWaitingForResponse
-    ? 'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30 opacity-30 '
-    : 'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30';
+  const inputClass = clsx(
+    'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30',
+    { 'opacity-30': aiChatBotState.isWaitingForResponse }
+  );
 
   useEffect(() => {
     document.body.style.overflow = aiChatBotState.isModalOpen ? 'hidden' : 'unset';

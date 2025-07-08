@@ -22,7 +22,7 @@ const createValidationSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t('nameRequiredError')),
     description: z.string().optional(),
-    org_id: z.string(),
+    org_id: z.coerce.number(),
   });
 
 type UserGroupFormValues = z.infer<ReturnType<typeof createValidationSchema>>;
@@ -39,7 +39,7 @@ function AddUserGroup(props: AddUserGroupProps) {
     defaultValues: {
       name: '',
       description: '',
-      org_id: org.id.toString(), // TODO: that's weird, fix this
+      org_id: org.id,
     },
   });
 

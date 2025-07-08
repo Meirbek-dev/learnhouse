@@ -172,7 +172,7 @@ class ExternalVideoInDB(PydanticStrictBaseModel):
     activity_id: int
 
 
-async def create_external_video_activity(  # TODO: Broken, fix this
+async def create_external_video_activity(
     request: Request,
     current_user: PublicUser | AnonymousUser,
     data: ExternalVideo,

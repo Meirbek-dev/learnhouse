@@ -489,6 +489,7 @@
       "triggerText": "Onboarding"
     },
     "OrgInviteCodeGenerate": {
+      "selectUserGroup": "Select User Group",
       "createInviteError": "Error creating invite code: {error}",
       "createUserGroupLink": "Create Group",
       "generateButton": "Generate",
