@@ -95,12 +95,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                           src={touEmblemLight}
                           alt={t('aiIconAlt')}
                         />
-                        <div className="flex items-center">
-                          {t('aiEditorTitle')}{' '}
-                          <span className="ml-3 rounded-3xl bg-white/10 px-2 py-1 text-[10px] uppercase">
-                            PRE-ALPHA
-                          </span>
-                        </div>
+                        <div className="flex items-center">{t('aiEditorTitle')}</div>
                         <MoreVertical
                           className="text-white/50"
                           size={12}

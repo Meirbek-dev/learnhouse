@@ -40,14 +40,11 @@ def install(
     if short:
         # Create the Organization
         print("Creating OpenU...")
-        slug = typer.prompt(
-            "What's the slug for your organization? (e.g. school, acme)"
-        )
         org = OrganizationCreate(
             name="OpenU",
             description="OpenU",
             about="OpenU - Образовательная платформа для онлайн-обучения",
-            slug=slug,
+            slug="openu",
             email="meirbek.123@gmail.com",
             logo_image="",
             thumbnail_image="",

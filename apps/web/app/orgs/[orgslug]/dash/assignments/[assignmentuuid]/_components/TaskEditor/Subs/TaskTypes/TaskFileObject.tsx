@@ -99,7 +99,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success) {
+      if (res.success && res.data && res.data.task_submission) {
         setUserSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -108,6 +108,10 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
         });
+      } else {
+        // No submission yet, reset state
+        setUserSubmissions({ fileUUID: '' });
+        setInitialUserSubmissions({ fileUUID: '' });
       }
     }
   }, [assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
@@ -173,7 +177,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success) {
+      if (res.success && res.data && res.data.task_submission) {
         setUserSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -183,6 +187,11 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
         });
+      } else {
+        // No submission yet, reset state
+        setUserSubmissions({ fileUUID: '' });
+        setInitialUserSubmissions({ fileUUID: '' });
+        setUserSubmissionObject(null);
       }
     }
   }, [assignmentTaskUUID, user_id, assignment.assignment_object.assignment_uuid, access_token]);

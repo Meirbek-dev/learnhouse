@@ -91,7 +91,6 @@ const FormTagInput = ({ value, onChange, separator = ' | ', error, placeholder }
             error && 'border-destructive focus-within:ring-destructive/40',
           )}
           onClick={handleContainerClick}
-          tabIndex={0}
           aria-invalid={!!error}
         >
           {tags.map((tag, index) => (

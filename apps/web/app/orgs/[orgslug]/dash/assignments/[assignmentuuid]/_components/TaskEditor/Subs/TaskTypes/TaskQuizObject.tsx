@@ -236,7 +236,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success) {
+      if (res.success && res.data && res.data.task_submission) {
         setUserSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -245,6 +245,10 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
         });
+      } else {
+        // No submission yet, reset state
+        setUserSubmissions({ questions: [], submissions: [] });
+        setInitialUserSubmissions({ questions: [], submissions: [] });
       }
     }
   }, [assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token]);
@@ -320,7 +324,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success) {
+      if (res.success && res.data && res.data.task_submission) {
         setUserSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -330,6 +334,11 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
         });
+      } else {
+        // No submission yet, reset state
+        setUserSubmissions({ questions: [], submissions: [] });
+        setInitialUserSubmissions({ questions: [], submissions: [] });
+        setUserSubmissionObject(null);
       }
     }
   }, [assignmentTaskUUID, user_id, assignment.assignment_object.assignment_uuid, access_token]);

@@ -1,20 +1,36 @@
-export const dynamic = 'force-dynamic'; // defaults to auto
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    return NextResponse.json(
-      {
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        version: process.env.npm_package_version || 'unknown',
-        node: process.version,
-        environment: process.env.NODE_ENV,
+    const healthData = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: {
+        rss: Math.round(process.memoryUsage().rss / 1024 / 1024),
+        heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+        heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        external: Math.round(process.memoryUsage().external / 1024 / 1024),
       },
-      { status: 200 },
-    );
+      version: process.env.npm_package_version || 'unknown',
+      node: process.version,
+      environment: process.env.NODE_ENV,
+      pid: process.pid,
+      platform: process.platform,
+      arch: process.arch,
+    };
+
+    return NextResponse.json(healthData, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       {
@@ -25,4 +41,13 @@ export async function GET() {
       { status: 500 },
     );
   }
+}
+
+export async function HEAD() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    },
+  });
 }
