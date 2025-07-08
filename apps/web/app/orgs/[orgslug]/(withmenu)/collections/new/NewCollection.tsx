@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';

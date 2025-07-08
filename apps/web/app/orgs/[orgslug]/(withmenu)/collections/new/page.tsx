@@ -3,9 +3,10 @@ import { getTranslations } from 'next-intl/server';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import NewCollection from './NewCollection';
 
-export async function generateMetadata({ params }: { params: { orgslug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ orgslug: string }> }): Promise<Metadata> {
+  const { orgslug } = await params;
   const t = await getTranslations('NewCollectionPage');
-  const org = await getOrganizationContextInfo(params.orgslug, {
+  const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 0,
     tags: ['organizations'],
   });

@@ -6,7 +6,6 @@
       "askAI": "Ask AI",
       "errorTitle": "Something wrong happened",
       "examplesAbbr": "ex. ",
-      "experimental": "Experimental",
       "hello": "Hello",
       "howCanWeHelp": "how can I help?",
       "logoAlt": "OpenU AI Logo",
@@ -681,8 +680,7 @@
     "Org": {
       "fetchError": "An error occurred while loading organization data",
       "joinOrgCTA": "Join {orgName}",
-      "notMemberInfo": "You are not yet a member of this Organization",
-      "orgInactiveError": "This Organization is no longer active"
+      "notMemberInfo": "You are not yet a member of this Organization"
     }
   },
   "CourseBreadcrumbs": {
