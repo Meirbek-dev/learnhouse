@@ -1,11 +1,6 @@
 import { getAPIUrl } from '@services/config/config';
 import { getResponseMetadata, RequestBody } from '@services/utils/ts/requests';
 
-interface LoginAndGetTokenResponse {
-  access_token: 'string';
-  token_type: 'string';
-}
-
 // ⚠️ mvp phase code
 // TODO : everything in this file need to be refactored including security issues fix
 

@@ -18,7 +18,6 @@ function BreadCrumbs(props: BreadCrumbsProps) {
         <div className="flex items-center space-x-1">
           {props.type == 'courses' ? (
             <div className="flex items-center space-x-2">
-              {' '}
               <Book
                 className="text-gray"
                 size={14}
@@ -30,7 +29,6 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           )}
           {props.type == 'assignments' ? (
             <div className="flex items-center space-x-2">
-              {' '}
               <Backpack
                 className="text-gray"
                 size={14}
@@ -42,7 +40,6 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           )}
           {props.type == 'user' ? (
             <div className="flex items-center space-x-2">
-              {' '}
               <User
                 className="text-gray"
                 size={14}
@@ -54,7 +51,6 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           )}
           {props.type == 'orgusers' ? (
             <div className="flex items-center space-x-2">
-              {' '}
               <Users
                 className="text-gray"
                 size={14}
@@ -67,7 +63,6 @@ function BreadCrumbs(props: BreadCrumbsProps) {
 
           {props.type == 'org' ? (
             <div className="flex items-center space-x-2">
-              {' '}
               <School
                 className="text-gray"
                 size={14}
@@ -79,7 +74,6 @@ function BreadCrumbs(props: BreadCrumbsProps) {
           )}
           {props.type == 'payments' ? (
             <div className="flex items-center space-x-2">
-              {' '}
               <CreditCard
                 className="text-gray"
                 size={14}

@@ -489,7 +489,6 @@
       "triggerText": "Onboarding"
     },
     "OrgInviteCodeGenerate": {
-      "selectUserGroup": "Select User Group",
       "createInviteError": "Error creating invite code: {error}",
       "createUserGroupLink": "Create Group",
       "generateButton": "Generate",
@@ -501,6 +500,7 @@
       "noUserGroupsAvailable": "No user groups available",
       "normalDescription": "User will not be linked to any group when they sign up",
       "normalTitle": "Normal Invite Code",
+      "selectUserGroup": "Select User Group",
       "unknownError": "Unknown error"
     },
     "OrgMenuLinks": {
@@ -790,11 +790,12 @@
       },
       "both": "Both",
       "description": {
-        "label": "Description"
+        "label": "Description",
+        "placeholder": "Enter course description"
       },
       "errors": {
         "allLearningItemsMustHaveText": "All learning items must have text",
-        "atLeastOneLearningItem": "Must have at least one learning item with text",
+        "atLeastOneLearningItem": "At least one learning item is required",
         "invalidFormat": "Invalid format",
         "invalidJsonFormat": "Invalid JSON format",
         "maxLength": "Must be {count} characters or less",
@@ -807,7 +808,12 @@
       },
       "loading": "Loading...",
       "name": {
-        "label": "Course Name"
+        "label": "Course Name",
+        "placeholder": "Enter course name"
+      },
+      "public": {
+        "description": "Make course publicly available (even for unregistered users)",
+        "label": "Public course"
       },
       "tags": {
         "label": "Course Tags",
@@ -3023,10 +3029,27 @@
     "viewCourses": "View Courses"
   },
   "Validation": {
+    "activityDescriptionRequired": "Activity description is required",
+    "activityNameRequired": "Activity name is required",
+    "assignmentDescriptionRequired": "Assignment description is required",
+    "assignmentTitleRequired": "Assignment title is required",
+    "chapterDescriptionRequired": "Chapter description is required",
+    "chapterNameRequired": "Chapter name is required",
+    "contentRequired": "Content is required",
+    "descriptionRequired": "Description is required",
+    "documentNameRequired": "Document name is required",
+    "fieldRequired": "{fieldName} is required",
+    "fileRequired": "Please select a file",
     "invalidEmail": "Invalid email address",
     "loading": "Loading...",
+    "maxLength": "Must be no more than {length} characters",
+    "minLength": "Must be at least {length} characters",
+    "nameRequired": "Name is required",
     "passwordMinLength": "Password must be at least {length} characters",
+    "pdfFileRequired": "Please select a PDF file",
     "required": "Required",
+    "roleRequired": "Role is required",
+    "titleRequired": "Title is required",
     "usernameMinLength": "Username must be at least {length} characters",
     "wrongCredentials": "Wrong Email or Password"
   },

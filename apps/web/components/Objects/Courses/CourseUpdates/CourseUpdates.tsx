@@ -59,7 +59,7 @@ function CourseUpdates() {
         className="flex items-center space-x-2 font-normal text-gray-600 hover:cursor-pointer"
       >
         <div>
-          <Rss size={16} />{' '}
+          <Rss size={16} />
         </div>
         <div className="flex items-center space-x-2">
           <span>{t('updates')}</span>

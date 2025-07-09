@@ -72,7 +72,7 @@ function Activity(props: any) {
                 <Video size={16} />{' '}
                 <div className="mx-auto justify-center rounded-full bg-gray-200 px-2 py-1 align-middle text-xs font-bold text-gray-400">
                   {t('activityTypes.video')}
-                </div>{' '}
+                </div>
               </div>
             )}
             {props.activity.type === 'documentpdf' && (
@@ -82,7 +82,7 @@ function Activity(props: any) {
                 </div>
                 <div className="rounded-full bg-gray-200 px-2 py-1 text-xs font-bold text-gray-400">
                   {t('activityTypes.document')}
-                </div>{' '}
+                </div>
               </div>
             )}
             {props.activity.type === 'dynamic' && (
@@ -90,7 +90,7 @@ function Activity(props: any) {
                 <Sparkles size={16} />{' '}
                 <div className="rounded-full bg-gray-200 px-2 py-1 text-xs font-bold text-gray-400">
                   {t('activityTypes.dynamic')}
-                </div>{' '}
+                </div>
               </div>
             )}
           </div>

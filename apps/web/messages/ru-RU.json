@@ -500,6 +500,7 @@
       "noUserGroupsAvailable": "Нет доступных групп пользователей",
       "normalDescription": "Пользователь не будет привязан ни к одной группе при регистрации",
       "normalTitle": "Обычный код приглашения",
+      "selectUserGroup": "Выберите группу пользователей",
       "unknownError": "Неизвестная ошибка"
     },
     "OrgMenuLinks": {
@@ -789,7 +790,8 @@
       },
       "both": "Оба",
       "description": {
-        "label": "Описание"
+        "label": "Описание",
+        "placeholder": "Введите описание курса"
       },
       "errors": {
         "allLearningItemsMustHaveText": "Все элементы обучения должны содержать текст",
@@ -806,7 +808,12 @@
       },
       "loading": "Загрузка...",
       "name": {
-        "label": "Название курса"
+        "label": "Название курса",
+        "placeholder": "Введите название курса"
+      },
+      "public": {
+        "description": "Сделать курс общедоступным (даже для незарегистрированных пользователей)",
+        "label": "Публичный курс"
       },
       "tags": {
         "label": "Теги курса",
@@ -1998,6 +2005,7 @@
           "uploadImageButton": "Загрузить новое изображение"
         },
         "description": "Настройте домашнюю страницу",
+        "enableToggleLabel": "Включить пользовательскую целевую страницу",
         "saveButton": "Сохранить изменения",
         "savingButton": "Сохранение...",
         "title": "Домашняя страница"
@@ -3021,10 +3029,27 @@
     "viewCourses": "Просмотреть курсы"
   },
   "Validation": {
+    "activityDescriptionRequired": "Описание активности обязательно",
+    "activityNameRequired": "Название активности обязательно",
+    "assignmentDescriptionRequired": "Описание задания обязательно",
+    "assignmentTitleRequired": "Название задания обязательно",
+    "chapterDescriptionRequired": "Описание главы обязательно",
+    "chapterNameRequired": "Название главы обязательно",
+    "contentRequired": "Содержимое обязательно",
+    "descriptionRequired": "Описание обязательно",
+    "documentNameRequired": "Название документа обязательно",
+    "fieldRequired": "{fieldName} обязательно",
+    "fileRequired": "Пожалуйста, выберите файл",
     "invalidEmail": "Неверный адрес электронной почты",
     "loading": "Загрузка...",
+    "maxLength": "Должно содержать не более {length} символов",
+    "minLength": "Должно содержать не менее {length} символов",
+    "nameRequired": "Имя обязательно",
     "passwordMinLength": "Пароль должен содержать не менее {length} символов",
+    "pdfFileRequired": "Пожалуйста, выберите PDF-файл",
     "required": "Обязательно",
+    "roleRequired": "Роль обязательна",
+    "titleRequired": "Заголовок обязателен",
     "usernameMinLength": "Имя пользователя должно содержать не менее {length} символов",
     "wrongCredentials": "Неверный адрес электронной почты или пароль"
   },

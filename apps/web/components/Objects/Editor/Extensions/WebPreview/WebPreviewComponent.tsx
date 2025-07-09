@@ -374,7 +374,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                       <X
                         size={16}
                         className="mr-1"
-                      />{' '}
+                      />
                       {t('cancel')}
                     </span>
                   </Button>
@@ -386,7 +386,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                       <Save
                         size={16}
                         className="mr-1"
-                      />{' '}
+                      />
                       {t('save')}
                     </span>
                   </Button>

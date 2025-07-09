@@ -23,12 +23,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-const validationSchema = z.object({
-  name: z.string().min(1, 'Activity name is required'),
-  description: z.string().min(1, 'Activity description is required'),
-  dueDate: z.string().optional(),
-  gradingType: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
-});
+const createValidationSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().min(1, t('assignmentTitleRequired')),
+    description: z.string().min(1, t('assignmentDescriptionRequired')),
+    dueDate: z.string().optional(),
+    gradingType: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
+  });
 
 interface FormValues {
   name: string;
@@ -38,11 +39,13 @@ interface FormValues {
 }
 
 function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
+  const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewAssignmentModal');
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0] ?? 'ru';
   const org = useOrg() as any;
   const session = useLHSession() as any;
+  const validationSchema = createValidationSchema(validationT);
 
   // Get the appropriate date-fns locale
   const getDateFnsLocale = (locale: string) => {

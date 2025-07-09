@@ -10,10 +10,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-const validationSchema = z.object({
-  name: z.string().min(1, 'Activity name is required'),
-  description: z.string().min(1, 'Activity description is required'),
-});
+const createValidationSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().min(1, t('activityNameRequired')),
+    description: z.string().min(1, t('activityDescriptionRequired')),
+  });
 
 interface FormValues {
   name: string;
@@ -21,7 +22,9 @@ interface FormValues {
 }
 
 function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
+  const validationT = useTranslations('Validation');
   const t = useTranslations('Components.DynamicCanvaModal');
+  const validationSchema = createValidationSchema(validationT);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),

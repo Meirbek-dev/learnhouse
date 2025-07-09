@@ -50,17 +50,20 @@ interface FormValues {
   grading_type: 'ALPHABET' | 'NUMERIC' | 'PERCENTAGE';
 }
 
-const validationSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
-  due_date: z.string(),
-  grading_type: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
-});
+const createValidationSchema = (t: (key: string) => string) =>
+  z.object({
+    title: z.string().min(1, t('assignmentTitleRequired')),
+    description: z.string().min(1, t('assignmentDescriptionRequired')),
+    due_date: z.string(),
+    grading_type: z.enum(['ALPHABET', 'NUMERIC', 'PERCENTAGE']),
+  });
 
 const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, accessToken }) => {
+  const validationT = useTranslations('Validation');
   const t = useTranslations('Components.EditAssignmentModal');
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0] ?? 'ru';
+  const validationSchema = createValidationSchema(validationT);
 
   // Get the appropriate date-fns locale
   const getDateFnsLocale = (locale: string) => {

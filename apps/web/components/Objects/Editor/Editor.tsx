@@ -258,7 +258,6 @@ function Editor(props: EditorProps) {
                   />
                 </Link>
                 <EditorInfoDocName>
-                  {' '}
                   <b>{props.course.name}</b> <SlashIcon /> {props.activity.name}{' '}
                 </EditorInfoDocName>
               </EditorInfoWrapper>
@@ -309,8 +308,7 @@ function Editor(props: EditorProps) {
                   className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-teal-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-sky-700"
                   onClick={handleContentSave}
                 >
-                  {' '}
-                  {t('save')}{' '}
+                  {t('save')}
                 </div>
                 <ToolTip content={t('preview')}>
                   <Link

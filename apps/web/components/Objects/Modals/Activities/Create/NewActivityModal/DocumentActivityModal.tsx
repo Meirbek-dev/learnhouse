@@ -12,10 +12,11 @@ import { constructAcceptValue } from '@/lib/constants';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
-const validationSchema = z.object({
-  name: z.string().min(1, 'Document name is required'),
-  file: z.instanceof(File, { message: 'Please select a PDF file' }),
-});
+const createValidationSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().min(1, t('documentNameRequired')),
+    file: z.instanceof(File, { message: t('pdfFileRequired') }),
+  });
 
 interface FormValues {
   name: string;
@@ -23,7 +24,9 @@ interface FormValues {
 }
 
 function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
+  const validationT = useTranslations('Validation');
   const t = useTranslations('Components.DocumentPdfModal');
+  const validationSchema = createValidationSchema(validationT);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),

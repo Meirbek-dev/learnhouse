@@ -20,19 +20,22 @@ interface Props {
   alreadyAssignedRole: string;
 }
 
-const validationSchema = z.object({
-  role: z.string().min(1, 'Role is required'),
-});
+const createValidationSchema = (t: (key: string) => string) =>
+  z.object({
+    role: z.string().min(1, t('roleRequired')),
+  });
 
 interface FormValues {
   role: string;
 }
 
 function RolesUpdate(props: Props) {
+  const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
+  const validationSchema = createValidationSchema(validationT);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),
