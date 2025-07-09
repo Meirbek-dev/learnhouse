@@ -423,7 +423,7 @@ async def create_course(
             detail="Organization not found",
         )
 
-    course.course_uuid = str(f"course_{ULID()}")
+    course.course_uuid = f"course_{ULID()}"
     course.creation_date = str(datetime.now())
     course.update_date = str(datetime.now())
 

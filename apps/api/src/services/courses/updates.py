@@ -43,7 +43,7 @@ async def create_update(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "update", db_session)
     # Generate UUID
-    courseupdate_uuid = str(f"courseupdate_{ULID()}")
+    courseupdate_uuid = f"courseupdate_{ULID()}"
 
     update = CourseUpdate(
         **update_object.model_dump(),

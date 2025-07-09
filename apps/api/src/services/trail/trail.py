@@ -36,7 +36,7 @@ async def create_user_trail(
     trail.creation_date = str(datetime.now())
     trail.update_date = str(datetime.now())
     trail.org_id = trail_object.org_id
-    trail.trail_uuid = str(f"trail_{ULID()}")
+    trail.trail_uuid = f"trail_{ULID()}"
 
     # create trail
     db_session.add(trail)

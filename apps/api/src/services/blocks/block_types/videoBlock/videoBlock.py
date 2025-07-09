@@ -44,7 +44,7 @@ async def create_video_block(
         )
 
     # get block id
-    block_uuid = str(f"block_{ULID()}")
+    block_uuid = f"block_{ULID()}"
 
     block_data = await upload_file_and_return_file_object(
         request,

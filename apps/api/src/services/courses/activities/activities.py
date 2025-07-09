@@ -58,7 +58,7 @@ async def create_activity(
     # Create Activity
     activity = Activity(**activity_object.model_dump())
 
-    activity.activity_uuid = str(f"activity_{ULID()}")
+    activity.activity_uuid = f"activity_{ULID()}"
     activity.creation_date = str(datetime.now())
     activity.update_date = str(datetime.now())
     activity.org_id = chapter.org_id

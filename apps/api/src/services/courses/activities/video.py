@@ -102,7 +102,7 @@ async def create_video_activity(
     course = db_session.exec(statement).first()
 
     # generate activity_uuid
-    activity_uuid = str(f"activity_{ULID()}")
+    activity_uuid = f"activity_{ULID()}"
 
     # Validate video file and get format
     video_format = validate_video_file(video_file)
@@ -201,7 +201,7 @@ async def create_external_video_activity(
         )
 
     # generate activity_uuid
-    activity_uuid = str(f"activity_{ULID()}")
+    activity_uuid = f"activity_{ULID()}"
 
     # convert details to dict
     details = orjson.loads(data.details)

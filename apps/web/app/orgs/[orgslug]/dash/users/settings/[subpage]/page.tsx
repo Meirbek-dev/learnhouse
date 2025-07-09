@@ -82,7 +82,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/users`}>
             <div
               className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'users' ? 'border-b-4' : 'opacity-50'
+                params.subpage === 'users' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
               <div className="mx-2 flex items-center space-x-2.5">
@@ -94,7 +94,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/usergroups`}>
             <div
               className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'usergroups' ? 'border-b-4' : 'opacity-50'
+                params.subpage === 'usergroups' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
               <div className="mx-2 flex items-center space-x-2.5">
@@ -106,7 +106,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/signups`}>
             <div
               className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'signups' ? 'border-b-4' : 'opacity-50'
+                params.subpage === 'signups' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
               <div className="mx-2 flex items-center space-x-2.5">
@@ -118,7 +118,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
           <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/users/settings/add`}>
             <div
               className={`border-primary w-fit py-2 text-center transition-all ease-linear ${
-                params.subpage.toString() === 'add' ? 'border-b-4' : 'opacity-50'
+                params.subpage === 'add' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
             >
               <div className="mx-2 flex items-center space-x-2.5">

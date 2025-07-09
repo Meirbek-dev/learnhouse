@@ -48,7 +48,7 @@ async def create_install_instance(request: Request, data: dict, db_session: Sess
     install = Install.model_validate(data)
 
     # complete install instance
-    install.install_uuid = str(f"install_{ULID()}")
+    install.install_uuid = f"install_{ULID()}"
     install.update_date = str(datetime.now())
     install.creation_date = str(datetime.now())
     install.step = 1

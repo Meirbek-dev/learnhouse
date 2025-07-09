@@ -39,7 +39,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/general`}>
               <div
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
-                  params.subpage.toString() === 'general' ? 'border-b-4' : 'opacity-50'
+                  params.subpage === 'general' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >
                 <div className="mx-2 flex items-center space-x-2.5">
@@ -52,7 +52,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/content`}>
               <div
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
-                  params.subpage.toString() === 'content' ? 'border-b-4' : 'opacity-50'
+                  params.subpage === 'content' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >
                 <div className="mx-2 flex items-center space-x-2.5">
@@ -64,7 +64,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/access`}>
               <div
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
-                  params.subpage.toString() === 'access' ? 'border-b-4' : 'opacity-50'
+                  params.subpage === 'access' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >
                 <div className="mx-2 flex items-center space-x-2.5">
@@ -76,7 +76,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/contributors`}>
               <div
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
-                  params.subpage.toString() === 'contributors' ? 'border-b-4' : 'opacity-50'
+                  params.subpage === 'contributors' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >
                 <div className="mx-2 flex items-center space-x-2.5">
