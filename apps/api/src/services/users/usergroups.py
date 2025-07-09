@@ -269,7 +269,13 @@ async def add_users_to_usergroup(
 
     user_ids_array = user_ids.split(",")
 
-    for user_id in user_ids_array:
+    for user_id_str in user_ids_array:
+        try:
+            user_id = int(user_id_str.strip())
+        except ValueError:
+            logging.error(f"Invalid user_id format: {user_id_str}")
+            continue
+
         statement = select(User).where(User.id == user_id)
         user = db_session.exec(statement).first()
 
@@ -331,7 +337,13 @@ async def remove_users_from_usergroup(
 
     user_ids_array = user_ids.split(",")
 
-    for user_id in user_ids_array:
+    for user_id_str in user_ids_array:
+        try:
+            user_id = int(user_id_str.strip())
+        except ValueError:
+            logging.error(f"Invalid user_id format: {user_id_str}")
+            continue
+
         statement = select(UserGroupUser).where(
             UserGroupUser.user_id == user_id, UserGroupUser.usergroup_id == usergroup_id
         )
@@ -382,10 +394,7 @@ async def add_resources_to_usergroup(
         usergroup_resource = db_session.exec(statement).first()
 
         if usergroup_resource:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Resource {resource_uuid} already exists in UserGroup",
-            )
+            logging.error(f"Resource {resource_uuid} already exists in UserGroup")
             continue
 
         # TODO : Find a way to check if resource really exists
