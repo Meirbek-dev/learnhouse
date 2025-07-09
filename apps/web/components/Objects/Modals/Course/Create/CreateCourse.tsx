@@ -3,7 +3,7 @@
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
+import { TagsInput } from '@components/ui/custom/tags-input';
 import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
@@ -33,8 +33,8 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   const validationSchema = z.object({
     name: z.string().min(1, t('schemaNameRequired')).max(100, t('schemaNameMax')),
     description: z.string().max(1000, t('schemaDescriptionMax')).optional().or(z.literal('')),
-    learnings: z.string().optional().or(z.literal('')),
-    tags: z.string().optional().or(z.literal('')),
+    learnings: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
     visibility: z.boolean(),
     thumbnail: z.any().nullable(),
   });
@@ -46,9 +46,9 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
     defaultValues: {
       name: '',
       description: '',
-      learnings: '',
+      learnings: [],
       visibility: true,
-      tags: '',
+      tags: [],
       thumbnail: null,
     },
   });
@@ -76,8 +76,8 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         {
           name: values.name,
           description: values.description,
-          learnings: values.learnings,
-          tags: values.tags,
+          learnings: values.learnings?.join(', ') || '',
+          tags: values.tags?.join(', ') || '',
           visibility: values.visibility,
         },
         values.thumbnail,
@@ -234,11 +234,10 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             <FormItem>
               <FormLabel>{t('labelLearnings')}</FormLabel>
               <FormControl>
-                <FormTagInput
+                <TagsInput
                   placeholder={t('placeholderLearnings')}
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  error={form.formState.errors.learnings?.message}
+                  value={field.value || []}
+                  onValueChange={field.onChange}
                 />
               </FormControl>
               <FormMessage />
@@ -253,11 +252,10 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
             <FormItem>
               <FormLabel>{t('labelTags')}</FormLabel>
               <FormControl>
-                <FormTagInput
+                <TagsInput
                   placeholder={t('placeholderTags')}
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  error={form.formState.errors.tags?.message}
+                  value={field.value || []}
+                  onValueChange={field.onChange}
                 />
               </FormControl>
               <FormMessage />

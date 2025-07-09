@@ -2,7 +2,7 @@
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
+import { TagsInput } from '@components/ui/custom/tags-input';
 import { Checkbox } from '@components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
@@ -60,7 +60,7 @@ const createCourseFormSchema = (t: any) =>
           return false;
         }
       }, t('errors.allLearningItemsMustHaveText')),
-    tags: z.string(),
+    tags: z.array(z.string()),
     public: z.boolean(),
     thumbnail_type: z.enum(['image', 'video', 'both']),
   });
@@ -108,6 +108,23 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
     }
   }, []);
 
+  const initializeTags = useCallback((tags: any): string[] => {
+    if (!tags) return [];
+
+    if (typeof tags === 'string') {
+      return tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
+    }
+
+    if (Array.isArray(tags)) {
+      return tags.filter((tag) => typeof tag === 'string' && tag.trim().length > 0);
+    }
+
+    return [];
+  }, []);
+
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
@@ -115,7 +132,7 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
       description: '',
       about: '',
       learnings: JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]),
-      tags: '',
+      tags: [],
       public: false,
       thumbnail_type: 'image',
     },
@@ -149,7 +166,7 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
         description: courseStructure?.description || '',
         about: courseStructure?.about || '',
         learnings: initializeLearnings(courseStructure?.learnings || ''),
-        tags: courseStructure?.tags || '',
+        tags: initializeTags(courseStructure?.tags || ''),
         public: Boolean(courseStructure?.public),
         thumbnail_type: validThumbnailType,
       };
@@ -158,7 +175,7 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
       reset(newValues);
       setIsFormInitialized(true);
     }
-  }, [courseStructure?.course_uuid, isLoading, isFormInitialized, initializeLearnings, reset]);
+  }, [courseStructure?.course_uuid, isLoading, isFormInitialized, initializeLearnings, initializeTags, reset]);
 
   useEffect(() => {
     if (!isLoading && isDirty) {
@@ -206,6 +223,7 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
           const updatedCourseStructure = {
             ...courseStructureRef.current,
             ...formValues,
+            tags: formValues.tags.join(', '), // Convert array back to string for API
           };
 
           dispatchCourse({ type: 'setCourseStructure', payload: updatedCourseStructure });
@@ -231,7 +249,11 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
 
       try {
         setError('');
-        const updatedCourseStructure = { ...courseStructure, ...data };
+        const updatedCourseStructure = {
+          ...courseStructure,
+          ...data,
+          tags: data.tags.join(', '), // Convert array back to string for API
+        };
 
         mutate(
           `${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
@@ -344,10 +366,10 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
                       <FormItem>
                         <FormLabel>{t('tags.label')}</FormLabel>
                         <FormControl>
-                          <FormTagInput
+                          <TagsInput
                             placeholder={t('tags.placeholder')}
-                            onChange={field.onChange}
-                            value={field.value}
+                            value={field.value || []}
+                            onValueChange={field.onChange}
                           />
                         </FormControl>
                         <FormMessage />
