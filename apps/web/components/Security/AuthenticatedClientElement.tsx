@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 interface AuthenticatedClientElementProps {
   children: ReactNode;
   checkMethod: 'authentication' | 'roles';
-  orgId?: string;
+  orgId?: number;
   ressourceType?: 'collections' | 'courses' | 'activities' | 'users' | 'organizations';
   action?: 'create' | 'update' | 'delete' | 'read';
 }

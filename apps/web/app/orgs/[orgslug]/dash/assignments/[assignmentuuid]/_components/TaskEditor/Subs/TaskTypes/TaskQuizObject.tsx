@@ -41,7 +41,7 @@ interface QuizSubmitSchema {
 
 interface TaskQuizObjectProps {
   view: 'teacher' | 'student' | 'grading';
-  user_id?: string; // Only for read-only view
+  user_id?: number; // Only for read-only view
   assignmentTaskUUID?: string;
 }
 

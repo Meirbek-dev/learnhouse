@@ -35,7 +35,7 @@ export async function getCollectionById(collection_uuid: any, access_token: stri
   return res;
 }
 
-export async function getOrgCollections(org_id: string, access_token?: string, next?: any) {
+export async function getOrgCollections(org_id: number, access_token?: string, next?: any) {
   const result: any = await fetch(
     `${getAPIUrl()}collections/org/${org_id}/page/1/limit/10`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),

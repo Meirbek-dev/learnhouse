@@ -28,7 +28,7 @@ import UserAvatar from '../../UserAvatar';
 
 interface Author {
   user: {
-    id: string;
+    id: number;
     user_uuid: string;
     avatar_image: string;
     first_name: string;

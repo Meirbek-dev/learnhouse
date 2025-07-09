@@ -219,7 +219,7 @@ interface NewAccountBody {
   email: string;
   password: string;
   org_slug: string;
-  org_id: string;
+  org_id: number;
 }
 
 export async function signup(body: NewAccountBody): Promise<Response> {

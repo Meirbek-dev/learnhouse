@@ -384,6 +384,7 @@
       "linkError": "Error linking to group: {error}",
       "linkSuccess": "Successfully linked to group",
       "noUserGroupsAvailable": "No user groups available",
+      "selectUserGroup": "Select user group",
       "unknownError": "Unknown error",
       "userGroupNameLabel": "Group Name"
     },

@@ -38,7 +38,7 @@ const getSessionCache = () => {
 
 interface SessionData {
   user: {
-    id: string;
+    id: number;
     email: string;
     username: string;
     first_name?: string;
@@ -54,7 +54,7 @@ interface SessionData {
 }
 
 interface UserWithTokens {
-  id: string;
+  id: number;
   email: string;
   username: string;
   first_name?: string;

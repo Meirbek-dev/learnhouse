@@ -27,7 +27,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 
 interface UserProfilePopupProps {
   children: ReactNode;
-  userId: string;
+  userId: number;
 }
 
 interface UserData {

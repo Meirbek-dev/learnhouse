@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 export type ContributorStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'INACTIVE';
 
 interface Contributor {
-  user_id: string;
+  user_id: number;
   authorship_status: ContributorStatus;
 }
 

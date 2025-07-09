@@ -6,7 +6,7 @@ import { getResponseMetadata, RequestBodyWithAuthHeader } from '@services/utils/
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
-export async function updatePassword(user_id: string, data: any, access_token: any) {
+export async function updatePassword(user_id: number, data: any, access_token: any) {
   const result: any = await fetch(
     `${getAPIUrl()}users/change_password/${user_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),

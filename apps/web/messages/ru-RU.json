@@ -384,6 +384,7 @@
       "linkError": "Ошибка привязки к группе: {error}",
       "linkSuccess": "Пользователь успешно связан с группой",
       "noUserGroupsAvailable": "Нет доступных групп пользователей",
+      "selectUserGroup": "Выберите группу пользователей",
       "unknownError": "Неизвестная ошибка",
       "userGroupNameLabel": "Название группы"
     },

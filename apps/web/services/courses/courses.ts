@@ -81,7 +81,7 @@ export async function updateCourseThumbnail(course_uuid: any, formData: FormData
   return res;
 }
 
-export async function createNewCourse(org_id: string, course_body: any, thumbnail: any, access_token: any) {
+export async function createNewCourse(org_id: number, course_body: any, thumbnail: any, access_token: any) {
   // Send file thumbnail as form data
   const formData = new FormData();
   formData.append('name', course_body.name);
@@ -123,7 +123,7 @@ export async function getCourseContributors(course_uuid: string, access_token: s
 
 export async function editContributor(
   course_uuid: string,
-  contributor_id: string,
+  contributor_id: number,
   authorship: any,
   authorship_status: any,
   access_token: string | null | undefined,

@@ -76,7 +76,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
         description: description.trim(),
         courses: selectedCourses,
         public: isPublic,
-        org_id: Number(org.id),
+        org_id: org.id,
       };
       await createCollection(collection, session.data?.tokens?.access_token);
       await revalidateTags(['collections'], org.slug);

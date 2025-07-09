@@ -49,7 +49,7 @@ interface SearchUser {
 
 interface Contributor {
   id: string;
-  user_id: string;
+  user_id: number; // just changed from string to number
   authorship: ContributorRole;
   authorship_status: ContributorStatus;
   creation_date: string;
@@ -188,7 +188,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const debouncedSearch = useDebounce(searchQuery, 300);
-  const [selectedContributors, setSelectedContributors] = useState<string[]>([]);
+  const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
   const [masterCheckboxChecked, setMasterCheckboxChecked] = useState(false);
 
   useEffect(() => {
@@ -305,7 +305,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
   };
 
   const updateContributor = async (
-    contributorId: string,
+    contributorId: number,
     data: {
       authorship?: ContributorRole;
       authorship_status?: ContributorStatus;
@@ -370,7 +370,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
     return creator ? [creator, ...otherContributors] : otherContributors;
   };
 
-  const handleContributorSelect = (userId: string) => {
+  const handleContributorSelect = (userId: number) => {
     setSelectedContributors((prev) => {
       if (prev.includes(userId)) {
         return prev.filter((id) => id !== userId);
@@ -548,7 +548,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 width={40}
                                 avatar_url={user.avatar_url}
                                 predefined_avatar={user.avatar_image ? undefined : 'empty'}
-                                userId={user.id.toString()}
+                                userId={user.id}
                                 showProfilePopup
                                 rounded="rounded-full"
                                 backgroundColor="bg-gray-100"

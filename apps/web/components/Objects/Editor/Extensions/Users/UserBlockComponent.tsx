@@ -33,7 +33,7 @@ import type { FormEvent } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 
 interface UserData {
-  id: string;
+  id: number;
   user_uuid: string;
   first_name: string;
   last_name: string;
@@ -88,7 +88,7 @@ function UserBlockComponent(props: any) {
   const { updateAttributes, node } = props;
 
   const fetchUserById = useCallback(
-    async (userId: string) => {
+    async (userId: number) => {
       setIsLoading(true);
       setError(null);
       try {

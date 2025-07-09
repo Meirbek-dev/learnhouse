@@ -22,11 +22,11 @@ interface Course {
   name: string;
   description: string;
   thumbnail_image: string;
-  org_id: string;
+  org_id: number;
   update_date: string;
   authors?: {
     user: {
-      id: string;
+      id: number;
       user_uuid: string;
       avatar_image: string;
       first_name: string;

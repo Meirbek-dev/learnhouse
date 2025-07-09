@@ -26,7 +26,7 @@ interface FileSchema {
 interface TaskFileObjectProps {
   view: 'teacher' | 'student' | 'grading' | 'custom-grading';
   assignmentTaskUUID?: string;
-  user_id?: string;
+  user_id?: number;
 }
 
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: TaskFileObjectProps) {

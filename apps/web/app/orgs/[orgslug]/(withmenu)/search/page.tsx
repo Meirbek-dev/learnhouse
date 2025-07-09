@@ -434,7 +434,7 @@ function SearchPage() {
                                     : ''
                                 }
                                 predefined_avatar={course.authors[0].user.avatar_image ? undefined : 'empty'}
-                                userId={course.authors[0].user.id.toString()}
+                                userId={course.authors[0].user.id}
                                 showProfilePopup={false}
                                 rounded="rounded-full"
                                 backgroundColor="bg-gray-100"
@@ -510,7 +510,7 @@ function SearchPage() {
                             user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : ''
                           }
                           predefined_avatar={user.avatar_image ? undefined : 'empty'}
-                          userId={user.id.toString()}
+                          userId={user.id}
                           showProfilePopup
                           rounded="rounded-full"
                           backgroundColor="bg-gray-100"

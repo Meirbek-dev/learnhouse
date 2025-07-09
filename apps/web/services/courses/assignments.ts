@@ -86,7 +86,7 @@ export async function getAssignmentTaskSubmissionsMe(
 
 export async function getAssignmentTaskSubmissionsUser(
   assignmentTaskUUID: string,
-  user_id: string,
+  user_id: number,
   assignmentUUID: string,
   access_token: string,
 ) {
@@ -186,7 +186,7 @@ export async function submitAssignmentForGrading(assignmentUUID: string, access_
   return res;
 }
 
-export async function deleteUserSubmission(user_id: string, assignmentUUID: string, access_token: string) {
+export async function deleteUserSubmission(user_id: number, assignmentUUID: string, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -195,7 +195,7 @@ export async function deleteUserSubmission(user_id: string, assignmentUUID: stri
   return res;
 }
 
-export async function putUserSubmission(body: any, user_id: string, assignmentUUID: string, access_token: string) {
+export async function putUserSubmission(body: any, user_id: number, assignmentUUID: string, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
@@ -204,7 +204,7 @@ export async function putUserSubmission(body: any, user_id: string, assignmentUU
   return res;
 }
 
-export async function putFinalGrade(user_id: string, assignmentUUID: string, access_token: string) {
+export async function putFinalGrade(user_id: number, assignmentUUID: string, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}/grade`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
@@ -213,7 +213,7 @@ export async function putFinalGrade(user_id: string, assignmentUUID: string, acc
   return res;
 }
 
-export async function getFinalGrade(user_id: string, assignmentUUID: string, access_token: string) {
+export async function getFinalGrade(user_id: number, assignmentUUID: string, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}/grade`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
@@ -222,7 +222,7 @@ export async function getFinalGrade(user_id: string, assignmentUUID: string, acc
   return res;
 }
 
-export async function markActivityAsDoneForUser(user_id: string, assignmentUUID: string, access_token: string) {
+export async function markActivityAsDoneForUser(user_id: number, assignmentUUID: string, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}/done`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),

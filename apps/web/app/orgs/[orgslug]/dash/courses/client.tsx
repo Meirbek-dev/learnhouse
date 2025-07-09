@@ -14,7 +14,7 @@ import { useState } from 'react';
 interface CourseProps {
   orgslug: string;
   courses: any;
-  org_id: string;
+  org_id: number;
 }
 
 function CoursesHome(params: CourseProps) {

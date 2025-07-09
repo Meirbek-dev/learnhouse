@@ -7,7 +7,7 @@ import {
   RequestBodyWithAuthHeader,
 } from '@services/utils/ts/requests';
 
-export async function getUser(user_id: string, access_token?: string) {
+export async function getUser(user_id: number, access_token?: string) {
   const result = await fetch(
     `${getAPIUrl()}users/id/${user_id}`,
     access_token ? RequestBodyWithAuthHeader('GET', null, null, access_token) : RequestBody('GET', null, null),
@@ -25,7 +25,7 @@ export async function getUserByUsername(username: string, access_token?: string)
   return res;
 }
 
-export async function getCoursesByUser(user_id: string, access_token?: string) {
+export async function getCoursesByUser(user_id: number, access_token?: string) {
   const result = await fetch(
     `${getAPIUrl()}users/${user_id}/courses`,
     access_token ? RequestBodyWithAuthHeader('GET', null, null, access_token) : RequestBody('GET', null, null),

@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl';
 interface PropsType {
   collection: any;
   orgslug: string;
-  org_id: string;
+  org_id: number;
 }
 
 const removeCollectionPrefix = (collectionid: string) => {

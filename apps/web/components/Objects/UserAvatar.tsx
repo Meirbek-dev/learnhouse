@@ -20,7 +20,7 @@ interface UserAvatarProps {
   predefined_avatar?: 'ai' | 'empty';
   backgroundColor?: 'bg-white' | 'bg-gray-100';
   showProfilePopup?: boolean;
-  userId?: string;
+  userId?: number;
   username?: string;
 }
 

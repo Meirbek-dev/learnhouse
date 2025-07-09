@@ -14,7 +14,7 @@ interface LandingClassicProps {
   courses: any[];
   collections: any[];
   orgslug: string;
-  org_id: string;
+  org_id: number;
 }
 
 function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassicProps) {
