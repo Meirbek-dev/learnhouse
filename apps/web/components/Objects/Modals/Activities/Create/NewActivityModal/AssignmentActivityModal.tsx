@@ -200,6 +200,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
                 >
                   <Calendar
                     mode="single"
+                    captionLayout="dropdown"
                     selected={field.value ? new Date(field.value) : undefined}
                     onSelect={(date) => {
                       if (date) {

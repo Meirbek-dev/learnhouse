@@ -175,6 +175,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                 >
                   <Calendar
                     mode="single"
+                    captionLayout="dropdown"
                     selected={field.value ? new Date(field.value) : undefined}
                     onSelect={(date) => {
                       if (date) {
