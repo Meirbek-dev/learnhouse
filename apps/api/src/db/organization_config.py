@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal
+from typing import Literal
 
 from sqlalchemy import JSON, BigInteger, Column, ForeignKey
 from sqlmodel import Field
@@ -96,7 +96,7 @@ class OrganizationConfigBase(PydanticStrictBaseModel):
     general: OrgGeneralConfig
     features: OrgFeatureConfig
     cloud: OrgCloudConfig
-    landing: ClassVar[dict] = {}
+    landing: dict = {}
 
 
 class OrganizationConfig(SQLModelStrictBaseModel, table=True):

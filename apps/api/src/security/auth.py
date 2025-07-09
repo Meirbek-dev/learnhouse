@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import ClassVar
 
 import jwt
 from fastapi import Depends, HTTPException, Request, status
