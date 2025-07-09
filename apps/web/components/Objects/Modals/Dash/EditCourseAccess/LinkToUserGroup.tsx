@@ -58,7 +58,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
       <div className="flex flex-row items-center justify-between p-4">
         {usergroups?.length >= 1 && (
           <div className="py-1">
-            <span className="mx-3 rounded-full bg-gray-100 px-3 py-1 font-bold text-gray-400">
+            <span className="ml-0.5 rounded-full bg-gray-100 px-3 py-1 font-bold text-gray-500">
               {t('userGroupNameLabel')}
             </span>
 
@@ -66,7 +66,7 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
               onValueChange={setSelectedUserGroup}
               defaultValue={selectedUserGroup}
             >
-              <SelectTrigger className="w-fit min-w-32">
+              <SelectTrigger className="mx-5 mt-2 w-fit min-w-32">
                 <SelectValue placeholder={t('selectUserGroup')} />
               </SelectTrigger>
               <SelectContent>

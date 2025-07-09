@@ -67,7 +67,7 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal }: any) {
       name: '',
       description: '',
       dueDate: '',
-      gradingType: 'PERCENTAGE',
+      gradingType: 'NUMERIC',
     },
   });
 

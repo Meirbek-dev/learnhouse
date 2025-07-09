@@ -259,7 +259,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
                 className="disabled:cursor-not-allowed"
               >
                 <span className="sr-only">Remove {item} option</span>
-                <RemoveIcon className="hover:stroke-destructive h-3 w-3" />
+                <RemoveIcon className="hover:stroke-destructive h-5 w-5" />
               </button>
             </Badge>
           ))}
