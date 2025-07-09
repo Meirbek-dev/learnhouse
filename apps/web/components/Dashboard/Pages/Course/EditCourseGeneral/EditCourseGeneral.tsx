@@ -1,7 +1,9 @@
 'use client';
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
+import { Checkbox } from '@components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
@@ -9,37 +11,34 @@ import { Textarea } from '@components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { mutate } from 'swr';
+
+import { updateCourse } from '@services/courses/courses';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 import LearningItemsList from './LearningItemsList';
 import ThumbnailUpdate from './ThumbnailUpdate';
 
-interface EditCourseStructureProps {
+const generateId = () => crypto.randomUUID();
+
+interface EditCourseGeneralProps {
   orgslug: string;
   course_uuid?: string;
 }
 
-interface MyCourseFormValues {
-  name: string;
-  description: string;
-  about: string;
-  learnings: string;
-  tags: string;
-  public: boolean;
-  thumbnail_type: 'image' | 'video' | 'both';
-}
-
-const createValidationSchema = (t: (key: string, values?: any) => string) =>
+const createCourseFormSchema = (t: any) =>
   z.object({
     name: z
       .string()
-      .min(1, t('errors.required', { fieldName: t('name.label') }))
+      .min(2, t('errors.required', { fieldName: t('name.label') }))
       .max(100, t('errors.maxLength', { count: 100 })),
     description: z
       .string()
-      .min(1, t('errors.required', { fieldName: t('description.label') }))
+      .min(2, t('errors.required', { fieldName: t('description.label') }))
       .max(1000, t('errors.maxLength', { count: 1000 })),
     about: z.string(),
     learnings: z
@@ -48,134 +47,212 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       .refine((value) => {
         try {
           const learningItems = JSON.parse(value);
-          if (!Array.isArray(learningItems)) {
-            return false;
-          }
-          if (learningItems.length === 0) {
-            return false;
-          }
-          const hasEmptyText = learningItems.some((item: any) => !item.text || item.text.trim() === '');
-          return !hasEmptyText;
+          return Array.isArray(learningItems) && learningItems.length > 0;
         } catch {
           return false;
         }
-      }, t('errors.invalidJsonFormat')),
+      }, t('errors.atLeastOneLearningItem'))
+      .refine((value) => {
+        try {
+          const learningItems = JSON.parse(value);
+          return !learningItems.some((item: any) => !item.text || item.text.trim() === '');
+        } catch {
+          return false;
+        }
+      }, t('errors.allLearningItemsMustHaveText')),
     tags: z.string(),
     public: z.boolean(),
     thumbnail_type: z.enum(['image', 'video', 'both']),
   });
 
-// Initialize learnings as a JSON array if it's not already
-const initializeLearnings = (learnings: any) => {
-  if (!learnings) {
-    return JSON.stringify([{ id: 'initial-learning-item', text: '', emoji: '📝' }]);
-  }
-
-  try {
-    // Check if it's already a valid JSON array
-    const parsed = JSON.parse(learnings);
-    if (Array.isArray(parsed)) {
-      return learnings;
-    }
-
-    // If it's a string but not a JSON array, convert it to a learning item
-    if (typeof learnings === 'string') {
-      return JSON.stringify([
-        {
-          id: 'initial-learning-item',
-          text: learnings,
-          emoji: '📝',
-        },
-      ]);
-    }
-
-    // Default empty array
-    return JSON.stringify([{ id: 'init-learn-item', text: '', emoji: '📝' }]);
-  } catch {
-    // If it's not valid JSON, convert the string to a learning item
-    if (typeof learnings === 'string') {
-      return JSON.stringify([
-        {
-          id: 'init-learn-item-from-string',
-          text: learnings,
-          emoji: '📝',
-        },
-      ]);
-    }
-
-    // Default empty array
-    return JSON.stringify([{ id: 'init-new-learn-item', text: '', emoji: '📝' }]);
-  }
-};
-function EditCourseGeneral(props: EditCourseStructureProps) {
+function EditCourseGeneral(props: EditCourseGeneralProps) {
   const [error, setError] = useState('');
+  const [isFormInitialized, setIsFormInitialized] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const initialValuesRef = useRef<any>(null);
+  const courseStructureRef = useRef<any>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const course = useCourse();
   const dispatchCourse = useCourseDispatch() as any;
   const { isLoading, courseStructure } = course as any;
+  const session = useLHSession() as any;
   const t = useTranslations('CourseEdit.General');
-  const thumbnailType = courseStructure?.thumbnail_type || 'image';
-  const validationSchema = createValidationSchema(t);
 
-  const form = useForm<MyCourseFormValues>({
-    resolver: zodResolver(validationSchema),
+  const courseFormSchema = createCourseFormSchema(t);
+  type CourseFormData = z.infer<typeof courseFormSchema>;
+
+  const initializeLearnings = useCallback((learnings: any): string => {
+    if (!learnings) {
+      return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+    }
+
+    try {
+      const parsed = JSON.parse(learnings);
+      if (Array.isArray(parsed)) {
+        return parsed.length > 0
+          ? JSON.stringify(parsed.map((item: any) => ({ ...item, id: item.id || generateId() })))
+          : JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+      }
+
+      if (typeof learnings === 'string') {
+        return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
+      }
+
+      return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+    } catch {
+      if (typeof learnings === 'string') {
+        return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
+      }
+
+      return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+    }
+  }, []);
+
+  const form = useForm<CourseFormData>({
+    resolver: zodResolver(courseFormSchema),
     defaultValues: {
-      name: courseStructure?.name || '',
-      description: courseStructure?.description || '',
-      about: courseStructure?.about || '',
-      learnings: initializeLearnings(courseStructure?.learnings || ''),
-      tags: courseStructure?.tags || '',
-      public: courseStructure?.public,
-      thumbnail_type: thumbnailType,
+      name: '',
+      description: '',
+      about: '',
+      learnings: JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]),
+      tags: '',
+      public: false,
+      thumbnail_type: 'image',
     },
+    mode: 'onChange',
   });
 
-  const handleSubmit = async (values: MyCourseFormValues) => {
-    try {
-      dispatchCourse({ type: 'setIsSaved' });
-    } catch {
-      setError(t('errors.saveFailed'));
-    }
-  };
+  const {
+    watch,
+    reset,
+    formState: { errors, isDirty },
+  } = form;
 
-  // Reset form when courseStructure changes
+  // Watch all form values at once to prevent multiple rerenders
+  const formValues = watch();
+  const thumbnailType = formValues.thumbnail_type;
+
   useEffect(() => {
-    if (courseStructure && !isLoading) {
-      const newValues = {
+    courseStructureRef.current = courseStructure;
+  }, [courseStructure]);
+
+  useEffect(() => {
+    if (courseStructure && !isLoading && !isFormInitialized) {
+      // Ensure thumbnail_type always has a valid enum value
+      const thumbnailType = courseStructure?.thumbnail_type || 'image';
+      const validThumbnailType = (['image', 'video', 'both'] as const).includes(thumbnailType)
+        ? (thumbnailType as 'image' | 'video' | 'both')
+        : 'image';
+
+      const newValues: CourseFormData = {
         name: courseStructure?.name || '',
         description: courseStructure?.description || '',
         about: courseStructure?.about || '',
         learnings: initializeLearnings(courseStructure?.learnings || ''),
         tags: courseStructure?.tags || '',
-        public: courseStructure?.public,
-        thumbnail_type: thumbnailType,
+        public: Boolean(courseStructure?.public),
+        thumbnail_type: validThumbnailType,
       };
-      form.reset(newValues);
-    }
-  }, [courseStructure, isLoading, thumbnailType, form]);
 
-  const watchedValues = form.watch();
+      initialValuesRef.current = newValues;
+      reset(newValues);
+      setIsFormInitialized(true);
+    }
+  }, [courseStructure?.course_uuid, isLoading, isFormInitialized, initializeLearnings, reset]);
 
   useEffect(() => {
-    if (!isLoading) {
-      const formValues = form.getValues();
-      const defaultValues = form.formState.defaultValues;
-      const valuesChanged = Object.keys(formValues).some(
-        (key) => formValues[key as keyof MyCourseFormValues] !== defaultValues?.[key as keyof MyCourseFormValues],
-      );
+    if (!isLoading && isDirty) {
+      dispatchCourse({ type: 'setIsNotSaved' });
+    }
+  }, [isDirty, isLoading, dispatchCourse]);
 
-      if (valuesChanged) {
-        dispatchCourse({ type: 'setIsNotSaved' });
-        const updatedCourse = {
-          ...courseStructure,
-          ...formValues,
-        };
-        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
+  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
+
+  // Memoized auto-save function
+  const autoSaveCourse = useCallback(
+    async (courseData: any) => {
+      if (!(session?.data?.tokens?.access_token && courseData.course_uuid)) return;
+
+      try {
+        setIsAutoSaving(true);
+        mutate(
+          `${getAPIUrl()}courses/${courseData.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+        );
+        await updateCourse(courseData.course_uuid, courseData, session.data.tokens.access_token);
+        await revalidateTags(['courses'], props.orgslug);
+        dispatchCourse({ type: 'setIsSaved' });
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      } finally {
+        setIsAutoSaving(false);
+      }
+    },
+    [session, withUnpublishedActivities, props.orgslug, dispatchCourse],
+  );
+
+  // Single useEffect for auto-save logic
+  useEffect(() => {
+    if (!isLoading && isFormInitialized && initialValuesRef.current) {
+      const hasChanges = JSON.stringify(formValues) !== JSON.stringify(initialValuesRef.current);
+
+      if (hasChanges && !isAutoSaving) {
+        // Clear existing timeout
+        if (autoSaveTimeoutRef.current) {
+          clearTimeout(autoSaveTimeoutRef.current);
+        }
+
+        // Set new timeout for auto-save
+        autoSaveTimeoutRef.current = setTimeout(() => {
+          const updatedCourseStructure = {
+            ...courseStructureRef.current,
+            ...formValues,
+          };
+
+          dispatchCourse({ type: 'setCourseStructure', payload: updatedCourseStructure });
+          autoSaveCourse(updatedCourseStructure);
+        }, 2000); // 2 second delay
       }
     }
-  }, [watchedValues, isLoading, courseStructure, dispatchCourse, form]);
+  }, [formValues, isLoading, isFormInitialized, dispatchCourse, autoSaveCourse]);
+
+  // Cleanup auto-save timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Form submission handler
+  const onSubmit = useCallback(
+    async (data: CourseFormData) => {
+      if (!(session?.data?.tokens?.access_token && courseStructure?.course_uuid)) return;
+
+      try {
+        setError('');
+        const updatedCourseStructure = { ...courseStructure, ...data };
+
+        mutate(
+          `${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+        );
+        await updateCourse(courseStructure.course_uuid, updatedCourseStructure, session.data.tokens.access_token);
+        await revalidateTags(['courses'], props.orgslug);
+
+        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourseStructure });
+        dispatchCourse({ type: 'setIsSaved' });
+
+        // Update initial values after successful save
+        initialValuesRef.current = data;
+      } catch (error: any) {
+        setError(error?.message || t('errors.saveFailed'));
+      }
+    },
+    [session, courseStructure, withUnpublishedActivities, props.orgslug, dispatchCourse, t],
+  );
 
   if (isLoading || !courseStructure) {
-    return <div>{t('loading')}</div>;
+    return <div className="flex h-64 items-center justify-center">{t('loading')}</div>;
   }
 
   return (
@@ -184,144 +261,159 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       <div className="px-10 pb-10">
         <div className="shadow-xs rounded-xl bg-white">
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="p-6"
-            >
-              {error && (
-                <div className="shadow-xs mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
-                  <AlertTriangle size={18} />
-                  <div className="text-sm font-bold">{error}</div>
-                </div>
-              )}
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="p-6">
+                {error && (
+                  <div className="mb-6 flex items-center rounded-md bg-red-50 p-4 text-red-700">
+                    <AlertTriangle className="mr-2 h-4 w-4" />
+                    {error}
+                  </div>
+                )}
 
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('name.label')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          style={{ backgroundColor: 'white' }}
-                          type="text"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('name.label')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t('name.placeholder')}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('description.label')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          style={{ backgroundColor: 'white' }}
-                          type="text"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('description.label')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t('description.placeholder')}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="about"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('about.label')}</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          style={{ backgroundColor: 'white', height: '200px', minHeight: '200px' }}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="about"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('about.label')}</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="learnings"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('learnings.label')}</FormLabel>
-                      <FormControl>
-                        <LearningItemsList
-                          value={field.value}
-                          onChange={field.onChange}
-                          error={form.formState.errors.learnings?.message}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="learnings"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('learnings.label')}</FormLabel>
+                        <FormControl>
+                          <LearningItemsList
+                            value={field.value}
+                            onChange={field.onChange}
+                            error={errors.learnings?.message}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="tags"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('tags.label')}</FormLabel>
-                      <FormControl>
-                        <FormTagInput
-                          placeholder={t('tags.placeholder')}
-                          onChange={field.onChange}
-                          value={field.value}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="tags"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('tags.label')}</FormLabel>
+                        <FormControl>
+                          <FormTagInput
+                            placeholder={t('tags.placeholder')}
+                            onChange={field.onChange}
+                            value={field.value}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="thumbnail_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('thumbnailType')}</FormLabel>
-                      <FormControl>
+                  <FormField
+                    control={form.control}
+                    name="public"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>{t('public.label')}</FormLabel>
+                          <p className="text-muted-foreground text-sm">{t('public.description')}</p>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="thumbnail_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('thumbnailType')}</FormLabel>
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
                         >
-                          <SelectTrigger className="w-full bg-white">
-                            <SelectValue>
-                              {field.value === 'image'
-                                ? t('image')
-                                : field.value === 'video'
-                                  ? t('video')
-                                  : field.value === 'both'
-                                    ? t('both')
-                                    : t('image')}
-                            </SelectValue>
-                          </SelectTrigger>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue>
+                                {field.value === 'image'
+                                  ? t('image')
+                                  : field.value === 'video'
+                                    ? t('video')
+                                    : field.value === 'both'
+                                      ? t('both')
+                                      : t('image')}
+                              </SelectValue>
+                            </SelectTrigger>
+                          </FormControl>
                           <SelectContent>
                             <SelectItem value="image">{t('image')}</SelectItem>
                             <SelectItem value="video">{t('video')}</SelectItem>
                             <SelectItem value="both">{t('both')}</SelectItem>
                           </SelectContent>
                         </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <div>
-                  <FormLabel>{t('thumbnail.label')}</FormLabel>
-                  <ThumbnailUpdate thumbnailType={form.watch('thumbnail_type')} />
+                  {/* Thumbnail Upload Section */}
+                  <div className="space-y-4">
+                    <FormLabel>{t('thumbnail.label')}</FormLabel>
+                    <ThumbnailUpdate thumbnailType={thumbnailType} />
+                  </div>
                 </div>
               </div>
             </form>
