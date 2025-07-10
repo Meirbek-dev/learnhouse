@@ -22,7 +22,7 @@ const createValidationSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t('nameRequiredError')),
     description: z.string().optional(),
-    org_id: z.coerce.number(),
+    org_id: z.number(),
   });
 
 type UserGroupFormValues = z.infer<ReturnType<typeof createValidationSchema>>;

@@ -16,7 +16,7 @@ import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
 interface NewActivityButtonProps {
-  chapterId: string;
+  chapterId: number;
   orgslug: string;
 }
 
@@ -56,7 +56,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
   };
 
   // Submit File Upload
-  const submitFileActivity = async (file: any, type: any, activity: any, chapterId: string) => {
+  const submitFileActivity = async (file: any, type: any, activity: any, chapterId: number) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
     await createFileActivity(file, type, activity, chapterId, access_token);
     mutate(
@@ -71,7 +71,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
   };
 
   // Submit YouTube Video Upload
-  const submitExternalVideo = async (external_video_data: any, activity: any, _chapterId: string) => {
+  const submitExternalVideo = async (external_video_data: any, activity: any, _chapterId: number) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     await createExternalVideoActivity(external_video_data, activity, props.chapterId, access_token);
     mutate(

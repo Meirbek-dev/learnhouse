@@ -133,7 +133,6 @@ const NavigationButtons = ({
 export default function ActivityNavigation(props: ActivityNavigationProps): ReactNode {
   const t = useTranslations('ActivityPage');
   const router = useRouter();
-  const _isMobile = useIsMobile();
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const bottomNavRef = useRef<HTMLDivElement>(null);
   const [_navWidth, setNavWidth] = useState<number | null>(null);

@@ -45,7 +45,7 @@ export async function getCourseMetadata(course_uuid: string, next: any, access_t
   return res;
 }
 
-export async function updateCourse(course_uuid: any, data: any, access_token: any) {
+export async function updateCourse(course_uuid: string, data: any, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
@@ -54,7 +54,7 @@ export async function updateCourse(course_uuid: any, data: any, access_token: an
   return res;
 }
 
-export async function getCourse(course_uuid: string, next: any, access_token: any) {
+export async function getCourse(course_uuid: string, next: any, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
@@ -63,7 +63,7 @@ export async function getCourse(course_uuid: string, next: any, access_token: an
   return res;
 }
 
-export async function getCourseById(course_id: string, next: any, access_token: any) {
+export async function getCourseById(course_id: string, next: any, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/id/${course_id}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
@@ -72,7 +72,7 @@ export async function getCourseById(course_id: string, next: any, access_token: 
   return res;
 }
 
-export async function updateCourseThumbnail(course_uuid: any, formData: FormData, access_token: any) {
+export async function updateCourseThumbnail(course_uuid: string, formData: FormData, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
@@ -81,7 +81,7 @@ export async function updateCourseThumbnail(course_uuid: any, formData: FormData
   return res;
 }
 
-export async function createNewCourse(org_id: number, course_body: any, thumbnail: any, access_token: any) {
+export async function createNewCourse(org_id: number, course_body: any, thumbnail: any, access_token: string) {
   // Send file thumbnail as form data
   const formData = new FormData();
   formData.append('name', course_body.name);
@@ -103,7 +103,7 @@ export async function createNewCourse(org_id: number, course_body: any, thumbnai
   return res;
 }
 
-export async function deleteCourseFromBackend(course_uuid: any, access_token: any) {
+export async function deleteCourseFromBackend(course_uuid: string, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),

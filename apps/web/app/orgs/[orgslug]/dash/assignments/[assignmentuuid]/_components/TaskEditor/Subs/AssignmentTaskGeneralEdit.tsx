@@ -30,7 +30,7 @@ const createValidationSchema = (t: (key: string) => string) =>
     title: z.string().min(1, t('titleRequired')),
     description: z.string().min(1, t('descriptionRequired')),
     hint: z.string().optional(),
-    max_grade_value: z.coerce.number().min(20, t('gradeValidationError')).max(100, t('gradeValidationError')),
+    max_grade_value: z.number().min(20, t('gradeValidationError')).max(100, t('gradeValidationError')),
   });
 
 type TaskFormData = z.infer<ReturnType<typeof createValidationSchema>>;
@@ -52,6 +52,7 @@ export function AssignmentTaskGeneralEdit() {
       hint: assignmentTaskState.assignmentTask.hint,
       max_grade_value: assignmentTaskState.assignmentTask.max_grade_value,
     },
+    mode: 'onChange',
   });
 
   const handleSubmit = async (values: TaskFormData) => {
@@ -219,26 +220,6 @@ function UpdateTaskRef() {
       assignmentTaskState.assignmentTask.assignment_task_uuid,
       assignmentTaskState.assignmentTask.reference_file,
     );
-  };
-
-  const _deleteReferenceFile = async () => {
-    setIsLoading(true);
-    const res = await updateReferenceFile(
-      '',
-      assignmentTaskState.assignmentTask.assignment_task_uuid,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-    assignmentTaskStateHook({ type: 'reload' });
-    // wait for 1.5 second to show loading animation
-    await new Promise((r) => setTimeout(r, 1500));
-    if (res.success === false) {
-      setError(res.data.detail);
-      setIsLoading(false);
-    } else {
-      setIsLoading(false);
-      setError('');
-    }
   };
 
   const getActivityUI = useCallback(async () => {

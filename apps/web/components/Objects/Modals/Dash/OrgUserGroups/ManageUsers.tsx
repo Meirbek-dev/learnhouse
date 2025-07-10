@@ -12,7 +12,7 @@ import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 
 interface ManageUsersProps {
-  usergroup_id: any;
+  usergroup_id: number;
 }
 
 function ManageUsers(props: ManageUsersProps) {
@@ -27,14 +27,14 @@ function ManageUsers(props: ManageUsersProps) {
     swrFetcher(url, access_token),
   );
 
-  const isUserPartOfGroup = (user_id: any) => {
+  const isUserPartOfGroup = (user_id: number) => {
     if (UGusers) {
       return UGusers.some((user: any) => user.id === user_id);
     }
     return false;
   };
 
-  const handleLinkUser = async (user_id: any) => {
+  const handleLinkUser = async (user_id: number) => {
     const res = await linkUserToUserGroup(props.usergroup_id, user_id, access_token);
     if (res.status === 200) {
       toast.success(t('linkSuccess'));
@@ -44,7 +44,7 @@ function ManageUsers(props: ManageUsersProps) {
     }
   };
 
-  const handleUnlinkUser = async (user_id: any) => {
+  const handleUnlinkUser = async (user_id: number) => {
     const res = await unLinkUserToUserGroup(props.usergroup_id, user_id, access_token);
     if (res.status === 200) {
       toast.success(t('unlinkSuccess'));

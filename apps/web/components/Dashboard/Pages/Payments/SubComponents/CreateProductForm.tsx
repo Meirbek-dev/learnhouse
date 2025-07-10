@@ -22,14 +22,14 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({
     name: z.string().min(1, t('Payments.ProductForm.errors.nameRequired')),
     description: z.string().min(1, t('Payments.ProductForm.errors.descriptionRequired')),
-    amount: z.coerce.number().min(1, t('Payments.ProductForm.errors.amountMin')),
+    amount: z.number().min(1, t('Payments.ProductForm.errors.amountMin')),
     benefits: z.string().optional(),
     currency: z.string().min(1, t('Payments.ProductForm.errors.currencyRequired')),
-    product_type: z.enum(['one_time', 'subscription'], {
-      errorMap: () => ({ message: t('Payments.ProductForm.errors.productTypeRequired') }),
+    product_type: z.enum(['one_time', 'subscription'] as const, {
+      message: t('Payments.ProductForm.errors.productTypeRequired'),
     }),
-    price_type: z.enum(['fixed_price', 'customer_choice'], {
-      errorMap: () => ({ message: t('Payments.ProductForm.errors.priceTypeRequired') }),
+    price_type: z.enum(['fixed_price', 'customer_choice'] as const, {
+      message: t('Payments.ProductForm.errors.priceTypeRequired'),
     }),
   });
 
@@ -62,6 +62,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
       amount: 1,
       currency: 'KZT',
     },
+    mode: 'onChange',
   });
 
   const handleSubmit = async (values: ProductFormValues) => {

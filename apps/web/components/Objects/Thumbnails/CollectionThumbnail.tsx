@@ -78,7 +78,7 @@ const CollectionAdminEditsArea = (props: any) => {
   const router = useRouter();
   const session = useLHSession() as any;
 
-  const deleteCollectionUI = async (collectionId: number) => {
+  const deleteCollectionUI = async (collectionId: string) => {
     await deleteCollection(collectionId, session.data?.tokens?.access_token);
     await revalidateTags(['collections'], props.orgslug);
     // reload the page

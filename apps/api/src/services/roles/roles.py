@@ -37,7 +37,7 @@ async def create_role(
 
 
 async def read_role(
-    request: Request, db_session: Session, role_id: str, current_user: PublicUser
+    request: Request, db_session: Session, role_id: int, current_user: PublicUser
 ):
     statement = select(Role).where(Role.id == role_id)
     result = db_session.exec(statement)
@@ -96,7 +96,7 @@ async def update_role(
 
 
 async def delete_role(
-    request: Request, db_session: Session, role_id: str, current_user: PublicUser
+    request: Request, db_session: Session, role_id: int, current_user: PublicUser
 ) -> str:
     # RBAC check
     await rbac_check(request, current_user, "delete", role_id, db_session)

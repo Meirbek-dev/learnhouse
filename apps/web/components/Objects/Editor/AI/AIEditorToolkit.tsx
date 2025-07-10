@@ -481,7 +481,6 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
 const AiEditorToolButton = (props: any) => {
   const dispatchAIEditor = useAIEditorDispatch() as any;
-  const _aiEditorState = useAIEditor() as AIEditorStateTypes;
   const t = useTranslations('Activities.AIEditorToolkit');
 
   const handleToolButtonClick = async (

@@ -41,7 +41,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
         fieldName: t('DashPage.Payments.ProductPage.editForm.descriptionLabel'),
       }),
     ),
-    amount: z.coerce.number().min(0, t('Components.Form.positiveNumber')),
+    amount: z.number().min(0, t('Components.Form.positiveNumber')),
     benefits: z.string().optional(),
     currency: z.string().min(
       1,
@@ -284,6 +284,7 @@ const EditProductForm = ({
       benefits: product.benefits || '',
       currency: product.currency || '',
     },
+    mode: 'onChange',
   });
 
   const handleSubmit = async (values: EditProductFormData) => {

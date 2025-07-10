@@ -27,7 +27,7 @@ export type OrderPayload =
   | {
       chapter_order_by_ids: [
         {
-          chapter_id: string;
+          chapter_id: number;
           activities_order_by_ids: [
             {
               activity_id: string;

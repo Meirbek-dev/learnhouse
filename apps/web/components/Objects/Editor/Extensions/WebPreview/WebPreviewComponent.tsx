@@ -423,18 +423,18 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                   />
                 )}
                 <div className="pb-2 pt-4">
-                    <span
-                      className="mb-1.5 text-lg font-semibold leading-tight text-[#232323] no-underline hover:no-underline focus:no-underline active:no-underline"
-                      style={{ textDecoration: 'none', borderBottom: 'none' }}
-                    >
-                      {previewData.title}
-                    </span>
-                    <span
-                      className="mb-3 block text-sm leading-snug text-gray-700 no-underline hover:no-underline focus:no-underline active:no-underline"
-                      style={{ textDecoration: 'none', borderBottom: 'none' }}
-                    >
-                      {previewData.description}
-                    </span>
+                  <span
+                    className="mb-1.5 text-lg font-semibold leading-tight text-[#232323] no-underline hover:no-underline focus:no-underline active:no-underline"
+                    style={{ textDecoration: 'none', borderBottom: 'none' }}
+                  >
+                    {previewData.title}
+                  </span>
+                  <span
+                    className="mb-3 block text-sm leading-snug text-gray-700 no-underline hover:no-underline focus:no-underline active:no-underline"
+                    style={{ textDecoration: 'none', borderBottom: 'none' }}
+                  >
+                    {previewData.description}
+                  </span>
                 </div>
               </a>
               <FaviconDisplay

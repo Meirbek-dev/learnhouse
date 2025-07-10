@@ -112,7 +112,6 @@ export const ToolbarButtons = ({ editor, props }: any) => {
     const { from, to } = editor.state.selection;
 
     if (editor.isActive('link')) {
-      const _currentLink = editor.getAttributes('link');
       setShowLinkInput(true);
     } else {
       setShowLinkInput(true);

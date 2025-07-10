@@ -304,8 +304,6 @@ interface AIMessageProps {
 }
 
 function AIMessage(props: AIMessageProps) {
-  const _session = useLHSession() as any;
-
   const words = props.message.message.split(' ');
 
   return (

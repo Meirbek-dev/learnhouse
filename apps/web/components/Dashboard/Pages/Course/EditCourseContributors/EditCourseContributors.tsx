@@ -48,8 +48,8 @@ interface SearchUser {
 }
 
 interface Contributor {
-  id: string;
-  user_id: number; // just changed from string to number
+  id: number;
+  user_id: number;
   authorship: ContributorRole;
   authorship_status: ContributorStatus;
   creation_date: string;
@@ -97,7 +97,7 @@ const RoleDropdown = ({
         className="w-[200px] justify-between"
         disabled={contributor.authorship === 'CREATOR'}
       >
-        {t(contributor.authorship.toLowerCase() as any) || contributor.authorship}
+        {t(contributor.authorship.toLowerCase() as string) || contributor.authorship}
         <ChevronDown className="text-muted-foreground ml-2 h-4 w-4" />
       </Button>
     </DropdownMenuTrigger>
@@ -115,7 +115,7 @@ const RoleDropdown = ({
           }
           className="justify-between"
         >
-          {t(role.toLowerCase() as any)}
+          {t(role.toLowerCase() as string)}
           {contributor.authorship === role && <Check className="ml-2 h-4 w-4" />}
         </DropdownMenuItem>
       ))}
@@ -141,7 +141,7 @@ const StatusDropdown = ({
         className={`w-[200px] justify-between ${getStatusStyle(contributor.authorship_status)}`}
         disabled={contributor.authorship === 'CREATOR'}
       >
-        {t(contributor.authorship_status.toLowerCase() as any) || contributor.authorship_status}
+        {t(contributor.authorship_status.toLowerCase() as string) || contributor.authorship_status}
         <ChevronDown className="ml-2 h-4 w-4" />
       </Button>
     </DropdownMenuTrigger>
@@ -159,7 +159,7 @@ const StatusDropdown = ({
           }
           className="justify-between"
         >
-          {t(status.toLowerCase() as any)}
+          {t(status.toLowerCase() as string)}
           {contributor.authorship_status === status && <Check className="ml-2 h-4 w-4" />}
         </DropdownMenuItem>
       ))}

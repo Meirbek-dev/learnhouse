@@ -15,7 +15,7 @@ import { mutate } from 'swr';
 import Activity from './Activity';
 
 interface ModifiedChapterInterface {
-  chapterId: string;
+  chapterId: number;
   chapterName: string;
 }
 
@@ -28,7 +28,7 @@ function Chapter(props: any) {
   const course = useCourse() as any;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  async function updateChapterName(chapterId: string) {
+  async function updateChapterName(chapterId: number) {
     if (modifiedChapter?.chapterId === chapterId) {
       const modifiedChapterCopy = {
         name: modifiedChapter.chapterName,

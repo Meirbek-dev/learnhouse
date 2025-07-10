@@ -7,7 +7,7 @@ to gracefully handle string-to-enum conversion.
 """
 
 from enum import Enum
-from typing import Any, TypeVar
+from typing import TypeVar
 
 from pydantic import field_validator
 

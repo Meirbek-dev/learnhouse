@@ -23,7 +23,7 @@ interface ChapterElementProps {
 }
 
 interface ModifiedChapterInterface {
-  chapterId: string;
+  chapterId: number;
   chapterName: string;
 }
 
@@ -46,7 +46,7 @@ function ChapterElement(props: ChapterElementProps) {
     router.refresh();
   };
 
-  async function updateChapterName(chapterId: string) {
+  async function updateChapterName(chapterId: number) {
     if (modifiedChapter?.chapterId === chapterId) {
       const modifiedChapterCopy = {
         name: modifiedChapter.chapterName,

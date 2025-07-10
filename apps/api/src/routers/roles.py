@@ -28,7 +28,7 @@ async def api_create_role(
 @router.get("/{role_id}")
 async def api_get_role(
     request: Request,
-    role_id: str,
+    role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> RoleRead:
@@ -54,7 +54,7 @@ async def api_update_role(
 @router.delete("/{role_id}")
 async def api_delete_role(
     request: Request,
-    role_id: str,
+    role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):

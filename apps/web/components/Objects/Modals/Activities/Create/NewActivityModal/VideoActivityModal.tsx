@@ -22,7 +22,7 @@ interface ExternalVideoObject {
   name: string;
   type: string;
   uri: string;
-  chapter_id: string;
+  chapter_id: number;
   details: VideoDetails;
 }
 

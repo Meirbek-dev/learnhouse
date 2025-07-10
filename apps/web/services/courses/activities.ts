@@ -5,7 +5,7 @@ import {
   RequestBodyWithAuthHeader,
 } from '@services/utils/ts/requests';
 
-export async function createActivity(data: any, chapter_id: any, org_id: any, access_token: string) {
+export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
   data.content = {};
   // remove chapter_id from data
   data.chapterId = undefined;
@@ -16,10 +16,16 @@ export async function createActivity(data: any, chapter_id: any, org_id: any, ac
   return result.json();
 }
 
-export async function createFileActivity(file: File, type: string, data: any, chapter_id: any, access_token: string) {
+export async function createFileActivity(
+  file: File,
+  type: string,
+  data: any,
+  chapter_id: number,
+  access_token: string,
+) {
   // Send file thumbnail as form data
   const formData = new FormData();
-  formData.append('chapter_id', chapter_id);
+  formData.append('chapter_id', chapter_id.toString());
   let endpoint = '';
   if (type === 'video') {
     formData.append('name', data.name);
@@ -46,7 +52,7 @@ export async function createFileActivity(file: File, type: string, data: any, ch
   return result.json();
 }
 
-export async function createExternalVideoActivity(data: any, activity: any, chapter_id: any, access_token: string) {
+export async function createExternalVideoActivity(data: any, activity: any, chapter_id: number, access_token: string) {
   // add coursechapter_id to data
   data.chapter_id = chapter_id;
   data.activity_id = activity.id;
@@ -74,7 +80,7 @@ export async function createExternalVideoActivity(data: any, activity: any, chap
   return result.json();
 }
 
-export async function getActivity(activity_uuid: any, next: any, access_token: string) {
+export async function getActivity(activity_uuid: string, next: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
@@ -90,7 +96,7 @@ export async function getActivityByID(activity_id: any, next: any, access_token:
   return result.json();
 }
 
-export async function deleteActivity(activity_uuid: any, access_token: string) {
+export async function deleteActivity(activity_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -99,7 +105,7 @@ export async function deleteActivity(activity_uuid: any, access_token: string) {
 }
 
 export async function getActivityWithAuthHeader(
-  activity_uuid: any,
+  activity_uuid: string,
   next: any,
   access_token: string | null | undefined,
 ) {

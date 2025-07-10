@@ -10,7 +10,6 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 function DashMobileMenu() {
-  const _org = useOrg() as any;
   const session = useLHSession() as any;
   const t = useTranslations('DashboardMenu');
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();

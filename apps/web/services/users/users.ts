@@ -33,11 +33,11 @@ export async function getCoursesByUser(user_id: number, access_token?: string) {
   const res = await getResponseMetadata(result);
   return res;
 }
-export async function updateUserAvatar(user_uuid: any, avatar_file: any, access_token: any) {
+export async function updateUserAvatar(user_id: number, avatar_file: any, access_token: string) {
   const formData = new FormData();
   formData.append('avatar_file', avatar_file);
   const result: any = await fetch(
-    `${getAPIUrl()}users/update_avatar/${user_uuid}`,
+    `${getAPIUrl()}users/update_avatar/${user_id}`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
   const res = await getResponseMetadata(result);

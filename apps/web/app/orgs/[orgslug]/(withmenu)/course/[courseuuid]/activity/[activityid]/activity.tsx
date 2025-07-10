@@ -1278,7 +1278,7 @@ function AssignmentTools(props: {
   };
 
   // Helper function to convert numeric grade to alphabet grade
-  function convertNumericToAlphabet(grade: any, maxGrade: any) {
+  function convertNumericToAlphabet(grade: number, maxGrade: number) {
     const percentage = (grade / maxGrade) * 100;
     if (percentage >= 90) return 'A';
     if (percentage >= 80) return 'B';

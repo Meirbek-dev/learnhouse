@@ -31,7 +31,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
     first_name: z.string().optional(),
     last_name: z.string().optional(),
     org_slug: z.string().optional(),
-    org_id: z.string().optional(),
+    org_id: z.number().optional(),
   });
 
 type SignUpFormData = z.infer<ReturnType<typeof createValidationSchema>>;

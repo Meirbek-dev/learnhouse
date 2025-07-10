@@ -17,7 +17,7 @@ export async function createNewOrganization(body: any, access_token: string) {
   return res;
 }
 
-export async function deleteOrganizationFromBackend(org_id: any, access_token: string) {
+export async function deleteOrganizationFromBackend(org_id: number, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/${org_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -35,7 +35,7 @@ export async function getOrganizationContextInfo(org_slug: any, next: any, acces
   return res;
 }
 
-export async function getOrganizationContextInfoWithId(org_id: any, next: any, access_token: string) {
+export async function getOrganizationContextInfoWithId(org_id: number, next: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/${org_id}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
@@ -67,7 +67,7 @@ export function getOrganizationContextInfoNoAsync(org_slug: any, next: any, acce
   return result;
 }
 
-export async function updateUserRole(org_id: any, user_id: any, role_uuid: any, access_token: string) {
+export async function updateUserRole(org_id: number, user_id: number, role_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/${org_id}/users/${user_id}/role/${role_uuid}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
@@ -76,7 +76,7 @@ export async function updateUserRole(org_id: any, user_id: any, role_uuid: any, 
   return res;
 }
 
-export async function updateOrgLanding(org_id: any, landing_object: any, access_token: string) {
+export async function updateOrgLanding(org_id: number, landing_object: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/${org_id}/landing`,
     RequestBodyWithAuthHeader('PUT', landing_object, null, access_token),
@@ -85,7 +85,7 @@ export async function updateOrgLanding(org_id: any, landing_object: any, access_
   return res;
 }
 
-export async function uploadLandingContent(org_uuid: any, content_file: File, access_token: string) {
+export async function uploadLandingContent(org_uuid: string, content_file: File, access_token: string) {
   const formData = new FormData();
   formData.append('content_file', content_file);
 
@@ -97,7 +97,7 @@ export async function uploadLandingContent(org_uuid: any, content_file: File, ac
   return res;
 }
 
-export async function removeUserFromOrg(org_id: any, user_id: any, access_token: any) {
+export async function removeUserFromOrg(org_id: number, user_id: number, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/${org_id}/users/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -109,7 +109,7 @@ export async function removeUserFromOrg(org_id: any, user_id: any, access_token:
 export async function joinOrg(
   args: {
     org_id: number;
-    user_id: number; // TODO: maybe this should be a string?
+    user_id: number;
     invite_code?: string | null;
   },
   next: any,

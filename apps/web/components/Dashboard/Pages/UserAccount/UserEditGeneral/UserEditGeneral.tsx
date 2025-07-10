@@ -97,6 +97,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       .max(400, t('Form.maxChars', { count: 400 }))
       .optional(),
     details: z.record(
+      z.string(),
       z.object({
         id: z.string(),
         label: z.string(),
@@ -650,12 +651,8 @@ function UserEditGeneral() {
       bio: '',
       details: {},
     },
+    mode: 'onChange',
   });
-
-  // Add a handler to update the state when locale changes
-  const _handleLocaleChange = useCallback((newLocale: Locale) => {
-    setCurrentLocale(newLocale);
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

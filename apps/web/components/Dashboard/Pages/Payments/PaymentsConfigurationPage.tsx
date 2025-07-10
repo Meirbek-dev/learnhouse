@@ -41,7 +41,6 @@ import { z } from 'zod';
 const PaymentsConfigurationPage: FC = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
-  const _router = useRouter();
   const access_token = session?.data?.tokens?.access_token;
   const {
     data: paymentConfigs,

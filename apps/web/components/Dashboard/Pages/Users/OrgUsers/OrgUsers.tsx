@@ -41,7 +41,7 @@ function OrgUsers() {
     setRolesModal(false);
   };
 
-  const handleRemoveUser = async (user_id: any) => {
+  const handleRemoveUser = async (user_id: number) => {
     const toastId = toast.loading(t('removingUser'));
     try {
       const res = await removeUserFromOrg(org.id, user_id, access_token);

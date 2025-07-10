@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, cast
+from typing import cast
 
 from pydantic import ConfigDict, field_validator
 from sqlalchemy import Column, ForeignKey, Integer, TypeDecorator

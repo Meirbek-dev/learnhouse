@@ -59,7 +59,7 @@ function UserEditPassword() {
     const loadingToast = toast.loading(t('updating'));
     try {
       const user_id = session?.data?.user?.id;
-      if (!user_id) {
+      if (!user_id || !access_token) {
         toast.error(t('passwordUpdateError'), { id: loadingToast });
         return;
       }

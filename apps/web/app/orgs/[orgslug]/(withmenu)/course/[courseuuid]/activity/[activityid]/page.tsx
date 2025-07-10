@@ -39,11 +39,6 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const access_token = session?.tokens?.access_token || null;
   const t = await getTranslations('General');
 
-  // Get Org context information
-  const _org = await getOrganizationContextInfo(orgslug, {
-    revalidate: 1800,
-    tags: ['organizations'],
-  });
   const course_meta = await fetchCourseMetadata(courseuuid, access_token);
   const activity = await getActivityWithAuthHeader(
     activityid,

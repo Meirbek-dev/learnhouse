@@ -284,7 +284,6 @@ const UpdatesListView = () => {
 const DeleteUpdateButton = ({ update }: any) => {
   const session = useLHSession() as any;
   const course = useCourse() as any;
-  const _org = useOrg() as any;
   const t = useTranslations('Courses.CourseUpdates');
 
   const handleDelete = async () => {

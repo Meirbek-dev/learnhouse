@@ -15,7 +15,6 @@ import { useEffect } from 'react';
 function AssignmentStudentActivity() {
   const t = useTranslations('Activities.AssignmentStudentActivity');
   const assignments = useAssignments() as any;
-  const _course = useCourse() as any;
   const org = useOrg() as any;
 
   useEffect(() => {}, [assignments, org]);

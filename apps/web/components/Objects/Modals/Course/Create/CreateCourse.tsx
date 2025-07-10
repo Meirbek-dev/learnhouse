@@ -26,7 +26,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   const t = useTranslations('Components.CreateCourseModal');
   const router = useRouter();
   const session = useLHSession() as any;
-  const [orgId, setOrgId] = useState(null) as any;
+  const [orgId, setOrgId] = useState<number | null>(null);
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -68,6 +68,10 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   }, [orgslug, getOrgMetadata]);
 
   const onSubmit = async (values: FormValues) => {
+    if (orgId == null) {
+      toast.error(t('toastErrorOrgMissing'));
+      return;
+    }
     const toast_loading = toast.loading(t('toastLoading'));
 
     try {

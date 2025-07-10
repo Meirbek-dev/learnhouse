@@ -7,7 +7,7 @@ import { getAPIUrl } from '../config/config';
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
-export async function deleteCollection(collection_uuid: any, access_token: any) {
+export async function deleteCollection(collection_uuid: string, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}collections/${collection_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -17,7 +17,7 @@ export async function deleteCollection(collection_uuid: any, access_token: any) 
 }
 
 // Create a new collection
-export async function createCollection(collection: any, access_token: any) {
+export async function createCollection(collection: any, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}collections/`,
     RequestBodyWithAuthHeader('POST', collection, null, access_token),
@@ -26,7 +26,7 @@ export async function createCollection(collection: any, access_token: any) {
   return res;
 }
 
-export async function getCollectionById(collection_uuid: any, access_token: string, next: any) {
+export async function getCollectionById(collection_uuid: string, access_token: string, next: any) {
   const result: any = await fetch(
     `${getAPIUrl()}collections/collection_${collection_uuid}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),

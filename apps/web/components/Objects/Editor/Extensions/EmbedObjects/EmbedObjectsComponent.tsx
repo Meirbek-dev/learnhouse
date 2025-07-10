@@ -177,7 +177,6 @@ function EmbedObjectsComponent(props: any) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorState = useEditorProvider() as any;
   const { isEditable } = editorState;
-  const _router = useRouter();
 
   // Add ResizeObserver to track parent container size changes
   useEffect(() => {
@@ -313,11 +312,6 @@ function EmbedObjectsComponent(props: any) {
     }
   }, [embedCode, embedType]);
 
-  const _handleEmbedTypeChange = (type: 'url' | 'code') => {
-    setEmbedType(type);
-    props.updateAttributes({ embedType: type });
-  };
-
   const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = event.target.value;
     const trimmedUrl = newUrl.trim();
@@ -427,10 +421,6 @@ function EmbedObjectsComponent(props: any) {
     const newAlignment = alignment === 'center' ? 'left' : 'center';
     setAlignment(newAlignment);
     props.updateAttributes({ alignment: newAlignment });
-  };
-
-  const _handleProductClick = (guide: string) => {
-    window.open(guide, '_blank', 'noopener,noreferrer');
   };
 
   // Calculate responsive styles based on parent width
