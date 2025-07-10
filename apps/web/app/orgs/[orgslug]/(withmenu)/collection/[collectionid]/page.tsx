@@ -9,7 +9,7 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';
 
 interface MetadataProps {
-  params: Promise<{ orgslug: string; courseid: string; collectionid: string }>;
+  params: Promise<{ orgslug: string; courseid: number; collectionid: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 

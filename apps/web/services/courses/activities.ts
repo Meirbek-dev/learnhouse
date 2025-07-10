@@ -88,7 +88,7 @@ export async function getActivity(activity_uuid: string, next: any, access_token
   return result.json();
 }
 
-export async function getActivityByID(activity_id: any, next: any, access_token: string) {
+export async function getActivityByID(activity_id: number, next: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/id/${activity_id}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),

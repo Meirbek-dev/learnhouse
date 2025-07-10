@@ -31,7 +31,7 @@ interface Author {
 
 interface CourseRun {
   status: string;
-  course_id: string;
+  course_id: number;
 }
 
 interface Course {

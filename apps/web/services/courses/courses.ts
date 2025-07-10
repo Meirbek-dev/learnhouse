@@ -63,7 +63,7 @@ export async function getCourse(course_uuid: string, next: any, access_token: st
   return res;
 }
 
-export async function getCourseById(course_id: string, next: any, access_token: string) {
+export async function getCourseById(course_id: number, next: any, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/id/${course_id}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),

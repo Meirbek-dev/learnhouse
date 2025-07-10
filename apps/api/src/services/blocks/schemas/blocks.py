@@ -8,6 +8,6 @@ BlockType = Literal["quizBlock", "videoBlock", "pdfBlock", "imageBlock"]
 class Block(PydanticStrictBaseModel):
     block_id: str
     activity_id: int
-    course_id: str
+    course_id: int
     org_id: number
     block_type: BlockType

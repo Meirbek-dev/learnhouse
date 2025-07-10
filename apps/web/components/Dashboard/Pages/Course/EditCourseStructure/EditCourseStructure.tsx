@@ -30,7 +30,7 @@ export type OrderPayload =
           chapter_id: number;
           activities_order_by_ids: [
             {
-              activity_id: string;
+              activity_id: number;
             },
           ];
         },

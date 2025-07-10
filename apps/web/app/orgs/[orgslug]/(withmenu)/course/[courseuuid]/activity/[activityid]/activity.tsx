@@ -297,7 +297,7 @@ function ActivityClient(props: ActivityClientProps) {
     }
   }, [isFocusMode]);
 
-  function getChapterNameByActivityId(course: any, activity_id: any) {
+  function getChapterNameByActivityId(course: any, activity_id: number) {
     for (let i = 0; i < course.chapters.length; i++) {
       const chapter = course.chapters[i];
       for (let j = 0; j < chapter.activities.length; j++) {

@@ -114,7 +114,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
     }
   };
 
-  const isLinked = (courseId: string): boolean => {
+  const isLinked = (courseId: number): boolean => {
     return !!linkedCoursesData?.data?.some((course: any) => course.id === courseId);
   };
 

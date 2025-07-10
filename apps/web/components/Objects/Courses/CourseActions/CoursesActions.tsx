@@ -22,9 +22,9 @@ import CoursePaidOptions from './CoursePaidOptions';
 
 interface CourseRun {
   status: string;
-  course_id: string;
+  course_id: number;
   steps: {
-    activity_id: string;
+    activity_id: number;
     complete: boolean;
   }[];
 }
