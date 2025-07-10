@@ -4,14 +4,14 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { NodeViewWrapper } from '@tiptap/react';
-import { AlertTriangle, Download, FileText } from 'lucide-react';
+import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
 import { constructAcceptValue } from '@/lib/constants';
-
 import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf';
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
@@ -23,11 +23,12 @@ function PDFBlockComponent(props: any) {
   const [pdf, setPDF] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const fileId = blockObject ? `${blockObject.content.file_id}.${blockObject.content.file_format}` : null;
   const editorState = useEditorProvider() as any;
   const { isEditable } = editorState;
 
-  const handlePDFChange = (event: ChangeEvent<any>) => {
+  const handlePDFChange = (event: React.ChangeEvent<any>) => {
     setPDF(event.target.files[0]);
   };
 
@@ -61,71 +62,105 @@ function PDFBlockComponent(props: any) {
     link.setAttribute('download', '');
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
-    document.body.append(link);
+    document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  const handleExpand = () => {
+    setIsModalOpen(true);
+  };
+
+  const pdfUrl = blockObject
+    ? getActivityBlockMediaDirectory(
+        org?.org_uuid,
+        course?.courseStructure.course_uuid,
+        props.extension.options.activity.activity_uuid,
+        blockObject.block_uuid,
+        fileId || '',
+        'pdfBlock',
+      )
+    : null;
+
   useEffect(() => {}, [course, org]);
 
   return (
-    <NodeViewWrapper className="block-pdf">
-      <FileUploadBlock
-        isEditable={isEditable}
-        isLoading={isLoading}
-        isEmpty={!blockObject}
-        Icon={FileText}
-      >
-        <FileUploadBlockInput
-          onChange={handlePDFChange}
-          accept={SUPPORTED_FILES}
-        />
-        <FileUploadBlockButton
-          onClick={handleSubmit}
-          disabled={!pdf}
-        />
-      </FileUploadBlock>
-
-      {blockObject && (
-        <BlockPDF>
-          <div className="relative">
-            <iframe
-              className="h-96 w-full rounded-lg bg-black object-scale-down shadow-sm"
-              title="PDF Document Viewer"
-              src={
-                blockObject && fileId && blockObject.block_uuid
-                  ? getActivityBlockMediaDirectory(
-                      org?.org_uuid || '',
-                      course?.courseStructure.course_uuid || '',
-                      props.extension.options.activity.activity_uuid || '',
-                      blockObject.block_uuid || '',
-                      fileId,
-                      'pdfBlock',
-                    )
-                  : ''
-              }
-            />
-            {!isEditable && (
-              <button
-                onClick={handleDownload}
-                className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                title="Download PDF"
-              >
-                <Download className="h-4 w-4 text-white" />
-              </button>
-            )}
-          </div>
-        </BlockPDF>
-      )}
-      {isLoading && (
-        <div>
-          <AlertTriangle
-            color="#e1e0e0"
-            size={50}
+    <>
+      <NodeViewWrapper className="block-pdf">
+        <FileUploadBlock
+          isEditable={isEditable}
+          isLoading={isLoading}
+          isEmpty={!blockObject}
+          Icon={FileText}
+        >
+          <FileUploadBlockInput
+            onChange={handlePDFChange}
+            accept={SUPPORTED_FILES}
           />
-        </div>
+          <FileUploadBlockButton
+            onClick={handleSubmit}
+            disabled={!pdf}
+          />
+        </FileUploadBlock>
+
+        {blockObject && (
+          <BlockPDF>
+            <div className="relative">
+              <iframe
+                className="h-96 w-full rounded-lg bg-black object-scale-down shadow-sm"
+                src={pdfUrl || ''}
+                title="PDF Document Viewer"
+              />
+              <div className="absolute right-2 top-2 flex gap-1">
+                <button
+                  onClick={handleExpand}
+                  className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                  title="Expand PDF"
+                >
+                  <Expand className="h-4 w-4 text-white" />
+                </button>
+                {!isEditable && (
+                  <button
+                    onClick={handleDownload}
+                    className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                    title="Download PDF"
+                  >
+                    <Download className="h-4 w-4 text-white" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </BlockPDF>
+        )}
+        {isLoading && (
+          <div>
+            <AlertTriangle
+              color="#e1e0e0"
+              size={50}
+            />
+          </div>
+        )}
+      </NodeViewWrapper>
+
+      {blockObject && pdfUrl && (
+        <Modal
+          isDialogOpen={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          dialogTitle="PDF Document"
+          minWidth="xl"
+          minHeight="xl"
+          dialogContent={
+            <div className="h-[80vh] w-full">
+              <iframe
+                className="h-full w-full rounded-lg border shadow-lg"
+                src={pdfUrl}
+                title="PDF Document"
+              />
+            </div>
+          }
+        />
       )}
-    </NodeViewWrapper>
+    </>
   );
 }
 

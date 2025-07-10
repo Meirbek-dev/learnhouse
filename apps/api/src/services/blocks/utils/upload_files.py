@@ -16,7 +16,7 @@ async def upload_file_and_return_file_object(
     course_uuid: str,
 ):
     # get file id
-    file_id = ULID()
+    file_id = str(ULID())
 
     # get file format
     file_format = file.filename.split(".")[-1]

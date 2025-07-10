@@ -54,7 +54,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
           onValueChange([...value, val]);
         }
       },
-      [value],
+      [value, onValueChange, parseMaxItems],
     );
 
     const RemoveValue = React.useCallback(
@@ -63,7 +63,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
           onValueChange(value.filter((item) => item !== val));
         }
       },
-      [value],
+      [value, onValueChange, parseMinItems],
     );
 
     const handlePaste = React.useCallback(
@@ -80,7 +80,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
         onValueChange(newValue);
         setInputValue('');
       },
-      [value],
+      [value, onValueChange, parseMaxItems],
     );
 
     const handleSelect = React.useCallback(
@@ -110,7 +110,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
         }
       };
       VerifyDisable();
-    }, [value]);
+    }, [value, parseMinItems, parseMaxItems]);
 
     // ? check: Under build , default option support
     // * support : for the uncontrolled && controlled ui
@@ -148,10 +148,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               if (value.length > 0 && activeIndex !== -1) {
                 moveNext();
               }
-            } else {
-              if (value.length > 0 && target.selectionStart === 0) {
-                movePrev();
-              }
+            } else if (value.length > 0 && target.selectionStart === 0) {
+              movePrev();
             }
             break;
 
@@ -160,10 +158,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               if (value.length > 0 && target.selectionStart === 0) {
                 movePrev();
               }
-            } else {
-              if (value.length > 0 && activeIndex !== -1) {
-                moveNext();
-              }
+            } else if (value.length > 0 && activeIndex !== -1) {
+              moveNext();
             }
             break;
 
@@ -176,23 +172,22 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
                   RemoveValue(tag);
                 }
                 moveCurrent();
-              } else {
-                if (target.selectionStart === 0) {
-                  if (selectedValue === inputValue || isValueSelected) {
-                    const lastTag = value[value.length - 1];
-                    if (typeof lastTag === 'string') {
-                      RemoveValue(lastTag);
-                    }
+              } else if (target.selectionStart === 0) {
+                if (selectedValue === inputValue || isValueSelected) {
+                  const lastTag = value[value.length - 1];
+                  if (typeof lastTag === 'string') {
+                    RemoveValue(lastTag);
                   }
                 }
               }
             }
             break;
 
-          case 'Escape':
+          case 'Escape': {
             const newIndex = activeIndex === -1 ? value.length - 1 : -1;
             setActiveIndex(newIndex);
             break;
+          }
 
           case 'Enter':
             if (inputValue.trim() !== '') {
@@ -203,7 +198,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             break;
         }
       },
-      [activeIndex, value, inputValue, RemoveValue],
+      [activeIndex, value, inputValue, RemoveValue, dir, selectedValue, isValueSelected, onValueChangeHandler],
     );
 
     const mousePreventDefault = React.useCallback((e: React.MouseEvent) => {

@@ -101,17 +101,16 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
           </div>
 
           <div className="py-0.5">
-            {props.course.chapters.map((chapter: any) => (
+            {props.course.chapters.map((chapter: any, index: number) => (
               <div
                 key={chapter.id}
                 className="mb-1"
               >
                 <div className="flex items-center border-y border-gray-100 bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-600">
                   <div className="flex items-center space-x-1.5">
-                    <Folder
-                      size={14}
-                      className="text-gray-400"
-                    />
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full bg-gray-500 text-[10px] font-bold text-white">
+                      {index + 1}
+                    </div>
                     <span>{chapter.name}</span>
                   </div>
                 </div>

@@ -207,6 +207,8 @@ const CourseClient = (props: any) => {
                           )}
                           className="h-auto w-full rounded-lg bg-black object-contain"
                           controls
+                          autoPlay
+                          muted
                           preload="metadata"
                           playsInline
                         />

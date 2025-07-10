@@ -9,6 +9,7 @@ import { NodeViewWrapper } from '@tiptap/react';
 import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface EditorContext {
   isEditable: boolean;
@@ -131,6 +132,16 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
         const res = await getUrlPreview(url);
         if (!res) throw new Error(t('errorFetchingPreview'));
         const data = res;
+
+        // Check if metadata is insufficient (only has basic fields like favicon/url but no title/description)
+        const hasMinimalMetadata = !(data.title || data.description || data.og_image);
+
+        if (hasMinimalMetadata) {
+          toast.error('Unable to get metadata from this website. The preview card may appear incomplete.', {
+            duration: 4000,
+          });
+        }
+
         updateAttributes({ ...data, url });
         setEditing(false);
       } catch (error: any) {
@@ -146,7 +157,8 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
     if (node.attrs.url && !hasPreview) {
       fetchPreview(node.attrs.url);
     }
-  }, [node.attrs.url, hasPreview, fetchPreview]);
+    // eslint-disable-next-line
+  }, []);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -411,18 +423,18 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                   />
                 )}
                 <div className="pb-2 pt-4">
-                  <span
-                    className="mb-1.5 text-lg font-semibold leading-tight text-[#232323] no-underline hover:no-underline focus:no-underline active:no-underline"
-                    style={{ textDecoration: 'none', borderBottom: 'none' }}
-                  >
-                    {previewData.title}
-                  </span>
-                  <span
-                    className="mb-3 block text-sm leading-snug text-gray-700 no-underline hover:no-underline focus:no-underline active:no-underline"
-                    style={{ textDecoration: 'none', borderBottom: 'none' }}
-                  >
-                    {previewData.description}
-                  </span>
+                    <span
+                      className="mb-1.5 text-lg font-semibold leading-tight text-[#232323] no-underline hover:no-underline focus:no-underline active:no-underline"
+                      style={{ textDecoration: 'none', borderBottom: 'none' }}
+                    >
+                      {previewData.title}
+                    </span>
+                    <span
+                      className="mb-3 block text-sm leading-snug text-gray-700 no-underline hover:no-underline focus:no-underline active:no-underline"
+                      style={{ textDecoration: 'none', borderBottom: 'none' }}
+                    >
+                      {previewData.description}
+                    </span>
                 </div>
               </a>
               <FaviconDisplay

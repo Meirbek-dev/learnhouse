@@ -31,44 +31,49 @@ async def signWithGoogle(
     email: str,
     org_id: int | None = None,
     current_user=Depends(get_current_user),
-    db_session=Depends(get_db_session),
+    db_session: Session = Depends(get_db_session),
 ):
     # Google
     google_user = await get_google_user_info(access_token)
 
-    user = db_session.exec(
-        select(User).where(User.email == google_user["email"])
-    ).first()
+    # Use Google email with fallback to parameter email
+    user_email = google_user.get("email", email)
+
+    # Validate we have a valid email
+    if not user_email:
+        raise HTTPException(
+            status_code=400, detail="No email address available from Google or request"
+        )
+
+    user = db_session.exec(select(User).where(User.email == user_email)).first()
 
     if not user:
-        # Safely extract user data with fallbacks for missing fields
+        # Extract user data with safe defaults
         given_name = google_user.get("given_name", "")
         family_name = google_user.get("family_name", "")
-        email = google_user.get("email", "")
         picture = google_user.get("picture", "")
 
-        # Create a safe username from ASCII chars only, fallback to email prefix
-        safe_given = "".join(c for c in given_name if c.isalnum())
-        safe_family = "".join(c for c in family_name if c.isalnum())
+        # Generate username more robustly
+        username_parts = []
+        if given_name:
+            username_parts.append(given_name)
+        if family_name:
+            username_parts.append(family_name)
 
-        if safe_given or safe_family:
-            username = safe_given + safe_family + str(random.randint(10, 999))
-        else:
-            # Fallback to email prefix if names contain no ASCII chars
-            email_prefix = email.split("@")[0]
-            safe_prefix = "".join(c for c in email_prefix if c.isalnum())[:10]
-            username = safe_prefix + str(random.randint(10, 999))
+        # If no name parts available, use part of email
+        if not username_parts and user_email and "@" in user_email:
+            email_prefix = user_email.split("@")[0]
+            if email_prefix:  # Make sure it's not empty
+                username_parts.append(email_prefix)
 
-        # Ensure username is unique
-        existing_username = db_session.exec(
-            select(User).where(User.username == username)
-        ).first()
+        # If still no parts, use a default
+        if not username_parts:
+            username_parts.append("user")
 
-        if existing_username:
-            username = username + str(random.randint(1000, 9999))
+        username = "".join(username_parts) + str(random.randint(10, 999))
 
         user_object = UserCreate(
-            email=email,
+            email=user_email,
             username=username,
             password="",
             first_name=given_name,

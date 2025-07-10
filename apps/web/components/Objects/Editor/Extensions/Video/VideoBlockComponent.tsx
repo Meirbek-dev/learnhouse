@@ -9,8 +9,8 @@ import { getActivityBlockMediaDirectory } from '@services/media/media';
 import type { Node } from '@tiptap/core';
 import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
 import type ArtplayerType from 'artplayer';
-import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, ArrowLeftRight, CheckCircle2, Download, Loader2, Upload, Video, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Video, Upload, X, ArrowLeftRight, CheckCircle2, AlertCircle, Download, Expand } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { ChangeEvent, DragEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -19,6 +19,7 @@ import { constructAcceptValue } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4']);
 
@@ -155,6 +156,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [blockObject, setBlockObject] = useState<VideoBlockObject | null>(initialBlockObject || null);
   const [selectedSize, setSelectedSize] = useState<VideoSize>(initialBlockObject?.size || 'medium');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Update block object when size changes
   useEffect(() => {
@@ -283,69 +285,102 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     link.setAttribute('download', '');
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
-    document.body.append(link);
+    document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleExpand = () => {
+    setIsModalOpen(true);
   };
 
   // If we're in preview mode and have a video, show only the video player
   if (!isEditable && blockObject && videoUrl) {
     const { width } = VIDEO_SIZES[blockObject.size];
     return (
-      <NodeViewWrapper className="block-video w-full">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="relative flex w-full justify-center"
-        >
-          <div
-            style={{
-              maxWidth: typeof width === 'number' ? width : '100%',
-              width: '100%',
-            }}
+      <>
+        <NodeViewWrapper className="block-video w-full">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="relative flex w-full justify-center"
           >
-            <div className="relative">
-              <ArtPlayer
-                option={{
-                  url: videoUrl,
-                  muted: false,
-                  autoplay: false,
-                  lang: locale,
-                  pip: true,
-                }}
-                subtitle={{
-                  url: `/subtitle.${locale}.srt`,
-                  type: 'srt',
-                  style: {
-                    color: '#ffffff',
-                    fontSize: '2rem',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    textAlign: 'center',
-                  },
-                  encoding: 'utf8',
-                }}
-                locale={locale}
-                subtitleEntries={subtitleEntries}
-                className="aspect-video w-full rounded-lg shadow-sm"
-                onPlayerReady={(art: ArtplayerType) => {}}
-              />
-              <button
-                onClick={handleDownload}
-                className="absolute right-2 top-2 rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                title="Download video"
-              >
-                <Download className="h-4 w-4 text-white" />
-              </button>
+            <div
+              style={{
+                maxWidth: typeof width === 'number' ? width : '100%',
+                width: '100%',
+              }}
+            >
+              <div className="relative">
+                <ArtPlayer
+                  option={{
+                    url: videoUrl,
+                    muted: false,
+                    autoplay: false,
+                    lang: locale,
+                    pip: true,
+                  }}
+                  subtitle={{
+                    url: `/subtitle.${locale}.srt`,
+                    type: 'srt',
+                    style: {
+                      color: '#ffffff',
+                      fontSize: '2rem',
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      textAlign: 'center',
+                    },
+                    encoding: 'utf8',
+                  }}
+                  locale={locale}
+                  subtitleEntries={subtitleEntries}
+                  className="aspect-video w-full rounded-lg shadow-sm"
+                  onPlayerReady={(art: ArtplayerType) => {}}
+                />
+                <div className="absolute right-2 top-2 flex gap-1">
+                  <button
+                    onClick={handleExpand}
+                    className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                    title="Expand video"
+                  >
+                    <Expand className="h-4 w-4 text-white" />
+                  </button>
+                  <button
+                    onClick={handleDownload}
+                    className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                    title="Download video"
+                  >
+                    <Download className="h-4 w-4 text-white" />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </NodeViewWrapper>
+          </motion.div>
+        </NodeViewWrapper>
+
+        <Modal
+          isDialogOpen={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          dialogTitle="Video Player"
+          minWidth="lg"
+          minHeight="lg"
+          dialogContent={
+            <div className="w-full">
+              <video
+                controls
+                autoPlay
+                className="aspect-video w-full rounded-lg bg-black object-contain shadow-lg"
+                src={videoUrl}
+              />
+            </div>
+          }
+        />
+      </>
     );
   }
 
   // If we're in preview mode but don't have a video, show nothing
-  if (!(isEditable || (blockObject && videoUrl))) {
+  if (!isEditable && !(blockObject && videoUrl)) {
     return null;
   }
 
@@ -466,7 +501,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {selectedSize === size && <CheckCircle2 size={14} />}
+                    {size === selectedSize && <CheckCircle2 size={14} />}
                     {t(VIDEO_SIZES[size].label)}
                   </SizeButton>
                 ))}
@@ -523,12 +558,48 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                       )}
                       onPlayerReady={(art: ArtplayerType) => {}}
                     />
+                    <div className="absolute right-2 top-2 flex gap-1">
+                      <button
+                        onClick={handleExpand}
+                        className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                        title="Expand video"
+                      >
+                        <Expand className="h-4 w-4 text-white" />
+                      </button>
+                      <button
+                        onClick={handleDownload}
+                        className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
+                        title="Download video"
+                      >
+                        <Download className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </VideoContainer>
             </motion.div>
           )}
         </VideoWrapper>
+
+        {blockObject && videoUrl && (
+          <Modal
+            isDialogOpen={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            dialogTitle="Video Player"
+            minWidth="lg"
+            minHeight="lg"
+            dialogContent={
+              <div className="w-full">
+                <video
+                  controls
+                  autoPlay
+                  className="aspect-video w-full rounded-lg bg-black object-contain shadow-lg"
+                  src={videoUrl}
+                />
+              </div>
+            }
+          />
+        )}
       </motion.div>
     </NodeViewWrapper>
   );

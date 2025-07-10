@@ -90,7 +90,7 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
       const parsed = JSON.parse(learnings);
       if (Array.isArray(parsed)) {
         return parsed.length > 0
-          ? JSON.stringify(parsed.map((item: any) => ({ ...item, id: item.id || generateId() })))
+          ? JSON.stringify(parsed.map((item: any) => Object.assign(item, { id: item.id || generateId() })))
           : JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
       }
 
