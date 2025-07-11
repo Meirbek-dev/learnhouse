@@ -5,21 +5,20 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import type { Node } from '@tiptap/core';
 import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
 import type ArtplayerType from 'artplayer';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Video, Upload, X, ArrowLeftRight, CheckCircle2, AlertCircle, Download, Expand } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, ArrowLeftRight, CheckCircle2, Download, Expand, Loader2, Upload, Video, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { ChangeEvent, DragEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { styled } from 'styled-components';
 import { constructAcceptValue } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-
 import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4']);
 
@@ -380,7 +379,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   }
 
   // If we're in preview mode but don't have a video, show nothing
-  if (!isEditable && !(blockObject && videoUrl)) {
+  if (!(isEditable || (blockObject && videoUrl))) {
     return null;
   }
 

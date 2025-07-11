@@ -5,6 +5,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import Image from 'next/image';
@@ -12,7 +13,6 @@ import { useTranslations } from 'next-intl';
 import touEmblemLight from 'public/tou_emblem_light.png';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
 
 import useGetAIFeatures from '../../../Hooks/useGetAIFeatures';
 

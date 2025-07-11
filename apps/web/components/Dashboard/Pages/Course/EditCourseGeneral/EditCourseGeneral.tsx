@@ -2,23 +2,22 @@
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { TagsInput } from '@components/ui/custom/tags-input';
 import { Checkbox } from '@components/ui/checkbox';
+import { TagsInput } from '@components/ui/custom/tags-input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Textarea } from '@components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { getAPIUrl } from '@services/config/config';
+import { updateCourse } from '@services/courses/courses';
+import { revalidateTags } from '@services/utils/ts/requests';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { mutate } from 'swr';
-
-import { updateCourse } from '@services/courses/courses';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { z } from 'zod';
 
 import LearningItemsList from './LearningItemsList';
 import ThumbnailUpdate from './ThumbnailUpdate';

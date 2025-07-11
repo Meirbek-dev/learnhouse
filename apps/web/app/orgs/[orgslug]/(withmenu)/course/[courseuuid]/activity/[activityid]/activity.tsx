@@ -1,4 +1,5 @@
 'use client';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import AssignmentSubmissionProvider, {
   useAssignmentSubmission,
@@ -39,13 +40,12 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus';
 
@@ -915,11 +915,7 @@ export function MarkStatus(props: {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-      />
+      <circle cx="12" cy="12" r="10" />
       <path d="M12 16v-4" />
       <path d="M12 8h.01" />
     </svg>
@@ -1035,13 +1031,7 @@ export function MarkStatus(props: {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <rect
-                        x="3"
-                        y="3"
-                        width="18"
-                        height="18"
-                        rx="2"
-                      />
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
                       <path d="M7 12l3 3 7-7" />
                     </svg>
                     <span className="text-xs font-bold">{t('statusComplete')}</span>
@@ -1098,13 +1088,7 @@ export function MarkStatus(props: {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <rect
-                      x="3"
-                      y="3"
-                      width="18"
-                      height="18"
-                      rx="2"
-                    />
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
                   </svg>
                 )}
                 <span className="min-w-[90px] text-xs font-bold">{isLoading ? t('marking') : t('markAsComplete')}</span>
@@ -1314,8 +1298,7 @@ function AssignmentTools(props: {
           displayGrade = t('unknownGradingType');
       } // Use displayGrade here, e.g., update state or display it
       setFinalGrade(displayGrade);
-    } else {
-    }
+    } else {}
   }, [session.data?.user?.id, props.assignment?.assignment_uuid, session.data?.tokens?.access_token, t, setFinalGrade]);
 
   useEffect(() => {

@@ -2,6 +2,7 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { NodeViewWrapper } from '@tiptap/react';
 import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
@@ -11,7 +12,6 @@ import { styled } from 'styled-components';
 import { constructAcceptValue } from '@/lib/constants';
 import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf';
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 

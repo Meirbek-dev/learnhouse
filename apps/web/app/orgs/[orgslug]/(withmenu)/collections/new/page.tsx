@@ -1,6 +1,6 @@
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import NewCollection from './NewCollection';
 
 export async function generateMetadata({ params }: { params: Promise<{ orgslug: string }> }): Promise<Metadata> {

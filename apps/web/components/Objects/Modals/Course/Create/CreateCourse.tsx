@@ -3,8 +3,8 @@
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { TagsInput } from '@components/ui/custom/tags-input';
 import { Button } from '@components/ui/button';
+import { TagsInput } from '@components/ui/custom/tags-input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';

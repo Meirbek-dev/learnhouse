@@ -11,10 +11,10 @@ import { updateOrganization } from '@services/settings/org';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { Plus, X as XIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
-import { useCallback, useMemo } from 'react';
 
 interface OrganizationValues {
   socials: {
