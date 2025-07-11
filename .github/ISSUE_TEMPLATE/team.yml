@@ -1,6 +1,6 @@
 name: Team
 description: You are someone from the team
-labels: ["team"]
+labels: ['team']
 body:
   - type: textarea
     id: content
@@ -12,4 +12,3 @@ body:
       label: Is this issue planned ?
       options:
         - label: Planned
-          

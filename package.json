@@ -8,8 +8,6 @@
   "scripts": {
     "build": "turbo run build",
     "start": "turbo run start",
-    "start-standalone": "node ./apps/web/.next/standalone/apps/web/server.js",
-    "postbuild": "xcopy .\\.next\\static .\\.next\\standalone\\.next\\static /E /I /Y || cp -r ./.next/static ./.next/standalone/.next/static",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "oxlint": "oxlint --fix --fix-suggestions",
@@ -27,6 +25,12 @@
   "packageManager": "pnpm@10.13.1",
   "engines": {
     "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "pnpm": ">=10.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.1.8",
+      "@types/react-dom": "19.1.6"
+    }
   }
 }

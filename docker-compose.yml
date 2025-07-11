@@ -25,13 +25,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U openu"]
+      test: ['CMD-SHELL', 'pg_isready -U openu']
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
   redis:
-    image: redis:8.2-m01-alpine
+    image: redis:8.2-rc1-alpine
     restart: unless-stopped
     ports:
       - '6379:6379'

@@ -19,17 +19,17 @@ hosting_config:
     - http://localhost:3000
     - http://localhost:3001
   cookies_config:
-    domain: ".localhost"
+    domain: '.localhost'
   allowed_regexp: '\b((?:https?://)[^\s/$.?#].[^\s]*)\b'
   content_delivery:
-    type: "filesystem" # "filesystem" or "s3api"
+    type: 'filesystem' # "filesystem" or "s3api"
     s3api:
-      bucket_name: ""
-      endpoint_url: ""
+      bucket_name: ''
+      endpoint_url: ''
 
 mailing_config:
-  resend_api_key: ""
-  system_email_adress: ""
+  resend_api_key: ''
+  system_email_adress: ''
 
 database_config:
   sql_connection_string: postgresql+psycopg://openu:openu@localhost:5432/openu
@@ -39,12 +39,12 @@ redis_config:
 
 payments_config:
   stripe:
-    stripe_secret_key: ""
-    stripe_publishable_key: ""
-    stripe_webhook_standard_secret: ""
-    stripe_client_id: ""
+    stripe_secret_key: ''
+    stripe_publishable_key: ''
+    stripe_webhook_standard_secret: ''
+    stripe_client_id: ''
 
 ai_config:
   chromadb_config:
     isSeparateDatabaseEnabled: True
-    db_host: "localhost"
+    db_host: 'localhost'

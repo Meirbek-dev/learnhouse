@@ -5,15 +5,15 @@
 
 version: 2
 updates:
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/apps/api" # Location of package manifests
+  - package-ecosystem: 'pip' # See documentation for possible values
+    directory: '/apps/api' # Location of package manifests
     labels:
-      - "dependencies"
-      - "pip"
+      - 'dependencies'
+      - 'pip'
     reviewers:
-      - "swve"
+      - 'swve'
     schedule:
-      interval: "monthly"
+      interval: 'monthly'
 #  - package-ecosystem: "npm" # See documentation for possible values
 #    directory: "/" # Location of package manifests
 #    labels:
