@@ -2,10 +2,10 @@
 description = "OpenU Backend"
 name = "openu-api"
 version = "0.1.0"
-requires-python = ">=3.13.2"
+requires-python = ">=3.13.4"
 dependencies = [
-  "boto3>=1.39.3",
-  "botocore>=1.39.3",
+  "boto3>=1.39.4",
+  "botocore>=1.39.4",
   "fastapi==0.116.0",
   "fastapi-another-jwt-auth>=0.1.11",
   "httpx>=0.28.1",
@@ -15,23 +15,23 @@ dependencies = [
   "langchain-core>=0.3.68",
   "langchain-openai>=0.3.27",
   "langchain-text-splitters>=0.3.8",
-  "openai>=1.93.2",
+  "openai>=1.95.0",
   "psycopg[binary,pool]>=3.2.9",
   "pydantic[email]>=2.11.7",
   "python-dotenv>=1.1.1",
   "python-multipart>=0.0.20",
   "pyyaml>=6.0.2",
   "redis[hiredis]>=6.2.0",
-  "resend>=2.10.0",
+  "resend>=2.11.0",
   "sqlmodel>=0.0.24",
   "tiktoken>=0.9.0",
   "uvicorn[standard]>=0.35.0",
   "typer>=0.16.0",
   "chromadb>=1.0.15",
-  "alembic>=1.16.2",
+  "alembic>=1.16.4",
   "alembic-postgresql-enum>=1.7.0",
   "stripe>=12.3.0",
-  "logfire[fastapi,sqlalchemy]>=3.23.0",
+  "logfire[fastapi,sqlalchemy]>=3.24.0",
   "beautifulsoup4>=4.13.4",
   "python-ulid>=3.0.0",
   "argon2-cffi>=25.1.0",

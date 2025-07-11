@@ -399,7 +399,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                 content: [
                   {
                     type: 'text',
-                    text: 'This is a Badge',
+                    text: 'This is a Badge', // TODO: Translate
                   },
                 ],
               })
