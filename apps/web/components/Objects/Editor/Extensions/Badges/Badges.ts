@@ -7,9 +7,7 @@ export default Node.create({
   name: 'badge',
   group: 'block',
   draggable: true,
-  content: 'text*',
-
-  // TODO : multi line support
+  content: 'block+',
 
   addAttributes() {
     return {
@@ -35,6 +33,8 @@ export default Node.create({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(BadgesExtension);
+    return ReactNodeViewRenderer(BadgesExtension, {
+      contentDOMElementTag: 'div',
+    });
   },
 });

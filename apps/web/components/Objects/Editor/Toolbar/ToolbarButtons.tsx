@@ -268,12 +268,32 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       </TableMenuWrapper>
       <DividerVerticalIcon style={{ marginTop: 'auto', marginBottom: 'auto', color: 'grey' }} />
       <ToolTip content={t('infoCallout')}>
-        <ToolBtn onClick={() => editor.chain().focus().toggleNode('calloutInfo').run()}>
+        <ToolBtn onClick={() => editor.chain().focus().insertContent({
+          type: 'calloutInfo',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: t('defaultInfoCalloutText') }
+              ]
+            }
+          ]
+        }).run()}>
           <AlertCircle size={15} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('warningCallout')}>
-        <ToolBtn onClick={() => editor.chain().focus().toggleNode('calloutWarning').run()}>
+        <ToolBtn onClick={() => editor.chain().focus().insertContent({
+          type: 'calloutWarning',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: t('defaultWarningCalloutText') }
+              ]
+            }
+          ]
+        }).run()}>
           <AlertTriangle size={15} />
         </ToolBtn>
       </ToolTip>
@@ -398,9 +418,11 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                 type: 'badge',
                 content: [
                   {
-                    type: 'text',
-                    text: 'This is a Badge', // TODO: Translate
-                  },
+                    type: 'paragraph',
+                    content: [
+                      { type: 'text', text: 'This is a Badge' }
+                    ]
+                  }
                 ],
               })
               .run()

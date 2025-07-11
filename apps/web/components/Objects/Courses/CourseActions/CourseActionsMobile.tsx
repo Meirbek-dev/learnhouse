@@ -9,8 +9,8 @@ import { checkPaidAccess } from '@services/payments/payments';
 import { getProductsByCourse } from '@services/payments/products';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { AlertCircle, LogIn, LogOut, ShoppingCart } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import UserAvatar from '../../UserAvatar';

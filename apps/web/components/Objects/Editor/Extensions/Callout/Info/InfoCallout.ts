@@ -7,9 +7,7 @@ export default Node.create({
   name: 'calloutInfo',
   group: 'block',
   draggable: true,
-  content: 'text*',
-
-  // TODO : multi line support
+  content: 'block+',
 
   parseHTML() {
     return [
@@ -24,6 +22,8 @@ export default Node.create({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(InfoCalloutComponent);
+    return ReactNodeViewRenderer(InfoCalloutComponent, {
+      contentDOMElementTag: 'div',
+    });
   },
 });

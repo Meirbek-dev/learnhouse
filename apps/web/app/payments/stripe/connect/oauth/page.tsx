@@ -4,9 +4,9 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { motion } from 'framer-motion';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import touEmblemDark from 'public/tou_emblem_dark.png';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -31,7 +31,7 @@ function StripeConnectCallback() {
         }
 
         const _response = await verifyStripeConnection(
-          Number.parseInt(orgId, 10), // TODO: why parsing orgId as int?
+          Number.parseInt(orgId, 10),
           code,
           session?.data?.tokens?.access_token,
         );
