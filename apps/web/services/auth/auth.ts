@@ -1,218 +1,35 @@
-import { getResponseMetadata, RequestBody } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { getResponseMetadata, RequestBody } from '@services/utils/ts/requests';
 
-// ⚠️ mvp phase code
-// TODO : everything in this file need to be refactored including security issues fix
-
-export async function loginAndGetToken(username: any, password: any): Promise<any> {
-  // Request Config
-
-  // get origin
-  const HeadersConfig = new Headers({
-    'Content-Type': 'application/x-www-form-urlencoded',
-  });
-  const urlencoded = new URLSearchParams({
-    username,
-    password,
-  });
-
-  const requestOptions: RequestInit = {
-    method: 'POST',
-    headers: HeadersConfig,
-    body: urlencoded,
-    redirect: 'follow',
-    credentials: 'include',
-  };
-
-  return await fetch(`${getAPIUrl()}auth/login`, requestOptions);
+// Auth service types and interfaces
+interface AuthTokens {
+  access_token: string;
+  refresh_token: string;
 }
 
-export async function loginWithOAuthToken(email: string, provider: string, accessToken: string): Promise<Response> {
-  const HeadersConfig = new Headers({
-    'Content-Type': 'application/json',
-  });
-
-  const body = {
-    email,
-    provider,
-    access_token: accessToken,
-  };
-
-  const requestOptions: RequestInit = {
-    method: 'POST',
-    headers: HeadersConfig,
-    body: JSON.stringify(body),
-    redirect: 'follow',
-    credentials: 'include',
-  };
-
-  return await fetch(`${getAPIUrl()}auth/oauth`, requestOptions);
+interface AuthUser {
+  id: number;
+  email: string;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  [key: string]: any;
 }
 
-export async function sendResetLink(email: string, org_id: number) {
-  const result = await fetch(
-    `${getAPIUrl()}users/reset_password/send_reset_code/${email}?org_id=${org_id}`,
-    RequestBody('POST', null, null),
-  );
-  const res = await getResponseMetadata(result);
-  return res;
+interface LoginResponse {
+  user: AuthUser;
+  tokens: AuthTokens;
 }
 
-export async function resetPassword(email: string, new_password: string, org_id: number, reset_code: string) {
-  const result = await fetch(
-    `${getAPIUrl()}users/reset_password/change_password/${email}?reset_code=${reset_code}&new_password=${new_password}&org_id=${org_id}`,
-    RequestBody('POST', null, null),
-  );
-  const res = await getResponseMetadata(result);
-  return res;
+interface UserSessionResponse {
+  user: AuthUser;
+  roles: string[];
 }
 
-export async function logout(): Promise<Response> {
-  const HeadersConfig = new Headers({
-    'Content-Type': 'application/x-www-form-urlencoded',
-  });
-
-  const urlencoded = new URLSearchParams();
-
-  const requestOptions: RequestInit = {
-    method: 'DELETE',
-    headers: HeadersConfig,
-    body: urlencoded,
-    redirect: 'follow',
-    credentials: 'include',
-  };
-
-  return await fetch(`${getAPIUrl()}auth/logout`, requestOptions);
+interface AuthError extends Error {
+  status?: number;
+  code?: string;
 }
-
-export async function getUserInfo(token: string): Promise<any> {
-  if (typeof window === 'undefined') {
-    throw new Error('getUserInfo can only be called on the client side');
-  }
-
-  const { origin } = window.location;
-  const HeadersConfig = new Headers({
-    Authorization: `Bearer ${token}`,
-    Origin: origin,
-  });
-
-  const requestOptions: RequestInit = {
-    method: 'GET',
-    headers: HeadersConfig,
-    redirect: 'follow',
-    credentials: 'include',
-  };
-
-  try {
-    const response = await fetch(`${getAPIUrl()}users/profile`, requestOptions);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to fetch user info:', error);
-    throw error;
-  }
-}
-
-export async function getUserSession(token: string): Promise<any> {
-  if (!token) {
-    throw new Error('Access token is required');
-  }
-
-  const HeadersConfig = new Headers({
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  });
-
-  const requestOptions: RequestInit = {
-    method: 'GET',
-    headers: HeadersConfig,
-    redirect: 'follow',
-    credentials: 'include',
-    cache: 'no-cache',
-  };
-
-  try {
-    const response = await fetch(`${getAPIUrl()}users/session`, requestOptions);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to fetch user session:', error);
-    throw error;
-  }
-}
-
-export async function getNewAccessTokenUsingRefreshToken(): Promise<any> {
-  const requestOptions: RequestInit = {
-    method: 'GET',
-    redirect: 'follow',
-    credentials: 'include',
-  };
-
-  try {
-    const response = await fetch(`${getAPIUrl()}auth/refresh`, requestOptions);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to refresh token:', error);
-    throw error;
-  }
-}
-
-export async function getNewAccessTokenUsingRefreshTokenServer(refresh_token: string): Promise<any> {
-  if (!refresh_token) {
-    throw new Error('Refresh token is required');
-  }
-
-  const requestOptions: RequestInit = {
-    method: 'GET',
-    redirect: 'follow',
-    headers: {
-      'Cookie': `refresh_token_cookie=${refresh_token}`,
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    cache: 'no-cache',
-  };
-
-  try {
-    const response = await fetch(`${getAPIUrl()}auth/refresh`, requestOptions);
-
-    if (!response.ok) {
-      throw new Error(`Failed to refresh token: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Token refresh failed:', error);
-    throw error;
-  }
-}
-
-// cookies
-export async function getAccessTokenFromRefreshTokenCookie(cookieStore: any) {
-  try {
-    const refresh_token_cookie: any = cookieStore.get('refresh_token_cookie');
-    if (!refresh_token_cookie?.value) {
-      return null;
-    }
-
-    const access_token_cookie: any = await getNewAccessTokenUsingRefreshTokenServer(refresh_token_cookie.value);
-    return access_token_cookie?.access_token || null;
-  } catch (error) {
-    console.error('Failed to get access token from refresh token cookie:', error);
-    return null;
-  }
-}
-
-// signup
 
 interface NewAccountBody {
   username: string;
@@ -222,28 +39,655 @@ interface NewAccountBody {
   org_id: number;
 }
 
+// Auth API configuration
+const AUTH_ENDPOINTS = {
+  login: 'auth/login',
+  oauth: 'auth/oauth',
+  logout: 'auth/logout',
+  refresh: 'auth/refresh',
+  userProfile: 'users/profile',
+  userSession: 'users/session',
+  resetPassword: 'users/reset_password',
+  signup: 'users',
+} as const;
+
+// Utility functions for request creation
+const createHeaders = (contentType: string, additionalHeaders?: Record<string, string>): Headers => {
+  const headers = new Headers({ 'Content-Type': contentType });
+  if (additionalHeaders) {
+    Object.entries(additionalHeaders).forEach(([key, value]) => {
+      headers.set(key, value);
+    });
+  }
+  return headers;
+};
+
+const createAuthError = (message: string, status?: number, code?: string): AuthError => {
+  const error = new Error(message) as AuthError;
+  error.status = status;
+  error.code = code;
+  return error;
+};
+
+const handleAuthResponse = async <T>(response: Response, operation: string): Promise<T> => {
+  if (!response.ok) {
+    const errorMessage = `${operation} failed: ${response.status} ${response.statusText}`;
+    throw createAuthError(errorMessage, response.status, operation.toUpperCase().replace(' ', '_'));
+  }
+
+  try {
+    return await response.json();
+  } catch (error) {
+    throw createAuthError(`Failed to parse ${operation} response`, response.status, 'PARSE_ERROR');
+  }
+};
+
+// Input validation utilities
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validatePassword = (password: string): boolean => {
+  return Boolean(password && password.length >= 8);
+};
+
+const sanitizeStringInput = (input: string): string => {
+  return input.trim().toLowerCase();
+};
+
+/**
+ * Login function with proper typing and validation
+ * @param username - Email or username for login
+ * @param password - User password
+ * @returns Promise<Response> - Raw response for compatibility
+ */
+export async function loginAndGetToken(username: any, password: any): Promise<Response> {
+  // Input validation
+  if (!username?.trim() || !password?.trim()) {
+    throw createAuthError('Username and password are required', 400, 'INVALID_CREDENTIALS');
+  }
+
+  const sanitizedUsername = sanitizeStringInput(username);
+
+  // Validate email format if username appears to be an email
+  if (sanitizedUsername.includes('@') && !validateEmail(sanitizedUsername)) {
+    throw createAuthError('Invalid email format', 400, 'INVALID_EMAIL');
+  }
+
+  if (!validatePassword(password)) {
+    throw createAuthError('Invalid password', 400, 'INVALID_PASSWORD');
+  }
+
+  try {
+    const headers = createHeaders('application/x-www-form-urlencoded');
+    const body = new URLSearchParams({
+      username: sanitizedUsername,
+      password,
+    });
+
+    const requestOptions: RequestInit = {
+      method: 'POST',
+      headers,
+      body,
+      redirect: 'follow',
+      credentials: 'include',
+    };
+
+    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.login}`, requestOptions);
+
+    // For backward compatibility, return raw response
+    // Calling code can use handleAuthResponse if needed
+    return response;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw createAuthError(`Login request failed: ${error.message}`, undefined, 'NETWORK_ERROR');
+    }
+    throw createAuthError('Unknown login error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * OAuth login with validation
+ * @param email - User email from OAuth provider
+ * @param provider - OAuth provider name
+ * @param accessToken - OAuth access token
+ * @returns Promise<Response> - Raw response for compatibility
+ */
+export async function loginWithOAuthToken(
+  email: string,
+  provider: string,
+  accessToken: string
+): Promise<Response> {
+  // Input validation
+  if (!email?.trim() || !validateEmail(email)) {
+    throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
+  }
+
+  if (!provider?.trim()) {
+    throw createAuthError('OAuth provider is required', 400, 'INVALID_PROVIDER');
+  }
+
+  if (!accessToken?.trim()) {
+    throw createAuthError('OAuth access token is required', 400, 'INVALID_TOKEN');
+  }
+
+  try {
+    const headers = createHeaders('application/json');
+    const body = {
+      email: sanitizeStringInput(email),
+      provider: provider.toLowerCase().trim(),
+      access_token: accessToken,
+    };
+
+    const requestOptions: RequestInit = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      redirect: 'follow',
+      credentials: 'include',
+    };
+
+    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.oauth}`, requestOptions);
+    return response;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw createAuthError(`OAuth login failed: ${error.message}`, undefined, 'OAUTH_ERROR');
+    }
+    throw createAuthError('Unknown OAuth error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * Password reset link sender with validation
+ * @param email - User email address
+ * @param orgId - Organization ID
+ * @returns Promise with response metadata
+ */
+export async function sendResetLink(email: string, orgId: number) {
+  if (!email?.trim() || !validateEmail(email)) {
+    throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
+  }
+
+  if (!Number.isInteger(orgId) || orgId <= 0) {
+    throw createAuthError('Valid organization ID is required', 400, 'INVALID_ORG_ID');
+  }
+
+  try {
+    const sanitizedEmail = sanitizeStringInput(email);
+    const url = `${getAPIUrl()}${AUTH_ENDPOINTS.resetPassword}/send_reset_code/${encodeURIComponent(sanitizedEmail)}?org_id=${orgId}`;
+
+    const result = await fetch(url, RequestBody('POST', null, null));
+    return await getResponseMetadata(result);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw createAuthError(`Failed to send reset link: ${error.message}`, undefined, 'RESET_LINK_ERROR');
+    }
+    throw createAuthError('Unknown reset link error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * Password reset with validation
+ * @param email - User email address
+ * @param newPassword - New password
+ * @param orgId - Organization ID
+ * @param resetCode - Password reset code
+ * @returns Promise with response metadata
+ */
+export async function resetPassword(
+  email: string,
+  newPassword: string,
+  orgId: number,
+  resetCode: string
+) {
+  // Input validation
+  if (!email?.trim() || !validateEmail(email)) {
+    throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
+  }
+
+  if (!validatePassword(newPassword)) {
+    throw createAuthError('Valid password is required', 400, 'INVALID_PASSWORD');
+  }
+
+  if (!Number.isInteger(orgId) || orgId <= 0) {
+    throw createAuthError('Valid organization ID is required', 400, 'INVALID_ORG_ID');
+  }
+
+  if (!resetCode?.trim()) {
+    throw createAuthError('Reset code is required', 400, 'INVALID_RESET_CODE');
+  }
+
+  try {
+    const sanitizedEmail = sanitizeStringInput(email);
+    const params = new URLSearchParams({
+      reset_code: resetCode.trim(),
+      new_password: newPassword,
+      org_id: orgId.toString(),
+    });
+
+    const url = `${getAPIUrl()}${AUTH_ENDPOINTS.resetPassword}/change_password/${encodeURIComponent(sanitizedEmail)}?${params}`;
+
+    const result = await fetch(url, RequestBody('POST', null, null));
+    return await getResponseMetadata(result);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw createAuthError(`Failed to reset password: ${error.message}`, undefined, 'PASSWORD_RESET_ERROR');
+    }
+    throw createAuthError('Unknown password reset error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * Logout function
+ * @returns Promise<Response> - Raw response for compatibility
+ */
+export async function logout(): Promise<Response> {
+  try {
+    const headers = createHeaders('application/x-www-form-urlencoded');
+    const body = new URLSearchParams(); // Empty body for logout
+
+    const requestOptions: RequestInit = {
+      method: 'DELETE',
+      headers,
+      body,
+      redirect: 'follow',
+      credentials: 'include',
+    };
+
+    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.logout}`, requestOptions);
+    return response;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw createAuthError(`Logout failed: ${error.message}`, undefined, 'LOGOUT_ERROR');
+    }
+    throw createAuthError('Unknown logout error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * User info retrieval with proper validation
+ * @param token - JWT access token
+ * @returns Promise<AuthUser> - User information
+ */
+export async function getUserInfo(token: string): Promise<AuthUser> {
+  if (typeof window === 'undefined') {
+    throw createAuthError('getUserInfo can only be called on the client side', 400, 'CLIENT_SIDE_ONLY');
+  }
+
+  if (!token?.trim()) {
+    throw createAuthError('Access token is required', 400, 'MISSING_TOKEN');
+  }
+
+  try {
+    const { origin } = window.location;
+    const headers = createHeaders('application/json', {
+      Authorization: `Bearer ${token.trim()}`,
+      Origin: origin,
+    });
+
+    const requestOptions: RequestInit = {
+      method: 'GET',
+      headers,
+      redirect: 'follow',
+      credentials: 'include',
+    };
+
+    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.userProfile}`, requestOptions);
+    return await handleAuthResponse<AuthUser>(response, 'get user info');
+  } catch (error) {
+    if (error instanceof Error) {
+      // Re-throw AuthError instances
+      if ('status' in error) throw error;
+      throw createAuthError(`Failed to fetch user info: ${error.message}`, undefined, 'USER_INFO_ERROR');
+    }
+    throw createAuthError('Unknown user info error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * User session retrieval with validation
+ * @param token - JWT access token
+ * @returns Promise<UserSessionResponse> - User session information
+ */
+export async function getUserSession(token: string): Promise<UserSessionResponse> {
+  if (!token?.trim()) {
+    throw createAuthError('Access token is required', 400, 'MISSING_TOKEN');
+  }
+
+  try {
+    const headers = createHeaders('application/json', {
+      Authorization: `Bearer ${token.trim()}`,
+    });
+
+    const requestOptions: RequestInit = {
+      method: 'GET',
+      headers,
+      redirect: 'follow',
+      credentials: 'include',
+      cache: 'no-cache',
+    };
+
+    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.userSession}`, requestOptions);
+    return await handleAuthResponse<UserSessionResponse>(response, 'get user session');
+  } catch (error) {
+    if (error instanceof Error) {
+      // Re-throw AuthError instances
+      if ('status' in error) throw error;
+      throw createAuthError(`Failed to fetch user session: ${error.message}`, undefined, 'USER_SESSION_ERROR');
+    }
+    throw createAuthError('Unknown user session error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * Token refresh for client-side usage
+ * @returns Promise<AuthTokens> - New token pair
+ */
+export async function getNewAccessTokenUsingRefreshToken(): Promise<AuthTokens> {
+  try {
+    const requestOptions: RequestInit = {
+      method: 'GET',
+      redirect: 'follow',
+      credentials: 'include',
+    };
+
+    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.refresh}`, requestOptions);
+    return await handleAuthResponse<AuthTokens>(response, 'refresh token');
+  } catch (error) {
+    if (error instanceof Error) {
+      // Re-throw AuthError instances
+      if ('status' in error) throw error;
+      throw createAuthError(`Failed to refresh token: ${error.message}`, undefined, 'TOKEN_REFRESH_ERROR');
+    }
+    throw createAuthError('Unknown token refresh error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * Server-side token refresh with validation
+ * @param refreshToken - Refresh token for server-side usage
+ * @returns Promise<AuthTokens> - New token pair
+ */
+export async function getNewAccessTokenUsingRefreshTokenServer(refreshToken: string): Promise<AuthTokens> {
+  if (!refreshToken?.trim()) {
+    throw createAuthError('Refresh token is required', 400, 'MISSING_REFRESH_TOKEN');
+  }
+
+  try {
+    const headers = createHeaders('application/json', {
+      Cookie: `refresh_token_cookie=${refreshToken.trim()}`,
+    });
+
+    const requestOptions: RequestInit = {
+      method: 'GET',
+      redirect: 'follow',
+      headers,
+      credentials: 'include',
+      cache: 'no-cache',
+    };
+
+    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.refresh}`, requestOptions);
+    return await handleAuthResponse<AuthTokens>(response, 'refresh token server');
+  } catch (error) {
+    if (error instanceof Error) {
+      // Re-throw AuthError instances
+      if ('status' in error) throw error;
+      throw createAuthError(`Server token refresh failed: ${error.message}`, undefined, 'SERVER_TOKEN_REFRESH_ERROR');
+    }
+    throw createAuthError('Unknown server token refresh error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+/**
+ * Cookie-based token refresh with validation
+ * @param cookieStore - Cookie store object (Next.js cookies() or similar)
+ * @returns Promise<string | null> - Access token or null if failed
+ */
+export async function getAccessTokenFromRefreshTokenCookie(cookieStore: any): Promise<string | null> {
+  if (!cookieStore || typeof cookieStore.get !== 'function') {
+    console.error('Invalid cookie store provided');
+    return null;
+  }
+
+  try {
+    const refreshTokenCookie = cookieStore.get('refresh_token_cookie');
+
+    if (!refreshTokenCookie?.value?.trim()) {
+      return null; // No refresh token available
+    }
+
+    const tokenResponse = await getNewAccessTokenUsingRefreshTokenServer(refreshTokenCookie.value);
+    return tokenResponse?.access_token || null;
+  } catch (error) {
+    console.error('Failed to get access token from refresh token cookie:', error);
+    return null; // Fail silently for cookie-based operations
+  }
+}
+
+/**
+ * Signup function with validation
+ * @param body - New account details
+ * @returns Promise<Response> - Raw response for compatibility
+ */
 export async function signup(body: NewAccountBody): Promise<Response> {
-  const HeadersConfig = new Headers({ 'Content-Type': 'application/json' });
+  // Input validation
+  if (!body) {
+    throw createAuthError('Account details are required', 400, 'MISSING_BODY');
+  }
 
-  const requestOptions: RequestInit = {
-    method: 'POST',
-    headers: HeadersConfig,
-    body: JSON.stringify(body),
-    redirect: 'follow',
-  };
+  const { username, email, password, org_slug, org_id } = body;
 
-  return await fetch(`${getAPIUrl()}users/${body.org_id}`, requestOptions);
+  if (!username?.trim()) {
+    throw createAuthError('Username is required', 400, 'MISSING_USERNAME');
+  }
+
+  if (!email?.trim() || !validateEmail(email)) {
+    throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
+  }
+
+  if (!validatePassword(password)) {
+    throw createAuthError('Valid password is required', 400, 'INVALID_PASSWORD');
+  }
+
+  if (!org_slug?.trim()) {
+    throw createAuthError('Organization slug is required', 400, 'MISSING_ORG_SLUG');
+  }
+
+  if (!Number.isInteger(org_id) || org_id <= 0) {
+    throw createAuthError('Valid organization ID is required', 400, 'INVALID_ORG_ID');
+  }
+
+  try {
+    const headers = createHeaders('application/json');
+    const sanitizedBody = {
+      username: username.trim(),
+      email: sanitizeStringInput(email),
+      password,
+      org_slug: org_slug.trim(),
+      org_id,
+    };
+
+    const requestOptions: RequestInit = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(sanitizedBody),
+      redirect: 'follow',
+    };
+
+    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}`, requestOptions);
+    return response;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw createAuthError(`Signup failed: ${error.message}`, undefined, 'SIGNUP_ERROR');
+    }
+    throw createAuthError('Unknown signup error', undefined, 'UNKNOWN_ERROR');
+  }
 }
 
-export async function signUpWithInviteCode(body: NewAccountBody, invite_code: string): Promise<Response> {
-  const HeadersConfig = new Headers({ 'Content-Type': 'application/json' });
+/**
+ * Signup with invite code and validation
+ * @param body - New account details
+ * @param inviteCode - Invitation code
+ * @returns Promise<Response> - Raw response for compatibility
+ */
+export async function signUpWithInviteCode(body: NewAccountBody, inviteCode: string): Promise<Response> {
+  // Validate invite code first
+  if (!inviteCode?.trim()) {
+    throw createAuthError('Invite code is required', 400, 'MISSING_INVITE_CODE');
+  }
 
-  const requestOptions: RequestInit = {
-    method: 'POST',
-    headers: HeadersConfig,
-    body: JSON.stringify(body),
-    redirect: 'follow',
+  // Reuse signup validation
+  if (!body) {
+    throw createAuthError('Account details are required', 400, 'MISSING_BODY');
+  }
+
+  const { username, email, password, org_slug, org_id } = body;
+
+  if (!username?.trim()) {
+    throw createAuthError('Username is required', 400, 'MISSING_USERNAME');
+  }
+
+  if (!email?.trim() || !validateEmail(email)) {
+    throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
+  }
+
+  if (!validatePassword(password)) {
+    throw createAuthError('Valid password is required', 400, 'INVALID_PASSWORD');
+  }
+
+  if (!org_slug?.trim()) {
+    throw createAuthError('Organization slug is required', 400, 'MISSING_ORG_SLUG');
+  }
+
+  if (!Number.isInteger(org_id) || org_id <= 0) {
+    throw createAuthError('Valid organization ID is required', 400, 'INVALID_ORG_ID');
+  }
+
+  try {
+    const headers = createHeaders('application/json');
+    const sanitizedBody = {
+      username: username.trim(),
+      email: sanitizeStringInput(email),
+      password,
+      org_slug: org_slug.trim(),
+      org_id,
+    };
+
+    const requestOptions: RequestInit = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(sanitizedBody),
+      redirect: 'follow',
+    };
+
+    const sanitizedInviteCode = inviteCode.trim();
+    const response = await fetch(
+      `${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}/invite/${encodeURIComponent(sanitizedInviteCode)}`,
+      requestOptions
+    );
+
+    return response;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw createAuthError(`Invite signup failed: ${error.message}`, undefined, 'INVITE_SIGNUP_ERROR');
+    }
+    throw createAuthError('Unknown invite signup error', undefined, 'UNKNOWN_ERROR');
+  }
+}
+
+// Export types for external usage
+export type {
+  AuthError, AuthTokens,
+  AuthUser,
+  LoginResponse, NewAccountBody, UserSessionResponse
+};
+
+// Export utility functions for advanced usage
+  export {
+    createAuthError,
+    handleAuthResponse,
+    validateEmail,
+    validatePassword
   };
 
-  return await fetch(`${getAPIUrl()}users/${body.org_id}/invite/${invite_code}`, requestOptions);
-}
+// Export constants for external usage
+  export { AUTH_ENDPOINTS };
+
+/**
+ * Helper function to check if an error is an AuthError
+ * @param error - Error to check
+ * @returns boolean indicating if error is an AuthError
+ */
+export const isAuthError = (error: unknown): error is AuthError => {
+  return error instanceof Error && ('status' in error || 'code' in error);
+};
+
+/**
+ * Helper function to extract error details for logging/monitoring
+ * @param error - Error to extract details from
+ * @returns Object with error details
+ */
+export const getAuthErrorDetails = (error: unknown) => {
+  if (isAuthError(error)) {
+    return {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      name: error.name,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      name: error.name,
+    };
+  }
+
+  return {
+    message: 'Unknown error',
+    error: String(error),
+  };
+};
+
+/**
+ * Helper function to safely parse JWT payload (client-side only)
+ * Note: This is for convenience only, never trust client-side JWT parsing for security decisions
+ * @param token - JWT token to parse
+ * @returns Parsed payload or null if invalid
+ */
+export const parseJWTPayload = (token: string): any | null => {
+  if (typeof window === 'undefined') {
+    console.warn('parseJWTPayload should only be used client-side');
+    return null;
+  }
+
+  try {
+    if (!token?.trim()) return null;
+
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    const payload = parts[1];
+    if (!payload) return null;
+
+    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Helper function to check if a token is expired (client-side only)
+ * Note: This is for convenience only, never trust client-side validation for security decisions
+ * @param token - JWT token to check
+ * @returns boolean indicating if token is expired
+ */
+export const isTokenExpired = (token: string): boolean => {
+  const payload = parseJWTPayload(token);
+  if (!payload?.exp) return true;
+
+  return Date.now() >= payload.exp * 1000;
+};

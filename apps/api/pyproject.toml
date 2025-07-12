@@ -6,7 +6,7 @@ requires-python = ">=3.13.4"
 dependencies = [
   "boto3>=1.39.4",
   "botocore>=1.39.4",
-  "fastapi==0.116.0",
+  "fastapi==0.116.1",
   "fastapi-another-jwt-auth>=0.1.11",
   "httpx>=0.28.1",
   "langchain>=0.3.26",
@@ -15,7 +15,7 @@ dependencies = [
   "langchain-core>=0.3.68",
   "langchain-openai>=0.3.27",
   "langchain-text-splitters>=0.3.8",
-  "openai>=1.95.0",
+  "openai>=1.95.1",
   "psycopg[binary,pool]>=3.2.9",
   "pydantic[email]>=2.11.7",
   "python-dotenv>=1.1.1",
