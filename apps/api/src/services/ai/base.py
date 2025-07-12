@@ -309,7 +309,7 @@ class FastAIService:
             return AgentExecutor(
                 agent=agent,
                 tools=[retriever_tool],
-                verbose=True,  # TODO: disable this at some point
+                verbose=True,
                 return_intermediate_steps=False,  # Reduce overhead
                 handle_parsing_errors=True,
                 max_iterations=max_iterations,
