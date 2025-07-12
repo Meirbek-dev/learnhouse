@@ -29,7 +29,7 @@ async def api_ai_start_activity_chat_session(
     """
     Start a new AI Chat session with a Course Activity
     """
-    return ai_start_activity_chat_session(
+    return await ai_start_activity_chat_session(
         request, chat_session_object, current_user, db_session
     )
 
@@ -44,6 +44,6 @@ async def api_ai_send_activity_chat_message(
     """
     Send a message to an AI Chat session with a Course Activity
     """
-    return ai_send_activity_chat_message(
+    return await ai_send_activity_chat_message(
         request, chat_session_object, current_user, db_session
     )

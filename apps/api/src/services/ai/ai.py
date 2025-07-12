@@ -1,3 +1,6 @@
+import asyncio
+from typing import Optional
+
 from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
 
@@ -8,7 +11,7 @@ from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.services.ai.base import ask_ai, get_chat_session_history
+from src.services.ai.base import ask_ai_fast, get_chat_session_history
 from src.services.ai.schemas.ai import (
     ActivityAIChatSessionResponse,
     SendActivityAIChatMessage,
@@ -19,212 +22,208 @@ from src.services.courses.activities.utils import (
     structure_activity_content_by_type,
 )
 
+# Cache for database queries
+_activity_cache: dict[str, ActivityRead] = {}
+_course_cache: dict[str, CourseRead] = {}
+_org_config_cache: dict[int, OrganizationConfig] = {}
 
-def ai_start_activity_chat_session(
+
+async def _get_activity_data(
+    activity_uuid: str, db_session: Session
+) -> tuple[ActivityRead, CourseRead, OrganizationConfig]:
+    """Optimized data fetching with caching."""
+
+    # Check cache first
+    if activity_uuid in _activity_cache:
+        activity = _activity_cache[activity_uuid]
+        course = _course_cache.get(str(activity.course_id))
+        if course:
+            org_config = _org_config_cache.get(course.org_id)
+            if org_config:
+                return activity, course, org_config
+
+    # Fetch with optimized single query
+    statement = (
+        select(Activity, Course, Organization, OrganizationConfig)
+        .join(Course, Activity.course_id == Course.id)
+        .join(Organization, Course.org_id == Organization.id)
+        .join(OrganizationConfig, Organization.id == OrganizationConfig.org_id)
+        .where(Activity.activity_uuid == activity_uuid)
+    )
+
+    result = db_session.exec(statement).first()
+    if not result:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    activity_db, course_db, org_db, org_config_db = result
+
+    # Convert to Pydantic models
+    activity = ActivityRead.model_validate(activity_db)
+    course = CourseRead.model_validate(course_db)
+    org_config = OrganizationConfig.model_validate(org_config_db)
+
+    # Cache the results
+    _activity_cache[activity_uuid] = activity
+    _course_cache[str(activity.course_id)] = course
+    _org_config_cache[course.org_id] = org_config
+
+    return activity, course, org_config
+
+
+async def ai_start_activity_chat_session(
     request: Request,
     chat_session_object: StartActivityAIChatSession,
     current_user: PublicUser = Depends(get_current_user),
-    db_session=Depends(get_db_session),
+    db_session: Session = Depends(get_db_session),
 ) -> ActivityAIChatSessionResponse:
-    """
-    Start a new AI Chat session with a Course Activity
-    """
-    # Get the Activity
-    statement = select(Activity).where(
-        Activity.activity_uuid == chat_session_object.activity_uuid
-    )
-    activity = db_session.exec(statement).first()
+    """Optimized AI chat session start."""
 
-    activity = ActivityRead.model_validate(activity)
-
-    # Get the Course
-    statement = (
-        select(Course)
-        .join(Activity)
-        .where(Activity.activity_uuid == chat_session_object.activity_uuid)
-    )
-    course = db_session.exec(statement).first()
-    course = CourseRead.model_validate(course)
-
-    # Get the Organization
-    statement = select(Organization).where(Organization.id == course.org_id)
-    org = db_session.exec(statement).first()
-
-    if not org or org.id is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
+    try:
+        # Get cached activity data
+        activity, course, org_config = await _get_activity_data(
+            chat_session_object.activity_uuid, db_session
         )
 
-    if not activity:
-        raise HTTPException(
-            status_code=404,
-            detail="Activity not found",
+        # Process content in parallel
+        content_task = asyncio.to_thread(
+            structure_activity_content_by_type, activity.content
+        )
+        chat_session_task = asyncio.to_thread(get_chat_session_history)
+
+        structured, chat_session = await asyncio.gather(content_task, chat_session_task)
+
+        # Generate AI-friendly text
+        isEmpty = not structured
+        ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
+            structured, course, activity, isActivityEmpty=isEmpty
         )
 
-    # Get Activity Content Blocks
-    content = activity.content
-    # Serialize Activity Content Blocks to a text comprehensible by the AI
-    structured = structure_activity_content_by_type(content)
+        # Get AI configuration
+        embeddings = "text-embedding-3-small"
+        ai_model = org_config.config["features"]["ai"]["model"]
 
-    isEmpty = structured == []
+        # Optimized system message
+        system_message = (
+            f"You are a helpful Education Assistant for '{course.name}' course, "
+            f"helping with the '{activity.name}' lecture. "
+            "Use available tools to get context and provide accurate, helpful responses. "
+            "If context is insufficient, use your knowledge to assist the student."
+        )
 
-    ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
-        structured, course, activity, isActivityEmpty=isEmpty
-    )
+        # Use fast AI processing
+        response = await ask_ai_fast(
+            chat_session_object.message,
+            chat_session["message_history"],
+            ai_friendly_text,
+            system_message,
+            embeddings,
+            ai_model,
+            session_id=chat_session["aichat_uuid"],
+        )
 
-    # Get Activity Organization
-    statement = select(Organization).where(Organization.id == course.org_id)
-    org = db_session.exec(statement).first()
+        if "error" in response:
+            raise HTTPException(
+                status_code=500,
+                detail=f"AI processing failed: {response['error']}",
+            )
 
-    # Get Organization Config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-    org_config = result.first()
+        ai_message = response.get("output", "")
+        if not ai_message:
+            raise HTTPException(
+                status_code=500,
+                detail="AI response is empty",
+            )
 
-    org_config = OrganizationConfig.model_validate(org_config)
-    embeddings = "text-embedding-3-small"
-    ai_model = org_config.config["features"]["ai"]["model"]
+        return ActivityAIChatSessionResponse(
+            aichat_uuid=chat_session["aichat_uuid"],
+            activity_uuid=activity.activity_uuid,
+            message=ai_message,
+        )
 
-    chat_session = get_chat_session_history()
-
-    message = "You are a helpful Education Assistant, and you are helping a student with the associated Course. "
-    message += "Use the available tools to get context about this question even if the question is not specific enough."
-    message += "For context, this is the Course name :"
-    message += course.name
-    message += " and this is the Lecture name :"
-    message += activity.name
-    message += "."
-    message += "Use your knowledge to help the student if the context is not enough."
-
-    response = ask_ai(
-        chat_session_object.message,
-        chat_session["message_history"],
-        ai_friendly_text,
-        message,
-        embeddings,
-        ai_model,
-        session_id=chat_session["aichat_uuid"],
-    )
-
-    # Handle both success and error responses
-    if "error" in response:
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"AI processing failed: {response['error']}",
+            detail=f"Internal server error: {str(e)}",
         )
 
-    # Extract the output from the response
-    ai_message = response.get("output", "")
-    if not ai_message:
-        raise HTTPException(
-            status_code=500,
-            detail="AI response is empty",
-        )
 
-    return ActivityAIChatSessionResponse(
-        aichat_uuid=chat_session["aichat_uuid"],
-        activity_uuid=activity.activity_uuid,
-        message=ai_message,
-    )
-
-
-def ai_send_activity_chat_message(
+async def ai_send_activity_chat_message(
     request: Request,
     chat_session_object: SendActivityAIChatMessage,
     current_user: PublicUser = Depends(get_current_user),
-    db_session=Depends(get_db_session),
+    db_session: Session = Depends(get_db_session),
 ) -> ActivityAIChatSessionResponse:
-    """
-    Start a new AI Chat session with a Course Activity
-    """
-    # Get the Activity
-    statement = select(Activity).where(
-        Activity.activity_uuid == chat_session_object.activity_uuid
-    )
-    activity = db_session.exec(statement).first()
+    """Optimized AI chat message sending."""
 
-    activity = ActivityRead.model_validate(activity)
-
-    # Get the Course
-    statement = (
-        select(Course)
-        .join(Activity)
-        .where(Activity.activity_uuid == chat_session_object.activity_uuid)
-    )
-    course = db_session.exec(statement).first()
-    course = CourseRead.model_validate(course)
-
-    # Get the Organization
-    statement = select(Organization).where(Organization.id == course.org_id)
-    org = db_session.exec(statement).first()
-
-    if not activity:
-        raise HTTPException(
-            status_code=404,
-            detail="Activity not found",
+    try:
+        # Get cached activity data
+        activity, course, org_config = await _get_activity_data(
+            chat_session_object.activity_uuid, db_session
         )
 
-    # Get Activity Content Blocks
-    content = activity.content
+        # Process content and get chat session in parallel
+        content_task = asyncio.to_thread(
+            structure_activity_content_by_type, activity.content
+        )
+        chat_session_task = asyncio.to_thread(
+            get_chat_session_history, chat_session_object.aichat_uuid
+        )
 
-    # Serialize Activity Content Blocks to a text comprehensible by the AI
-    structured = structure_activity_content_by_type(content)
-    ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
-        structured, course, activity
-    )
+        structured, chat_session = await asyncio.gather(content_task, chat_session_task)
 
-    # Get Activity Organization
-    statement = select(Organization).where(Organization.id == course.org_id)
-    org = db_session.exec(statement).first()
+        # Generate AI-friendly text
+        ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
+            structured, course, activity
+        )
 
-    # Get Organization Config
-    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
-    result = db_session.exec(statement)
-    org_config = result.first()
+        # Get AI configuration
+        embeddings = "text-embedding-3-small"
+        ai_model = org_config.config["features"]["ai"]["model"]
 
-    org_config = OrganizationConfig.model_validate(org_config)
-    embeddings = "text-embedding-3-small"
-    ai_model = org_config.config["features"]["ai"]["model"]
+        # Optimized system message
+        system_message = (
+            f"You are a helpful Education Assistant for '{course.name}' course, "
+            f"helping with the '{activity.name}' lecture. "
+            "Use available tools to get context and provide accurate, helpful responses. "
+            "If context is insufficient, use your knowledge to assist the student."
+        )
 
-    chat_session = get_chat_session_history(chat_session_object.aichat_uuid)
+        # Use fast AI processing
+        response = await ask_ai_fast(
+            chat_session_object.message,
+            chat_session["message_history"],
+            ai_friendly_text,
+            system_message,
+            embeddings,
+            ai_model,
+            session_id=chat_session["aichat_uuid"],
+        )
 
-    message = "You are a helpful Education Assistant, and you are helping a student with the associated Course. "
-    message += "Use the available tools to get context about this question even if the question is not specific enough."
-    message += "For context, this is the Course name :"
-    message += course.name
-    message += " and this is the Lecture name :"
-    message += activity.name
-    message += "."
-    message += "Use your knowledge to help the student if the context is not enough."
+        if "error" in response:
+            raise HTTPException(
+                status_code=500,
+                detail=f"AI processing failed: {response['error']}",
+            )
 
-    response = ask_ai(
-        chat_session_object.message,
-        chat_session["message_history"],
-        ai_friendly_text,
-        message,
-        embeddings,
-        ai_model,
-        session_id=chat_session["aichat_uuid"],
-    )
+        ai_message = response.get("output", "")
+        if not ai_message:
+            raise HTTPException(
+                status_code=500,
+                detail="AI response is empty",
+            )
 
-    # Handle both success and error responses
-    if "error" in response:
+        return ActivityAIChatSessionResponse(
+            aichat_uuid=chat_session["aichat_uuid"],
+            activity_uuid=activity.activity_uuid,
+            message=ai_message,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"AI processing failed: {response['error']}",
+            detail=f"Internal server error: {str(e)}",
         )
-
-    # Extract the output from the response
-    ai_message = response.get("output", "")
-    if not ai_message:
-        raise HTTPException(
-            status_code=500,
-            detail="AI response is empty",
-        )
-
-    return ActivityAIChatSessionResponse(
-        aichat_uuid=chat_session["aichat_uuid"],
-        activity_uuid=activity.activity_uuid,
-        message=ai_message,
-    )

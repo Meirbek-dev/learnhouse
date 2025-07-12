@@ -1,3 +1,9 @@
+import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
+import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import type { Editor } from '@tiptap/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
   BetweenHorizontalStart,
@@ -9,18 +15,12 @@ import {
   MoreVertical,
   X,
 } from 'lucide-react';
-import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
-import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import touEmblemLight from 'public/tou_emblem_light.png';
-import { AnimatePresence, motion } from 'framer-motion';
-import type { ChangeEvent, KeyboardEvent } from 'react';
-import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import touEmblemLight from 'public/tou_emblem_light.png';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import Image from 'next/image';
 
 interface AIEditorToolkitProps {
   editor: Editor;
@@ -423,7 +423,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         mass: 0.2,
         velocity: 2,
       }}
-      className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center backdrop-blur-md"
+      className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center "
       style={{ pointerEvents: 'none' }}
     >
       <div
@@ -440,7 +440,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                 ),
                 radial-gradient(circle at 75% 25%, oklch(0.6231 0.188 259.8145 / 0.12) 0%, transparent 40%)`,
         }}
-        className="max-w-(--breakpoint-2xl) fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 backdrop-blur-md"
+        className="max-w-(--breakpoint-2xl) fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-inset ring-white/10 "
       >
         <div className="flex justify-center">
           <Image

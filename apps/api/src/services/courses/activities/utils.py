@@ -3,7 +3,7 @@ from src.db.courses.courses import CourseRead
 
 
 def structure_activity_content_by_type(activity):
-    ### Get Headings, Texts, Callouts, Answers and Paragraphs from the activity as a big list of strings (text only) and return it
+    """Get Headings, Texts, Callouts, Answers and Paragraphs from the activity as a big list of strings (text only) and return it"""
 
     if "content" not in activity or not activity["content"]:
         return []
@@ -15,8 +15,12 @@ def structure_activity_content_by_type(activity):
     paragraphs = []
 
     for item in content:
-        if "content" in item:
-            if item["type"] == "heading" and "text" in item["content"][0]:
+        if "content" in item and item["content"]:
+            if (
+                item["type"] == "heading"
+                and len(item["content"]) > 0
+                and "text" in item["content"][0]
+            ):
                 headings.append(item["content"][0]["text"])
             elif item["type"] in ["calloutInfo", "calloutWarning"] and all(
                 "text" in text_item for text_item in item["content"]
@@ -24,7 +28,11 @@ def structure_activity_content_by_type(activity):
                 callouts.append(
                     "".join([text_item["text"] for text_item in item["content"]])
                 )
-            elif item["type"] == "paragraph" and "text" in item["content"][0]:
+            elif (
+                item["type"] == "paragraph"
+                and len(item["content"]) > 0
+                and "text" in item["content"][0]
+            ):
                 paragraphs.append(item["content"][0]["text"])
 
     # TODO: Get Questions and Answers (if any)
