@@ -420,7 +420,7 @@ const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
   const sortedAuthors = [...authors]
     .filter((author) => author.authorship_status === 'ACTIVE')
     .sort((a, b) => {
-      const rolePriority: { [key: string]: number } = {
+      const rolePriority: Record<string, number> = {
         CREATOR: 0,
         MAINTAINER: 1,
         CONTRIBUTOR: 2,

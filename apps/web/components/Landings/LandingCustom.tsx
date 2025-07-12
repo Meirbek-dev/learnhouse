@@ -37,9 +37,9 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               background:
                 section.background.type === 'solid'
                   ? section.background.color
-                  : (section.background.type === 'gradient'
+                  : section.background.type === 'gradient'
                     ? `linear-gradient(${section.background.direction || '45deg'}, ${section.background.colors?.join(', ')})`
-                    : `url(${section.background.image}) center/cover`),
+                    : `url(${section.background.image}) center/cover`,
             }}
           >
             <div
@@ -53,9 +53,9 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                   className={`flex items-${section.illustration.verticalAlign} w-full p-6 ${
                     section.illustration.size === 'small'
                       ? 'sm:w-1/4'
-                      : (section.illustration.size === 'medium'
+                      : section.illustration.size === 'medium'
                         ? 'sm:w-1/3'
-                        : 'sm:w-2/5')
+                        : 'sm:w-2/5'
                   }`}
                 >
                   <img
@@ -71,9 +71,9 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                 className={`flex flex-1 items-center ${
                   section.contentAlign === 'left'
                     ? 'justify-start text-left'
-                    : (section.contentAlign === 'right'
+                    : section.contentAlign === 'right'
                       ? 'justify-end text-right'
-                      : 'justify-center text-center')
+                      : 'justify-center text-center'
                 } p-6`}
               >
                 <div className="max-w-2xl">
@@ -93,9 +93,9 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                     className={`flex flex-col gap-3 sm:flex-row sm:gap-4 ${
                       section.contentAlign === 'left'
                         ? 'justify-start'
-                        : (section.contentAlign === 'right'
+                        : section.contentAlign === 'right'
                           ? 'justify-end'
-                          : 'justify-center')
+                          : 'justify-center'
                     } items-center`}
                   >
                     {section.buttons.map((button, index) => (
@@ -218,7 +218,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                         border="border-4"
                         showProfilePopup
                       />
-                    ) : (person.image_url && person.image_url.trim() !== '' ? (
+                    ) : person.image_url && person.image_url.trim() !== '' ? (
                       <img
                         src={person.image_url}
                         alt={person.name}
@@ -228,7 +228,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                       <div className="soft-shadow flex h-full w-full items-center justify-center rounded-full border-4 border-white bg-gray-200">
                         <span className="text-xs text-gray-400">{t('noImage')}</span>
                       </div>
-                    ))}
+                    )}
                   </div>
                   <h3 className="text-center text-lg font-semibold text-gray-900">{person.name}</h3>
                   <p className="mt-1 text-center text-sm text-gray-600">{person.description}</p>

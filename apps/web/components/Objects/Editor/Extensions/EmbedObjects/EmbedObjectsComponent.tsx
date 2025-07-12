@@ -659,11 +659,11 @@ function EmbedObjectsComponent(props: any) {
                   )}
                   <h3 className="text-lg font-medium text-gray-800">
                     {activeInput === 'url'
-                      ? (selectedProduct
+                      ? selectedProduct
                         ? t('addProductEmbedTitle', {
                             productName: selectedProduct.name,
                           })
-                        : t('addEmbedUrlTitle'))
+                        : t('addEmbedUrlTitle')
                       : t('addEmbedCodeTitle')}
                   </h3>
                 </div>

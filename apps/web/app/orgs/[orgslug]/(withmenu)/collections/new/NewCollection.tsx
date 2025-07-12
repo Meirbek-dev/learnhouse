@@ -160,7 +160,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
                 </div>
-              ) : (courses?.length === 0 ? (
+              ) : courses?.length === 0 ? (
                 <p className="py-4 text-sm text-gray-500">{t('noCoursesAvailable')}</p>
               ) : (
                 <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50">
@@ -210,7 +210,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                     <p className="text-xs text-gray-500">{t('selectedCount', { count: selectedCourses.length })}</p>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

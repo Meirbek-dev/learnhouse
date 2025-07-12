@@ -100,7 +100,7 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
             </TableCell>
             <TableCell>
               <Badge
-                variant={item.status === 'active' ? 'default' : (item.status === 'completed' ? 'default' : 'secondary')}
+                variant={item.status === 'active' ? 'default' : item.status === 'completed' ? 'default' : 'secondary'}
               >
                 {item.status}
               </Badge>

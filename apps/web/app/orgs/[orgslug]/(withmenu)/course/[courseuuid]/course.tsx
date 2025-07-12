@@ -23,7 +23,7 @@ import useSWR from 'swr';
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');
   const [learnings, setLearnings] = useState<any>([]);
-  const [expandedChapters, setExpandedChapters] = useState<{ [key: string]: boolean }>({});
+  const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image');
   const { courseuuid } = props;
   const { orgslug } = props;
@@ -78,7 +78,7 @@ const CourseClient = (props: any) => {
         (sum: number, chapter: any) => sum + (chapter.activities?.length || 0),
         0,
       );
-      const defaultExpanded: { [key: string]: boolean } = {};
+      const defaultExpanded: Record<string, boolean> = {};
       course.chapters.forEach((chapter: any, idx: number) => {
         // Always expand the first chapter
         defaultExpanded[chapter.chapter_uuid] = idx === 0 ? true : totalActivities <= 5;

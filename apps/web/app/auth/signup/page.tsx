@@ -8,7 +8,7 @@ import SignUpClient from './signup';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: number }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata(params: MetadataProps): Promise<Metadata> {

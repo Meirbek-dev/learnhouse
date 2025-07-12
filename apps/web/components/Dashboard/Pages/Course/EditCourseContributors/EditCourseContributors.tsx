@@ -488,7 +488,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 <div className="soft-shadow divide-y rounded-xl bg-white">
                   {isSearching ? (
                     <div className="p-4 text-center text-sm text-gray-500">{t('searchingMessage')}</div>
-                  ) : (searchResults && searchResults.length > 0 ? (
+                  ) : searchResults && searchResults.length > 0 ? (
                     <>
                       {selectedUsers.length > 0 && (
                         <div className="bg-gray-100 p-3">
@@ -571,7 +571,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     </>
                   ) : (
                     <div className="p-4 text-center text-sm text-gray-500">{t('noUsersFoundMessage')}</div>
-                  ))}
+                  )}
                 </div>
               )}
               <div className="soft-shadow rounded-xl bg-white">

@@ -145,7 +145,7 @@ async def ai_start_activity_chat_session(
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Internal server error: {str(e)}",
+            detail=f"Internal server error: {e!s}",
         )
 
 
@@ -225,5 +225,5 @@ async def ai_send_activity_chat_message(
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Internal server error: {str(e)}",
+            detail=f"Internal server error: {e!s}",
         )

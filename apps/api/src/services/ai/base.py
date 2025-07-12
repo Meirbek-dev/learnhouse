@@ -4,7 +4,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import chromadb
 from langchain.agents import AgentExecutor, create_tool_calling_agent
@@ -32,10 +32,10 @@ os.environ.update(
 logger = logging.getLogger(__name__)
 
 # Global caches
-_vector_store_cache: Dict[str, Chroma] = {}
-_agent_cache: Dict[str, AgentExecutor] = {}
-_embedding_cache: Dict[str, Any] = {}
-_llm_cache: Dict[str, Any] = {}
+_vector_store_cache: dict[str, Chroma] = {}
+_agent_cache: dict[str, AgentExecutor] = {}
+_embedding_cache: dict[str, Any] = {}
+_llm_cache: dict[str, Any] = {}
 
 # Cache TTL in seconds
 VECTOR_STORE_TTL = 3600  # 1 hour
@@ -45,11 +45,11 @@ AGENT_TTL = 1800  # 30 minutes
 class CacheManager:
     """Thread-safe cache manager with TTL support."""
 
-    def __init__(self):
-        self._cache: Dict[str, Dict[str, Any]] = {}
-        self._timestamps: Dict[str, datetime] = {}
+    def __init__(self) -> None:
+        self._cache: dict[str, dict[str, Any]] = {}
+        self._timestamps: dict[str, datetime] = {}
 
-    def get(self, key: str, ttl: int = 3600) -> Optional[Any]:
+    def get(self, key: str, ttl: int = 3600) -> Any | None:
         """Get cached item if it exists and hasn't expired."""
         if key not in self._cache:
             return None
@@ -91,9 +91,9 @@ class OptimizedTextSplitter:
             length_function=length_function,
             separators=["\n\n", "\n", ". ", " ", ""],
         )
-        self._chunk_cache: Dict[str, List[str]] = {}
+        self._chunk_cache: dict[str, list[str]] = {}
 
-    def split_text(self, text: str) -> List[str]:
+    def split_text(self, text: str) -> list[str]:
         """Split text with caching."""
         if not text or not isinstance(text, str):
             return []
@@ -136,17 +136,17 @@ class FastAIService:
         """Cache LLM instances."""
         return get_llm(model_name)
 
-    def _generate_content_hash(self, documents: List[str]) -> str:
+    def _generate_content_hash(self, documents: list[str]) -> str:
         """Generate deterministic hash for document content."""
         content = "".join(sorted(documents))
         return hashlib.sha256(content.encode()).hexdigest()
 
     async def get_or_create_vector_store(
         self,
-        documents: List[str],
+        documents: list[str],
         embedding_model_name: str,
-        collection_name: Optional[str] = None,
-    ) -> Optional[Chroma]:
+        collection_name: str | None = None,
+    ) -> Chroma | None:
         """Get cached vector store or create new one."""
 
         # Generate cache key
@@ -172,10 +172,10 @@ class FastAIService:
 
     async def _create_vector_store(
         self,
-        documents: List[str],
+        documents: list[str],
         embedding_model_name: str,
-        collection_name: Optional[str] = None,
-    ) -> Optional[Chroma]:
+        collection_name: str | None = None,
+    ) -> Chroma | None:
         """Create vector store with optimizations."""
         try:
             # Get cached embedding function
@@ -231,7 +231,7 @@ class FastAIService:
         system_prompt: str,
         vector_store: Chroma,
         max_iterations: int = 3,
-    ) -> Optional[AgentExecutor]:
+    ) -> AgentExecutor | None:
         """Get cached agent or create new one."""
 
         # Generate cache key
@@ -271,7 +271,7 @@ class FastAIService:
         system_prompt: str,
         vector_store: Chroma,
         max_iterations: int = 3,
-    ) -> Optional[AgentExecutor]:
+    ) -> AgentExecutor | None:
         """Create agent with optimizations."""
         try:
             # Get cached LLM
@@ -324,13 +324,13 @@ class FastAIService:
 
 async def ask_ai_fast(
     question: str,
-    message_history: Union[RedisChatMessageHistory, List],
+    message_history: RedisChatMessageHistory | list,
     text_reference: str,
     message_for_the_prompt: str,
     embedding_model_name: str,
     openai_model_name: str,
     session_id: str = "default",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Fast AI processing with comprehensive optimizations."""
 
     # Input validation
@@ -385,13 +385,13 @@ async def ask_ai_fast(
         logger.info("AI query processed successfully")
         return result
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.error("AI processing timed out")
         return {"error": "Request timed out", "type": "timeout_error"}
     except Exception as e:
         logger.error(f"Error processing AI request: {e}")
         return {
-            "error": f"AI processing failed: {str(e)}",
+            "error": f"AI processing failed: {e!s}",
             "type": "ai_processing_error",
         }
 
@@ -399,13 +399,13 @@ async def ask_ai_fast(
 # Backwards compatibility wrapper
 def ask_ai(
     question: str,
-    message_history: Union[RedisChatMessageHistory, List],
+    message_history: RedisChatMessageHistory | list,
     text_reference: str,
     message_for_the_prompt: str,
     embedding_model_name: str,
     openai_model_name: str,
     session_id: str = "default",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Synchronous wrapper for the async fast AI function."""
     try:
         # Get or create event loop
@@ -429,10 +429,10 @@ def ask_ai(
         )
     except Exception as e:
         logger.error(f"Error in ask_ai wrapper: {e}")
-        return {"error": f"AI processing failed: {str(e)}", "type": "wrapper_error"}
+        return {"error": f"AI processing failed: {e!s}", "type": "wrapper_error"}
 
 
-def get_chat_session_history(aichat_uuid: Optional[str] = None) -> Dict[str, Any]:
+def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
     """Optimized chat session history with connection pooling."""
     try:
         session_id = aichat_uuid or f"aichat_{ULID()}"

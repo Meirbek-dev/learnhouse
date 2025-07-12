@@ -11,7 +11,7 @@ import { useAssignments } from './AssignmentContext';
 
 interface State {
   selectedAssignmentTaskUUID: string | null;
-  assignmentTask: { [key: string]: any };
+  assignmentTask: Record<string, any>;
   reloadTrigger: number;
 }
 

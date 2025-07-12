@@ -8,7 +8,7 @@ import CourseClient from './course';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseuuid: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {

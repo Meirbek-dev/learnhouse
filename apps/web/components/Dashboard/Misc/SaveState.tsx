@@ -138,7 +138,7 @@ function SaveState(props: { orgslug: string }) {
             />
             <div>{t('saving')}</div>
           </>
-        ) : (saved ? (
+        ) : saved ? (
           <>
             <Check size={20} />
             <div>{t('saved')}</div>
@@ -148,7 +148,7 @@ function SaveState(props: { orgslug: string }) {
             <SaveAllIcon size={20} />
             <div>{t('save')}</div>
           </>
-        ))}
+        )}
       </div>
     </div>
   );

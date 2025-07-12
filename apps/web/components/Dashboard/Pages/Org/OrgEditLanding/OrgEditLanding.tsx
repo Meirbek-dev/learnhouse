@@ -189,7 +189,7 @@ const getSectionTypes = (t: Function) => ({
 });
 
 // Map gradient direction keys to translation keys
-const GRADIENT_DIRECTION_KEYS: { [key: string]: string } = {
+const GRADIENT_DIRECTION_KEYS: Record<string, string> = {
   '45deg': 'topRight',
   '90deg': 'top',
   '135deg': 'topLeft',
@@ -207,7 +207,7 @@ const getGradientDirections = (t: Function) => {
       acc[key] = t(`GradientDirections.${tKey}`);
       return acc;
     },
-    {} as { [key: string]: string },
+    {} as Record<string, string>,
   );
 };
 

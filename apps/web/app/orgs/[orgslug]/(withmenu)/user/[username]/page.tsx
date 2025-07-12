@@ -11,7 +11,7 @@ interface UserPageParams {
 
 interface UserPageProps {
   params: Promise<UserPageParams>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
@@ -48,9 +48,9 @@ async function UserPage({ params }: UserPageProps) {
   try {
     const userData = await getUserByUsername(username);
     const profile = userData.profile
-      ? (typeof userData.profile === 'string'
+      ? typeof userData.profile === 'string'
         ? JSON.parse(userData.profile)
-        : userData.profile)
+        : userData.profile
       : { sections: [] };
 
     return (

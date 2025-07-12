@@ -9,7 +9,7 @@ import ActivityClient from './activity';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 interface Session {

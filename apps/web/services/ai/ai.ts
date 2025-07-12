@@ -1,5 +1,5 @@
-import { getAPIUrl } from '@services/config/config';
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 interface AIResponse {
   success: boolean;
@@ -47,7 +47,6 @@ export async function sendActivityAIChatMessage(
   activity_uuid: string,
   access_token: string,
 ): Promise<AIResponse> {
-
   try {
     const data = { aichat_uuid, message, activity_uuid };
     const result = await fetch(

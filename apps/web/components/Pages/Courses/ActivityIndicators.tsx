@@ -111,7 +111,7 @@ const ActivityTooltipContent = memo(
             {getActivityTypeLabel(activity.activity_type, t)}
           </span>
           <span className="text-xs text-gray-400">
-            {isCurrent ? t('currentActivity') : (isDone ? t('completed') : t('notStarted'))}
+            {isCurrent ? t('currentActivity') : isDone ? t('completed') : t('notStarted')}
           </span>
         </div>
       </div>

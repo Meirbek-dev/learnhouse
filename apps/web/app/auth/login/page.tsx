@@ -6,7 +6,7 @@ import LoginClient from './login';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata(params: MetadataProps): Promise<Metadata> {

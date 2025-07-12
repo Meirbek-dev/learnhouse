@@ -27,7 +27,7 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
   const [expandedProducts, setExpandedProducts] = useState<{
     [key: string]: boolean;
   }>({});
-  const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
+  const [isProcessing, setIsProcessing] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
   const { data: linkedProducts, error } = useSWR(
@@ -163,9 +163,9 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
           >
             {isProcessing[product.id]
               ? t('processing')
-              : (product.product_type === 'subscription'
+              : product.product_type === 'subscription'
                 ? t('subscribeNow')
-                : t('purchaseNow'))}
+                : t('purchaseNow')}
           </Button>
         </div>
       ))}

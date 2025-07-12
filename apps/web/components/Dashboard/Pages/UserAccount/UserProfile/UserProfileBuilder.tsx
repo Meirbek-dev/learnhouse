@@ -214,7 +214,7 @@ const UserProfileBuilder = () => {
 
   // Get the appropriate date-fns locale
   const getDateFnsLocale = (locale: string): Locale => {
-    const localeMap: { [key: string]: Locale } = {
+    const localeMap: Record<string, Locale> = {
       en: enUS,
       es: es,
       fr: fr,
@@ -1041,7 +1041,7 @@ const ExperienceEditor: FC<{
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0] ?? 'ru';
   const dateFnsLocale = (() => {
-    const localeMap: { [key: string]: Locale } = {
+    const localeMap: Record<string, Locale> = {
       en: enUS,
       es: es,
       fr: fr,
@@ -1235,7 +1235,7 @@ const EducationEditor: FC<{
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0] ?? 'ru';
   const dateFnsLocale = (() => {
-    const localeMap: { [key: string]: Locale } = {
+    const localeMap: Record<string, Locale> = {
       en: enUS,
       es: es,
       fr: fr,

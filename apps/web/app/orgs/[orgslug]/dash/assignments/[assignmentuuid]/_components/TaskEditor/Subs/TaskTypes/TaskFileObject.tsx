@@ -394,7 +394,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     <div className="text-xs font-medium sm:text-sm">{t('signInToUpload')}</div>
                   </div>
                 </div>
-              ) : (isLoading ? (
+              ) : isLoading ? (
                 <div className="mt-5 flex w-full items-center justify-center">
                   <input
                     type="file"
@@ -429,7 +429,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     <span>{t('submitFile')}</span>
                   </button>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

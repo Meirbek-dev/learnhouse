@@ -31,8 +31,8 @@ interface User {
   email: string;
   avatar_image: string;
   bio: string;
-  details: { [key: string]: any };
-  profile: { [key: string]: any };
+  details: Record<string, any>;
+  profile: Record<string, any>;
   id: number;
   user_uuid: string;
 }

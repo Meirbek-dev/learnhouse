@@ -31,7 +31,7 @@ const NavigationButtons = memo(
     currentIndex: number;
     allActivities: any[];
     navigateToActivity: (activity: any) => void;
-    t: (key: string, values?: { [key: string]: any }) => string;
+    t: (key: string, values?: Record<string, any>) => string;
   }) => (
     <div className="flex items-center space-x-2 sm:space-x-3">
       <button
@@ -102,7 +102,7 @@ NavigationButtons.displayName = 'NavigationButtons';
 
 // Memoized course info component
 const CourseInfo = memo(
-  ({ course, org, t }: { course: any; org: any; t: (key: string, values?: { [key: string]: any }) => string }) => (
+  ({ course, org, t }: { course: any; org: any; t: (key: string, values?: Record<string, any>) => string }) => (
     <div className="flex min-w-0 flex-shrink items-center space-x-2 sm:space-x-4">
       <img
         className="h-[20px] w-[35px] flex-shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"

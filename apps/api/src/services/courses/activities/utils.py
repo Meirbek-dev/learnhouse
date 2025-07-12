@@ -15,7 +15,7 @@ def structure_activity_content_by_type(activity):
     paragraphs = []
 
     for item in content:
-        if "content" in item and item["content"]:
+        if item.get("content"):
             if (
                 item["type"] == "heading"
                 and len(item["content"]) > 0

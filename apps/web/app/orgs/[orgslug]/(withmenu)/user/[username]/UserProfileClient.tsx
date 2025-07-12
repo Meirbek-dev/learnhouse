@@ -341,7 +341,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                             <div className="flex items-center justify-center py-8">
                               <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
                             </div>
-                          ) : (userCourses.length > 0 ? (
+                          ) : userCourses.length > 0 ? (
                             <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-8 pb-8">
                               {userCourses.map((course) => (
                                 <div
@@ -357,7 +357,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                             </div>
                           ) : (
                             <div className="py-8 text-center text-gray-500">{t('courseSection.noCoursesFound')}</div>
-                          ))}
+                          )}
                         </div>
                       )}
                     </div>

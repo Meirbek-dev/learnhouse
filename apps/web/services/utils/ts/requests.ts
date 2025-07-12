@@ -14,7 +14,7 @@ const createRequestInit = (
 ): RequestInit & { next?: any } => {
   const { data, token, next, isJson = true, limitBodyToMethods = false } = config;
 
-  const headers: { [key: string]: string } = {};
+  const headers: Record<string, string> = {};
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -85,7 +85,7 @@ export const RequestBodyFormWithAuthHeader = (method: string, data: any, next: a
 };
 
 export const swrFetcher = async (url: string, token?: string) => {
-  const headers: { [key: string]: string } = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
   if (token) {

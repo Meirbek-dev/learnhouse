@@ -243,7 +243,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   const sortedAuthors = [...course.authors]
     .filter((author) => author.authorship_status === 'ACTIVE')
     .sort((a, b) => {
-      const rolePriority: { [key: string]: number } = {
+      const rolePriority: Record<string, number> = {
         CREATOR: 0,
         MAINTAINER: 1,
         CONTRIBUTOR: 2,
@@ -289,7 +289,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
               >
                 {isActionLoading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (isStarted ? (
+                ) : isStarted ? (
                   <>
                     <LogOut className="h-4 w-4" />
                     {t('leaveCourse')}
@@ -299,7 +299,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                     <LogIn className="h-4 w-4" />
                     {t('startCourse')}
                   </>
-                ))}
+                )}
               </button>
             ) : (
               <>

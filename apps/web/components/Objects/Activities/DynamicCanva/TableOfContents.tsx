@@ -127,7 +127,7 @@ const TOCItem = styled.li<{ level: number }>`
     padding: 0;
     color: #23272f;
     font-weight: ${({ level }) => (level === 1 ? 500 : 400)};
-    font-size: ${({ level }) => (level === 1 ? '1rem' : (level === 2 ? '0.97rem' : '0.95rem'))};
+    font-size: ${({ level }) => (level === 1 ? '1rem' : level === 2 ? '0.97rem' : '0.95rem')};
     line-height: 1.4;
     text-decoration: none;
     word-break: break-word;
