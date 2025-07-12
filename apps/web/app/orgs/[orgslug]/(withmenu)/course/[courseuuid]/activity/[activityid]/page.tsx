@@ -1,9 +1,8 @@
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import type { Metadata } from 'next';
-import { JetBrains_Mono } from 'next/font/google';
 import { getTranslations } from 'next-intl/server';
+import { JetBrains_Mono } from 'next/font/google';
+import type { Metadata } from 'next';
 import { auth } from '@/auth';
 
 import ActivityClient from './activity';

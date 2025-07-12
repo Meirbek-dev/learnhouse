@@ -1,6 +1,6 @@
-import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import type { Metadata } from 'next';
 
 import ClientAdminLayout from './ClientAdminLayout';
 

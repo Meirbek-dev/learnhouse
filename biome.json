@@ -1,22 +1,17 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.0.5/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
   "files": {
     "ignoreUnknown": true,
-    "maxSize": 10000000,
-    "includes": ["**"]
+    "includes": ["**"],
+    "maxSize": 10000000
   },
   "formatter": {
+    "attributePosition": "auto",
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 120,
-    "attributePosition": "auto"
+    "lineWidth": 120
   },
   "javascript": {
     "formatter": {
@@ -24,70 +19,75 @@
       "bracketSpacing": true,
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
-      "semicolons": "always",
       "quoteStyle": "single",
+      "semicolons": "always",
       "trailingCommas": "all"
     }
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noExplicitAny": "off",
-        "noReactSpecificProps": "off",
-        "noDoubleEquals": "off",
-        "noEmptyBlockStatements": "off",
-        "noShadowRestrictedNames": "off",
-        "useAwait": "off",
-        "noArrayIndexKey": "off"
-      },
-      "correctness": {
-        "noUndeclaredDependencies": "off",
-        "useImportExtensions": "off",
-        "noUnusedVariables": "off",
-        "noUndeclaredVariables": "off",
-        "noUnusedFunctionParameters": "off",
-        "useExhaustiveDependencies": "off",
-        "noUnusedImports": "warn"
-      },
-      "style": {
-        "useNamingConvention": "off",
-        "useTemplate": "warn",
-        "useDefaultParameterLast": "off",
-        "noUselessElse": "warn",
-        "useSelfClosingElements": "warn",
-        "noDefaultExport": "off",
-        "noImplicitBoolean": "off",
-        "useCollapsedElseIf": "warn",
-        "noParameterAssign": "error",
-        "useAsConstAssertion": "error",
-        "useEnumInitializers": "error",
-        "useSingleVarDeclarator": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error"
+      "a11y": {
+        "noStaticElementInteractions": "off",
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off",
+        "useKeyWithClickEvents": "off"
       },
       "complexity": {
         "noBannedTypes": "off",
-        "noUselessCatch": "off",
         "noForEach": "off",
+        "noUselessCatch": "off",
         "useSimplifiedLogicExpression": "warn"
       },
-      "a11y": {
-        "noStaticElementInteractions": "off",
-        "useButtonType": "off",
-        "useKeyWithClickEvents": "off",
-        "noSvgWithoutTitle": "off"
-      },
-      "performance": {
-        "useTopLevelRegex": "off",
-        "noNamespaceImport": "off",
-        "noImgElement": "off"
+      "correctness": {
+        "noUndeclaredDependencies": "off",
+        "noUndeclaredVariables": "off",
+        "noUnusedFunctionParameters": "off",
+        "noUnusedImports": "warn",
+        "noUnusedVariables": "off",
+        "useExhaustiveDependencies": "off",
+        "useImportExtensions": "off"
       },
       "nursery": {
         "useUniqueElementIds": "off"
+      },
+      "performance": {
+        "noImgElement": "off",
+        "noNamespaceImport": "off",
+        "useTopLevelRegex": "off"
+      },
+      "recommended": true,
+      "style": {
+        "noDefaultExport": "off",
+        "noImplicitBoolean": "off",
+        "noInferrableTypes": "error",
+        "noParameterAssign": "error",
+        "noUnusedTemplateLiteral": "error",
+        "noUselessElse": "warn",
+        "useAsConstAssertion": "error",
+        "useCollapsedElseIf": "warn",
+        "useDefaultParameterLast": "off",
+        "useEnumInitializers": "error",
+        "useNamingConvention": "off",
+        "useNumberNamespace": "error",
+        "useSelfClosingElements": "warn",
+        "useSingleVarDeclarator": "error",
+        "useTemplate": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noDoubleEquals": "off",
+        "noEmptyBlockStatements": "off",
+        "noExplicitAny": "off",
+        "noReactSpecificProps": "off",
+        "noShadowRestrictedNames": "off",
+        "useAwait": "off"
       }
     }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
   }
 }

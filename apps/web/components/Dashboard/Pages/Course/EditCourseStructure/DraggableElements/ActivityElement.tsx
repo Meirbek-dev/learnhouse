@@ -1,22 +1,22 @@
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { Draggable } from '@hello-pangea/dnd';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { deleteActivity, updateActivity } from '@services/courses/activities';
-import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { Backpack, Eye, File, FilePenLine, Globe, Loader2, Lock, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
-import Link from 'next/link';
+import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { deleteActivity, updateActivity } from '@services/courses/activities';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useCallback, useEffect, useState } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import * as React from 'react';
+import Link from 'next/link';
 import { mutate } from 'swr';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface ActivitiyElementProps {
   orgslug: string;

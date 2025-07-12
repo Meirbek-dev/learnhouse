@@ -9,38 +9,38 @@
 
 # Auto-detect if inside Zellij
 if [ -z "$LAUNCH_TARGET" ] && [ -n "$ZELLIJ_PANE_ID" ]; then
-    CURRENT_TARGET="zellij"
+  CURRENT_TARGET="zellij"
 elif [ -z "$LAUNCH_TARGET" ]; then
-    CURRENT_TARGET="konsole"
+  CURRENT_TARGET="konsole"
 else
-    CURRENT_TARGET="$LAUNCH_TARGET"
+  CURRENT_TARGET="$LAUNCH_TARGET"
 fi
 
 echo "Launching services using target: $CURRENT_TARGET"
 
 # Function to run a command in the selected target
 launch_in_target() {
-    local command="$1"
-    local name="$2" # Optional: name for Zellij pane/tab if supported/needed
+  local command="$1"
+  local name="$2" # Optional: name for Zellij pane/tab if supported/needed
 
-    echo "Starting $name..."
+  echo "Starting $name..."
 
-    case "$CURRENT_TARGET" in
-        konsole)
-            # Konsole: Open in a new window
-            # Note: --new-tab might be preferred if you want them in one Konsole window
-            konsole --new-window -e "/bin/bash -c \"$command; echo 'Press Enter to close...'; read\"" &
-            ;;
-        zellij)
-            # Zellij: Open in a new pane in the current tab
-            # The -- command part is crucial for zellij run
-            zellij run -- /bin/bash -c "$command" &
-            ;;
-        *)
-            echo "Error: Unknown launch target '$CURRENT_TARGET'. Running in background."
-            /bin/bash -c "$command" &
-            ;;
-    esac
+  case "$CURRENT_TARGET" in
+    konsole)
+      # Konsole: Open in a new window
+      # Note: --new-tab might be preferred if you want them in one Konsole window
+      konsole --new-window -e "/bin/bash -c \"$command; echo 'Press Enter to close...'; read\"" &
+      ;;
+    zellij)
+      # Zellij: Open in a new pane in the current tab
+      # The -- command part is crucial for zellij run
+      zellij run -- /bin/bash -c "$command" &
+      ;;
+    *)
+      echo "Error: Unknown launch target '$CURRENT_TARGET'. Running in background."
+      /bin/bash -c "$command" &
+      ;;
+  esac
 }
 
 # Start Frontend

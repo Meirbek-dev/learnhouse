@@ -1,7 +1,5 @@
 'use client';
 
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { Textarea } from '@components/ui/textarea';
 import {
   SiCanva,
   SiCodepen,
@@ -17,14 +15,15 @@ import {
   SiX,
   SiYoutube,
 } from '@icons-pack/react-simple-icons';
-import { NodeViewWrapper } from '@tiptap/react';
-import DOMPurify from 'dompurify';
 import { AlignCenter, Code, GripHorizontal, GripVertical, Link as LinkIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import * as React from 'react';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { NodeViewWrapper } from '@tiptap/react';
+import { useTranslations } from 'next-intl';
+import DOMPurify from 'dompurify';
+import * as React from 'react';
 
 // Add new type for script-based embeds
 const SCRIPT_BASED_EMBEDS = {
@@ -660,11 +659,11 @@ function EmbedObjectsComponent(props: any) {
                   )}
                   <h3 className="text-lg font-medium text-gray-800">
                     {activeInput === 'url'
-                      ? selectedProduct
+                      ? (selectedProduct
                         ? t('addProductEmbedTitle', {
                             productName: selectedProduct.name,
                           })
-                        : t('addEmbedUrlTitle')
+                        : t('addEmbedUrlTitle'))
                       : t('addEmbedCodeTitle')}
                   </h3>
                 </div>

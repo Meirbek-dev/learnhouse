@@ -1,12 +1,12 @@
 'use client';
 
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { getUriWithOrg } from '@services/config/config';
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Video } from 'lucide-react';
-import Link from 'next/link';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { Fragment, memo, useMemo, useState } from 'react';
+import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Fragment, memo, useMemo, useState } from 'react';
+import Link from 'next/link';
 
 interface Props {
   course: any;
@@ -111,7 +111,7 @@ const ActivityTooltipContent = memo(
             {getActivityTypeLabel(activity.activity_type, t)}
           </span>
           <span className="text-xs text-gray-400">
-            {isCurrent ? t('currentActivity') : isDone ? t('completed') : t('notStarted')}
+            {isCurrent ? t('currentActivity') : (isDone ? t('completed') : t('notStarted'))}
           </span>
         </div>
       </div>

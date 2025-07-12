@@ -1,7 +1,7 @@
 'use client';
 import { Backpack, Book, ChevronRight, CreditCard, School, User, Users } from 'lucide-react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 interface BreadCrumbsProps {
   type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments';

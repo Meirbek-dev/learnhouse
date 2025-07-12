@@ -1,18 +1,18 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage';
 import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage';
 import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { motion } from 'framer-motion';
 import { Gem, Settings, Users } from 'lucide-react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import { use } from 'react';
 
 export interface PaymentsParams {

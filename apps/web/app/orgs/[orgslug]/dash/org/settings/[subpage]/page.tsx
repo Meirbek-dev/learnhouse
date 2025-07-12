@@ -1,17 +1,17 @@
 'use client';
 
-import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import { CodeIcon, ImageIcon, LayoutDashboardIcon, type LucideIcon, Share2Icon, TextIcon } from 'lucide-react';
+import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
+import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral';
 import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages';
-import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
 import OrgEditOther from '@components/Dashboard/Pages/Org/OrgEditOther/OrgEditOther';
-import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
+import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { getUriWithOrg } from '@services/config/config';
-import { motion } from 'framer-motion';
-import { CodeIcon, ImageIcon, LayoutDashboardIcon, type LucideIcon, Share2Icon, TextIcon } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 import { use, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export interface OrgParams {
   subpage: string;

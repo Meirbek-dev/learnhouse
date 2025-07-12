@@ -1,10 +1,10 @@
 'use client';
 
 import { X as RemoveIcon } from 'lucide-react';
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 /**
  * used for identifying the split char and use will pasting

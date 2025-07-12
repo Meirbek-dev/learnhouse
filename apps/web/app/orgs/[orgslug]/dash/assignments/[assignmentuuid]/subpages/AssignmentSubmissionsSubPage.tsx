@@ -1,16 +1,16 @@
 'use client';
 
-import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { getAPIUrl } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { swrFetcher } from '@services/utils/ts/requests';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { SendHorizonal, UserCheck, X } from 'lucide-react';
+import { swrFetcher } from '@services/utils/ts/requests';
+import UserAvatar from '@components/Objects/UserAvatar';
 import { useLocale, useTranslations } from 'next-intl'; // Import useLocale
+import { getAPIUrl } from '@services/config/config';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 

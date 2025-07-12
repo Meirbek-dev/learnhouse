@@ -1,15 +1,15 @@
 'use client';
-import Image from 'next/image';
-import { useTranslations } from 'next-intl';
-import AssignmentActivityImage from 'public//activities_types/assignment-page-activity.png';
 import DocumentPdfPageActivityImage from 'public//activities_types/documentpdf-page-activity.png';
-import VideoPageActivityImage from 'public//activities_types/video-page-activity.png';
+import AssignmentActivityImage from 'public//activities_types/assignment-page-activity.png';
 import DynamicPageActivityImage from 'public/activities_types/dynamic-page-activity.png';
+import VideoPageActivityImage from 'public//activities_types/video-page-activity.png';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import Image from 'next/image';
 
-import Assignment from './NewActivityModal/AssignmentActivityModal';
 import DocumentPdfModal from './NewActivityModal/DocumentActivityModal';
 import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal';
+import Assignment from './NewActivityModal/AssignmentActivityModal';
 import VideoModal from './NewActivityModal/VideoActivityModal';
 
 function NewActivityModal({

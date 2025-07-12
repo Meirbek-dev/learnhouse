@@ -2,16 +2,16 @@
 
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 
-import { NodeViewWrapper } from '@tiptap/react';
-import { motion } from 'framer-motion';
 import { BookOpen, ChevronDown, ExternalLink, Lightbulb, Save, Sigma } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { NodeViewWrapper } from '@tiptap/react';
+import { useTranslations } from 'next-intl';
+import { styled } from 'styled-components';
+import type { ChangeEvent } from 'react';
+import { BlockMath } from 'react-katex';
+import { motion } from 'framer-motion';
 import 'katex/dist/katex.min.css';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import type { ChangeEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { BlockMath } from 'react-katex';
-import { styled } from 'styled-components';
 
 // Predefined LaTeX templates
 const mathTemplates = [

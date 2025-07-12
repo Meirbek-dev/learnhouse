@@ -1,9 +1,9 @@
-import { getAPIUrl } from '@services/config/config';
 import {
   getResponseMetadata,
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
 } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 export async function createAssignment(body: any, access_token: string) {
   const result: any = await fetch(

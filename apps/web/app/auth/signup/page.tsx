@@ -1,7 +1,7 @@
-import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import type { Metadata } from 'next';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import SignUpClient from './signup';

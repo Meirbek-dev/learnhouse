@@ -1,10 +1,3 @@
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import {
-  useAssignmentsTask,
-  useAssignmentsTaskDispatch,
-} from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import {
   getAssignmentTask,
   getAssignmentTaskSubmissionsMe,
@@ -12,9 +5,16 @@ import {
   handleAssignmentTaskSubmission,
   updateAssignmentTask,
 } from '@services/courses/assignments';
+import {
+  useAssignmentsTask,
+  useAssignmentsTaskDispatch,
+} from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Check, Info, Minus, Plus, PlusCircle, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 
 interface QuizSchema {

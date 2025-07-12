@@ -1,12 +1,12 @@
 'use client';
 
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { NodeViewWrapper } from '@tiptap/react';
 import { BadgeHelp, Check, Minus, Plus, RefreshCcw } from 'lucide-react';
+import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import ReactConfetti from 'react-confetti';
 import { twMerge } from 'tailwind-merge';
+import { useState } from 'react';
 
 interface Answer {
   answer_id: string;

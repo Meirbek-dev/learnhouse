@@ -1,23 +1,23 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { Textarea } from '@components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertTriangle, Code2, PencilLine, Plus, Trash2 } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { updateOrganization } from '@services/settings/org';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
-import { updateOrganization } from '@services/settings/org';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { AlertTriangle, Code2, PencilLine, Plus, Trash2 } from 'lucide-react';
+import { Textarea } from '@components/ui/textarea';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
+import React from 'react';
 import { z } from 'zod';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Script {
   name: string;

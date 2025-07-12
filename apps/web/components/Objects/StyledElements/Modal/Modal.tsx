@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +10,7 @@ import {
   DialogTrigger,
 } from '@components/ui/dialog';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';

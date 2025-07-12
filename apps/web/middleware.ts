@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
-import { auth } from '@/auth';
 import { getDefaultOrg, getUriWithOrg, OPENU_TOP_DOMAIN } from './services/config/config';
+import { auth } from '@/auth';
 
 export const config = {
   matcher: [

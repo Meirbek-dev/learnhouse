@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 import CollectionsLogo from 'public/svg/collections.svg';
 import CoursesLogo from 'public/svg/courses.svg';

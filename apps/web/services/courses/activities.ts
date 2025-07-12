@@ -1,9 +1,9 @@
-import { getAPIUrl } from '@services/config/config';
 import {
   getResponseMetadata,
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
 } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 export async function createActivity(data: any, chapter_id: number, org_id: number, access_token: string) {
   data.content = {};

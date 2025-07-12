@@ -1,21 +1,21 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
-import { getAPIUrl } from '@services/config/config';
+import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Toast from '@components/Objects/StyledElements/Toast/Toast';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeUserFromOrg } from '@services/organizations/orgs';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 import { KeyRound, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { useState } from 'react';
 
 function OrgUsers() {
   const org = useOrg() as any;

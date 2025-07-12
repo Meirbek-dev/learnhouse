@@ -1,36 +1,39 @@
 {
-  "name": "openu",
-  "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "turbo run build",
-    "start": "turbo run start",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "oxlint": "oxlint --fix --fix-suggestions",
-    "format": "prettier --write \"**/*.{js,ts,tsx,md,css}\"",
-    "fresh-install": "rm -rf node_modules apps/web/node_modules && pnpm install"
-  },
   "devDependencies": {
     "@biomejs/biome": "2.1.1",
-    "eslint": "^9.30.1",
+    "eslint": "^9.31.0",
     "oxlint": "^1.6.0",
     "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-sort-imports": "^1.8.8",
+    "prettier-plugin-sort-json": "^4.1.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "turbo": "^2.5.4"
   },
-  "packageManager": "pnpm@10.13.1",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=10.0.0"
   },
+  "name": "openu",
+  "packageManager": "pnpm@10.13.1",
   "pnpm": {
     "overrides": {
       "@types/react": "19.1.8",
       "@types/react-dom": "19.1.6"
     }
-  }
+  },
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "format": "prettier --write \"**/*.{js,ts,tsx,md,css,json}\"",
+    "fresh-install": "rm -rf node_modules apps/web/node_modules && pnpm install",
+    "lint": "turbo run lint",
+    "oxlint": "oxlint --fix --fix-suggestions",
+    "start": "turbo run start"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

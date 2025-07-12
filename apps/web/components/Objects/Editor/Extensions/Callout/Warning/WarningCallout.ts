@@ -1,6 +1,6 @@
-import { mergeAttributes, Node } from '@tiptap/core';
-import { ReactNodeViewRenderer } from '@tiptap/react';
 import WarningCalloutComponent from './WarningCalloutComponent';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes, Node } from '@tiptap/core';
 
 export default Node.create({
   name: 'calloutWarning',

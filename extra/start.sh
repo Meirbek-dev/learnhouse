@@ -16,7 +16,10 @@ cd /app/api || {
 }
 
 # Start API service
-pm2 start app.py --cwd /app/api --interpreter /app/api/.venv/bin/python --name openu-api > /dev/null 2>&1 || { echo "Failed to start openu-api"; exit 1; }
+pm2 start app.py --cwd /app/api --interpreter /app/api/.venv/bin/python --name openu-api > /dev/null 2>&1 || {
+  echo "Failed to start openu-api"
+  exit 1
+}
 
 # Change back to app root
 cd /app || {
@@ -31,4 +34,3 @@ nginx -g 'daemon off;' &
 
 # Tail Nginx error and access logs
 pm2 logs
-

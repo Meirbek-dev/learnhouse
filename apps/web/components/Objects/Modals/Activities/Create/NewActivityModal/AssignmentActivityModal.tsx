@@ -1,27 +1,27 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { getAPIUrl } from '@services/config/config';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createActivity, deleteActivity } from '@services/courses/activities';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { createAssignment } from '@services/courses/assignments';
-import { format } from 'date-fns';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { getAPIUrl } from '@services/config/config';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { mutate } from 'swr';
 import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 
 const createValidationSchema = (t: (key: string) => string) =>
   z.object({

@@ -1,32 +1,32 @@
 'use client';
 
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { getAPIUrl } from '@services/config/config';
-import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { searchOrgContent } from '@services/search/search';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
+import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { searchOrgContent } from '@services/search/search';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { useLocale, useTranslations } from 'next-intl';
+import { Checkbox } from '@/components/ui/checkbox';
+import { getAPIUrl } from '@services/config/config';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import type { Locale } from '@/i18n/config';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
 
 interface EditCourseContributorsProps {
   orgslug: string;
@@ -488,7 +488,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 <div className="soft-shadow divide-y rounded-xl bg-white">
                   {isSearching ? (
                     <div className="p-4 text-center text-sm text-gray-500">{t('searchingMessage')}</div>
-                  ) : searchResults && searchResults.length > 0 ? (
+                  ) : (searchResults && searchResults.length > 0 ? (
                     <>
                       {selectedUsers.length > 0 && (
                         <div className="bg-gray-100 p-3">
@@ -571,7 +571,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     </>
                   ) : (
                     <div className="p-4 text-center text-sm text-gray-500">{t('noUsersFoundMessage')}</div>
-                  )}
+                  ))}
                 </div>
               )}
               <div className="soft-shadow rounded-xl bg-white">

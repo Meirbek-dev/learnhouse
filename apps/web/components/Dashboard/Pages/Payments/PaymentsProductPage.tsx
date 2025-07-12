@@ -1,31 +1,31 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { Badge } from '@components/ui/badge';
-import { Button } from '@components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Textarea } from '@components/ui/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
-import { getPaymentConfigs } from '@services/payments/payments';
-import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
-import currencyCodes from 'currency-codes';
 import { Archive, ChevronDown, ChevronUp, Info, Pencil, Plus, RefreshCcw, SquareCheck } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getPaymentConfigs } from '@services/payments/payments';
+import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useState } from 'react';
+import { Textarea } from '@components/ui/textarea';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Badge } from '@components/ui/badge';
+import { useTranslations } from 'next-intl';
+import currencyCodes from 'currency-codes';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { z } from 'zod';
 
-import CreateProductForm from './SubComponents/CreateProductForm';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
+import CreateProductForm from './SubComponents/CreateProductForm';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({

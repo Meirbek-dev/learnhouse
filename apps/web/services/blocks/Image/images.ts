@@ -1,5 +1,5 @@
-import { getAPIUrl } from '@services/config/config';
 import { RequestBodyFormWithAuthHeader, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 export async function uploadNewImageFile(file: File, activity_uuid: string, access_token: string) {
   // Send file thumbnail as form data

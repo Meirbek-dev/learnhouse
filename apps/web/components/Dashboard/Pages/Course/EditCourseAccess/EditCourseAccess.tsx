@@ -1,15 +1,15 @@
 'use client';
 
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
-import { getAPIUrl } from '@services/config/config';
+import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
+import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Globe, SquareUserRound, Users, X } from 'lucide-react';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';

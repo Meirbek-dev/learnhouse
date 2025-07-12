@@ -1,21 +1,21 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
-import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
-import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
-import { getAPIUrl } from '@services/config/config';
-import { deleteUserGroup } from '@services/usergroups/usergroups';
-import { swrFetcher } from '@services/utils/ts/requests';
+import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
+import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
+import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
 import { Loader, Pencil, SquareUserRound, Users, X } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { deleteUserGroup } from '@services/usergroups/usergroups';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import { useState } from 'react';
 
 function OrgUserGroups() {
   const org = useOrg() as any;

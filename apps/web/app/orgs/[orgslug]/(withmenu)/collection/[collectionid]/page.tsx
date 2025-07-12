@@ -1,12 +1,12 @@
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import { getUriWithOrg } from '@services/config/config';
-import { getCollectionById } from '@services/courses/collections';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import type { Metadata } from 'next';
-import Link from 'next/link';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getCollectionById } from '@services/courses/collections';
+import { getUriWithOrg } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { auth } from '@/auth';
+import Link from 'next/link';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: number; collectionid: string }>;

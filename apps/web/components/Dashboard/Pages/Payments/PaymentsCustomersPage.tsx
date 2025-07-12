@@ -1,17 +1,17 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import UserAvatar from '@components/Objects/UserAvatar';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { Badge } from '@components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
-import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { getOrgCustomers } from '@services/payments/payments';
+import { useOrg } from '@components/Contexts/OrgContext';
+import UserAvatar from '@components/Objects/UserAvatar';
 import { RefreshCcw, SquareCheck } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { Badge } from '@components/ui/badge';
 import useSWR from 'swr';
 
 interface PaymentUserData {
@@ -100,7 +100,7 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
             </TableCell>
             <TableCell>
               <Badge
-                variant={item.status === 'active' ? 'default' : item.status === 'completed' ? 'default' : 'secondary'}
+                variant={item.status === 'active' ? 'default' : (item.status === 'completed' ? 'default' : 'secondary')}
               >
                 {item.status}
               </Badge>

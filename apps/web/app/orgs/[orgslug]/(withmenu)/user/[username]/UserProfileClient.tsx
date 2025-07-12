@@ -1,10 +1,5 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { getCoursesByUser } from '@services/users/users';
 import {
   Award,
   BookOpen,
@@ -20,10 +15,15 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import Image from 'next/image';
+import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { getCoursesByUser } from '@services/users/users';
+import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
-import type { FC } from 'react';
 import { useEffect, useState } from 'react';
+import type { FC } from 'react';
+import Image from 'next/image';
 
 interface UserProfileClientProps {
   userData: any;
@@ -341,7 +341,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                             <div className="flex items-center justify-center py-8">
                               <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
                             </div>
-                          ) : userCourses.length > 0 ? (
+                          ) : (userCourses.length > 0 ? (
                             <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-8 pb-8">
                               {userCourses.map((course) => (
                                 <div
@@ -357,7 +357,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                             </div>
                           ) : (
                             <div className="py-8 text-center text-gray-500">{t('courseSection.noCoursesFound')}</div>
-                          )}
+                          ))}
                         </div>
                       )}
                     </div>

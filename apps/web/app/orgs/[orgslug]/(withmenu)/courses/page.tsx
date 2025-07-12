@@ -1,8 +1,8 @@
-import { getOrgCourses } from '@services/courses/courses';
-import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import type { Metadata } from 'next';
+import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import { getOrgCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { auth } from '@/auth';
 
 import Courses from './courses';

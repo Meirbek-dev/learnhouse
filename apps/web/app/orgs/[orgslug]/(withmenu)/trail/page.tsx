@@ -1,6 +1,6 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { auth } from '@/auth';
 
 import Trail from './trail';

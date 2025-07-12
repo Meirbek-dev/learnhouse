@@ -1,17 +1,17 @@
 'use client';
 
+import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getOrgCourses } from '@services/courses/courses';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import { getOrgCourses } from '@services/courses/courses';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
-import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { Search } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
+import { useState } from 'react';
 
 interface LinkCourseModalProps {
   productId: string;

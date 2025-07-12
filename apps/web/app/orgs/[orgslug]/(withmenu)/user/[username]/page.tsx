@@ -1,6 +1,6 @@
 import { getUserByUsername } from '@services/users/users';
-import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 
 import UserProfileClient from './UserProfileClient';
 
@@ -48,9 +48,9 @@ async function UserPage({ params }: UserPageProps) {
   try {
     const userData = await getUserByUsername(username);
     const profile = userData.profile
-      ? typeof userData.profile === 'string'
+      ? (typeof userData.profile === 'string'
         ? JSON.parse(userData.profile)
-        : userData.profile
+        : userData.profile)
       : { sections: [] };
 
     return (

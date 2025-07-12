@@ -1,34 +1,39 @@
 {
   "$schema": "https://json.schemastore.org/prettierrc.json",
-  "plugins": ["prettier-plugin-tailwindcss"],
-  "printWidth": 120,
-  "tabWidth": 2,
-  "useTabs": false,
-  "semi": true,
-  "singleQuote": true,
-  "quoteProps": "consistent",
-  "jsxSingleQuote": false,
-  "trailingComma": "all",
-  "bracketSpacing": true,
-  "bracketSameLine": false,
   "arrowParens": "always",
-  "rangeStart": 0,
-  "requirePragma": false,
-  "insertPragma": false,
-  "proseWrap": "preserve",
-  "htmlWhitespaceSensitivity": "strict",
-  "vueIndentScriptAndStyle": true,
-  "endOfLine": "lf",
+  "bracketSameLine": false,
+  "bracketSpacing": true,
   "embeddedLanguageFormatting": "auto",
-  "singleAttributePerLine": true,
+  "endOfLine": "lf",
   "experimentalTernaries": false,
+  "htmlWhitespaceSensitivity": "strict",
+  "insertPragma": false,
+  "jsxSingleQuote": false,
   "overrides": [
     {
       "files": "*.md",
       "options": {
-        "proseWrap": "always",
-        "printWidth": 100
+        "printWidth": 100,
+        "proseWrap": "always"
       }
     }
-  ]
+  ],
+  "plugins": [
+    "prettier-plugin-tailwindcss",
+    "prettier-plugin-organize-imports",
+    "prettier-plugin-sort-json",
+    "prettier-plugin-sort-imports"
+  ],
+  "printWidth": 120,
+  "proseWrap": "preserve",
+  "quoteProps": "consistent",
+  "rangeStart": 0,
+  "requirePragma": false,
+  "semi": true,
+  "singleAttributePerLine": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "useTabs": false,
+  "vueIndentScriptAndStyle": true
 }

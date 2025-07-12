@@ -1,17 +1,17 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { getUriWithOrg } from '@services/config/config';
-import { deleteCollection } from '@services/courses/collections';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { deleteCollection } from '@services/courses/collections';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { X } from 'lucide-react';
-import Link from 'next/link';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { X } from 'lucide-react';
+import Link from 'next/link';
 
 interface PropsType {
   collection: any;

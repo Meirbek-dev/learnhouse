@@ -1,14 +1,14 @@
 'use client';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { getUriWithoutOrg } from '@services/config/config';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { FC, ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface AuthorizationProps {
   children: ReactNode;

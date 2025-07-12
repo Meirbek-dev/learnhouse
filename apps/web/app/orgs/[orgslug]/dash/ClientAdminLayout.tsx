@@ -1,9 +1,9 @@
 'use client';
-import DashLeftMenu from '@components/Dashboard/Menus/DashLeftMenu';
-import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
-import type { ReactNode } from 'react';
+import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu';
+import DashLeftMenu from '@components/Dashboard/Menus/DashLeftMenu';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import type { ReactNode } from 'react';
 
 function ClientAdminLayout({ children, params }: { children: ReactNode; params: any }) {
   const isMobile = useIsMobile();

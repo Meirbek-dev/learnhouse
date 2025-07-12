@@ -1,9 +1,9 @@
 'use client';
 
-import { getAPIUrl } from '@services/config/config';
 import { swrFetcher } from '@services/utils/ts/requests';
-import type { ReactNode } from 'react';
+import { getAPIUrl } from '@services/config/config';
 import { createContext, use } from 'react';
+import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
 import { useLHSession } from '../LHSessionContext';

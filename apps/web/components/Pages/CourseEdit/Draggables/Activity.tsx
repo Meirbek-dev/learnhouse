@@ -1,15 +1,15 @@
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { Draggable } from '@hello-pangea/dnd';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { deleteActivity, updateActivity } from '@services/courses/activities';
-import { revalidateTags } from '@services/utils/ts/requests';
 import { Eye, File, MoreVertical, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
-import Link from 'next/link';
+import { deleteActivity, updateActivity } from '@services/courses/activities';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import Link from 'next/link';
 import { mutate } from 'swr';
 
 interface ModifiedActivityInterface {

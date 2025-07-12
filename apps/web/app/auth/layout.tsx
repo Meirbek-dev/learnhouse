@@ -1,7 +1,7 @@
 'use client';
 
-import { OrgProvider } from '@components/Contexts/OrgContext';
 import ErrorUI from '@components/Objects/StyledElements/Error/Error';
+import { OrgProvider } from '@components/Contexts/OrgContext';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 

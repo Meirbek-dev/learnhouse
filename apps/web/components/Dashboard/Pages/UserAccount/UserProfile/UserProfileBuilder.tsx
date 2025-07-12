@@ -1,17 +1,3 @@
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Button } from '@components/ui/button';
-import { Calendar } from '@components/ui/calendar';
-import { Checkbox } from '@components/ui/checkbox';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Textarea } from '@components/ui/textarea';
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { updateProfile } from '@services/settings/profile';
-import { getUser } from '@services/users/users';
-import { format, type Locale } from 'date-fns';
-import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import {
   Award,
   BookOpen,
@@ -27,10 +13,24 @@ import {
   TextIcon,
   Trash2,
 } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-import type { FC } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { updateProfile } from '@services/settings/profile';
 import { createElement, useEffect, useState } from 'react';
+import { de, enUS, es, fr, ru } from 'date-fns/locale';
+import { useLocale, useTranslations } from 'next-intl';
+import { Textarea } from '@components/ui/textarea';
+import { Checkbox } from '@components/ui/checkbox';
+import { Calendar } from '@components/ui/calendar';
+import { getUser } from '@services/users/users';
+import { Button } from '@components/ui/button';
+import { format, type Locale } from 'date-fns';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
 import { toast } from 'react-hot-toast';
+import type { FC } from 'react';
 
 // Define section type keys
 const SECTION_TYPE_KEYS = {

@@ -1,10 +1,10 @@
 'use client';
 
-import { Input } from '@components/ui/input'; // Assuming this path is correct
-import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { Link as LinkIcon, Plus, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { useEffect, useRef, useState } from 'react';
+import { Input } from '@components/ui/input'; // Assuming this path is correct
+import { useTranslations } from 'next-intl';
 
 interface LearningItem {
   id: string;

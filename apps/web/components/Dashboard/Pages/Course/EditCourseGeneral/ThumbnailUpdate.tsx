@@ -1,17 +1,17 @@
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
-import { getAPIUrl } from '@services/config/config';
-import { updateCourseThumbnail } from '@services/courses/courses';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { updateCourseThumbnail } from '@services/courses/courses';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useOrg } from '@components/Contexts/OrgContext';
 import UnsplashImagePicker from './UnsplashImagePicker';
+import { getAPIUrl } from '@services/config/config';
+import { useEffect, useRef, useState } from 'react';
+import { Button } from '@components/ui/button';
+import { useTranslations } from 'next-intl';
+import { toast } from 'react-hot-toast';
+import type React from 'react';
+import { mutate } from 'swr';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB for images
 const MAX_VIDEO_FILE_SIZE = 100_000_000; // 100MB for videos

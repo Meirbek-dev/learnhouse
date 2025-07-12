@@ -1,21 +1,21 @@
 'use client';
 
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { resetPassword } from '@services/auth/auth';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { getOrgLogoMediaDirectory } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
+import touEmblemDark from 'public/tou_emblem_dark.png';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { resetPassword } from '@services/auth/auth';
 import { AlertTriangle, Info } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { useTranslations } from 'next-intl';
+import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import touEmblemDark from 'public/tou_emblem_dark.png';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>

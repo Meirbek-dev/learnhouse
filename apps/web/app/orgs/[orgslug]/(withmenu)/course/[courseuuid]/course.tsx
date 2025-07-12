@@ -1,24 +1,24 @@
 'use client';
-import { CourseProvider } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { ArrowRight, Backpack, Check, File, ImageIcon, Layers, Square, StickyNote, Video } from 'lucide-react';
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions';
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { ArrowRight, Backpack, Check, File, ImageIcon, Layers, Square, StickyNote, Video } from 'lucide-react';
-import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import useSWR from 'swr';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');

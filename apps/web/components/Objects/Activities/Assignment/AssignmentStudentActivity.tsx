@@ -1,16 +1,15 @@
 'use client';
 
+import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
+import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { Backpack, Calendar, Download, EllipsisVertical, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { getTaskRefFileDir } from '@services/media/media';
-import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
-import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
-import { Backpack, Calendar, Download, EllipsisVertical, Info } from 'lucide-react';
-import Link from 'next/link';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 function AssignmentStudentActivity() {
   const t = useTranslations('Activities.AssignmentStudentActivity');

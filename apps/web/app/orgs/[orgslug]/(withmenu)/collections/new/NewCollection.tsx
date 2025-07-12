@@ -1,24 +1,24 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
-import { Checkbox } from '@components/ui/checkbox';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import { ScrollArea } from '@components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Textarea } from '@components/ui/textarea';
+import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { createCollection } from '@services/courses/collections';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import { Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { ScrollArea } from '@components/ui/scroll-area';
+import { Textarea } from '@components/ui/textarea';
+import { Checkbox } from '@components/ui/checkbox';
+import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import * as React from 'react';
-import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useState } from 'react';
+import * as React from 'react';
 import useSWR from 'swr';
 
 function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
@@ -160,7 +160,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
                 </div>
-              ) : courses?.length === 0 ? (
+              ) : (courses?.length === 0 ? (
                 <p className="py-4 text-sm text-gray-500">{t('noCoursesAvailable')}</p>
               ) : (
                 <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50">
@@ -210,7 +210,7 @@ function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
                     <p className="text-xs text-gray-500">{t('selectedCount', { count: selectedCourses.length })}</p>
                   </div>
                 </div>
-              )}
+              ))}
             </div>
           </div>
 

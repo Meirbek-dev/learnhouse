@@ -1,10 +1,10 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl } from '@services/config/config';
-import { getAssignmentTask } from '@services/courses/assignments';
-import type { ReactNode } from 'react';
 import { createContext, use, useCallback, useEffect, useReducer } from 'react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAssignmentTask } from '@services/courses/assignments';
+import { getAPIUrl } from '@services/config/config';
+import type { ReactNode } from 'react';
 import { mutate } from 'swr';
 
 import { useAssignments } from './AssignmentContext';

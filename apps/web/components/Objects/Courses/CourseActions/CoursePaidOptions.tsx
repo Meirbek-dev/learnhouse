@@ -1,16 +1,16 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Badge } from '@components/ui/badge';
-import { Button } from '@components/ui/button';
-import { getUriWithOrg } from '@services/config/config';
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
 import { ChevronDown, ChevronUp, RefreshCcw, SquareCheck } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { Button } from '@components/ui/button';
+import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useState } from 'react';
 import useSWR from 'swr';
 
 interface CoursePaidOptionsProps {
@@ -163,9 +163,9 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
           >
             {isProcessing[product.id]
               ? t('processing')
-              : product.product_type === 'subscription'
+              : (product.product_type === 'subscription'
                 ? t('subscribeNow')
-                : t('purchaseNow')}
+                : t('purchaseNow'))}
           </Button>
         </div>
       ))}

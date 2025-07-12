@@ -45,7 +45,6 @@ dependencies = [
 
 dev = ["faker>=37.4.0", "pytest>=8.4.1", "ruff>=0.11.12"]
 
-
 [tool.ruff]
 target-version = "py314"
 lint.select = []

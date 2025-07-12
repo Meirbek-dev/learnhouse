@@ -1,15 +1,15 @@
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { Hexagon, MoreVertical, Pencil, Save, Sparkles, X } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { updateChapter } from '@services/courses/chapters';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
-import { updateChapter } from '@services/courses/chapters';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { Hexagon, MoreVertical, Pencil, Save, Sparkles, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { styled } from 'styled-components';
+import { useState } from 'react';
 import { mutate } from 'swr';
 
 import Activity from './Activity';

@@ -1,5 +1,5 @@
-import { getAPIUrl } from '@services/config/config';
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 export async function submitQuizBlock(activity_id: number, data: any, access_token: string) {
   return fetch(`${getAPIUrl()}blocks/quiz/${activity_id}`, RequestBodyWithAuthHeader('POST', data, null, access_token))

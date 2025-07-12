@@ -1,4 +1,3 @@
-import { getAPIUrl } from '@services/config/config';
 import {
   errorHandling,
   getResponseMetadata,
@@ -6,6 +5,7 @@ import {
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
 } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 export async function getUser(user_id: number, access_token?: string) {
   const result = await fetch(

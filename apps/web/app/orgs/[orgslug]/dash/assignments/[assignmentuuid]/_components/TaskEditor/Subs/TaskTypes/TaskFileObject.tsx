@@ -1,8 +1,3 @@
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import {
   getAssignmentTask,
   getAssignmentTaskSubmissionsMe,
@@ -10,13 +5,18 @@ import {
   handleAssignmentTaskSubmission,
   updateSubFile,
 } from '@services/courses/assignments';
-import { getTaskFileSubmissionDir } from '@services/media/media';
+import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Cloud, Download, File, Info, Loader, UploadCloud } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import * as React from 'react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getTaskFileSubmissionDir } from '@services/media/media';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
+import * as React from 'react';
+import Link from 'next/link';
 
 interface FileSchema {
   fileUUID: string;
@@ -394,7 +394,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     <div className="text-xs font-medium sm:text-sm">{t('signInToUpload')}</div>
                   </div>
                 </div>
-              ) : isLoading ? (
+              ) : (isLoading ? (
                 <div className="mt-5 flex w-full items-center justify-center">
                   <input
                     type="file"
@@ -429,7 +429,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     <span>{t('submitFile')}</span>
                   </button>
                 </div>
-              )}
+              ))}
             </div>
           </div>
         </div>

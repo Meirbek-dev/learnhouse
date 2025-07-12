@@ -1,13 +1,12 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, Users } from 'lucide-react';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
-import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, Users } from 'lucide-react';
-import Link from 'next/link';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 function DashMobileMenu() {
   const session = useLHSession() as any;

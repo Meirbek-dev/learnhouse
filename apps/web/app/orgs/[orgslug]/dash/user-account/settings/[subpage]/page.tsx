@@ -1,17 +1,17 @@
 'use client';
 
+import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
+import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral';
+import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile';
+import { Info, Lock, type LucideIcon, User as UserIcon } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral';
-import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
-import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile';
 import { getUriWithOrg } from '@services/config/config';
-import { motion } from 'framer-motion';
-import { Info, Lock, type LucideIcon, User as UserIcon } from 'lucide-react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { ComponentType } from 'react';
+import { motion } from 'framer-motion';
 import { use, useEffect } from 'react';
+import Link from 'next/link';
 
 interface User {
   username: string;

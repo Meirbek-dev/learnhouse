@@ -5,8 +5,8 @@ import {
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useEffect } from 'react';
 
-import TaskFileObject from './TaskTypes/TaskFileObject';
 import TaskQuizObject from './TaskTypes/TaskQuizObject';
+import TaskFileObject from './TaskTypes/TaskFileObject';
 
 function AssignmentTaskContentEdit() {
   const session = useLHSession() as any;

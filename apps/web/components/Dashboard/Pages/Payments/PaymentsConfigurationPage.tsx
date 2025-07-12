@@ -1,16 +1,5 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { Button } from '@components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { SiStripe } from '@icons-pack/react-simple-icons';
-import { getUriWithoutOrg } from '@services/config/config';
 import {
   deletePaymentConfig,
   getPaymentConfigs,
@@ -29,13 +18,23 @@ import {
   Trash2,
   UnplugIcon,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { getUriWithoutOrg } from '@services/config/config';
+import { SiStripe } from '@icons-pack/react-simple-icons';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import type { FC } from 'react';
 import { z } from 'zod';
 
 const PaymentsConfigurationPage: FC = () => {

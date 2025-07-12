@@ -1,7 +1,3 @@
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { ScrollArea } from '@components/ui/scroll-area';
 import {
   Bike,
   Book,
@@ -24,9 +20,13 @@ import {
   Shirt,
   Utensils,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import type { ChangeEvent, FC } from 'react';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useCallback, useEffect, useState } from 'react';
+import { ScrollArea } from '@components/ui/scroll-area';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import type { ChangeEvent, FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { createApi } from 'unsplash-js';
 
 const unsplash = createApi({

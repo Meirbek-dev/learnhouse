@@ -1,10 +1,10 @@
+import { AlignCenter, AlignLeft, AlignRight, ArrowRight, ChevronDown, Link, Palette } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
-import { AlignCenter, AlignLeft, AlignRight, ArrowRight, ChevronDown, Link, Palette } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import type { ChangeEvent, FC } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import type { ChangeEvent, FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 
 const ButtonsExtension: FC = (props: any) => {

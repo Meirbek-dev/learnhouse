@@ -1,12 +1,12 @@
+import type { CourseOverviewParams } from 'app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import type { CourseOverviewParams } from 'app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 import EmptyThumbnailImage from '../../../public/empty_thumbnail.png';
 

@@ -1,11 +1,10 @@
 'use client';
-import { getUriWithOrg } from '@services/config/config';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getUriWithOrg } from '@services/config/config';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface ActivityNavigationProps {
   course: any;

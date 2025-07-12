@@ -1,10 +1,10 @@
 'use client';
 
-import LHSessionProvider from '@components/Contexts/LHSessionContext';
-import { motion } from 'framer-motion';
-import { SessionProvider } from 'next-auth/react';
-import type { ReactNode } from 'react';
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
+import LHSessionProvider from '@components/Contexts/LHSessionContext';
+import { SessionProvider } from 'next-auth/react';
+import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
 
 interface ClientLayoutProps {
   children: ReactNode;

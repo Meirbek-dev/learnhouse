@@ -1,5 +1,5 @@
-import { getAPIUrl } from '@services/config/config';
 import { getResponseMetadata, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 export async function getUserGroups(org_id: number, access_token: string) {
   const result: any = await fetch(

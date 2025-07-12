@@ -1,5 +1,5 @@
-import { getAPIUrl } from '@services/config/config';
 import { getResponseMetadata, RequestBody } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 export async function checkHealth() {
   try {

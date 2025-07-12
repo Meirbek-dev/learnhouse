@@ -1,7 +1,5 @@
 'use client';
 
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import { SiYoutube } from '@icons-pack/react-simple-icons';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -35,9 +33,11 @@ import {
   User,
   Video,
 } from 'lucide-react';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { SiYoutube } from '@icons-pack/react-simple-icons';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
 import { styled } from 'styled-components';
+import { useRef, useState } from 'react';
 
 import LinkInputTooltip from './LinkInputTooltip';
 
@@ -268,32 +268,44 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       </TableMenuWrapper>
       <DividerVerticalIcon style={{ marginTop: 'auto', marginBottom: 'auto', color: 'grey' }} />
       <ToolTip content={t('infoCallout')}>
-        <ToolBtn onClick={() => editor.chain().focus().insertContent({
-          type: 'calloutInfo',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: t('defaultInfoCalloutText') }
-              ]
-            }
-          ]
-        }).run()}>
+        <ToolBtn
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'calloutInfo',
+                content: [
+                  {
+                    type: 'paragraph',
+                    content: [{ type: 'text', text: t('defaultInfoCalloutText') }],
+                  },
+                ],
+              })
+              .run()
+          }
+        >
           <AlertCircle size={15} />
         </ToolBtn>
       </ToolTip>
       <ToolTip content={t('warningCallout')}>
-        <ToolBtn onClick={() => editor.chain().focus().insertContent({
-          type: 'calloutWarning',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                { type: 'text', text: t('defaultWarningCalloutText') }
-              ]
-            }
-          ]
-        }).run()}>
+        <ToolBtn
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'calloutWarning',
+                content: [
+                  {
+                    type: 'paragraph',
+                    content: [{ type: 'text', text: t('defaultWarningCalloutText') }],
+                  },
+                ],
+              })
+              .run()
+          }
+        >
           <AlertTriangle size={15} />
         </ToolBtn>
       </ToolTip>
@@ -419,10 +431,8 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                 content: [
                   {
                     type: 'paragraph',
-                    content: [
-                      { type: 'text', text: 'This is a Badge' }
-                    ]
-                  }
+                    content: [{ type: 'text', text: 'This is a Badge' }],
+                  },
                 ],
               })
               .run()

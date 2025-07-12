@@ -1,17 +1,17 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { createInviteCode, createInviteCodeWithUserGroup } from '@services/organizations/invites';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { Ticket } from 'lucide-react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { Ticket } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
+import Link from 'next/link';
 
 interface OrgInviteCodeGenerateProps {
   setInvitesModal: any;

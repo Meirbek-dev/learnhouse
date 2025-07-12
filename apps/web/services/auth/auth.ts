@@ -1,5 +1,5 @@
-import { getAPIUrl } from '@services/config/config';
 import { getResponseMetadata, RequestBody } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 // ⚠️ mvp phase code
 // TODO : everything in this file need to be refactored including security issues fix

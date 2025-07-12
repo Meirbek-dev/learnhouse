@@ -1,11 +1,11 @@
 'use client';
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
+import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
-import { getAPIUrl } from '@services/config/config';
-import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 import { Check, Plus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';

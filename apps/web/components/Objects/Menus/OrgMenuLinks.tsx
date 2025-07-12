@@ -1,8 +1,8 @@
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { getUriWithOrg } from '@services/config/config';
 import { BookCopy, Signpost, SquareLibrary } from 'lucide-react';
-import Link from 'next/link';
+import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 function MenuLinks(props: { orgslug: string }) {
   return (

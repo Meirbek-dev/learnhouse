@@ -1,13 +1,13 @@
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { Button } from '@components/ui/button';
+import { constructAcceptValue } from '@/lib/constants';
 import { Checkbox } from '@components/ui/checkbox';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import * as Form from '@radix-ui/react-form';
+import { Button } from '@components/ui/button';
 import { Upload, Youtube } from 'lucide-react';
+import * as Form from '@radix-ui/react-form';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
-import { constructAcceptValue } from '@/lib/constants';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 

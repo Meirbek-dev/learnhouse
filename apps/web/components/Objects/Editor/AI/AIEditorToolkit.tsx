@@ -1,9 +1,3 @@
-import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
-import type { Editor } from '@tiptap/react';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
   BetweenHorizontalStart,
@@ -15,12 +9,18 @@ import {
   MoreVertical,
   X,
 } from 'lucide-react';
-import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
+import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import touEmblemLight from 'public/tou_emblem_light.png';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { ChangeEvent, KeyboardEvent } from 'react';
+import type { Editor } from '@tiptap/react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image';
 
 interface AIEditorToolkitProps {
   editor: Editor;

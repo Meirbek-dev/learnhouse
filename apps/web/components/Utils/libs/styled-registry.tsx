@@ -1,9 +1,9 @@
 'use client';
 
+import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
 import { useServerInsertedHTML } from 'next/navigation';
 import type { ReactElement, ReactNode } from 'react';
 import { useState } from 'react';
-import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
 
 export default function StyledComponentsRegistry({ children }: { children: ReactNode }) {
   // Only create stylesheet once with lazy initial state

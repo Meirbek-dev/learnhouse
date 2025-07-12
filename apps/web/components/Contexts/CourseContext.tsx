@@ -1,12 +1,12 @@
 'use client';
 
+import ErrorUI from '@components/Objects/StyledElements/Error/Error';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import ErrorUI from '@components/Objects/StyledElements/Error/Error';
-import { getAPIUrl } from '@services/config/config';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { useTranslations } from 'next-intl';
 import { createContext, use, useEffect, useReducer } from 'react';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
+import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
 
 type CourseDispatch = React.Dispatch<any>;

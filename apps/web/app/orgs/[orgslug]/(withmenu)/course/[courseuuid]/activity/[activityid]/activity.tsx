@@ -1,35 +1,4 @@
 'use client';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import AssignmentSubmissionProvider, {
-  useAssignmentSubmission,
-} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
-import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { CourseProvider } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
-import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import UserAvatar from '@components/Objects/UserAvatar';
-import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
-import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
-import CourseEndView from '@components/Pages/Activity/CourseEndView';
-import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
-import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
-import {
-  getAssignmentFromActivityUUID,
-  getFinalGrade,
-  submitAssignmentForGrading,
-} from '@services/courses/assignments';
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookOpenCheck,
   CheckCircle,
@@ -40,12 +9,43 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
-import { useFormatter, useLocale, useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import AssignmentSubmissionProvider, {
+  useAssignmentSubmission,
+} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import {
+  getAssignmentFromActivityUUID,
+  getFinalGrade,
+  submitAssignmentForGrading,
+} from '@services/courses/assignments';
+import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
+import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
+import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
+import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import CourseEndView from '@components/Pages/Activity/CourseEndView';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { usePathname, useRouter } from 'next/navigation';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import Link from 'next/link';
 
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus';
 
@@ -915,7 +915,11 @@ export function MarkStatus(props: {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <circle cx="12" cy="12" r="10" />
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+      />
       <path d="M12 16v-4" />
       <path d="M12 8h.01" />
     </svg>
@@ -1031,7 +1035,13 @@ export function MarkStatus(props: {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <rect
+                        x="3"
+                        y="3"
+                        width="18"
+                        height="18"
+                        rx="2"
+                      />
                       <path d="M7 12l3 3 7-7" />
                     </svg>
                     <span className="text-xs font-bold">{t('statusComplete')}</span>
@@ -1088,7 +1098,13 @@ export function MarkStatus(props: {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <rect
+                      x="3"
+                      y="3"
+                      width="18"
+                      height="18"
+                      rx="2"
+                    />
                   </svg>
                 )}
                 <span className="min-w-[90px] text-xs font-bold">{isLoading ? t('marking') : t('markAsComplete')}</span>
@@ -1298,7 +1314,7 @@ function AssignmentTools(props: {
           displayGrade = t('unknownGradingType');
       } // Use displayGrade here, e.g., update state or display it
       setFinalGrade(displayGrade);
-    } else {}
+    }
   }, [session.data?.user?.id, props.assignment?.assignment_uuid, session.data?.tokens?.access_token, t, setFinalGrade]);
 
   useEffect(() => {

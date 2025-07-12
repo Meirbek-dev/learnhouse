@@ -1,19 +1,19 @@
 'use client';
 
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { Textarea } from '@components/ui/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpWithInviteCode } from '@services/auth/auth';
 import { AlertTriangle, Check, User } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { signIn } from 'next-auth/react';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Textarea } from '@components/ui/textarea';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { signIn } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { z } from 'zod';
 
 interface InviteOnlySignUpProps {

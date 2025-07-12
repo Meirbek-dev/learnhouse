@@ -1,20 +1,20 @@
 'use client';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Checkbox } from '@components/ui/checkbox';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { TagsInput } from '@components/ui/custom/tags-input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Textarea } from '@components/ui/textarea';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { updateCourse } from '@services/courses/courses';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
-import { updateCourse } from '@services/courses/courses';
-import { revalidateTags } from '@services/utils/ts/requests';
+import { Textarea } from '@components/ui/textarea';
+import { Checkbox } from '@components/ui/checkbox';
+import { Input } from '@components/ui/input';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { mutate } from 'swr';
 import { z } from 'zod';

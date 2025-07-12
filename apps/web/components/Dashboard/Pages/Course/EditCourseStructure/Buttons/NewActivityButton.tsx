@@ -1,18 +1,18 @@
 'use client';
 
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { getAPIUrl } from '@services/config/config';
 import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
+import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { Layers } from 'lucide-react';
+import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { Layers } from 'lucide-react';
 import { mutate } from 'swr';
 
 interface NewActivityButtonProps {

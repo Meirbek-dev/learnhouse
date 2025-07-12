@@ -1,15 +1,5 @@
 'use client';
 
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { Badge } from '@components/ui/badge';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { getUser, getUserByUsername } from '@services/users/users';
-import { NodeViewWrapper } from '@tiptap/react';
 import {
   Award,
   BookOpen,
@@ -27,10 +17,20 @@ import {
   User,
   Users,
 } from 'lucide-react';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { getUser, getUserByUsername } from '@services/users/users';
+import { useCallback, useEffect, useState } from 'react';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { NodeViewWrapper } from '@tiptap/react';
+import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
+import { Input } from '@components/ui/input';
+import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { FormEvent } from 'react';
-import { useCallback, useEffect, useState } from 'react';
 
 interface UserData {
   id: number;

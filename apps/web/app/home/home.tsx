@@ -1,16 +1,16 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import UserAvatar from '@components/Objects/UserAvatar';
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import UserAvatar from '@components/Objects/UserAvatar';
+import openuLogoDark from 'public/openu_logo_dark.png';
 import { ArrowRightCircle, Info } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { signOut } from 'next-auth/react';
+import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
-import openuLogoDark from 'public/openu_logo_dark.png';
-import { useEffect } from 'react';
 import useSWR from 'swr';
 
 function HomeClient() {

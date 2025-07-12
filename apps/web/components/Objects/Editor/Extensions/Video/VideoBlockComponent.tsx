@@ -1,24 +1,24 @@
 'use client';
 
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { getActivityBlockMediaDirectory } from '@services/media/media';
-import type { Node } from '@tiptap/core';
-import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
-import type ArtplayerType from 'artplayer';
-import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, ArrowLeftRight, CheckCircle2, Download, Expand, Loader2, Upload, Video, X } from 'lucide-react';
+import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
+import { getActivityBlockMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import { constructAcceptValue } from '@/lib/constants';
 import { useLocale, useTranslations } from 'next-intl';
 import type { ChangeEvent, DragEvent } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
 import { styled } from 'styled-components';
-import { constructAcceptValue } from '@/lib/constants';
+import type ArtplayerType from 'artplayer';
+import type { Node } from '@tiptap/core';
 import { cn } from '@/lib/utils';
-import { uploadNewVideoFile } from '../../../../../services/blocks/Video/video';
 
 const SUPPORTED_FILES = constructAcceptValue(['webm', 'mkv', 'mp4']);
 

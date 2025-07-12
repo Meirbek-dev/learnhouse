@@ -1,24 +1,24 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker';
-import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { Button } from '@components/ui/button';
-import { TagsInput } from '@components/ui/custom/tags-input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Textarea } from '@components/ui/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createNewCourse } from '@services/courses/courses';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
-import { revalidateTags } from '@services/utils/ts/requests';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Image as ImageIcon, UploadCloud } from 'lucide-react';
+import { TagsInput } from '@components/ui/custom/tags-input';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { createNewCourse } from '@services/courses/courses';
+import { useCallback, useEffect, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Textarea } from '@components/ui/textarea';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import type { ChangeEvent } from 'react';
-import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import type { ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
 import { z } from 'zod';
 

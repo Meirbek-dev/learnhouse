@@ -1,9 +1,9 @@
 'use client';
 
-import { UploadIcon } from '@radix-ui/react-icons';
-import { Loader } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import type { ButtonHTMLAttributes, FC, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
+import { UploadIcon } from '@radix-ui/react-icons';
+import { useTranslations } from 'next-intl';
+import { Loader } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -102,4 +102,4 @@ function FileUploadBlockWrapper({ children, isEmpty, ...props }: UploadBlockComp
   );
 }
 
-export { FileUploadBlockWrapper as FileUploadBlock, FileUploadBlockInput, FileUploadBlockButton };
+export { FileUploadBlockWrapper as FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput };

@@ -1,31 +1,31 @@
 'use client';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
-import { Input } from '@components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
-import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
-import {
-  getOrgLogoMediaDirectory,
-  getOrgPreviewMediaDirectory,
-  getOrgThumbnailMediaDirectory,
-} from '@services/media/media';
 import {
   updateOrganization,
   uploadOrganizationLogo,
   uploadOrganizationPreview,
   uploadOrganizationThumbnail,
 } from '@services/settings/org';
+import {
+  getOrgLogoMediaDirectory,
+  getOrgPreviewMediaDirectory,
+  getOrgThumbnailMediaDirectory,
+} from '@services/media/media';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
+import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { constructAcceptValue } from '@/lib/constants';
+import type { ChangeEvent, MouseEvent } from 'react';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import type { ChangeEvent, MouseEvent } from 'react';
-import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { constructAcceptValue } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg']);
 

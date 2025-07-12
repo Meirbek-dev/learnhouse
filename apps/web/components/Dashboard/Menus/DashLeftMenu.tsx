@@ -1,18 +1,18 @@
 'use client';
 
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import useFeatureFlag from '@components/Hooks/useFeatureFlag';
+import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
-import openuLogoLight from '@public/openu_logo_light.png';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import { getUriWithoutOrg } from '@services/config/config';
-import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
+import openuLogoLight from '@public/openu_logo_light.png';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
 
 import UserAvatar from '../../Objects/UserAvatar';
 

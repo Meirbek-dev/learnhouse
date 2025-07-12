@@ -1,7 +1,7 @@
 'use client';
+import Toast from '@components/Objects/StyledElements/Toast/Toast';
 import { OrgProvider } from '@components/Contexts/OrgContext';
 import Footer from '@components/Footer/Footer';
-import Toast from '@components/Objects/StyledElements/Toast/Toast';
 
 import NextTopLoader from 'nextjs-toploader';
 import '@styles/globals.css';

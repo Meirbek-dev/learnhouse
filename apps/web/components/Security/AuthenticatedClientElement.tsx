@@ -2,8 +2,8 @@
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 interface AuthenticatedClientElementProps {
   children: ReactNode;
