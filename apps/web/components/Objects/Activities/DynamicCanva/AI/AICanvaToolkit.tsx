@@ -1,14 +1,14 @@
 import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
-import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import touEmblemDark from 'public/tou_emblem_dark.png';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import { type Editor } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
+import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { BubbleMenu } from '@tiptap/react';
-import type { Editor } from '@tiptap/core';
 import Image from 'next/image';
+import touEmblemDark from 'public/tou_emblem_dark.png';
+import { useEffect, useState } from 'react';
 
 import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures';
 
@@ -31,9 +31,8 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
   return (
     <>
       {isBubbleMenuAvailable && (
-        <BubbleMenu
+        <BubbleMenu // TODO: Migrate BubbleMenu to v3 https://next.tiptap.dev/docs/guides/upgrade-tiptap-v2
           className="w-fit"
-          tippyOptions={{ duration: 100 }}
           editor={props.editor}
         >
           <div
