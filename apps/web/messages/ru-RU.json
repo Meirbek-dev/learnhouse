@@ -78,7 +78,6 @@
       "task": "Задание {index}"
     }
   },
-  "activity": "Активность",
   "ActivityIndicators": {
     "activityTypes": {
       "assignment": "Задание",
@@ -164,8 +163,6 @@
     "unpublishedActivity": "Эта активность еще не опубликована",
     "viewAllActivities": "Посмотреть все активности"
   },
-  "additionalSettings": "Дополнительные настройки",
-  "aiEditor": "ИИ-Редактор",
   "Auth": {
     "Forgot": {
       "backToLogin": "Вернуться к входу",
@@ -240,8 +237,6 @@
       "usernamePlaceholder": "Введите имя пользователя"
     }
   },
-  "clickMe": "Нажми меня",
-  "close": "Закрыть",
   "Common": {
     "save": "Сохранить",
     "saved": "Сохранено",
@@ -916,7 +911,6 @@
     "viewAllActivities": "Просмотреть все активности",
     "whatYouWillLearn": "Чему вы научитесь"
   },
-  "courses": "Курсы",
   "Courses": {
     "access": "Доступ",
     "content": "Содержание",
@@ -1079,7 +1073,6 @@
     },
     "title": "Курсы"
   },
-  "courses-0": "Курсы",
   "CoursesPage": {
     "createACourse": "Создайте курс, чтобы добавить контент",
     "createCourse": "Создать курс",
@@ -1088,30 +1081,6 @@
     "noCourses": "Пока нет курсов",
     "noCoursesAvailable": "Пока нет доступных курсов",
     "title": "Курсы"
-  },
-  "DashboardMenu": {
-    "mobile": {
-      "assignments": "Задания",
-      "courses": "Курсы",
-      "home": "Главная",
-      "org": "Орг.",
-      "payments": "Платежи",
-      "settings": "Настройки",
-      "users": "Пользователи"
-    },
-    "tooltips": {
-      "assignments": "Задания",
-      "backToHome": "Вернуться на главную",
-      "courses": "Курсы",
-      "home": "Главная панель управления",
-      "logout": "Выйти",
-      "organization": "Настройки OpenU",
-      "payments": "Платежи",
-      "userOwnedCourses": "Курсы @{username}",
-      "users": "Пользователи",
-      "userSettings": "Настройки @{username}",
-      "yourOrganization": "OpenU"
-    }
   },
   "DashPage": {
     "Assignments": {
@@ -2771,9 +2740,30 @@
       "usersTitle": "Пользователи"
     }
   },
-  "deleteChapter": "Удалить главу",
-  "dialog": "Диалог",
-  "failedToLoadUserData": "Не удалось загрузить данные пользователя.",
+  "DashboardMenu": {
+    "mobile": {
+      "assignments": "Задания",
+      "courses": "Курсы",
+      "home": "Главная",
+      "org": "Орг.",
+      "payments": "Платежи",
+      "settings": "Настройки",
+      "users": "Пользователи"
+    },
+    "tooltips": {
+      "assignments": "Задания",
+      "backToHome": "Вернуться на главную",
+      "courses": "Курсы",
+      "home": "Главная панель управления",
+      "logout": "Выйти",
+      "organization": "Настройки OpenU",
+      "payments": "Платежи",
+      "userOwnedCourses": "Курсы @{username}",
+      "users": "Пользователи",
+      "userSettings": "Настройки @{username}",
+      "yourOrganization": "OpenU"
+    }
+  },
   "FixedActivitySecondaryBar": {
     "activityCounter": "{current} из {total}",
     "course": "Курс",
@@ -2946,7 +2936,6 @@
     "noFeaturedCourses": "Нет выбранных рекомендованных курсов",
     "noImage": "Нет изображения"
   },
-  "minutes": "Минут",
   "NewCollectionPage": {
     "cancelButton": "Отмена",
     "createButton": "Создать коллекцию",
@@ -2974,14 +2963,11 @@
     "visibilityPrivate": "Приватная коллекция — видна только пользователям OpenU",
     "visibilityPublic": "Публичная коллекция — видна всем"
   },
-  "noInviteCodesGenerated": "Коды приглашения еще не сгенерированы.",
   "NotFoundPage": {
     "button": "Вернуться на главную",
     "message": "Приносим извинения за неудобства. Похоже, вы пытаетесь получить доступ к странице, которая была удалена или никогда не существовала."
   },
-  "openu-logo": "логотип OpenU",
   "OpenuUniversity": "Торайгыров Университет",
-  "previous": "Предыдущий",
   "SearchPage": {
     "collections": "Коллекции",
     "courses": "Курсы",
@@ -2997,11 +2983,9 @@
     "searchTitle": "Поиск",
     "users": "Пользователи"
   },
-  "seconds": "Секунд",
   "Security": {
     "unauthorizedAccessMessage": "У вас нет прав для доступа к этой странице"
   },
-  "selectDeadline": "Выберите крайний срок выполнения задания",
   "SignupPage": {
     "enterInviteCode": "Введите код приглашения",
     "hi": "Привет",
@@ -3023,7 +3007,6 @@
     "orgJoinSuccess": " успешно присоединился к OpenU.",
     "submit": "Отправить "
   },
-  "touUniversity": "Торайгыров Университет",
   "Trail": {
     "courseLabel": "Курс",
     "quitCourseButton": "Выйти из курса"
@@ -3082,5 +3065,22 @@
     "usernameMinLength": "Имя пользователя должно содержать не менее {length} символов",
     "wrongCredentials": "Неверный адрес электронной почты или пароль"
   },
+  "activity": "Активность",
+  "additionalSettings": "Дополнительные настройки",
+  "aiEditor": "ИИ-Редактор",
+  "clickMe": "Нажми меня",
+  "close": "Закрыть",
+  "courses": "Курсы",
+  "courses-0": "Курсы",
+  "deleteChapter": "Удалить главу",
+  "dialog": "Диалог",
+  "failedToLoadUserData": "Не удалось загрузить данные пользователя.",
+  "minutes": "Минут",
+  "noInviteCodesGenerated": "Коды приглашения еще не сгенерированы.",
+  "openu-logo": "логотип OpenU",
+  "previous": "Предыдущий",
+  "seconds": "Секунд",
+  "selectDeadline": "Выберите крайний срок выполнения задания",
+  "touUniversity": "Торайгыров Университет",
   "webPreview": "Предварительный просмотр в браузере"
 }

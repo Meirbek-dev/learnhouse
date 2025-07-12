@@ -7,18 +7,30 @@ export const OPENU_TOP_DOMAIN = process.env.NEXT_PUBLIC_OPENU_TOP_DOMAIN;
 export const getAPIUrl = () => OPENU_API_URL;
 export const getBackendUrl = () => OPENU_BACKEND_URL;
 
+// Multi Organization Mode
+export const isMultiOrgModeEnabled = () => (process.env.NEXT_PUBLIC_OPENU_MULTI_ORG === 'true' ? true : false);
+
 export const getUriWithOrg = (orgslug: string, path: string) => {
+  const multi_org = isMultiOrgModeEnabled();
+  if (multi_org) {
+    return `${OPENU_HTTP_PROTOCOL}${orgslug}.${OPENU_DOMAIN}${path}`;
+  }
   return `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`;
 };
 
 export const getUriWithoutOrg = (path: string) => `${OPENU_HTTP_PROTOCOL}${OPENU_DOMAIN}${path}`;
 
 export const getOrgFromUri = () => {
-  if (typeof window !== 'undefined') {
-    const { hostname } = window.location;
-    return hostname.replace(`.${OPENU_DOMAIN}`, '');
+  const multi_org = isMultiOrgModeEnabled();
+  if (multi_org) {
+    getDefaultOrg();
+  } else {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+
+      return hostname.replace(`.${OPENU_DOMAIN}`, '');
+    }
   }
-  return;
 };
 
 export const getDefaultOrg = () => process.env.NEXT_PUBLIC_OPENU_DEFAULT_ORG;

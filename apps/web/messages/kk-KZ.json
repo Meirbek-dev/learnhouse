@@ -79,7 +79,6 @@
       "task": "Тапсырма {index}"
     }
   },
-  "activity": "Белсенділік",
   "ActivityIndicators": {
     "activityTypes": {
       "assignment": "Тапсырма",
@@ -165,8 +164,6 @@
     "unpublishedActivity": "Бұл белсенділік әлі жарияланған жоқ",
     "viewAllActivities": "Барлық белсенділіктерді көру"
   },
-  "additionalSettings": "Қосымша параметрлер",
-  "aiEditor": "ЖИ-Редактор",
   "Auth": {
     "Forgot": {
       "backToLogin": "Кіру дегенге қайта келу",
@@ -241,8 +238,6 @@
       "usernamePlaceholder": "Пайдаланушы атыңызды енгізіңіз"
     }
   },
-  "clickMe": "Мені бас",
-  "close": "Жабу",
   "Common": {
     "save": "Сақтау",
     "saved": "Сақталды",
@@ -858,7 +853,6 @@
     "viewAllActivities": "Барлық белсенділіктерді көру",
     "whatYouWillLearn": "Не үйренесіз"
   },
-  "courses": "Курстар",
   "Courses": {
     "access": "Қолжетімділік",
     "content": "Мазмұны",
@@ -1020,7 +1014,6 @@
     },
     "title": "Курстар"
   },
-  "courses-0": "Курстар",
   "CoursesPage": {
     "createACourse": "Мазмұн қосу үшін курс жасаңыз",
     "createCourse": "Курс жасау",
@@ -1029,30 +1022,6 @@
     "noCourses": "Әзірге курстар жоқ",
     "noCoursesAvailable": "Әзірге қол жетімді курстар жоқ",
     "title": "Курстар"
-  },
-  "DashboardMenu": {
-    "mobile": {
-      "assignments": "Тапсырмалар",
-      "courses": "Курстар",
-      "home": "Басты бет",
-      "org": "Ұйым",
-      "payments": "Төлемдер",
-      "settings": "Параметрлер",
-      "users": "Пайдаланушылар"
-    },
-    "tooltips": {
-      "assignments": "Тапсырмалар",
-      "backToHome": "Басты бетке оралу",
-      "courses": "Курстар",
-      "home": "Басты басқару тақтасы",
-      "logout": "Шығу",
-      "organization": "Ұйым параметрлері",
-      "payments": "Төлемдер",
-      "userOwnedCourses": "@{username} курстары",
-      "users": "Пайдаланушылар",
-      "userSettings": "@{username} параметрлері",
-      "yourOrganization": "Сіздің ұйымыңыз"
-    }
   },
   "DashPage": {
     "Assignments": {
@@ -2689,9 +2658,30 @@
       "usersTitle": "Пайдаланушылар"
     }
   },
-  "deleteChapter": "Тарауды жою",
-  "dialog": "Диалог",
-  "failedToLoadUserData": "Пайдаланушы деректерін жүктеу мүмкін болмады.",
+  "DashboardMenu": {
+    "mobile": {
+      "assignments": "Тапсырмалар",
+      "courses": "Курстар",
+      "home": "Басты бет",
+      "org": "Ұйым",
+      "payments": "Төлемдер",
+      "settings": "Параметрлер",
+      "users": "Пайдаланушылар"
+    },
+    "tooltips": {
+      "assignments": "Тапсырмалар",
+      "backToHome": "Басты бетке оралу",
+      "courses": "Курстар",
+      "home": "Басты басқару тақтасы",
+      "logout": "Шығу",
+      "organization": "Ұйым параметрлері",
+      "payments": "Төлемдер",
+      "userOwnedCourses": "@{username} курстары",
+      "users": "Пайдаланушылар",
+      "userSettings": "@{username} параметрлері",
+      "yourOrganization": "Сіздің ұйымыңыз"
+    }
+  },
   "FixedActivitySecondaryBar": {
     "activityCounter": "{total} ішінен {current}",
     "course": "Курс",
@@ -2850,7 +2840,6 @@
     "noFeaturedCourses": "Таңдалған ұсынылған курстар жоқ",
     "noImage": "No Image"
   },
-  "minutes": "Минут",
   "NewCollectionPage": {
     "cancelButton": "Бас тарту",
     "createButton": "Жинақ жасау",
@@ -2876,14 +2865,11 @@
     "visibilityPrivate": "Жеке жинақ — тек ұйым мүшелеріне көрінеді",
     "visibilityPublic": "Жалпыға ортақ жинақ — барлығына көрінеді"
   },
-  "noInviteCodesGenerated": "Шақыру кодтары әлі жасалмаған.",
   "NotFoundPage": {
     "button": "Басты бетке оралу",
     "message": "Қолайсыздықтар үшін кешірім сұраймыз. Сіз жойылған немесе ешқашан болмаған бетке кіруге тырысып жатқан сияқтысыз."
   },
-  "openu-logo": "OpenU логотипі",
   "OpenuUniversity": "Торайгыров университеті",
-  "previous": "Алдыңғы",
   "SearchPage": {
     "collections": "Жинақтар",
     "courses": "Курстар",
@@ -2899,11 +2885,9 @@
     "searchTitle": "Іздеу",
     "users": "Пайдаланушылар"
   },
-  "seconds": "Секундтар",
   "Security": {
     "unauthorizedAccessMessage": "Бұл бетке кіруге рұқсатыңыз жоқ"
   },
-  "selectDeadline": "Тапсырманың соңғы мерзімін таңдаңыз",
   "SignupPage": {
     "enterInviteCode": "Шақыру кодын енгізіңіз",
     "hi": "Сәлем",
@@ -2925,7 +2909,6 @@
     "orgJoinSuccess": "ұйымға сәтті қосылды.",
     "submit": "Жіберу"
   },
-  "touUniversity": "Торайгыров Университет",
   "Trail": {
     "courseLabel": "Курс",
     "quitCourseButton": "Курстан шығу"
@@ -2984,5 +2967,22 @@
     "usernameMinLength": "Пайдаланушы аты кемінде {length} таңбадан тұруы керек",
     "wrongCredentials": "Электрондық пошта мекенжайы немесе құпия сөз қате"
   },
+  "activity": "Белсенділік",
+  "additionalSettings": "Қосымша параметрлер",
+  "aiEditor": "ЖИ-Редактор",
+  "clickMe": "Мені бас",
+  "close": "Жабу",
+  "courses": "Курстар",
+  "courses-0": "Курстар",
+  "deleteChapter": "Тарауды жою",
+  "dialog": "Диалог",
+  "failedToLoadUserData": "Пайдаланушы деректерін жүктеу мүмкін болмады.",
+  "minutes": "Минут",
+  "noInviteCodesGenerated": "Шақыру кодтары әлі жасалмаған.",
+  "openu-logo": "OpenU логотипі",
+  "previous": "Алдыңғы",
+  "seconds": "Секундтар",
+  "selectDeadline": "Тапсырманың соңғы мерзімін таңдаңыз",
+  "touUniversity": "Торайгыров Университет",
   "webPreview": "Веб алдын ала қарау"
 }

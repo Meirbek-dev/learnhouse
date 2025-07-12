@@ -1,5 +1,5 @@
-import { getAPIUrl } from '@services/config/config';
 import { getResponseMetadata, RequestBody } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 
 // Auth service types and interfaces
 interface AuthTokens {
@@ -154,11 +154,7 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
  * @param accessToken - OAuth access token
  * @returns Promise<Response> - Raw response for compatibility
  */
-export async function loginWithOAuthToken(
-  email: string,
-  provider: string,
-  accessToken: string
-): Promise<Response> {
+export async function loginWithOAuthToken(email: string, provider: string, accessToken: string): Promise<Response> {
   // Input validation
   if (!email?.trim() || !validateEmail(email)) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
@@ -235,12 +231,7 @@ export async function sendResetLink(email: string, orgId: number) {
  * @param resetCode - Password reset code
  * @returns Promise with response metadata
  */
-export async function resetPassword(
-  email: string,
-  newPassword: string,
-  orgId: number,
-  resetCode: string
-) {
+export async function resetPassword(email: string, newPassword: string, orgId: number, resetCode: string) {
   // Input validation
   if (!email?.trim() || !validateEmail(email)) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
@@ -584,7 +575,7 @@ export async function signUpWithInviteCode(body: NewAccountBody, inviteCode: str
     const sanitizedInviteCode = inviteCode.trim();
     const response = await fetch(
       `${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}/invite/${encodeURIComponent(sanitizedInviteCode)}`,
-      requestOptions
+      requestOptions,
     );
 
     return response;
@@ -597,22 +588,13 @@ export async function signUpWithInviteCode(body: NewAccountBody, inviteCode: str
 }
 
 // Export types for external usage
-export type {
-  AuthError, AuthTokens,
-  AuthUser,
-  LoginResponse, NewAccountBody, UserSessionResponse
-};
+export type { AuthError, AuthTokens, AuthUser, LoginResponse, NewAccountBody, UserSessionResponse };
 
 // Export utility functions for advanced usage
-  export {
-    createAuthError,
-    handleAuthResponse,
-    validateEmail,
-    validatePassword
-  };
+export { createAuthError, handleAuthResponse, validateEmail, validatePassword };
 
 // Export constants for external usage
-  export { AUTH_ENDPOINTS };
+export { AUTH_ENDPOINTS };
 
 /**
  * Helper function to check if an error is an AuthError

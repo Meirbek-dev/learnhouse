@@ -1,7 +1,12 @@
+import {
+  OPENU_DOMAIN,
+  OPENU_TOP_DOMAIN,
+  getDefaultOrg,
+  getUriWithOrg,
+  isMultiOrgModeEnabled,
+} from './services/config/config';
+import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-
-import { getDefaultOrg, getUriWithOrg, OPENU_TOP_DOMAIN } from './services/config/config';
-import { auth } from '@/auth';
 
 export const config = {
   matcher: [
@@ -20,28 +25,17 @@ export const config = {
   ],
 };
 
-// Helper to set orgslug cookie
-function setOrgslugCookie(response: NextResponse, orgslug: string) {
-  response.cookies.set({
-    name: 'openu_current_orgslug',
-    value: orgslug,
-    domain: OPENU_TOP_DOMAIN === 'localhost' ? '' : OPENU_TOP_DOMAIN,
-    path: '/',
-    secure: OPENU_TOP_DOMAIN !== 'localhost',
-    sameSite: 'lax',
-  });
-}
-
-export default auth(async (req) => {
+export default async function middleware(req: NextRequest) {
   // Get initial data
-  const default_org = getDefaultOrg() as string;
+  const hosting_mode = isMultiOrgModeEnabled() ? 'multi' : 'single';
+  const default_org = getDefaultOrg();
   const { pathname, search } = req.nextUrl;
+  const fullhost = req.headers ? req.headers.get('host') : '';
   const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value;
 
   // Out of orgslug paths & rewrite
   const standard_paths = ['/home'];
   const auth_paths = ['/login', '/signup', '/reset', '/forgot'];
-
   if (standard_paths.includes(pathname)) {
     // Redirect to the same pathname with the original search params
     return NextResponse.rewrite(new URL(`${pathname}${search}`, req.url));
@@ -53,13 +47,41 @@ export default auth(async (req) => {
     // Parse the search params
     const searchParams = new URLSearchParams(search);
     const orgslug = searchParams.get('orgslug');
-    if (orgslug) setOrgslugCookie(response, orgslug);
+
+    if (orgslug) {
+      response.cookies.set({
+        name: 'openu_current_orgslug',
+        value: orgslug,
+        domain: OPENU_TOP_DOMAIN === 'localhost' ? '' : OPENU_TOP_DOMAIN,
+      });
+    }
     return response;
   }
 
   // Dynamic Pages Editor
   if (/^\/course\/[^/]+\/activity\/[^/]+\/edit$/.test(pathname)) {
     return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url));
+  }
+
+  // Check if the request is for the Stripe callback URL
+  if (req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
+    const searchParams = req.nextUrl.searchParams;
+    const orgslug = searchParams.get('state')?.split('_')[0]; // Assuming state parameter contains orgslug_randomstring
+
+    // Construct the new URL with the required parameters
+    const redirectUrl = new URL('/payments/stripe/connect/oauth', req.url);
+
+    // Preserve all original search parameters
+    searchParams.forEach((value, key) => {
+      redirectUrl.searchParams.append(key, value);
+    });
+
+    // Add orgslug if available
+    if (orgslug) {
+      redirectUrl.searchParams.set('orgslug', orgslug);
+    }
+
+    return NextResponse.rewrite(redirectUrl);
   }
 
   // Health Check
@@ -77,20 +99,63 @@ export default auth(async (req) => {
         redirectUrl.search = queryString;
       }
       return NextResponse.redirect(redirectUrl);
+    } else {
+      return 'Did not find the orgslug in the cookie';
     }
-    return NextResponse.json({ error: 'Did not find the orgslug in the cookie' }, { status: 400 });
   }
 
-  // Sitemap
   if (pathname.startsWith('/sitemap.xml')) {
-    const sitemapUrl = new URL('/api/sitemap', req.url);
+    let orgslug: string;
+
+    if (hosting_mode === 'multi') {
+      orgslug = fullhost ? fullhost.replace(`.${OPENU_DOMAIN}`, '') : (default_org as string);
+    } else {
+      // Single hosting mode
+      orgslug = default_org as string;
+    }
+
+    const sitemapUrl = new URL(`/api/sitemap`, req.url);
+
+    // Create a response object
     const response = NextResponse.rewrite(sitemapUrl);
-    response.headers.set('X-Sitemap-Orgslug', default_org);
+
+    // Set the orgslug in a header
+    response.headers.set('X-Sitemap-Orgslug', orgslug);
+
     return response;
   }
 
-  // Organization Mode Routing
-  const response = NextResponse.rewrite(new URL(`/orgs/${default_org}${pathname}`, req.url));
-  setOrgslugCookie(response, default_org);
-  return response;
-});
+  // Multi Organization Mode
+  if (hosting_mode === 'multi') {
+    // Get the organization slug from the URL
+    const orgslug = fullhost ? fullhost.replace(`.${OPENU_DOMAIN}`, '') : (default_org as string);
+    const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
+
+    // Set the cookie with the orgslug value
+    response.cookies.set({
+      name: 'openu_current_orgslug',
+      value: orgslug,
+      domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+      path: '/',
+    });
+
+    return response;
+  }
+
+  // Single Organization Mode
+  if (hosting_mode === 'single') {
+    // Get the default organization slug
+    const orgslug = default_org as string;
+    const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
+
+    // Set the cookie with the orgslug value
+    response.cookies.set({
+      name: 'openu_current_orgslug',
+      value: orgslug,
+      domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+      path: '/',
+    });
+
+    return response;
+  }
+}

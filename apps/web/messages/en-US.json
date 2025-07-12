@@ -78,7 +78,6 @@
       "task": "Task {index}"
     }
   },
-  "activity": "Activity",
   "ActivityIndicators": {
     "activityTypes": {
       "assignment": "Assignment",
@@ -164,8 +163,6 @@
     "unpublishedActivity": "This activity is not published yet",
     "viewAllActivities": "View all activities"
   },
-  "additionalSettings": "Additional Settings",
-  "aiEditor": "AI Editor",
   "Auth": {
     "Forgot": {
       "backToLogin": "Back to Login",
@@ -240,8 +237,6 @@
       "usernamePlaceholder": "Enter your username"
     }
   },
-  "clickMe": "Click me",
-  "close": "Close",
   "Common": {
     "save": "Save",
     "saved": "Saved",
@@ -916,7 +911,6 @@
     "viewAllActivities": "View all activities",
     "whatYouWillLearn": "What you will learn"
   },
-  "courses": "Courses",
   "Courses": {
     "access": "Access",
     "content": "Content",
@@ -1079,7 +1073,6 @@
     },
     "title": "Courses"
   },
-  "courses-0": "Courses",
   "CoursesPage": {
     "createACourse": "Create a course to add content",
     "createCourse": "Create Course",
@@ -1088,30 +1081,6 @@
     "noCourses": "No courses yet",
     "noCoursesAvailable": "No courses available yet",
     "title": "Courses"
-  },
-  "DashboardMenu": {
-    "mobile": {
-      "assignments": "Assignments",
-      "courses": "Courses",
-      "home": "Home",
-      "org": "Org.",
-      "payments": "Payments",
-      "settings": "Settings",
-      "users": "Users"
-    },
-    "tooltips": {
-      "assignments": "Assignments",
-      "backToHome": "Back to Home",
-      "courses": "Courses",
-      "home": "Dashboard Home",
-      "logout": "Logout",
-      "organization": "Organization Settings",
-      "payments": "Payments",
-      "userOwnedCourses": "@{username}'s Courses",
-      "users": "Users",
-      "userSettings": "@{username}'s Settings",
-      "yourOrganization": "Your Organization"
-    }
   },
   "DashPage": {
     "Assignments": {
@@ -2771,9 +2740,30 @@
       "usersTitle": "Users"
     }
   },
-  "deleteChapter": "Delete Chapter",
-  "dialog": "Dialog",
-  "failedToLoadUserData": "Failed to load user data.",
+  "DashboardMenu": {
+    "mobile": {
+      "assignments": "Assignments",
+      "courses": "Courses",
+      "home": "Home",
+      "org": "Org.",
+      "payments": "Payments",
+      "settings": "Settings",
+      "users": "Users"
+    },
+    "tooltips": {
+      "assignments": "Assignments",
+      "backToHome": "Back to Home",
+      "courses": "Courses",
+      "home": "Dashboard Home",
+      "logout": "Logout",
+      "organization": "Organization Settings",
+      "payments": "Payments",
+      "userOwnedCourses": "@{username}'s Courses",
+      "users": "Users",
+      "userSettings": "@{username}'s Settings",
+      "yourOrganization": "Your Organization"
+    }
+  },
   "FixedActivitySecondaryBar": {
     "activityCounter": "{current} of {total}",
     "course": "Course",
@@ -2946,7 +2936,6 @@
     "noFeaturedCourses": "No featured courses selected",
     "noImage": "No Image"
   },
-  "minutes": "Minutes",
   "NewCollectionPage": {
     "cancelButton": "Cancel",
     "createButton": "Create Collection",
@@ -2974,14 +2963,11 @@
     "visibilityPrivate": "Private Collection - Only visible to organization members",
     "visibilityPublic": "Public Collection - Visible to everyone"
   },
-  "noInviteCodesGenerated": "No invite codes generated yet.",
   "NotFoundPage": {
     "button": "Return to Homepage",
     "message": "We apologize for the inconvenience. It seems you are trying to access a page that has been deleted or never existed."
   },
-  "openu-logo": "OpenU logo",
   "OpenuUniversity": "OpenU University",
-  "previous": "Previous",
   "SearchPage": {
     "collections": "Collections",
     "courses": "Courses",
@@ -2997,11 +2983,9 @@
     "searchTitle": "Search",
     "users": "Users"
   },
-  "seconds": "Seconds",
   "Security": {
     "unauthorizedAccessMessage": "You do not have permissions to access this page"
   },
-  "selectDeadline": "Select a deadline for completing the task",
   "SignupPage": {
     "enterInviteCode": "Enter invite code",
     "hi": "Hi",
@@ -3023,7 +3007,6 @@
     "orgJoinSuccess": " successfully joined the organization.",
     "submit": "Submit "
   },
-  "touUniversity": "Toraighyrov University",
   "Trail": {
     "courseLabel": "Course",
     "quitCourseButton": "Quit Course"
@@ -3082,5 +3065,22 @@
     "usernameMinLength": "Username must be at least {length} characters",
     "wrongCredentials": "Wrong Email or Password"
   },
+  "activity": "Activity",
+  "additionalSettings": "Additional Settings",
+  "aiEditor": "AI Editor",
+  "clickMe": "Click me",
+  "close": "Close",
+  "courses": "Courses",
+  "courses-0": "Courses",
+  "deleteChapter": "Delete Chapter",
+  "dialog": "Dialog",
+  "failedToLoadUserData": "Failed to load user data.",
+  "minutes": "Minutes",
+  "noInviteCodesGenerated": "No invite codes generated yet.",
+  "openu-logo": "OpenU logo",
+  "previous": "Previous",
+  "seconds": "Seconds",
+  "selectDeadline": "Select a deadline for completing the task",
+  "touUniversity": "Toraighyrov University",
   "webPreview": "Web Preview"
 }

@@ -51,4 +51,4 @@ COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Run the application using the activated virtual environment
-CMD ["uv", "run", "app.py"]
+CMD ["python", "app.py"]

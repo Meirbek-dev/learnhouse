@@ -10,18 +10,8 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "turbo": "^2.5.4"
   },
-  "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=10.0.0"
-  },
   "name": "openu",
   "packageManager": "pnpm@10.13.1",
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.1.8",
-      "@types/react-dom": "19.1.6"
-    }
-  },
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -31,9 +21,5 @@
     "lint": "turbo run lint",
     "oxlint": "oxlint --fix --fix-suggestions",
     "start": "turbo run start"
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  }
 }
