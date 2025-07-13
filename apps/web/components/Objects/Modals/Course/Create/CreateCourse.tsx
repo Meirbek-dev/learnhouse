@@ -68,7 +68,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
   }, [orgslug, getOrgMetadata]);
 
   const onSubmit = async (values: FormValues) => {
-    if (orgId == null) {
+    if (orgId === null) {
       toast.error(t('toastErrorOrgMissing'));
       return;
     }

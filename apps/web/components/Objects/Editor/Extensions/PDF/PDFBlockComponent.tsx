@@ -1,16 +1,16 @@
-import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf';
-import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
-import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { uploadNewPDFFile } from '@services/blocks/Pdf/pdf';
+import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { NodeViewWrapper } from '@tiptap/react';
+import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
+import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 

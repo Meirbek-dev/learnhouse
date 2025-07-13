@@ -1,16 +1,16 @@
-import { AlertTriangle, AlignCenter, AlignLeft, AlignRight, Download, Expand, Image } from 'lucide-react';
-import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
-import { uploadNewImageFile } from '../../../../../services/blocks/Image/images';
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { uploadNewImageFile } from '@services/blocks/Image/images';
+import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { NodeViewWrapper } from '@tiptap/react';
-import { useEffect, useState } from 'react';
+import { AlertTriangle, AlignCenter, AlignLeft, AlignRight, Download, Expand, Image } from 'lucide-react';
 import { Resizable } from 're-resizable';
+import { useEffect, useState } from 'react';
+import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
 

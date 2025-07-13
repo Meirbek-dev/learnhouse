@@ -1,15 +1,4 @@
 {
-  "devDependencies": {
-    "@biomejs/biome": "2.1.1",
-    "eslint": "^9.31.0",
-    "oxlint": "^1.6.0",
-    "prettier": "^3.6.2",
-    "prettier-plugin-organize-imports": "^4.1.0",
-    "prettier-plugin-sort-imports": "^1.8.8",
-    "prettier-plugin-sort-json": "^4.1.1",
-    "prettier-plugin-tailwindcss": "^0.6.14",
-    "turbo": "^2.5.4"
-  },
   "name": "openu",
   "packageManager": "pnpm@10.13.1",
   "private": true,
@@ -21,5 +10,16 @@
     "lint": "turbo run lint",
     "oxlint": "oxlint --fix --fix-suggestions",
     "start": "turbo run start"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.1.1",
+    "eslint": "^9.31.0",
+    "oxlint": "^1.6.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-sort-imports": "^1.8.8",
+    "prettier-plugin-sort-json": "^4.1.1",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "turbo": "^2.5.4"
   }
 }

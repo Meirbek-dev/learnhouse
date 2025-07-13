@@ -1,8 +1,7 @@
 'use client';
 
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-
 import { BookOpen, ChevronDown, ExternalLink, Lightbulb, Save, Sigma } from 'lucide-react';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useRef, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';

@@ -1,4 +1,36 @@
 'use client';
+import { useContributorStatus } from '@/hooks/useContributorStatus';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import AssignmentSubmissionProvider, {
+  useAssignmentSubmission,
+} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
+import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import UserAvatar from '@components/Objects/UserAvatar';
+import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
+import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
+import CourseEndView from '@components/Pages/Activity/CourseEndView';
+import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
+import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
+import {
+  getAssignmentFromActivityUUID,
+  getFinalGrade,
+  submitAssignmentForGrading,
+} from '@services/courses/assignments';
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookOpenCheck,
   CheckCircle,
@@ -9,45 +41,12 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
-import AssignmentSubmissionProvider, {
-  useAssignmentSubmission,
-} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
-import {
-  getAssignmentFromActivityUUID,
-  getFinalGrade,
-  submitAssignmentForGrading,
-} from '@services/courses/assignments';
-import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
-import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
-import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
-import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
-import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import CourseEndView from '@components/Pages/Activity/CourseEndView';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
-import { CourseProvider } from '@components/Contexts/CourseContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
-import Link from 'next/link';
-
-import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));
@@ -298,9 +297,9 @@ function ActivityClient(props: ActivityClientProps) {
   }, [isFocusMode]);
 
   function getChapterNameByActivityId(course: any, activity_id: number) {
-    for (let i = 0; i < course.chapters.length; i++) {
+    for (let i = 0; i < course.chapters.length; i += 1) {
       const chapter = course.chapters[i];
-      for (let j = 0; j < chapter.activities.length; j++) {
+      for (let j = 0; j < chapter.activities.length; j += 1) {
         const activity = chapter.activities[j];
         if (activity.id === activity_id) {
           return `${t('chapter')} ${i + 1} : ${chapter.name}`;
@@ -934,12 +933,12 @@ export function MarkStatus(props: {
 
     props.course.chapters.forEach((chapter: any) => {
       chapter.activities.forEach((activity: any) => {
-        totalActivities++;
+        totalActivities += 1;
         const isCompleted = run.steps.find(
           (step: any) => step.activity_uuid === activity.activity_uuid && step.complete === true,
         );
         if (isCompleted) {
-          completedActivities++;
+          completedActivities += 1;
         }
       });
     });

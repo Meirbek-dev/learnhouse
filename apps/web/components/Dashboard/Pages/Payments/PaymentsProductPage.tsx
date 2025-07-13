@@ -6,8 +6,10 @@ import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/Unconfigu
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
+import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -23,9 +25,6 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { z } from 'zod';
-
-import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
-import CreateProductForm from './SubComponents/CreateProductForm';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({

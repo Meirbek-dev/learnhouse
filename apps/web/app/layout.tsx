@@ -1,10 +1,9 @@
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
-import { Inter } from 'next/font/google';
-import Script from 'next/script';
-
 import ClientLayout from './client-layout';
+import { Inter } from 'next/font/google';
 import { isDevEnv } from '@/auth';
+import Script from 'next/script';
 
 import '../styles/globals.css';
 

@@ -1,23 +1,23 @@
-import { AlertCircle, ArrowRight, BookOpen, ClockIcon, ShoppingCart, UserPen } from 'lucide-react';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import UserAvatar from '@components/Objects/UserAvatar';
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { removeCourse, startCourse } from '@services/courses/activity';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
 import { checkPaidAccess } from '@services/payments/payments';
+import { getProductsByCourse } from '@services/payments/products';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useOrg } from '@components/Contexts/OrgContext';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { useRouter } from 'next/navigation';
+import { AlertCircle, ArrowRight, BookOpen, ClockIcon, ShoppingCart, UserPen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
-import { useContributorStatus } from '../../../../hooks/useContributorStatus';
 import CourseProgress from '../CourseProgress/CourseProgress';
 
+import { useContributorStatus } from '@/hooks/useContributorStatus';
 import CoursePaidOptions from './CoursePaidOptions';
 
 interface CourseRun {

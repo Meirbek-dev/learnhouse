@@ -30,7 +30,7 @@ export async function startActivityAIChatSession(
       HTTPmessage: result.statusText,
     };
   } catch (error) {
-    console.error(`AI chat session failed after:`, error);
+    console.error('AI chat session failed after:', error);
 
     return {
       success: false,
@@ -62,7 +62,7 @@ export async function sendActivityAIChatMessage(
       HTTPmessage: result.statusText,
     };
   } catch (error) {
-    console.error(`AI message failed:`, error);
+    console.error('AI message failed:', error);
 
     return {
       success: false,

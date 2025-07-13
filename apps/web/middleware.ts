@@ -1,9 +1,9 @@
 import {
-  OPENU_DOMAIN,
-  OPENU_TOP_DOMAIN,
   getDefaultOrg,
   getUriWithOrg,
   isMultiOrgModeEnabled,
+  OPENU_DOMAIN,
+  OPENU_TOP_DOMAIN,
 } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -99,9 +99,8 @@ export default async function middleware(req: NextRequest) {
         redirectUrl.search = queryString;
       }
       return NextResponse.redirect(redirectUrl);
-    } else {
-      return 'Did not find the orgslug in the cookie';
     }
+    return 'Did not find the orgslug in the cookie';
   }
 
   if (pathname.startsWith('/sitemap.xml')) {
@@ -114,7 +113,7 @@ export default async function middleware(req: NextRequest) {
       orgslug = default_org as string;
     }
 
-    const sitemapUrl = new URL(`/api/sitemap`, req.url);
+    const sitemapUrl = new URL('/api/sitemap', req.url);
 
     // Create a response object
     const response = NextResponse.rewrite(sitemapUrl);
