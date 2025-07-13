@@ -31,9 +31,13 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
   return (
     <>
       {isBubbleMenuAvailable && (
-        <BubbleMenu // TODO: Migrate BubbleMenu to v3 https://next.tiptap.dev/docs/guides/upgrade-tiptap-v2
+        <BubbleMenu
           className="w-fit"
           editor={props.editor}
+          shouldShow={({ editor }) => {
+            // Only show the bubble menu if text is selected
+            return editor.isActive('text') && !editor.state.selection.empty;
+          }}
         >
           <div
             style={{
