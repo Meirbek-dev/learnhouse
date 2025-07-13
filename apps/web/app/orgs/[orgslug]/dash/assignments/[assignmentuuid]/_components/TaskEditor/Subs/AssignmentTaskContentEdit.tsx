@@ -3,10 +3,9 @@ import {
   useAssignmentsTaskDispatch,
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useEffect } from 'react';
-
 import TaskQuizObject from './TaskTypes/TaskQuizObject';
 import TaskFileObject from './TaskTypes/TaskFileObject';
+import { useEffect } from 'react';
 
 function AssignmentTaskContentEdit() {
   const session = useLHSession() as any;

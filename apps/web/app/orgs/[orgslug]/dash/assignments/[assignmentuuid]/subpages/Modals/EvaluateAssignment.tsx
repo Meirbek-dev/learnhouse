@@ -1,4 +1,6 @@
 import { deleteUserSubmission, markActivityAsDoneForUser, putFinalGrade } from '@services/courses/assignments';
+import TaskQuizObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
+import TaskFileObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BookOpenCheck, Check, Download, Info, MoveRight, X } from 'lucide-react';
@@ -8,9 +10,6 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-
-import TaskQuizObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
-import TaskFileObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 
 function EvaluateAssignment({ user_id }: any) {
   const t = useTranslations('DashPage.Assignments.EvaluateModal');

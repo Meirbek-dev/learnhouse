@@ -35,6 +35,7 @@ import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { CourseProvider } from '@components/Contexts/CourseContext';
+import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -46,8 +47,6 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
-
-import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));
@@ -298,9 +297,9 @@ function ActivityClient(props: ActivityClientProps) {
   }, [isFocusMode]);
 
   function getChapterNameByActivityId(course: any, activity_id: number) {
-    for (let i = 0; i < course.chapters.length; i++) {
+    for (let i = 0; i < course.chapters.length; i += 1) {
       const chapter = course.chapters[i];
-      for (let j = 0; j < chapter.activities.length; j++) {
+      for (let j = 0; j < chapter.activities.length; j += 1) {
         const activity = chapter.activities[j];
         if (activity.id === activity_id) {
           return `${t('chapter')} ${i + 1} : ${chapter.name}`;
@@ -934,12 +933,12 @@ export function MarkStatus(props: {
 
     props.course.chapters.forEach((chapter: any) => {
       chapter.activities.forEach((activity: any) => {
-        totalActivities++;
+        totalActivities += 1;
         const isCompleted = run.steps.find(
           (step: any) => step.activity_uuid === activity.activity_uuid && step.complete === true,
         );
         if (isCompleted) {
-          completedActivities++;
+          completedActivities += 1;
         }
       });
     });

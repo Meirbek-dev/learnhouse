@@ -3,14 +3,13 @@ import DocumentPdfPageActivityImage from 'public//activities_types/documentpdf-p
 import AssignmentActivityImage from 'public//activities_types/assignment-page-activity.png';
 import DynamicPageActivityImage from 'public/activities_types/dynamic-page-activity.png';
 import VideoPageActivityImage from 'public//activities_types/video-page-activity.png';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import Image from 'next/image';
-
 import DocumentPdfModal from './NewActivityModal/DocumentActivityModal';
 import DynamicCanvaModal from './NewActivityModal/DynamicActivityModal';
 import Assignment from './NewActivityModal/AssignmentActivityModal';
 import VideoModal from './NewActivityModal/VideoActivityModal';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import Image from 'next/image';
 
 function NewActivityModal({
   closeModal,

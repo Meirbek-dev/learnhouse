@@ -1,16 +1,15 @@
 import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
-import { type Editor } from '@tiptap/react';
-import { BubbleMenu } from '@tiptap/react/menus';
 import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Image from 'next/image';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import touEmblemDark from 'public/tou_emblem_dark.png';
+import { BubbleMenu } from '@tiptap/react/menus';
+import type { Editor } from '@tiptap/react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-
-import useGetAIFeatures from '../../../../Hooks/useGetAIFeatures';
+import Image from 'next/image';
 
 interface AICanvaToolkitProps {
   editor: Editor;

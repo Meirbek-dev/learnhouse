@@ -22,8 +22,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(react-hook-form@7.60.0(react@19.1.0))
       '@icons-pack/react-simple-icons':
-        specifier: ^13.4.0
-        version: 13.4.0(react@19.1.0)
+        specifier: ^13.5.0
+        version: 13.5.0(react@19.1.0)
       '@radix-ui/colors':
         specifier: ^3.0.0
         version: 3.0.0
@@ -151,11 +151,11 @@ importers:
         specifier: ^3.2.6
         version: 3.2.6
       emoji-picker-react:
-        specifier: ^4.13.0
-        version: 4.13.0(react@19.1.0)
+        specifier: ^4.13.1
+        version: 4.13.1(react@19.1.0)
       framer-motion:
-        specifier: ^12.23.3
-        version: 12.23.3(@emotion/is-prop-valid@1.2.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: ^12.23.5
+        version: 12.23.5(@emotion/is-prop-valid@1.2.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       highlight.js:
         specifier: ^11.11.1
         version: 11.11.1
@@ -441,8 +441,8 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@icons-pack/react-simple-icons@13.4.0':
-    resolution: {integrity: sha512-SBBR2Jq88IEhr5NEg22MtF5WxlC6B5uRgXCL8tFHS/CBr5WBepEIFIcHG8ijNjfjIQa8YuO73Q2UvVHoM148fA==}
+  '@icons-pack/react-simple-icons@13.5.0':
+    resolution: {integrity: sha512-00/E53YOt967SomgPWyH4eTtHdUDLAeaowl0CAU7UnEuBOrHznrKhFQHccdN0wShR5CVXxYh41qeYl6ZGJ/OSg==}
     peerDependencies:
       react: ^16.13 || ^17 || ^18 || ^19
 
@@ -1940,8 +1940,8 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
-  emoji-picker-react@4.13.0:
-    resolution: {integrity: sha512-wkZPWljbHaFuKI4qnOdqQTSMhraUy5LV/girtO8pXtMGNQXCBIzm23PulNSrcaL8iWmu5gifcDuOEplvipMIjg==}
+  emoji-picker-react@4.13.1:
+    resolution: {integrity: sha512-0I+8stp8/l3H/DAa8axeO/ffb7NmqSs4zlh4fW+CgQ4BsEaNiDnXFv6Ll72iZiGzvIKR4GEVVAkj3B692Ey3Gg==}
     engines: {node: '>=10'}
     peerDependencies:
       react: '>=16'
@@ -2175,8 +2175,8 @@ packages:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
     engines: {node: '>= 0.4'}
 
-  framer-motion@12.23.3:
-    resolution: {integrity: sha512-llmLkf44zuIZOPSrE4bl4J0UTg6bav+rlKEfMRKgvDMXqBrUtMg6cspoQeRVK3nqRLxTmAJhfGXk39UDdZD7Kw==}
+  framer-motion@12.23.5:
+    resolution: {integrity: sha512-t+6/f2TUowkr1gVuGwVwxR3ZQupCdCZj0mivG8M8CW2kwHPqtSePomECvmto15qoFCwost77O/XuEsq59MLDKw==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0 || ^19.0.0
@@ -2616,8 +2616,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  motion-dom@12.23.2:
-    resolution: {integrity: sha512-73j6xDHX/NvVh5L5oS1ouAVnshsvmApOq4F3VZo5MkYSD/YVsVLal4Qp9wvVgJM9uU2bLZyc0Sn8B9c/MMKk4g==}
+  motion-dom@12.23.5:
+    resolution: {integrity: sha512-RrUS4X11w7kIU1COoSVptuYTx1QQ/sViDEI1Yl1zL0nem8UXn3HRcsMrFTCkZSSRLXeVpN540bFP1iS87SicPQ==}
 
   motion-utils@12.23.2:
     resolution: {integrity: sha512-cIEXlBlXAOUyiAtR0S+QPQUM9L3Diz23Bo+zM420NvSd/oPQJwg6U+rT+WRTpp0rizMsBGQOsAwhWIfglUcZfA==}
@@ -3594,7 +3594,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@icons-pack/react-simple-icons@13.4.0(react@19.1.0)':
+  '@icons-pack/react-simple-icons@13.5.0(react@19.1.0)':
     dependencies:
       react: 19.1.0
 
@@ -5082,7 +5082,7 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
-  emoji-picker-react@4.13.0(react@19.1.0):
+  emoji-picker-react@4.13.1(react@19.1.0):
     dependencies:
       flairup: 1.0.0
       react: 19.1.0
@@ -5460,9 +5460,9 @@ snapshots:
     dependencies:
       is-callable: 1.2.7
 
-  framer-motion@12.23.3(@emotion/is-prop-valid@1.2.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  framer-motion@12.23.5(@emotion/is-prop-valid@1.2.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
-      motion-dom: 12.23.2
+      motion-dom: 12.23.5
       motion-utils: 12.23.2
       tslib: 2.8.1
     optionalDependencies:
@@ -5885,7 +5885,7 @@ snapshots:
 
   mkdirp@3.0.1: {}
 
-  motion-dom@12.23.2:
+  motion-dom@12.23.5:
     dependencies:
       motion-utils: 12.23.2
 

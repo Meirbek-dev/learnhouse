@@ -1,10 +1,10 @@
 import { AlertTriangle, AlignCenter, AlignLeft, AlignRight, Download, Expand, Image } from 'lucide-react';
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
-import { uploadNewImageFile } from '../../../../../services/blocks/Image/images';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import { uploadNewImageFile } from '@services/blocks/Image/images';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';

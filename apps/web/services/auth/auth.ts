@@ -77,7 +77,7 @@ const handleAuthResponse = async <T>(response: Response, operation: string): Pro
 
   try {
     return await response.json();
-  } catch (error) {
+  } catch {
     throw createAuthError(`Failed to parse ${operation} response`, response.status, 'PARSE_ERROR');
   }
 };
@@ -104,7 +104,7 @@ const sanitizeStringInput = (input: string): string => {
  */
 export async function loginAndGetToken(username: any, password: any): Promise<Response> {
   // Input validation
-  if (!username?.trim() || !password?.trim()) {
+  if (!(username?.trim() && password?.trim())) {
     throw createAuthError('Username and password are required', 400, 'INVALID_CREDENTIALS');
   }
 
@@ -156,7 +156,7 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
  */
 export async function loginWithOAuthToken(email: string, provider: string, accessToken: string): Promise<Response> {
   // Input validation
-  if (!email?.trim() || !validateEmail(email)) {
+  if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
   }
 
@@ -201,7 +201,7 @@ export async function loginWithOAuthToken(email: string, provider: string, acces
  * @returns Promise with response metadata
  */
 export async function sendResetLink(email: string, orgId: number) {
-  if (!email?.trim() || !validateEmail(email)) {
+  if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
   }
 
@@ -233,7 +233,7 @@ export async function sendResetLink(email: string, orgId: number) {
  */
 export async function resetPassword(email: string, newPassword: string, orgId: number, resetCode: string) {
   // Input validation
-  if (!email?.trim() || !validateEmail(email)) {
+  if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
   }
 
@@ -473,7 +473,7 @@ export async function signup(body: NewAccountBody): Promise<Response> {
     throw createAuthError('Username is required', 400, 'MISSING_USERNAME');
   }
 
-  if (!email?.trim() || !validateEmail(email)) {
+  if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
   }
 
@@ -539,7 +539,7 @@ export async function signUpWithInviteCode(body: NewAccountBody, inviteCode: str
     throw createAuthError('Username is required', 400, 'MISSING_USERNAME');
   }
 
-  if (!email?.trim() || !validateEmail(email)) {
+  if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
   }
 

@@ -1,7 +1,7 @@
 import type { Editor } from '@tiptap/react';
-import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
+import { Check } from 'lucide-react';
 
 interface TableOfContentsProps {
   editor: Editor | null;

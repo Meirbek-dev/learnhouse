@@ -15,9 +15,9 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
-import { useContributorStatus } from '../../../../hooks/useContributorStatus';
 import CourseProgress from '../CourseProgress/CourseProgress';
 
+import { useContributorStatus } from '@/hooks/useContributorStatus';
 import CoursePaidOptions from './CoursePaidOptions';
 
 interface CourseRun {

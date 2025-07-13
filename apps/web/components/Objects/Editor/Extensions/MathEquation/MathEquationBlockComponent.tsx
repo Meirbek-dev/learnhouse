@@ -1,8 +1,7 @@
 'use client';
 
-import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-
 import { BookOpen, ChevronDown, ExternalLink, Lightbulb, Save, Sigma } from 'lucide-react';
+import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useRef, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
@@ -405,21 +404,26 @@ function MathEquationBlockComponent(props: any) {
                           {'{'}denominator{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('exponents')}</span> x^{'{'}'power'{'}'}
-                        </div>
-                        <div>
-                          <span className="font-medium">{t('subscripts')}</span> x_{'{'}'subscript'
+                          <span className="font-medium">{t('exponents')}</span> x^{'{'}'power'
                           {'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('squareRoot')}</span> \sqrt{'{'}'x'{'}'}
+                          <span className="font-medium">{t('subscripts')}</span> x_{'{'}
+                          'subscript'
+                          {'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('summation')}</span> \sum_{'{'}'lower'
+                          <span className="font-medium">{t('squareRoot')}</span> \sqrt{'{'}'x'
+                          {'}'}
+                        </div>
+                        <div>
+                          <span className="font-medium">{t('summation')}</span> \sum_{'{'}
+                          'lower'
                           {'}'}^{'{'}'upper'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('integral')}</span> \int_{'{'}'lower'
+                          <span className="font-medium">{t('integral')}</span> \int_{'{'}
+                          'lower'
                           {'}'}^{'{'}'upper'{'}'}
                         </div>
                         <div className="border-t pt-1">

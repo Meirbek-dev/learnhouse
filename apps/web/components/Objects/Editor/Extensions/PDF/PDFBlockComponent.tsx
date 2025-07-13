@@ -1,11 +1,11 @@
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { uploadNewPDFFile } from '../../../../../services/blocks/Pdf/pdf';
 import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { uploadNewPDFFile } from '@services/blocks/Pdf/pdf';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';

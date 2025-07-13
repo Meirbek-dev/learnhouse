@@ -9,6 +9,7 @@ import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { PencilLine, Rss, TentTree } from 'lucide-react';
+import UserAvatar from '@components/Objects/UserAvatar';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
@@ -23,8 +24,6 @@ import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
 import { z } from 'zod';
-
-import UserAvatar from '../../UserAvatar';
 
 interface Author {
   user: {

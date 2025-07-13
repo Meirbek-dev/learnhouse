@@ -31,7 +31,7 @@ const createRequestInit = (
     headers['Content-Type'] = 'application/json';
   }
 
-  const shouldSetBody = data != null && (!limitBodyToMethods || ['POST', 'PUT', 'DELETE'].includes(method));
+  const shouldSetBody = data !== null && (!limitBodyToMethods || ['POST', 'PUT', 'DELETE'].includes(method));
 
   if (shouldSetBody) {
     options.body = isJson ? JSON.stringify(data) : data;
