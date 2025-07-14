@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { type Locale, locales } from '@/i18n/config';
 import { setUserLocale } from '@/i18n/locale';
 import { cn } from '@/lib/utils';
+import { Languages } from 'lucide-react';
 
 interface LocaleSwitcherProps {
   className?: string;
@@ -33,9 +34,10 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
       disabled={isPending}
     >
       <SelectTrigger
-        className={cn('w-[180px]', className)}
+        className={cn('w-auto', className)}
         aria-label={t('selectLanguage')}
       >
+        <Languages size={22} />
         <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>
       </SelectTrigger>
       <SelectContent>

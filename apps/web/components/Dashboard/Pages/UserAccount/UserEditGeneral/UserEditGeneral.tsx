@@ -1,4 +1,20 @@
 'use client';
+import { useDebounce } from '@/hooks/useDebounce';
+import type { Locale } from '@/i18n/config';
+import { getUserLocale } from '@/i18n/locale';
+import { constructAcceptValue } from '@/lib/constants';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Textarea } from '@components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { getUriWithoutOrg } from '@services/config/config';
+import { updateProfile } from '@services/settings/profile';
+import { getUser, updateUserAvatar } from '@services/users/users';
 import {
   AlertTriangle,
   ArrowBigUpDash,
@@ -19,29 +35,12 @@ import {
   UploadCloud,
   Users,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { LocaleSwitcher } from '@components/Utils/LocaleSwitcher';
-import { getUser, updateUserAvatar } from '@services/users/users';
+import { signOut } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
+import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type UseFormReturn, useForm } from 'react-hook-form';
-import { updateProfile } from '@services/settings/profile';
-import { getUriWithoutOrg } from '@services/config/config';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { constructAcceptValue } from '@/lib/constants';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Textarea } from '@components/ui/textarea';
-import { useDebounce } from '@/hooks/useDebounce';
-import { Button } from '@components/ui/button';
-import { getUserLocale } from '@/i18n/locale';
-import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
-import type { Locale } from '@/i18n/config';
-import { useTranslations } from 'next-intl';
-import { signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
-import * as React from 'react';
 import { z } from 'zod';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
@@ -420,11 +419,6 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                 </FormItem>
               )}
             />
-
-            <div>
-              <Label className="mb-1.5">{t('language')}</Label>
-              <LocaleSwitcher />
-            </div>
 
             <div className="space-y-4">
               <div className="flex flex-col gap-3">

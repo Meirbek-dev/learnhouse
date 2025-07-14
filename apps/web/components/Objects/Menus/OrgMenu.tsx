@@ -1,15 +1,16 @@
 'use client';
 
-import { HeaderProfileBox } from '@components/Security/HeaderProfileBox';
 import { SearchBar } from '@components/Objects/Search/SearchBar';
+import { HeaderProfileBox } from '@components/Security/HeaderProfileBox';
 import { OpenULogoSVG } from '@components/svg/openuLogoSvg';
 import { getUriWithOrg } from '@services/config/config';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import * as React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 
+import { LocaleSwitcher } from '@components/Utils/LocaleSwitcher';
 import MenuLinks from './OrgMenuLinks';
 
 export const OrgMenu = (props: any) => {
@@ -90,6 +91,8 @@ export const OrgMenu = (props: any) => {
               className="w-full"
             />
           </div>
+
+          <LocaleSwitcher />
 
           <div className="flex items-center space-x-4">
             <div className="hidden md:flex">
