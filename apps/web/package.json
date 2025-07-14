@@ -76,6 +76,7 @@
     "next-intl": "4.3.4",
     "nextjs-toploader": "^3.8.16",
     "prosemirror-state": "^1.4.3",
+    "radix-ui": "^1.4.2",
     "re-resizable": "^6.11.2",
     "react": "19.1.0",
     "react-confetti": "^6.4.0",

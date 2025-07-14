@@ -1,19 +1,19 @@
 'use client';
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
-import openuLogoDark from 'public/openu_logo_dark.png';
+import { Button } from '@components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { sendResetLink } from '@services/auth/auth';
+import { getUriWithOrg } from '@services/config/config';
 import { AlertTriangle, Info } from 'lucide-react';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import openuLogoDark from 'public/openu_logo_dark.png';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string) => string) =>
@@ -71,8 +71,8 @@ function ForgotPasswordClient() {
               <p className="mb-4 text-sm">{t('enterEmailMessage')}</p>
 
               {error && (
-                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
-                  <AlertTriangle size={18} />
+                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 transition-all my-4">
+                  <AlertTriangle size={22} />
                   <div className="text-sm font-bold">{error}</div>
                 </div>
               )}

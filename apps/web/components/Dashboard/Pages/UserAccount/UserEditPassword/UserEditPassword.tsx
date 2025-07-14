@@ -1,17 +1,17 @@
 'use client';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { updatePassword } from '@services/settings/password';
-import { getUriWithoutOrg } from '@services/config/config';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@components/ui/button';
+import PasswordInput from '@components/ui/custom/password-input';
 import { Label } from '@components/ui/label';
-import { Input } from '@components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { getUriWithoutOrg } from '@services/config/config';
+import { updatePassword } from '@services/settings/password';
 import { AlertTriangle } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import { z } from 'zod';
 
@@ -116,8 +116,7 @@ function UserEditPassword() {
           >
             <div>
               <Label htmlFor="old_password">{tPassword('currentPasswordLabel')}</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 id="old_password"
                 {...register('old_password')}
                 className="mt-1"
@@ -127,8 +126,7 @@ function UserEditPassword() {
 
             <div>
               <Label htmlFor="new_password">{tPassword('newPasswordLabel')}</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 id="new_password"
                 {...register('new_password')}
                 className="mt-1"

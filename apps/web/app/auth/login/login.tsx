@@ -1,18 +1,19 @@
 'use client';
 
+import { Button } from '@components/ui/button';
+import PasswordInput from '@components/ui/custom/password-input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { Input } from '@components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { AlertTriangle, UserRoundPlus } from 'lucide-react';
-import openuLogoDark from 'public/openu_logo_dark.png';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
+import openuLogoDark from 'public/openu_logo_dark.png';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 interface LoginClientProps {
@@ -125,8 +126,7 @@ const LoginClient = (props: LoginClientProps) => {
                       <FormItem>
                         <FormLabel>{t('password')}</FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
+                          <PasswordInput
                             placeholder={t('passwordPlaceholder')}
                             autoComplete="current-password"
                             {...field}

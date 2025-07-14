@@ -180,6 +180,8 @@
       "accessFromOrg": "Получите доступ к этой странице",
       "orgNotSpecified": "Платформа не указана"
     },
+    "password": "Пароль",
+    "passwordPlaceholder": "Введите ваш пароль",
     "Login": {
       "email": "Электронная почта",
       "emailPlaceholder": "Введите ваш email",

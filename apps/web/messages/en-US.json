@@ -180,6 +180,8 @@
       "accessFromOrg": "Please access this page from an organization",
       "orgNotSpecified": "Organization not specified"
     },
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
     "Login": {
       "email": "Email",
       "emailPlaceholder": "Enter your email",
