@@ -1,19 +1,19 @@
 'use client';
 
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
-import PasswordInput from '@components/ui/custom/password-input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
+import PasswordInput from '@components/ui/custom/password-input';
+import { getUriWithoutOrg } from '@services/config/config';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPassword } from '@services/auth/auth';
-import { getUriWithoutOrg } from '@services/config/config';
 import { AlertTriangle, Info } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import Link from 'next/link';
 import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>

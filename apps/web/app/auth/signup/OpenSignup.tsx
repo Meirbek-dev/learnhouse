@@ -1,20 +1,20 @@
 'use client';
 
-import { useOrg } from '@components/Contexts/OrgContext';
-import { Button } from '@components/ui/button';
-import PasswordInput from '@components/ui/custom/password-input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { Textarea } from '@components/ui/textarea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { signup } from '@services/auth/auth';
+import PasswordInput from '@components/ui/custom/password-input';
 import { AlertTriangle, Check, User } from 'lucide-react';
-import { signIn } from 'next-auth/react';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Textarea } from '@components/ui/textarea';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { signup } from '@services/auth/auth';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { signIn } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>

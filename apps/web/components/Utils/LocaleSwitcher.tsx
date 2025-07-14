@@ -12,9 +12,10 @@ import { Languages } from 'lucide-react';
 
 interface LocaleSwitcherProps {
   className?: string;
+  isMobile?: boolean;
 }
 
-export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
+export function LocaleSwitcher({ className, isMobile }: LocaleSwitcherProps) {
   const router = useRouter();
   const currentLocale = useLocale();
   const [isPending, startTransition] = useTransition();
@@ -34,13 +35,18 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
       disabled={isPending}
     >
       <SelectTrigger
-        className={cn('w-auto', className)}
+        className={cn('w-auto touch-manipulation', isMobile && 'w-full', className)}
         aria-label={t('selectLanguage')}
       >
         <Languages size={22} />
         <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent
+        className={cn(isMobile && 'z-[80]')}
+        position={isMobile ? 'popper' : 'popper'}
+        sideOffset={4}
+        side={isMobile ? 'bottom' : 'bottom'}
+      >
         {locales.map((locale) => (
           <SelectItem
             key={locale}

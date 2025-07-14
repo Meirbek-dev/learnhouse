@@ -1,17 +1,17 @@
 'use client';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Button } from '@components/ui/button';
 import PasswordInput from '@components/ui/custom/password-input';
-import { Label } from '@components/ui/label';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { getUriWithoutOrg } from '@services/config/config';
 import { updatePassword } from '@services/settings/password';
+import { getUriWithoutOrg } from '@services/config/config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
 import { AlertTriangle } from 'lucide-react';
-import { signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
+import { signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import { z } from 'zod';
 

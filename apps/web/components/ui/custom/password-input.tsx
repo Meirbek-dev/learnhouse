@@ -1,10 +1,10 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { forwardRef, useId, useState } from 'react';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
 
 interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;

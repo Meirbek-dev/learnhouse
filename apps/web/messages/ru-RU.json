@@ -506,6 +506,14 @@
       "selectUserGroup": "Выберите группу пользователей",
       "unknownError": "Неизвестная ошибка"
     },
+    "OrgMenu": {
+      "openMenu": "Открыть меню",
+      "closeMenu": "Закрыть меню",
+      "search": "Поиск",
+      "navigation": "Навигация",
+      "language": "Язык",
+      "account": "Аккаунт"
+    },
     "OrgMenuLinks": {
       "collections": "Коллекции",
       "courses": "Курсы",

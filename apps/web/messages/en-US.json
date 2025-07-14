@@ -506,9 +506,17 @@
       "selectUserGroup": "Select User Group",
       "unknownError": "Unknown error"
     },
+    "OrgMenu": {
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "search": "Search",
+      "navigation": "Navigation",
+      "language": "Language",
+      "account": "Account"
+    },
     "OrgMenuLinks": {
-      "collections": "Collections",
       "courses": "Courses",
+      "collections": "Collections",
       "trail": "Trail"
     },
     "PageLoading": {
