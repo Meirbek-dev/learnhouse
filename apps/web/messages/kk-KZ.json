@@ -320,7 +320,8 @@
       "visibilityItemPublic": "Жалпы (Барлығына қарау үшін қолжетімді)"
     },
     "Dialog": {
-      "close": "Жабу"
+      "close": "Жабу",
+      "cancel": "Болдырмау"
     },
     "DocumentPdfModal": {
       "createActivity": "Белсенділік жасау",

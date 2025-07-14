@@ -1,32 +1,64 @@
 'use client';
-import { isValidElement, useCallback, useState } from 'react';
-import styled, { keyframes } from 'styled-components';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 import { AlertTriangle, Info } from 'lucide-react';
-import * as Dialog from '@radix-ui/react-dialog';
-import { blackA } from '@radix-ui/colors';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
+import { isValidElement, useCallback, useState } from 'react';
 
+/**
+ * Props for the ConfirmationModal component
+ */
 interface ModalParams {
+  /** The message displayed in the modal body */
   confirmationMessage: string;
+  /** Text for the confirm/action button */
   confirmationButtonText: string;
+  /** Title displayed in the modal header */
   dialogTitle: string;
-  functionToExecute: any;
+  /** Function to execute when the confirmation button is clicked */
+  functionToExecute: () => void | Promise<void>;
+  /** ReactNode that triggers the modal when clicked */
   dialogTrigger?: ReactNode;
+  /** Visual style of the modal - 'warning' for destructive actions, 'info' for general confirmations */
   status?: 'warning' | 'info';
+  /** Optional ID for the confirmation button */
   buttonid?: string;
+  /** Text for the cancel button */
+  cancelButtonText?: string;
+  /** Whether to show the cancel button (default: true) */
+  showCancelButton?: boolean;
+  /** Size of the modal dialog */
+  size?: 'sm' | 'md' | 'lg';
+  /** Whether the confirmation button is disabled */
+  disabled?: boolean;
 }
 
 const ConfirmationModal = (params: ModalParams) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const warningColors = 'bg-red-100 text-red-600';
-  const infoColors = 'bg-blue-100 text-blue-600';
-  const warningButtonColors = 'text-white bg-red-500 hover:bg-red-600';
-  const infoButtonColors = 'text-white bg-blue-500 hover:bg-blue-600';
+  const [isExecuting, setIsExecuting] = useState(false);
+  const t = useTranslations('Components.ConfirmationModal')
 
-  const onOpenChange = useCallback((open: boolean) => setIsDialogOpen(open), []);
+  const onOpenChange = useCallback(
+    (open: boolean) => {
+      if (!isExecuting) {
+        setIsDialogOpen(open);
+      }
+    },
+    [isExecuting],
+  );
 
-  // Helper: wrap button in span if needed
-  const getSafeDialogTrigger = (trigger: ReactNode) => {
+  // Helper: wrap button in span if needed for proper DialogTrigger usage
+  const getSafeDialogTrigger = useCallback((trigger: ReactNode) => {
     if (!trigger) return null;
     if (isValidElement(trigger)) {
       const type = (trigger.type as any)?.toString?.() || '';
@@ -36,110 +68,121 @@ const ConfirmationModal = (params: ModalParams) => {
       if (type.includes('button')) return <span>{trigger}</span>;
     }
     return trigger;
-  };
+  }, []);
+
+  const getStatusConfig = useCallback(() => {
+    const isWarning = params.status === 'warning';
+    return {
+      iconBg: isWarning
+        ? 'bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400'
+        : 'bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400',
+      buttonVariant: isWarning ? 'destructive' : 'default',
+      icon: isWarning ? AlertTriangle : Info,
+    };
+  }, [params.status]);
+
+  const getSizeConfig = useCallback(() => {
+    switch (params.size) {
+      case 'sm':
+        return 'sm:max-w-sm';
+      case 'lg':
+        return 'sm:max-w-lg';
+      default:
+        return 'sm:max-w-md';
+    }
+  }, [params.size]);
+
+  const handleExecute = useCallback(async () => {
+    if (params.disabled || isExecuting) return;
+
+    setIsExecuting(true);
+    try {
+      await params.functionToExecute();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error executing confirmation action:', error);
+      // Keep modal open on error so user can retry
+    } finally {
+      setIsExecuting(false);
+    }
+  }, [params.disabled, params.functionToExecute, isExecuting]);
+
+  const statusConfig = getStatusConfig();
+  const sizeConfig = getSizeConfig();
+  const Icon = statusConfig.icon;
 
   return (
-    <Dialog.Root
+    <Dialog
       open={isDialogOpen}
       onOpenChange={onOpenChange}
     >
-      {params.dialogTrigger ? (
-        <Dialog.Trigger asChild>{getSafeDialogTrigger(params.dialogTrigger)}</Dialog.Trigger>
-      ) : null}
-      <Dialog.Portal>
-        <DialogOverlay />
-        <DialogContent>
-          <div className="flex space-x-4 tracking-tight">
+      {params.dialogTrigger && <DialogTrigger asChild>{getSafeDialogTrigger(params.dialogTrigger)}</DialogTrigger>}
+      <DialogContent
+        className={cn(sizeConfig)}
+        aria-describedby="confirmation-description"
+      >
+        <DialogHeader className="pb-0">
+          <div className="flex gap-4 items-start">
             <div
-              className={`icon align-content-center flex items-center rounded-xl p-6 ${params.status === 'warning' ? warningColors : infoColors}`}
+              className={cn(
+                'flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-colors',
+                statusConfig.iconBg,
+              )}
+              aria-hidden="true"
             >
-              {params.status === 'warning' ? <AlertTriangle size={35} /> : <Info size={35} />}
+              <Icon className="w-8 h-8" />
             </div>
-            <div className="text w-auto grow space-x-0 pt-1">
-              <Dialog.DialogTitle className="text-xl font-bold text-black">{params.dialogTitle}</Dialog.DialogTitle>
-              <Dialog.DialogDescription className="text-md mt-1 leading-tight text-gray-500">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-lg font-semibold text-foreground mb-2 text-left">
+                {params.dialogTitle}
+              </DialogTitle>
+              <DialogDescription
+                id="confirmation-description"
+                className="text-sm text-muted-foreground leading-relaxed text-left"
+              >
                 {params.confirmationMessage}
-              </Dialog.DialogDescription>
-              <div className="mt-4 flex flex-row-reverse">
-                <div
-                  id={params.buttonid}
-                  className={`flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold hover:cursor-pointer ${params.status === 'warning' ? warningButtonColors : infoButtonColors} transition duration-300 ease-in-out hover:shadow-lg`}
-                  onClick={() => {
-                    params.functionToExecute();
-                    setIsDialogOpen(false);
-                  }}
-                >
-                  {params.confirmationButtonText}
-                </div>
-              </div>
+              </DialogDescription>
             </div>
           </div>
-        </DialogContent>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </DialogHeader>
+        <DialogFooter className="pt-6 flex-col-reverse sm:flex-row gap-2">
+          {params.showCancelButton !== false && (
+            <Button
+              variant="outline"
+              onClick={() => setIsDialogOpen(false)}
+              className="w-full sm:w-auto"
+              disabled={isExecuting}
+              type="button"
+            >
+              {params.cancelButtonText || t('cancel')}
+            </Button>
+          )}
+          <Button
+            id={params.buttonid}
+            variant={statusConfig.buttonVariant as any}
+            onClick={handleExecute}
+            className="w-full sm:w-auto"
+            disabled={params.disabled || isExecuting}
+            type="button"
+            aria-describedby="confirmation-description"
+          >
+            {isExecuting ? (
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+                  aria-hidden="true"
+                />
+                <span className="sr-only">{t('loading')}</span>
+                {t('loading')}
+              </div>
+            ) : (
+              params.confirmationButtonText
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
-
-const overlayShow = keyframes({
-  '0%': { opacity: 0 },
-  '100%': { opacity: 1 },
-});
-
-const overlayClose = keyframes({
-  '0%': { opacity: 1 },
-  '100%': { opacity: 0 },
-});
-
-const contentShow = keyframes({
-  '0%': { opacity: 0, transform: 'translate(-50%, -50%) scale(.96)' },
-  '100%': { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
-});
-
-const contentClose = keyframes({
-  '0%': { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
-  '100%': { opacity: 0, transform: 'translate(-50%, -52%) scale(.96)' },
-});
-
-const DialogOverlay = styled(Dialog.Overlay)`
-  background-color: ${blackA.blackA9};
-  position: fixed;
-  z-index: 500;
-  inset: 0;
-  animation: ${overlayShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
-
-  &[data-state='closed'] {
-    animation: ${overlayClose} 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-`;
-
-const DialogContent = styled(Dialog.Content)`
-  background-color: white;
-  border-radius: 18px;
-  z-index: 501;
-  box-shadow:
-    hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
-    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: auto;
-  min-width: 500px;
-  max-width: 600px;
-  overflow: visible;
-  height: auto;
-  max-height: 85vh;
-  padding: 24px;
-  animation: ${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  transition: max-height 0.3s ease-out;
-
-  &:focus {
-    outline: none;
-  }
-
-  &[data-state='closed'] {
-    animation: ${contentClose} 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-`;
 
 export default ConfirmationModal;

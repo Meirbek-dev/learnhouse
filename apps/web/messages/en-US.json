@@ -246,6 +246,11 @@
     "unsavedChanges": "Unsaved changes"
   },
   "Components": {
+    "ConfirmationModal": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "loading": "Loading..."
+    },
     "AddUserGroup": {
       "createButton": "Create Group",
       "descriptionLabel": "Description",
@@ -321,7 +326,8 @@
       "visibilityItemPublic": "Public (Available to view on the internet)"
     },
     "Dialog": {
-      "close": "Close"
+      "close": "Close",
+      "cancel": "Cancel"
     },
     "DocumentPdfModal": {
       "createActivity": "Create Activity",

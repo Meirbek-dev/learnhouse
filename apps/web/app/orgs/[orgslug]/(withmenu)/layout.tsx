@@ -1,8 +1,8 @@
 'use client';
 
 import OrgMenu from '@components/Objects/Menus/org-menu';
-import '@styles/globals.css';
 import { Children, cloneElement, use } from 'react';
+import '@styles/globals.css';
 
 export default function RootLayout(props: { children: React.ReactNode; params: Promise<any> }) {
   const params = use(props.params);

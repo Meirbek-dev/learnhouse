@@ -246,6 +246,11 @@
     "unsavedChanges": "Несохраненные изменения"
   },
   "Components": {
+    "ConfirmationModal": {
+      "cancel": "Отмена",
+      "close": "Закрыть",
+      "loading": "Загрузка..."
+    },
     "AddUserGroup": {
       "createButton": "Создать группу",
       "descriptionLabel": "Описание",
@@ -321,7 +326,8 @@
       "visibilityItemPublic": "Публичный (Доступен всем для просмотра)"
     },
     "Dialog": {
-      "close": "Закрыть"
+      "close": "Закрыть",
+      "cancel": "Отмена"
     },
     "DocumentPdfModal": {
       "createActivity": "Создать активность",

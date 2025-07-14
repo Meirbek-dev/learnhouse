@@ -1,18 +1,18 @@
 'use client';
 
-import { SearchBar } from '@/components/Objects/Search/SearchBar';
 import AuthenticatedClientElement from '@/components/Security/AuthenticatedClientElement';
-import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
-import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
-import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
-import { getUriWithOrg } from '@/services/config/config';
+import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
+import { SearchBar } from '@/components/Objects/Search/SearchBar';
+import { getUriWithOrg } from '@/services/config/config';
 import { OpenULogoSVG } from '../../svg/openuLogoSvg';
+import { Button } from '@/components/ui/button';
+import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface OrgMenuProps {
   orgslug: string;
@@ -118,11 +118,12 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Element;
       // Only close if clicking outside the mobile menu and not on menu trigger or select dropdown
-      if (isMenuOpen &&
-          !target.closest('[data-mobile-menu]') &&
-          !target.closest('[data-menu-trigger]') &&
-          !target.closest('[data-radix-select-content]') &&
-          !target.closest('[data-slot="select-content"]')
+      if (
+        isMenuOpen &&
+        !target.closest('[data-mobile-menu]') &&
+        !target.closest('[data-menu-trigger]') &&
+        !target.closest('[data-radix-select-content]') &&
+        !target.closest('[data-slot="select-content"]')
       ) {
         setIsMenuOpen(false);
       }
@@ -364,7 +365,10 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     className="min-h-[44px] flex items-center relative z-[70]"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <LocaleSwitcher className="w-full" isMobile />
+                    <LocaleSwitcher
+                      className="w-full"
+                      isMobile
+                    />
                   </div>
                 </div>
               </div>

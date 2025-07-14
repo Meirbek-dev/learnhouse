@@ -7,8 +7,8 @@ import { useTransition } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type Locale, locales } from '@/i18n/config';
 import { setUserLocale } from '@/i18n/locale';
-import { cn } from '@/lib/utils';
 import { Languages } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LocaleSwitcherProps {
   className?: string;
