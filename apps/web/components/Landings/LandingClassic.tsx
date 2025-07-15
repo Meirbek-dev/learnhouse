@@ -104,7 +104,7 @@ const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string
     {courses.map((course: any) => (
       <div
         key={course.course_uuid}
-        className="flex justify-center transform transition-transform duration-200 hover:scale-[1.02]"
+        className="flex justify-center"
       >
         <CourseThumbnail
           course={course}

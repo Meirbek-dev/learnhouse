@@ -1,20 +1,19 @@
 'use client';
 
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { Book, GraduationCap, Search, Users } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnailLanding';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { getUriWithOrg } from '@services/config/config';
 import { Input } from '@components/ui/input';
+import { getUriWithOrg } from '@services/config/config';
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { searchOrgContent } from '@services/search/search';
+import { Book, GraduationCap, Search, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
 import Link from 'next/link';
-
+import { useRouter, useSearchParams } from 'next/navigation';
+import type { FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 // Types from SearchBar component
 interface User {
   username: string;

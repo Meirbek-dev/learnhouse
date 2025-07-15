@@ -4,11 +4,11 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { type Locale, locales } from '@/i18n/config';
 import { setUserLocale } from '@/i18n/locale';
-import { Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Languages } from 'lucide-react';
 
 interface LocaleSwitcherProps {
   className?: string;
@@ -39,7 +39,6 @@ export function LocaleSwitcher({ className, isMobile }: LocaleSwitcherProps) {
         aria-label={t('selectLanguage')}
       >
         <Languages size={22} />
-        <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>
       </SelectTrigger>
       <SelectContent
         className={cn(isMobile && 'z-[80]')}

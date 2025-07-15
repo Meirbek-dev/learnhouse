@@ -100,3 +100,4 @@ const searchParams = await props.searchParams;
   completely irrelevant after a code change. if unsure, do not remove the comment.
 - Follow best practices of the frameworks and libraries used in the project
 - Project is using latest versions of libraries and frameworks
+- Use shadcn UI best practices
