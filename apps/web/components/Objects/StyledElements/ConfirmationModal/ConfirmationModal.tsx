@@ -1,5 +1,4 @@
 'use client';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,11 +8,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+import { isValidElement, useCallback, useState } from 'react';
 import { AlertTriangle, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
-import { isValidElement, useCallback, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 /**
  * Props for the ConfirmationModal component
@@ -46,7 +46,7 @@ interface ModalParams {
 const ConfirmationModal = (params: ModalParams) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
-  const t = useTranslations('Components.ConfirmationModal')
+  const t = useTranslations('Components.ConfirmationModal');
 
   const onOpenChange = useCallback(
     (open: boolean) => {

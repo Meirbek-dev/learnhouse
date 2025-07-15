@@ -132,7 +132,7 @@ const Pagination = ({
 };
 
 const LoadingState = () => (
-  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+  <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
     {[1, 2, 3, 4, 5, 6].map((i) => (
       <div
         key={i}
@@ -391,7 +391,7 @@ function SearchPage() {
                     />
                     {t('courses')} ({searchResults.courses.length})
                   </h2>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
                     {searchResults.courses.map((course) => (
                       <Link
                         key={course.course_uuid}
@@ -456,7 +456,7 @@ function SearchPage() {
                     />
                     {t('collections')} ({searchResults.collections.length})
                   </h2>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                     {searchResults.collections.map((collection) => (
                       <Link
                         key={collection.collection_uuid}
@@ -493,7 +493,7 @@ function SearchPage() {
                     />
                     {t('users')} ({searchResults.users.length})
                   </h2>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                     {searchResults.users.map((user) => (
                       <Link
                         key={user.user_uuid}

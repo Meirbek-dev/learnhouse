@@ -1,16 +1,16 @@
 'use client';
 
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { useSearchParams } from 'next/navigation';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { memo, useState } from 'react';
 
 interface CourseProps {
   orgslug: string;
@@ -18,10 +18,56 @@ interface CourseProps {
   org_id: number;
 }
 
+const EmptyStateMessage = memo(({ isUserAdmin, t, newCourseButtonTrigger }: any) => (
+  <div className="col-span-full flex items-center justify-center py-12">
+    <div className="text-center max-w-md">
+      <div className="mb-6">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <svg
+            className="w-8 h-8 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            />
+          </svg>
+        </div>
+      </div>
+      <h1 className="mb-3 text-2xl font-bold text-gray-700">{t('noCourses')}</h1>
+      <p className="text-lg text-gray-500 mb-6">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
+      {isUserAdmin && <div className="flex justify-center">{newCourseButtonTrigger}</div>}
+    </div>
+  </div>
+));
+
+EmptyStateMessage.displayName = 'EmptyStateMessage';
+
+const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
+  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-12">
+    {courses.map((course: any) => (
+      <div
+        key={course.course_uuid}
+        className="mx-auto w-full max-w-[300px]"
+      >
+        <CourseThumbnail
+          course={course}
+          orgslug={orgslug}
+        />
+      </div>
+    ))}
+  </div>
+));
+
+CourseGrid.displayName = 'CourseGrid';
+
 function Courses(props: CourseProps) {
   const t = useTranslations('CoursesPage');
-  const { orgslug } = props;
-  const { courses } = props;
+  const { orgslug, courses, org_id } = props;
   const searchParams = useSearchParams();
   const isCreatingCourse = !!searchParams.get('new');
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
@@ -37,7 +83,7 @@ function Courses(props: CourseProps) {
       checkMethod="roles"
       action="create"
       ressourceType="courses"
-      orgId={props.org_id}
+      orgId={org_id}
     >
       <NewCourseButton onClick={() => setNewCourseModal(true)} />
     </AuthenticatedClientElement>
@@ -70,32 +116,22 @@ function Courses(props: CourseProps) {
             dialogDescription={t('createCourseDescription')}
           />
 
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6 pb-12">
-            {courses.map((course: any) => (
-              <div
-                key={course.course_uuid}
-                className="mx-auto w-full max-w-[300px]"
-              >
-                <CourseThumbnail
-                  course={course}
-                  orgslug={orgslug}
-                />
-              </div>
-            ))}
-            {courses.length === 0 && (
-              <div className="col-span-full flex items-center justify-center py-8">
-                <div className="text-center">
-                  <h1 className="mb-2 text-xl font-bold text-gray-600">{t('noCourses')}</h1>
-                  <p className="text-md text-gray-400">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
-                  {isUserAdmin && <div className="mt-4 flex justify-center">{newCourseButtonTrigger}</div>}
-                </div>
-              </div>
-            )}
-          </div>
+          {courses.length === 0 ? (
+            <EmptyStateMessage
+              isUserAdmin={isUserAdmin}
+              t={t}
+              newCourseButtonTrigger={newCourseButtonTrigger}
+            />
+          ) : (
+            <CourseGrid
+              courses={courses}
+              orgslug={orgslug}
+            />
+          )}
         </div>
       </GeneralWrapperStyled>
     </div>
   );
 }
 
-export default Courses;
+export default memo(Courses);

@@ -258,7 +258,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
             <h2 className="mb-6 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6 pb-12">
+            <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-12">
               {featuredCourses.map((course: any) => (
                 <div
                   key={course.course_uuid}

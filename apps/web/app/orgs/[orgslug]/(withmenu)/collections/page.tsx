@@ -1,16 +1,16 @@
+import { auth } from '@/auth';
+import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import NewCollectionButton from '@components/Objects/StyledElements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
-import { getOrgThumbnailMediaDirectory } from '@services/media/media';
-import { getOrgCollections } from '@services/courses/collections';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { getUriWithOrg } from '@services/config/config';
-import { getTranslations } from 'next-intl/server';
+import { getOrgCollections } from '@services/courses/collections';
+import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 interface MetadataProps {
@@ -90,7 +90,7 @@ const CollectionsPage = async (params: any) => {
             </Link>
           </AuthenticatedClientElement>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid w-full grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
           {collections.map((collection: any) => (
             <div
               key={collection.collection_uuid}

@@ -217,7 +217,6 @@
   }
 
   html {
-    scroll-behavior: smooth;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     font-variant-ligatures: common-ligatures contextual;
     -webkit-font-smoothing: antialiased;

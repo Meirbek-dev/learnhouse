@@ -64,11 +64,11 @@ function CoursesHome(params: CourseProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-8 pb-8">
+      <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-8">
         {courses.map((course: any) => (
           <div
             key={course.course_uuid}
-            className="mx-auto w-full max-w-[400px]"
+            className="mx-auto w-full max-w-[300px]"
           >
             <CourseThumbnail
               customLink={`/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`}
