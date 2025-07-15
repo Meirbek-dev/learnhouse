@@ -1,7 +1,7 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import NewCollection from './NewCollection';
-import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ orgslug: string }> }): Promise<Metadata> {
   const { orgslug } = await params;
@@ -42,6 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
   };
 }
 
-export default function Page(props: any) {
-  return <NewCollection {...props} />;
+export default async function Page(props: any) {
+  const params = await props.params;
+  return <NewCollection params={params} />;
 }

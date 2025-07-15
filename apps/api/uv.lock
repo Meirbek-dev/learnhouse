@@ -1115,7 +1115,7 @@ wheels = [
 
 [[package]]
 name = "logfire"
-version = "3.24.1"
+version = "3.24.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "executing" },
@@ -1126,9 +1126,9 @@ dependencies = [
     { name = "rich" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/84/4f966153bba68f7544270e1f861a7d33553ae6174efc02e78dd326b127a3/logfire-3.24.1.tar.gz", hash = "sha256:1347a01b0d52d344a53e2ab1e1c77daff329853001f2f0e7387bfa5ce5813323", size = 504228, upload-time = "2025-07-14T13:12:49.815Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/55/61c0146a413b1fdfa8ae2e9c97a4e62f799462f015ea49a697cf46281f0e/logfire-3.24.2.tar.gz", hash = "sha256:814533697890ac94b0669360e974e75f491bf5b2d9be7a1a5bbf5e1d66989d20", size = 504379, upload-time = "2025-07-14T16:04:32.89Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/75/56/935f464acabaa94006a8c2d1fea2590480885465df6e8357d6dab0002506/logfire-3.24.1-py3-none-any.whl", hash = "sha256:7c6bff564f4bb2cc624c7022cbf138ebdfb64353b4280b2183ee6212659f7919", size = 206262, upload-time = "2025-07-14T13:12:46.59Z" },
+    { url = "https://files.pythonhosted.org/packages/6e/f8/5d702656e45ec4a8cb6ac7adc2410fd0953e582c03baaeb45401c5cf830a/logfire-3.24.2-py3-none-any.whl", hash = "sha256:c3a119769f8f5f1fabb6f23722125b26f987d7adeecfa9c6a90265161e6f5597", size = 206258, upload-time = "2025-07-14T16:04:27.973Z" },
 ]
 
 [package.optional-dependencies]
@@ -1618,9 +1618,9 @@ requires-dist = [
     { name = "langchain-chroma", specifier = ">=0.2.4" },
     { name = "langchain-community", specifier = ">=0.3.27" },
     { name = "langchain-core", specifier = ">=0.3.68" },
-    { name = "langchain-openai", specifier = ">=0.3.27" },
+    { name = "langchain-openai", specifier = ">=0.3.28" },
     { name = "langchain-text-splitters", specifier = ">=0.3.8" },
-    { name = "logfire", extras = ["fastapi", "sqlalchemy"], specifier = ">=3.24.0" },
+    { name = "logfire", extras = ["fastapi", "sqlalchemy"], specifier = ">=3.24.2" },
     { name = "openai", specifier = ">=1.95.1" },
     { name = "orjson", specifier = ">=3.10.18" },
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.9" },
