@@ -1,18 +1,18 @@
 'use client';
 
-import { SearchBar } from '@/components/Objects/Search/SearchBar';
 import AuthenticatedClientElement from '@/components/Security/AuthenticatedClientElement';
-import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
-import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
-import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
-import { getUriWithOrg } from '@/services/config/config';
+import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
+import { SearchBar } from '@/components/Objects/Search/SearchBar';
+import { getUriWithOrg } from '@/services/config/config';
 import { OpenULogoSVG } from '../../svg/openuLogoSvg';
+import { Button } from '@/components/ui/button';
+import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface OrgMenuProps {
   orgslug: string;
@@ -42,17 +42,13 @@ function NavigationLinkItem({ href, type, orgslug }: NavigationLinkProps) {
     <div>
       <Link
         href={getUriWithOrg(orgslug, href)}
-        className={`group relative flex items-center gap-3 font-medium py-2 px-4 rounded-md transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] touch-manipulation max-h-[36px] ${
-          isActive
-            ? 'text-primary bg-primary/15 shadow-sm ring-1 ring-primary/20'
-            : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
+        className={`hover:text-primary flex items-center gap-3 font-medium py-2 px-4 rounded-md transition-colors max-h-[36px] ${
+          isActive ? 'text-primary bg-primary/15' : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
         }`}
       >
         <Icon
           size={20}
-          className={`flex-shrink-0 transition-all duration-300 group-hover:scale-110 ${
-            isActive ? 'text-primary drop-shadow-sm' : 'group-hover:text-primary'
-          }`}
+          className={`flex-shrink-0 ${isActive ? 'text-primary' : ''}`}
         />
         <span className={`text-base font-medium whitespace-nowrap ${isActive ? 'font-semibold' : ''}`}>{label}</span>
       </Link>
@@ -88,7 +84,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
       }
     };
 
-    // Scroll detection for header background with improved thresholds
+    // Scroll detection for header background
     const handleScroll = () => {
       const scrollY = window.scrollY;
       setIsScrolled(scrollY > 20);
@@ -155,31 +151,27 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
 
   return (
     <>
-      {/* Backdrop blur with gradient */}
-      <div className="fixed top-0 left-0 right-0 h-[52px] -z-10 bg-gradient-to-b from-background/85 via-background/70 to-transparent backdrop-blur-2xl" />
+      {/* Backdrop blur */}
+      <div className="fixed top-0 left-0 right-0 h-[52px] -z-10 bg-background/85 backdrop-blur-sm" />
 
       {/* Main header */}
       <header
-        className={`fixed left-0 right-0 top-0 z-50 h-[52px] transition-all duration-300 ease-out ${
-          isScrolled
-            ? 'bg-background/97 shadow-xl shadow-black/8 border-b border-border/60'
-            : 'bg-background/92 shadow-md shadow-black/3'
-        } backdrop-blur-2xl supports-[backdrop-filter]:bg-background/85`}
+        className={`fixed left-0 right-0 top-0 z-50 h-[52px] transition-colors shadow-sm border-b border-border/60 ${
+          isScrolled ? 'bg-background/97' : 'bg-background/92'
+        } backdrop-blur-sm`}
       >
         <div className="max-w-8xl mx-auto flex h-full w-full items-center justify-between px-4 sm:px-6 lg:px-10">
-          {/* Left section - enhanced layout */}
+          {/* Left section */}
           <div className="flex items-center gap-8 md:gap-10">
-            {/* Logo - premium hover effect */}
+            {/* Logo */}
             <Link
               href={getUriWithOrg(orgslug, '/')}
-              className="group flex items-center justify-center p-2 rounded-xl hover:bg-accent/60 transition-all duration-300 hover:scale-105 active:scale-95"
+              className="flex items-center justify-center p-2 rounded-xl hover:bg-accent/60 transition-colors"
             >
-              <div className="transition-transform duration-300 group-hover:rotate-1">
-                <OpenULogoSVG />
-              </div>
+              <OpenULogoSVG />
             </Link>
 
-            {/* Desktop Navigation - enhanced with better spacing */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex">
               <NavigationMenu>
                 <NavigationMenuList className="gap-1">
@@ -205,7 +197,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
             </nav>
           </div>
 
-          {/* Center - Enhanced Search with better responsiveness */}
+          {/* Center - Search */}
           <div className="hidden md:flex flex-1 justify-center px-8 max-w-2xl">
             <div className="w-full max-w-lg">
               <SearchBar
@@ -215,7 +207,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
             </div>
           </div>
 
-          {/* Right section - enhanced with better spacing */}
+          {/* Right section */}
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex">
               <LocaleSwitcher />
@@ -226,10 +218,10 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               <HeaderProfileBox />
             </div>
 
-            {/* Mobile menu trigger - enhanced animation */}
+            {/* Mobile menu trigger */}
             <Button
-              className={`md:hidden relative h-11 w-11 rounded-xl transition-all duration-300 touch-manipulation ${
-                isMenuOpen ? 'bg-accent shadow-inner scale-95' : 'hover:bg-accent/60 hover:scale-105 active:scale-95'
+              className={`md:hidden h-11 w-11 rounded-xl transition-colors ${
+                isMenuOpen ? 'bg-accent' : 'hover:bg-accent/60'
               }`}
               variant="ghost"
               size="icon"
@@ -242,16 +234,12 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                 <Menu
                   size={22}
                   strokeWidth={2.5}
-                  className={`absolute inset-0 transition-all duration-300 ease-out ${
-                    isMenuOpen ? 'rotate-90 opacity-0 scale-75' : 'rotate-0 opacity-100 scale-100'
-                  }`}
+                  className={`absolute inset-0 transition-opacity ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`}
                 />
                 <X
                   size={22}
                   strokeWidth={2.5}
-                  className={`absolute inset-0 transition-all duration-300 ease-out ${
-                    isMenuOpen ? 'rotate-0 opacity-100 scale-100' : 'rotate-90 opacity-0 scale-75'
-                  }`}
+                  className={`absolute inset-0 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0'}`}
                 />
               </div>
             </Button>
@@ -259,25 +247,21 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
         </div>
       </header>
 
-      {/* Enhanced Mobile menu with glassmorphism design */}
+      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
-          {/* Animated overlay */}
+          {/* Overlay */}
           <div
-            className={`absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/30 backdrop-blur-md transition-all duration-500 ${
-              isMenuOpen ? 'opacity-100' : 'opacity-0'
-            }`}
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
             onClick={() => setIsMenuOpen(false)}
             role="button"
             tabIndex={-1}
             aria-label="Close menu overlay"
           />
 
-          {/* Menu panel with enhanced glassmorphism */}
+          {/* Menu panel */}
           <div
-            className={`absolute left-0 right-0 bg-gradient-to-b from-background/98 to-background/95 backdrop-blur-2xl border-b border-border/60 shadow-2xl transition-all duration-500 ease-out ${
-              isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-            }`}
+            className="absolute left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border/60 shadow-lg"
             data-mobile-menu
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -287,7 +271,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
             }}
           >
             <div className="px-4 py-6 space-y-6">
-              {/* Mobile Search - premium styling */}
+              {/* Mobile Search */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
                   <div className="w-1 h-4 bg-primary rounded-full"></div>
@@ -295,7 +279,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     {t('search')}
                   </label>
                 </div>
-                <div className="touch-manipulation">
+                <div>
                   <SearchBar
                     orgslug={orgslug}
                     isMobile
@@ -304,7 +288,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                 </div>
               </div>
 
-              {/* Mobile Navigation - enhanced with cards */}
+              {/* Mobile Navigation */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
                   <div className="w-1 h-4 bg-primary rounded-full"></div>
@@ -312,23 +296,17 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     {t('navigation')}
                   </label>
                 </div>
-                <div className="bg-accent/30 rounded-2xl p-3 backdrop-blur-sm border border-border/30">
+                <div className="bg-accent/20 rounded-xl p-3 border border-border/30">
                   <nav className="space-y-1">
                     <div className="space-y-1">
-                      <div
-                        onClick={() => setIsMenuOpen(false)}
-                        className="touch-manipulation"
-                      >
+                      <div onClick={() => setIsMenuOpen(false)}>
                         <NavigationLinkItem
                           href="/courses"
                           type="courses"
                           orgslug={orgslug}
                         />
                       </div>
-                      <div
-                        onClick={() => setIsMenuOpen(false)}
-                        className="touch-manipulation"
-                      >
+                      <div onClick={() => setIsMenuOpen(false)}>
                         <NavigationLinkItem
                           href="/collections"
                           type="collections"
@@ -336,10 +314,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                         />
                       </div>
                       <AuthenticatedClientElement checkMethod="authentication">
-                        <div
-                          onClick={() => setIsMenuOpen(false)}
-                          className="touch-manipulation"
-                        >
+                        <div onClick={() => setIsMenuOpen(false)}>
                           <NavigationLinkItem
                             href="/trail"
                             type="trail"
@@ -352,7 +327,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                 </div>
               </div>
 
-              {/* Mobile locale switcher - Fixed positioning and z-index */}
+              {/* Mobile locale switcher */}
               <div className="sm:hidden space-y-3">
                 <div className="flex items-center gap-2 px-2">
                   <div className="w-1 h-4 bg-primary rounded-full"></div>
@@ -360,9 +335,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     {t('language')}
                   </label>
                 </div>
-                <div className="bg-accent/30 rounded-2xl p-4 backdrop-blur-sm border border-border/30 touch-manipulation relative">
+                <div className="bg-accent/20 rounded-xl p-4 border border-border/30">
                   <div
-                    className="min-h-[44px] flex items-center relative z-[70]"
+                    className="min-h-[44px] flex items-center"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <LocaleSwitcher
@@ -373,7 +348,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                 </div>
               </div>
 
-              {/* Mobile profile - premium card design */}
+              {/* Mobile profile */}
               <div className="border-t border-border/50 pt-6 space-y-3">
                 <div className="flex items-center gap-2 px-2">
                   <div className="w-1 h-4 bg-primary rounded-full"></div>
@@ -381,7 +356,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     {t('account')}
                   </label>
                 </div>
-                <div className="bg-accent/30 rounded-2xl p-4 backdrop-blur-sm border border-border/30 touch-manipulation">
+                <div className="bg-accent/20 rounded-xl p-4 border border-border/30">
                   <div className="min-h-[44px] flex justify-center items-center">
                     <HeaderProfileBox />
                   </div>

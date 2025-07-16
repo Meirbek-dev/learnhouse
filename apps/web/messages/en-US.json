@@ -3052,6 +3052,15 @@
     "keyboardShortcut": {
       "toToggle": "to toggle"
     },
+    "mobile": {
+      "assignments": "Assignments",
+      "courses": "Courses",
+      "home": "Home",
+      "org": "Organization",
+      "payments": "Payments",
+      "settings": "Settings",
+      "users": "Users"
+    },
     "orgName": "OpenU",
     "tooltips": {
       "assignments": "Assignments",

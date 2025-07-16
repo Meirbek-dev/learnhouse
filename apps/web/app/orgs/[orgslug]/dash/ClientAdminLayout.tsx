@@ -2,7 +2,7 @@
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import NewSidebar from '@components/Dashboard/Menus/NewSidebar';
+import DashSidebar from '@components/Dashboard/Menus/DashSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { ReactNode } from 'react';
 
@@ -18,7 +18,7 @@ function ClientAdminLayout({ children, params }: { children: ReactNode; params: 
         </div>
       ) : (
         <SidebarProvider>
-          <NewSidebar className="z-50" />
+          <DashSidebar className="z-50" />
           <SidebarInset className="flex-1">{children}</SidebarInset>
         </SidebarProvider>
       )}

@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 function DashMobileMenu() {
   const session = useLHSession() as any;
-  const t = useTranslations('DashboardMenu');
+  const t = useTranslations('SidebarMenu');
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
 
   return (

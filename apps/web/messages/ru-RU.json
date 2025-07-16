@@ -3052,6 +3052,15 @@
     "keyboardShortcut": {
       "toToggle": "для переключения"
     },
+    "mobile": {
+      "assignments": "Задания",
+      "courses": "Курсы",
+      "home": "Главная",
+      "org": "Организация",
+      "payments": "Платежи",
+      "settings": "Настройки",
+      "users": "Пользователи"
+    },
     "orgName": "OpenU",
     "tooltips": {
       "assignments": "Задания",

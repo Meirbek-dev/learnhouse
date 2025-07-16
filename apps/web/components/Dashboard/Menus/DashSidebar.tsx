@@ -216,7 +216,7 @@ const NavigationItem = memo(({ item, isCollapsed }: { item: NavigationItem; isCo
 
 NavigationItem.displayName = 'NavigationItem';
 
-function NewSidebar({ className }: SidebarProps) {
+function DashSidebar({ className }: SidebarProps) {
   const org = useOrg() as any;
   const session = useLHSession();
   const { state, toggleSidebar } = useSidebar();
@@ -467,4 +467,4 @@ function NewSidebar({ className }: SidebarProps) {
   );
 }
 
-export default memo(NewSidebar);
+export default memo(DashSidebar);
