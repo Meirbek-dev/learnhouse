@@ -220,18 +220,12 @@ function DashSidebar({ className }: SidebarProps) {
   const org = useOrg() as any;
   const session = useLHSession();
   const { state, toggleSidebar } = useSidebar();
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   const t = useTranslations('SidebarMenu');
   const navigationItems = useNavigationItems();
 
   const isCollapsed = state === 'collapsed';
   const isExpanded = state === 'expanded';
-
-  const waitForEverythingToLoad = useCallback(() => {
-    return org && session.data;
-  }, [org, session.data]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -244,11 +238,6 @@ function DashSidebar({ className }: SidebarProps) {
       // Could add toast notification here
     }
   }, [org?.slug]);
-
-  const handleRetry = useCallback(() => {
-    setError(false);
-    setRetryCount((prev) => prev + 1);
-  }, []);
 
   // Keyboard shortcut handler
   useEffect(() => {
@@ -276,42 +265,21 @@ function DashSidebar({ className }: SidebarProps) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        setLoading(true);
         setError(false);
 
         // Simulate async loading with timeout
         await new Promise((resolve) => setTimeout(resolve, 100));
-
-        if (waitForEverythingToLoad()) {
-          setLoading(false);
-        }
       } catch (err) {
         console.error('Failed to load sidebar data:', err);
         setError(true);
-        setLoading(false);
       }
     };
 
     loadData();
-  }, [waitForEverythingToLoad, retryCount]);
+  }, []);
 
-  if (loading || !session.data?.user) {
+  if (!session.data?.user) {
     return <SidebarSkeleton />;
-  }
-
-  if (error) {
-    return (
-      <Sidebar
-        side="left"
-        variant="sidebar"
-        collapsible="icon"
-        className="border-r"
-      >
-        <SidebarContent>
-          <SidebarError onRetry={handleRetry} />
-        </SidebarContent>
-      </Sidebar>
-    );
   }
 
   return (
