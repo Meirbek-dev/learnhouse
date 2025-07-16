@@ -257,8 +257,10 @@
       "toastSuccess": "Жаңа топ жасалды"
     },
     "AuthorsDisplay": {
+      "authorTooltip": "{FirstName} {LastName} - {Авторлық}",
       "authorsLabel": "Курс авторлары",
       "moreAuthors": {
+        "one": "Көбірек автор",
         "other": "Көбірек авторлар"
       }
     },
@@ -295,12 +297,15 @@
     },
     "CourseThumbnail": {
       "authors": "Авторлар",
+      "courseOptions": "Курстың нұсқалары",
+      "courseThumbnailAlt": "Курс эскизі {{joursename}",
       "delete": "Курсты жою",
       "deleteButtonText": "Курсты жою",
       "deleteConfirmationMessage": "Бұл курсты жойғыңыз келетініне сенімдісіз бе?",
       "deleteConfirmationTitle": "{courseName} жою керек пе?",
       "deleting": "Жойылуда...",
       "editContent": "Мазмұнды өңдеу",
+      "noThumbnailAlt": "Әдепкі курстық нобай",
       "settings": "Параметрлер",
       "startLearning": "Оқуды бастау",
       "startLearningButton": "Оқуды бастау",
@@ -309,6 +314,7 @@
       "updated": "Жаңартылды"
     },
     "CreateCourseModal": {
+      "ariaLabel": "Жүктеу үшін курстың нобай кескінін таңдаңыз",
       "createCourse": "Курс жасау",
       "labelDescription": "Сипаттамасы",
       "labelLearnings": "Курс оқулары (Курс не үйретеді?)",
@@ -323,9 +329,11 @@
       "schemaNameMax": "100 таңбадан аз болуы керек",
       "schemaNameRequired": "Курс атауы қажет",
       "selectFile": "Нобай кескінін таңдаңыз",
+      "supportedFormats": "Қолдау көрсетілетін форматтар: jpg, png",
       "thumbnailChoose": "Галереядан таңдау",
       "thumbnailUpload": "Суретті жүктеу",
       "toastError": "Курсты жасау мүмкін болмады",
+      "toastErrorOrgMissing": "Ұйым туралы ақпарат жоқ",
       "toastErrorUnsplash": "Unsplash-тен суретті алу мүмкін болмады",
       "toastLoading": "Курс жасалуда...",
       "toastSuccess": "Курс сәтті жасалды",
@@ -337,9 +345,12 @@
       "close": "Жабу"
     },
     "DocumentPdfModal": {
+      "ariaLabel": "Жүктеу үшін PDF құжат файлын таңдаңыз",
       "createActivity": "Белсенділік жасау",
       "pdfDocumentFile": "PDF құжатының файлы",
       "pdfDocumentName": "PDF құжатының атауы",
+      "selectFile": "PDF файлын таңдаңыз",
+      "supportedFormats": "Қолдау көрсетілетін формат: PDF",
       "valueMissingFile": "Белсенділігіңіз үшін PDF құжатын беріңіз",
       "valueMissingName": "PDF белсенділігіңіз үшін атауды көрсетіңіз"
     },
@@ -399,6 +410,7 @@
       "linkError": "Топқа байланыстыру қатесі: {error}",
       "linkSuccess": "Пайдаланушы топпен сәтті байланыстырылды",
       "noUserGroupsAvailable": "Пайдаланушы топтары жоқ",
+      "selectUserGroup": "Пайдаланушы тобын таңдаңыз",
       "unknownError": "Белгісіз қате",
       "userGroupNameLabel": "Топ атауы"
     },
@@ -448,6 +460,7 @@
       "numeric": "Сандық",
       "percentage": "Пайыздық",
       "selectDeadline": "Тапсырманың соңғы мерзімін таңдаңыз",
+      "selectGradingType": "Бағалау түрін таңдаңыз",
       "unexpectedError": "Күтпеген қате орын алды",
       "unknownError": "Белгісіз қате",
       "valueMissingDescription": "Тапсырма сипаттамасын беріңіз",
@@ -514,7 +527,16 @@
       "noUserGroupsAvailable": "Пайдаланушы топтары жоқ",
       "normalDescription": "Пайдаланушы тіркелген кезде ешбір топқа байланыстырылмайды",
       "normalTitle": "Қалыпты шақыру коды",
+      "selectUserGroup": "Пайдаланушы тобын таңдаңыз",
       "unknownError": "Белгісіз қате"
+    },
+    "OrgMenu": {
+      "account": "Шот",
+      "closeMenu": "Мәзірді жабыңыз",
+      "language": "Тіл",
+      "navigation": "Навигация",
+      "openMenu": "Ашық мәзір",
+      "search": "Іздеу"
     },
     "OrgMenuLinks": {
       "collections": "Жинақтар",
@@ -563,6 +585,56 @@
       "altText": "Пайдаланушы аватары"
     },
     "UserProfilePopup": {
+      "Icons": {
+        "architecture": "Сәулет",
+        "art": "Өнер",
+        "award": "Жетістік",
+        "bike": "Жарамдылық",
+        "biology": "Биология",
+        "book": "Тарихшы",
+        "book-open": "Үйрету",
+        "briefcase": "Жұмыс",
+        "building": "Сәулет",
+        "building-2": "Ұйым",
+        "business": "Бизнес",
+        "calendar": "Кесте",
+        "camera": "Фотография",
+        "coffee": "Өмір салты",
+        "coins": "Қаржыландыру",
+        "cpu": "Технология",
+        "dumbbell": "Спорт",
+        "education": "Білім",
+        "fashion": "Мода",
+        "finance": "Қаржыландыру",
+        "fitness": "Жарамдылық",
+        "flower": "Табиғат",
+        "food": "Ас",
+        "gamepad": "Ойын",
+        "gaming": "Ойын",
+        "globe": "Сайт",
+        "graduation-cap": "Білім",
+        "health": "Денсаулық",
+        "heart": "Денсаулық",
+        "history": "Тарихшы",
+        "laptop-2": "Технология",
+        "lifestyle": "Өмір салты",
+        "link": "Байланыс",
+        "map-pin": "Орналасқан жері",
+        "microscope": "Ғылым",
+        "music": "Музыка",
+        "nature": "Табиғат",
+        "palette": "Өнер",
+        "photography": "Фотография",
+        "plane": "Саяхат жасау",
+        "science": "Ғылым",
+        "shirt": "Мода",
+        "speciality": "Мамандық",
+        "sports": "Спорт",
+        "technology": "Технология",
+        "travel": "Саяхат жасау",
+        "users": "Қауым",
+        "utensils": "Ас"
+      },
       "loadingError": "Пайдаланушы деректерін жүктеу мүмкін болмады"
     },
     "VideoModal": {
@@ -570,6 +642,7 @@
       "activityNamePlaceholder": "Белсенділік атауын енгізіңіз...",
       "addSubtitles": "Субтитрлерді қосу",
       "additionalSettings": "Қосымша параметрлер",
+      "ariaLabel": "Әрекет ету үшін бейне файлды таңдаңыз",
       "autoplay": "Бейнені автоматты ойнату",
       "autoplaySubtitles": "Субтитрлерді автоматты ойнату",
       "chooseVideoFile": "Бейне файлды таңдаңыз",
@@ -587,6 +660,7 @@
       "ru": "Орыс",
       "seconds": "Секундтар",
       "secondsPlaceholder": "секунд",
+      "selectFile": "Бейне файлын таңдаңыз",
       "selectLanguage": "Тілді таңдаңыз",
       "sp": "Испан",
       "startMuted": "Дыбыссыз бастау",
@@ -594,6 +668,7 @@
       "startTimeLabel": "Басталу уақыты",
       "startTimePlaceholder": "0",
       "subtitleFile": "Субтитр файлы",
+      "supportedFormats": "Қолдау көрсетілетін форматтар: MP4, MKV, WEBM",
       "uploadVideo": "Бейнені жүктеу",
       "valueMissingFile": "Белсенділік үшін бейне файлды ұсыныңыз",
       "valueMissingName": "Бейне белсенділігіңізге атау беріңіз",
@@ -695,6 +770,8 @@
         "searchEmojis": "Эмодзи іздеу..."
       },
       "Thumbnail": {
+        "ariaLabelImage": "Жүктеу үшін курстың нобай кескінін таңдаңыз",
+        "ariaLabelVideo": "Жүктеу үшін курсты таңдаңыз",
         "currentThumbnailAlt": "Курстың ағымдағы нобайы",
         "errors": {
           "fileTooLarge": "Файл өлшемі ({fileSize}МБ) 8МБ шегінен асады",
@@ -710,6 +787,8 @@
         "image": "Кескін",
         "imageAltText": "Курс нобайы",
         "pleaseSelectAFile": "Файлды таңдаңыз",
+        "selectImageFile": "Сурет файлын таңдаңыз",
+        "selectVideoFile": "Бейне файлын таңдаңыз",
         "supportedFormats": "Қолдау көрсетілетін пішімдер: JPG, PNG (макс. 8МБ)",
         "supportedVideoFormats": "Қолдау көрсетілетін пішімдер: MP4, WebM (макс. 100МБ)",
         "thumbnailPreviewAlt": "Курс нобайының алдын ала қарауы",
@@ -753,7 +832,8 @@
       },
       "both": "Екеуі де",
       "description": {
-        "label": "Сипаттама"
+        "label": "Сипаттама",
+        "placeholder": "Курстың сипаттамасын енгізіңіз"
       },
       "errors": {
         "allLearningItemsMustHaveText": "Барлық оқу элементтерінде мәтін болуы керек",
@@ -770,7 +850,12 @@
       },
       "loading": "Жүктелуде...",
       "name": {
-        "label": "Курс атауы"
+        "label": "Курс атауы",
+        "placeholder": "Курстың атын енгізіңіз"
+      },
+      "public": {
+        "description": "Курсты көпшілікке қол жетімді ету (тіркелмеген пайдаланушылар үшін де)",
+        "label": "Қоғамдық курс"
       },
       "tags": {
         "label": "Курс тегтері",
@@ -896,6 +981,7 @@
       "newUpdate": "Жаңа жаңарту",
       "noUpdatesYet": "Әлі жаңартулар жоқ",
       "publishUpdate": "Жаңартуды жариялау",
+      "publishing": "Баспа ісі",
       "titleRequired": "Атауы міндетті",
       "update": "жаңарту",
       "updateAddFailed": "Жаңартуды қосу мүмкін болмады",
@@ -1106,8 +1192,10 @@
       },
       "TaskFileObject": {
         "allowedFormats": "Рұқсат етілген форматтар: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
+        "ariaLabel": "Тапсырма беру үшін файлды таңдаңыз",
         "authRequiredSubmit": "Аутентификация қажет. Тапсырманы жіберу үшін кіріңіз.",
         "authRequiredUpload": "Аутентификация қажет. Файлдарды жүктеу үшін кіріңіз.",
+        "chooseFile": "Файлды таңдаңыз",
         "errorSaving": "Тапсырманы сақтауда қате шықты, кейінірек қайталап көріңіз.",
         "gradeError": "Тапсырманы бағалауда қате шықты, кейінірек қайталап көріңіз.",
         "gradeRangeError": "Баға {maxGradeValue} баллдан аспауы керек",
@@ -1116,15 +1204,19 @@
         "gradingViewInfo": "Файлды жүктеп алып, оны қолмен бағалаңыз, содан кейін жоғарыдағы бағаны енгізіңіз",
         "loading": "Жүктелуде",
         "saveSuccess": "Тапсырма сәтті сақталды",
+        "selectFile": "Файл таңдаңыз",
         "signInToUpload": "Файлдарды жүктеу үшін кіріңіз",
         "submitFile": "Файлды жіберу",
         "teacherViewInfo": "Пайдаланушы осы тапсырма үшін файлды жібере алады, сіз оны «Жіберілген жұмыстар» қойындысынан тексере аласыз"
       },
       "TaskGeneralEdit": {
         "allowedFormats": "Рұқсат етілген форматтар: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
+        "ariaLabel": "Жүктеу үшін сілтеме файлын таңдаңыз",
         "changeRefFile": "Анықтамалық файлды өзгерту",
+        "chooseFile": "Файлды таңдаңыз",
         "delete": "Жою",
         "description": "Сипаттамасы",
+        "descriptionRequired": "Сипаттама қажет",
         "download": "Жүктеп алу",
         "gradeValidationError": "Мән 20-дан 100-ге дейін болуы керек",
         "hint": "Кеңес",
@@ -1133,7 +1225,10 @@
         "refFileUpdateSuccess": "Анықтамалық файл сәтті жаңартылды",
         "referenceFile": "Анықтамалық файл",
         "save": "Сақтау",
+        "saving": "Сақтау",
+        "selectFile": "Файл таңдаңыз",
         "title": "Атауы",
+        "titleRequired": "Тақырып қажет",
         "updateError": "Тапсырманы жаңартуда қате шықты, кейінірек қайталап көріңіз.",
         "updateSuccess": "Тапсырма сәтті жаңартылды"
       },
@@ -1379,8 +1474,14 @@
         "urlTip": "Кеңес: {productName} тікелей кірістіру үшін кез келген URL мекенжайын қойыңыз"
       },
       "FileUploadBlock": {
+        "browseFiles": "Файлдарды шолыңыз",
+        "chooseFile": "Файлды таңдаңыз",
+        "dragAndDrop": "Файлдарды осы жерге апарып, тастаңыз",
         "noFilePreview": "Алдын ала қарау үшін файл жоқ.",
-        "submit": "Жіберу"
+        "selectFile": "Файл таңдаңыз",
+        "submit": "Жіберу",
+        "uploadFile": "Жүктеу файлы",
+        "uploadFiles": "Файлдарды жүктеңіз"
       },
       "MathEquationBlock": {
         "completeReference": "Толық анықтаманы қарау",
@@ -1497,15 +1598,18 @@
         "usernamePlaceholder": "Пайдаланушы атын енгізіңіз"
       },
       "VideoBlock": {
+        "ariaLabel": "Жүктеу үшін бейне файлды таңдаңыз",
         "download": "Жүктеп алу",
         "errorFormat": "Бейнені қолдау көрсетілетін форматта (MP4, MKV немесе WebM) жүктеңіз",
         "errorUpload": "Бейнені жүктеу мүмкін болмады. Қайталап көріңіз.",
         "remove": "Жою",
+        "selectVideoFile": "Бейне файлын таңдаңыз",
         "sizeFull": "Толық ені",
         "sizeLabel": "Бейне өлшемі:",
         "sizeLarge": "Үлкен",
         "sizeMedium": "Орташа",
         "sizeSmall": "Кішкентай",
+        "supportedFormats": "Қолдау көрсетілетін форматтар: MP4, MKV, WEBM",
         "title": "Бейне блогы",
         "uploadHint": "MP4, MKV және WebM форматтары қолдау көрсетіледі",
         "uploadPlaceholder": "Бейнеңізді осы жерге сүйреп апарыңыз немесе таңдау үшін басыңыз",
@@ -1536,6 +1640,9 @@
         "requiredField": "{fieldName} өрісі міндетті"
       },
       "ImageUploader": {
+        "ariaLabel": "Жүктеу үшін суретті таңдаңыз",
+        "selectFile": "Сурет файлын таңдаңыз",
+        "supportedFormats": "Қолдау көрсетілетін форматтар: jpg, png",
         "uploading": "Жүктелуде..."
       },
       "LogosEditor": {
@@ -1723,6 +1830,12 @@
       "Images": {
         "Buttons": {
           "addPreview": "Алдын ала қарауды қосу",
+          "ariaLabelLogo": "Жүктеу үшін ұйымның логотипін таңдаңыз",
+          "ariaLabelPreview": "Жүктеу үшін алдын ала қарау кескінін таңдаңыз",
+          "ariaLabelThumbnail": "Жүктеу үшін Ұйымның нобайын таңдаңыз",
+          "selectLogoFile": "Логотип файлын таңдаңыз",
+          "selectPreviewFile": "Алдын-ала қарау файлын таңдаңыз",
+          "selectThumbnailFile": "Thumbnail файлын таңдаңыз",
           "uploadNewLogo": "Жаңа логотип жүктеу",
           "uploadNewThumbnail": "Жаңа нобай жүктеу",
           "uploadingLogo": "Жүктелуде...",
@@ -1893,7 +2006,10 @@
           }
         },
         "ImageUploader": {
+          "ariaLabel": "Бет бөліміне жүктеу үшін кескінді таңдаңыз",
           "defaultButtonText": "Сурет жүктеу",
+          "selectFile": "Сурет файлын таңдаңыз",
+          "supportedFormats": "Қолдау көрсетілетін форматтар: jpg, png",
           "uploading": "Жүктелуде..."
         },
         "LogosEditor": {
@@ -1958,6 +2074,7 @@
           "uploadImageButton": "Жаңа сурет жүктеу"
         },
         "description": "Ұйымыңыздың мақсатты бетін баптаңыз",
+        "enableToggleLabel": "Реттелетін қону бетін қосыңыз",
         "saveButton": "Өзгерістерді сақтау",
         "savingButton": "Сақталуда...",
         "title": "Мақсатты бет"
@@ -2213,6 +2330,7 @@
           "addGeneralInfo": "Жалпы ақпарат қосу",
           "addProfessionalInfo": "Кәсіби ақпарат қосу",
           "additionalDetails": "Қосымша мәліметтер",
+          "ariaLabel": "Жүктеу үшін профиль суретін таңдаңыз",
           "avatarError": "Аватарды жүктеу мүмкін болмады",
           "avatarSuccess": "Аватар жаңартылды",
           "bioLabel": "Биография",
@@ -2241,6 +2359,8 @@
           "recommendedSize": "Ұсынылатын өлшем: 100x100",
           "saveChanges": "Өзгерістерді сақтау",
           "saving": "Сақталуда...",
+          "selectFile": "Профиль суретін таңдаңыз",
+          "supportedFormats": "Қолдау көрсетілетін форматтар: jpg, png",
           "title": "Аккаунт параметрлері",
           "uploadingAvatar": "Жүктелуде",
           "usernameLabel": "Пайдаланушы аты",
@@ -2283,6 +2403,21 @@
         "detailLabelPlaceholder": "Белгіні енгізіңіз (мысалы, Лауазымы, Орналасқан жері)",
         "detailRemove": "Жою",
         "detailSelectIconPlaceholder": "Белгішені таңдау",
+        "detailTemplateLabels": {
+          "academic-title": "Академиялық атағы",
+          "affiliation": "Елестету",
+          "community": "Қауым",
+          "company": "Компания",
+          "department": "Бөлім",
+          "expertise": "Сараптама",
+          "industry": "Өнеркәсіп",
+          "institution": "Институт",
+          "linkedin": "Linkedin",
+          "location": "Орналасқан жері",
+          "research": "Зерттеу аймағы",
+          "title": "Тақырып",
+          "website": "Сайт"
+        },
         "detailTextLabel": "Мәтін",
         "detailTextPlaceholder": "Егжей-тегжейлі мәтінді енгізіңіз",
         "email": "Электрондық пошта",
@@ -2415,12 +2550,14 @@
         "descriptionPlaceholder": "Біліміңіз туралы қосымша мәліметтер",
         "educationItemsLabel": "Білім пункттері",
         "endDateLabel": "Аяқталу күні",
+        "endDatePlaceholder": "Аяқтау күнін таңдаңыз",
         "fieldOfStudyLabel": "Зерттеу саласы",
         "fieldOfStudyPlaceholder": "Мамандық немесе мамандану",
         "institutionLabel": "Оқу орны",
         "institutionPlaceholder": "Мектеп немесе университет",
         "removeButton": "Жою",
         "startDateLabel": "Басталу күні",
+        "startDatePlaceholder": "Старт күнін таңдаңыз",
         "title": "Білім"
       },
       "EmptyEditor": {
@@ -2439,11 +2576,13 @@
         "descriptionLabel": "Сипаттама",
         "descriptionPlaceholder": "Рөліңіз бен жетістіктеріңізді сипаттаңыз",
         "endDateLabel": "Аяқталу күні",
+        "endDatePlaceholder": "Аяқтау күнін таңдаңыз",
         "experienceItemsLabel": "Тәжірибе пункттері",
         "organizationLabel": "Ұйым",
         "organizationPlaceholder": "Компания немесе ұйым",
         "removeButton": "Жою",
         "startDateLabel": "Басталу күні",
+        "startDatePlaceholder": "Старт күнін таңдаңыз",
         "title": "Тәжірибе",
         "titleLabel": "Атауы",
         "titlePlaceholder": "Лауазымы немесе рөлі"
@@ -2697,9 +2836,13 @@
   "General": {
     "actions": "Әрекеттер",
     "active": "Белсенді",
+    "addTag": "Тег қосыңыз",
     "alreadyLinked": "Қазірдің өзінде байланысқан",
     "amount": "Сома",
+    "andUsers": "және пайдаланушылар",
+    "at": "-та",
     "back": "Артқа",
+    "browse": "Шолу",
     "cancel": "Бас тарту",
     "close": "Жабу",
     "collection": "Жинақ",
@@ -2713,16 +2856,19 @@
     "deleting": "Жойылуда...",
     "description": "Сипаттама",
     "details": "Толық ақпарат",
+    "discoverCourses": "Курстарды ашыңыз",
     "download": "Жүктеп алу",
     "edit": "Өңдеу",
     "edu": "Білім",
     "education": "Білім",
     "error": "Қате",
     "false": "Жалған",
+    "findCourses": "Курстарды табыңыз",
     "finish": "Аяқтау",
     "general": "Жалпы",
     "hint": "Кеңес",
     "home": "Басты бет",
+    "in": "-да",
     "inactive": "Белсенді емес",
     "info": "Ақпарат",
     "learning": "Оқу",
@@ -2742,10 +2888,15 @@
     "preview": "Алдын ала қарау",
     "purchaseDate": "Сатып алу күні",
     "remove": "Жою",
+    "removeTag": "Тегті жою",
     "retry": "Қайталау",
     "role": "Рөл",
     "save": "Сақтау",
     "saving": "Сақталуда...",
+    "search": "Іздеу",
+    "searchContent": "Мазмұнын іздеу",
+    "searchResults": "Іздеу нәтижелері",
+    "searchResultsFor": "Іздеу нәтижелері",
     "sent": "Жіберілді",
     "settings": "Параметрлер",
     "showLess": "Аз көрсету",
@@ -2762,6 +2913,7 @@
     "untitled": "Атаусыз",
     "updating": "Жаңартылуда...",
     "upload": "Жүктеу",
+    "users": "Пайдаланушылар",
     "warning": "Ескерту",
     "yes": "Иә"
   },
@@ -2810,6 +2962,7 @@
   "HomePage": {
     "Collections": {
       "collectionOfCourses": "Курстардың жинақтары {orgName}",
+      "newCollection": "Жаңа коллекция",
       "noContent": "Жинақтар жоқ",
       "noContentUserAdmin": "Курстарды топтастыру үшін жинақтар жасаңыз",
       "title": "Жинақтар"
@@ -2838,6 +2991,8 @@
     "descriptionLabel": "Сипаттама",
     "descriptionPlaceholder": "Жинақтың сипаттамасын енгізіңіз",
     "errorLoadingCourses": "Курстарды жүктеу мүмкін болмады. Кейінірек қайталап көріңіз.",
+    "metaDescription": "Курстардың жаңа жинағын жасаңыз",
+    "metaTitle": "Жаңа коллекция жасаңыз",
     "nameLabel": "Жинақ атауы",
     "namePlaceholder": "Жинақ атауын енгізіңіз",
     "noCoursesAvailable": "Қолжетімді курстар жоқ. Алдымен бірнеше курс жасаңыз.",
@@ -2877,6 +3032,46 @@
   },
   "Security": {
     "unauthorizedAccessMessage": "Бұл бетке кіруге рұқсатыңыз жоқ"
+  },
+  "SidebarMenu": {
+    "ariaLabels": {
+      "collapseSidebar": "Бүйірлік тақтаны тасалау",
+      "expandSidebar": "Бүйірлік тақтаны кеңейтіңіз",
+      "goToHomepage": "Басты бетке өтіңіз",
+      "openuLogo": "Opendu logo",
+      "userSettings": "Пайдаланушы параметрлері"
+    },
+    "buttons": {
+      "logout": "Кіру",
+      "settings": "Параметрлер"
+    },
+    "errors": {
+      "failedToLoad": "Бүйірлік тақтаны жүктеу сәтсіз аяқталды",
+      "retry": "Қайталау"
+    },
+    "keyboardShortcut": {
+      "toToggle": "ауыстыру"
+    },
+    "mobile": {
+      "assignments": "Тапсырмалар",
+      "courses": "Курстар",
+      "home": "Үй",
+      "org": "Ұйым",
+      "payments": "Төлемдер",
+      "settings": "Параметрлер",
+      "users": "Пайдаланушылар"
+    },
+    "orgName": "Сайлау",
+    "tooltips": {
+      "assignments": "Тапсырмалар",
+      "courses": "Курстар",
+      "home": "Бақылау тақтасы",
+      "logout": "Кіру",
+      "organization": "Ұйымның параметрлері",
+      "payments": "Төлемдер",
+      "userSettings": "@ {{Пайдаланушы аты} параметрлері",
+      "users": "Пайдаланушылар"
+    }
   },
   "SignupPage": {
     "enterInviteCode": "Шақыру кодын енгізіңіз",
