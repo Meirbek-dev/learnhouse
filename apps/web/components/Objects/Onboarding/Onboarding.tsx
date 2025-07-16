@@ -26,7 +26,7 @@ import OnBoardAI from '@public/onboarding/OnBoardAI.png';
 import { useOrg } from '@components/Contexts/OrgContext';
 import Image, { type StaticImageData } from 'next/image';
 import { getUriWithOrg } from '@services/config/config';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';

@@ -1,8 +1,9 @@
 'use client';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu';
-import DashLeftMenu from '@components/Dashboard/Menus/DashLeftMenu';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import NewSidebar from '@components/Dashboard/Menus/NewSidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { ReactNode } from 'react';
 
 function ClientAdminLayout({ children, params }: { children: ReactNode; params: any }) {
@@ -10,10 +11,17 @@ function ClientAdminLayout({ children, params }: { children: ReactNode; params: 
 
   return (
     <AdminAuthorization authorizationMode="page">
-      <div className="flex flex-col md:flex-row">
-        {isMobile ? <DashMobileMenu /> : <DashLeftMenu />}
-        <div className="flex w-full">{children}</div>
-      </div>
+      {isMobile ? (
+        <div className="flex flex-col">
+          <DashMobileMenu />
+          <div className="flex w-full">{children}</div>
+        </div>
+      ) : (
+        <SidebarProvider>
+          <NewSidebar className="z-50" />
+          <SidebarInset className="flex-1">{children}</SidebarInset>
+        </SidebarProvider>
+      )}
     </AdminAuthorization>
   );
 }

@@ -1,15 +1,15 @@
 'use client';
 
+import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
-import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnailLanding';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 interface CourseProps {

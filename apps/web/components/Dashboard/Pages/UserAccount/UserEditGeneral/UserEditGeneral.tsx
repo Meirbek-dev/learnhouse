@@ -583,6 +583,8 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                       accept={SUPPORTED_FILES}
                       className="hidden"
                       onChange={profilePicture.handleFileChange}
+                      aria-label={t('ariaLabel')}
+                      title={t('selectFile')}
                     />
                     <Button
                       type="button"

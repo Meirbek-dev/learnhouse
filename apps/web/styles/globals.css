@@ -208,6 +208,10 @@
 }
 
 @layer base {
+  * {
+    @apply border-border outline-ring/30;
+  }
+
   *,
   ::after,
   ::before,
@@ -225,6 +229,7 @@
   }
 
   body {
+    @apply bg-background text-foreground antialiased;
     letter-spacing: var(--tracking-normal);
     font-feature-settings:
       'kern' 1,
@@ -339,15 +344,5 @@
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-muted-foreground) var(--color-background);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/30;
-  }
-
-  body {
-    @apply bg-background text-foreground antialiased;
   }
 }

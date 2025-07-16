@@ -1,18 +1,18 @@
 'use client';
 
-import AuthenticatedClientElement from '@/components/Security/AuthenticatedClientElement';
-import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
-import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
-import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
-import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
-import { getUriWithOrg } from '@/services/config/config';
-import { OpenULogoSVG } from '../../svg/openuLogoSvg';
+import AuthenticatedClientElement from '@/components/Security/AuthenticatedClientElement';
+import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { Button } from '@/components/ui/button';
-import { usePathname } from 'next/navigation';
+import { NavigationMenu, NavigationMenuList } from '@/components/ui/navigation-menu';
+import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
+import { getUriWithOrg } from '@/services/config/config';
+import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { OpenULogoSVG } from '../../svg/openuLogoSvg';
 
 interface OrgMenuProps {
   orgslug: string;

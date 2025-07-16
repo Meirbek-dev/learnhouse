@@ -43,7 +43,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { usePathname, useRouter } from 'next/navigation';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';

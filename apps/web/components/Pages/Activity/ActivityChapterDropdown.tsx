@@ -2,7 +2,7 @@
 import { ArrowRight, Backpack, Check, FileText, ListTree, StickyNote, Video, X } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useEffect, useRef, useState } from 'react';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import Link from 'next/link';

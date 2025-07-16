@@ -423,6 +423,8 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                 onChange={handleVideoChange}
                 accept={SUPPORTED_FILES}
                 className="hidden"
+                aria-label={t('ariaLabel')}
+                title={t('selectVideoFile')}
               />
 
               <UploadZone

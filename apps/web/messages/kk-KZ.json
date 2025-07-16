@@ -6,7 +6,6 @@
       "askAI": "ЖИ-дан сұрау",
       "errorTitle": "Бірдеңе дұрыс болмады",
       "examplesAbbr": "мысал.",
-      "experimental": "Эксперименттік",
       "hello": "Сәлеметсіз бе",
       "howCanWeHelp": "қалай көмектесе аламын?",
       "logoAlt": "OpenU AI логотипі",
@@ -34,28 +33,28 @@
       "translateTooltip": "ЖИ көмегімен әртүрлі тілдерге аударыңыз"
     },
     "AIEditorToolkit": {
+      "ContinueWritingLabel": "Жазуды жалғастыру",
+      "GenerateQuizLabel": "Тест жасау",
+      "MakeLongerLabel": "Ұзарту",
+      "TranslateLabel": "Аудару",
+      "WriterLabel": "Жазушы",
       "aiEditorTitle": "ЖИ Редактор",
       "aiIconAlt": "OpenU AI белгішесі",
       "applicationPending": "Қатысушы өтініші қаралуда",
       "applyToContribute": "Қатысуға өтініш беру",
       "askAI": "ЖИ-дан сұрау",
       "continuePlaceholder": "Жазуды жалғастыру үшін курсорды сөйлемнің соңына қойыңыз",
-      "ContinueWritingLabel": "Жазуды жалғастыру",
       "errorTitle": "Бірдеңе дұрыс болмады",
-      "GenerateQuizLabel": "Тест жасау",
       "longerPlaceholder": "Ұзарту үшін мәтінді таңдаңыз",
-      "MakeLongerLabel": "Ұзарту",
       "prompt_continueWriting": "{selection} туралы жазуды жалғастыру",
       "prompt_makeLonger": "Бұл мәтінді ұзарту: {selection}",
       "prompt_translateTo": "{language} тіліне аудару: {selection}",
       "prompt_writer": "{selection} туралы жазу",
       "thinking": "Ойланып жатыр...",
       "translateExample": "Жапон, араб, неміс және т.б.",
-      "TranslateLabel": "Аудару",
       "translatePlaceholder": "Таңдалған мәтінді мынаған аудару",
       "translateToLanguageMissing": "Аудару үшін тілді енгізіңіз",
       "userInputPlaceholder": "ЖИ-дан сұрау",
-      "WriterLabel": "Жазушы",
       "writerPlaceholder": "Мынау туралы жазу..."
     },
     "AssignmentBoxUI": {
@@ -133,11 +132,11 @@
     "lastUpdated": "Соңғы жаңарту",
     "markAsComplete": "Аяқталды деп белгілеу",
     "markCompleteError": "Белсенділікті аяқталды деп белгілеу мүмкін болмады",
-    "marking": "Белгіленуде...",
     "markStatus": {
       "markTooltipMessage": "Бұл белсенділікті аяқталды деп белгілеу үшін құсбелгіні басыңыз",
       "unmarkTooltipMessage": "Қажет болса, аяқтау белгісін алып тастау үшін құсбелгіні басыңыз"
     },
+    "marking": "Белгіленуде...",
     "next": "Келесі",
     "nextActivityTitle": "Келесі: {name}",
     "nextActivityTooltip": "Келесі: {activityName}",
@@ -236,7 +235,9 @@
       "title": "Тіркелу — {orgName}",
       "username": "Пайдаланушы аты",
       "usernamePlaceholder": "Пайдаланушы атыңызды енгізіңіз"
-    }
+    },
+    "password": "Пароль",
+    "passwordPlaceholder": "Құпия сөзді енгізіңіз"
   },
   "Common": {
     "save": "Сақтау",
@@ -255,6 +256,12 @@
       "toastLoading": "Жасалуда...",
       "toastSuccess": "Жаңа топ жасалды"
     },
+    "AuthorsDisplay": {
+      "authorsLabel": "Курс авторлары",
+      "moreAuthors": {
+        "other": "Көбірек авторлар"
+      }
+    },
     "Button": {
       "newCollection": "Жаңа жинақ",
       "newCourse": "Жаңа курс"
@@ -264,6 +271,11 @@
       "deleteButtonText": "Жинақты жою",
       "deleteConfirmationMessage": "Бұл жинақты жойғыңыз келетініне сенімдісіз бе?",
       "deleteConfirmationTitle": "{collectionName} жою керек пе?"
+    },
+    "ConfirmationModal": {
+      "cancel": "Күшін жою",
+      "close": "Жабу",
+      "loading": "Жүктеу ..."
     },
     "CourseActions": {
       "authenticateToStart": "Курсты бастау үшін авторизациядан өтіңіз",
@@ -282,6 +294,7 @@
       "purchaseToAccess": "Бұл мазмұнға қол жеткізу үшін курсты сатып алу қажет."
     },
     "CourseThumbnail": {
+      "authors": "Авторлар",
       "delete": "Курсты жою",
       "deleteButtonText": "Курсты жою",
       "deleteConfirmationMessage": "Бұл курсты жойғыңыз келетініне сенімдісіз бе?",
@@ -293,8 +306,7 @@
       "startLearningButton": "Оқуды бастау",
       "toastDeleteError": "Курсты жою мүмкін болмады",
       "toastDeleteSuccess": "Курс сәтті жойылды",
-      "updated": "Жаңартылды",
-      "updatedDate": "{updateDate, date, medium} жаңартылды"
+      "updated": "Жаңартылды"
     },
     "CreateCourseModal": {
       "createCourse": "Курс жасау",
@@ -310,6 +322,7 @@
       "schemaDescriptionMax": "1000 таңбадан аз болуы керек",
       "schemaNameMax": "100 таңбадан аз болуы керек",
       "schemaNameRequired": "Курс атауы қажет",
+      "selectFile": "Нобай кескінін таңдаңыз",
       "thumbnailChoose": "Галереядан таңдау",
       "thumbnailUpload": "Суретті жүктеу",
       "toastError": "Курсты жасау мүмкін болмады",
@@ -320,8 +333,8 @@
       "visibilityItemPublic": "Жалпы (Барлығына қарау үшін қолжетімді)"
     },
     "Dialog": {
-      "close": "Жабу",
-      "cancel": "Болдырмау"
+      "cancel": "Болдырмау",
+      "close": "Жабу"
     },
     "DocumentPdfModal": {
       "createActivity": "Белсенділік жасау",
@@ -350,6 +363,7 @@
       "saveChanges": "Өзгерістерді сақтау",
       "saving": "Сақталуда...",
       "selectDeadline": "Тапсырманың соңғы мерзімін таңдаңыз",
+      "selectGradingType": "Бағалау түрін таңдаңыз",
       "updateDetails": "Тапсырма мәліметтерін жаңарту",
       "updateError": "Тапсырманы жаңарту мүмкін болмады",
       "updateErrorGeneric": "Тапсырманы жаңарту кезінде қате орын алды",
@@ -400,10 +414,10 @@
     "ManageUsers": {
       "actionsHeader": "Әрекеттер",
       "linkButton": "Байланыстыру",
-      "linkedHeader": "Байланыстырылған",
-      "linkedStatus": "Байланыстырылған",
       "linkError": "Пайдаланушыны байланыстыру қатесі: {error}",
       "linkSuccess": "Пайдаланушы сәтті байланыстырылды",
+      "linkedHeader": "Байланыстырылған",
+      "linkedStatus": "Байланыстырылған",
       "notLinkedStatus": "Байланыстырылмаған",
       "unknownError": "Белгісіз қате",
       "unlinkButton": "Байланысты үзу",
@@ -493,13 +507,13 @@
       "createUserGroupLink": "Топ жасау",
       "generateButton": "Генерациялау",
       "linkButton": "Байланыстыру",
-      "linkedDescription": "Пайдаланушылар тіркелген кезде автоматты түрде таңдалған топқа қосылады",
-      "linkedTitle": "Шақыру коды топпен байланыстырылған",
       "linkError": "Топпен байланыстыру қатесі: {error}",
       "linkSuccess": "Пайдаланушы топпен сәтті байланыстырылды",
+      "linkedDescription": "Пайдаланушылар тіркелген кезде автоматты түрде таңдалған топқа қосылады",
+      "linkedTitle": "Шақыру коды топпен байланыстырылған",
+      "noUserGroupsAvailable": "Пайдаланушы топтары жоқ",
       "normalDescription": "Пайдаланушы тіркелген кезде ешбір топқа байланыстырылмайды",
       "normalTitle": "Қалыпты шақыру коды",
-      "noUserGroupsAvailable": "Пайдаланушы топтары жоқ",
       "unknownError": "Белгісіз қате"
     },
     "OrgMenuLinks": {
@@ -524,17 +538,17 @@
       "userRole": "Пайдаланушы"
     },
     "SearchBar": {
-      "collectionsSection": "Жинақтар",
       "collectionType": "Жинақ",
-      "coursesSection": "Курстар",
+      "collectionsSection": "Жинақтар",
       "courseType": "Курс",
+      "coursesSection": "Курстар",
       "discoverSubtitle": "Сізге қызықты мазмұнды табыңыз",
       "discoverTitle": "Келесі оқу саяхатыңызды ашыңыз",
       "placeholder": "Курстарды, пайдаланушыларды, жинақтарды іздеу...",
       "quickResultsTitle": "Нәтижелер",
       "suggestionsTitle": "Іздеу ұсыныстары",
-      "usersSection": "Пайдаланушылар",
       "userType": "Пайдаланушы",
+      "usersSection": "Пайдаланушылар",
       "viewAllResults": "Барлық нәтижелерді көру"
     },
     "TypeOfContentTitle": {
@@ -554,8 +568,8 @@
     "VideoModal": {
       "activityName": "Белсенділік атауы",
       "activityNamePlaceholder": "Белсенділік атауын енгізіңіз...",
-      "additionalSettings": "Қосымша параметрлер",
       "addSubtitles": "Субтитрлерді қосу",
+      "additionalSettings": "Қосымша параметрлер",
       "autoplay": "Бейнені автоматты ойнату",
       "autoplaySubtitles": "Субтитрлерді автоматты ойнату",
       "chooseVideoFile": "Бейне файлды таңдаңыз",
@@ -594,8 +608,8 @@
     },
     "WebPreview": {
       "align": "Туралау",
-      "alignment": "Туралау",
       "alignOption": "{value} туралау",
+      "alignment": "Туралау",
       "buttonLabel": "Түйме белгісі",
       "buttonLabelPlaceholder": "Түйме белгісі",
       "buttonOptions": "Түймешік параметрлері",
@@ -630,8 +644,7 @@
     "Org": {
       "fetchError": "Ұйым деректерін жүктеу кезінде қате орын алды",
       "joinOrgCTA": "{orgName} қосылу",
-      "notMemberInfo": "Сіз әлі бұл Ұйымның мүшесі емессіз",
-      "orgInactiveError": "Бұл Ұйым енді белсенді емес"
+      "notMemberInfo": "Сіз әлі бұл Ұйымның мүшесі емессіз"
     }
   },
   "CourseBreadcrumbs": {
@@ -639,15 +652,15 @@
   },
   "CourseEdit": {
     "ActivityElement": {
-      "activityDeletedSuccess": "Белсенділік сәтті жойылды",
-      "activityNamePlaceholder": "Белсенділік атауы",
-      "activityNameUpdatedSuccess": "Белсенділік атауы сәтті жаңартылды",
       "ActivityTypes": {
         "assignment": "Тапсырма",
         "document": "Құжат",
         "dynamic": "Динамикалық",
         "video": "Бейне"
       },
+      "activityDeletedSuccess": "Белсенділік сәтті жойылды",
+      "activityNamePlaceholder": "Белсенділік атауы",
+      "activityNameUpdatedSuccess": "Белсенділік атауы сәтті жаңартылды",
       "activityUpdateSuccess": "Белсенділік сәтті жаңартылды",
       "deleteButton": "Белсенділікті жою",
       "deleteConfirmation": "Бұл белсенділікті жойғыңыз келетініне сенімдісіз бе?",
@@ -663,47 +676,13 @@
       "unpublishButton": "Жариялаудан алу",
       "updating": "Белсенділік жаңартылуда..."
     },
-    "activityNamePlaceholder": "Белсенділік атауы",
-    "activityTypes": {
-      "assignment": "Тапсырма",
-      "document": "Құжат",
-      "dynamic": "Динамикалық",
-      "video": "Бейне"
-    },
-    "addActivityButton": "Белсенділік қосу",
     "ChapterElement": {
       "chapterNamePlaceholder": "Тарау атауы",
       "deleteChapterButton": "Тарауды жою",
       "deleteChapterConfirmation": "Бұл тарауды жойғыңыз келетініне сенімдісіз бе?",
       "deleteChapterTitle": "{name} жою керек пе?"
     },
-    "chapterNamePlaceholder": "Тарау атауы",
-    "deleteActivityButton": "Белсенділікті жою",
-    "deleteActivityConfirmation": "Бұл белсенділікті жойғыңыз келетініне сенімдісіз бе?",
-    "deleteActivityTitle": "{name} жою керек пе?",
-    "deleteChapter": "Тарауды жою",
-    "deleteChapterButton": "Тарауды жою",
-    "deleteChapterConfirmation": "Бұл тарауды жойғыңыз келетініне сенімдісіз бе?",
-    "deleteChapterTitle": "{name} жою керек пе?",
-    "editButton": "Өңдеу",
     "General": {
-      "about": {
-        "label": "Сипаттамасы"
-      },
-      "both": "Екеуі де",
-      "description": {
-        "label": "Сипаттама"
-      },
-      "errors": {
-        "allLearningItemsMustHaveText": "Барлық оқу элементтерінде мәтін болуы керек",
-        "atLeastOneLearningItem": "Мәтіні бар кемінде бір оқу элементі болуы керек",
-        "invalidFormat": "Жарамсыз пішім",
-        "invalidJsonFormat": "Жарамсыз JSON пішімі",
-        "maxLength": "{count} таңбадан аз болуы керек",
-        "required": "{fieldName} міндетті",
-        "saveFailed": "Курстың жалпы ақпаратын сақтау сәтсіз аяқталды."
-      },
-      "image": "Кескін",
       "LearningItems": {
         "addItemButton": "Оқу элементін қосу",
         "addLinkTooltip": "Сілтеме қосу",
@@ -714,23 +693,6 @@
         "removeItemAriaLabel": "Оқу элементін жою",
         "removeItemTooltip": "Элементті жою",
         "searchEmojis": "Эмодзи іздеу..."
-      },
-      "learnings": {
-        "label": "Сіз не үйренесіз"
-      },
-      "loading": "Жүктелуде...",
-      "name": {
-        "label": "Курс атауы"
-      },
-      "tags": {
-        "label": "Курс тегтері",
-        "placeholder": "Қосу үшін Enter пернесін басыңыз..."
-      },
-      "thumbnail": {
-        "chooseFromGalleryButton": "Галереядан таңдаңыз",
-        "label": "Курс нобайы",
-        "uploadImageButton": "Кескінді жүктеу",
-        "uploading": "Жүктелуде..."
       },
       "Thumbnail": {
         "currentThumbnailAlt": "Курстың ағымдағы нобайы",
@@ -753,11 +715,10 @@
         "thumbnailPreviewAlt": "Курс нобайының алдын ала қарауы",
         "thumbnailUpdatedSuccessfully": "Нобай сәтті жаңартылды",
         "uploadImageButton": "Кескінді жүктеу",
-        "uploading": "Жүктелуде...",
         "uploadVideo": "Бейнені жүктеу",
+        "uploading": "Жүктелуде...",
         "video": "Бейне"
       },
-      "thumbnailType": "Нобай түрі",
       "UnsplashPicker": {
         "Labels": {
           "architecture": "Сәулет",
@@ -781,12 +742,47 @@
           "technology": "Технология",
           "travel": "Саяхат"
         },
-        "loading": "Жүктелуде...",
         "loadMoreButton": "Көбірек жүктеу",
+        "loading": "Жүктелуде...",
         "modalTitle": "Unsplash-тен кескін таңдаңыз",
         "noResults": "Нәтиже жоқ",
         "searchPlaceholder": "Жоғары ажыратымдылықтағы тегін фотосуреттерді іздеу..."
       },
+      "about": {
+        "label": "Сипаттамасы"
+      },
+      "both": "Екеуі де",
+      "description": {
+        "label": "Сипаттама"
+      },
+      "errors": {
+        "allLearningItemsMustHaveText": "Барлық оқу элементтерінде мәтін болуы керек",
+        "atLeastOneLearningItem": "Мәтіні бар кемінде бір оқу элементі болуы керек",
+        "invalidFormat": "Жарамсыз пішім",
+        "invalidJsonFormat": "Жарамсыз JSON пішімі",
+        "maxLength": "{count} таңбадан аз болуы керек",
+        "required": "{fieldName} міндетті",
+        "saveFailed": "Курстың жалпы ақпаратын сақтау сәтсіз аяқталды."
+      },
+      "image": "Кескін",
+      "learnings": {
+        "label": "Сіз не үйренесіз"
+      },
+      "loading": "Жүктелуде...",
+      "name": {
+        "label": "Курс атауы"
+      },
+      "tags": {
+        "label": "Курс тегтері",
+        "placeholder": "Қосу үшін Enter пернесін басыңыз..."
+      },
+      "thumbnail": {
+        "chooseFromGalleryButton": "Галереядан таңдаңыз",
+        "label": "Курс нобайы",
+        "uploadImageButton": "Кескінді жүктеу",
+        "uploading": "Жүктелуде..."
+      },
+      "thumbnailType": "Нобай түрі",
       "video": "Бейне"
     },
     "NewActivityModal": {
@@ -795,15 +791,32 @@
       "title": "Белсенділік қосу"
     },
     "Structure": {
-      "addChapterButton": "Тарау қосу",
-      "chapterCreatedSuccess": "Тарау сәтті жасалды",
-      "chapterCreateFailed": "Тарауды жасау мүмкін болмады",
-      "creatingChapter": "Жасалуда...",
       "NewChapterModal": {
         "description": "Курсыңыздың құрылымына жаңа тарау қосыңыз.",
         "title": "Жаңа тарау жасау"
-      }
-    }
+      },
+      "addChapterButton": "Тарау қосу",
+      "chapterCreateFailed": "Тарауды жасау мүмкін болмады",
+      "chapterCreatedSuccess": "Тарау сәтті жасалды",
+      "creatingChapter": "Жасалуда..."
+    },
+    "activityNamePlaceholder": "Белсенділік атауы",
+    "activityTypes": {
+      "assignment": "Тапсырма",
+      "document": "Құжат",
+      "dynamic": "Динамикалық",
+      "video": "Бейне"
+    },
+    "addActivityButton": "Белсенділік қосу",
+    "chapterNamePlaceholder": "Тарау атауы",
+    "deleteActivityButton": "Белсенділікті жою",
+    "deleteActivityConfirmation": "Бұл белсенділікті жойғыңыз келетініне сенімдісіз бе?",
+    "deleteActivityTitle": "{name} жою керек пе?",
+    "deleteChapter": "Тарауды жою",
+    "deleteChapterButton": "Тарауды жою",
+    "deleteChapterConfirmation": "Бұл тарауды жойғыңыз келетініне сенімдісіз бе?",
+    "deleteChapterTitle": "{name} жою керек пе?",
+    "editButton": "Өңдеу"
   },
   "CourseEndView": {
     "backToCourse": "Курсқа оралу",
@@ -855,9 +868,6 @@
     "whatYouWillLearn": "Не үйренесіз"
   },
   "Courses": {
-    "access": "Қолжетімділік",
-    "content": "Мазмұны",
-    "contributors": "Авторлар",
     "CourseActionsMobile": {
       "author": "Автор",
       "authors": "Авторлар",
@@ -888,16 +898,16 @@
       "publishUpdate": "Жаңартуды жариялау",
       "titleRequired": "Атауы міндетті",
       "update": "жаңарту",
-      "updateAddedSuccess": "Жаңарту сәтті қосылды",
       "updateAddFailed": "Жаңартуды қосу мүмкін болмады",
+      "updateAddedSuccess": "Жаңарту сәтті қосылды",
       "updateContent": "Жаңарту мазмұны",
       "updateContentPlaceholder": "Жаңартуыңыздың мәліметтерін бөлісіңіз...",
-      "updateDeletedSuccess": "Жаңарту сәтті жойылды",
       "updateDeleteFailed": "Жаңартуды жою мүмкін болмады",
-      "updates": "жаңартулар",
-      "updatesAppearHere": "Бұл курс бойынша жаңартулар осы жерде пайда болады",
+      "updateDeletedSuccess": "Жаңарту сәтті жойылды",
       "updateTitle": "Жаңарту атауы",
-      "updateTitlePlaceholder": "Бұл жаңартуда не жаңалық бар?"
+      "updateTitlePlaceholder": "Бұл жаңартуда не жаңалық бар?",
+      "updates": "жаңартулар",
+      "updatesAppearHere": "Бұл курс бойынша жаңартулар осы жерде пайда болады"
     },
     "CoursePaidOptions": {
       "benefits": "Артықшылықтары:",
@@ -917,6 +927,43 @@
       "showMore": "Көбірек көрсету",
       "subscribeNow": "Қазір жазылу",
       "subscription": "Жазылым"
+    },
+    "CourseUpdates": {
+      "addNewCourseUpdate": "Жаңа курс жаңартуын қосу",
+      "addNewUpdateTitle": "Жаңа курс жаңартуын қосу",
+      "addUpdate": "Жаңартуды қосу",
+      "areYouSureYouWantToDeleteThisUpdate": "Бұл жаңартуды жойғыңыз келетініне сенімдісіз бе?",
+      "cancel": "Бас тарту",
+      "content": "Мазмұны",
+      "contentLabel": "Мазмұны",
+      "contentRequired": "Мазмұн міндетті",
+      "courseLabel": "Курс",
+      "createdAt": "{date} жасалды",
+      "createdAtFull": "{date, date, long} {date, time, short} жасалды",
+      "createdAtRelative": "{time} бұрын",
+      "createdAtTooltipPrefix": "Жасалған ",
+      "delete": "Жою",
+      "deleteError": "Жаңартуды жою мүмкін болмады",
+      "deleteSuccess": "Жаңарту сәтті жойылды",
+      "deleteUpdate": "Жаңартуды жою керек пе?",
+      "deleteUpdateButton": "Жаңартуды жою",
+      "deleteUpdateMessage": "Бұл жаңартуды жойғыңыз келетініне сенімдісіз бе?",
+      "deleteUpdateTitle": "Жаңартуды жою керек пе?",
+      "deletingUpdate": "Жаңарту жойылуда...",
+      "failedDelete": "Жаңартуды жою мүмкін болмады",
+      "newUpdate": "Жаңа жаңарту",
+      "noUpdates": "Әлі жаңартулар жоқ",
+      "noUpdatesYet": "Әлі жаңартулар жоқ",
+      "successfullDelete": "Жаңарту сәтті жойылды",
+      "testCourse": "Тест курсы",
+      "title": "Атауы",
+      "titleLabel": "Атауы",
+      "titlePlaceholder": "Атауын енгізіңіз",
+      "titleRequired": "Атауы міндетті",
+      "updateAddFailed": "Жаңартуды қосу мүмкін болмады",
+      "updateAddedError": "Жаңартуды қосу мүмкін болмады",
+      "updateAddedSuccess": "Жаңарту сәтті қосылды",
+      "updates": "Жаңартулар"
     },
     "CoursesActions": {
       "accessCheckError": "Курсқа кіруді тексеру мүмкін болмады. Кейінірек қайталап көріңіз.",
@@ -955,64 +1002,30 @@
       "selectPaymentOption": "Бұл курсқа қол жеткізу үшін төлем әдісін таңдаңыз",
       "startCourse": "Курсты бастау",
       "startCourseError": "Курсты бастау мүмкін болмады. Кейінірек қайталап көріңіз.",
-      "startedCourseSuccess": "Курс сәтті басталды",
       "startError": "Курсты бастау мүмкін болмады. Кейінірек қайталап көріңіз.",
-      "startingCourse": "Курс басталуда...",
       "startLearningJourney": "{totalActivities} {totalActivities, plural, one {қызықты сабақпен} few {қызықты сабақтармен} many {қызықты сабақтармен} other {қызықты сабақтармен}} оқу сапарыңызды бастаңыз",
       "startSuccess": "Курс сәтті басталды",
+      "startedCourseSuccess": "Курс сәтті басталды",
+      "startingCourse": "Курс басталуда...",
       "submittingContributorApplication": "Қатысуға өтінім жіберілуде...",
       "youAreAContributor": "Сіз авторсыз",
       "youAreContributor": "Сіз авторсыз",
       "youHavePurchasedThisCourse": "Сіз бұл курсты сатып алдыңыз және барлық мазмұнға толық қол жеткізе аласыз.",
       "youOwnThisCourse": "Сіз бұл курстың иесісіз"
     },
-    "CourseUpdates": {
-      "addNewCourseUpdate": "Жаңа курс жаңартуын қосу",
-      "addNewUpdateTitle": "Жаңа курс жаңартуын қосу",
-      "addUpdate": "Жаңартуды қосу",
-      "areYouSureYouWantToDeleteThisUpdate": "Бұл жаңартуды жойғыңыз келетініне сенімдісіз бе?",
-      "cancel": "Бас тарту",
-      "content": "Мазмұны",
-      "contentLabel": "Мазмұны",
-      "contentRequired": "Мазмұн міндетті",
-      "courseLabel": "Курс",
-      "createdAt": "{date} жасалды",
-      "createdAtFull": "{date, date, long} {date, time, short} жасалды",
-      "createdAtRelative": "{time} бұрын",
-      "createdAtTooltipPrefix": "Жасалған ",
-      "delete": "Жою",
-      "deleteError": "Жаңартуды жою мүмкін болмады",
-      "deleteSuccess": "Жаңарту сәтті жойылды",
-      "deleteUpdate": "Жаңартуды жою керек пе?",
-      "deleteUpdateButton": "Жаңартуды жою",
-      "deleteUpdateMessage": "Бұл жаңартуды жойғыңыз келетініне сенімдісіз бе?",
-      "deleteUpdateTitle": "Жаңартуды жою керек пе?",
-      "deletingUpdate": "Жаңарту жойылуда...",
-      "failedDelete": "Жаңартуды жою мүмкін болмады",
-      "newUpdate": "Жаңа жаңарту",
-      "noUpdates": "Әлі жаңартулар жоқ",
-      "noUpdatesYet": "Әлі жаңартулар жоқ",
-      "successfullDelete": "Жаңарту сәтті жойылды",
-      "testCourse": "Тест курсы",
-      "title": "Атауы",
-      "titleLabel": "Атауы",
-      "titlePlaceholder": "Атауын енгізіңіз",
-      "titleRequired": "Атауы міндетті",
-      "updateAddedError": "Жаңартуды қосу мүмкін болмады",
-      "updateAddedSuccess": "Жаңарту сәтті қосылды",
-      "updateAddFailed": "Жаңартуды қосу мүмкін болмады",
-      "updates": "Жаңартулар"
+    "PaidCourseActivityDisclaimer": {
+      "message": "Мазмұнға қол жеткізу үшін курсты сатып алу қажет.",
+      "paidContent": "Ақылы мазмұн"
     },
+    "access": "Қолжетімділік",
+    "content": "Мазмұны",
+    "contributors": "Авторлар",
     "createACourse": "Мазмұн қосу үшін курс жасаңыз",
     "error": "Курстарды жүктеу қатесі",
     "general": "Жалпы",
     "myCourses": "Менің курстарым",
     "noCourses": "Әзірге курстар жоқ",
     "noCoursesavailable": "Әзірге қол жетімді курстар жоқ",
-    "PaidCourseActivityDisclaimer": {
-      "message": "Мазмұнға қол жеткізу үшін курсты сатып алу қажет.",
-      "paidContent": "Ақылы мазмұн"
-    },
     "title": "Курстар"
   },
   "CoursesPage": {
@@ -1026,7 +1039,6 @@
   },
   "DashPage": {
     "Assignments": {
-      "addQuestion": "Сұрақ қосу",
       "AssignmentPage": {
         "assignmentTools": "Тапсырмаларға арналған құралдар",
         "desktopOnlyMessage1": "Бұл бет тек жұмыс үстелі құрылғысында қол жетімді.",
@@ -1038,17 +1050,16 @@
         "preview": "Алдын ала қарау",
         "previewTooltip": "Тапсырманы студент ретінде алдын ала қарау",
         "publish": "Жариялау",
-        "published": "Жарияланды",
         "publishTooltip": "Тапсырмаңызды көпшілікке және студенттерге қол жетімді ету",
+        "published": "Жарияланды",
         "submissions": "Жіберілген жұмыстар",
         "unpublish": "Жариялаудан алу",
-        "unpublished": "Жарияланбаған",
         "unpublishTooltip": "Тапсырмаңызды студенттерге қол жетімсіз ету",
+        "unpublished": "Жарияланбаған",
         "updateError": "Тапсырманы жаңартуда қате шықты, кейінірек қайталап көріңіз.",
         "updateLoading": "Тапсырма жаңартылуда...",
         "updateSuccess": "Тапсырма сәтті жаңартылды"
       },
-      "evaluate": "Бағалау",
       "EvaluateModal": {
         "assignmentDataMissing": "Тапсырма деректері жоқ.",
         "gradeFinalError": "{message}",
@@ -1063,9 +1074,6 @@
         "setFinalGrade": "Қорытынды бағаны қою",
         "taskLabel": "{index} тапсырмасы"
       },
-      "evaluateSubmission": "Бұл жіберілген жұмысты бағалау",
-      "evaluateUser": "{username} бағалау",
-      "graded": "Бағаланды",
       "HomePage": {
         "assignment": "Тапсырма",
         "assignments": "Тапсырмалар",
@@ -1075,9 +1083,6 @@
         "noAssignments": "Бұл курс үшін қол жетімді тапсырмалар жоқ, курс редакторында тапсырмалар жасаңыз",
         "submissions": "Жіберілген жұмыстар"
       },
-      "late": "Кеш",
-      "markedAsFalse": "Жалған деп белгіленді",
-      "markedAsTrue": "Шындық деп белгіленді",
       "NewTaskModal": {
         "createSuccess": "Тапсырма сәтті жасалды",
         "fileSubmissionDescription": "Студенттер осы тапсырма үшін файлдарды жібере алады",
@@ -1090,11 +1095,6 @@
         "reminderToast": "Тапсырмаларды өңдегенде/қосқанда, студенттерде проблема туындамас үшін тапсырманы жариялаудан алып тастағаныңызға көз жеткізіңіз. Дайын болған кезде қайта жариялай аласыз.",
         "untitledTaskTitle": "Атауы жоқ тапсырма"
       },
-      "noQuestionsFound": "Сұрақтар табылмады",
-      "optionPlaceholder": "Нұсқа мәтінін енгізіңіз",
-      "questionPlaceholder": "Сұрақ мәтінін енгізіңіз",
-      "submission": "Жіберілген жұмыс",
-      "submitted": "Жіберілді",
       "TaskEditor": {
         "assignmentObjectMissingError": "Тапсырма нысаны немесе оның UUID-і жоқ. Тапсырманы жою мүмкін емес.",
         "content": "Мазмұны",
@@ -1109,10 +1109,10 @@
         "authRequiredSubmit": "Аутентификация қажет. Тапсырманы жіберу үшін кіріңіз.",
         "authRequiredUpload": "Аутентификация қажет. Файлдарды жүктеу үшін кіріңіз.",
         "errorSaving": "Тапсырманы сақтауда қате шықты, кейінірек қайталап көріңіз.",
-        "gradedByTeacher": "Мұғалім бағалады: @{username}",
         "gradeError": "Тапсырманы бағалауда қате шықты, кейінірек қайталап көріңіз.",
         "gradeRangeError": "Баға {maxGradeValue} баллдан аспауы керек",
         "gradeSuccess": "Тапсырма {grade} баллмен сәтті бағаланды",
+        "gradedByTeacher": "Мұғалім бағалады: @{username}",
         "gradingViewInfo": "Файлды жүктеп алып, оны қолмен бағалаңыз, содан кейін жоғарыдағы бағаны енгізіңіз",
         "loading": "Жүктелуде",
         "saveSuccess": "Тапсырма сәтті сақталды",
@@ -1130,8 +1130,8 @@
         "hint": "Кеңес",
         "loading": "Жүктелуде",
         "maxGradeValue": "Максималды баға мәні",
-        "referenceFile": "Анықтамалық файл",
         "refFileUpdateSuccess": "Анықтамалық файл сәтті жаңартылды",
+        "referenceFile": "Анықтамалық файл",
         "save": "Сақтау",
         "title": "Атауы",
         "updateError": "Тапсырманы жаңартуда қате шықты, кейінірек қайталап көріңіз.",
@@ -1153,12 +1153,25 @@
         "saveSuccess": "Тапсырма сәтті сақталды",
         "true": "Шындық"
       },
-      "tasks": "Тапсырмалар",
       "Tasks": {
         "addTask": "Тапсырма қосу",
         "addTaskModalDescription": "Жаңа тапсырма жасаңыз",
         "addTaskModalTitle": "Тапсырма қосу"
       },
+      "addQuestion": "Сұрақ қосу",
+      "evaluate": "Бағалау",
+      "evaluateSubmission": "Бұл жіберілген жұмысты бағалау",
+      "evaluateUser": "{username} бағалау",
+      "graded": "Бағаланды",
+      "late": "Кеш",
+      "markedAsFalse": "Жалған деп белгіленді",
+      "markedAsTrue": "Шындық деп белгіленді",
+      "noQuestionsFound": "Сұрақтар табылмады",
+      "optionPlaceholder": "Нұсқа мәтінін енгізіңіз",
+      "questionPlaceholder": "Сұрақ мәтінін енгізіңіз",
+      "submission": "Жіберілген жұмыс",
+      "submitted": "Жіберілді",
+      "tasks": "Тапсырмалар",
       "title": "Тапсырмалар"
     },
     "Card": {
@@ -1170,17 +1183,17 @@
         "description": "Курстарды, тарауларды және тапсырмаларды жасаңыз және басқарыңыз",
         "title": "Курстар"
       },
-      "openuLogo": "OpenU логотипі",
-      "openuUniversity": "Торайгыров Университеті",
       "Organization": {
         "description": "Ұйымыңыз үшін жалпы параметрлерді реттеңіз",
         "title": "Ұйым"
       },
-      "touUniversity": "Торайгыров Университет",
       "Users": {
         "description": "Ұйымыңыздың пайдаланушылары мен рөлдерін басқарыңыз",
         "title": "Пайдаланушылар"
-      }
+      },
+      "openuLogo": "OpenU логотипі",
+      "openuUniversity": "Торайгыров Университеті",
+      "touUniversity": "Торайгыров Университет"
     },
     "CourseOverview": {
       "courseLabel": "Курс"
@@ -1220,7 +1233,6 @@
         "contributors": "Бірлескен авторлар",
         "general": "Жалпы"
       },
-      "error": "Курстарды жүктеу қатесі",
       "HomePageClient": {
         "courses": "Курстар",
         "createACourse": "Мазмұн қосу үшін курс жасаңыз",
@@ -1229,6 +1241,7 @@
         "noCourses": "Әзірге курстар жоқ",
         "noCoursesAvailable": "Әзірге қолжетімді курстар жоқ"
       },
+      "error": "Курстарды жүктеу қатесі",
       "myCourses": "Менің курстарым",
       "noPurchasedCourses": "Сатып алынған курстар жоқ",
       "noPurchasedCoursesDesc": "Сіз әлі ешқандай курс сатып алған жоқсыз",
@@ -1240,24 +1253,24 @@
       "active": "Белсенді",
       "activeBadge": "Белсенді",
       "activeStatus": "Белсенді",
-      "addedOnColumn": "Қосылған күні",
       "addSelectedButton": "Таңдалғандарды қосу",
+      "addedOnColumn": "Қосылған күні",
       "alreadyContributorMessage": "Қазірдің өзінде қатысушы",
       "cannotModifyCreator": "Жасаушының рөлін немесе мәртебесін өзгерту мүмкін емес",
       "clearButton": "Тазарту",
       "closeConfirmMsg": "Бұл курсты қатысушылар үшін жапқыңыз келетініне сенімдісіз бе?",
       "closeConfirmTitle": "Қатысушылар үшін жабу керек пе?",
-      "closedDescription": "Курс қатысушылар үшін жабық. Тек қазіргі қатысушылар курс мазмұнын өзгерте алады.",
-      "closedLabel": "Қатысушылар үшін жабық",
       "closeToContributorsButton": "Қатысушылар үшін жабу",
       "closeToContributorsDescription": "Курс қатысушылар үшін жабық. Тек қазіргі қатысушылар курс мазмұнын өзгерте алады.",
       "closeToContributorsMessage": "Бұл курсты қатысушылар үшін жапқыңыз келетініне сенімдісіз бе?",
       "closeToContributorsTitle": "Қатысушылар үшін жабу керек пе?",
+      "closedDescription": "Курс қатысушылар үшін жабық. Тек қазіргі қатысушылар курс мазмұнын өзгерте алады.",
+      "closedLabel": "Қатысушылар үшін жабық",
       "contributor": "Қатысушы",
-      "contributorsSelectedMessage": "{count, plural, one {# қатысушы таңдалды} other {# қатысушы таңдалды}}",
       "contributorUpdateErrorDetailed": "Қатысушыны жаңарту сәтсіз аяқталды: {error}",
       "contributorUpdateErrorGeneric": "Қатысушыны жаңарту сәтсіз аяқталды",
       "contributorUpdateSuccess": "Қатысушы сәтті жаңартылды",
+      "contributorsSelectedMessage": "{count, plural, one {# қатысушы таңдалды} other {# қатысушы таңдалды}}",
       "courseContributorsSubtitle": "Қатысушыларды басқарыңыз және курсыңызға жаңасын қосыңыз",
       "courseContributorsTitle": "Курс қатысушылары",
       "creator": "Жасаушы",
@@ -1294,8 +1307,8 @@
       "roleContributor": "Қатысушы",
       "roleMaintainer": "Қолдаушы",
       "roleReporter": "Баяндамашы",
-      "searchingMessage": "Іздеуде...",
       "searchUsersPlaceholder": "Пайдаланушыларды аты немесе пайдаланушы аты бойынша іздеу, қатысушы ретінде қосу үшін...",
+      "searchingMessage": "Іздеуде...",
       "statusActive": "Белсенді",
       "statusColumn": "Мәртебе",
       "statusInactive": "Белсенді емес",
@@ -1312,7 +1325,6 @@
       "usersSelectedMessage": "{count, plural, one {# пайдаланушы таңдалды} other {# пайдаланушы таңдалды}}"
     },
     "Editor": {
-      "activity": "Белсенділік",
       "BadgesExtension": {
         "deepDive": "Терең талдау",
         "discussionTopic": "Талқылау тақырыбы",
@@ -1401,7 +1413,6 @@
         "templateMatrixDesc": "Жақшалары бар 2×2 матрица",
         "templateQuadratic": "Квадраттық теңдеу",
         "templateQuadraticDesc": "Квадраттық теңдеуді шешу",
-        "templates": "Үлгілер",
         "templateSqrt": "Квадрат түбірі",
         "templateSqrtDesc": "Квадрат түбірі",
         "templateSum": "Қосу",
@@ -1410,9 +1421,9 @@
         "templateSystemEqDesc": "Сызықтық теңдеулер жүйесі",
         "templateVector": "Вектор",
         "templateVectorDesc": "3D вектор",
+        "templates": "Үлгілер",
         "title": "Математикалық теңдеу"
       },
-      "metaTitleEdit": "Өңдеу - Белсенділік {activityName}",
       "QuizBlock": {
         "addAnswer": "Жауап қосу",
         "addQuestion": "Сұрақ қосу",
@@ -1479,8 +1490,8 @@
       },
       "UserBlock": {
         "errorNotFound": "Пайдаланушы табылмады",
-        "loading": "Жүктелуде...",
         "loadUser": "Пайдаланушыны жүктеу",
+        "loading": "Жүктелуде...",
         "noUserSelected": "Пайдаланушы таңдалмаған",
         "usernameLabel": "Пайдаланушы аты",
         "usernamePlaceholder": "Пайдаланушы атын енгізіңіз"
@@ -1497,14 +1508,71 @@
         "sizeSmall": "Кішкентай",
         "title": "Бейне блогы",
         "uploadHint": "MP4, MKV және WebM форматтары қолдау көрсетіледі",
-        "uploading": "Бейне жүктелуде... {progress}%",
-        "uploadPlaceholder": "Бейнеңізді осы жерге сүйреп апарыңыз немесе таңдау үшін басыңыз"
-      }
+        "uploadPlaceholder": "Бейнеңізді осы жерге сүйреп апарыңыз немесе таңдау үшін басыңыз",
+        "uploading": "Бейне жүктелуде... {progress}%"
+      },
+      "activity": "Белсенділік",
+      "metaTitleEdit": "Өңдеу - Белсенділік {activityName}"
     },
     "Notifications": {
+      "Editor": {
+        "sectionTitleLabel": "Атауы",
+        "sectionTitlePlaceholder": "Бөлімнің атауын енгізіңіз",
+        "titleSuffix": "Бөлім"
+      },
+      "FeaturedCoursesEditor": {
+        "loadingCourses": "Курстар жүктелуде...",
+        "selectButton": "Таңдау",
+        "selectCoursesLabel": "Курстарды таңдау",
+        "selectedButton": "Таңдалған"
+      },
+      "Form": {
+        "errorMessageDefault": "Қате енгізу",
+        "invalidEmail": "Жарамсыз электрондық пошта мекенжайы",
+        "maxChars": "Кемінде {count} таңбадан аспауы керек",
+        "minAmount": "Сома кемінде {min} болуы керек",
+        "minChars": "Кемінде {count} таңбадан тұруы керек",
+        "positiveNumber": "Оң сан болуы керек",
+        "requiredField": "{fieldName} өрісі міндетті"
+      },
+      "ImageUploader": {
+        "uploading": "Жүктелуде..."
+      },
+      "LogosEditor": {
+        "addButton": "Логотип қосу",
+        "logoAltPlaceholder": "Балама мәтін",
+        "logoUrlPlaceholder": "Логотип URL",
+        "logosLabel": "Логотиптер",
+        "uploadButton": "Логотип жүктеу"
+      },
+      "PeopleEditor": {
+        "addButton": "Адам қосу",
+        "descriptionLabel": "Сипаттамасы",
+        "descriptionPlaceholder": "Сипаттама немесе рөл",
+        "imageLabel": "Сурет",
+        "imageUrlPlaceholder": "Сурет URL",
+        "nameLabel": "Аты",
+        "namePlaceholder": "Адамның аты",
+        "peopleLabel": "Адамдар",
+        "uploadAvatarButton": "Аватар жүктеу",
+        "usernameLabel": "Пайдаланушы аты",
+        "usernamePlaceholder": "@пайдаланушы_аты"
+      },
+      "TextAndImageEditor": {
+        "contentLabel": "Мазмұны",
+        "contentPlaceholder": "Бөлімнің мазмұнын енгізіңіз",
+        "imageAltPlaceholder": "Балама мәтін",
+        "imageLabel": "Сурет",
+        "imagePositionLabel": "Суреттің орналасуы",
+        "imagePositionPlaceholder": "Суреттің орналасуын таңдаңыз",
+        "imageUrlPlaceholder": "Сурет URL",
+        "positionLeft": "Сол жақта",
+        "positionRight": "Оң жақта",
+        "uploadImageButton": "Жаңа сурет жүктеу"
+      },
       "activityCreatedSuccess": "Белсенділік сәтті жасалды",
-      "activityDeletedSuccess": "Белсенділік сәтті жойылды",
       "activityDeleteFailed": "Белсенділікті жою мүмкін болмады",
+      "activityDeletedSuccess": "Белсенділік сәтті жойылды",
       "activityNameUpdateFailed": "Белсенділік атауын жаңарту мүмкін болмады",
       "activityNameUpdateSuccess": "Белсенділік атауы сәтті жаңартылды",
       "activityUpdateErrorGeneric": "Белсенділікті жаңарту мүмкін болмады",
@@ -1522,11 +1590,6 @@
       "deleting": "Жойылуда...",
       "deletingStripeConfig": "Stripe конфигурациясы жойылуда...",
       "deletingUserGroup": "Пайдаланушы тобы жойылуда...",
-      "Editor": {
-        "sectionTitleLabel": "Атауы",
-        "sectionTitlePlaceholder": "Бөлімнің атауын енгізіңіз",
-        "titleSuffix": "Бөлім"
-      },
       "enablingStripe": "Stripe қосуда...",
       "errorGeneric": "Қате орын алды",
       "errorNetwork": "Желі қатесі, байланысыңызды тексеріңіз",
@@ -1548,56 +1611,18 @@
         "updateConfigFailed": "Конфигурацияны жаңарту мүмкін болмады.",
         "updateProductFailed": "Өнімді жаңарту мүмкін болмады."
       },
-      "FeaturedCoursesEditor": {
-        "loadingCourses": "Курстар жүктелуде...",
-        "selectButton": "Таңдау",
-        "selectCoursesLabel": "Курстарды таңдау",
-        "selectedButton": "Таңдалған"
-      },
       "fileUploadSuccess": "Файл сәтті жүктелді",
-      "Form": {
-        "errorMessageDefault": "Қате енгізу",
-        "invalidEmail": "Жарамсыз электрондық пошта мекенжайы",
-        "maxChars": "Кемінде {count} таңбадан аспауы керек",
-        "minAmount": "Сома кемінде {min} болуы керек",
-        "minChars": "Кемінде {count} таңбадан тұруы керек",
-        "positiveNumber": "Оң сан болуы керек",
-        "requiredField": "{fieldName} өрісі міндетті"
-      },
-      "ImageUploader": {
-        "uploading": "Жүктелуде..."
-      },
       "imageUploadFailed": "Суретті жүктеу мүмкін болмады",
       "imageUploadSuccess": "Сурет сәтті жүктелді",
       "inviteSentSuccess": "Шақыру жіберілді.",
       "joinMethodChangedSuccess": "Қосылу әдісі {method} болып өзгертілді.",
-      "landingPageSavedSuccess": "Нысана беті сәтті сақталды",
       "landingPageSaveError": "Нысана бетін сақтауда қате",
+      "landingPageSavedSuccess": "Нысана беті сәтті сақталды",
       "loading": "Жүктелуде...",
-      "LogosEditor": {
-        "addButton": "Логотип қосу",
-        "logoAltPlaceholder": "Балама мәтін",
-        "logosLabel": "Логотиптер",
-        "logoUrlPlaceholder": "Логотип URL",
-        "uploadButton": "Логотип жүктеу"
-      },
       "newPasswordLabel": "Жаңа құпия сөз",
       "orgIdNotFound": "Ұйым идентификаторы табылмады",
       "passwordUpdateError": "Құпия сөзді жаңарту мүмкін болмады. Қайталап көріңіз.",
       "passwordUpdateSuccess": "Құпия сөз сәтті жаңартылды",
-      "PeopleEditor": {
-        "addButton": "Адам қосу",
-        "descriptionLabel": "Сипаттамасы",
-        "descriptionPlaceholder": "Сипаттама немесе рөл",
-        "imageLabel": "Сурет",
-        "imageUrlPlaceholder": "Сурет URL",
-        "nameLabel": "Аты",
-        "namePlaceholder": "Адамның аты",
-        "peopleLabel": "Адамдар",
-        "uploadAvatarButton": "Аватар жүктеу",
-        "usernameLabel": "Пайдаланушы аты",
-        "usernamePlaceholder": "@пайдаланушы_аты"
-      },
       "productArchivedSuccess": "Өнім сәтті мұрағатталды.",
       "productCreatedSuccess": "Өнім сәтті жасалды!",
       "productUpdatedSuccess": "Өнім сәтті жаңартылды.",
@@ -1614,18 +1639,6 @@
       "stripeConfigDeletedSuccess": "Stripe конфигурациясы сәтті жойылды.",
       "stripeEnabledSuccess": "Stripe сәтті қосылды!",
       "successGeneric": "Операция сәтті орындалды",
-      "TextAndImageEditor": {
-        "contentLabel": "Мазмұны",
-        "contentPlaceholder": "Бөлімнің мазмұнын енгізіңіз",
-        "imageAltPlaceholder": "Балама мәтін",
-        "imageLabel": "Сурет",
-        "imagePositionLabel": "Суреттің орналасуы",
-        "imagePositionPlaceholder": "Суреттің орналасуын таңдаңыз",
-        "imageUrlPlaceholder": "Сурет URL",
-        "positionLeft": "Сол жақта",
-        "positionRight": "Оң жақта",
-        "uploadImageButton": "Жаңа сурет жүктеу"
-      },
       "unsavedChanges": "Сақталмаған өзгерістер",
       "updating": "Жаңартылуда...",
       "updatingConfig": "Конфигурация жаңартылуда...",
@@ -1647,9 +1660,7 @@
         "lastUpdated": "Соңғы жаңартылған күні {date, date, short}",
         "title": "Жинақ"
       },
-      "general": "Жалпы",
       "General": {
-        "description": "Ұйым профилін және параметрлерін басқару",
         "Form": {
           "aboutLabel": "Ұйым туралы",
           "aboutMax": " ",
@@ -1703,22 +1714,20 @@
           "travel": "✈️ Саяхат",
           "vocational": "🔧 Кәсіптік оқыту"
         },
-        "orgUpdatedSuccess": "Ұйым жаңартылды",
+        "description": "Ұйым профилін және параметрлерін басқару",
         "orgUpdateFailed": "Ұйымды жаңарту мүмкін болмады",
+        "orgUpdatedSuccess": "Ұйым жаңартылды",
         "title": "Ұйым параметрлері",
         "updatingOrg": "Ұйым жаңартылуда..."
       },
-      "generalDescription": "Ұйымыңыздың параметрлерін басқару",
-      "generalTitle": "Жалпы",
       "Images": {
         "Buttons": {
           "addPreview": "Алдын ала қарауды қосу",
-          "uploadingLogo": "Жүктелуде...",
-          "uploadingThumbnail": "Жүктелуде...",
           "uploadNewLogo": "Жаңа логотип жүктеу",
-          "uploadNewThumbnail": "Жаңа нобай жүктеу"
+          "uploadNewThumbnail": "Жаңа нобай жүктеу",
+          "uploadingLogo": "Жүктелуде...",
+          "uploadingThumbnail": "Жүктелуде..."
         },
-        "description": "Ұйым логотипін, нобайын және алдын ала қарау кескіндерін басқару.",
         "Dialog": {
           "AddPreview": {
             "addButton": "Алдын ала қарауды қосу",
@@ -1768,19 +1777,18 @@
           "uploadingLogo": "Логотип жүктелуде...",
           "uploadingPreviews": "{count} алдын ала қарау жүктелуде...",
           "uploadingThumbnail": "Нобай жүктелуде...",
-          "videoPreviewAddedSuccess": "Бейне алдын ала қарауы сәтті қосылды.",
-          "videoPreviewAddFailed": "Бейне алдын ала қарауын қосу мүмкін болмады."
+          "videoPreviewAddFailed": "Бейне алдын ала қарауын қосу мүмкін болмады.",
+          "videoPreviewAddedSuccess": "Бейне алдын ала қарауы сәтті қосылды."
         },
         "Tabs": {
           "logo": "Логотип",
           "previews": "Алдын ала қарау",
           "thumbnail": "Нобай"
         },
+        "description": "Ұйым логотипін, нобайын және алдын ала қарау кескіндерін басқару.",
         "title": "Суреттер және алдын ала қарау"
       },
-      "landing": "Басты бет",
       "Landing": {
-        "description": "Ұйымыңыздың мақсатты бетін баптаңыз",
         "Editor": {
           "sectionTitleLabel": "Бөлім атауы",
           "sectionTitlePlaceholder": "Бөлімнің атауын енгізіңіз",
@@ -1891,8 +1899,8 @@
         "LogosEditor": {
           "addButton": "Логотип қосу",
           "logoAltPlaceholder": "Балама мәтін",
-          "logosLabel": "Логотиптер",
           "logoUrlPlaceholder": "Логотип URL мекенжайы",
+          "logosLabel": "Логотиптер",
           "removeButton": "Логотипті жою",
           "uploadButton": "Логотип жүктеу"
         },
@@ -1909,12 +1917,6 @@
           "uploadAvatarButton": "Аватар жүктеу",
           "usernameLabel": "Пайдаланушы аты",
           "usernamePlaceholder": "@пайдаланушы_аты"
-        },
-        "saveButton": "Өзгерістерді сақтау",
-        "savingButton": "Сақталуда...",
-        "SectionsPanel": {
-          "addSectionButton": "Бөлім қосу",
-          "title": "Бөлімдер"
         },
         "SectionTypes": {
           "featuredCourses": {
@@ -1938,6 +1940,10 @@
             "label": "Мәтін және сурет"
           }
         },
+        "SectionsPanel": {
+          "addSectionButton": "Бөлім қосу",
+          "title": "Бөлімдер"
+        },
         "TextAndImageEditor": {
           "contentLabel": "Мазмұны",
           "contentPlaceholder": "Бөлім мазмұнын енгізіңіз",
@@ -1951,19 +1957,13 @@
           "positionRight": "Оң жақта",
           "uploadImageButton": "Жаңа сурет жүктеу"
         },
+        "description": "Ұйымыңыздың мақсатты бетін баптаңыз",
+        "saveButton": "Өзгерістерді сақтау",
+        "savingButton": "Сақталуда...",
         "title": "Мақсатты бет"
       },
-      "landingDescription": "Ұйымыңыздың басты бетін баптаңыз",
-      "landingTitle": "Басты бет",
       "Manage additional organization settings": "Қосымша ұйым параметрлерін басқарыңыз",
-      "other": "Басқа",
-      "previews": "Суреттер және алдын ала қарау",
-      "previewsDescription": "Ұйымыңыздың алдын ала қарауын басқару",
-      "previewsTitle": "Алдын ала қарау",
-      "socials": "Әлеуметтік желілер",
       "Socials": {
-        "customLinksTitle": "Арнайы сілтемелер",
-        "description": "Ұйымыңыздың әлеуметтік желілердегі қатысуын басқарыңыз",
         "Form": {
           "addCustomLinkButton": "Сілтеме қосу",
           "customLinkInfo": "Ұйымыңыздың профилінде көрсетілетін 3 арнайы сілтеме қосыңыз",
@@ -1978,12 +1978,25 @@
           "xPlaceholder": "X профилінің URL мекенжайы",
           "youtubePlaceholder": "YouTube арнасының URL мекенжайы"
         },
-        "orgUpdatedSuccess": "Ұйым жаңартылды",
+        "customLinksTitle": "Арнайы сілтемелер",
+        "description": "Ұйымыңыздың әлеуметтік желілердегі қатысуын басқарыңыз",
         "orgUpdateFailed": "Ұйымды жаңарту мүмкін болмады",
+        "orgUpdatedSuccess": "Ұйым жаңартылды",
         "socialLinksTitle": "Әлеуметтік сілтемелер",
         "title": "Әлеуметтік сілтемелер",
         "updatingOrg": "Ұйым жаңартылуда.."
       },
+      "general": "Жалпы",
+      "generalDescription": "Ұйымыңыздың параметрлерін басқару",
+      "generalTitle": "Жалпы",
+      "landing": "Басты бет",
+      "landingDescription": "Ұйымыңыздың басты бетін баптаңыз",
+      "landingTitle": "Басты бет",
+      "other": "Басқа",
+      "previews": "Суреттер және алдын ала қарау",
+      "previewsDescription": "Ұйымыңыздың алдын ала қарауын басқару",
+      "previewsTitle": "Алдын ала қарау",
+      "socials": "Әлеуметтік желілер",
       "socialsDescription": "Ұйымыңыздың әлеуметтік желі сілтемелерін басқару",
       "socialsTitle": "Әлеуметтік желілер"
     },
@@ -1999,13 +2012,13 @@
       "saving": "Сақталуда...",
       "scriptContentLabel": "Скрипт мазмұны",
       "scriptContentPlaceholder": "JavaScript кодын енгізіңіз",
-      "scriptDeletedSuccess": "Скрипт сәтті жойылды",
       "scriptDeleteError": "Скриптті жою сәтсіз аяқталды",
+      "scriptDeletedSuccess": "Скрипт сәтті жойылды",
       "scriptNameLabel": "Скрипт атауы",
       "scriptNamePlaceholder": "Скрипт атауын енгізіңіз",
-      "scripts": "Скрипттер",
-      "scriptSavedSuccess": "Скрипт сәтті сақталды",
       "scriptSaveError": "Скриптті сақтау сәтсіз аяқталды",
+      "scriptSavedSuccess": "Скрипт сәтті сақталды",
+      "scripts": "Скрипттер",
       "scriptsDescription": "Ұйымыңыз үшін реттелетін скрипттерді басқарыңыз. Сақтықпен қолданыңыз.",
       "scriptsWarning": "Ұйымыңыздың қауіпсіздігі үшін, кез келген скриптті қоспас бұрын оған сенім артып, түсінгеніңізге көз жеткізіңіз. Скрипттер ұйымыңыздың беттерімен әрекеттесе алады.",
       "tooltipWarning": "Скрипттер өте қуатты және сайтыңыздың қауіпсіздігі мен өнімділігіне әсер етуі мүмкін. Тек сенімді дереккөздерден скрипттерді қосыңыз. Скрипттердің құпиялылық ережелеріне сәйкес келетініне және пайдаланушы деректерін жауапкершілікпен өңдейтініне көз жеткізіңіз. Қате енгізілген скрипттер функционалдылықты бұзуы немесе осалдықтарды ашуы мүмкін.",
@@ -2016,7 +2029,6 @@
       }
     },
     "Payments": {
-      "configuration": "Төлем параметрлері",
       "Configuration": {
         "aboutStripe": {
           "acceptPayments": "Курстар мен жазылымдар үшін төлемдерді қабылдау",
@@ -2060,12 +2072,6 @@
         "stripeEnabledSuccess": "Stripe сәтті қосылды",
         "updatingConfig": "Конфигурация жаңартылуда..."
       },
-      "configurationInfo": "Төлем шлюзіңізді реттеңіз және басқарыңыз",
-      "configureStripe": "Stripe тіркелгіңізді конфигурациялаңыз.",
-      "contactAdmin": "Төлемдерді қосу үшін әкімшімен байланысыңыз.",
-      "createProducts": "Өнімдер немесе жазылымдар жасаңыз.",
-      "customerInfo": "Клиент ақпаратын қарау және басқару",
-      "customers": "Клиенттер",
       "CustomersPage": {
         "amountHeader": "Сома",
         "description": "Тұтынушы ақпаратыңызды қараңыз және басқарыңыз",
@@ -2083,7 +2089,6 @@
         "typeHeader": "Түрі",
         "userHeader": "Пайдаланушы"
       },
-      "goToConfiguration": "Конфигурацияға өту",
       "LinkCourseModal": {
         "alreadyLinked": "Бұрыннан байланыстырылған",
         "linkCourseButton": "Курсты байланыстыру",
@@ -2097,11 +2102,6 @@
         "noCoursesLinked": "Бұл өнімге әлі курстар байланыстырылмаған.",
         "title": "Байланыстырылған курстар"
       },
-      "notAvailable": "Төлемдер қолжетімсіз",
-      "notEnabledMessage": "Бұл ұйым үшін төлем функциясы қосылмаған.",
-      "overview": "Шолу",
-      "paidProducts": "Ақылы өнімдер",
-      "paidProductsInfo": "Ақылы өнімдер мен бағаларды басқару",
       "ProductForm": {
         "benefitsLabel": "Артықшылықтар (міндетті емес)",
         "benefitsPlaceholder": "Артықшылықтарды тізімдеңіз, әр жолда бір-бірден",
@@ -2139,9 +2139,9 @@
       },
       "ProductPage": {
         "archiveButton": "Мұрағаттау",
+        "archiveConfirmButton": "Өнімді мұрағаттау",
         "archiveConfirmationMessage": "Бұл өнімді мұрағаттағыңыз келетініне сенімдісіз бе?",
         "archiveConfirmationTitle": "{productName} мұрағаттау керек пе?",
-        "archiveConfirmButton": "Өнімді мұрағаттау",
         "benefitsLabel": "Артықшылықтары:",
         "createModalDescription": "Ұйымыңызға жаңа өнім қосыңыз",
         "createModalTitle": "Жаңа өнім жасау",
@@ -2177,6 +2177,19 @@
         "showMore": "Көбірек көрсету",
         "subscriptionType": "Жазылым"
       },
+      "configuration": "Төлем параметрлері",
+      "configurationInfo": "Төлем шлюзіңізді реттеңіз және басқарыңыз",
+      "configureStripe": "Stripe тіркелгіңізді конфигурациялаңыз.",
+      "contactAdmin": "Төлемдерді қосу үшін әкімшімен байланысыңыз.",
+      "createProducts": "Өнімдер немесе жазылымдар жасаңыз.",
+      "customerInfo": "Клиент ақпаратын қарау және басқару",
+      "customers": "Клиенттер",
+      "goToConfiguration": "Конфигурацияға өту",
+      "notAvailable": "Төлемдер қолжетімсіз",
+      "notEnabledMessage": "Бұл ұйым үшін төлем функциясы қосылмаған.",
+      "overview": "Шолу",
+      "paidProducts": "Ақылы өнімдер",
+      "paidProductsInfo": "Ақылы өнімдер мен бағаларды басқару",
       "productsSubscriptions": "Өнімдер мен жазылымдар",
       "startSelling": "Курстарыңызды сата бастаңыз!",
       "title": "Төлемдер",
@@ -2193,13 +2206,71 @@
       "tryAgainOrContact": "Қайталап көріңіз немесе мәселе шешілмесе, қолдау қызметіне хабарласыңыз."
     },
     "UserAccountSettings": {
+      "UserAccount": {
+        "EditGeneral": {
+          "addAcademicInfo": "Академиялық ақпарат қосу",
+          "addDetail": "Егжей-тегжей қосу",
+          "addGeneralInfo": "Жалпы ақпарат қосу",
+          "addProfessionalInfo": "Кәсіби ақпарат қосу",
+          "additionalDetails": "Қосымша мәліметтер",
+          "avatarError": "Аватарды жүктеу мүмкін болмады",
+          "avatarSuccess": "Аватар жаңартылды",
+          "bioLabel": "Биография",
+          "bioPlaceholder": "Өзіңіз туралы айтыңыз",
+          "changeAvatar": "Аватарды өзгерту",
+          "charactersLeft": "таңба қалды",
+          "clearAll": "Барлығын тазалау",
+          "description": "Тіркелгі деректерін басқару",
+          "detailIconLabel": "Белгіше",
+          "detailLabelPlaceholder": "Белгіні енгізіңіз (мысалы, Лауазымы, Орналасқан жері)",
+          "detailRemove": "Жою",
+          "detailSelectIconPlaceholder": "Белгішені таңдау",
+          "detailTextLabel": "Мәтін",
+          "detailTextPlaceholder": "Егжей-тегжейлі мәтінді енгізіңіз",
+          "emailChangeWarning": "Электрондық пошта мекенжайын өзгерту қайта кіруді қажет етеді",
+          "emailLabel": "Электрондық пошта",
+          "emailPlaceholder": "Электрондық пошта мекенжайыңызды енгізіңіз",
+          "firstNameLabel": "Аты",
+          "firstNamePlaceholder": "Атыңызды енгізіңіз",
+          "languageLabel": "Тіл",
+          "lastNameLabel": "Тегі",
+          "lastNamePlaceholder": "Тегіңізді енгізіңіз",
+          "loadingError": "Қажетті деректерді жүктеу мүмкін болмады",
+          "newDetail": "Жаңа егжей-тегжей",
+          "profilePicture": "Профиль суреті",
+          "recommendedSize": "Ұсынылатын өлшем: 100x100",
+          "saveChanges": "Өзгерістерді сақтау",
+          "saving": "Сақталуда...",
+          "title": "Аккаунт параметрлері",
+          "uploadingAvatar": "Жүктелуде",
+          "usernameLabel": "Пайдаланушы аты",
+          "usernamePlaceholder": "Пайдаланушы атыңызды енгізіңіз"
+        },
+        "EditPassword": {
+          "Notifications": {
+            "passwordUpdateError": "Құпия сөзді жаңарту мүмкін болмады",
+            "passwordUpdateSuccess": "Құпия сөз сәтті жаңартылды",
+            "promptLogoutOnPasswordChange": "Жаңа құпия сөзіңізбен қайта кіріңіз",
+            "updating": "Құпия сөз жаңартылуда..."
+          },
+          "confirmPasswordLabel": "Құпия сөзді растаңыз",
+          "currentPasswordLabel": "Ағымдағы құпия сөз",
+          "description": "Тіркелгі қауіпсіздігін қамтамасыз ету үшін құпия сөзіңізді жаңартыңыз",
+          "logoutWarning": "Құпия сөзді өзгерткеннен кейін жүйеден шығасыз",
+          "newPasswordLabel": "Жаңа құпия сөз",
+          "promptLogoutOnPasswordChange": "Жаңа құпия сөзіңізбен қайта кіріңіз",
+          "title": "Құпия сөзді өзгерту",
+          "updateButton": "Құпия сөзді жаңарту",
+          "updatingButton": "Жаңартылуда..."
+        }
+      },
       "general": "Жалпы",
       "generalSection": {
         "addAcademicInfo": "Академиялық ақпарат қосу",
         "addDetail": "Егжей-тегжей қосу",
         "addGeneralInfo": "Жалпы ақпарат қосу",
-        "additionalDetails": "Қосымша мәліметтер",
         "addProfessionalInfo": "Кәсіби ақпарат қосу",
+        "additionalDetails": "Қосымша мәліметтер",
         "avatarError": "Аватарды жүктеу мүмкін болмады",
         "avatarSuccess": "Аватар жаңартылды",
         "bio": "Биография",
@@ -2312,65 +2383,7 @@
         },
         "untitledSection": "Атаусыз бөлім"
       },
-      "title": "Тіркелгі параметрлері",
-      "UserAccount": {
-        "EditGeneral": {
-          "addAcademicInfo": "Академиялық ақпарат қосу",
-          "addDetail": "Егжей-тегжей қосу",
-          "addGeneralInfo": "Жалпы ақпарат қосу",
-          "additionalDetails": "Қосымша мәліметтер",
-          "addProfessionalInfo": "Кәсіби ақпарат қосу",
-          "avatarError": "Аватарды жүктеу мүмкін болмады",
-          "avatarSuccess": "Аватар жаңартылды",
-          "bioLabel": "Биография",
-          "bioPlaceholder": "Өзіңіз туралы айтыңыз",
-          "changeAvatar": "Аватарды өзгерту",
-          "charactersLeft": "таңба қалды",
-          "clearAll": "Барлығын тазалау",
-          "description": "Тіркелгі деректерін басқару",
-          "detailIconLabel": "Белгіше",
-          "detailLabelPlaceholder": "Белгіні енгізіңіз (мысалы, Лауазымы, Орналасқан жері)",
-          "detailRemove": "Жою",
-          "detailSelectIconPlaceholder": "Белгішені таңдау",
-          "detailTextLabel": "Мәтін",
-          "detailTextPlaceholder": "Егжей-тегжейлі мәтінді енгізіңіз",
-          "emailChangeWarning": "Электрондық пошта мекенжайын өзгерту қайта кіруді қажет етеді",
-          "emailLabel": "Электрондық пошта",
-          "emailPlaceholder": "Электрондық пошта мекенжайыңызды енгізіңіз",
-          "firstNameLabel": "Аты",
-          "firstNamePlaceholder": "Атыңызды енгізіңіз",
-          "languageLabel": "Тіл",
-          "lastNameLabel": "Тегі",
-          "lastNamePlaceholder": "Тегіңізді енгізіңіз",
-          "loadingError": "Қажетті деректерді жүктеу мүмкін болмады",
-          "newDetail": "Жаңа егжей-тегжей",
-          "profilePicture": "Профиль суреті",
-          "recommendedSize": "Ұсынылатын өлшем: 100x100",
-          "saveChanges": "Өзгерістерді сақтау",
-          "saving": "Сақталуда...",
-          "title": "Аккаунт параметрлері",
-          "uploadingAvatar": "Жүктелуде",
-          "usernameLabel": "Пайдаланушы аты",
-          "usernamePlaceholder": "Пайдаланушы атыңызды енгізіңіз"
-        },
-        "EditPassword": {
-          "confirmPasswordLabel": "Құпия сөзді растаңыз",
-          "currentPasswordLabel": "Ағымдағы құпия сөз",
-          "description": "Тіркелгі қауіпсіздігін қамтамасыз ету үшін құпия сөзіңізді жаңартыңыз",
-          "logoutWarning": "Құпия сөзді өзгерткеннен кейін жүйеден шығасыз",
-          "newPasswordLabel": "Жаңа құпия сөз",
-          "Notifications": {
-            "passwordUpdateError": "Құпия сөзді жаңарту мүмкін болмады",
-            "passwordUpdateSuccess": "Құпия сөз сәтті жаңартылды",
-            "promptLogoutOnPasswordChange": "Жаңа құпия сөзіңізбен қайта кіріңіз",
-            "updating": "Құпия сөз жаңартылуда..."
-          },
-          "promptLogoutOnPasswordChange": "Жаңа құпия сөзіңізбен қайта кіріңіз",
-          "title": "Құпия сөзді өзгерту",
-          "updateButton": "Құпия сөзді жаңарту",
-          "updatingButton": "Жаңартылуда..."
-        }
-      }
+      "title": "Тіркелгі параметрлері"
     },
     "UserProfileBuilder": {
       "AffiliationEditor": {
@@ -2393,7 +2406,6 @@
         "autoDisplayMessage": "Сіздің авторлық курстарыңыз осы бөлімде автоматты түрде көрсетіледі.",
         "title": "Курстар"
       },
-      "description": "Кәсіби профиліңізді баптаңыз",
       "EducationEditor": {
         "addEducationButton": "Білім қосу",
         "currentLabel": "Қазіргі уақытқа дейін",
@@ -2440,23 +2452,17 @@
         "addImageButton": "Сурет қосу",
         "captionLabel": "Тақырып",
         "captionPlaceholder": "Сурет тақырыбы",
-        "imagesLabel": "Суреттер",
         "imageUrlLabel": "Сурет URL мекенжайы",
         "imageUrlPlaceholder": "Сурет URL мекенжайын енгізіңіз",
+        "imagesLabel": "Суреттер",
         "title": "Сурет галереясы"
       },
       "LinksEditor": {
         "addLinkButton": "Сілтеме қосу",
-        "linksLabel": "Сілтемелер",
         "linkTitlePlaceholder": "Сілтеме атауы",
+        "linksLabel": "Сілтемелер",
         "title": "Сілтемелер",
         "urlPlaceholder": "URL"
-      },
-      "saveButton": "Өзгерістерді сақтау",
-      "savingButton": "Сақталуда...",
-      "SectionsPanel": {
-        "addSectionButton": "Бөлім қосу",
-        "title": "Бөлімдер"
       },
       "SectionTypes": {
         "affiliation": {
@@ -2512,6 +2518,10 @@
           "label": "Мәтін және суреттер"
         }
       },
+      "SectionsPanel": {
+        "addSectionButton": "Бөлім қосу",
+        "title": "Бөлімдер"
+      },
       "SkillsEditor": {
         "addSkillButton": "Дағды қосу",
         "categoryPlaceholder": "Санат (міндетті емес)",
@@ -2529,6 +2539,9 @@
         "contentPlaceholder": "Мазмұныңызды осы жерге енгізіңіз...",
         "title": "Мәтіндік мазмұн"
       },
+      "description": "Кәсіби профиліңізді баптаңыз",
+      "saveButton": "Өзгерістерді сақтау",
+      "savingButton": "Сақталуда...",
       "title": "Профиль редакторы"
     },
     "UserSettings": {
@@ -2546,14 +2559,14 @@
         },
         "inviteCodeLabel": "Шақыру коды",
         "inviteCodeTooltip": "Тіркелуге рұқсат бетінде жасаған шақыру кодтарының бірін пайдаланыңыз",
+        "inviteSentSuccess": "Шақыру жіберілді",
         "invitedUsersDescription": "Ұйымыңызға қосылуға шақырылған пайдаланушылар",
         "invitedUsersTitle": "Шақырылған пайдаланушылар",
-        "inviteSentSuccess": "Шақыру жіберілді",
         "noInviteCodesAvailable": "Қолжетімді шақыру кодтары жоқ",
         "noInvitedUsers": "Шақырылған пайдаланушылар жоқ.",
         "selectInviteCode": "Шақыру кодын таңдаңыз",
-        "sendingInvite": "Шақыру жіберілуде...",
         "sendInvitesButton": "Шақыруларды электрондық пошта арқылы жіберу",
+        "sendingInvite": "Шақыру жіберілуде...",
         "signupStatusHeader": "Тіркелу күйі",
         "statusPending": "Күтуде",
         "statusSigned": "Тіркелді",
@@ -2659,33 +2672,7 @@
       "usersTitle": "Пайдаланушылар"
     }
   },
-  "DashboardMenu": {
-    "mobile": {
-      "assignments": "Тапсырмалар",
-      "courses": "Курстар",
-      "home": "Басты бет",
-      "org": "Ұйым",
-      "payments": "Төлемдер",
-      "settings": "Параметрлер",
-      "users": "Пайдаланушылар"
-    },
-    "tooltips": {
-      "assignments": "Тапсырмалар",
-      "backToHome": "Басты бетке оралу",
-      "courses": "Курстар",
-      "home": "Басты басқару тақтасы",
-      "logout": "Шығу",
-      "organization": "Ұйым параметрлері",
-      "payments": "Төлемдер",
-      "userOwnedCourses": "@{username} курстары",
-      "users": "Пайдаланушылар",
-      "userSettings": "@{username} параметрлері",
-      "yourOrganization": "Сіздің ұйымыңыз"
-    }
-  },
   "FixedActivitySecondaryBar": {
-    "activityCounter": "{total} ішінен {current}",
-    "course": "Курс",
     "CourseInfo": {
       "course": "Курс"
     },
@@ -2698,6 +2685,8 @@
       "previous": "Артқа",
       "previousActivityTitle": "Артқа: {activityName}"
     },
+    "activityCounter": "{total} ішінен {current}",
+    "course": "Курс",
     "next": "Келесі",
     "nextActivityTitle": "Келесі: {name}",
     "noNextActivity": "Келесі әрекет жоқ",

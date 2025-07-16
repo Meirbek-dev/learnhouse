@@ -314,6 +314,7 @@
       "updated": "Обновлён"
     },
     "CreateCourseModal": {
+      "ariaLabel": "Выберите «Конечное изображение миниатюр» для загрузки",
       "createCourse": "Создать курс",
       "labelDescription": "Описание",
       "labelLearnings": "Изучаемые темы курса (Чему научит курс?)",
@@ -327,9 +328,12 @@
       "schemaDescriptionMax": "Должно быть 1000 символов или меньше",
       "schemaNameMax": "Должно быть 100 символов или меньше",
       "schemaNameRequired": "Требуется название курса",
+      "selectFile": "Выберите изображение миниатюры",
+      "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
       "thumbnailChoose": "Выбрать из галереи",
       "thumbnailUpload": "Загрузить изображение",
       "toastError": "Не удалось создать курс",
+      "toastErrorOrgMissing": "Информация об организации отсутствует",
       "toastErrorUnsplash": "Не удалось получить изображение из Unsplash",
       "toastLoading": "Создание курса...",
       "toastSuccess": "Курс успешно создан",
@@ -341,9 +345,12 @@
       "close": "Закрыть"
     },
     "DocumentPdfModal": {
+      "ariaLabel": "Выбрать PDF-документ для загрузки",
       "createActivity": "Создать активность",
       "pdfDocumentFile": "Файл PDF документа",
       "pdfDocumentName": "Название PDF документа",
+      "selectFile": "Выбрать PDF файл",
+      "supportedFormats": "Поддерживаемый формат: PDF",
       "valueMissingFile": "Пожалуйста, предоставьте PDF-документ для активности",
       "valueMissingName": "Пожалуйста, укажите название для PDF-активности"
     },
@@ -635,6 +642,7 @@
       "activityNamePlaceholder": "Введите название активности...",
       "addSubtitles": "Добавить субтитры",
       "additionalSettings": "Дополнительные настройки",
+      "ariaLabel": "Выберите видеофайл для загрузки для активности",
       "autoplay": "Автоматическое воспроизведение видео",
       "autoplaySubtitles": "Автоматическое воспроизведение субтитров",
       "chooseVideoFile": "Выберите видеофайл",
@@ -652,6 +660,7 @@
       "ru": "Русский",
       "seconds": "Секунд",
       "secondsPlaceholder": "секунды",
+      "selectFile": "Выберите видеофайл",
       "selectLanguage": "Выберите язык",
       "sp": "Испанский",
       "startMuted": "Начинать с выключенным звуком",
@@ -659,6 +668,7 @@
       "startTimeLabel": "Время начала",
       "startTimePlaceholder": "0",
       "subtitleFile": "Файл субтитров",
+      "supportedFormats": "Поддерживаемые форматы: MP4, MKV, Webm",
       "uploadVideo": "Загрузить видео",
       "valueMissingFile": "Пожалуйста, предоставьте видеофайл активности",
       "valueMissingName": "Пожалуйста, укажите название видео-активности",
@@ -760,6 +770,8 @@
         "searchEmojis": "Искать эмодзи..."
       },
       "Thumbnail": {
+        "ariaLabelImage": "Выберите «Конечное изображение миниатюр» для загрузки",
+        "ariaLabelVideo": "Выберите «Миниатюрный видео», чтобы загрузить",
         "currentThumbnailAlt": "Текущая миниатюра курса",
         "errors": {
           "fileTooLarge": "Размер файла ({fileSize}МБ) превышает лимит в 8МБ",
@@ -775,6 +787,8 @@
         "image": "Изображение",
         "imageAltText": "Миниатюра курса",
         "pleaseSelectAFile": "Пожалуйста, выберите файл",
+        "selectImageFile": "Выберите файл изображения",
+        "selectVideoFile": "Выберите видеофайл",
         "supportedFormats": "Поддерживаемые форматы: JPG, PNG (макс. 8МБ)",
         "supportedVideoFormats": "Поддерживаемые форматы: MP4, WebM (макс. 100МБ)",
         "thumbnailPreviewAlt": "Предварительный просмотр миниатюры курса",
@@ -1178,8 +1192,10 @@
       },
       "TaskFileObject": {
         "allowedFormats": "Разрешенные форматы: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
+        "ariaLabel": "Выберите файл для загрузки для назначения",
         "authRequiredSubmit": "Требуется аутентификация. Пожалуйста, войдите, чтобы отправить задание.",
         "authRequiredUpload": "Требуется аутентификация. Пожалуйста, войдите, чтобы загрузить файлы.",
+        "chooseFile": "Выберите файл",
         "errorSaving": "Ошибка сохранения задания, пожалуйста, повторите попытку позже.",
         "gradeError": "Ошибка оценивания задания, пожалуйста, повторите попытку позже.",
         "gradeRangeError": "Оценка не может превышать {maxGradeValue} баллов",
@@ -1188,13 +1204,16 @@
         "gradingViewInfo": "Пожалуйста, скачайте файл и оцените его вручную, затем введите оценку выше",
         "loading": "Загрузка",
         "saveSuccess": "Задание успешно сохранено",
+        "selectFile": "Выберите файл",
         "signInToUpload": "Войдите, чтобы загрузить файлы",
         "submitFile": "Отправить файл",
         "teacherViewInfo": "Пользователь сможет отправить файл для этого задания, вы сможете проверить его на вкладке «Отправленные работы»"
       },
       "TaskGeneralEdit": {
         "allowedFormats": "Разрешенные форматы: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
+        "ariaLabel": "Выбрать справочный файл для загрузки",
         "changeRefFile": "Изменить справочный файл",
+        "chooseFile": "Выбрать файл",
         "delete": "Удалить",
         "description": "Описание",
         "descriptionRequired": "Требуется описание",
@@ -1207,6 +1226,7 @@
         "referenceFile": "Справочный файл",
         "save": "Сохранить",
         "saving": "Сохранение",
+        "selectFile": "Выбрать файл",
         "title": "Название",
         "titleRequired": "Требуется название",
         "updateError": "Ошибка обновления задания, пожалуйста, повторите попытку позже.",
@@ -1454,8 +1474,14 @@
         "urlTip": "Подсказка: Вставьте любой URL для встраивания {productName} напрямую"
       },
       "FileUploadBlock": {
+        "browseFiles": "Обзор файлов",
+        "chooseFile": "Выбрать файл",
+        "dragAndDrop": "Перетащите файлы сюда или",
         "noFilePreview": "Нет файла для предварительного просмотра.",
-        "submit": "Отправить"
+        "selectFile": "Выбрать файл",
+        "submit": "Отправить",
+        "uploadFile": "Загрузить файл",
+        "uploadFiles": "Загрузить файлы"
       },
       "MathEquationBlock": {
         "completeReference": "Просмотреть полную справку",
@@ -1572,15 +1598,18 @@
         "usernamePlaceholder": "Введите имя пользователя"
       },
       "VideoBlock": {
+        "ariaLabel": "Выбрать видеофайл для загрузки",
         "download": "Скачать",
         "errorFormat": "Пожалуйста, загрузите видео в поддерживаемом формате (MP4, MKV или WebM)",
         "errorUpload": "Не удалось загрузить видео. Пожалуйста, попробуйте еще раз.",
         "remove": "Удалить",
+        "selectVideoFile": "Выбрать видеофайл",
         "sizeFull": "Полная ширина",
         "sizeLabel": "Размер видео:",
         "sizeLarge": "Большой",
         "sizeMedium": "Средний",
         "sizeSmall": "Маленький",
+        "supportedFormats": "Поддерживаемые форматы: MP4, MKV, WebM",
         "title": "Блок видео",
         "uploadHint": "Поддерживаются форматы MP4, MKV и WebM",
         "uploadPlaceholder": "Перетащите видео сюда или нажмите, чтобы выбрать",
@@ -1611,6 +1640,9 @@
         "requiredField": "Поле {fieldName} обязательно для заполнения"
       },
       "ImageUploader": {
+        "ariaLabel": "Выберите изображение для загрузки",
+        "selectFile": "Выберите файл изображения",
+        "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
         "uploading": "Загрузка..."
       },
       "LogosEditor": {
@@ -1798,6 +1830,12 @@
       "Images": {
         "Buttons": {
           "addPreview": "Добавить предварительный просмотр",
+          "ariaLabelLogo": "Выберите логотип организации для загрузки",
+          "ariaLabelPreview": "Выберите предварительное изображение для загрузки",
+          "ariaLabelThumbnail": "Выберите миниатюру организации для загрузки",
+          "selectLogoFile": "Выберите файл логотипа",
+          "selectPreviewFile": "Выберите предварительный просмотр файла",
+          "selectThumbnailFile": "Выберите файл миниатюры",
           "uploadNewLogo": "Загрузить новый логотип",
           "uploadNewThumbnail": "Загрузить новый эскиз",
           "uploadingLogo": "Загрузка...",
@@ -1968,7 +2006,10 @@
           }
         },
         "ImageUploader": {
+          "ariaLabel": "Выберите изображение для загрузки для разделения целевой страницы",
           "defaultButtonText": "Загрузить изображение",
+          "selectFile": "Выберите файл изображения",
+          "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
           "uploading": "Загрузка..."
         },
         "LogosEditor": {
@@ -2289,6 +2330,7 @@
           "addGeneralInfo": "Добавить общую информацию",
           "addProfessionalInfo": "Добавить профессиональную информацию",
           "additionalDetails": "Дополнительные сведения",
+          "ariaLabel": "Выберите изображение профиля для загрузки",
           "avatarError": "Не удалось загрузить аватар",
           "avatarSuccess": "Аватар обновлен",
           "bioLabel": "Биография",
@@ -2317,6 +2359,8 @@
           "recommendedSize": "Рекомендуемый размер: 100x100",
           "saveChanges": "Сохранить изменения",
           "saving": "Сохранение...",
+          "selectFile": "Выберите изображение профиля",
+          "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
           "title": "Настройки аккаунта",
           "uploadingAvatar": "Загрузка",
           "usernameLabel": "Имя пользователя",
@@ -2767,30 +2811,6 @@
       "usersTitle": "Пользователи"
     }
   },
-  "DashboardMenu": {
-    "mobile": {
-      "assignments": "Задания",
-      "courses": "Курсы",
-      "home": "Главная",
-      "org": "Орг.",
-      "payments": "Платежи",
-      "settings": "Настройки",
-      "users": "Пользователи"
-    },
-    "tooltips": {
-      "assignments": "Задания",
-      "backToHome": "Вернуться на главную",
-      "courses": "Курсы",
-      "home": "Главная панель управления",
-      "logout": "Выйти",
-      "organization": "Настройки OpenU",
-      "payments": "Платежи",
-      "userOwnedCourses": "Курсы @{username}",
-      "userSettings": "Настройки @{username}",
-      "users": "Пользователи",
-      "yourOrganization": "OpenU"
-    }
-  },
   "FixedActivitySecondaryBar": {
     "CourseInfo": {
       "course": "Курс"
@@ -3012,6 +3032,37 @@
   },
   "Security": {
     "unauthorizedAccessMessage": "У вас нет прав для доступа к этой странице"
+  },
+  "SidebarMenu": {
+    "ariaLabels": {
+      "collapseSidebar": "Свернуть боковую панель",
+      "expandSidebar": "Развернуть боковую панель",
+      "goToHomepage": "Перейти на главную",
+      "openuLogo": "Логотип OpenU",
+      "userSettings": "Настройки пользователя"
+    },
+    "buttons": {
+      "logout": "Выйти",
+      "settings": "Настройки"
+    },
+    "errors": {
+      "failedToLoad": "Не удалось загрузить боковое меню",
+      "retry": "Повторить"
+    },
+    "keyboardShortcut": {
+      "toToggle": "для переключения"
+    },
+    "orgName": "OpenU",
+    "tooltips": {
+      "assignments": "Задания",
+      "courses": "Курсы",
+      "home": "Главная панель",
+      "logout": "Выйти",
+      "organization": "Настройки организации",
+      "payments": "Платежи",
+      "userSettings": "Настройки @{username}",
+      "users": "Пользователи"
+    }
   },
   "SignupPage": {
     "enterInviteCode": "Введите код приглашения",

@@ -24,11 +24,11 @@ import TableCell from '@tiptap/extension-table-cell';
 import java from 'highlight.js/lib/languages/java';
 import TableRow from '@tiptap/extension-table-row';
 import html from 'highlight.js/lib/languages/xml';
-// Custom Extensions
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { common, createLowlight } from 'lowlight';
 import css from 'highlight.js/lib/languages/css';
 import AICanvaToolkit from './AI/AICanvaToolkit';
+// Custom Extensions
+import { useIsMobile } from '@/hooks/use-mobile';
 import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import TableOfContents from './TableOfContents';

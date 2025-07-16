@@ -1,15 +1,15 @@
 'use client';
 
-import useAdminStatus from '@components/Hooks/useAdminStatus';
-import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
-import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
+import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { useTranslations } from 'next-intl';
+import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
+import Modal from '@components/Objects/StyledElements/Modal/Modal';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { memo, useState } from 'react';
 
 interface CourseProps {

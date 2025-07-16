@@ -7,7 +7,13 @@ import { Loader } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-const FileUploadBlockInput: FC<InputHTMLAttributes<HTMLInputElement>> = ({ onChange, className, ...props }) => {
+const FileUploadBlockInput: FC<InputHTMLAttributes<HTMLInputElement> & { ariaLabel?: string }> = ({
+  onChange,
+  className,
+  ariaLabel,
+  ...props
+}) => {
+  const t = useTranslations('DashPage.Editor.FileUploadBlock');
   return (
     <input
       className={cn(
@@ -17,6 +23,8 @@ const FileUploadBlockInput: FC<InputHTMLAttributes<HTMLInputElement>> = ({ onCha
       onChange={onChange}
       type="file"
       required
+      aria-label={ariaLabel || t('selectFile')}
+      title={ariaLabel || t('selectFile')}
       {...props}
     />
   );
