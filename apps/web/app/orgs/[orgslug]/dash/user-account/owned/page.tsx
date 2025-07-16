@@ -59,7 +59,7 @@ function OwnedCoursesPage() {
     ([_url, token]) => getOwnedCourses(org.id, token),
     {
       revalidateOnFocus: false,
-      dedupingInterval: 60000, // Cache for 1 minute
+      dedupingInterval: 60_000, // Cache for 1 minute
     },
   );
 

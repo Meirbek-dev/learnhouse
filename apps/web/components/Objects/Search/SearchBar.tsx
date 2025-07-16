@@ -21,7 +21,7 @@ import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-import { removeCoursePrefix } from '../Thumbnails/CourseThumbnailLanding';
+import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import { Input } from '@components/ui/input';
 import UserAvatar from '../UserAvatar';
 

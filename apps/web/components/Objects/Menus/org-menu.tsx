@@ -139,9 +139,8 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
         document.removeEventListener('click', handleClickOutside);
         document.body.style.overflow = 'unset';
       };
-    } else {
-      document.body.style.overflow = 'unset';
     }
+    document.body.style.overflow = 'unset';
   }, [isMenuOpen]);
 
   // Hide menu in focus mode during activities
@@ -274,7 +273,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               {/* Mobile Search */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
-                  <div className="w-1 h-4 bg-primary rounded-full"></div>
+                  <div className="w-1 h-4 bg-primary rounded-full" />
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t('search')}
                   </label>
@@ -291,7 +290,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               {/* Mobile Navigation */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 px-2">
-                  <div className="w-1 h-4 bg-primary rounded-full"></div>
+                  <div className="w-1 h-4 bg-primary rounded-full" />
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t('navigation')}
                   </label>
@@ -330,7 +329,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               {/* Mobile locale switcher */}
               <div className="sm:hidden space-y-3">
                 <div className="flex items-center gap-2 px-2">
-                  <div className="w-1 h-4 bg-primary rounded-full"></div>
+                  <div className="w-1 h-4 bg-primary rounded-full" />
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t('language')}
                   </label>
@@ -351,7 +350,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
               {/* Mobile profile */}
               <div className="border-t border-border/50 pt-6 space-y-3">
                 <div className="flex items-center gap-2 px-2">
-                  <div className="w-1 h-4 bg-primary rounded-full"></div>
+                  <div className="w-1 h-4 bg-primary rounded-full" />
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t('account')}
                   </label>

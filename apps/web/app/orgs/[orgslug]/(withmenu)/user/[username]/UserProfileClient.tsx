@@ -15,7 +15,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getCoursesByUser } from '@services/users/users';
@@ -346,7 +346,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                                   key={course.id}
                                   className="mx-auto w-full max-w-[300px]"
                                 >
-                                  <CourseThumbnailLanding
+                                  <CourseThumbnail
                                     course={course}
                                     orgslug={userData.org_slug || course.org_slug}
                                   />

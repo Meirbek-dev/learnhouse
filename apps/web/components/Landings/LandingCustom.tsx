@@ -1,7 +1,7 @@
 'use client';
 
 import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types';
-import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getOrgCourses } from '@services/courses/courses';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -263,7 +263,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                   key={course.course_uuid}
                   className="mx-auto w-full max-w-[300px]"
                 >
-                  <CourseThumbnailLanding
+                  <CourseThumbnail
                     course={course}
                     orgslug={orgslug}
                   />

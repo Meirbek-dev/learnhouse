@@ -1,9 +1,9 @@
 'use client';
 
-import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnailLanding';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';

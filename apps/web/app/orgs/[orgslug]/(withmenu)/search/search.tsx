@@ -1,7 +1,7 @@
 'use client';
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnailLanding';
+import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { Book, GraduationCap, Search, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';

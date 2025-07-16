@@ -193,7 +193,7 @@ const NavigationItem = memo(({ item, isCollapsed }: { item: NavigationItem; isCo
       >
         <item.icon
           className="h-4 w-4 shrink-0"
-          aria-hidden={true}
+          aria-hidden
         />
         {!isCollapsed && (
           <>
@@ -269,8 +269,8 @@ function DashSidebar({ className }: SidebarProps) {
 
         // Simulate async loading with timeout
         await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (err) {
-        console.error('Failed to load sidebar data:', err);
+      } catch (error) {
+        console.error('Failed to load sidebar data:', error);
         setError(true);
       }
     };

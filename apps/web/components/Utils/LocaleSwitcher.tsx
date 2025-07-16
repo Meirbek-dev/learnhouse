@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectTriggerWithoutChevron } from '@/components/ui/select';
 import { SelectValue } from '@radix-ui/react-select';
 import { type Locale, locales } from '@/i18n/config';
 import { setUserLocale } from '@/i18n/locale';
@@ -35,13 +35,23 @@ export function LocaleSwitcher({ className, isMobile }: LocaleSwitcherProps) {
       onValueChange={(value) => handleLocaleChange(value as Locale)}
       disabled={isPending}
     >
-      <SelectTrigger
-        className={cn('w-auto touch-manipulation', isMobile && 'w-full', className)}
-        aria-label={t('selectLanguage')}
-      >
-        <Languages size={22} />
-        {isMobile && <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>}
-      </SelectTrigger>
+      {isMobile ? (
+        <SelectTrigger
+          className={cn('w-auto touch-manipulation', isMobile && 'w-full', className)}
+          aria-label={t('selectLanguage')}
+        >
+          <Languages size={22} />
+          {isMobile && <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>}
+        </SelectTrigger>
+      ) : (
+        <SelectTriggerWithoutChevron
+          className={cn('w-auto touch-manipulation', isMobile && 'w-full', className)}
+          aria-label={t('selectLanguage')}
+        >
+          <Languages size={22} />
+          {isMobile && <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>}
+        </SelectTriggerWithoutChevron>
+      )}
       <SelectContent
         className={cn(isMobile && 'z-[80]')}
         position={isMobile ? 'popper' : 'popper'}

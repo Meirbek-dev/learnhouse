@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
     styledComponents: true,
   },
   reactStrictMode: false,
-  devIndicators: { position: 'bottom-right' },
+  devIndicators: false,
   output: 'standalone',
 };
 
