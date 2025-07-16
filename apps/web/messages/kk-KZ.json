@@ -311,7 +311,8 @@
       "startLearningButton": "Оқуды бастау",
       "toastDeleteError": "Курсты жою мүмкін болмады",
       "toastDeleteSuccess": "Курс сәтті жойылды",
-      "updated": "Жаңартылды"
+      "updated": "Жаңартылды",
+      "updatedDate": "Жаңартылған {updateDate, date, medium}"
     },
     "CreateCourseModal": {
       "ariaLabel": "Жүктеу үшін курстың нобай кескінін таңдаңыз",

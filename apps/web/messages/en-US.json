@@ -311,7 +311,8 @@
       "startLearningButton": "Start Learning",
       "toastDeleteError": "Failed to delete course. Please try again.",
       "toastDeleteSuccess": "Course deleted successfully",
-      "updated": "Updated"
+      "updated": "Updated",
+      "updatedDate": "Updated {updateDate, date, medium}"
     },
     "CreateCourseModal": {
       "ariaLabel": "Choose course thumbnail image to upload",

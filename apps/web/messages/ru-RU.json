@@ -311,7 +311,8 @@
       "startLearningButton": "Начать обучение",
       "toastDeleteError": "Не удалось удалить курс. Пожалуйста, попробуйте снова.",
       "toastDeleteSuccess": "Курс успешно удалён",
-      "updated": "Обновлён"
+      "updated": "Обновлён",
+      "updatedDate": "Обновлено {updateDate, date, medium}"
     },
     "CreateCourseModal": {
       "ariaLabel": "Выберите «Конечное изображение миниатюр» для загрузки",

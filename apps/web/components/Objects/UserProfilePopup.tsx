@@ -102,7 +102,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
       closeDelay={150}
     >
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
-      <HoverCardContent className="soft-shadow w-96 bg-white/95 p-0 backdrop-blur-md">
+      <HoverCardContent className="soft-shadow min-w-96 max-w-196 w-auto bg-white/95 p-0 backdrop-blur-md">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-gray-400" />

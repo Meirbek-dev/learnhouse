@@ -654,7 +654,7 @@ function ActivityClient(props: ActivityClientProps) {
                                         className="z-[${10-idx}] relative"
                                       >
                                         <UserAvatar
-                                          size="xs"
+                                          size="sm"
                                           variant="outline"
                                           avatar_url={
                                             author.user.avatar_image

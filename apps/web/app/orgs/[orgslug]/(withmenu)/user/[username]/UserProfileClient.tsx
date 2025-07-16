@@ -116,12 +116,11 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
       <div className="relative mb-0 h-48 w-full overflow-hidden rounded-t-xl bg-gray-100">
         {/* Optional banner content */}
       </div>
-
       {/* Profile Content */}
       <div className="soft-shadow relative rounded-b-xl bg-white p-8">
         {/* Avatar Positioned on the banner */}
-        <div className="absolute -top-24 left-8">
-          <div className="overflow-hidden rounded-xl border-4 border-white shadow-lg">
+        <div className="absolute -top-24 left-12">
+          <div className="overflow-hidden rounded-full border-4 border-white shadow-lg">
             <UserAvatar
               size="3xl"
               avatar_url={
@@ -371,7 +370,6 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
           </div>
         </div>
       </div>
-
       {/* Image Modal */}
       {selectedImage && (
         <ImageModal
