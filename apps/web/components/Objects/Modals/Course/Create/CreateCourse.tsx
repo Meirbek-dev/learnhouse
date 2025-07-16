@@ -196,6 +196,8 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
                           style={{ display: 'none' }}
                           onChange={handleFileChange}
                           accept="image/*"
+                          aria-label={t('ariaLabel')}
+                          title={t('selectFile')}
                         />
                         <Button
                           type="button"

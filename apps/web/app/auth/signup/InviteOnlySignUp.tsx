@@ -1,6 +1,7 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import PasswordInput from '@components/ui/custom/password-input';
 import { signUpWithInviteCode } from '@services/auth/auth';
 import { AlertTriangle, Check, User } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -94,8 +95,8 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
   return (
     <div className="m-auto w-72">
       {error && (
-        <div className="shadow-xs mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
-          <AlertTriangle size={18} />
+        <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 transition-all my-4">
+          <AlertTriangle size={22} />
           <div className="text-sm font-bold">{error}</div>
         </div>
       )}
@@ -146,8 +147,7 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
               <FormItem>
                 <FormLabel>{t('password')}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
+                  <PasswordInput
                     placeholder={t('passwordPlaceholder')}
                     autoComplete="new-password"
                     {...field}

@@ -1099,6 +1099,8 @@ const HeroSectionEditor: FC<{
                       accept="image/*"
                       onChange={handleImageUpload}
                       className="hidden"
+                      aria-label={t('ImageUploader.ariaLabel')}
+                      title={t('ImageUploader.selectFile')}
                     />
                   </div>
                   {section.background.image && (
@@ -1441,6 +1443,8 @@ const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, 
         accept="image/*"
         onChange={handleFileChange}
         className="hidden"
+        aria-label={t('ImageUploader.ariaLabel')}
+        title={t('ImageUploader.selectFile')}
       />
     </div>
   );

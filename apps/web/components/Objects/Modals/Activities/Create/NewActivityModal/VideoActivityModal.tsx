@@ -290,6 +290,8 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
                     accept={SUPPORTED_VIDEO_FILES}
                     onChange={handleVideoChange}
                     className="hidden"
+                    aria-label={t('ariaLabel')}
+                    title={t('selectFile')}
                   />
                 </div>
                 <div className="flex flex-row items-center">

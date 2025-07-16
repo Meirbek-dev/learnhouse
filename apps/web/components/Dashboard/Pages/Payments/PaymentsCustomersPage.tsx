@@ -60,8 +60,8 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
             <TableCell className="font-medium">
               <div className="flex items-center space-x-3">
                 <UserAvatar
-                  border="border-2"
-                  rounded="rounded-md"
+                  size="sm"
+                  variant="outline"
                   avatar_url={getUserAvatarMediaDirectory(item.user.user_uuid, item.user.avatar_image)}
                 />
                 <div className="flex flex-col">

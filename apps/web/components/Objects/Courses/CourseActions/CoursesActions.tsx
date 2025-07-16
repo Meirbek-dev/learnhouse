@@ -190,11 +190,9 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
       return (
         <>
           <UserAvatar
-            width={24}
+            size="xs"
+            variant="outline"
             predefined_avatar="empty"
-            rounded="rounded-full"
-            border="border-2"
-            borderColor="border-white"
           />
           <span>{action === 'start' ? t('startCourse') : t('leaveCourse')}</span>
           <ArrowRight className="h-5 w-5" />
@@ -205,11 +203,9 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     return (
       <>
         <UserAvatar
-          width={24}
+          size="xs"
+          variant="outline"
           use_with_session
-          rounded="rounded-full"
-          border="border-2"
-          borderColor="border-white"
         />
         <span>{action === 'start' ? t('startCourse') : t('leaveCourse')}</span>
         <ArrowRight className="h-5 w-5" />

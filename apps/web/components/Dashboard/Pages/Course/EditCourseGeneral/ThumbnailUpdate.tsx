@@ -272,6 +272,8 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
             className="hidden"
             accept=".jpg,.jpeg,.png"
             onChange={(e) => handleFileChange(e, 'image')}
+            aria-label={t('ariaLabelImage')}
+            title={t('selectImageFile')}
           />
           <Button
             type="button"
@@ -303,6 +305,8 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           className="hidden"
           accept=".mp4,.webm"
           onChange={(e) => handleFileChange(e, 'video')}
+          aria-label={t('ariaLabelVideo')}
+          title={t('selectVideoFile')}
         />
         <button
           type="button"

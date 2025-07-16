@@ -1,28 +1,28 @@
-import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { Button } from '@components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Input } from '@components/ui/input';
-import { Textarea } from '@components/ui/textarea';
+import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { useCourse } from '@components/Contexts/CourseContext';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { PencilLine, Rss, TentTree } from 'lucide-react';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { format, formatDistanceToNow } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
-import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
-import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { format, formatDistanceToNow } from 'date-fns';
-import { motion } from 'framer-motion';
-import { PencilLine, Rss, TentTree } from 'lucide-react';
+import { Textarea } from '@components/ui/textarea';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
+import { useState } from 'react';
 import { z } from 'zod';
 
 interface Author {
@@ -66,15 +66,14 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
           >
             <div className="ring-white">
               <UserAvatar
-                border={borderSize}
-                rounded="rounded-full"
+                size={isMobile ? 'xl' : '2xl'}
+                variant="outline"
                 avatar_url={
                   author.user.avatar_image
                     ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image)
                     : ''
                 }
                 predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                width={avatarSize}
                 showProfilePopup
                 userId={author.user.id}
               />

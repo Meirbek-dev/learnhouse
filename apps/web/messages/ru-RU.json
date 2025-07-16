@@ -33,28 +33,28 @@
       "translateTooltip": "Переводите на разные языки с помощью ИИ"
     },
     "AIEditorToolkit": {
+      "ContinueWritingLabel": "Продолжить писать",
+      "GenerateQuizLabel": "Создать квиз",
+      "MakeLongerLabel": "Удлинить",
+      "TranslateLabel": "Перевести",
+      "WriterLabel": "Писатель",
       "aiEditorTitle": "ИИ Редактор",
       "aiIconAlt": "Иконка OpenU AI",
       "applicationPending": "Заявка участника на рассмотрении",
       "applyToContribute": "Подать заявку на участие",
       "askAI": "Спросить ИИ",
       "continuePlaceholder": "Поместите курсор в конец предложения, чтобы продолжить писать",
-      "ContinueWritingLabel": "Продолжить писать",
       "errorTitle": "Что-то пошло не так",
-      "GenerateQuizLabel": "Создать квиз",
       "longerPlaceholder": "Выберите текст, чтобы сделать его длиннее",
-      "MakeLongerLabel": "Удлинить",
       "prompt_continueWriting": "Продолжить писать о {selection}",
       "prompt_makeLonger": "Удлинить этот текст: {selection}",
       "prompt_translateTo": "Перевести на {language}: {selection}",
       "prompt_writer": "Написать о {selection}",
       "thinking": "Думаю...",
       "translateExample": "Японский, арабский, немецкий и т.д.",
-      "TranslateLabel": "Перевести",
       "translatePlaceholder": "Перевести выбранный текст на",
       "translateToLanguageMissing": "Пожалуйста, введите язык для перевода",
       "userInputPlaceholder": "Спросить ИИ",
-      "WriterLabel": "Писатель",
       "writerPlaceholder": "Написать о..."
     },
     "AssignmentBoxUI": {
@@ -132,11 +132,11 @@
     "lastUpdated": "Последнее обновление",
     "markAsComplete": "Отметить как завершенное",
     "markCompleteError": "Не удалось отметить активность как завершенную",
-    "marking": "Отмечается...",
     "markStatus": {
       "markTooltipMessage": "Нажмите на флажок, чтобы отметить эту активность как завершенную",
       "unmarkTooltipMessage": "Нажмите на флажок, чтобы снять отметку о завершении, если необходимо"
     },
+    "marking": "Отмечается...",
     "next": "Далее",
     "nextActivityTitle": "Далее: {name}",
     "nextActivityTooltip": "Далее: {activityName}",
@@ -235,7 +235,9 @@
       "title": "Регистрация — {orgName}",
       "username": "Имя пользователя",
       "usernamePlaceholder": "Введите имя пользователя"
-    }
+    },
+    "password": "Пароль",
+    "passwordPlaceholder": "Введите ваш пароль"
   },
   "Common": {
     "save": "Сохранить",
@@ -254,6 +256,14 @@
       "toastLoading": "Создание...",
       "toastSuccess": "Новая группа создана"
     },
+    "AuthorsDisplay": {
+      "authorTooltip": "{firstName} {lastName} — {authorship}",
+      "authorsLabel": "Авторы курса",
+      "moreAuthors": {
+        "one": "ещё один автор",
+        "other": "другие авторы"
+      }
+    },
     "Button": {
       "newCollection": "Новая коллекция",
       "newCourse": "Новый курс"
@@ -263,6 +273,11 @@
       "deleteButtonText": "Удалить коллекцию",
       "deleteConfirmationMessage": "Вы уверены, что хотите удалить эту коллекцию?",
       "deleteConfirmationTitle": "Удалить {collectionName}?"
+    },
+    "ConfirmationModal": {
+      "cancel": "Отмена",
+      "close": "Закрыть",
+      "loading": "Загрузка..."
     },
     "CourseActions": {
       "authenticateToStart": "Авторизуйтесь, чтобы начать курс",
@@ -281,21 +296,25 @@
       "purchaseToAccess": "Для доступа к этому контенту требуется покупка курса."
     },
     "CourseThumbnail": {
+      "authors": "Авторы",
+      "courseOptions": "Опции курса",
+      "courseThumbnailAlt": "Миниатюра курса {courseName}",
       "delete": "Удалить курс",
       "deleteButtonText": "Удалить курс",
-      "deleteConfirmationMessage": "Вы уверены, что хотите удалить этот курс?",
+      "deleteConfirmationMessage": "Вы уверены, что хотите удалить этот курс? Это действие невозможно отменить.",
       "deleteConfirmationTitle": "Удалить {courseName}?",
-      "deleting": "Удаление...",
-      "editContent": "Редактировать содержимое",
+      "deleting": "Удаление курса...",
+      "editContent": "Редактировать содержание",
+      "noThumbnailAlt": "Миниатюра курса по умолчанию",
       "settings": "Настройки",
       "startLearning": "Начать обучение",
       "startLearningButton": "Начать обучение",
-      "toastDeleteError": "Не удалось удалить курс",
-      "toastDeleteSuccess": "Курс успешно удален",
-      "updated": "Обновлено",
-      "updatedDate": "Обновлено {updateDate, date, medium}"
+      "toastDeleteError": "Не удалось удалить курс. Пожалуйста, попробуйте снова.",
+      "toastDeleteSuccess": "Курс успешно удалён",
+      "updated": "Обновлён"
     },
     "CreateCourseModal": {
+      "ariaLabel": "Выберите «Конечное изображение миниатюр» для загрузки",
       "createCourse": "Создать курс",
       "labelDescription": "Описание",
       "labelLearnings": "Изучаемые темы курса (Чему научит курс?)",
@@ -309,9 +328,12 @@
       "schemaDescriptionMax": "Должно быть 1000 символов или меньше",
       "schemaNameMax": "Должно быть 100 символов или меньше",
       "schemaNameRequired": "Требуется название курса",
+      "selectFile": "Выберите изображение миниатюры",
+      "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
       "thumbnailChoose": "Выбрать из галереи",
       "thumbnailUpload": "Загрузить изображение",
       "toastError": "Не удалось создать курс",
+      "toastErrorOrgMissing": "Информация об организации отсутствует",
       "toastErrorUnsplash": "Не удалось получить изображение из Unsplash",
       "toastLoading": "Создание курса...",
       "toastSuccess": "Курс успешно создан",
@@ -319,12 +341,16 @@
       "visibilityItemPublic": "Публичный (Доступен всем для просмотра)"
     },
     "Dialog": {
+      "cancel": "Отмена",
       "close": "Закрыть"
     },
     "DocumentPdfModal": {
+      "ariaLabel": "Выбрать PDF-документ для загрузки",
       "createActivity": "Создать активность",
       "pdfDocumentFile": "Файл PDF документа",
       "pdfDocumentName": "Название PDF документа",
+      "selectFile": "Выбрать PDF файл",
+      "supportedFormats": "Поддерживаемый формат: PDF",
       "valueMissingFile": "Пожалуйста, предоставьте PDF-документ для активности",
       "valueMissingName": "Пожалуйста, укажите название для PDF-активности"
     },
@@ -400,10 +426,10 @@
     "ManageUsers": {
       "actionsHeader": "Действия",
       "linkButton": "Связать",
-      "linkedHeader": "Связан",
-      "linkedStatus": "Связан",
       "linkError": "Ошибка привязки пользователя: {error}",
       "linkSuccess": "Пользователь успешно связан",
+      "linkedHeader": "Связан",
+      "linkedStatus": "Связан",
       "notLinkedStatus": "Не связан",
       "unknownError": "Неизвестная ошибка",
       "unlinkButton": "Отвязать",
@@ -494,15 +520,23 @@
       "createUserGroupLink": "Создать группу",
       "generateButton": "Сгенерировать",
       "linkButton": "Связать",
-      "linkedDescription": "Пользователи будут автоматически добавлены в выбранную вами группу при регистрации",
-      "linkedTitle": "Код приглашения связан с группой",
       "linkError": "Ошибка при связывании с группой: {error}",
       "linkSuccess": "Пользователь успешно связан с группой",
+      "linkedDescription": "Пользователи будут автоматически добавлены в выбранную вами группу при регистрации",
+      "linkedTitle": "Код приглашения связан с группой",
+      "noUserGroupsAvailable": "Нет доступных групп пользователей",
       "normalDescription": "Пользователь не будет привязан ни к одной группе при регистрации",
       "normalTitle": "Обычный код приглашения",
-      "noUserGroupsAvailable": "Нет доступных групп пользователей",
       "selectUserGroup": "Выберите группу пользователей",
       "unknownError": "Неизвестная ошибка"
+    },
+    "OrgMenu": {
+      "account": "Аккаунт",
+      "closeMenu": "Закрыть меню",
+      "language": "Язык",
+      "navigation": "Навигация",
+      "openMenu": "Открыть меню",
+      "search": "Поиск"
     },
     "OrgMenuLinks": {
       "collections": "Коллекции",
@@ -526,17 +560,17 @@
       "userRole": "Пользователь"
     },
     "SearchBar": {
-      "collectionsSection": "Коллекции",
       "collectionType": "Коллекция",
-      "coursesSection": "Курсы",
+      "collectionsSection": "Коллекции",
       "courseType": "Курс",
+      "coursesSection": "Курсы",
       "discoverSubtitle": "Найдите интересующий вас контент",
       "discoverTitle": "Откройте для себя свое следующее учебное путешествие",
       "placeholder": "Поиск курсов, пользователей, коллекций...",
       "quickResultsTitle": "Результаты",
       "suggestionsTitle": "Предложения для поиска",
-      "usersSection": "Пользователи",
       "userType": "Пользователь",
+      "usersSection": "Пользователи",
       "viewAllResults": "Посмотреть все результаты"
     },
     "TypeOfContentTitle": {
@@ -606,8 +640,9 @@
     "VideoModal": {
       "activityName": "Название активности",
       "activityNamePlaceholder": "Введите название активности...",
-      "additionalSettings": "Дополнительные настройки",
       "addSubtitles": "Добавить субтитры",
+      "additionalSettings": "Дополнительные настройки",
+      "ariaLabel": "Выберите видеофайл для загрузки для активности",
       "autoplay": "Автоматическое воспроизведение видео",
       "autoplaySubtitles": "Автоматическое воспроизведение субтитров",
       "chooseVideoFile": "Выберите видеофайл",
@@ -625,6 +660,7 @@
       "ru": "Русский",
       "seconds": "Секунд",
       "secondsPlaceholder": "секунды",
+      "selectFile": "Выберите видеофайл",
       "selectLanguage": "Выберите язык",
       "sp": "Испанский",
       "startMuted": "Начинать с выключенным звуком",
@@ -632,6 +668,7 @@
       "startTimeLabel": "Время начала",
       "startTimePlaceholder": "0",
       "subtitleFile": "Файл субтитров",
+      "supportedFormats": "Поддерживаемые форматы: MP4, MKV, Webm",
       "uploadVideo": "Загрузить видео",
       "valueMissingFile": "Пожалуйста, предоставьте видеофайл активности",
       "valueMissingName": "Пожалуйста, укажите название видео-активности",
@@ -646,8 +683,8 @@
     },
     "WebPreview": {
       "align": "Выровнять",
-      "alignment": "Выравнивание",
       "alignOption": "Выровнять {value}",
+      "alignment": "Выравнивание",
       "buttonLabel": "Надпись на кнопке",
       "buttonLabelPlaceholder": "Надпись на кнопке",
       "buttonOptions": "Параметры кнопки",
@@ -690,15 +727,15 @@
   },
   "CourseEdit": {
     "ActivityElement": {
-      "activityDeletedSuccess": "Активность успешно удалена",
-      "activityNamePlaceholder": "Название активности",
-      "activityNameUpdatedSuccess": "Название активности успешно обновлено",
       "ActivityTypes": {
         "assignment": "Задание",
         "document": "Документ",
         "dynamic": "Динамический",
         "video": "Видео"
       },
+      "activityDeletedSuccess": "Активность успешно удалена",
+      "activityNamePlaceholder": "Название активности",
+      "activityNameUpdatedSuccess": "Название активности успешно обновлено",
       "activityUpdateSuccess": "Активность успешно обновлена",
       "deleteButton": "Удалить активность",
       "deleteConfirmation": "Вы уверены, что хотите удалить эту активность?",
@@ -714,48 +751,13 @@
       "unpublishButton": "Снять с публикации",
       "updating": "Обновление активности..."
     },
-    "activityNamePlaceholder": "Название активности",
-    "activityTypes": {
-      "assignment": "Задание",
-      "document": "Документ",
-      "dynamic": "Динамический",
-      "video": "Видео"
-    },
-    "addActivityButton": "Добавить активность",
     "ChapterElement": {
       "chapterNamePlaceholder": "Название главы",
       "deleteChapterButton": "Удалить главу",
       "deleteChapterConfirmation": "Вы уверены, что хотите удалить эту главу?",
       "deleteChapterTitle": "Удалить {name}?"
     },
-    "chapterNamePlaceholder": "Название главы",
-    "deleteActivityButton": "Удалить активность",
-    "deleteActivityConfirmation": "Вы уверены, что хотите удалить эту активность?",
-    "deleteActivityTitle": "Удалить {name}?",
-    "deleteChapter": "Удалить главу",
-    "deleteChapterButton": "Удалить главу",
-    "deleteChapterConfirmation": "Вы уверены, что хотите удалить эту главу?",
-    "deleteChapterTitle": "Удалить {name}?",
-    "editButton": "Редактировать",
     "General": {
-      "about": {
-        "label": "О курсе"
-      },
-      "both": "Оба",
-      "description": {
-        "label": "Описание",
-        "placeholder": "Введите описание курса"
-      },
-      "errors": {
-        "allLearningItemsMustHaveText": "Все элементы обучения должны содержать текст",
-        "atLeastOneLearningItem": "Должен быть хотя бы один элемент обучения с текстом",
-        "invalidFormat": "Неверный формат",
-        "invalidJsonFormat": "Неверный формат JSON",
-        "maxLength": "Должно быть не более {count} символов",
-        "required": "Поле {fieldName} обязательно для заполнения",
-        "saveFailed": "Не удалось сохранить общую информацию о курсе."
-      },
-      "image": "Изображение",
       "LearningItems": {
         "addItemButton": "Добавить элемент обучения",
         "addLinkTooltip": "Добавить ссылку",
@@ -767,29 +769,9 @@
         "removeItemTooltip": "Удалить элемент",
         "searchEmojis": "Искать эмодзи..."
       },
-      "learnings": {
-        "label": "Что вы узнаете"
-      },
-      "loading": "Загрузка...",
-      "name": {
-        "label": "Название курса",
-        "placeholder": "Введите название курса"
-      },
-      "public": {
-        "description": "Сделать курс общедоступным (даже для незарегистрированных пользователей)",
-        "label": "Публичный курс"
-      },
-      "tags": {
-        "label": "Теги курса",
-        "placeholder": "Нажмите Enter, чтобы добавить..."
-      },
-      "thumbnail": {
-        "chooseFromGalleryButton": "Выбрать из галереи",
-        "label": "Миниатюра курса",
-        "uploadImageButton": "Загрузить изображение",
-        "uploading": "Загрузка..."
-      },
       "Thumbnail": {
+        "ariaLabelImage": "Выберите «Конечное изображение миниатюр» для загрузки",
+        "ariaLabelVideo": "Выберите «Миниатюрный видео», чтобы загрузить",
         "currentThumbnailAlt": "Текущая миниатюра курса",
         "errors": {
           "fileTooLarge": "Размер файла ({fileSize}МБ) превышает лимит в 8МБ",
@@ -805,16 +787,17 @@
         "image": "Изображение",
         "imageAltText": "Миниатюра курса",
         "pleaseSelectAFile": "Пожалуйста, выберите файл",
+        "selectImageFile": "Выберите файл изображения",
+        "selectVideoFile": "Выберите видеофайл",
         "supportedFormats": "Поддерживаемые форматы: JPG, PNG (макс. 8МБ)",
         "supportedVideoFormats": "Поддерживаемые форматы: MP4, WebM (макс. 100МБ)",
         "thumbnailPreviewAlt": "Предварительный просмотр миниатюры курса",
         "thumbnailUpdatedSuccessfully": "Миниатюра успешно обновлена",
         "uploadImageButton": "Загрузить изображение",
-        "uploading": "Загрузка...",
         "uploadVideo": "Загрузить видео",
+        "uploading": "Загрузка...",
         "video": "Видео"
       },
-      "thumbnailType": "Тип миниатюры",
       "UnsplashPicker": {
         "Labels": {
           "architecture": "Архитектура",
@@ -838,12 +821,53 @@
           "technology": "Технологии",
           "travel": "Путешествия"
         },
-        "loading": "Загрузка...",
         "loadMoreButton": "Загрузить ещё",
+        "loading": "Загрузка...",
         "modalTitle": "Выберите изображение из Unsplash",
         "noResults": "Нет результатов",
         "searchPlaceholder": "Поиск бесплатных фотографий с высоким разрешением..."
       },
+      "about": {
+        "label": "О курсе"
+      },
+      "both": "Оба",
+      "description": {
+        "label": "Описание",
+        "placeholder": "Введите описание курса"
+      },
+      "errors": {
+        "allLearningItemsMustHaveText": "Все элементы обучения должны содержать текст",
+        "atLeastOneLearningItem": "Должен быть хотя бы один элемент обучения с текстом",
+        "invalidFormat": "Неверный формат",
+        "invalidJsonFormat": "Неверный формат JSON",
+        "maxLength": "Должно быть не более {count} символов",
+        "required": "Поле {fieldName} обязательно для заполнения",
+        "saveFailed": "Не удалось сохранить общую информацию о курсе."
+      },
+      "image": "Изображение",
+      "learnings": {
+        "label": "Что вы узнаете"
+      },
+      "loading": "Загрузка...",
+      "name": {
+        "label": "Название курса",
+        "placeholder": "Введите название курса"
+      },
+      "public": {
+        "description": "Сделать курс общедоступным (даже для незарегистрированных пользователей)",
+        "label": "Публичный курс"
+      },
+      "tags": {
+        "label": "Теги курса",
+        "placeholder": "Нажмите Enter, чтобы добавить..."
+      },
+      "thumbnail": {
+        "chooseFromGalleryButton": "Выбрать из галереи",
+        "label": "Миниатюра курса",
+        "uploadImageButton": "Загрузить изображение",
+        "uploading": "Загрузка..."
+      },
+      "thumbnailType": "Тип миниатюры",
       "video": "Видео"
     },
     "NewActivityModal": {
@@ -852,15 +876,32 @@
       "title": "Добавить активность"
     },
     "Structure": {
-      "addChapterButton": "Добавить главу",
-      "chapterCreatedSuccess": "Глава успешно создана",
-      "chapterCreateFailed": "Не удалось создать главу",
-      "creatingChapter": "Создание...",
       "NewChapterModal": {
         "description": "Добавьте новую главу в структуру курса.",
         "title": "Создать новую главу"
-      }
-    }
+      },
+      "addChapterButton": "Добавить главу",
+      "chapterCreateFailed": "Не удалось создать главу",
+      "chapterCreatedSuccess": "Глава успешно создана",
+      "creatingChapter": "Создание..."
+    },
+    "activityNamePlaceholder": "Название активности",
+    "activityTypes": {
+      "assignment": "Задание",
+      "document": "Документ",
+      "dynamic": "Динамический",
+      "video": "Видео"
+    },
+    "addActivityButton": "Добавить активность",
+    "chapterNamePlaceholder": "Название главы",
+    "deleteActivityButton": "Удалить активность",
+    "deleteActivityConfirmation": "Вы уверены, что хотите удалить эту активность?",
+    "deleteActivityTitle": "Удалить {name}?",
+    "deleteChapter": "Удалить главу",
+    "deleteChapterButton": "Удалить главу",
+    "deleteChapterConfirmation": "Вы уверены, что хотите удалить эту главу?",
+    "deleteChapterTitle": "Удалить {name}?",
+    "editButton": "Редактировать"
   },
   "CourseEndView": {
     "backToCourse": "Вернуться к курсу",
@@ -912,9 +953,6 @@
     "whatYouWillLearn": "Чему вы научитесь"
   },
   "Courses": {
-    "access": "Доступ",
-    "content": "Содержание",
-    "contributors": "Авторы",
     "CourseActionsMobile": {
       "author": "Автор",
       "authors": "Авторы",
@@ -942,20 +980,20 @@
       "deletingUpdate": "Удаление обновления...",
       "newUpdate": "Новое обновление",
       "noUpdatesYet": "Пока нет обновлений",
-      "publishing": "Публикуется...",
       "publishUpdate": "Опубликовать обновление",
+      "publishing": "Публикуется...",
       "titleRequired": "Название обязательно",
       "update": "обновить",
-      "updateAddedSuccess": "Обновление успешно добавлено",
       "updateAddFailed": "Не удалось добавить обновление",
+      "updateAddedSuccess": "Обновление успешно добавлено",
       "updateContent": "Содержание обновления",
       "updateContentPlaceholder": "Поделитесь подробностями обновления...",
-      "updateDeletedSuccess": "Обновление успешно удалено",
       "updateDeleteFailed": "Не удалось удалить обновление",
-      "updates": "обновления",
-      "updatesAppearHere": "Обновления по этому курсу появятся здесь",
+      "updateDeletedSuccess": "Обновление успешно удалено",
       "updateTitle": "Название обновления",
-      "updateTitlePlaceholder": "Что нового в этом обновлении?"
+      "updateTitlePlaceholder": "Что нового в этом обновлении?",
+      "updates": "обновления",
+      "updatesAppearHere": "Обновления по этому курсу появятся здесь"
     },
     "CoursePaidOptions": {
       "benefits": "Преимущества:",
@@ -975,6 +1013,43 @@
       "showMore": "Показать больше",
       "subscribeNow": "Подписаться сейчас",
       "subscription": "Подписка"
+    },
+    "CourseUpdates": {
+      "addNewCourseUpdate": "Добавить новое обновление курса",
+      "addNewUpdateTitle": "Добавить новое обновление курса",
+      "addUpdate": "Добавить обновление",
+      "areYouSureYouWantToDeleteThisUpdate": "Вы уверены, что хотите удалить это обновление?",
+      "cancel": "Отмена",
+      "content": "Содержимое",
+      "contentLabel": "Содержимое",
+      "contentRequired": "Содержимое обязательно",
+      "courseLabel": "Курс",
+      "createdAt": "Создано {date}",
+      "createdAtFull": "Создано {date, date, long} {date, time, short}",
+      "createdAtRelative": "{time} назад",
+      "createdAtTooltipPrefix": "Создано ",
+      "delete": "Удалить",
+      "deleteError": "Не удалось удалить обновление",
+      "deleteSuccess": "Обновление успешно удалено",
+      "deleteUpdate": "Удалить обновление?",
+      "deleteUpdateButton": "Удалить обновление",
+      "deleteUpdateMessage": "Вы уверены, что хотите удалить это обновление?",
+      "deleteUpdateTitle": "Удалить обновление?",
+      "deletingUpdate": "Удаление обновления...",
+      "failedDelete": "Не удалось удалить обновление",
+      "newUpdate": "Новое обновление",
+      "noUpdates": "Пока нет обновлений",
+      "noUpdatesYet": "Пока нет обновлений",
+      "successfullDelete": "Обновление успешно удалено",
+      "testCourse": "Тестовый курс",
+      "title": "Название",
+      "titleLabel": "Название",
+      "titlePlaceholder": "Введите название",
+      "titleRequired": "Название обязательно",
+      "updateAddFailed": "Не удалось добавить обновление",
+      "updateAddedError": "Не удалось добавить обновление",
+      "updateAddedSuccess": "Обновление успешно добавлено",
+      "updates": "Обновления"
     },
     "CoursesActions": {
       "accessCheckError": "Не удалось проверить доступ к курсу. Пожалуйста, повторите попытку позже.",
@@ -1013,64 +1088,30 @@
       "selectPaymentOption": "Выберите способ оплаты, чтобы получить доступ к этому курсу",
       "startCourse": "Начать курс",
       "startCourseError": "Не удалось начать курс. Пожалуйста, повторите попытку позже.",
-      "startedCourseSuccess": "Курс успешно начат",
       "startError": "Не удалось начать курс. Пожалуйста, повторите попытку позже.",
-      "startingCourse": "Начинаем курс...",
       "startLearningJourney": "Начните свой путь обучения с {totalActivities} {totalActivities, plural, one {увлекательным занятием} few {увлекательными занятиями} many {увлекательными занятиями} other {увлекательными занятиями}}",
       "startSuccess": "Курс успешно начат",
+      "startedCourseSuccess": "Курс успешно начат",
+      "startingCourse": "Начинаем курс...",
       "submittingContributorApplication": "Отправка заявки на участие...",
       "youAreAContributor": "Вы являетесь автором",
       "youAreContributor": "Вы являетесь автором",
       "youHavePurchasedThisCourse": "Вы приобрели этот курс и имеете полный доступ ко всему содержимому.",
       "youOwnThisCourse": "Вы являетесь владельцем этого курса"
     },
-    "CourseUpdates": {
-      "addNewCourseUpdate": "Добавить новое обновление курса",
-      "addNewUpdateTitle": "Добавить новое обновление курса",
-      "addUpdate": "Добавить обновление",
-      "areYouSureYouWantToDeleteThisUpdate": "Вы уверены, что хотите удалить это обновление?",
-      "cancel": "Отмена",
-      "content": "Содержимое",
-      "contentLabel": "Содержимое",
-      "contentRequired": "Содержимое обязательно",
-      "courseLabel": "Курс",
-      "createdAt": "Создано {date}",
-      "createdAtFull": "Создано {date, date, long} {date, time, short}",
-      "createdAtRelative": "{time} назад",
-      "createdAtTooltipPrefix": "Создано ",
-      "delete": "Удалить",
-      "deleteError": "Не удалось удалить обновление",
-      "deleteSuccess": "Обновление успешно удалено",
-      "deleteUpdate": "Удалить обновление?",
-      "deleteUpdateButton": "Удалить обновление",
-      "deleteUpdateMessage": "Вы уверены, что хотите удалить это обновление?",
-      "deleteUpdateTitle": "Удалить обновление?",
-      "deletingUpdate": "Удаление обновления...",
-      "failedDelete": "Не удалось удалить обновление",
-      "newUpdate": "Новое обновление",
-      "noUpdates": "Пока нет обновлений",
-      "noUpdatesYet": "Пока нет обновлений",
-      "successfullDelete": "Обновление успешно удалено",
-      "testCourse": "Тестовый курс",
-      "title": "Название",
-      "titleLabel": "Название",
-      "titlePlaceholder": "Введите название",
-      "titleRequired": "Название обязательно",
-      "updateAddedError": "Не удалось добавить обновление",
-      "updateAddedSuccess": "Обновление успешно добавлено",
-      "updateAddFailed": "Не удалось добавить обновление",
-      "updates": "Обновления"
+    "PaidCourseActivityDisclaimer": {
+      "message": "Для доступа содержимому требуется покупка курса.",
+      "paidContent": "Платный контент"
     },
+    "access": "Доступ",
+    "content": "Содержание",
+    "contributors": "Авторы",
     "createACourse": "Создайте курс, чтобы добавить контент",
     "error": "Ошибка загрузки курсов",
     "general": "Общее",
     "myCourses": "Мои курсы",
     "noCourses": "Пока нет курсов",
     "noCoursesavailable": "Пока нет доступных курсов",
-    "PaidCourseActivityDisclaimer": {
-      "message": "Для доступа содержимому требуется покупка курса.",
-      "paidContent": "Платный контент"
-    },
     "title": "Курсы"
   },
   "CoursesPage": {
@@ -1084,7 +1125,6 @@
   },
   "DashPage": {
     "Assignments": {
-      "addQuestion": "Добавить вопрос",
       "AssignmentPage": {
         "assignmentTools": "Инструменты для заданий",
         "desktopOnlyMessage1": "Эта страница доступна только на настольном устройстве.",
@@ -1096,17 +1136,16 @@
         "preview": "Предварительный просмотр",
         "previewTooltip": "Предварительный просмотр задания как студент",
         "publish": "Опубликовать",
-        "published": "Опубликовано",
         "publishTooltip": "Сделать задание общедоступным и доступным для студентов",
+        "published": "Опубликовано",
         "submissions": "Отправленные работы",
         "unpublish": "Снять с публикации",
-        "unpublished": "Не опубликовано",
         "unpublishTooltip": "Сделать задание недоступным для студентов",
+        "unpublished": "Не опубликовано",
         "updateError": "Ошибка при обновлении задания, пожалуйста, повторите попытку позже.",
         "updateLoading": "Обновление задания...",
         "updateSuccess": "Задание успешно обновлено"
       },
-      "evaluate": "Оценить",
       "EvaluateModal": {
         "assignmentDataMissing": "Данные задания отсутствуют.",
         "gradeFinalError": "{message}",
@@ -1121,9 +1160,6 @@
         "setFinalGrade": "Установить итоговую оценку",
         "taskLabel": "Задание {index}"
       },
-      "evaluateSubmission": "Оценить эту отправленную работу",
-      "evaluateUser": "Оценить {username}",
-      "graded": "Оценено",
       "HomePage": {
         "assignment": "Задание",
         "assignments": "Задания",
@@ -1133,9 +1169,6 @@
         "noAssignments": "Для этого курса нет доступных заданий, создайте задания в редакторе курса",
         "submissions": "Отправленные работы"
       },
-      "late": "Просрочено",
-      "markedAsFalse": "Отмечен неверным",
-      "markedAsTrue": "Отмечен верным",
       "NewTaskModal": {
         "createSuccess": "Задание успешно создано",
         "fileSubmissionDescription": "Студенты могут отправлять файлы для этого задания",
@@ -1148,11 +1181,6 @@
         "reminderToast": "При редактировании/добавлении заданий убедитесь, что вы сняли задание с публикации, чтобы избежать проблем у студентов. Вы можете опубликовать его снова, когда будете готовы.",
         "untitledTaskTitle": "Безымянное задание"
       },
-      "noQuestionsFound": "Вопросов не найдено",
-      "optionPlaceholder": "Введите текст варианта",
-      "questionPlaceholder": "Введите текст вопроса",
-      "submission": "Отправленная работа",
-      "submitted": "Отправлено",
       "TaskEditor": {
         "assignmentObjectMissingError": "Объект задания или его UUID отсутствует. Невозможно удалить задание.",
         "content": "Содержание",
@@ -1164,23 +1192,28 @@
       },
       "TaskFileObject": {
         "allowedFormats": "Разрешенные форматы: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
+        "ariaLabel": "Выберите файл для загрузки для назначения",
         "authRequiredSubmit": "Требуется аутентификация. Пожалуйста, войдите, чтобы отправить задание.",
         "authRequiredUpload": "Требуется аутентификация. Пожалуйста, войдите, чтобы загрузить файлы.",
+        "chooseFile": "Выберите файл",
         "errorSaving": "Ошибка сохранения задания, пожалуйста, повторите попытку позже.",
-        "gradedByTeacher": "Оценено преподавателем: @{username}",
         "gradeError": "Ошибка оценивания задания, пожалуйста, повторите попытку позже.",
         "gradeRangeError": "Оценка не может превышать {maxGradeValue} баллов",
         "gradeSuccess": "Задание успешно оценено на {grade} баллов",
+        "gradedByTeacher": "Оценено преподавателем: @{username}",
         "gradingViewInfo": "Пожалуйста, скачайте файл и оцените его вручную, затем введите оценку выше",
         "loading": "Загрузка",
         "saveSuccess": "Задание успешно сохранено",
+        "selectFile": "Выберите файл",
         "signInToUpload": "Войдите, чтобы загрузить файлы",
         "submitFile": "Отправить файл",
         "teacherViewInfo": "Пользователь сможет отправить файл для этого задания, вы сможете проверить его на вкладке «Отправленные работы»"
       },
       "TaskGeneralEdit": {
         "allowedFormats": "Разрешенные форматы: pdf, docx, mp4, mkv, jpg, jpeg, png, pptx, zip",
+        "ariaLabel": "Выбрать справочный файл для загрузки",
         "changeRefFile": "Изменить справочный файл",
+        "chooseFile": "Выбрать файл",
         "delete": "Удалить",
         "description": "Описание",
         "descriptionRequired": "Требуется описание",
@@ -1189,10 +1222,11 @@
         "hint": "Подсказка",
         "loading": "Загрузка",
         "maxGradeValue": "Максимальное значение оценки",
-        "referenceFile": "Справочный файл",
         "refFileUpdateSuccess": "Справочный файл успешно обновлен",
+        "referenceFile": "Справочный файл",
         "save": "Сохранить",
         "saving": "Сохранение",
+        "selectFile": "Выбрать файл",
         "title": "Название",
         "titleRequired": "Требуется название",
         "updateError": "Ошибка обновления задания, пожалуйста, повторите попытку позже.",
@@ -1214,12 +1248,25 @@
         "saveSuccess": "Задание успешно сохранено",
         "true": "Верно"
       },
-      "tasks": "Задания",
       "Tasks": {
         "addTask": "Добавить задание",
         "addTaskModalDescription": "Создайте новое задание",
         "addTaskModalTitle": "Добавить задание"
       },
+      "addQuestion": "Добавить вопрос",
+      "evaluate": "Оценить",
+      "evaluateSubmission": "Оценить эту отправленную работу",
+      "evaluateUser": "Оценить {username}",
+      "graded": "Оценено",
+      "late": "Просрочено",
+      "markedAsFalse": "Отмечен неверным",
+      "markedAsTrue": "Отмечен верным",
+      "noQuestionsFound": "Вопросов не найдено",
+      "optionPlaceholder": "Введите текст варианта",
+      "questionPlaceholder": "Введите текст вопроса",
+      "submission": "Отправленная работа",
+      "submitted": "Отправлено",
+      "tasks": "Задания",
       "title": "Задания"
     },
     "Card": {
@@ -1231,17 +1278,17 @@
         "description": "Создавайте и управляйте курсами, главами и заданиями",
         "title": "Курсы"
       },
-      "openuLogo": "Логотип OpenU",
-      "openuUniversity": "Торайгыров Университет",
       "Organization": {
         "description": "Настройте общие параметры",
         "title": "Платформа"
       },
-      "touUniversity": "Торайгыров Университет",
       "Users": {
         "description": "Управляйте пользователями и ролями",
         "title": "Пользователи"
-      }
+      },
+      "openuLogo": "Логотип OpenU",
+      "openuUniversity": "Торайгыров Университет",
+      "touUniversity": "Торайгыров Университет"
     },
     "CourseOverview": {
       "courseLabel": "Курс"
@@ -1281,7 +1328,6 @@
         "contributors": "Соавторы",
         "general": "Общее"
       },
-      "error": "Ошибка загрузки курсов",
       "HomePageClient": {
         "courses": "Курсы",
         "createACourse": "Создайте курс, чтобы добавить контент",
@@ -1290,6 +1336,7 @@
         "noCourses": "Пока нет курсов",
         "noCoursesAvailable": "Пока нет доступных курсов"
       },
+      "error": "Ошибка загрузки курсов",
       "myCourses": "Мои курсы",
       "noPurchasedCourses": "Нет приобретенных курсов",
       "noPurchasedCoursesDesc": "Вы еще не приобрели ни одного курса",
@@ -1301,24 +1348,24 @@
       "active": "Активный",
       "activeBadge": "Активный",
       "activeStatus": "Активный",
-      "addedOnColumn": "Добавлено",
       "addSelectedButton": "Добавить выбранные",
+      "addedOnColumn": "Добавлено",
       "alreadyContributorMessage": "Уже является соавтором",
       "cannotModifyCreator": "Невозможно изменить роль или статус создателя",
       "clearButton": "Очистить",
       "closeConfirmMsg": "Вы уверены, что хотите закрыть этот курс для соавторов?",
       "closeConfirmTitle": "Закрыть для соавторов?",
-      "closedDescription": "Курс закрыт для соавторов. Только существующие соавторы могут изменять содержимое курса.",
-      "closedLabel": "Закрыто для соавторов",
       "closeToContributorsButton": "Закрыть для соавторов",
       "closeToContributorsDescription": "Курс закрыт для соавторов. Только существующие соавторы могут изменять содержимое курса.",
       "closeToContributorsMessage": "Вы уверены, что хотите закрыть этот курс для соавторов?",
       "closeToContributorsTitle": "Закрыть для соавторов?",
+      "closedDescription": "Курс закрыт для соавторов. Только существующие соавторы могут изменять содержимое курса.",
+      "closedLabel": "Закрыто для соавторов",
       "contributor": "Соавтор",
-      "contributorsSelectedMessage": "{count, plural, one {# соавтор выбран} few {# соавтора выбрано} many {# соавторов выбрано} other {# соавторов выбрано}}",
       "contributorUpdateErrorDetailed": "Не удалось обновить соавтора: {error}",
       "contributorUpdateErrorGeneric": "Не удалось обновить соавтора",
       "contributorUpdateSuccess": "Соавтор успешно обновлен",
+      "contributorsSelectedMessage": "{count, plural, one {# соавтор выбран} few {# соавтора выбрано} many {# соавторов выбрано} other {# соавторов выбрано}}",
       "courseContributorsSubtitle": "Управляйте соавторами и добавляйте новых в ваш курс",
       "courseContributorsTitle": "Соавторы курса",
       "creator": "Создатель",
@@ -1355,8 +1402,8 @@
       "roleContributor": "Соавтор",
       "roleMaintainer": "Сопровождающий",
       "roleReporter": "Репортер",
-      "searchingMessage": "Поиск...",
       "searchUsersPlaceholder": "Искать пользователей по имени или логину для добавления в соавторы...",
+      "searchingMessage": "Поиск...",
       "statusActive": "Активный",
       "statusColumn": "Статус",
       "statusInactive": "Неактивный",
@@ -1373,7 +1420,6 @@
       "usersSelectedMessage": "{count, plural, one {# пользователь выбран} few {# пользователя выбрано} many {# пользователей выбрано} other {# пользователей выбрано}}"
     },
     "Editor": {
-      "activity": "Активность",
       "BadgesExtension": {
         "deepDive": "Глубокое погружение",
         "discussionTopic": "Тема для обсуждения",
@@ -1428,8 +1474,14 @@
         "urlTip": "Подсказка: Вставьте любой URL для встраивания {productName} напрямую"
       },
       "FileUploadBlock": {
+        "browseFiles": "Обзор файлов",
+        "chooseFile": "Выбрать файл",
+        "dragAndDrop": "Перетащите файлы сюда или",
         "noFilePreview": "Нет файла для предварительного просмотра.",
-        "submit": "Отправить"
+        "selectFile": "Выбрать файл",
+        "submit": "Отправить",
+        "uploadFile": "Загрузить файл",
+        "uploadFiles": "Загрузить файлы"
       },
       "MathEquationBlock": {
         "completeReference": "Просмотреть полную справку",
@@ -1462,7 +1514,6 @@
         "templateMatrixDesc": "Матрица 2×2 со скобками",
         "templateQuadratic": "Квадратное уравнение",
         "templateQuadraticDesc": "Решение квадратного уравнения",
-        "templates": "Шаблоны",
         "templateSqrt": "Квадратный корень",
         "templateSqrtDesc": "Квадратный корень",
         "templateSum": "Суммирование",
@@ -1471,9 +1522,9 @@
         "templateSystemEqDesc": "Система линейных уравнений",
         "templateVector": "Вектор",
         "templateVectorDesc": "3D вектор",
+        "templates": "Шаблоны",
         "title": "Математическое уравнение"
       },
-      "metaTitleEdit": "Редактировать - Активность {activityName}",
       "QuizBlock": {
         "addAnswer": "Добавить ответ",
         "addQuestion": "Добавить вопрос",
@@ -1540,32 +1591,95 @@
       },
       "UserBlock": {
         "errorNotFound": "Пользователь не найден",
-        "loading": "Загрузка...",
         "loadUser": "Загрузить пользователя",
+        "loading": "Загрузка...",
         "noUserSelected": "Пользователь не выбран",
         "usernameLabel": "Имя пользователя",
         "usernamePlaceholder": "Введите имя пользователя"
       },
       "VideoBlock": {
+        "ariaLabel": "Выбрать видеофайл для загрузки",
         "download": "Скачать",
         "errorFormat": "Пожалуйста, загрузите видео в поддерживаемом формате (MP4, MKV или WebM)",
         "errorUpload": "Не удалось загрузить видео. Пожалуйста, попробуйте еще раз.",
         "remove": "Удалить",
+        "selectVideoFile": "Выбрать видеофайл",
         "sizeFull": "Полная ширина",
         "sizeLabel": "Размер видео:",
         "sizeLarge": "Большой",
         "sizeMedium": "Средний",
         "sizeSmall": "Маленький",
+        "supportedFormats": "Поддерживаемые форматы: MP4, MKV, WebM",
         "title": "Блок видео",
         "uploadHint": "Поддерживаются форматы MP4, MKV и WebM",
-        "uploading": "Загрузка видео... {progress}%",
-        "uploadPlaceholder": "Перетащите видео сюда или нажмите, чтобы выбрать"
-      }
+        "uploadPlaceholder": "Перетащите видео сюда или нажмите, чтобы выбрать",
+        "uploading": "Загрузка видео... {progress}%"
+      },
+      "activity": "Активность",
+      "metaTitleEdit": "Редактировать - Активность {activityName}"
     },
     "Notifications": {
+      "Editor": {
+        "sectionTitleLabel": "Название",
+        "sectionTitlePlaceholder": "Введите название раздела",
+        "titleSuffix": "Раздел"
+      },
+      "FeaturedCoursesEditor": {
+        "loadingCourses": "Загрузка курсов...",
+        "selectButton": "Выбрать",
+        "selectCoursesLabel": "Выбрать курсы",
+        "selectedButton": "Выбрано"
+      },
+      "Form": {
+        "errorMessageDefault": "Неверный ввод",
+        "invalidEmail": "Неверный адрес электронной почты",
+        "maxChars": "Должно быть не более {count} символов",
+        "minAmount": "Сумма должна быть не менее {min}",
+        "minChars": "Должно быть не менее {count} символов",
+        "positiveNumber": "Должно быть положительное число",
+        "requiredField": "Поле {fieldName} обязательно для заполнения"
+      },
+      "ImageUploader": {
+        "ariaLabel": "Выберите изображение для загрузки",
+        "selectFile": "Выберите файл изображения",
+        "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
+        "uploading": "Загрузка..."
+      },
+      "LogosEditor": {
+        "addButton": "Добавить логотип",
+        "logoAltPlaceholder": "Альтернативный текст",
+        "logoUrlPlaceholder": "URL логотипа",
+        "logosLabel": "Логотипы",
+        "uploadButton": "Загрузить логотип"
+      },
+      "PeopleEditor": {
+        "addButton": "Добавить человека",
+        "descriptionLabel": "Описание",
+        "descriptionPlaceholder": "Описание или роль",
+        "imageLabel": "Изображение",
+        "imageUrlPlaceholder": "URL изображения",
+        "nameLabel": "Имя",
+        "namePlaceholder": "Имя человека",
+        "peopleLabel": "Люди",
+        "uploadAvatarButton": "Загрузить аватар",
+        "usernameLabel": "Имя пользователя",
+        "usernamePlaceholder": "@имя_пользователя"
+      },
+      "TextAndImageEditor": {
+        "contentLabel": "Содержание",
+        "contentPlaceholder": "Введите содержание раздела",
+        "imageAltPlaceholder": "Альтернативный текст",
+        "imageLabel": "Изображение",
+        "imagePositionLabel": "Положение изображения",
+        "imagePositionPlaceholder": "Выберите положение изображения",
+        "imageUrlPlaceholder": "URL изображения",
+        "positionLeft": "Слева",
+        "positionRight": "Справа",
+        "uploadImageButton": "Загрузить новое изображение"
+      },
       "activityCreatedSuccess": "Активность успешно создана",
-      "activityDeletedSuccess": "Активность успешно удалена",
       "activityDeleteFailed": "Не удалось удалить активность",
+      "activityDeletedSuccess": "Активность успешно удалена",
       "activityNameUpdateFailed": "Не удалось обновить название активности",
       "activityNameUpdateSuccess": "Название активности успешно обновлено",
       "activityUpdateErrorGeneric": "Не удалось обновить активность",
@@ -1583,11 +1697,6 @@
       "deleting": "Удаление...",
       "deletingStripeConfig": "Удаление конфигурации Stripe...",
       "deletingUserGroup": "Удаление группы пользователей...",
-      "Editor": {
-        "sectionTitleLabel": "Название",
-        "sectionTitlePlaceholder": "Введите название раздела",
-        "titleSuffix": "Раздел"
-      },
       "enablingStripe": "Включение Stripe...",
       "errorGeneric": "Произошла ошибка",
       "errorNetwork": "Ошибка сети, проверьте соединение",
@@ -1609,56 +1718,18 @@
         "updateConfigFailed": "Не удалось обновить конфигурацию.",
         "updateProductFailed": "Не удалось обновить продукт."
       },
-      "FeaturedCoursesEditor": {
-        "loadingCourses": "Загрузка курсов...",
-        "selectButton": "Выбрать",
-        "selectCoursesLabel": "Выбрать курсы",
-        "selectedButton": "Выбрано"
-      },
       "fileUploadSuccess": "Файл успешно загружен",
-      "Form": {
-        "errorMessageDefault": "Неверный ввод",
-        "invalidEmail": "Неверный адрес электронной почты",
-        "maxChars": "Должно быть не более {count} символов",
-        "minAmount": "Сумма должна быть не менее {min}",
-        "minChars": "Должно быть не менее {count} символов",
-        "positiveNumber": "Должно быть положительное число",
-        "requiredField": "Поле {fieldName} обязательно для заполнения"
-      },
-      "ImageUploader": {
-        "uploading": "Загрузка..."
-      },
       "imageUploadFailed": "Не удалось загрузить изображение",
       "imageUploadSuccess": "Изображение успешно загружено",
       "inviteSentSuccess": "Приглашение отправлено.",
       "joinMethodChangedSuccess": "Метод присоединения изменен на {method}.",
-      "landingPageSavedSuccess": "Домашняя страница успешно сохранена",
       "landingPageSaveError": "Ошибка сохранения домашней страницы",
+      "landingPageSavedSuccess": "Домашняя страница успешно сохранена",
       "loading": "Загрузка...",
-      "LogosEditor": {
-        "addButton": "Добавить логотип",
-        "logoAltPlaceholder": "Альтернативный текст",
-        "logosLabel": "Логотипы",
-        "logoUrlPlaceholder": "URL логотипа",
-        "uploadButton": "Загрузить логотип"
-      },
       "newPasswordLabel": "Новый пароль",
       "orgIdNotFound": "Идентификатор платформы не найден",
       "passwordUpdateError": "Не удалось обновить пароль. Пожалуйста, попробуйте еще раз.",
       "passwordUpdateSuccess": "Пароль успешно обновлен",
-      "PeopleEditor": {
-        "addButton": "Добавить человека",
-        "descriptionLabel": "Описание",
-        "descriptionPlaceholder": "Описание или роль",
-        "imageLabel": "Изображение",
-        "imageUrlPlaceholder": "URL изображения",
-        "nameLabel": "Имя",
-        "namePlaceholder": "Имя человека",
-        "peopleLabel": "Люди",
-        "uploadAvatarButton": "Загрузить аватар",
-        "usernameLabel": "Имя пользователя",
-        "usernamePlaceholder": "@имя_пользователя"
-      },
       "productArchivedSuccess": "Продукт успешно заархивирован.",
       "productCreatedSuccess": "Продукт успешно создан!",
       "productUpdatedSuccess": "Продукт успешно обновлен.",
@@ -1675,18 +1746,6 @@
       "stripeConfigDeletedSuccess": "Конфигурация Stripe успешно удалена.",
       "stripeEnabledSuccess": "Stripe успешно включен!",
       "successGeneric": "Операция прошла успешно",
-      "TextAndImageEditor": {
-        "contentLabel": "Содержание",
-        "contentPlaceholder": "Введите содержание раздела",
-        "imageAltPlaceholder": "Альтернативный текст",
-        "imageLabel": "Изображение",
-        "imagePositionLabel": "Положение изображения",
-        "imagePositionPlaceholder": "Выберите положение изображения",
-        "imageUrlPlaceholder": "URL изображения",
-        "positionLeft": "Слева",
-        "positionRight": "Справа",
-        "uploadImageButton": "Загрузить новое изображение"
-      },
       "unsavedChanges": "Несохраненные изменения",
       "updating": "Обновление...",
       "updatingConfig": "Обновление конфигурации...",
@@ -1708,9 +1767,7 @@
         "lastUpdated": "Последнее обновление {date, date, short}",
         "title": "Коллекция"
       },
-      "general": "Общее",
       "General": {
-        "description": "Управление профилем и настройками платформы",
         "Form": {
           "aboutLabel": "О платформе",
           "aboutMax": " ",
@@ -1764,22 +1821,26 @@
           "travel": "✈️ Путешествия",
           "vocational": "🔧 Профессиональное обучение"
         },
-        "orgUpdatedSuccess": "Платформа успешно обновлена",
+        "description": "Управление профилем и настройками платформы",
         "orgUpdateFailed": "Не удалось обновить данные платформы",
+        "orgUpdatedSuccess": "Платформа успешно обновлена",
         "title": "Настройки платформы",
         "updatingOrg": "Обновление данных платформы..."
       },
-      "generalDescription": "Управление настройками",
-      "generalTitle": "Общее",
       "Images": {
         "Buttons": {
           "addPreview": "Добавить предварительный просмотр",
-          "uploadingLogo": "Загрузка...",
-          "uploadingThumbnail": "Загрузка...",
+          "ariaLabelLogo": "Выберите логотип организации для загрузки",
+          "ariaLabelPreview": "Выберите предварительное изображение для загрузки",
+          "ariaLabelThumbnail": "Выберите миниатюру организации для загрузки",
+          "selectLogoFile": "Выберите файл логотипа",
+          "selectPreviewFile": "Выберите предварительный просмотр файла",
+          "selectThumbnailFile": "Выберите файл миниатюры",
           "uploadNewLogo": "Загрузить новый логотип",
-          "uploadNewThumbnail": "Загрузить новый эскиз"
+          "uploadNewThumbnail": "Загрузить новый эскиз",
+          "uploadingLogo": "Загрузка...",
+          "uploadingThumbnail": "Загрузка..."
         },
-        "description": "Управление логотипом, эскизом и изображениями предварительного просмотра OpenU.",
         "Dialog": {
           "AddPreview": {
             "addButton": "Добавить предварительный просмотр",
@@ -1829,19 +1890,18 @@
           "uploadingLogo": "Загрузка логотипа...",
           "uploadingPreviews": "Загрузка {count} предварительных просмотров...",
           "uploadingThumbnail": "Загрузка эскиза...",
-          "videoPreviewAddedSuccess": "Предварительный просмотр видео успешно добавлен.",
-          "videoPreviewAddFailed": "Не удалось добавить предварительный просмотр видео."
+          "videoPreviewAddFailed": "Не удалось добавить предварительный просмотр видео.",
+          "videoPreviewAddedSuccess": "Предварительный просмотр видео успешно добавлен."
         },
         "Tabs": {
           "logo": "Логотип",
           "previews": "Предварительный просмотр",
           "thumbnail": "Эскиз"
         },
+        "description": "Управление логотипом, эскизом и изображениями предварительного просмотра OpenU.",
         "title": "Изображения и предварительный просмотр"
       },
-      "landing": "Домашняя страница",
       "Landing": {
-        "description": "Настройте домашнюю страницу",
         "Editor": {
           "sectionTitleLabel": "Название раздела",
           "sectionTitlePlaceholder": "Введите название раздела",
@@ -1870,7 +1930,6 @@
             "title": "Новый раздел «Текст и изображение»"
           }
         },
-        "enableToggleLabel": "Включить пользовательскую целевую страницу",
         "Errors": {
           "invalidSectionType": "Неверный тип раздела",
           "unknownSectionType": "Неизвестный тип раздела"
@@ -1947,14 +2006,17 @@
           }
         },
         "ImageUploader": {
+          "ariaLabel": "Выберите изображение для загрузки для разделения целевой страницы",
           "defaultButtonText": "Загрузить изображение",
+          "selectFile": "Выберите файл изображения",
+          "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
           "uploading": "Загрузка..."
         },
         "LogosEditor": {
           "addButton": "Добавить логотип",
           "logoAltPlaceholder": "Альтернативный текст",
-          "logosLabel": "Логотипы",
           "logoUrlPlaceholder": "URL логотипа",
+          "logosLabel": "Логотипы",
           "removeButton": "Удалить логотип",
           "uploadButton": "Загрузить логотип"
         },
@@ -1971,12 +2033,6 @@
           "uploadAvatarButton": "Загрузить аватар",
           "usernameLabel": "Имя пользователя",
           "usernamePlaceholder": "@имя_пользователя"
-        },
-        "saveButton": "Сохранить изменения",
-        "savingButton": "Сохранение...",
-        "SectionsPanel": {
-          "addSectionButton": "Добавить раздел",
-          "title": "Разделы"
         },
         "SectionTypes": {
           "featuredCourses": {
@@ -2000,6 +2056,10 @@
             "label": "Текст и изображение"
           }
         },
+        "SectionsPanel": {
+          "addSectionButton": "Добавить раздел",
+          "title": "Разделы"
+        },
         "TextAndImageEditor": {
           "contentLabel": "Содержимое",
           "contentPlaceholder": "Введите содержимое раздела",
@@ -2013,19 +2073,14 @@
           "positionRight": "Справа",
           "uploadImageButton": "Загрузить новое изображение"
         },
+        "description": "Настройте домашнюю страницу",
+        "enableToggleLabel": "Включить пользовательскую целевую страницу",
+        "saveButton": "Сохранить изменения",
+        "savingButton": "Сохранение...",
         "title": "Домашняя страница"
       },
-      "landingDescription": "Настройте домашнюю страницу",
-      "landingTitle": "Домашняя страница",
       "Manage additional organization settings": "Управление дополнительными настройками OpenU",
-      "other": "Другое",
-      "previews": "Изображения и предварительный просмотр",
-      "previewsDescription": "Управление предварительным просмотром",
-      "previewsTitle": "Предварительный просмотр",
-      "socials": "Социальные сети",
       "Socials": {
-        "customLinksTitle": "Пользовательские ссылки",
-        "description": "Управляйте присутствием в социальных сетях",
         "Form": {
           "addCustomLinkButton": "Добавить ссылку",
           "customLinkInfo": "Добавьте до 3 пользовательских ссылок, которые будут отображаться в профиле",
@@ -2040,12 +2095,25 @@
           "xPlaceholder": "URL-адрес профиля X",
           "youtubePlaceholder": "URL-адрес канала YouTube"
         },
-        "orgUpdatedSuccess": "Данные OpenU обновлены",
+        "customLinksTitle": "Пользовательские ссылки",
+        "description": "Управляйте присутствием в социальных сетях",
         "orgUpdateFailed": "Не удалось обновить платформу",
+        "orgUpdatedSuccess": "Данные OpenU обновлены",
         "socialLinksTitle": "Социальные ссылки",
         "title": "Социальные ссылки",
         "updatingOrg": "Обновление данных OpenU."
       },
+      "general": "Общее",
+      "generalDescription": "Управление настройками",
+      "generalTitle": "Общее",
+      "landing": "Домашняя страница",
+      "landingDescription": "Настройте домашнюю страницу",
+      "landingTitle": "Домашняя страница",
+      "other": "Другое",
+      "previews": "Изображения и предварительный просмотр",
+      "previewsDescription": "Управление предварительным просмотром",
+      "previewsTitle": "Предварительный просмотр",
+      "socials": "Социальные сети",
       "socialsDescription": "Управление ссылками на социальные сети",
       "socialsTitle": "Социальные сети"
     },
@@ -2061,13 +2129,13 @@
       "saving": "Сохранение...",
       "scriptContentLabel": "Содержимое скрипта",
       "scriptContentPlaceholder": "Введите код JavaScript",
-      "scriptDeletedSuccess": "Скрипт успешно удален",
       "scriptDeleteError": "Не удалось удалить скрипт",
+      "scriptDeletedSuccess": "Скрипт успешно удален",
       "scriptNameLabel": "Название скрипта",
       "scriptNamePlaceholder": "Введите название скрипта",
-      "scripts": "Скрипты",
-      "scriptSavedSuccess": "Скрипт успешно сохранен",
       "scriptSaveError": "Не удалось сохранить скрипт",
+      "scriptSavedSuccess": "Скрипт успешно сохранен",
+      "scripts": "Скрипты",
       "scriptsDescription": "Управляйте пользовательскими скриптами. Используйте с осторожностью.",
       "scriptsWarning": "Для безопасности, пожалуйста, убедитесь, что вы доверяете и понимаете любые скрипты, прежде чем добавлять их. Скрипты могут взаимодействовать со страницами.",
       "tooltipWarning": "Скрипты мощные и могут влиять на безопасность и производительность сайта. Добавляйте скрипты только из надежных источников. Убедитесь, что скрипты соответствуют правилам конфиденциальности и ответственно обрабатывают пользовательские данные. Неправильно реализованные скрипты могут нарушить функциональность или создать уязвимости.",
@@ -2078,7 +2146,6 @@
       }
     },
     "Payments": {
-      "configuration": "Настройка платежей",
       "Configuration": {
         "aboutStripe": {
           "acceptPayments": "Принимайте платежи за курсы и подписки",
@@ -2122,12 +2189,6 @@
         "stripeEnabledSuccess": "Stripe успешно включен",
         "updatingConfig": "Обновление конфигурации..."
       },
-      "configurationInfo": "Настройте и управляйте своим платежным шлюзом",
-      "configureStripe": "Настройте свою учетную запись Stripe.",
-      "contactAdmin": "Пожалуйста, свяжитесь с администратором, чтобы включить платежи.",
-      "createProducts": "Создавайте продукты или подписки.",
-      "customerInfo": "Просмотр и управление информацией о клиентах",
-      "customers": "Клиенты",
       "CustomersPage": {
         "amountHeader": "Сумма",
         "description": "Просматривайте и управляйте информацией о ваших клиентах",
@@ -2145,7 +2206,6 @@
         "typeHeader": "Тип",
         "userHeader": "Пользователь"
       },
-      "goToConfiguration": "Перейти к конфигурации",
       "LinkCourseModal": {
         "alreadyLinked": "Уже связано",
         "linkCourseButton": "Связать курс",
@@ -2159,11 +2219,6 @@
         "noCoursesLinked": "К этому продукту еще не привязаны курсы.",
         "title": "Связанные курсы"
       },
-      "notAvailable": "Платежи недоступны",
-      "notEnabledMessage": "Функция платежей находится в разработке.",
-      "overview": "Обзор",
-      "paidProducts": "Платные продукты",
-      "paidProductsInfo": "Управление платными продуктами и ценами",
       "ProductForm": {
         "benefitsLabel": "Преимущества (необязательно)",
         "benefitsPlaceholder": "Перечислите преимущества, по одному на строку",
@@ -2201,9 +2256,9 @@
       },
       "ProductPage": {
         "archiveButton": "Архивировать",
+        "archiveConfirmButton": "Архивировать продукт",
         "archiveConfirmationMessage": "Вы уверены, что хотите архивировать этот продукт?",
         "archiveConfirmationTitle": "Архивировать {productName}?",
-        "archiveConfirmButton": "Архивировать продукт",
         "benefitsLabel": "Преимущества:",
         "createModalDescription": "Создайте платный курс",
         "createModalTitle": "Создать новый платный курс",
@@ -2239,6 +2294,19 @@
         "showMore": "Показать больше",
         "subscriptionType": "Подписка"
       },
+      "configuration": "Настройка платежей",
+      "configurationInfo": "Настройте и управляйте своим платежным шлюзом",
+      "configureStripe": "Настройте свою учетную запись Stripe.",
+      "contactAdmin": "Пожалуйста, свяжитесь с администратором, чтобы включить платежи.",
+      "createProducts": "Создавайте продукты или подписки.",
+      "customerInfo": "Просмотр и управление информацией о клиентах",
+      "customers": "Клиенты",
+      "goToConfiguration": "Перейти к конфигурации",
+      "notAvailable": "Платежи недоступны",
+      "notEnabledMessage": "Функция платежей находится в разработке.",
+      "overview": "Обзор",
+      "paidProducts": "Платные продукты",
+      "paidProductsInfo": "Управление платными продуктами и ценами",
       "productsSubscriptions": "Продукты и подписки",
       "startSelling": "Начните продавать свои курсы!",
       "title": "Платежи",
@@ -2255,13 +2323,75 @@
       "tryAgainOrContact": "Пожалуйста, попробуйте еще раз или свяжитесь со службой поддержки, если проблема не исчезнет."
     },
     "UserAccountSettings": {
+      "UserAccount": {
+        "EditGeneral": {
+          "addAcademicInfo": "Добавить академическую информацию",
+          "addDetail": "Добавить деталь",
+          "addGeneralInfo": "Добавить общую информацию",
+          "addProfessionalInfo": "Добавить профессиональную информацию",
+          "additionalDetails": "Дополнительные сведения",
+          "ariaLabel": "Выберите изображение профиля для загрузки",
+          "avatarError": "Не удалось загрузить аватар",
+          "avatarSuccess": "Аватар обновлен",
+          "bioLabel": "Биография",
+          "bioPlaceholder": "Расскажите о себе",
+          "changeAvatar": "Изменить аватар",
+          "charactersLeft": "символов осталось",
+          "clearAll": "Очистить все",
+          "description": "Управление данными учетной записи",
+          "detailIconLabel": "Значок",
+          "detailLabelPlaceholder": "Введите метку (например, Должность, Местоположение)",
+          "detailRemove": "Удалить",
+          "detailSelectIconPlaceholder": "Выбрать значок",
+          "detailTextLabel": "Текст",
+          "detailTextPlaceholder": "Введите текст детали",
+          "emailChangeWarning": "Изменение адреса электронной почты потребует повторного входа",
+          "emailLabel": "Электронная почта",
+          "emailPlaceholder": "Введите ваш адрес электронной почты",
+          "firstNameLabel": "Имя",
+          "firstNamePlaceholder": "Введите ваше имя",
+          "languageLabel": "Язык",
+          "lastNameLabel": "Фамилия",
+          "lastNamePlaceholder": "Введите вашу фамилию",
+          "loadingError": "Не удалось загрузить необходимые данные",
+          "newDetail": "Новая деталь",
+          "profilePicture": "Изображение профиля",
+          "recommendedSize": "Рекомендуемый размер: 100x100",
+          "saveChanges": "Сохранить изменения",
+          "saving": "Сохранение...",
+          "selectFile": "Выберите изображение профиля",
+          "supportedFormats": "Поддерживаемые форматы: JPG, PNG",
+          "title": "Настройки аккаунта",
+          "uploadingAvatar": "Загрузка",
+          "usernameLabel": "Имя пользователя",
+          "usernamePlaceholder": "Введите имя пользователя"
+        },
+        "EditPassword": {
+          "Notifications": {
+            "passwordUpdateError": "Не удалось обновить пароль",
+            "passwordUpdateSuccess": "Пароль успешно обновлен",
+            "promptLogoutOnPasswordChange": "Пожалуйста, войдите снова с вашим новым паролем",
+            "updating": "Обновление пароля..."
+          },
+          "confirmPasswordLabel": "Подтвердите пароль",
+          "currentPasswordLabel": "Текущий пароль",
+          "description": "Обновите свой пароль, чтобы обеспечить безопасность учетной записи",
+          "logoutWarning": "Вы будете выведены из системы после смены пароля",
+          "newPasswordLabel": "Новый пароль",
+          "promptLogoutOnPasswordChange": "Пожалуйста, войдите снова с вашим новым паролем",
+          "title": "Изменить пароль",
+          "updateButton": "Обновить пароль",
+          "updatingButton": "Обновление..."
+        }
+      },
       "general": "Общие",
       "generalSection": {
         "addAcademicInfo": "Добавить академическую информацию",
         "addDetail": "Добавить деталь",
         "addGeneralInfo": "Добавить общую информацию",
-        "additionalDetails": "Дополнительные сведения",
         "addProfessionalInfo": "Добавить профессиональную информацию",
+        "additionalDetails": "Дополнительные сведения",
+        "ariaLabel": "Выберите файл изображения для загрузки",
         "avatarError": "Не удалось загрузить аватар",
         "avatarSuccess": "Аватар обновлен",
         "bio": "Биография",
@@ -2305,6 +2435,7 @@
         "recommendedSize": "Рекомендуемый размер: 100x100",
         "saveChanges": "Сохранить изменения",
         "saving": "Сохранение...",
+        "selectFile": "Выберите файл изображения",
         "title": "Настройки аккаунта",
         "uploadingAvatar": "Загрузка",
         "username": "Имя пользователя",
@@ -2389,65 +2520,7 @@
         },
         "untitledSection": "Раздел без названия"
       },
-      "title": "Настройки аккаунта",
-      "UserAccount": {
-        "EditGeneral": {
-          "addAcademicInfo": "Добавить академическую информацию",
-          "addDetail": "Добавить деталь",
-          "addGeneralInfo": "Добавить общую информацию",
-          "additionalDetails": "Дополнительные сведения",
-          "addProfessionalInfo": "Добавить профессиональную информацию",
-          "avatarError": "Не удалось загрузить аватар",
-          "avatarSuccess": "Аватар обновлен",
-          "bioLabel": "Биография",
-          "bioPlaceholder": "Расскажите о себе",
-          "changeAvatar": "Изменить аватар",
-          "charactersLeft": "символов осталось",
-          "clearAll": "Очистить все",
-          "description": "Управление данными учетной записи",
-          "detailIconLabel": "Значок",
-          "detailLabelPlaceholder": "Введите метку (например, Должность, Местоположение)",
-          "detailRemove": "Удалить",
-          "detailSelectIconPlaceholder": "Выбрать значок",
-          "detailTextLabel": "Текст",
-          "detailTextPlaceholder": "Введите текст детали",
-          "emailChangeWarning": "Изменение адреса электронной почты потребует повторного входа",
-          "emailLabel": "Электронная почта",
-          "emailPlaceholder": "Введите ваш адрес электронной почты",
-          "firstNameLabel": "Имя",
-          "firstNamePlaceholder": "Введите ваше имя",
-          "languageLabel": "Язык",
-          "lastNameLabel": "Фамилия",
-          "lastNamePlaceholder": "Введите вашу фамилию",
-          "loadingError": "Не удалось загрузить необходимые данные",
-          "newDetail": "Новая деталь",
-          "profilePicture": "Изображение профиля",
-          "recommendedSize": "Рекомендуемый размер: 100x100",
-          "saveChanges": "Сохранить изменения",
-          "saving": "Сохранение...",
-          "title": "Настройки аккаунта",
-          "uploadingAvatar": "Загрузка",
-          "usernameLabel": "Имя пользователя",
-          "usernamePlaceholder": "Введите имя пользователя"
-        },
-        "EditPassword": {
-          "confirmPasswordLabel": "Подтвердите пароль",
-          "currentPasswordLabel": "Текущий пароль",
-          "description": "Обновите свой пароль, чтобы обеспечить безопасность учетной записи",
-          "logoutWarning": "Вы будете выведены из системы после смены пароля",
-          "newPasswordLabel": "Новый пароль",
-          "Notifications": {
-            "passwordUpdateError": "Не удалось обновить пароль",
-            "passwordUpdateSuccess": "Пароль успешно обновлен",
-            "promptLogoutOnPasswordChange": "Пожалуйста, войдите снова с вашим новым паролем",
-            "updating": "Обновление пароля..."
-          },
-          "promptLogoutOnPasswordChange": "Пожалуйста, войдите снова с вашим новым паролем",
-          "title": "Изменить пароль",
-          "updateButton": "Обновить пароль",
-          "updatingButton": "Обновление..."
-        }
-      }
+      "title": "Настройки аккаунта"
     },
     "UserProfileBuilder": {
       "AffiliationEditor": {
@@ -2470,7 +2543,6 @@
         "autoDisplayMessage": "Ваши авторские курсы будут автоматически отображаться в этом разделе.",
         "title": "Курсы"
       },
-      "description": "Настройте свой профессиональный профиль",
       "EducationEditor": {
         "addEducationButton": "Добавить образование",
         "currentLabel": "По настоящее время",
@@ -2521,23 +2593,17 @@
         "addImageButton": "Добавить изображение",
         "captionLabel": "Подпись",
         "captionPlaceholder": "Подпись к изображению",
-        "imagesLabel": "Изображения",
         "imageUrlLabel": "URL изображения",
         "imageUrlPlaceholder": "Введите URL изображения",
+        "imagesLabel": "Изображения",
         "title": "Галерея изображений"
       },
       "LinksEditor": {
         "addLinkButton": "Добавить ссылку",
-        "linksLabel": "Ссылки",
         "linkTitlePlaceholder": "Название ссылки",
+        "linksLabel": "Ссылки",
         "title": "Ссылки",
         "urlPlaceholder": "URL"
-      },
-      "saveButton": "Сохранить изменения",
-      "savingButton": "Сохранение...",
-      "SectionsPanel": {
-        "addSectionButton": "Добавить раздел",
-        "title": "Разделы"
       },
       "SectionTypes": {
         "affiliation": {
@@ -2593,6 +2659,10 @@
           "label": "Текст и изображения"
         }
       },
+      "SectionsPanel": {
+        "addSectionButton": "Добавить раздел",
+        "title": "Разделы"
+      },
       "SkillsEditor": {
         "addSkillButton": "Добавить навык",
         "categoryPlaceholder": "Категория (необязательно)",
@@ -2610,6 +2680,9 @@
         "contentPlaceholder": "Введите содержание здесь...",
         "title": "Текстовое содержание"
       },
+      "description": "Настройте свой профессиональный профиль",
+      "saveButton": "Сохранить изменения",
+      "savingButton": "Сохранение...",
       "title": "Редактор профиля"
     },
     "UserSettings": {
@@ -2627,14 +2700,14 @@
         },
         "inviteCodeLabel": "Код приглашения",
         "inviteCodeTooltip": "Используйте один из кодов приглашения, которые вы сгенерировали на странице доступа к регистрации",
+        "inviteSentSuccess": "Приглашение отправлено",
         "invitedUsersDescription": "Пользователи, которые были приглашены присоединиться к OpenU",
         "invitedUsersTitle": "Приглашенные пользователи",
-        "inviteSentSuccess": "Приглашение отправлено",
         "noInviteCodesAvailable": "Нет доступных кодов приглашения",
         "noInvitedUsers": "Приглашенных пользователей нет.",
         "selectInviteCode": "Выберите код приглашения",
-        "sendingInvite": "Отправка приглашения...",
         "sendInvitesButton": "Отправить приглашения по электронной почте",
+        "sendingInvite": "Отправка приглашения...",
         "signupStatusHeader": "Статус регистрации",
         "statusPending": "В ожидании",
         "statusSigned": "Зарегистрирован",
@@ -2740,33 +2813,7 @@
       "usersTitle": "Пользователи"
     }
   },
-  "DashboardMenu": {
-    "mobile": {
-      "assignments": "Задания",
-      "courses": "Курсы",
-      "home": "Главная",
-      "org": "Орг.",
-      "payments": "Платежи",
-      "settings": "Настройки",
-      "users": "Пользователи"
-    },
-    "tooltips": {
-      "assignments": "Задания",
-      "backToHome": "Вернуться на главную",
-      "courses": "Курсы",
-      "home": "Главная панель управления",
-      "logout": "Выйти",
-      "organization": "Настройки OpenU",
-      "payments": "Платежи",
-      "userOwnedCourses": "Курсы @{username}",
-      "users": "Пользователи",
-      "userSettings": "Настройки @{username}",
-      "yourOrganization": "OpenU"
-    }
-  },
   "FixedActivitySecondaryBar": {
-    "activityCounter": "{current} из {total}",
-    "course": "Курс",
     "CourseInfo": {
       "course": "Курс"
     },
@@ -2779,6 +2826,8 @@
       "previous": "Назад",
       "previousActivityTitle": "Назад: {activityName}"
     },
+    "activityCounter": "{current} из {total}",
+    "course": "Курс",
     "next": "Далее",
     "nextActivityTitle": "Далее: {name}",
     "noNextActivity": "Нет следующей активности",
@@ -2985,6 +3034,46 @@
   },
   "Security": {
     "unauthorizedAccessMessage": "У вас нет прав для доступа к этой странице"
+  },
+  "SidebarMenu": {
+    "ariaLabels": {
+      "collapseSidebar": "Свернуть боковую панель",
+      "expandSidebar": "Развернуть боковую панель",
+      "goToHomepage": "Перейти на главную",
+      "openuLogo": "Логотип OpenU",
+      "userSettings": "Настройки пользователя"
+    },
+    "buttons": {
+      "logout": "Выйти",
+      "settings": "Настройки"
+    },
+    "errors": {
+      "failedToLoad": "Не удалось загрузить боковое меню",
+      "retry": "Повторить"
+    },
+    "keyboardShortcut": {
+      "toToggle": "для переключения"
+    },
+    "mobile": {
+      "assignments": "Задания",
+      "courses": "Курсы",
+      "home": "Главная",
+      "org": "Организация",
+      "payments": "Платежи",
+      "settings": "Настройки",
+      "users": "Пользователи"
+    },
+    "orgName": "OpenU",
+    "tooltips": {
+      "assignments": "Задания",
+      "courses": "Курсы",
+      "home": "Главная панель",
+      "logout": "Выйти",
+      "organization": "Настройки организации",
+      "payments": "Платежи",
+      "userSettings": "Настройки @{username}",
+      "users": "Пользователи"
+    }
   },
   "SignupPage": {
     "enterInviteCode": "Введите код приглашения",

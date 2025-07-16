@@ -1,10 +1,9 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { getOrgLogoMediaDirectory } from '@services/media/media';
+import PasswordInput from '@components/ui/custom/password-input';
+import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
-import touEmblemDark from 'public/tou_emblem_dark.png';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPassword } from '@services/auth/auth';
 import { AlertTriangle, Info } from 'lucide-react';
@@ -14,7 +13,6 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { z } from 'zod';
 
@@ -69,168 +67,124 @@ function ResetPasswordClient() {
   };
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
-      <div
-        style={{
-          background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
-        }}
-      >
-        <div className="m-10">
-          <Link
-            prefetch
-            href={getUriWithOrg(org?.slug, '/')}
-          >
-            <Image
-              quality={100}
-              width={30}
-              height={30}
-              src={touEmblemDark}
-              alt="OpenU logo"
-            />
-          </Link>
-        </div>
-        <div className="ml-10 flex h-4/6 flex-row text-white">
-          <div className="m-auto flex flex-wrap items-center space-x-4">
-            <div className="shadow-[0px_4px_16px_rgba(0,0,0,0.02)]">
-              {org?.logo_image ? (
-                <Image
-                  src={`${getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)}`}
-                  alt={org?.name}
-                  width={70}
-                  height={70}
-                  className="inset-0 rounded-xl bg-white shadow-xl ring-1 ring-inset ring-black/10"
-                />
-              ) : (
-                <Image
-                  quality={100}
-                  width={70}
-                  height={70}
-                  src={touEmblemDark}
-                  alt="OpenU logo"
-                />
-              )}
-            </div>
-            <div className="text-xl font-bold">{org?.name}</div>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-row bg-white">
-        <div className="m-auto w-72">
-          <h1 className="mb-4 text-2xl font-bold">{t('title')}</h1>
-          <p className="mb-4 text-sm text-gray-600">{t('enterResetDetails')}</p>
+      <div className="flex h-screen flex-col items-center justify-center bg-neutral-100">
+        <div className="rounded-xl border-2 bg-white p-12 shadow-lg">
+          <div className="m-auto w-72">
+            <h1 className="mb-4 text-2xl font-bold">{t('title')}</h1>
+            <p className="mb-4 text-sm text-gray-600">{t('enterResetDetails')}</p>
 
-          {error && (
-            <div className="shadow-xs mb-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
-              <AlertTriangle size={18} />
-              <div className="text-sm font-bold">{error}</div>
-            </div>
-          )}
-          {message && (
-            <div className="mb-4 flex flex-col gap-2">
-              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 transition-all">
-                <Info size={18} />
-                <div className="text-sm font-bold">{t('success')}</div>
+            {error && (
+              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 transition-all my-4">
+                <AlertTriangle size={22} />
+                <div className="text-sm font-bold">{error}</div>
               </div>
-              <Link
-                href={getUriWithoutOrg(`/login?orgslug=${org.slug}`)}
-                className="text-center text-sm text-blue-600 transition-colors hover:text-blue-800 hover:underline"
-              >
-                {t('loginAgain')}
-              </Link>
-            </div>
-          )}
-
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-4"
-            >
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('email')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder={t('emailPlaceholder')}
-                        autoComplete="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="reset_code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('resetCode')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder={t('resetCodePlaceholder')}
-                        autoComplete="one-time-code"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="new_password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('newPassword')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder={t('newPasswordPlaceholder')}
-                        autoComplete="new-password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="confirm_password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('confirmPassword')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder={t('confirmPasswordPlaceholder')}
-                        autoComplete="new-password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex py-4">
-                <Button
-                  type="submit"
-                  className="w-full font-bold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={form.formState.isSubmitting}
+            )}
+            {message && (
+              <div className="mb-4 flex flex-col gap-2">
+                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 transition-all">
+                  <Info size={18} />
+                  <div className="text-sm font-bold">{t('success')}</div>
+                </div>
+                <Link
+                  href={getUriWithoutOrg(`/login?orgslug=${org.slug}`)}
+                  className="text-center text-sm text-blue-600 transition-colors hover:text-blue-800 hover:underline"
                 >
-                  {form.formState.isSubmitting ? t('loading') : t('changePassword')}
-                </Button>
+                  {t('loginAgain')}
+                </Link>
               </div>
-            </form>
-          </Form>
+            )}
+
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('email')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder={t('emailPlaceholder')}
+                          autoComplete="email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="reset_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('resetCode')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder={t('resetCodePlaceholder')}
+                          autoComplete="one-time-code"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="new_password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('newPassword')}</FormLabel>
+                      <FormControl>
+                        <PasswordInput
+                          placeholder={t('newPasswordPlaceholder')}
+                          autoComplete="new-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="confirm_password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('confirmPassword')}</FormLabel>
+                      <FormControl>
+                        <PasswordInput
+                          placeholder={t('confirmPasswordPlaceholder')}
+                          autoComplete="new-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex py-4">
+                  <Button
+                    type="submit"
+                    className="w-full font-bold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting ? t('loading') : t('changePassword')}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
         </div>
       </div>
     </div>

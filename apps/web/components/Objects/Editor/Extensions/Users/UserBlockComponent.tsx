@@ -222,7 +222,7 @@ function UserBlockComponent(props: any) {
               <div className="flex-shrink-0">
                 <div className="rounded-full">
                   <UserAvatar
-                    width={80}
+                    size="xl"
                     avatar_url={
                       userData.avatar_image
                         ? getUserAvatarMediaDirectory(userData.user_uuid, userData.avatar_image)
@@ -231,7 +231,6 @@ function UserBlockComponent(props: any) {
                     predefined_avatar={userData.avatar_image ? undefined : 'empty'}
                     userId={userData.id}
                     showProfilePopup
-                    rounded="rounded-full"
                   />
                 </div>
               </div>

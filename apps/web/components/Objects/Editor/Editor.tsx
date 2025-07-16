@@ -26,9 +26,9 @@ import TableCell from '@tiptap/extension-table-cell';
 import java from 'highlight.js/lib/languages/java';
 import TableRow from '@tiptap/extension-table-row';
 import html from 'highlight.js/lib/languages/xml';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { common, createLowlight } from 'lowlight';
 import css from 'highlight.js/lib/languages/css';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import StarterKit from '@tiptap/starter-kit';
@@ -335,9 +335,9 @@ function Editor(props: EditorProps) {
 
               <EditorUserProfileWrapper>
                 <UserAvatar
-                  border="border-4"
+                  size="lg"
+                  variant="outline"
                   use_with_session
-                  width={45}
                 />
               </EditorUserProfileWrapper>
             </EditorUsersSection>

@@ -1,36 +1,4 @@
 'use client';
-import { useContributorStatus } from '@/hooks/useContributorStatus';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import AssignmentSubmissionProvider, {
-  useAssignmentSubmission,
-} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
-import { CourseProvider } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
-import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
-import UserAvatar from '@components/Objects/UserAvatar';
-import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
-import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
-import CourseEndView from '@components/Pages/Activity/CourseEndView';
-import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
-import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
-import {
-  getAssignmentFromActivityUUID,
-  getFinalGrade,
-  submitAssignmentForGrading,
-} from '@services/courses/assignments';
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookOpenCheck,
   CheckCircle,
@@ -41,12 +9,44 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
-import { useFormatter, useLocale, useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import AssignmentSubmissionProvider, {
+  useAssignmentSubmission,
+} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
+import {
+  getAssignmentFromActivityUUID,
+  getFinalGrade,
+  submitAssignmentForGrading,
+} from '@services/courses/assignments';
+import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
+import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
+import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
+import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
+import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
+import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+import CourseEndView from '@components/Pages/Activity/CourseEndView';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
+import { CourseProvider } from '@components/Contexts/CourseContext';
+import { useContributorStatus } from '@/hooks/useContributorStatus';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { usePathname, useRouter } from 'next/navigation';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
+import Link from 'next/link';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));
@@ -654,8 +654,8 @@ function ActivityClient(props: ActivityClientProps) {
                                         className="z-[${10-idx}] relative"
                                       >
                                         <UserAvatar
-                                          border="border-2"
-                                          rounded="rounded-full"
+                                          size="xs"
+                                          variant="outline"
                                           avatar_url={
                                             author.user.avatar_image
                                               ? getUserAvatarMediaDirectory(
@@ -665,7 +665,6 @@ function ActivityClient(props: ActivityClientProps) {
                                               : ''
                                           }
                                           predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                                          width={26}
                                           showProfilePopup
                                           userId={author.user.id}
                                         />

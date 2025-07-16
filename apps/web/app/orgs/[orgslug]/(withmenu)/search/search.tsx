@@ -1,7 +1,7 @@
 'use client';
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
+import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnailLanding';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { Book, GraduationCap, Search, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,7 +14,6 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import Link from 'next/link';
-
 // Types from SearchBar component
 interface User {
   username: string;
@@ -132,7 +131,7 @@ const Pagination = ({
 };
 
 const LoadingState = () => (
-  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+  <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
     {[1, 2, 3, 4, 5, 6].map((i) => (
       <div
         key={i}
@@ -391,7 +390,7 @@ function SearchPage() {
                     />
                     {t('courses')} ({searchResults.courses.length})
                   </h2>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
                     {searchResults.courses.map((course) => (
                       <Link
                         key={course.course_uuid}
@@ -419,7 +418,7 @@ function SearchPage() {
                           {course.authors && course.authors.length > 0 && course.authors[0]?.user && (
                             <div className="mt-3 flex items-center gap-2">
                               <UserAvatar
-                                width={20}
+                                size="xs"
                                 avatar_url={
                                   course.authors[0].user.avatar_image
                                     ? getUserAvatarMediaDirectory(
@@ -431,8 +430,6 @@ function SearchPage() {
                                 predefined_avatar={course.authors[0].user.avatar_image ? undefined : 'empty'}
                                 userId={course.authors[0].user.id}
                                 showProfilePopup={false}
-                                rounded="rounded-full"
-                                backgroundColor="bg-gray-100"
                               />
                               <span className="text-xs text-black/40">
                                 {course.authors[0].user.first_name} {course.authors[0].user.last_name}
@@ -456,7 +453,7 @@ function SearchPage() {
                     />
                     {t('collections')} ({searchResults.collections.length})
                   </h2>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                     {searchResults.collections.map((collection) => (
                       <Link
                         key={collection.collection_uuid}
@@ -493,7 +490,7 @@ function SearchPage() {
                     />
                     {t('users')} ({searchResults.users.length})
                   </h2>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                     {searchResults.users.map((user) => (
                       <Link
                         key={user.user_uuid}
@@ -501,15 +498,13 @@ function SearchPage() {
                         className="soft-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                       >
                         <UserAvatar
-                          width={48}
+                          size="lg"
                           avatar_url={
                             user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : ''
                           }
                           predefined_avatar={user.avatar_image ? undefined : 'empty'}
                           userId={user.id}
                           showProfilePopup
-                          rounded="rounded-full"
-                          backgroundColor="bg-gray-100"
                         />
                         <div>
                           <h3 className="text-sm font-medium text-black/80">

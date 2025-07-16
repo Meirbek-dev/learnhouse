@@ -460,6 +460,8 @@ export default function OrgEditImages() {
                     accept={SUPPORTED_FILES}
                     className="hidden"
                     onChange={handleFileChange}
+                    aria-label={t('Buttons.ariaLabelLogo')}
+                    title={t('Buttons.selectLogoFile')}
                   />
                   <button
                     type="button"
@@ -528,6 +530,8 @@ export default function OrgEditImages() {
                     accept={SUPPORTED_FILES}
                     className="hidden"
                     onChange={handleThumbnailChange}
+                    aria-label={t('Buttons.ariaLabelThumbnail')}
+                    title={t('Buttons.selectThumbnailFile')}
                   />
                   <button
                     type="button"
@@ -733,6 +737,8 @@ export default function OrgEditImages() {
                                         className="hidden"
                                         onChange={handlePreviewUpload}
                                         multiple
+                                        aria-label={t('Buttons.ariaLabelPreview')}
+                                        title={t('Buttons.selectPreviewFile')}
                                       />
                                     </>
                                   ) : (

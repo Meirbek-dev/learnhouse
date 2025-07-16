@@ -21,12 +21,12 @@ import { useState } from 'react';
 import * as React from 'react';
 import useSWR from 'swr';
 
-function NewCollection({ params }: { params: Promise<{ orgslug: string }> }) {
+function NewCollection({ params }: { params: { orgslug: string } }) {
   const t = useTranslations('NewCollectionPage');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { orgslug } = React.use(params);
+  const { orgslug } = params;
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [selectedCourses, setSelectedCourses] = React.useState([]) as any;

@@ -1,9 +1,10 @@
 'use client';
 
-import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
+import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnailLanding';
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
+import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
@@ -64,11 +65,11 @@ function CoursesHome(params: CourseProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-8 pb-8">
+      <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-8">
         {courses.map((course: any) => (
           <div
             key={course.course_uuid}
-            className="mx-auto w-full max-w-[400px]"
+            className="mx-auto w-full max-w-[300px]"
           >
             <CourseThumbnail
               customLink={`/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`}

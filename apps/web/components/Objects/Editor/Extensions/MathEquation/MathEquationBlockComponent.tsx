@@ -404,21 +404,26 @@ function MathEquationBlockComponent(props: any) {
                           {'{'}denominator{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('exponents')}</span> x^{'{'}'power'{'}'}
-                        </div>
-                        <div>
-                          <span className="font-medium">{t('subscripts')}</span> x_{'{'}'subscript'
+                          <span className="font-medium">{t('exponents')}</span> x^{'{'}'power'
                           {'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('squareRoot')}</span> \sqrt{'{'}'x'{'}'}
+                          <span className="font-medium">{t('subscripts')}</span> x_{'{'}
+                          'subscript'
+                          {'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('summation')}</span> \sum_{'{'}'lower'
+                          <span className="font-medium">{t('squareRoot')}</span> \sqrt{'{'}'x'
+                          {'}'}
+                        </div>
+                        <div>
+                          <span className="font-medium">{t('summation')}</span> \sum_{'{'}
+                          'lower'
                           {'}'}^{'{'}'upper'{'}'}
                         </div>
                         <div>
-                          <span className="font-medium">{t('integral')}</span> \int_{'{'}'lower'
+                          <span className="font-medium">{t('integral')}</span> \int_{'{'}
+                          'lower'
                           {'}'}^{'{'}'upper'{'}'}
                         </div>
                         <div className="border-t pt-1">

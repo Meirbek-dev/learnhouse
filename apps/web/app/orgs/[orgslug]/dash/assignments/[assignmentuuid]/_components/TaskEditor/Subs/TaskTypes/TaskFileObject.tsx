@@ -401,6 +401,8 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     id="fileInput"
                     style={{ display: 'none' }}
                     onChange={handleFileChange}
+                    aria-label={t('ariaLabel')}
+                    title={t('selectFile')}
                   />
                   <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2.5 text-xs font-medium text-slate-600 antialiased sm:px-5 sm:text-sm">
                     <Loader
@@ -417,6 +419,8 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     id={`fileInput_${assignmentTaskUUID}`}
                     style={{ display: 'none' }}
                     onChange={handleFileChange}
+                    aria-label={t('ariaLabel')}
+                    title={t('selectFile')}
                   />
                   <button
                     className="shadow-xs flex items-center rounded-md bg-emerald-500 px-4 py-2.5 text-xs font-medium text-white antialiased transition-colors hover:bg-emerald-600 sm:px-5 sm:text-sm"

@@ -277,6 +277,8 @@ function UpdateTaskRef() {
                 id="fileInput"
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
+                aria-label={t('ariaLabel')}
+                title={t('chooseFile')}
               />
               <div className="text-gray mt-4 flex animate-pulse items-center rounded-md bg-slate-200 px-4 py-2 text-sm font-bold antialiased">
                 <Loader
@@ -294,6 +296,8 @@ function UpdateTaskRef() {
                 id="fileInput"
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
+                aria-label={t('ariaLabel')}
+                title={t('chooseFile')}
               />
               <button
                 className="text-gray mt-6 flex items-center rounded-md px-4 text-sm font-semibold antialiased"

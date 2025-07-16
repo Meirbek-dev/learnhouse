@@ -81,7 +81,7 @@ async function DashboardHome() {
 
         <Link
           href={'/dash/user-account/settings/general'}
-          className="mx-auto flex max-w-md cursor-pointer items-center rounded-lg bg-white p-4 shadow-lg transition-all ease-linear hover:scale-105"
+          className="mx-auto flex max-w-md cursor-pointer items-center rounded-lg bg-background p-4 shadow-lg transition-all ease-linear hover:scale-105"
         >
           <div className="mx-auto flex flex-col items-center gap-2 text-center sm:flex-row sm:gap-3 sm:text-left">
             <Settings
@@ -113,7 +113,7 @@ function DashboardCard({
   return (
     <Link
       href={href}
-      className="mx-auto flex w-full cursor-pointer items-center rounded-lg bg-white p-6 shadow-lg transition-all ease-linear hover:scale-105 sm:w-[250px]"
+      className="mx-auto flex w-full cursor-pointer items-center rounded-lg bg-background p-6 shadow-lg transition-all ease-linear hover:scale-105 sm:w-[250px]"
     >
       <div className="mx-auto flex flex-col gap-2">
         {icon}

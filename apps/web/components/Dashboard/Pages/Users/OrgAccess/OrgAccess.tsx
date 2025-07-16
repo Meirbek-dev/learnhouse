@@ -191,7 +191,9 @@ function OrgAccess() {
                         </TableCell>
                         <TableCell>
                           {invite.expiration_date
-                            ? format(new Date(invite.expiration_date), 'dd/MM/yyyy', { locale })
+                            ? format(new Date(invite.expiration_date), 'dd/MM/yyyy', {
+                                locale,
+                              })
                             : '-'}
                         </TableCell>
                         <TableCell>

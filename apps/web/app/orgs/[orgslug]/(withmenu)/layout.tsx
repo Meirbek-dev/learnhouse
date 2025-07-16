@@ -1,6 +1,6 @@
 'use client';
 
-import { OrgMenu } from '@components/Objects/Menus/OrgMenu';
+import OrgMenu from '@components/Objects/Menus/org-menu';
 import { Children, cloneElement, use } from 'react';
 import '@styles/globals.css';
 
@@ -14,6 +14,8 @@ export default function RootLayout(props: { children: React.ReactNode; params: P
         key={`${params?.orgslug}-orgmenu`}
         orgslug={params?.orgslug}
       />
+      {/* Spacer for fixed header */}
+      <div className="h-[52px]" />
       {Children.map(children, (child, index) =>
         cloneElement(child as React.ReactElement, {
           key: `${params.orgslug}-child-${index}`,

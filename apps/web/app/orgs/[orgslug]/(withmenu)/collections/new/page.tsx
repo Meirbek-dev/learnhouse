@@ -42,6 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
   };
 }
 
-export default function Page(props: any) {
-  return <NewCollection {...props} />;
+export default async function Page(props: any) {
+  const params = await props.params;
+  return <NewCollection params={params} />;
 }

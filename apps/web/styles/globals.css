@@ -208,6 +208,10 @@
 }
 
 @layer base {
+  * {
+    @apply border-border outline-ring/30;
+  }
+
   *,
   ::after,
   ::before,
@@ -217,7 +221,6 @@
   }
 
   html {
-    scroll-behavior: smooth;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     font-variant-ligatures: common-ligatures contextual;
     -webkit-font-smoothing: antialiased;
@@ -226,6 +229,7 @@
   }
 
   body {
+    @apply bg-background text-foreground antialiased;
     letter-spacing: var(--tracking-normal);
     font-feature-settings:
       'kern' 1,
@@ -340,15 +344,5 @@
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-muted-foreground) var(--color-background);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/30;
-  }
-
-  body {
-    @apply bg-background text-foreground antialiased;
   }
 }

@@ -9,7 +9,7 @@ import { updateAssignment } from '@services/courses/assignments';
 import { updateActivity } from '@services/courses/activities';
 import { useParams, useSearchParams } from 'next/navigation';
 import { getAPIUrl } from '@services/config/config';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';

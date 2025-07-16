@@ -19,7 +19,7 @@ import { AlignCenter, Code, GripHorizontal, GripVertical, Link as LinkIcon } fro
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Textarea } from '@components/ui/textarea';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';

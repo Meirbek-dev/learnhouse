@@ -265,9 +265,8 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
             <div className="flex items-center space-x-2">
               <div className="">
                 <UserAvatar
-                  rounded="rounded-lg"
-                  border="border-2"
-                  width={35}
+                  size="sm"
+                  variant="outline"
                 />
               </div>
               <div className="w-full">
@@ -311,16 +310,14 @@ function AIMessage(props: AIMessageProps) {
       <div className="">
         {props.message.sender == 'ai' ? (
           <UserAvatar
-            rounded="rounded-lg"
-            border="border-2"
+            size="sm"
+            variant="outline"
             predefined_avatar="ai"
-            width={35}
           />
         ) : (
           <UserAvatar
-            rounded="rounded-lg"
-            border="border-2"
-            width={35}
+            size="sm"
+            variant="outline"
           />
         )}
       </div>
@@ -375,9 +372,8 @@ const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }
               <span className="items-center">{t('hello')}</span>
               <span className="flex items-center space-x-2 capitalize">
                 <UserAvatar
-                  rounded="rounded-lg"
-                  border="border-2"
-                  width={35}
+                  size="sm"
+                  variant="outline"
                 />
                 <span>{session.data.user.first_name ?? session.data.user.username},</span>
               </span>

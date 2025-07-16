@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 function DashMobileMenu() {
   const session = useLHSession() as any;
-  const t = useTranslations('DashboardMenu');
+  const t = useTranslations('SidebarMenu');
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
 
   return (
@@ -19,7 +19,7 @@ function DashMobileMenu() {
         background:
           'linear-gradient(160deg, #0c1222 0%, #1a2332 30%, #2d3748 60%, #4a5568 100%), radial-gradient(ellipse at top left, rgba(99, 179, 237, 0.12) 0%, transparent 60%), radial-gradient(ellipse at bottom right, rgba(167, 139, 250, 0.08) 0%, transparent 60%)',
       }}
-      className="fixed bottom-0 left-0 right-0 text-white shadow-xl backdrop-blur-lg"
+      className="fixed bottom-0 left-0 right-0 z-50 text-white shadow-xl backdrop-blur-lg"
     >
       <div className="flex h-16 items-center justify-around px-2">
         <AdminAuthorization authorizationMode="component">

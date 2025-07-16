@@ -130,15 +130,14 @@ function CourseThumbnail({ course, orgslug, customLink }: PropsType) {
                   style={{ zIndex: displayedAuthors.length - index }}
                 >
                   <UserAvatar
-                    border="border-2"
-                    rounded="rounded-full"
+                    size="sm"
+                    variant="outline"
                     avatar_url={
                       author.user.avatar_image
                         ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image)
                         : ''
                     }
                     predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                    width={32}
                     showProfilePopup
                     userId={author.user.id}
                   />

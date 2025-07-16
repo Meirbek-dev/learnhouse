@@ -71,8 +71,8 @@ function ForgotPasswordClient() {
               <p className="mb-4 text-sm">{t('enterEmailMessage')}</p>
 
               {error && (
-                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 transition-all">
-                  <AlertTriangle size={18} />
+                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 transition-all my-4">
+                  <AlertTriangle size={22} />
                   <div className="text-sm font-bold">{error}</div>
                 </div>
               )}

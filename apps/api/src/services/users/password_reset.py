@@ -9,16 +9,9 @@ from ulid import ULID
 
 from config.config import get_openu_config
 from src.db.organizations import Organization, OrganizationRead
-from src.db.users import (
-    AnonymousUser,
-    PublicUser,
-    User,
-    UserRead,
-)
+from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import generate_secure_code, security_hash_password
-from src.services.users.emails import (
-    send_password_reset_email,
-)
+from src.services.users.emails import send_password_reset_email
 
 
 async def send_reset_password_code(
@@ -103,7 +96,7 @@ async def send_reset_password_code(
     if not isEmailSent:
         raise HTTPException(
             status_code=500,
-            detail="Issue with sending reset code",
+            detail="Ошибка при отправлении кода сброса пароля",
         )
 
     return "Reset code sent"

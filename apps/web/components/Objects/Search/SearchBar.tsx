@@ -21,7 +21,8 @@ import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
+import { removeCoursePrefix } from '../Thumbnails/CourseThumbnailLanding';
+import { Input } from '@components/ui/input';
 import UserAvatar from '../UserAvatar';
 
 interface User {
@@ -381,13 +382,11 @@ export const SearchBar: FC<SearchBarProps> = ({
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
               >
                 <UserAvatar
-                  width={40}
+                  size="md"
                   avatar_url={user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : ''}
                   predefined_avatar={user.avatar_image ? undefined : 'empty'}
                   userId={user.id}
                   showProfilePopup
-                  rounded="rounded-full"
-                  backgroundColor="bg-gray-100"
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -429,25 +428,25 @@ export const SearchBar: FC<SearchBarProps> = ({
       className={`relative ${className}`}
     >
       <div className="group relative">
-        <input
-          type="text"
+        <Input
+          type="search"
+          className="peer ps-10 pe-2"
           value={searchQuery}
           onChange={handleSearchChange}
           onFocus={() => setShowResults(true)}
           onKeyDown={handleKeyDown}
           placeholder={t('placeholder')}
-          className="soft-shadow h-9 w-full rounded-xl bg-white pl-11 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
         />
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
           <Search
             className="text-black/40 transition-colors group-focus-within:text-black/60"
-            size={18}
+            size={16}
           />
         </div>
       </div>
 
       <div
-        className={`soft-shadow absolute z-50 mt-2 w-full transform divide-y divide-black/5 overflow-hidden rounded-xl bg-white transition-all duration-200 ease-in-out ${showResults ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[400px]'}`}
+        className={`soft-shadow absolute z-50 mt-2 w-full transform divide-y divide-black/5 overflow-hidden rounded-xl bg-white transition-all duration-200 ease-in-out ${showResults ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
       >
         {!searchQuery.trim() || isInitialLoad ? (
           MemoizedEmptyState
