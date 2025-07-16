@@ -335,9 +335,9 @@ function Editor(props: EditorProps) {
 
               <EditorUserProfileWrapper>
                 <UserAvatar
-                  border="border-4"
+                  size="lg"
+                  variant="outline"
                   use_with_session
-                  width={45}
                 />
               </EditorUserProfileWrapper>
             </EditorUsersSection>

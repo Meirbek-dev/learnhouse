@@ -142,9 +142,8 @@ const LoggedInJoinScreen = (props: any) => {
           <span className="items-center">{t('hi')}</span>
           <span className="flex items-center space-x-2 capitalize">
             <UserAvatar
-              rounded="rounded-xl"
-              border="border-4"
-              width={35}
+              size="sm"
+              variant="outline"
             />
             <span>{session.data.username},</span>
           </span>

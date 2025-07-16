@@ -213,9 +213,8 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                     {person.username ? (
                       <UserAvatar
                         username={person.username}
-                        width={96}
-                        rounded="rounded-full"
-                        border="border-4"
+                        size="2xl"
+                        variant="outline"
                         showProfilePopup
                       />
                     ) : person.image_url && person.image_url.trim() !== '' ? (

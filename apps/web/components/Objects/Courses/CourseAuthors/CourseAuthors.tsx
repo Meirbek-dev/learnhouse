@@ -66,15 +66,14 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
           >
             <div className="ring-white">
               <UserAvatar
-                border={borderSize}
-                rounded="rounded-full"
+                size={isMobile ? "xl" : "2xl"}
+                variant="outline"
                 avatar_url={
                   author.user.avatar_image
                     ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image)
                     : ''
                 }
                 predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                width={avatarSize}
                 showProfilePopup
                 userId={author.user.id}
               />

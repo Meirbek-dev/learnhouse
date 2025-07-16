@@ -382,13 +382,11 @@ export const SearchBar: FC<SearchBarProps> = ({
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/[0.02]"
               >
                 <UserAvatar
-                  width={40}
+                  size="md"
                   avatar_url={user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : ''}
                   predefined_avatar={user.avatar_image ? undefined : 'empty'}
                   userId={user.id}
                   showProfilePopup
-                  rounded="rounded-full"
-                  backgroundColor="bg-gray-100"
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">

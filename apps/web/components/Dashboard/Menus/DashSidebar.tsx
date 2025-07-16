@@ -386,10 +386,9 @@ function DashSidebar({ className }: SidebarProps) {
           <div className={`flex items-center gap-3 min-w-0 ${isCollapsed ? 'flex-col gap-2' : ''}`}>
             <div className="relative shrink-0">
               <UserAvatar
-                border="border-2"
-                width={32}
+                size="sm"
+                variant="outline"
               />
-              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-1 border-sidebar" />
             </div>
             <div
               className={`min-w-0 flex-1 overflow-hidden transition-all duration-300 ${

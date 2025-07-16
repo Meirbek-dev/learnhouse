@@ -102,10 +102,10 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
         <div className="flex justify-between space-x-2">
           <div className="flex space-x-2">
             <UserAvatar
-              border="border-4"
+              size="md"
+              variant="outline"
               avatar_url={getUserAvatarMediaDirectory(user?.user_uuid, user?.avatar_image)}
               predefined_avatar={user?.avatar_image ? undefined : 'empty'}
-              width={40}
             />
             <div className="flex flex-col">
               {user?.first_name && user?.last_name ? (

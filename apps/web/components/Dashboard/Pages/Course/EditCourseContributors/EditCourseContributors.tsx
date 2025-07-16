@@ -545,13 +545,11 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 />
                               </div>
                               <UserAvatar
-                                width={40}
+                                size="md"
                                 avatar_url={user.avatar_url}
                                 predefined_avatar={user.avatar_image ? undefined : 'empty'}
                                 userId={user.id}
                                 showProfilePopup
-                                rounded="rounded-full"
-                                backgroundColor="bg-gray-100"
                               />
                               <div>
                                 <div className="font-medium text-gray-900">
@@ -660,8 +658,8 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                           </TableCell>
                           <TableCell>
                             <UserAvatar
-                              width={30}
-                              border="border-2"
+                              size="sm"
+                              variant="outline"
                               avatar_url={
                                 contributor.user.avatar_image
                                   ? getUserAvatarMediaDirectory(
@@ -670,7 +668,6 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                     )
                                   : ''
                               }
-                              rounded="rounded"
                               predefined_avatar={contributor.user.avatar_image === '' ? 'empty' : undefined}
                             />
                           </TableCell>

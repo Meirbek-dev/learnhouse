@@ -1,5 +1,6 @@
 'use client';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getUserByUsername } from '@services/users/users';
@@ -7,22 +8,42 @@ import { getUriWithOrg } from '@services/config/config';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { User } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 import UserProfilePopup from './UserProfilePopup';
 
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+export type AvatarVariant = 'default' | 'outline' | 'ghost';
+
 interface UserAvatarProps {
-  width?: number;
+  size?: AvatarSize;
+  variant?: AvatarVariant;
   avatar_url?: string;
   use_with_session?: boolean;
-  rounded?: 'rounded-md' | 'rounded-xl' | 'rounded-lg' | 'rounded-full' | 'rounded';
-  border?: 'border-2' | 'border-4' | 'border-8';
-  borderColor?: string;
   predefined_avatar?: 'ai' | 'empty';
-  backgroundColor?: 'bg-white' | 'bg-gray-100';
   showProfilePopup?: boolean;
   userId?: number;
   username?: string;
+  className?: string;
+  fallbackText?: string;
 }
+
+const sizeVariants = {
+  'xs': 'h-6 w-6 text-[10px]',
+  'sm': 'h-8 w-8 text-xs',
+  'md': 'h-10 w-10 text-sm',
+  'lg': 'h-12 w-12 text-base',
+  'xl': 'h-16 w-16 text-lg',
+  '2xl': 'h-20 w-20 text-xl',
+  '3xl': 'h-32 w-32 text-2xl',
+};
+
+const variantStyles = {
+  default: 'border-2 border-background shadow-md',
+  outline: 'border-2 border-border',
+  ghost: 'border-0',
+};
 
 function UserAvatar(props: UserAvatarProps) {
   const t = useTranslations('Components.UserAvatar');
@@ -30,11 +51,23 @@ function UserAvatar(props: UserAvatarProps) {
   const params = useParams() as any;
   const [userData, setUserData] = useState<any>(null);
 
+  const {
+    size = 'md',
+    variant = 'default',
+    avatar_url,
+    predefined_avatar,
+    showProfilePopup,
+    userId,
+    username,
+    className,
+    fallbackText,
+  } = props;
+
   useEffect(() => {
     const fetchUserByUsername = async () => {
-      if (props.username) {
+      if (username) {
         try {
-          const data = await getUserByUsername(props.username);
+          const data = await getUserByUsername(username);
           setUserData(data);
         } catch (error) {
           console.error('Error fetching user by username:', error);
@@ -43,7 +76,7 @@ function UserAvatar(props: UserAvatarProps) {
     };
 
     fetchUserByUsername();
-  }, [props.username]);
+  }, [username]);
 
   const isExternalUrl = (url: string): boolean => {
     return url.startsWith('http://') || url.startsWith('https://');
@@ -60,24 +93,24 @@ function UserAvatar(props: UserAvatarProps) {
 
   const getAvatarUrl = (): string => {
     // If predefined avatar is specified
-    if (props.predefined_avatar) {
-      const avatarType = props.predefined_avatar === 'ai' ? 'tou_emblem_light.png' : 'empty_avatar.png';
+    if (predefined_avatar) {
+      const avatarType = predefined_avatar === 'ai' ? 'tou_emblem_light.png' : 'empty_avatar.png';
       return getUriWithOrg(params.orgslug, `/${avatarType}`);
     }
 
     // If avatar_url prop is provided
-    if (props.avatar_url) {
+    if (avatar_url) {
       // Check if it's a malformed URL (external URL processed through getUserAvatarMediaDirectory)
-      const extractedUrl = extractExternalUrl(props.avatar_url);
+      const extractedUrl = extractExternalUrl(avatar_url);
       if (extractedUrl) {
         return extractedUrl;
       }
       // If it's a direct external URL
-      if (isExternalUrl(props.avatar_url)) {
-        return props.avatar_url;
+      if (isExternalUrl(avatar_url)) {
+        return avatar_url;
       }
       // Otherwise use as is
-      return props.avatar_url;
+      return avatar_url;
     }
 
     // If we have user data from username fetch
@@ -106,21 +139,48 @@ function UserAvatar(props: UserAvatarProps) {
     return getUriWithOrg(params.orgslug, '/empty_avatar.png');
   };
 
-  const avatarImage = (
-    <img
-      alt={t('altText')}
-      width={props.width ?? 50}
-      height={props.width ?? 50}
-      src={getAvatarUrl()}
-      className={` ${props.avatar_url && session?.data?.user?.avatar_image ? '' : 'bg-gray-700'} ${props.border ? `border ${props.border}` : ''} ${props.borderColor ?? 'border-white'} ${props.backgroundColor ?? 'bg-gray-100'} aspect-square shadow-md shadow-gray-300/45 w-[${props.width ?? 50}px] h-[${props.width ?? 50}px] ${props.rounded ?? 'rounded-xl'} `}
-    />
+  const getFallbackText = (): string => {
+    if (fallbackText) return fallbackText;
+
+    // Try to get initials from userData
+    if (userData?.first_name && userData?.last_name) {
+      return `${userData.first_name[0]}${userData.last_name[0]}`.toUpperCase();
+    }
+
+    // Try to get initials from session
+    if (session?.data?.user?.first_name && session?.data?.user?.last_name) {
+      return `${session.data.user.first_name[0]}${session.data.user.last_name[0]}`.toUpperCase();
+    }
+
+    // Try to get first letter from username
+    if (userData?.username) {
+      return userData.username[0].toUpperCase();
+    }
+
+    if (session?.data?.user?.username) {
+      return session.data.user.username[0].toUpperCase();
+    }
+
+    return '?';
+  };
+
+  const avatarElement = (
+    <Avatar className={cn(sizeVariants[size], variantStyles[variant], className)}>
+      <AvatarImage
+        src={getAvatarUrl()}
+        alt={t('altText')}
+      />
+      <AvatarFallback className="bg-muted text-muted-foreground">
+        {predefined_avatar === 'ai' ? <User className="h-[60%] w-[60%]" /> : getFallbackText()}
+      </AvatarFallback>
+    </Avatar>
   );
 
-  if (props.showProfilePopup && (props.userId || userData?.id)) {
-    return <UserProfilePopup userId={props.userId || userData?.id}>{avatarImage}</UserProfilePopup>;
+  if (showProfilePopup && (userId || userData?.id)) {
+    return <UserProfilePopup userId={userId || userData?.id}>{avatarElement}</UserProfilePopup>;
   }
 
-  return avatarImage;
+  return avatarElement;
 }
 
 export default UserAvatar;

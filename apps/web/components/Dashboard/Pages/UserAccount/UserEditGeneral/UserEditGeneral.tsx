@@ -261,9 +261,9 @@ interface UserEditFormProps {
 
 // Form component to handle the details section
 const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
-  const t = useTranslations('DashPage.UserAccountSettings.generalSection');
   const tIcons = useTranslations('Components.UserProfilePopup.Icons');
   const tTemplates = useTranslations('DashPage.UserAccountSettings.generalSection.detailTemplateLabels');
+  const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
   const AVAILABLE_ICONS = useMemo(
     () =>
@@ -557,14 +557,14 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                 )}
                 {profilePicture.localAvatar ? (
                   <UserAvatar
-                    border="border-8"
-                    width={120}
+                    size="3xl"
+                    variant="outline"
                     avatar_url={URL.createObjectURL(profilePicture.localAvatar)}
                   />
                 ) : (
                   <UserAvatar
-                    border="border-8"
-                    width={120}
+                    size="3xl"
+                    variant="outline"
                   />
                 )}
                 {profilePicture.isLoading ? (

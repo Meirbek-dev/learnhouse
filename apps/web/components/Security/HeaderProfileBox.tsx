@@ -88,9 +88,8 @@ export const HeaderProfileBox = () => {
           </Tooltip>
           <div className="flex items-center">
             <UserAvatar
-              border="border-2"
-              rounded="rounded-lg"
-              width={32}
+              size="sm"
+              variant="outline"
             />
           </div>
         </div>

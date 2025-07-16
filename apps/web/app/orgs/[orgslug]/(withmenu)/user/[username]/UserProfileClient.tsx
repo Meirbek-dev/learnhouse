@@ -123,14 +123,13 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
         <div className="absolute -top-24 left-8">
           <div className="overflow-hidden rounded-xl border-4 border-white shadow-lg">
             <UserAvatar
-              width={150}
+              size="3xl"
               avatar_url={
                 userData.avatar_image ? getUserAvatarMediaDirectory(userData.user_uuid, userData.avatar_image) : ''
               }
               {...(!userData.avatar_image && { predefined_avatar: 'empty' })}
               userId={userData.id}
               showProfilePopup
-              rounded="rounded-xl"
             />
           </div>
         </div>

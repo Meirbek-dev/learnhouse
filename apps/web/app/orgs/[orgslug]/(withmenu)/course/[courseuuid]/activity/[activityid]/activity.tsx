@@ -654,8 +654,8 @@ function ActivityClient(props: ActivityClientProps) {
                                         className="z-[${10-idx}] relative"
                                       >
                                         <UserAvatar
-                                          border="border-2"
-                                          rounded="rounded-full"
+                                          size="xs"
+                                          variant="outline"
                                           avatar_url={
                                             author.user.avatar_image
                                               ? getUserAvatarMediaDirectory(
@@ -665,7 +665,6 @@ function ActivityClient(props: ActivityClientProps) {
                                               : ''
                                           }
                                           predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                                          width={26}
                                           showProfilePopup
                                           userId={author.user.id}
                                         />

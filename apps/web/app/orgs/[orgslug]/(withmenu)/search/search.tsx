@@ -418,7 +418,7 @@ function SearchPage() {
                           {course.authors && course.authors.length > 0 && course.authors[0]?.user && (
                             <div className="mt-3 flex items-center gap-2">
                               <UserAvatar
-                                width={20}
+                                size="xs"
                                 avatar_url={
                                   course.authors[0].user.avatar_image
                                     ? getUserAvatarMediaDirectory(
@@ -430,8 +430,6 @@ function SearchPage() {
                                 predefined_avatar={course.authors[0].user.avatar_image ? undefined : 'empty'}
                                 userId={course.authors[0].user.id}
                                 showProfilePopup={false}
-                                rounded="rounded-full"
-                                backgroundColor="bg-gray-100"
                               />
                               <span className="text-xs text-black/40">
                                 {course.authors[0].user.first_name} {course.authors[0].user.last_name}
@@ -500,15 +498,13 @@ function SearchPage() {
                         className="soft-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                       >
                         <UserAvatar
-                          width={48}
+                          size="lg"
                           avatar_url={
                             user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : ''
                           }
                           predefined_avatar={user.avatar_image ? undefined : 'empty'}
                           userId={user.id}
                           showProfilePopup
-                          rounded="rounded-full"
-                          backgroundColor="bg-gray-100"
                         />
                         <div>
                           <h3 className="text-sm font-medium text-black/80">
