@@ -66,7 +66,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
           >
             <div className="ring-white">
               <UserAvatar
-                size={isMobile ? "xl" : "2xl"}
+                size={isMobile ? 'xl' : '2xl'}
                 variant="outline"
                 avatar_url={
                   author.user.avatar_image
