@@ -53,13 +53,13 @@ function AssignmentsHome() {
   }, [courses, getAvailableAssignmentsForCourse]);
 
   return (
-    <div className="flex w-full">
-      <div className="mr-4 flex w-full flex-col space-y-5 pl-4 tracking-tighter sm:mr-10 sm:pl-10">
+    <div className="flex min-h-screen w-full">
+      <div className="mr-4 flex w-full flex-col min-h-full space-y-5 pl-4 tracking-tighter sm:mr-10 sm:pl-10">
         <div className="flex flex-col space-y-2">
           <BreadCrumbs type="assignments" />
           <h1 className="flex pt-3 text-4xl font-bold">{t('assignments')}</h1>
         </div>
-        <div className="flex w-full flex-col space-y-3">
+        <div className="flex w-full flex-col space-y-3 pb-8">
           {courseAssignments.map((assignments: any, index: number) => (
             <div
               key={index}

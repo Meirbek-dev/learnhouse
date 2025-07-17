@@ -50,10 +50,7 @@ function CourseUpdates() {
   }, []);
 
   return (
-    <div
-      style={{ position: 'relative' }}
-      className="soft-shadow z-20 rounded-full bg-white px-5 py-1 transition-all ease-linear hover:bg-neutral-50"
-    >
+    <div className="relative soft-shadow z-20 rounded-full bg-white px-5 py-1 transition-all ease-linear hover:bg-neutral-50">
       <div
         onClick={handleModelOpen}
         className="flex items-center space-x-2 font-normal text-gray-600 hover:cursor-pointer"
@@ -240,10 +237,7 @@ const UpdatesListView = () => {
   const locale = useDateFnsLocale();
 
   return (
-    <div
-      className="overflow-y-auto bg-white px-5"
-      style={{ maxHeight: '400px' }}
-    >
+    <div className="overflow-y-auto bg-white px-5 max-h-[400px]">
       {updates &&
         !adminStatus.loading &&
         updates.map((update: any) => (

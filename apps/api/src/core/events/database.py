@@ -57,9 +57,6 @@ def import_all_models() -> None:
                     try:
                         importlib.import_module(full_module_path)
                         imported_modules.add(full_module_path)
-                        logger.debug(
-                            f"Successfully imported module: {full_module_path}"
-                        )
                     except ImportError as e:
                         logger.warning(
                             f"Failed to import module {full_module_path}: {e}"
@@ -68,8 +65,6 @@ def import_all_models() -> None:
                         logger.error(
                             f"Unexpected error importing {full_module_path}: {e}"
                         )
-
-        logger.info(f"Imported {len(imported_modules)} database modules")
 
     except Exception as e:
         logger.error(f"Critical error during model import: {e}")
@@ -98,7 +93,6 @@ try:
     from src.db.trails import rebuild_trail_models  # type: ignore
 
     rebuild_trail_models()
-    logger.info("Trail models rebuilt successfully")
 except ImportError:
     logger.warning(
         "Could not import 'rebuild_trail_models'. "
@@ -160,13 +154,8 @@ def get_database_engine() -> Engine:
         if not openu_config.general_config.development_mode:
             try:
                 logfire.instrument_sqlalchemy(engine=_engine)
-                logger.info("SQLAlchemy instrumentation enabled")
             except Exception as e:
                 logger.warning(f"Failed to instrument SQLAlchemy: {e}")
-
-        logger.info(
-            f"Database engine created successfully ({connection_string.split('://')[0]})"
-        )
 
     return _engine
 
@@ -184,8 +173,6 @@ async def connect_to_db(app: FastAPI) -> None:
     Initializes the database connection and creates all tables if they don't exist.
     """
     try:
-        logger.info("Initializing database connection...")
-
         # Get the optimized engine
         db_engine = get_database_engine()
 
@@ -195,9 +182,6 @@ async def connect_to_db(app: FastAPI) -> None:
         # Create all tables defined by SQLModel metadata
         # This is only called once at application startup
         SQLModel.metadata.create_all(db_engine)
-
-        logger.info("Database tables verified/created successfully")
-        logger.info("Database initialization completed")
 
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
@@ -215,8 +199,6 @@ async def close_database(app: FastAPI) -> None:
     Performs cleanup operations with proper error handling.
     """
     try:
-        logger.info("Shutting down database connections...")
-
         # Get engine from app state
         if hasattr(app.state, "db_engine"):
             db_engine = app.state.db_engine

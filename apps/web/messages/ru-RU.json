@@ -296,6 +296,7 @@
       "purchaseToAccess": "Для доступа к этому контенту требуется покупка курса."
     },
     "CourseThumbnail": {
+      "authorLabel": "{count, plural, one {Автор} other {Авторы}}",
       "authors": "Авторы",
       "courseOptions": "Опции курса",
       "courseThumbnailAlt": "Миниатюра курса {courseName}",

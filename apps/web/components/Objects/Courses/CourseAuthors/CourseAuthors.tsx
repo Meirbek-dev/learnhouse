@@ -81,10 +81,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
           </div>
         ))}
         {remainingCount > 0 && (
-          <div
-            className="relative"
-            style={{ zIndex: 0 }}
-          >
+          <div className="relative z-0">
             <div
               className="flex items-center justify-center rounded-full border-4 border-white bg-neutral-100 font-medium text-neutral-600 shadow-sm"
               style={{

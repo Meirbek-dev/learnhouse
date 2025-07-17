@@ -266,11 +266,10 @@ const CourseClient = (props: any) => {
                   }
                   return (
                     <div
-                      className="relative w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset ring-black/10"
+                      className="relative w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset ring-black/10 h-auto"
                       style={{
                         backgroundImage: `url('../empty_thumbnail.png')`,
                         backgroundSize: 'auto',
-                        height: 'auto',
                       }}
                     />
                   );

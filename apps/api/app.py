@@ -154,8 +154,6 @@ async def lifespan(app: FastAPI):
     Application lifespan manager with optimized startup and shutdown.
     """
     try:
-        # Startup
-        logger.info("Starting OpenU API server...")
         await startup_app(app)()
 
         # Optimize asyncio event loop for production
@@ -437,7 +435,6 @@ def get_optimized_uvicorn_config() -> dict:
 if __name__ == "__main__":
     try:
         uvicorn_config = get_optimized_uvicorn_config()
-        logger.info("Starting server")
         uvicorn.run("app:app", **uvicorn_config)
     except Exception as e:
         logger.error(f"Failed to start server: {e}")

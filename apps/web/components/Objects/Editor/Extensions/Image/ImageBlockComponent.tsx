@@ -171,8 +171,7 @@ function ImageBlockComponent(props: any) {
                 <img
                   src={imageUrl || ''}
                   alt=""
-                  className="h-auto max-w-full rounded-lg shadow-sm"
-                  style={{ width: '100%' }}
+                  className="h-auto max-w-full rounded-lg shadow-sm w-full"
                 />
                 <div className="backdrop-blur-xs shadow-xs absolute right-2 top-2 flex items-center gap-1.5 rounded-lg bg-white bg-opacity-90 p-1 opacity-70 transition-opacity hover:opacity-100">
                   <button
@@ -217,7 +216,7 @@ function ImageBlockComponent(props: any) {
                 src={imageUrl || ''}
                 alt=""
                 className="h-auto max-w-full rounded-lg shadow-sm"
-                style={{ width: imageSize.width, maxWidth: '100%' }}
+                style={{ width: imageSize.width }}
               />
               <div className="absolute right-2 top-2 flex gap-1">
                 <button

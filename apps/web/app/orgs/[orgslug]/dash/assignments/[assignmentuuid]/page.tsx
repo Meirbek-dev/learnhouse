@@ -48,9 +48,9 @@ function AssignmentEdit() {
   }
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex h-screen w-full flex-col">
       <AssignmentProvider assignment_uuid={`assignment_${params.assignmentuuid}`}>
-        <div className="soft-shadow z-50 flex flex-col bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="soft-shadow z-10 flex flex-col bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)] flex-shrink-0">
           <div className="mr-10 flex h-full justify-between">
             <div className="mr-10 pl-10 tracking-tighter">
               <BrdCmpx />
@@ -89,7 +89,7 @@ function AssignmentEdit() {
             </div>
           </div>
         </div>
-        <div className="flex h-full w-full">
+        <div className="flex flex-1 w-full min-h-0">
           {selectedSubPage === 'editor' && <AssignmentEditorSubPage assignmentuuid={params.assignmentuuid} />}
           {selectedSubPage === 'submissions' && (
             <AssignmentSubmissionsSubPage assignment_uuid={params.assignmentuuid} />

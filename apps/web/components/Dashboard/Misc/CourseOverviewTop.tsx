@@ -42,10 +42,9 @@ export function CourseOverviewTop({ params }: { params: CourseOverviewParams }) 
             ) : (
               <Image
                 width={100}
-                className="h-[57px] rounded-md drop-shadow-md"
+                className="h-[57px] rounded-md drop-shadow-md size-auto"
                 src={EmptyThumbnailImage}
                 alt=""
-                style={{ width: 'auto', height: 'auto' }}
               />
             )}
           </Link>

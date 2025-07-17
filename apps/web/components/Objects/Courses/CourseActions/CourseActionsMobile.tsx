@@ -102,16 +102,12 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
           </div>
         ))}
         {remainingCount > 0 && (
-          <div
-            className="relative"
-            style={{ zIndex: 0 }}
-          >
+          <div className="relative z-0">
             <div
-              className="flex items-center justify-center rounded-full border-2 border-white bg-neutral-100 font-medium text-neutral-600 shadow-sm"
+              className="flex items-center justify-center rounded-full border-2 border-white bg-neutral-100 font-medium text-neutral-600 shadow-sm text-xs"
               style={{
                 width: `${avatarSize}px`,
                 height: `${avatarSize}px`,
-                fontSize: '12px',
               }}
             >
               +{remainingCount}

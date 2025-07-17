@@ -847,7 +847,7 @@ function ActivityClient(props: ActivityClientProps) {
                       />
                     )}
 
-                    <div style={{ height: '100px' }} />
+                    <div className="h-[100px]" />
                   </div>
                 </div>
               )}

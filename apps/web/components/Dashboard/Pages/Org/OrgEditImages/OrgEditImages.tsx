@@ -442,14 +442,10 @@ export default function OrgEditImages() {
                     }
                     alt="Лого организации"
                     className={cn(
-                      'max-h-[125px] min-h-[100px] min-w-[200px] max-w-[250px] rounded-lg bg-white object-contain shadow-md',
+                      'size-auto max-h-[125px] min-h-[100px] min-w-[200px] max-w-[250px] rounded-lg bg-white object-contain shadow-md',
                       'border-2 border-gray-100 transition-all duration-300 hover:border-blue-200',
                       isLogoUploading && 'opacity-50',
                     )}
-                    style={{
-                      width: 'auto',
-                      height: 'auto',
-                    }}
                   />
                 </div>
 
@@ -512,14 +508,10 @@ export default function OrgEditImages() {
                     }
                     alt="Organization thumbnail"
                     className={cn(
-                      'max-h-[125px] min-h-[100px] min-w-[200px] max-w-[250px] rounded-lg bg-white object-contain shadow-md',
+                      'size-auto max-h-[125px] min-h-[100px] min-w-[200px] max-w-[250px] rounded-lg bg-white object-contain shadow-md',
                       'border-2 border-gray-100 transition-all duration-300 hover:border-purple-200',
                       isThumbnailUploading && 'opacity-50',
                     )}
-                    style={{
-                      width: 'auto',
-                      height: 'auto',
-                    }}
                   />
                 </div>
 
@@ -630,15 +622,11 @@ export default function OrgEditImages() {
                                     src={getOrgPreviewMediaDirectory(org?.org_uuid, preview.id)}
                                     alt={`Preview ${preview.id}`}
                                     className={cn(
-                                      'max-h-28 max-w-48 rounded-xl bg-white object-contain',
+                                      'size-auto max-h-28 max-w-48 rounded-xl bg-white object-contain',
                                       'border border-gray-200 hover:border-gray-300',
                                       'transition-colors duration-200',
                                       snapshot.isDragging ? 'shadow-lg' : 'shadow-xs hover:shadow-md',
                                     )}
-                                    style={{
-                                      width: 'auto',
-                                      height: 'auto',
-                                    }}
                                   />
                                 ) : (
                                   <div

@@ -6,13 +6,14 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { Backpack, Calendar, Download, EllipsisVertical, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { getTaskRefFileDir } from '@services/media/media';
+import { useTranslations, useFormatter } from 'next-intl';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import Link from 'next/link';
 
 function AssignmentStudentActivity() {
   const t = useTranslations('Activities.AssignmentStudentActivity');
+  const format = useFormatter();
   const assignments = useAssignments() as any;
   const org = useOrg() as any;
 
@@ -39,8 +40,11 @@ function AssignmentStudentActivity() {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 text-xs text-slate-400 md:space-x-2">
                 <Calendar size={14} />
-                <p className="font-semibold">{t('dueDate')}</p>
-                <p className="font-semibold">{assignments?.assignment_object?.due_date}</p>
+                <p className="font-semibold">
+                  {t('dueDate')}
+                  {': '}
+                  {assignments?.assignment_object?.due_date}
+                </p>
               </div>
             </div>
           </div>

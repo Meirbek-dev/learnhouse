@@ -297,6 +297,7 @@
     },
     "CourseThumbnail": {
       "authors": "Authors",
+      "authorLabel": "{count, plural, one {Author} other {Authors}}",
       "courseOptions": "Course options",
       "courseThumbnailAlt": "Course thumbnail for {courseName}",
       "delete": "Delete course",

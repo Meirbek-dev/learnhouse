@@ -296,6 +296,7 @@
       "purchaseToAccess": "Бұл мазмұнға қол жеткізу үшін курсты сатып алу қажет."
     },
     "CourseThumbnail": {
+      "authorLabel": "{count, plural, one {Автор} other {Авторлар}}",
       "authors": "Авторлар",
       "courseOptions": "Курстың нұсқалары",
       "courseThumbnailAlt": "Курс эскизі {{joursename}",
