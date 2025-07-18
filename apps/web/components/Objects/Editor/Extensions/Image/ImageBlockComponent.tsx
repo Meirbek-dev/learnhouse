@@ -9,12 +9,14 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Resizable } from 're-resizable';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
 
 function ImageBlockComponent(props: any) {
+  const t = useTranslations('DashPage.Editor.ImageBlock');
   const org = useOrg() as any;
   const course = useCourse() as any;
   const editorState = useEditorProvider() as any;
@@ -177,21 +179,21 @@ function ImageBlockComponent(props: any) {
                   <button
                     onClick={() => handleAlignmentChange('left')}
                     className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'left' ? 'bg-gray-100' : ''}`}
-                    title="Align left"
+                    title={t('alignLeft')}
                   >
                     <AlignLeft size={16} />
                   </button>
                   <button
                     onClick={() => handleAlignmentChange('center')}
                     className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'center' ? 'bg-gray-100' : ''}`}
-                    title="Center align"
+                    title={t('alignCenter')}
                   >
                     <AlignCenter size={16} />
                   </button>
                   <button
                     onClick={() => handleAlignmentChange('right')}
                     className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'right' ? 'bg-gray-100' : ''}`}
-                    title="Align right"
+                    title={t('alignRight')}
                   >
                     <AlignRight size={16} />
                   </button>
@@ -199,7 +201,7 @@ function ImageBlockComponent(props: any) {
                   <button
                     onClick={handleExpand}
                     className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100"
-                    title="Expand image"
+                    title={t('expand')}
                   >
                     <Expand size={16} />
                   </button>
@@ -222,14 +224,14 @@ function ImageBlockComponent(props: any) {
                 <button
                   onClick={handleExpand}
                   className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                  title="Expand image"
+                  title={t('expand')}
                 >
                   <Expand className="h-4 w-4 text-white" />
                 </button>
                 <button
                   onClick={handleDownload}
                   className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                  title="Download image"
+                  title={t('download')}
                 >
                   <Download className="h-4 w-4 text-white" />
                 </button>
@@ -252,7 +254,7 @@ function ImageBlockComponent(props: any) {
         <Modal
           isDialogOpen={isModalOpen}
           onOpenChange={setIsModalOpen}
-          dialogTitle="Image Viewer"
+          dialogTitle={t('imageViewer')}
           minWidth="lg"
           minHeight="lg"
           dialogContent={

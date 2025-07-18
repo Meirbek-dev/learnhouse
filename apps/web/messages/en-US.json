@@ -296,8 +296,8 @@
       "purchaseToAccess": "This content requires a course purchase to access."
     },
     "CourseThumbnail": {
-      "authors": "Authors",
       "authorLabel": "{count, plural, one {Author} other {Authors}}",
+      "authors": "Authors",
       "courseOptions": "Course options",
       "courseThumbnailAlt": "Course thumbnail for {courseName}",
       "delete": "Delete course",
@@ -1055,6 +1055,7 @@
     },
     "CoursesActions": {
       "accessCheckError": "Failed to check course access. Please try again later.",
+      "activitiesCompleted": "{completed} of {total} activities completed",
       "applicationPending": "Contributor application pending",
       "applyToContribute": "Apply to contribute",
       "authenticateToContribute": "Authenticate to contribute",
@@ -1223,12 +1224,17 @@
         "gradeValidationError": "Value must be between 20 and 100",
         "hint": "Hint",
         "loading": "Loading",
+        "loadingTask": "Loading...",
         "maxGradeValue": "Maximum Grade Value",
+        "noTaskSelected": "No task selected",
         "refFileUpdateSuccess": "Reference file updated successfully",
         "referenceFile": "Reference File",
         "save": "Save",
+        "saveError": "Error saving task",
+        "saveSuccess": "Task saved successfully",
         "saving": "Saving",
         "selectFile": "Select File",
+        "taskNotLoaded": "Can't submit the task",
         "title": "Title",
         "titleRequired": "Title is required",
         "updateError": "Error updating task, please try again later.",
@@ -1485,6 +1491,14 @@
         "uploadFile": "Upload File",
         "uploadFiles": "Upload Files"
       },
+      "ImageBlock": {
+        "alignCenter": "Align center",
+        "alignLeft": "Align left",
+        "alignRight": "Align right",
+        "download": "Download",
+        "expand": "Expand",
+        "imageViewer": "Image Viewer"
+      },
       "MathEquationBlock": {
         "completeReference": "View complete reference",
         "exponents": "Exponents:",
@@ -1526,6 +1540,12 @@
         "templateVectorDesc": "3D vector",
         "templates": "Templates",
         "title": "Math Equation"
+      },
+      "PDFBlock": {
+        "download": "Download",
+        "expand": "Expand",
+        "pdfDocument": "PDF Document",
+        "pdfViewer": "PDF Viewer"
       },
       "QuizBlock": {
         "addAnswer": "Add Answer",
@@ -1604,6 +1624,7 @@
         "download": "Download",
         "errorFormat": "Please upload a supported video format (MP4, MKV or WebM)",
         "errorUpload": "Failed to upload video. Please try again.",
+        "expand": "Expand",
         "remove": "Remove",
         "selectVideoFile": "Select Video File",
         "sizeFull": "Full Width",
@@ -1615,7 +1636,8 @@
         "title": "Video Block",
         "uploadHint": "Supports MP4, MKV and WebM formats",
         "uploadPlaceholder": "Drop your video here or click to browse",
-        "uploading": "Uploading video... {progress}%"
+        "uploading": "Uploading video... {progress}%",
+        "videoPlayer": "Video Player"
       },
       "activity": "Activity",
       "metaTitleEdit": "Edit - {activityName} Activity"

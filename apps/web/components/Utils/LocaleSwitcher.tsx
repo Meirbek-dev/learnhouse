@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectTriggerWithoutChevron } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { SelectValue } from '@radix-ui/react-select';
 import { type Locale, locales } from '@/i18n/config';
 import { setUserLocale } from '@/i18n/locale';
@@ -44,13 +44,14 @@ export function LocaleSwitcher({ className, isMobile }: LocaleSwitcherProps) {
           {isMobile && <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>}
         </SelectTrigger>
       ) : (
-        <SelectTriggerWithoutChevron
+        <SelectTrigger
           className={cn('w-auto touch-manipulation', isMobile && 'w-full', className)}
           aria-label={t('selectLanguage')}
+          withChevron={false}
         >
           <Languages size={22} />
           {isMobile && <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>}
-        </SelectTriggerWithoutChevron>
+        </SelectTrigger>
       )}
       <SelectContent
         className={cn(isMobile && 'z-[80]')}

@@ -9,11 +9,13 @@ import { uploadNewPDFFile } from '@services/blocks/Pdf/pdf';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
 function PDFBlockComponent(props: any) {
+  const t = useTranslations('DashPage.Editor.PDFBlock');
   const org = useOrg() as any;
   const course = useCourse() as any;
   const session = useLHSession() as any;
@@ -100,20 +102,19 @@ function PDFBlockComponent(props: any) {
             disabled={!pdf}
           />
         </FileUploadBlock>
-
         {blockObject && (
           <div className="flex flex-col">
             <div className="relative">
               <iframe
                 className="h-96 w-full rounded-lg bg-black object-scale-down shadow-sm"
                 src={pdfUrl || ''}
-                title="PDF Document Viewer"
+                title={t('pdfViewer')}
               />
               <div className="absolute right-2 top-2 flex gap-1">
                 <button
                   onClick={handleExpand}
                   className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                  title="Expand PDF"
+                  title={t('expand')}
                 >
                   <Expand className="h-4 w-4 text-white" />
                 </button>
@@ -121,7 +122,7 @@ function PDFBlockComponent(props: any) {
                   <button
                     onClick={handleDownload}
                     className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                    title="Download PDF"
+                    title={t('download')}
                   >
                     <Download className="h-4 w-4 text-white" />
                   </button>
@@ -139,12 +140,11 @@ function PDFBlockComponent(props: any) {
           </div>
         )}
       </NodeViewWrapper>
-
       {blockObject && pdfUrl && (
         <Modal
           isDialogOpen={isModalOpen}
           onOpenChange={setIsModalOpen}
-          dialogTitle="PDF Document"
+          dialogTitle={t('pdfDocument')}
           minWidth="xl"
           minHeight="xl"
           dialogContent={
@@ -152,7 +152,7 @@ function PDFBlockComponent(props: any) {
               <iframe
                 className="h-full w-full rounded-lg border shadow-lg"
                 src={pdfUrl}
-                title="PDF Document"
+                title={t('pdfDocument')}
               />
             </div>
           }
