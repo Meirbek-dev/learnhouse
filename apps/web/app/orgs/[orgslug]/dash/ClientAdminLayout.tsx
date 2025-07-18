@@ -18,7 +18,7 @@ function ClientAdminLayout({ children, params }: { children: ReactNode; params: 
         </div>
       ) : (
         <SidebarProvider>
-          <DashSidebar className="z-100" />
+          <DashSidebar className="z-50" />
           <SidebarInset className="flex-1">{children}</SidebarInset>
         </SidebarProvider>
       )}

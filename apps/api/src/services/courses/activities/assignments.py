@@ -29,11 +29,6 @@ from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
-from src.security.features_utils.usage import (
-    check_limits_with_usage,
-    decrease_feature_usage,
-    increase_feature_usage,
-)
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles,
     authorization_verify_based_on_roles_and_authorship,
@@ -68,9 +63,6 @@ async def create_assignment(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "create", db_session)
 
-    # Usage check
-    check_limits_with_usage("assignments", course.org_id, db_session)
-
     # Create Assignment using model_dump() for Pydantic v2 compatibility
     assignment_data = assignment_object.model_dump(exclude_unset=True)
     assignment = Assignment(**assignment_data)
@@ -84,9 +76,6 @@ async def create_assignment(
     db_session.add(assignment)
     db_session.commit()
     db_session.refresh(assignment)
-
-    # Feature usage
-    increase_feature_usage("assignments", course.org_id, db_session)
 
     # return assignment read
     return AssignmentRead.model_validate(assignment)
@@ -243,9 +232,6 @@ async def delete_assignment(
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
 
-    # Feature usage
-    decrease_feature_usage("assignments", course.org_id, db_session)
-
     # Delete Assignment
     db_session.delete(assignment)
     db_session.commit()
@@ -292,9 +278,6 @@ async def delete_assignment_from_activity_uuid(
 
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
-
-    # Feature usage
-    decrease_feature_usage("assignments", course.org_id, db_session)
 
     # Delete Assignment
     db_session.delete(assignment)

@@ -23,11 +23,7 @@ from src.db.resource_authors import (
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.features_utils.usage import (
-    check_limits_with_usage,
-    decrease_feature_usage,
-    increase_feature_usage,
-)
+
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
@@ -410,9 +406,6 @@ async def create_course(
     # RBAC check
     await rbac_check(request, "course_x", current_user, "create", db_session)
 
-    # Usage check
-    check_limits_with_usage("courses", org_id, db_session)
-
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == org_id)
     org = db_session.exec(org_statement).first()
@@ -487,9 +480,6 @@ async def create_course(
         )
         for resource_author, user in author_results
     ]
-
-    # Feature usage
-    increase_feature_usage("courses", course.org_id, db_session)
 
     return CourseRead.model_validate({**course.model_dump(), "authors": authors})
 
@@ -662,9 +652,6 @@ async def delete_course(
 
     # RBAC check
     await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
-
-    # Feature usage
-    decrease_feature_usage("courses", course.org_id, db_session)
 
     db_session.delete(course)
     db_session.commit()
