@@ -10,7 +10,6 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useEffect, useState } from 'react';
-import { styled } from 'styled-components';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
@@ -103,7 +102,7 @@ function PDFBlockComponent(props: any) {
         </FileUploadBlock>
 
         {blockObject && (
-          <BlockPDF>
+          <div className="flex flex-col">
             <div className="relative">
               <iframe
                 className="h-96 w-full rounded-lg bg-black object-scale-down shadow-sm"
@@ -129,7 +128,7 @@ function PDFBlockComponent(props: any) {
                 )}
               </div>
             </div>
-          </BlockPDF>
+          </div>
         )}
         {isLoading && (
           <div>
@@ -164,16 +163,3 @@ function PDFBlockComponent(props: any) {
 }
 
 export default PDFBlockComponent;
-
-const BlockPDF = styled.div`
-  display: flex;
-  flex-direction: column;
-  img {
-    width: 100%;
-    height: 300px;
-    // cover
-    object-fit: cover;
-    border-radius: 6px;
-  }
-`;
-const _PDFNotFound = styled.div``;

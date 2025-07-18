@@ -9,7 +9,6 @@ import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { styled } from 'styled-components';
 import { Settings } from 'lucide-react';
 import { useEffect } from 'react';
 import Link from 'next/link';
@@ -23,7 +22,7 @@ export const HeaderProfileBox = () => {
   useEffect(() => {}, [session]);
 
   return (
-    <ProfileArea>
+    <div className="flex items-center">
       {session.status === 'unauthenticated' && (
         <div className="flex items-center gap-3">
           <Button
@@ -94,11 +93,6 @@ export const HeaderProfileBox = () => {
           </div>
         </div>
       )}
-    </ProfileArea>
+    </div>
   );
 };
-
-const ProfileArea = styled.div`
-  display: flex;
-  align-items: center;
-`;

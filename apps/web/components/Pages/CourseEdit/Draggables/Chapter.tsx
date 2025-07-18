@@ -8,7 +8,6 @@ import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { styled } from 'styled-components';
 import { useState } from 'react';
 import { mutate } from 'swr';
 
@@ -50,12 +49,11 @@ function Chapter(props: any) {
       index={props.index}
     >
       {(provided, _snapshot) => (
-        <ChapterWrapper
+        <div
           {...provided.dragHandleProps}
           {...provided.draggableProps}
           ref={provided.innerRef}
-          //  isDragging={snapshot.isDragging}
-          className="max-w-(--breakpoint-2xl) mx-auto bg-white px-5"
+          className="max-w-(--breakpoint-2xl) mx-auto mb-5 block rounded-lg border border-white/[0.19] bg-white px-5 py-3 text-[15px] shadow-sm transition-all duration-200 ease-in-out [&_h3]:px-5"
           key={props.info.list.chapter.id}
         >
           <div className="text-md flex items-center space-x-2 pr-3 pt-3 font-bold">
@@ -135,9 +133,10 @@ function Chapter(props: any) {
             type="activity"
           >
             {(provided) => (
-              <ActivitiesList
+              <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
+                className="p-2.5"
               >
                 <div className="flex flex-col">
                   {props.info.list.activities.map((activity: any, index: any) => (
@@ -164,32 +163,13 @@ function Chapter(props: any) {
                     <div className="mx-auto my-auto items-center text-sm font-bold">{t('addActivityButton')} + </div>
                   </div>
                 </div>
-              </ActivitiesList>
+              </div>
             )}
           </Droppable>
-        </ChapterWrapper>
+        </div>
       )}
     </Draggable>
   );
 }
-
-const ChapterWrapper = styled.div`
-  margin-bottom: 20px;
-  padding: 12px;
-  font-size: 15px;
-  display: block;
-  border-radius: 9px;
-  border: 1px solid rgba(255, 255, 255, 0.19);
-  box-shadow: 0px 13px 33px -13px rgb(0 0 0 / 12%);
-  transition: all 0.2s ease;
-  h3 {
-    padding-right: 20px;
-    padding-left: 20px;
-  }
-`;
-
-const ActivitiesList = styled.div`
-  padding: 10px;
-`;
 
 export default Chapter;

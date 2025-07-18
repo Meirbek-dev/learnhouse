@@ -142,7 +142,9 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
         {displayedAuthors.length > 0 && (
           <div className="flex items-center gap-2">
             <div className="flex items-center -space-x-2">
-              <span className="text-xs text-muted-foreground pr-4">{t('authorLabel', { count: activeAuthors.length })}</span>
+              <span className="text-xs text-muted-foreground pr-4">
+                {t('authorLabel', { count: activeAuthors.length })}
+              </span>
               {displayedAuthors.map((author, idx) => (
                 <div
                   key={author.user.user_uuid}
