@@ -2,7 +2,9 @@
 
 import { type DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { ru, enUS, es, fr, de, type Locale } from 'date-fns/locale';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
 
@@ -18,10 +20,62 @@ function Calendar({
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant'];
 }) {
+  const getDayPickerLocale = (locale: string): Locale => {
+    const localeMap: Record<string, Locale> = {
+      en: enUS,
+      es: es,
+      fr: fr,
+      de: de,
+      ru: ru,
+    };
+    return localeMap[locale] || enUS;
+  };
+
+  const locale = useLocale();
+  const t = useTranslations('calendar');
   const defaultClassNames = getDefaultClassNames();
+
+  // Select appropriate date-fns locale
+  const dateLocale = getDayPickerLocale(locale);
+
+  // Localized formatters
+  const localizedFormatters = {
+    formatMonthDropdown: (date: Date) => {
+      return date.toLocaleString(locale, { month: 'long' });
+    },
+    formatYearDropdown: (date: Date) => {
+      return date.getFullYear().toString();
+    },
+    formatWeekdayName: (date: Date) => {
+      return date.toLocaleDateString(locale, { weekday: 'short' });
+    },
+    formatDay: (date: Date) => {
+      return date.getDate().toString();
+    },
+    ...formatters,
+  };
+
+  // Localized labels
+  const localizedLabels = {
+    labelNext: () => t('next'),
+    labelPrevious: () => t('previous'),
+    labelMonthDropdown: () => t('monthDropdown'),
+    labelYearDropdown: () => t('yearDropdown'),
+    labelWeekday: (date: Date) => {
+      return date.toLocaleDateString(locale, { weekday: 'long' });
+    },
+    labelDay: (date: Date) => {
+      return date.toLocaleDateString(locale, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    },
+  };
 
   return (
     <DayPicker
+      locale={dateLocale}
       showOutsideDays={showOutsideDays}
       className={cn(
         'bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
@@ -30,10 +84,8 @@ function Calendar({
         className,
       )}
       captionLayout={captionLayout}
-      formatters={{
-        formatMonthDropdown: (date) => date.toLocaleString('default', { month: 'short' }),
-        ...formatters,
-      }}
+      formatters={localizedFormatters}
+      labels={localizedLabels}
       classNames={{
         root: cn('w-fit', defaultClassNames.root),
         months: cn('flex gap-4 flex-col md:flex-row relative', defaultClassNames.months),

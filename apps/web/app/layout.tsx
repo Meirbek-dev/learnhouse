@@ -33,12 +33,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         /> */}
       </head>
       <body>
-        {isDevEnv ? (
-          ''
-        ) : (
+        {!isDevEnv && (
           <Script
-            data-website-id="a1af6d7a-9286-4a1f-8385-ddad2a29fcbb"
-            src="/umami/script.js"
+            defer
+            src="https://cloud.umami.is/script.js"
+            data-website-id="ba038fd7-d78c-4765-acf2-e5d9cdafba44"
           />
         )}
 

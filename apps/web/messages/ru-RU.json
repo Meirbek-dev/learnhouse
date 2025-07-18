@@ -3196,6 +3196,12 @@
   "activity": "Активность",
   "additionalSettings": "Дополнительные настройки",
   "aiEditor": "ИИ-Редактор",
+  "calendar": {
+    "monthDropdown": "Месяц",
+    "next": "Вперед",
+    "previous": "Назад",
+    "yearDropdown": "Год"
+  },
   "clickMe": "Нажми меня",
   "close": "Закрыть",
   "courses": "Курсы",

@@ -3196,6 +3196,12 @@
   "activity": "Белсенділік",
   "additionalSettings": "Қосымша параметрлер",
   "aiEditor": "ЖИ-Редактор",
+  "calendar": {
+    "monthDropdown": "Ай",
+    "next": "Сосын",
+    "previous": "Алдыңғы",
+    "yearDropdown": "Жыл"
+  },
   "clickMe": "Мені бас",
   "close": "Жабу",
   "courses": "Курстар",
