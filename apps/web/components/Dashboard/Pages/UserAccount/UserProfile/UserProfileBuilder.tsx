@@ -13,7 +13,13 @@ import {
   TextIcon,
   Trash2,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -520,7 +526,10 @@ const UserProfileBuilder = () => {
                   }
                 }}
               >
-                <SelectTrigger className="bg-primary w-full border-0 p-0">
+                <SelectTrigger
+                  className="bg-primary w-full border-0 p-0"
+                  withChevron={false}
+                >
                   <div className="text-primary-foreground inline-flex w-full items-center justify-center gap-2 rounded-md text-sm font-medium">
                     <Plus color="white" />
                     {t('SectionsPanel.addSectionButton')}

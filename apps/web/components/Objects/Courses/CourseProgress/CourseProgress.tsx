@@ -2,6 +2,7 @@ import { ArrowRight, BookOpenCheck, Check, FileText, Folder, Layers, Square, Vid
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useCallback, useEffect, useState } from 'react';
 import { getUriWithOrg } from '@services/config/config';
+import { useTranslations } from 'next-intl';
 import type { FC } from 'react';
 import Link from 'next/link';
 
@@ -14,6 +15,7 @@ interface CourseProgressProps {
 }
 
 const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onClose, trailData }) => {
+  const t = useTranslations('Courses.CoursesActions');
   const [completedActivities, setCompletedActivities] = useState(0);
   const [totalActivities, setTotalActivities] = useState(0);
 
@@ -154,14 +156,13 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
       ))}
     </div>
   );
-
   return (
     <Modal
       isDialogOpen={isOpen}
       onOpenChange={onClose}
       dialogContent={dialogContent}
-      dialogTitle="Course Progress"
-      dialogDescription={`${completedActivities} of ${totalActivities} activities completed`}
+      dialogTitle={t('courseProgress')}
+      dialogDescription={t('activitiesCompleted', { completed: completedActivities, total: totalActivities })}
       minWidth="md"
     />
   );

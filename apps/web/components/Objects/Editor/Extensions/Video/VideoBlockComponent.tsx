@@ -356,11 +356,10 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
             </div>
           </motion.div>
         </NodeViewWrapper>
-
         <Modal
           isDialogOpen={isModalOpen}
           onOpenChange={setIsModalOpen}
-          dialogTitle="Video Player"
+          dialogTitle={t('videoPlayer')}
           minWidth="lg"
           minHeight="lg"
           dialogContent={
@@ -563,14 +562,14 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                       <button
                         onClick={handleExpand}
                         className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                        title="Expand video"
+                        title={t('expand')}
                       >
                         <Expand className="h-4 w-4 text-white" />
                       </button>
                       <button
                         onClick={handleDownload}
                         className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
-                        title="Download video"
+                        title={t('download')}
                       >
                         <Download className="h-4 w-4 text-white" />
                       </button>
@@ -581,12 +580,11 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
             </motion.div>
           )}
         </VideoWrapper>
-
         {blockObject && videoUrl && (
           <Modal
             isDialogOpen={isModalOpen}
             onOpenChange={setIsModalOpen}
-            dialogTitle="Video Player"
+            dialogTitle={t('videoPlayer')}
             minWidth="lg"
             minHeight="lg"
             dialogContent={
@@ -596,6 +594,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                   autoPlay
                   className="aspect-video w-full rounded-lg bg-black object-contain shadow-lg"
                   src={videoUrl}
+                  title={t('videoPlayer')}
                 />
               </div>
             }

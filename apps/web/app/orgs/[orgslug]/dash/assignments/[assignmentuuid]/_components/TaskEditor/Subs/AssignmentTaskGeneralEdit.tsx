@@ -44,41 +44,90 @@ export function AssignmentTaskGeneralEdit() {
   const assignment = useAssignments() as any;
   const validationSchema = createValidationSchema(t);
 
+  // Check if assignment task data is loaded and task is selected
+  const isTaskSelected = assignmentTaskState?.selectedAssignmentTaskUUID !== null;
+  const isTaskLoaded = assignmentTaskState?.assignmentTask &&
+    Object.keys(assignmentTaskState.assignmentTask).length > 0 &&
+    assignmentTaskState.selectedAssignmentTaskUUID === assignmentTaskState.assignmentTask.assignment_task_uuid;
+
   const form = useForm<TaskFormData>({
     resolver: zodResolver(validationSchema),
     defaultValues: {
-      title: assignmentTaskState.assignmentTask.title,
-      description: assignmentTaskState.assignmentTask.description,
-      hint: assignmentTaskState.assignmentTask.hint,
-      max_grade_value: assignmentTaskState.assignmentTask.max_grade_value,
+      title: '',
+      description: '',
+      hint: '',
+      max_grade_value: 20,
     },
     mode: 'onChange',
   });
 
   const handleSubmit = async (values: TaskFormData) => {
-    const res = await updateAssignmentTask(
-      values,
-      assignmentTaskState.assignmentTask.assignment_task_uuid,
-      assignment.assignment_object.assignment_uuid,
-      access_token,
-    );
-    if (res) {
-      assignmentTaskStateHook({ type: 'reload' });
-      toast.success(t('updateSuccess'));
-    } else {
-      toast.error(t('updateError'));
+    if (!isTaskLoaded) {
+      toast.error(t('taskNotLoaded'));
+      return;
+    }
+
+    try {
+      const res = await updateAssignmentTask(
+        values,
+        assignmentTaskState.assignmentTask.assignment_task_uuid,
+        assignment.assignment_object.assignment_uuid,
+        access_token,
+      );
+      if (res.success) {
+        assignmentTaskStateHook({ type: 'reload' });
+        toast.success(t('saveSuccess'));
+      } else {
+        toast.error(t('saveError'));
+      }
+    } catch (error) {
+      console.error('Error updating assignment task:', error);
+      toast.error(t('saveError'));
     }
   };
 
   // Update form values when assignment task changes
   useEffect(() => {
-    form.reset({
-      title: assignmentTaskState.assignmentTask.title,
-      description: assignmentTaskState.assignmentTask.description,
-      hint: assignmentTaskState.assignmentTask.hint,
-      max_grade_value: assignmentTaskState.assignmentTask.max_grade_value,
+    console.log('Form data update:', {
+      isTaskLoaded,
+      selectedTaskUUID: assignmentTaskState?.selectedAssignmentTaskUUID,
+      taskUUID: assignmentTaskState?.assignmentTask?.assignment_task_uuid,
+      taskData: assignmentTaskState?.assignmentTask
     });
-  }, [assignmentTaskState.assignmentTask, form]);
+
+    if (isTaskLoaded) {
+      const taskData = assignmentTaskState.assignmentTask;
+      form.reset({
+        title: taskData.title || '',
+        description: taskData.description || '',
+        hint: taskData.hint || '',
+        max_grade_value: taskData.max_grade_value || 20,
+      });
+    }
+  }, [assignmentTaskState.assignmentTask, form, isTaskLoaded]);
+
+  // Show message if no task is selected
+  if (!isTaskSelected) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <p className="text-gray-600">{t('noTaskSelected')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state if task is selected but not loaded yet
+  if (isTaskSelected && !isTaskLoaded) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-gray-600">{t('loadingTask')}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>

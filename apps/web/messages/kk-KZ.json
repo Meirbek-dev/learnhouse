@@ -1055,6 +1055,7 @@
     },
     "CoursesActions": {
       "accessCheckError": "Курсқа кіруді тексеру мүмкін болмады. Кейінірек қайталап көріңіз.",
+      "activitiesCompleted": "{completed}/{total} әрекеті аяқталды",
       "applicationPending": "Автор ретінде қатысуға өтінім қаралуда",
       "applyToContribute": "Қатысуға өтінім беру",
       "authenticateToContribute": "Өзгерістер енгізу үшін авторизациядан өтіңіз",
@@ -1223,12 +1224,17 @@
         "gradeValidationError": "Мән 20-дан 100-ге дейін болуы керек",
         "hint": "Кеңес",
         "loading": "Жүктелуде",
+        "loadingTask": "Жүктеу ...",
         "maxGradeValue": "Максималды баға мәні",
+        "noTaskSelected": "Тапсырма жоқ",
         "refFileUpdateSuccess": "Анықтамалық файл сәтті жаңартылды",
         "referenceFile": "Анықтамалық файл",
         "save": "Сақтау",
+        "saveError": "Тапсырманы сақтау кезінде қате пайда болды",
+        "saveSuccess": "Тапсырма сәтті сақталды",
         "saving": "Сақтау",
         "selectFile": "Файл таңдаңыз",
+        "taskNotLoaded": "Тапсырманы ұсына алмайды",
         "title": "Атауы",
         "titleRequired": "Тақырып қажет",
         "updateError": "Тапсырманы жаңартуда қате шықты, кейінірек қайталап көріңіз.",
@@ -1485,6 +1491,14 @@
         "uploadFile": "Жүктеу файлы",
         "uploadFiles": "Файлдарды жүктеңіз"
       },
+      "ImageBlock": {
+        "alignCenter": "Ортаңғы орталық",
+        "alignLeft": "Солға туралаңыз",
+        "alignRight": "Дұрыс туралаңыз",
+        "download": "Сайлау",
+        "expand": "Кеңейту",
+        "imageViewer": "Суретті қарау құралы"
+      },
       "MathEquationBlock": {
         "completeReference": "Толық анықтаманы қарау",
         "exponents": "Дәрежелер:",
@@ -1526,6 +1540,12 @@
         "templateVectorDesc": "3D вектор",
         "templates": "Үлгілер",
         "title": "Математикалық теңдеу"
+      },
+      "PDFBlock": {
+        "download": "Сайлау",
+        "expand": "Кеңейту",
+        "pdfDocument": "PDF құжаты",
+        "pdfViewer": "PDF қарау құралы"
       },
       "QuizBlock": {
         "addAnswer": "Жауап қосу",
@@ -1604,6 +1624,7 @@
         "download": "Жүктеп алу",
         "errorFormat": "Бейнені қолдау көрсетілетін форматта (MP4, MKV немесе WebM) жүктеңіз",
         "errorUpload": "Бейнені жүктеу мүмкін болмады. Қайталап көріңіз.",
+        "expand": "Кеңейту",
         "remove": "Жою",
         "selectVideoFile": "Бейне файлын таңдаңыз",
         "sizeFull": "Толық ені",
@@ -1615,7 +1636,8 @@
         "title": "Бейне блогы",
         "uploadHint": "MP4, MKV және WebM форматтары қолдау көрсетіледі",
         "uploadPlaceholder": "Бейнеңізді осы жерге сүйреп апарыңыз немесе таңдау үшін басыңыз",
-        "uploading": "Бейне жүктелуде... {progress}%"
+        "uploading": "Бейне жүктелуде... {progress}%",
+        "videoPlayer": "Бейне ойнатқыш"
       },
       "activity": "Белсенділік",
       "metaTitleEdit": "Өңдеу - Белсенділік {activityName}"
