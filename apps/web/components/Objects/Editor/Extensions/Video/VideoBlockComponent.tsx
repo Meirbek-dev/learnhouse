@@ -131,9 +131,9 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
   const course = useCourse() as Course | null;
 
   const subtitleEntries = [
-    { html: 'Русский', url: '/subtitle.ru.srt' },
-    { html: 'English', url: '/subtitle.en.srt' },
-    { html: 'Қазақша', url: '/subtitle.kz.srt' },
+    { html: t('subtitles.russian'), url: '/subtitle.ru.srt' },
+    { html: t('subtitles.english'), url: '/subtitle.en.srt' },
+    { html: t('subtitles.kazakh'), url: '/subtitle.kz.srt' },
   ];
   const editorState = useEditorProvider() as EditorState;
   const session = useLHSession() as Session;

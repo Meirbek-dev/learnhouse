@@ -1,8 +1,10 @@
 import { getActivityMediaDirectory } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 function DocumentPdfActivity({ activity, course }: { activity: any; course: any }) {
+  const t = useTranslations('Activities.DocumentPdf');
   const org = useOrg() as any;
 
   useEffect(() => {}, [activity, org]);
@@ -11,7 +13,7 @@ function DocumentPdfActivity({ activity, course }: { activity: any; course: any 
     <div className="m-8 mt-14 rounded-md bg-zinc-900">
       <iframe
         className="h-[900px] w-full rounded-lg"
-        title="PDF Document Viewer"
+        title={t('viewerTitle')}
         src={getActivityMediaDirectory(
           org?.org_uuid,
           course?.course_uuid,

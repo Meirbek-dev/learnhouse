@@ -309,7 +309,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <AlertTriangle size={15} />
         </ToolBtn>
       </ToolTip>
-      <ToolTip content={'Link'}>
+      <ToolTip content={t('link')}>
         <div style={{ position: 'relative' }}>
           <ToolBtn
             ref={linkButtonRef}
@@ -431,7 +431,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                 content: [
                   {
                     type: 'paragraph',
-                    content: [{ type: 'text', text: 'This is a Badge' }],
+                    content: [{ type: 'text', text: t('badgePlaceholder') }],
                   },
                 ],
               })

@@ -76,6 +76,9 @@
       "hint": "Подсказка",
       "referenceDocument": "Справочный документ",
       "task": "Задание {index}"
+    },
+    "DocumentPdf": {
+      "viewerTitle": "PDF Document Viewer"
     }
   },
   "ActivityIndicators": {
@@ -574,6 +577,9 @@
       "userType": "Пользователь",
       "usersSection": "Пользователи",
       "viewAllResults": "Посмотреть все результаты"
+    },
+    "Sidebar": {
+      "toggleSidebar": "Переключить боковую панель"
     },
     "TypeOfContentTitle": {
       "logoAlt": "Логотип {type}"
@@ -1566,6 +1572,7 @@
         "addColumnRight": "Добавить столбец справа",
         "addRowBelow": "Добавить строку ниже",
         "badge": "Значок",
+        "badgePlaceholder": "Это значок",
         "badges": "Значки",
         "bold": "Жирный",
         "bulletList": "Маркированный список",
@@ -1577,6 +1584,8 @@
         "clickMe": "Нажми меня",
         "codeBlock": "Блок кода",
         "codeInline": "Встроенный код",
+        "defaultInfoCalloutText": "Информация",
+        "defaultWarningCalloutText": "Предупреждение!",
         "deleteColumn": "Удалить текущий столбец",
         "deleteRow": "Удалить текущую строку",
         "document": "Документ",
@@ -1592,6 +1601,7 @@
         "insertTable": "Вставить новую таблицу (3×3)",
         "interactiveQuiz": "Интерактивный тест",
         "italic": "Курсив",
+        "link": "Ссылка",
         "listOptions": {
           "bulletList": "Маркированный список",
           "orderedList": "Нумерованный список"
@@ -1632,6 +1642,11 @@
         "sizeLarge": "Большой",
         "sizeMedium": "Средний",
         "sizeSmall": "Маленький",
+        "subtitles": {
+          "english": "Английский",
+          "kazakh": "Казахский",
+          "russian": "Русский"
+        },
         "supportedFormats": "Поддерживаемые форматы: MP4, MKV, WebM",
         "title": "Блок видео",
         "uploadHint": "Поддерживаются форматы MP4, MKV и WebM",
@@ -3187,6 +3202,7 @@
   "courses-0": "Курсы",
   "deleteChapter": "Удалить главу",
   "dialog": "Диалог",
+  "embeddedContentTitle": "Встроенное содержимое",
   "failedToLoadUserData": "Не удалось загрузить данные пользователя.",
   "minutes": "Минут",
   "noInviteCodesGenerated": "Коды приглашения еще не сгенерированы.",

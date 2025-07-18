@@ -76,6 +76,9 @@
       "hint": "Кеңес",
       "referenceDocument": "Анықтамалық құжат",
       "task": "Тапсырма {index}"
+    },
+    "DocumentPdf": {
+      "viewerTitle": "PDF құжаттарды қарау құралы"
     }
   },
   "ActivityIndicators": {
@@ -574,6 +577,9 @@
       "userType": "Пайдаланушы",
       "usersSection": "Пайдаланушылар",
       "viewAllResults": "Барлық нәтижелерді көру"
+    },
+    "Sidebar": {
+      "toggleSidebar": "Бүйірлік тақтаны ауыстырыңыз"
     },
     "TypeOfContentTitle": {
       "logoAlt": "{type} логотипі"
@@ -1566,6 +1572,7 @@
         "addColumnRight": "Оң жаққа баған қосу",
         "addRowBelow": "Төменге жол қосу",
         "badge": "Бейдж",
+        "badgePlaceholder": "Бұл белгі",
         "badges": "Бейдждер",
         "bold": "Қалың",
         "bulletList": "Нүктелі тізім",
@@ -1577,6 +1584,8 @@
         "clickMe": "Мені бас",
         "codeBlock": "Код блогы",
         "codeInline": "Желілік код",
+        "defaultInfoCalloutText": "Ақпарат",
+        "defaultWarningCalloutText": "НАЗАР АУДАРЫҢЫЗ!",
         "deleteColumn": "Ағымдағы бағанды жою",
         "deleteRow": "Ағымдағы жолды жою",
         "document": "Құжат",
@@ -1592,6 +1601,7 @@
         "insertTable": "Жаңа кесте енгізу (3×3)",
         "interactiveQuiz": "Интерактивті тест",
         "italic": "Курсив",
+        "link": "Байланыс",
         "listOptions": {
           "bulletList": "Нүктелі тізім",
           "orderedList": "Нөмірленген тізім"
@@ -1632,6 +1642,11 @@
         "sizeLarge": "Үлкен",
         "sizeMedium": "Орташа",
         "sizeSmall": "Кішкентай",
+        "subtitles": {
+          "english": "Ағылшынша",
+          "kazakh": "Қазақ",
+          "russian": "Орыс"
+        },
         "supportedFormats": "Қолдау көрсетілетін форматтар: MP4, MKV, WEBM",
         "title": "Бейне блогы",
         "uploadHint": "MP4, MKV және WebM форматтары қолдау көрсетіледі",
@@ -3187,6 +3202,7 @@
   "courses-0": "Курстар",
   "deleteChapter": "Тарауды жою",
   "dialog": "Диалог",
+  "embeddedContentTitle": "Енгізілген мазмұн",
   "failedToLoadUserData": "Пайдаланушы деректерін жүктеу мүмкін болмады.",
   "minutes": "Минут",
   "noInviteCodesGenerated": "Шақыру кодтары әлі жасалмаған.",

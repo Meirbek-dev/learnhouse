@@ -76,6 +76,9 @@
       "hint": "Hint",
       "referenceDocument": "Reference Document",
       "task": "Task {index}"
+    },
+    "DocumentPdf": {
+      "viewerTitle": "PDF Document Viewer"
     }
   },
   "ActivityIndicators": {
@@ -574,6 +577,9 @@
       "userType": "User",
       "usersSection": "Users",
       "viewAllResults": "View all results"
+    },
+    "Sidebar": {
+      "toggleSidebar": "Toggle Sidebar"
     },
     "TypeOfContentTitle": {
       "logoAlt": "{type} logo"
@@ -1566,6 +1572,7 @@
         "addColumnRight": "Add column right",
         "addRowBelow": "Add row below",
         "badge": "Badge",
+        "badgePlaceholder": "This is a Badge",
         "badges": "Badges",
         "bold": "Bold",
         "bulletList": "Bullet List",
@@ -1577,6 +1584,8 @@
         "clickMe": "Click me",
         "codeBlock": "Code Block",
         "codeInline": "Code Inline",
+        "defaultInfoCalloutText": "Info",
+        "defaultWarningCalloutText": "Warning!",
         "deleteColumn": "Delete current column",
         "deleteRow": "Delete current row",
         "document": "Document",
@@ -1592,6 +1601,7 @@
         "insertTable": "Insert new table (3×3)",
         "interactiveQuiz": "Interactive Quiz",
         "italic": "Italic",
+        "link": "Link",
         "listOptions": {
           "bulletList": "Bullet List",
           "orderedList": "Ordered List"
@@ -1632,6 +1642,11 @@
         "sizeLarge": "Large",
         "sizeMedium": "Medium",
         "sizeSmall": "Small",
+        "subtitles": {
+          "english": "English",
+          "kazakh": "Kazakh",
+          "russian": "Russian"
+        },
         "supportedFormats": "Supported formats: MP4, MKV, WebM",
         "title": "Video Block",
         "uploadHint": "Supports MP4, MKV and WebM formats",
@@ -3187,6 +3202,7 @@
   "courses-0": "Courses",
   "deleteChapter": "Delete Chapter",
   "dialog": "Dialog",
+  "embeddedContentTitle": "Embedded content",
   "failedToLoadUserData": "Failed to load user data.",
   "minutes": "Minutes",
   "noInviteCodesGenerated": "No invite codes generated yet.",
