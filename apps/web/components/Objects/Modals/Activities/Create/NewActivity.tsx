@@ -18,6 +18,7 @@ function NewActivityModal({
   submitExternalVideo,
   chapterId,
   course,
+  orgslug,
 }: any) {
   const t = useTranslations('Components.NewActivity');
   const [selectedView, setSelectedView] = useState('home');
@@ -128,6 +129,7 @@ function NewActivityModal({
           chapterId={chapterId}
           course={course}
           closeModal={closeModal}
+          orgslug={orgslug}
         />
       )}
     </>

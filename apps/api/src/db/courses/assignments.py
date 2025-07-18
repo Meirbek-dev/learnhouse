@@ -371,3 +371,25 @@ class AssignmentUserSubmission(AssignmentUserSubmissionBase, table=True):
             "assignment_id", ForeignKey("assignment.id", ondelete="CASCADE")
         )
     )
+
+
+class AssignmentCreateWithActivity(SQLModelStrictBaseModel):
+    """Model for creating an assignment along with its activity."""
+
+    model_config = ConfigDict(use_enum_values=True)
+
+    title: str
+    description: str
+    due_date: str
+    published: bool = False
+    grading_type: GradingTypeEnum
+    org_id: int
+    course_id: int
+    chapter_id: int
+
+    @field_validator("grading_type", mode="before")
+    @classmethod
+    def validate_grading_type(cls, v):
+        if isinstance(v, str):
+            return GradingTypeEnum(v)
+        return v

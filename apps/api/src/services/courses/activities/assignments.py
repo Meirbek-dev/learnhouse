@@ -5,10 +5,11 @@ from fastapi import HTTPException, Request, UploadFile
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.db.courses.activities import Activity
+from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.assignments import (
     Assignment,
     AssignmentCreate,
+    AssignmentCreateWithActivity,
     AssignmentRead,
     AssignmentTask,
     AssignmentTaskCreate,
@@ -24,6 +25,8 @@ from src.db.courses.assignments import (
     AssignmentUserSubmissionRead,
     AssignmentUserSubmissionStatus,
 )
+from src.db.courses.chapter_activities import ChapterActivity
+from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
@@ -40,6 +43,7 @@ from src.services.courses.activities.uploads.tasks_ref_files import (
     upload_reference_file,
 )
 from src.services.trail.trail import check_trail_presence
+from src.security.features_utils.usage import increase_feature_usage
 
 ## > Assignments CRUD
 
@@ -1729,3 +1733,111 @@ async def rbac_check(
 
 
 ## 🔒 RBAC Utils ##
+
+
+async def create_assignment_with_activity(
+    request: Request,
+    assignment_object: AssignmentCreateWithActivity,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+    chapter_id: int,
+    activity_name: str,
+) -> dict:
+    """
+    Create both an activity and assignment in a single transaction for better performance
+    """
+    # Optimize: Get chapter and course in a single join query
+    statement = (
+        select(Chapter, Course)
+        .join(Course, Chapter.course_id == Course.id)
+        .where(Chapter.id == chapter_id)
+    )
+    result = db_session.exec(statement).first()
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Chapter or Course not found",
+        )
+
+    chapter, course = result
+
+    # RBAC check
+    await rbac_check(request, course.course_uuid, current_user, "create", db_session)
+
+    try:
+        # Optimize: Get last order in the same transaction with a more efficient query
+        statement = (
+            select(ChapterActivity.order)
+            .where(ChapterActivity.chapter_id == chapter_id)
+            .order_by(ChapterActivity.order.desc())
+            .limit(1)
+        )
+        last_order_result = db_session.exec(statement).first()
+        last_order = last_order_result if last_order_result else 0
+        to_be_used_order = last_order + 1
+
+        # Create Activity first
+        activity = Activity(
+            name=activity_name,
+            chapter_id=chapter_id,
+            activity_type="TYPE_ASSIGNMENT",
+            activity_sub_type="SUBTYPE_ASSIGNMENT_ANY",
+            published=False,
+            course_id=course.id,
+            content={},
+            activity_uuid=f"activity_{ULID()}",
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+            org_id=chapter.org_id,
+        )
+
+        # Insert Activity in DB
+        db_session.add(activity)
+        db_session.flush()  # Flush to get the ID without committing
+
+        # Add activity to chapter
+        activity_chapter = ChapterActivity(
+            chapter_id=chapter_id,
+            activity_id=activity.id,
+            course_id=chapter.course_id,
+            org_id=chapter.org_id,
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+            order=to_be_used_order,
+        )
+
+        # Insert ChapterActivity link in DB
+        db_session.add(activity_chapter)
+        db_session.flush()  # Flush to get the ID without committing
+
+        # Create Assignment using model_dump() for Pydantic v2 compatibility
+        assignment_data = assignment_object.model_dump(exclude_unset=True)
+        assignment = Assignment(**assignment_data)
+
+        assignment.assignment_uuid = f"assignment_{ULID()}"
+        assignment.creation_date = datetime.now().isoformat()
+        assignment.update_date = datetime.now().isoformat()
+        assignment.org_id = course.org_id
+        assignment.activity_id = activity.id
+
+        # Insert Assignment in DB
+        db_session.add(assignment)
+
+        # Commit everything at once
+        db_session.commit()
+        db_session.refresh(activity)
+        db_session.refresh(assignment)
+
+        return {
+            "activity": ActivityRead.model_validate(activity),
+            "assignment": AssignmentRead.model_validate(assignment),
+            "success": True,
+        }
+
+    except Exception as e:
+        db_session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create assignment with activity: {str(e)}",
+        )

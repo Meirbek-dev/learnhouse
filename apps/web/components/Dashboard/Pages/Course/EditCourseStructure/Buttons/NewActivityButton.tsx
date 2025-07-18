@@ -102,6 +102,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
             submitActivity={submitActivity}
             chapterId={props.chapterId}
             course={course}
+            orgslug={props.orgslug}
           />
         }
         dialogTitle={t('title')}

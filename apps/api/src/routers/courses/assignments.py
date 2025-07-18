@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request, UploadFile
 from src.core.events.database import get_db_session
 from src.db.courses.assignments import (
     AssignmentCreate,
+    AssignmentCreateWithActivity,
     AssignmentRead,
     AssignmentTaskCreate,
     AssignmentTaskSubmissionUpdate,
@@ -18,6 +19,7 @@ from src.services.courses.activities.assignments import (
     create_assignment,
     create_assignment_submission,
     create_assignment_task,
+    create_assignment_with_activity,
     delete_assignment,
     delete_assignment_from_activity_uuid,
     delete_assignment_submission,
@@ -492,4 +494,21 @@ async def api_get_assignments(
     """
     return await get_assignments_from_course(
         request, course_uuid, current_user, db_session
+    )
+
+
+@router.post("/with-activity")
+async def api_create_assignment_with_activity(
+    request: Request,
+    assignment_object: AssignmentCreateWithActivity,
+    chapter_id: int,
+    activity_name: str,
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session=Depends(get_db_session),
+):
+    """
+    Create assignment with activity in a single transaction for better performance
+    """
+    return await create_assignment_with_activity(
+        request, assignment_object, current_user, db_session, chapter_id, activity_name
     )
