@@ -46,7 +46,8 @@ export function AssignmentTaskGeneralEdit() {
 
   // Check if assignment task data is loaded and task is selected
   const isTaskSelected = assignmentTaskState?.selectedAssignmentTaskUUID !== null;
-  const isTaskLoaded = assignmentTaskState?.assignmentTask &&
+  const isTaskLoaded =
+    assignmentTaskState?.assignmentTask &&
     Object.keys(assignmentTaskState.assignmentTask).length > 0 &&
     assignmentTaskState.selectedAssignmentTaskUUID === assignmentTaskState.assignmentTask.assignment_task_uuid;
 
@@ -92,7 +93,7 @@ export function AssignmentTaskGeneralEdit() {
       isTaskLoaded,
       selectedTaskUUID: assignmentTaskState?.selectedAssignmentTaskUUID,
       taskUUID: assignmentTaskState?.assignmentTask?.assignment_task_uuid,
-      taskData: assignmentTaskState?.assignmentTask
+      taskData: assignmentTaskState?.assignmentTask,
     });
 
     if (isTaskLoaded) {
@@ -144,6 +145,7 @@ export function AssignmentTaskGeneralEdit() {
               <FormControl>
                 <Input
                   type="text"
+                  placeholder={t('titlePlaceholder')}
                   {...field}
                 />
               </FormControl>
@@ -159,8 +161,9 @@ export function AssignmentTaskGeneralEdit() {
             <FormItem>
               <FormLabel>{t('description')}</FormLabel>
               <FormControl>
-                <Input
-                  type="text"
+                <Textarea
+                  placeholder={t('descriptionPlaceholder')}
+                  className="min-h-[100px]"
                   {...field}
                 />
               </FormControl>
@@ -176,7 +179,11 @@ export function AssignmentTaskGeneralEdit() {
             <FormItem>
               <FormLabel>{t('hint')}</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea
+                  placeholder={t('hintPlaceholder')}
+                  className="min-h-[80px]"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
