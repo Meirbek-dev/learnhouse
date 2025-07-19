@@ -11,7 +11,6 @@ import { updateCourse } from '@services/courses/courses';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
-import { Checkbox } from '@components/ui/checkbox';
 import { Input } from '@components/ui/input';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -371,26 +370,6 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
                             onValueChange={field.onChange}
                           />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="public"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>{t('public.label')}</FormLabel>
-                          <p className="text-muted-foreground text-sm">{t('public.description')}</p>
-                        </div>
                         <FormMessage />
                       </FormItem>
                     )}

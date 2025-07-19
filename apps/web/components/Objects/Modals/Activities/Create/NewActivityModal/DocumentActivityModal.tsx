@@ -82,20 +82,33 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
             <FormItem>
               <FormLabel>{t('pdfDocumentFile')}</FormLabel>
               <FormControl>
-                <input
-                  {...field}
-                  type="file"
-                  accept={SUPPORTED_FILES}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      onChange(file);
-                    }
-                  }}
-                  className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label={t('ariaLabel')}
-                  title={t('selectFile')}
-                />
+                <div className="relative">
+                  <input
+                    {...field}
+                    type="file"
+                    accept={SUPPORTED_FILES}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onChange(file);
+                      }
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    aria-label={t('ariaLabel')}
+                  />
+                  <div className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer items-center justify-between">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="-ml-3"
+                      onClick={() => {}}
+                    >
+                      {t('selectFile')}
+                    </Button>
+                    <span className="text-muted-foreground">{value ? value.name : t('noFileSelected')}</span>
+                  </div>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

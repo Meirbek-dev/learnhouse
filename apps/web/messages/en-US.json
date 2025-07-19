@@ -354,6 +354,7 @@
     "DocumentPdfModal": {
       "ariaLabel": "Choose PDF document file to upload",
       "createActivity": "Create Activity",
+      "noFileSelected": "No file selected",
       "pdfDocumentFile": "PDF Document File",
       "pdfDocumentName": "PDF Document Name",
       "selectFile": "Select PDF File",

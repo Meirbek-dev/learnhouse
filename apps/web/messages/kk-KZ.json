@@ -352,6 +352,7 @@
     "DocumentPdfModal": {
       "ariaLabel": "Жүктеу үшін PDF құжат файлын таңдаңыз",
       "createActivity": "Белсенділік жасау",
+      "noFileSelected": "Ешқандай файл таңдалмады",
       "pdfDocumentFile": "PDF құжатының файлы",
       "pdfDocumentName": "PDF құжатының атауы",
       "selectFile": "PDF файлын таңдаңыз",

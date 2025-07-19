@@ -174,8 +174,9 @@ async def ai_send_activity_chat_message(
         structured, chat_session = await asyncio.gather(content_task, chat_session_task)
 
         # Generate AI-friendly text
+        isEmpty = not structured
         ai_friendly_text = serialize_activity_text_to_ai_comprehensible_text(
-            structured, course, activity
+            structured, course, activity, isActivityEmpty=isEmpty
         )
 
         # Get AI configuration

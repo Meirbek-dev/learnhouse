@@ -6,7 +6,12 @@ def structure_activity_content_by_type(activity):
     """Get Headings, Texts, Callouts, Answers and Paragraphs from the activity as a big list of strings (text only) and return it"""
 
     if "content" not in activity or not activity["content"]:
-        return []
+        # Return empty structure instead of empty list
+        return [
+            {"Headings": []},
+            {"Callouts": []},
+            {"Paragraphs": []}
+        ]
 
     content = activity["content"]
 
@@ -57,7 +62,8 @@ def serialize_activity_text_to_ai_comprehensible_text(
     activity: ActivityRead,
     isActivityEmpty: bool = False,
 ):
-    if isActivityEmpty:
+    # Check if activity is empty or data_array is empty/invalid
+    if isActivityEmpty or not data_array or len(data_array) < 3:
         return (
             "Use this as a context "
             'This is a course about "'
@@ -69,19 +75,22 @@ def serialize_activity_text_to_ai_comprehensible_text(
             + "There is no content yet in this lecture."
         )
 
-    # Serialize Headings
+    # Serialize Headings (safe access)
     serialized_headings = ""
-    for heading in data_array[0]["Headings"]:
+    headings = data_array[0].get("Headings", [])
+    for heading in headings:
         serialized_headings += heading + " "
 
-    # Serialize Callouts
+    # Serialize Callouts (safe access)
     serialized_callouts = ""
-    for callout in data_array[1]["Callouts"]:
+    callouts = data_array[1].get("Callouts", [])
+    for callout in callouts:
         serialized_callouts += callout + " "
 
-    # Serialize Paragraphs
+    # Serialize Paragraphs (safe access)
     serialized_paragraphs = ""
-    for paragraph in data_array[2]["Paragraphs"]:
+    paragraphs = data_array[2].get("Paragraphs", [])
+    for paragraph in paragraphs:
         serialized_paragraphs += paragraph + " "
 
     # Get a text that is comprehensible by the AI

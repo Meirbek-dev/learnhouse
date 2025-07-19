@@ -4,8 +4,8 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.4"
 dependencies = [
-  "boto3>=1.39.7",
-  "botocore>=1.39.7",
+  "boto3>=1.39.9",
+  "botocore>=1.39.9",
   "fastapi==0.116.1",
   "fastapi-another-jwt-auth>=0.1.11",
   "httpx>=0.28.1",
@@ -31,7 +31,7 @@ dependencies = [
   "alembic>=1.16.4",
   "alembic-postgresql-enum>=1.7.0",
   "stripe>=12.3.0",
-  "logfire[fastapi,sqlalchemy]>=3.24.2",
+  "logfire[fastapi,sqlalchemy]>=3.25.0",
   "beautifulsoup4>=4.13.4",
   "python-ulid>=3.0.0",
   "argon2-cffi>=25.1.0",

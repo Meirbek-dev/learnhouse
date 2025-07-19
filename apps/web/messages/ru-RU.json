@@ -352,6 +352,7 @@
     "DocumentPdfModal": {
       "ariaLabel": "Выбрать PDF-документ для загрузки",
       "createActivity": "Создать активность",
+      "noFileSelected": "Файл не выбран",
       "pdfDocumentFile": "Файл PDF документа",
       "pdfDocumentName": "Название PDF документа",
       "selectFile": "Выбрать PDF файл",
