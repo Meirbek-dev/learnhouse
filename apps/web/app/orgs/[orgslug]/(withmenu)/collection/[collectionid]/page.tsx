@@ -83,7 +83,7 @@ const CollectionPage = async (params: any) => {
           >
             <Link href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}>
               <div
-                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-inset ring-black/10"
+                className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
                 style={{
                   backgroundImage: course.thumbnail_image
                     ? `url(${getCourseThumbnailMediaDirectory(

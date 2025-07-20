@@ -115,7 +115,7 @@ function PaymentsProductPage() {
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
-      <div className="mx-auto pl-10 pr-10">
+      <div className="mx-auto pr-10 pl-10">
         <Modal
           isDialogOpen={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
@@ -237,7 +237,7 @@ function PaymentsProductPage() {
         <div className="flex items-center justify-center py-10">
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className={`soft-shadow bg-linear-to-bl mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
+            className={`soft-shadow mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 bg-linear-to-bl from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
               isStripeEnabled ? 'hover:from-gray-600 hover:to-gray-800' : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}

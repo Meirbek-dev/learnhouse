@@ -13,13 +13,7 @@ import {
   TextIcon,
   Trash2,
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -32,7 +26,7 @@ import { Checkbox } from '@components/ui/checkbox';
 import { Calendar } from '@components/ui/calendar';
 import { getUser } from '@services/users/users';
 import { Button } from '@components/ui/button';
-import { format, type Locale } from 'date-fns';
+import { type Locale, format } from 'date-fns';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { toast } from 'react-hot-toast';
@@ -446,10 +440,10 @@ const UserProfileBuilder = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             onClick={() => setSelectedSection(index)}
-                            className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
+                            className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
                               selectedSection === index
-                                ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
-                                : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
+                                ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
+                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
                             } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                           >
                             <div className="group flex items-center justify-between">
@@ -1590,7 +1584,7 @@ const CoursesEditor: FC<{
           />
         </div>
 
-        <div className="text-sm italic text-gray-500">{t('CoursesEditor.autoDisplayMessage')}</div>
+        <div className="text-sm text-gray-500 italic">{t('CoursesEditor.autoDisplayMessage')}</div>
       </div>
     </div>
   );

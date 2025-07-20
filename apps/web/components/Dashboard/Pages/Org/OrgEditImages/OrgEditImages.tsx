@@ -12,7 +12,7 @@ import {
 } from '@services/media/media';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
-import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Draggable, type DropResult, Droppable } from '@hello-pangea/dnd';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
@@ -405,21 +405,21 @@ export default function OrgEditImages() {
         <TabsList className="grid w-full grid-cols-3 rounded-lg bg-gray-100 p-1">
           <TabsTrigger
             value="logo"
-            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <StarIcon size={16} />
             <span>{t('Tabs.logo')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="thumbnail"
-            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <ImageIcon size={16} />
             <span>{t('Tabs.thumbnail')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="previews"
-            className="data-[state=active]:shadow-xs flex items-center space-x-2 transition-all data-[state=active]:bg-white"
+            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
           >
             <Images size={16} />
             <span>{t('Tabs.previews')}</span>
@@ -431,7 +431,7 @@ export default function OrgEditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <img
@@ -497,7 +497,7 @@ export default function OrgEditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-8 transition-all duration-300">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative">
                   <img
@@ -565,7 +565,7 @@ export default function OrgEditImages() {
           className="mt-4"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="bg-linear-to-b w-full rounded-xl from-gray-50 to-white py-6 transition-all duration-300">
+            <div className="w-full rounded-xl bg-linear-to-b from-gray-50 to-white py-6 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable
@@ -642,7 +642,7 @@ export default function OrgEditImages() {
                                         backgroundImage: `url(${preview.thumbnailUrl})`,
                                       }}
                                     />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-[2px]">
+                                    <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black backdrop-blur-[2px]">
                                       {preview.type === 'youtube' ? (
                                         <SiYoutube className="h-10 w-10 text-red-500" />
                                       ) : (
@@ -710,7 +710,7 @@ export default function OrgEditImages() {
                                               'flex items-center justify-center',
                                             )}
                                           >
-                                            <option.icon className={`h-8 w-8 text-${option.color}-500`} />
+                                            <option.icon className={`text- h-8 w-8${option.color}-500`} />
                                           </div>
                                           <div className="text-center">
                                             <p className="font-medium text-gray-700">{option.title}</p>

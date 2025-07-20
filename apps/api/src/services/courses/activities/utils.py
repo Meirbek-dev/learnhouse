@@ -7,11 +7,7 @@ def structure_activity_content_by_type(activity):
 
     if "content" not in activity or not activity["content"]:
         # Return empty structure instead of empty list
-        return [
-            {"Headings": []},
-            {"Callouts": []},
-            {"Paragraphs": []}
-        ]
+        return [{"Headings": []}, {"Callouts": []}, {"Paragraphs": []}]
 
     content = activity["content"]
 

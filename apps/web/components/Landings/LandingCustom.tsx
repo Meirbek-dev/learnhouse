@@ -50,7 +50,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               {/* Logo */}
               {section.illustration?.image.url && section.illustration.image.url.trim() !== '' && (
                 <div
-                  className={`flex items-${section.illustration.verticalAlign} w-full p-6 ${
+                  className={`items- flex${section.illustration.verticalAlign} w-full p-6 ${
                     section.illustration.size === 'small'
                       ? 'sm:w-1/4'
                       : section.illustration.size === 'medium'
@@ -131,7 +131,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               <div className="w-full max-w-2xl flex-1">
                 <h2 className="mb-4 text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">{section.title}</h2>
                 <div className="prose prose-lg prose-gray max-w-none">
-                  <p className="whitespace-pre-line text-base leading-relaxed text-gray-600 md:text-lg">
+                  <p className="text-base leading-relaxed whitespace-pre-line text-gray-600 md:text-lg">
                     {section.text}
                   </p>
                 </div>
@@ -140,7 +140,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                     <a
                       key={index}
                       href={button.link}
-                      className="shadow-xs rounded-xl px-6 py-3 font-medium transition-all duration-200 hover:scale-105"
+                      className="rounded-xl px-6 py-3 font-medium shadow-xs transition-all duration-200 hover:scale-105"
                       style={{
                         backgroundColor: button.background,
                         color: button.color,
@@ -153,7 +153,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               </div>
               <div className="w-full flex-1 md:w-auto">
                 <div className="relative mx-auto w-full max-w-[500px] px-4 md:px-8">
-                  <div className="aspect-4/3 relative w-full">
+                  <div className="relative aspect-4/3 w-full">
                     {section.image.url && section.image.url.trim() !== '' && (
                       <img
                         src={section.image.url}
@@ -257,7 +257,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
             <h2 className="mb-6 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
-            <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-12">
+            <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
               {featuredCourses.map((course: any) => (
                 <div
                   key={course.course_uuid}
@@ -282,7 +282,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
   };
 
   return (
-    <div className="max-w-(--breakpoint-2xl) mx-auto flex h-full w-full flex-col items-center justify-between px-4 sm:px-6 lg:px-16">
+    <div className="mx-auto flex h-full w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between px-4 sm:px-6 lg:px-16">
       {landing.sections.map((section) => renderSection(section))}
     </div>
   );

@@ -20,11 +20,11 @@ interface CourseProps {
 
 const EmptyStateMessage = memo(({ isUserAdmin, t, newCourseButtonTrigger }: any) => (
   <div className="col-span-full flex items-center justify-center py-12">
-    <div className="text-center max-w-md">
+    <div className="max-w-md text-center">
       <div className="mb-6">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
           <svg
-            className="w-8 h-8 text-gray-400"
+            className="h-8 w-8 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -39,7 +39,7 @@ const EmptyStateMessage = memo(({ isUserAdmin, t, newCourseButtonTrigger }: any)
         </div>
       </div>
       <h1 className="mb-3 text-2xl font-bold text-gray-700">{t('noCourses')}</h1>
-      <p className="text-lg text-gray-500 mb-6">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
+      <p className="mb-6 text-lg text-gray-500">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
       {isUserAdmin && <div className="flex justify-center">{newCourseButtonTrigger}</div>}
     </div>
   </div>
@@ -48,7 +48,7 @@ const EmptyStateMessage = memo(({ isUserAdmin, t, newCourseButtonTrigger }: any)
 EmptyStateMessage.displayName = 'EmptyStateMessage';
 
 const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
-  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-12">
+  <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
     {courses.map((course: any) => (
       <div
         key={course.course_uuid}

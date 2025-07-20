@@ -1,14 +1,15 @@
 'use client';
-
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { useEffect, useMemo, useState } from 'react';
+import { Award, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { mutate } from 'swr';
 
@@ -32,13 +33,41 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
     () => (course_total_steps > 0 ? Math.round((course_completed_steps / course_total_steps) * 100) : 0),
     [course_total_steps, course_completed_steps],
   );
+  const [courseCertificate, setCourseCertificate] = useState<any>(null);
+  const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
 
   async function quitCourse(course_uuid: string) {
-    await removeCourse(course_uuid, orgslug, access_token);
+    // Close activity
+    const activity = await removeCourse(course_uuid, orgslug, access_token);
+    // Mutate course
     await revalidateTags(['courses'], orgslug);
     router.refresh();
+
+    // Mutate
     mutate(`${getAPIUrl()}trail/org/${orgID}/trail`);
   }
+
+  // Fetch certificate for this course
+  useEffect(() => {
+    const fetchCourseCertificate = async () => {
+      if (!access_token || course_progress < 100) return;
+
+      setIsLoadingCertificate(true);
+      try {
+        const result = await getUserCertificates(course.course_uuid, access_token);
+
+        if (result.success && result.data && result.data.length > 0) {
+          setCourseCertificate(result.data[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching course certificate:', error);
+      } finally {
+        setIsLoadingCertificate(false);
+      }
+    };
+
+    fetchCourseCertificate();
+  }, [access_token, course_progress, course.course_uuid]);
 
   useEffect(() => {}, [course, org]);
 
@@ -49,7 +78,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
     >
       <Link href={getUriWithOrg(orgslug, `/course/${courseid}`)}>
         <div
-          className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-inset ring-black/10"
+          className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-black/10 ring-inset"
           style={{
             backgroundImage: course.thumbnail_image
               ? `url(${getCourseThumbnailMediaDirectory(org.org_uuid, course.course_uuid, course.thumbnail_image)})`
@@ -87,6 +116,42 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
             />
           </div>
         </div>
+
+        {/* Certificate Section */}
+        {course_progress === 100 && (
+          <div className="mt-2 border-t border-gray-100 pt-2">
+            {isLoadingCertificate ? (
+              <div className="flex items-center space-x-1 text-xs text-gray-500">
+                <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-500" />
+                <span>Loading...</span>
+              </div>
+            ) : courseCertificate ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1">
+                  <Award className="h-3 w-3 text-yellow-500" />
+                  <span className="text-xs font-medium text-gray-700">Certificate</span>
+                </div>
+                <Link
+                  href={getUriWithOrg(
+                    orgslug,
+                    `/certificates/${courseCertificate.certificate_user.user_certification_uuid}/verify`,
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+                >
+                  <span>Verify</span>
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1 text-xs text-gray-500">
+                <Award className="h-3 w-3 text-gray-300" />
+                <span>No certificate</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -163,7 +163,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
             dialogTitle={t('NewChapterModal.title')}
             dialogDescription={t('NewChapterModal.description')}
             dialogTrigger={
-              <div className="max-w-(--breakpoint-2xl) shadow-xs mx-auto my-16 flex h-10 flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white">
+              <div className="mx-auto my-16 flex h-10 max-w-(--breakpoint-2xl) flex-row items-center rounded-xl bg-cyan-800 px-6 py-5 text-white shadow-xs">
                 <div className="mx-auto flex items-center space-x-2 hover:cursor-pointer">
                   <Hexagon
                     strokeWidth={3}

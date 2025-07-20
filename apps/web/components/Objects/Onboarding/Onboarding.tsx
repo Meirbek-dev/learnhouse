@@ -255,7 +255,7 @@ const Onboarding: FC = () => {
             ) : null
           }
           dialogTrigger={
-            <div className="bg-linear-to-t from-1% fixed bottom-0 w-full from-gray-950/25 to-transparent pb-10">
+            <div className="fixed bottom-0 w-full bg-linear-to-t from-gray-950/25 from-1% to-transparent pb-10">
               <div className="mx-auto flex w-fit cursor-pointer items-center space-x-2 rounded-full bg-gray-950 px-5 py-2 font-bold text-gray-200 shadow-md hover:bg-gray-900">
                 <Sprout size={20} />
                 <p>{t('onboarding')}</p>
@@ -352,7 +352,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
             {step.buttons?.map((button, index) => (
               <div
                 key={index}
-                className="inline-flex cursor-pointer items-center space-x-2 whitespace-nowrap rounded-full bg-black px-5 py-1 font-bold text-gray-200 antialiased shadow-md hover:bg-gray-700"
+                className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-black px-5 py-1 font-bold whitespace-nowrap text-gray-200 antialiased shadow-md hover:bg-gray-700"
                 onClick={button.action}
               >
                 <p>{button.label}</p>
@@ -361,7 +361,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
             ))}
             {isLastStep ? (
               <div
-                className="inline-flex cursor-pointer items-center space-x-2 whitespace-nowrap rounded-full bg-black px-5 py-1 font-bold text-gray-200 antialiased shadow-md hover:bg-gray-700"
+                className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-black px-5 py-1 font-bold whitespace-nowrap text-gray-200 antialiased shadow-md hover:bg-gray-700"
                 onClick={nextStep}
               >
                 <p>{t('finishButtonLabel')}</p>
@@ -369,7 +369,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
               </div>
             ) : (
               <div
-                className="inline-flex cursor-pointer items-center space-x-2 whitespace-nowrap rounded-full bg-black px-5 py-1 font-bold text-gray-200 antialiased shadow-md hover:bg-gray-700"
+                className="inline-flex cursor-pointer items-center space-x-2 rounded-full bg-black px-5 py-1 font-bold whitespace-nowrap text-gray-200 antialiased shadow-md hover:bg-gray-700"
                 onClick={nextStep}
               >
                 <p>{t('nextButtonLabel')}</p>

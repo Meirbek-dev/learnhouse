@@ -1,9 +1,9 @@
 import {
+  OPENU_DOMAIN,
+  OPENU_TOP_DOMAIN,
   getDefaultOrg,
   getUriWithOrg,
   isMultiOrgModeEnabled,
-  OPENU_DOMAIN,
-  OPENU_TOP_DOMAIN,
 } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';

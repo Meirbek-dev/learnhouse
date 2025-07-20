@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import Link from 'next/link';
+
 // Types from SearchBar component
 interface User {
   username: string;
@@ -131,7 +132,7 @@ const Pagination = ({
 };
 
 const LoadingState = () => (
-  <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
+  <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
     {[1, 2, 3, 4, 5, 6].map((i) => (
       <div
         key={i}
@@ -285,7 +286,7 @@ function SearchPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('searchInputPlaceholder')}
-                className="soft-shadow h-12 w-full rounded-xl bg-white pl-12 pr-4 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:outline-none focus:ring-1 focus:ring-black/5"
+                className="soft-shadow h-12 w-full rounded-xl bg-white pr-4 pl-12 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:ring-1 focus:ring-black/5 focus:outline-none"
               />
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <Search
@@ -390,7 +391,7 @@ function SearchPage() {
                     />
                     {t('courses')} ({searchResults.courses.length})
                   </h2>
-                  <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
+                  <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
                     {searchResults.courses.map((course) => (
                       <Link
                         key={course.course_uuid}
@@ -453,7 +454,7 @@ function SearchPage() {
                     />
                     {t('collections')} ({searchResults.collections.length})
                   </h2>
-                  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
                     {searchResults.collections.map((collection) => (
                       <Link
                         key={collection.collection_uuid}
@@ -490,7 +491,7 @@ function SearchPage() {
                     />
                     {t('users')} ({searchResults.users.length})
                   </h2>
-                  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                  <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
                     {searchResults.users.map((user) => (
                       <Link
                         key={user.user_uuid}

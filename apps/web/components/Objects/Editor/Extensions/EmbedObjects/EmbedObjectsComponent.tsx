@@ -518,7 +518,7 @@ function EmbedObjectsComponent(props: any) {
             {embedContent}
             {/* Minimal toolbar for existing embeds */}
             {isEditable && (
-              <div className="shadow-xs backdrop-blur-xs absolute right-2 top-2 flex items-center gap-1.5 rounded-lg bg-white bg-opacity-90 p-1 opacity-70 transition-opacity hover:opacity-100">
+              <div className="bg-opacity-90 absolute top-2 right-2 flex items-center gap-1.5 rounded-lg bg-white p-1 opacity-70 shadow-xs backdrop-blur-xs transition-opacity hover:opacity-100">
                 <button
                   onClick={() => setActiveInput(embedType)}
                   className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100"
@@ -607,7 +607,7 @@ function EmbedObjectsComponent(props: any) {
                 </button>
               ))}
             </div>
-            <p className="mb-2 mt-3 max-w-md text-center text-xs text-gray-500">{t('clickServiceToAdd')}</p>
+            <p className="mt-3 mb-2 max-w-md text-center text-xs text-gray-500">{t('clickServiceToAdd')}</p>
             {/* Direct input options */}
             {isEditable && (
               <div className="mt-4 flex justify-center gap-3">
@@ -616,7 +616,7 @@ function EmbedObjectsComponent(props: any) {
                     setEmbedType('url');
                     setActiveInput('url');
                   }}
-                  className="shadow-xs flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 transition-all hover:shadow-md"
+                  className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 shadow-xs transition-all hover:shadow-md"
                 >
                   <LinkIcon size={14} />
                   <span>{t('urlButton')}</span>
@@ -626,7 +626,7 @@ function EmbedObjectsComponent(props: any) {
                     setEmbedType('code');
                     setActiveInput('code');
                   }}
-                  className="shadow-xs flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 transition-all hover:shadow-md"
+                  className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm text-gray-700 shadow-xs transition-all hover:shadow-md"
                 >
                   <Code size={14} />
                   <span>{t('codeButton')}</span>
@@ -638,7 +638,7 @@ function EmbedObjectsComponent(props: any) {
 
         {/* Inline input UI - appears in place without covering content */}
         {isEditable && activeInput !== 'none' && (
-          <div className="backdrop-blur-xs absolute inset-0 z-10 flex items-center justify-center bg-gray-100 bg-opacity-95 p-4">
+          <div className="bg-opacity-95 absolute inset-0 z-10 flex items-center justify-center bg-gray-100 p-4 backdrop-blur-xs">
             <form
               onSubmit={handleInputSubmit}
               className="w-full max-w-lg rounded-xl bg-white p-4 shadow-lg"
@@ -702,7 +702,7 @@ function EmbedObjectsComponent(props: any) {
               {activeInput === 'url' ? (
                 <>
                   <div className="relative mb-2">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 transform text-blue-500">
+                    <div className="absolute top-1/2 left-3 -translate-y-1/2 transform text-blue-500">
                       <LinkIcon size={16} />
                     </div>
                     <input
@@ -710,7 +710,7 @@ function EmbedObjectsComponent(props: any) {
                       type="text"
                       value={embedUrl}
                       onChange={handleUrlChange}
-                      className="focus:outline-hidden w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                       placeholder={
                         selectedProduct
                           ? t('productUrlPlaceholder', {
@@ -833,7 +833,7 @@ function EmbedObjectsComponent(props: any) {
         {isEditable && (
           <>
             <div
-              className="absolute bottom-0 right-0 top-0 flex w-4 cursor-ew-resize items-center justify-center bg-white bg-opacity-70 transition-opacity hover:bg-opacity-100"
+              className="bg-opacity-70 hover:bg-opacity-100 absolute top-0 right-0 bottom-0 flex w-4 cursor-ew-resize items-center justify-center bg-white transition-opacity"
               onMouseDown={(e) => handleResizeStart(e, 'horizontal')}
             >
               <GripVertical
@@ -842,7 +842,7 @@ function EmbedObjectsComponent(props: any) {
               />
             </div>
             <div
-              className="absolute bottom-0 left-0 right-0 flex h-4 cursor-ns-resize items-center justify-center bg-white bg-opacity-70 transition-opacity hover:bg-opacity-100"
+              className="bg-opacity-70 hover:bg-opacity-100 absolute right-0 bottom-0 left-0 flex h-4 cursor-ns-resize items-center justify-center bg-white transition-opacity"
               onMouseDown={(e) => handleResizeStart(e, 'vertical')}
             >
               <GripHorizontal

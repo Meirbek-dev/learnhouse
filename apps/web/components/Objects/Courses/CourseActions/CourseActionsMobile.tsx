@@ -104,7 +104,7 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
         {remainingCount > 0 && (
           <div className="relative z-0">
             <div
-              className="flex items-center justify-center rounded-full border-2 border-white bg-neutral-100 font-medium text-neutral-600 shadow-sm text-xs"
+              className="flex items-center justify-center rounded-full border-2 border-white bg-neutral-100 text-xs font-medium text-neutral-600 shadow-sm"
               style={{
                 width: `${avatarSize}px`,
                 height: `${avatarSize}px`,
@@ -231,7 +231,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   };
 
   if (isLoading) {
-    return <div className="mb-8 mt-4 h-16 animate-pulse rounded-lg bg-gray-100" />;
+    return <div className="mt-4 mb-8 h-16 animate-pulse rounded-lg bg-gray-100" />;
   }
 
   // Filter active authors and sort by role priority

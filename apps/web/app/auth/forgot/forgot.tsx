@@ -71,13 +71,13 @@ function ForgotPasswordClient() {
               <p className="mb-4 text-sm">{t('enterEmailMessage')}</p>
 
               {error && (
-                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 transition-all my-4">
+                <div className="my-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 shadow-xs transition-all">
                   <AlertTriangle size={22} />
                   <div className="text-sm font-bold">{error}</div>
                 </div>
               )}
               {message && (
-                <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 transition-all">
+                <div className="flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
                   <Info size={18} />
                   <div className="text-sm font-bold">{t('checkEmail')}</div>
                 </div>

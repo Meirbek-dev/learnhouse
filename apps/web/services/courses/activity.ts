@@ -1,4 +1,4 @@
-import { errorHandling, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
 /*

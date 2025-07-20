@@ -81,10 +81,10 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="soft-shadow flex-shrink-0 bg-[#fcfbfc] pl-10 pr-10 tracking-tight">
+      <div className="soft-shadow flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
         <BreadCrumbs type="org" />
         <div className="my-2 py-2">
-          <div className="w-100 flex flex-col space-y-1">
+          <div className="flex w-100 flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
             <div className="text-md flex font-medium text-gray-400">{H2Label}</div>
           </div>

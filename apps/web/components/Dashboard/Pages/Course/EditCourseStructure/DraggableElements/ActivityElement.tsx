@@ -115,9 +115,9 @@ function ActivityElement(props: ActivitiyElementProps) {
         <div
           className={`my-2 grid w-full grid-cols-[auto_1fr_auto] gap-2 rounded-md px-3 py-2 text-gray-500 ${
             snapshot.isDragging
-              ? 'soft-shadow z-50 rotate-1 scale-[1.04] bg-white ring-2 ring-blue-500/20'
+              ? 'soft-shadow z-50 scale-[1.04] rotate-1 bg-white ring-2 ring-blue-500/20'
               : 'soft-shadow bg-gray-50 hover:bg-gray-100'
-          } border-1 items-center border-gray-200`}
+          } items-center border-1 border-gray-200`}
           key={props.activity.id}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -139,7 +139,7 @@ function ActivityElement(props: ActivitiyElementProps) {
               <div className="chapter-modification-zone space-x-3 rounded-lg bg-gray-200/60 px-4 py-1 text-[7px] text-gray-600 shadow-inner">
                 <input
                   type="text"
-                  className="outline-hidden bg-transparent text-xs text-gray-500"
+                  className="bg-transparent text-xs text-gray-500 outline-hidden"
                   placeholder={t('activityNamePlaceholder')}
                   value={modifiedActivity ? modifiedActivity?.activityName : props.activity.name}
                   onChange={(e) =>
@@ -185,8 +185,8 @@ function ActivityElement(props: ActivitiyElementProps) {
             <button
               className={`flex items-center space-x-1 rounded-md border p-1 px-2 text-xs font-semibold shadow-md transition-colors duration-200 sm:px-3 ${
                 !props.activity.published
-                  ? 'bg-linear-to-bl border-green-600/10 from-green-400/50 to-lime-200/80 text-green-800 hover:from-green-500/50 hover:to-lime-300/80'
-                  : 'bg-linear-to-bl border-gray-600/10 from-gray-400/50 to-gray-200/80 text-gray-800 hover:from-gray-500/50 hover:to-gray-300/80'
+                  ? 'border-green-600/10 bg-linear-to-bl from-green-400/50 to-lime-200/80 text-green-800 hover:from-green-500/50 hover:to-lime-300/80'
+                  : 'border-gray-600/10 bg-linear-to-bl from-gray-400/50 to-gray-200/80 text-gray-800 hover:from-gray-500/50 hover:to-gray-300/80'
               }`}
               onClick={() => changePublicStatus()}
               aria-label={!props.activity.published ? t('publishButton') : t('unpublishButton')}
@@ -217,7 +217,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                   'course_',
                   '',
                 )}/activity/${props.activity.activity_uuid.replace('activity_', '')}`}
-                className="bg-linear-to-bl flex items-center space-x-1 rounded-md border border-cyan-600/10 from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-semibold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
+                className="flex items-center space-x-1 rounded-md border border-cyan-600/10 bg-linear-to-bl from-sky-400/50 to-cyan-200/80 p-1 px-2 text-xs font-semibold text-cyan-800 shadow-md transition-colors duration-200 hover:from-sky-500/50 hover:to-cyan-300/80 sm:px-3"
                 rel="noopener noreferrer"
                 aria-label={t('previewTooltip')}
                 title={t('previewTooltip')}

@@ -64,16 +64,16 @@ function AssignmentTaskEditor({ page }: any) {
   }, [assignmentTaskState, assignmentTaskStateHook, selectedSubPage, assignment]);
 
   return (
-    <div className="z-20 flex w-full flex-col h-full text-sm font-bold overflow-auto">
+    <div className="z-20 flex h-full w-full flex-col overflow-auto text-sm font-bold">
       {assignmentTaskState.assignmentTask && Object.keys(assignmentTaskState.assignmentTask).length > 0 && (
-        <div className="flex flex-col space-y-3 h-full">
-          <div className="soft-shadow z-10 mb-3 flex flex-col bg-white pl-10 pr-10 pt-5 text-sm tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)] flex-shrink-0">
+        <div className="flex h-full flex-col space-y-3">
+          <div className="soft-shadow z-10 mb-3 flex flex-shrink-0 flex-col bg-white pt-5 pr-10 pl-10 text-sm tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between py-1">
               <div className="text-lg font-semibold">{assignmentTaskState?.assignmentTask.title}</div>
               <div>
                 <div
                   onClick={() => deleteTaskUI()}
-                  className="bg-linear-to-bl flex cursor-pointer items-center space-x-2 rounded-md border border-rose-600/10 bg-rose-100 px-2 py-1.5 text-red-800 shadow-lg shadow-rose-900/10"
+                  className="flex cursor-pointer items-center space-x-2 rounded-md border border-rose-600/10 bg-rose-100 bg-linear-to-bl px-2 py-1.5 text-red-800 shadow-lg shadow-rose-900/10"
                 >
                   <Trash size={18} />
                   <p className="text-xs font-semibold">{t('deleteTask')}</p>
@@ -105,14 +105,14 @@ function AssignmentTaskEditor({ page }: any) {
               </div>
             </div>
           </div>
-          <div className="soft-shadow shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-6 py-5 flex-1 min-h-0 overflow-auto">
+          <div className="soft-shadow mx-auto mr-10 ml-10 min-h-0 flex-1 overflow-auto rounded-xl bg-white px-6 py-5 shadow-xs">
             {selectedSubPage === 'general' && <AssignmentTaskGeneralEdit />}
             {selectedSubPage === 'content' && <AssignmentTaskContentEdit />}
           </div>
         </div>
       )}
       {Object.keys(assignmentTaskState.assignmentTask).length === 0 && (
-        <div className="z-10 flex flex-1 flex-col bg-white pl-10 pr-10 pt-5 text-sm tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="z-10 flex flex-1 flex-col bg-white pt-5 pr-10 pl-10 text-sm tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
           <div className="flex h-full items-center justify-center text-gray-300 antialiased">
             <div className="flex flex-col items-center space-y-2">
               <TentTree size={60} />

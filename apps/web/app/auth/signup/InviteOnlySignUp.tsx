@@ -95,13 +95,13 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
   return (
     <div className="m-auto w-72">
       {error && (
-        <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 transition-all my-4">
+        <div className="my-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 shadow-xs transition-all">
           <AlertTriangle size={22} />
           <div className="text-sm font-bold">{error}</div>
         </div>
       )}
       {message && (
-        <div className="shadow-xs mb-4 flex flex-col items-center justify-center space-x-2 space-y-4 rounded-md bg-green-200 p-4 text-green-950 transition-all">
+        <div className="mb-4 flex flex-col items-center justify-center space-y-4 space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
           <div className="flex space-x-2">
             <Check size={18} />
             <div className="text-sm font-bold">{t('accountCreated')}</div>
@@ -207,7 +207,7 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
         </form>
       </Form>
       <div>
-        <div className="mx-10 mb-5 mt-5 flex h-0.5 rounded-2xl bg-slate-100" />
+        <div className="mx-10 mt-5 mb-5 flex h-0.5 rounded-2xl bg-slate-100" />
         <button
           onClick={() => signIn('google', { callbackUrl: '/redirect_from_auth' })}
           className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"

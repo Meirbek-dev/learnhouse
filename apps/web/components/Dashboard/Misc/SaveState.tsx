@@ -2,6 +2,7 @@
 
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { updateCourseOrderStructure } from '@services/courses/chapters';
+import { updateCertification } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { Check, Loader2, SaveAllIcon, Timer } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -38,6 +39,8 @@ function SaveState(props: { orgslug: string }) {
       mutate(
         `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
       );
+      // Certification data (if present)
+      await saveCertificationData();
       await revalidateTags(['courses'], props.orgslug);
       dispatchCourse({ type: 'setIsSaved' });
     } finally {
@@ -69,6 +72,20 @@ function SaveState(props: { orgslug: string }) {
     await revalidateTags(['courses'], props.orgslug);
     router.refresh();
     dispatchCourse({ type: 'setIsSaved' });
+  };
+
+  // Certification data
+  const saveCertificationData = async () => {
+    if (course.courseStructure._certificationData) {
+      const certData = course.courseStructure._certificationData;
+      try {
+        await updateCertification(certData.certification_uuid, certData.config, session.data?.tokens?.access_token);
+        console.log('Certification data saved successfully');
+      } catch (error) {
+        console.error('Failed to save certification data:', error);
+        // Don't throw error to prevent breaking the main save flow
+      }
+    }
   };
 
   const handleCourseOrder = useCallback(
@@ -126,7 +143,7 @@ function SaveState(props: { orgslug: string }) {
       )}
       <div
         className={`flex cursor-pointer items-center space-x-2 rounded-lg px-4 py-2 font-semibold antialiased drop-shadow-md transition-all ease-linear ${
-          saved ? 'bg-gray-600 text-white' : 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 border'
+          saved ? 'bg-gray-600 text-white' : 'bg-primary text-primary-foreground hover:bg-primary/90 border shadow-xs'
         }${isLoading ? 'cursor-not-allowed opacity-50' : ''}`}
         onClick={saveCourseState}
       >

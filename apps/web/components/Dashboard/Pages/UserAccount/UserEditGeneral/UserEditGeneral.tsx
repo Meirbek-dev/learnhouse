@@ -611,7 +611,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
             </div>
           </div>
         </div>
-        <div className="mx-5 mb-5 mt-0 flex flex-row-reverse">
+        <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
           <Button
             type="submit"
             disabled={form.formState.isSubmitting}

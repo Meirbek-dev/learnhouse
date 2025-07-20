@@ -25,7 +25,7 @@ const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, c
   };
 
   return (
-    <div className="absolute left-0 top-full z-[1000] mt-1 rounded-md border border-gray-300/50 bg-white p-2 shadow-md">
+    <div className="absolute top-full left-0 z-[1000] mt-1 rounded-md border border-gray-300/50 bg-white p-2 shadow-md">
       <form
         onSubmit={handleSubmit}
         className="flex items-center gap-1"

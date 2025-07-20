@@ -122,7 +122,7 @@ const ConfirmationModal = (params: ModalParams) => {
         aria-describedby="confirmation-description"
       >
         <DialogHeader className="pb-0">
-          <div className="flex gap-4 items-start">
+          <div className="flex items-start gap-4">
             <div
               className={cn(
                 'flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-colors',
@@ -130,22 +130,22 @@ const ConfirmationModal = (params: ModalParams) => {
               )}
               aria-hidden="true"
             >
-              <Icon className="w-8 h-8" />
+              <Icon className="h-8 w-8" />
             </div>
-            <div className="flex-1 min-w-0">
-              <DialogTitle className="text-lg font-semibold text-foreground mb-2 text-left">
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-foreground mb-2 text-left text-lg font-semibold">
                 {params.dialogTitle}
               </DialogTitle>
               <DialogDescription
                 id="confirmation-description"
-                className="text-sm text-muted-foreground leading-relaxed text-left"
+                className="text-muted-foreground text-left text-sm leading-relaxed"
               >
                 {params.confirmationMessage}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
-        <DialogFooter className="pt-6 flex-col-reverse sm:flex-row gap-2">
+        <DialogFooter className="flex-col-reverse gap-2 pt-6 sm:flex-row">
           {params.showCancelButton !== false && (
             <Button
               variant="outline"
@@ -169,7 +169,7 @@ const ConfirmationModal = (params: ModalParams) => {
             {isExecuting ? (
               <div className="flex items-center gap-2">
                 <div
-                  className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+                  className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
                   aria-hidden="true"
                 />
                 <span className="sr-only">{t('loading')}</span>

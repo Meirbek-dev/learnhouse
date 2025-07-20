@@ -333,7 +333,7 @@ const UpdatesListView = () => {
                 <h4 className="truncate text-sm font-medium text-neutral-800">{update.title}</h4>
                 <span
                   title={format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })}
-                  className="whitespace-nowrap text-[11px] font-medium text-neutral-400"
+                  className="text-[11px] font-medium whitespace-nowrap text-neutral-400"
                 >
                   {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
                 </span>

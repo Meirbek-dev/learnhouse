@@ -2,23 +2,21 @@ import { AlertCircle, ArrowRight, BookOpen, ClockIcon, ShoppingCart, UserPen } f
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { removeCourse, startCourse } from '@services/courses/activity';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useContributorStatus } from '@/hooks/useContributorStatus';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
+import CourseProgress from '../CourseProgress/CourseProgress';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
+import CoursePaidOptions from './CoursePaidOptions';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
-
-import CourseProgress from '../CourseProgress/CourseProgress';
-
-import { useContributorStatus } from '@/hooks/useContributorStatus';
-import CoursePaidOptions from './CoursePaidOptions';
 
 interface CourseRun {
   status: string;

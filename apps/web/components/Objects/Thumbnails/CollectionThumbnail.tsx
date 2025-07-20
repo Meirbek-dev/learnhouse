@@ -102,7 +102,7 @@ const CollectionAdminEditsArea = (props: any) => {
           dialogTrigger={
             <span>
               <button
-                className="absolute right-2 top-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
+                className="absolute top-2 right-2 rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
                 rel="noopener noreferrer"
               >
                 <X size={14} />

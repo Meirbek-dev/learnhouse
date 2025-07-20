@@ -193,7 +193,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                 {userData.bio ? (
                   <p className="text-gray-700">{userData.bio}</p>
                 ) : (
-                  <p className="italic text-gray-500">{t('noBiography')}</p>
+                  <p className="text-gray-500 italic">{t('noBiography')}</p>
                 )}
               </div>
 
@@ -340,7 +340,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
                             </div>
                           ) : userCourses.length > 0 ? (
-                            <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6 pb-8">
+                            <div className="grid w-full grid-cols-1 gap-6 pb-8 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
                               {userCourses.map((course) => (
                                 <div
                                   key={course.id}

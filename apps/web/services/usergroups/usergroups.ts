@@ -1,4 +1,4 @@
-import { getResponseMetadata, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
 export async function getUserGroups(org_id: number, access_token: string) {

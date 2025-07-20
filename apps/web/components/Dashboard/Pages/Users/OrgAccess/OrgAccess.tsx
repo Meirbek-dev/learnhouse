@@ -88,7 +88,7 @@ function OrgAccess() {
       ) : (
         <>
           <div className="h-6" />
-          <div className="shadow-xs mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
+          <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('joinMethodTitle')}</h1>
               <h2 className="text-md text-gray-500">{t('description')}</h2>
@@ -101,7 +101,7 @@ function OrgAccess() {
                 dialogTrigger={
                   <div className="relative h-[160px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all ease-linear hover:bg-slate-200">
                     {joinMethod === 'open' && (
-                      <div className="absolute left-0 top-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
+                      <div className="absolute top-0 left-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                         {t('activeLabel')}
                       </div>
                     )}
@@ -127,7 +127,7 @@ function OrgAccess() {
                 dialogTrigger={
                   <div className="relative h-[160px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all ease-linear hover:bg-slate-200">
                     {joinMethod === 'inviteOnly' && (
-                      <div className="absolute left-0 top-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
+                      <div className="absolute top-0 left-0 mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                         {t('activeLabel')}
                       </div>
                     )}
@@ -148,7 +148,7 @@ function OrgAccess() {
               />
             </div>
             <div className={joinMethod !== 'inviteOnly' ? 'pointer-events-none opacity-50' : ''}>
-              <div className="mb-3 mt-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+              <div className="mt-3 mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
                 <h1 className="text-xl font-bold text-gray-800">{t('inviteCodesTitle')}</h1>
                 <h2 className="text-md text-gray-500">{t('inviteCodesDescription')}</h2>
               </div>
@@ -169,7 +169,7 @@ function OrgAccess() {
                         <TableCell>{invite.invite_code}</TableCell>
                         <TableCell>
                           <Link
-                            className="rounded-md bg-gray-50 px-2 py-1 text-gray-600 outline-dashed outline-1 outline-gray-300 transition-colors hover:bg-gray-100"
+                            className="rounded-md bg-gray-50 px-2 py-1 text-gray-600 outline-1 outline-gray-300 transition-colors outline-dashed hover:bg-gray-100"
                             target="_blank"
                             href={getUriWithoutOrg(`/signup?inviteCode=${invite.invite_code}&orgslug=${org.slug}`)}
                           >
@@ -230,7 +230,7 @@ function OrgAccess() {
                   </TableBody>
                 </Table>
               </div>
-              <div className="mr-2 mt-3 flex flex-row-reverse">
+              <div className="mt-3 mr-2 flex flex-row-reverse">
                 <Modal
                   isDialogOpen={invitesModal}
                   onOpenChange={() => setInvitesModal(!invitesModal)}

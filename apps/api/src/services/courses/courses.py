@@ -23,7 +23,6 @@ from src.db.resource_authors import (
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
@@ -191,7 +190,7 @@ async def get_courses_orgslug(
 
     if isinstance(current_user, AnonymousUser):
         # For anonymous users, only show public courses
-        query = query.where(Course.public == True)
+        query = query.where(Course.public)
     else:
         # For authenticated users, show:
         # 1. Public courses
@@ -214,7 +213,7 @@ async def get_courses_orgslug(
             )
             .where(
                 or_(
-                    Course.public == True,
+                    Course.public,
                     UserGroupResource.resource_uuid
                     is None,  # Courses not in any UserGroup
                     UserGroupUser.user_id
@@ -264,19 +263,25 @@ async def get_courses_orgslug(
     # Create CourseRead objects with authors
     course_reads = []
     for course in courses:
-        authors = course_authors.get(course.course_uuid, [])
-        course_data = {
-            **course.model_dump(),
-            "authors": authors,
-            # Ensure backwards compatibility by providing defaults for None values
-            "id": course.id or 0,
-            "description": course.description or "",
-            "about": course.about or "",
-            "learnings": course.learnings or "",
-            "tags": course.tags or "",
-            "thumbnail_image": course.thumbnail_image or "",
-        }
-        course_reads.append(CourseRead.model_validate(course_data))
+        course_read = CourseRead.model_validate(
+            {
+                "id": course.id or 0,  # Ensure id is never None
+                "org_id": course.org_id,
+                "name": course.name,
+                "description": course.description or "",
+                "about": course.about or "",
+                "learnings": course.learnings or "",
+                "tags": course.tags or "",
+                "thumbnail_image": course.thumbnail_image or "",
+                "public": course.public,
+                "open_to_contributors": course.open_to_contributors,
+                "course_uuid": course.course_uuid,
+                "creation_date": course.creation_date,
+                "update_date": course.update_date,
+                "authors": course_authors.get(course.course_uuid, []),
+            }
+        )
+        course_reads.append(course_read)
 
     return course_reads
 
@@ -310,7 +315,7 @@ async def search_courses(
 
     if isinstance(current_user, AnonymousUser):
         # For anonymous users, only show public courses
-        query = query.where(Course.public == True)
+        query = query.where(Course.public)
     else:
         # For authenticated users, show:
         # 1. Public courses
@@ -333,7 +338,7 @@ async def search_courses(
             )
             .where(
                 or_(
-                    Course.public == True,
+                    Course.public,
                     UserGroupResource.resource_uuid
                     is None,  # Courses not in any UserGroup
                     UserGroupUser.user_id
@@ -373,18 +378,25 @@ async def search_courses(
             for resource_author, user in author_results
         ]
 
-        course_data = {
-            **course.model_dump(),
-            "authors": authors,
-            # Ensure backwards compatibility by providing defaults for None values
-            "id": course.id or 0,
-            "description": course.description or "",
-            "about": course.about or "",
-            "learnings": course.learnings or "",
-            "tags": course.tags or "",
-            "thumbnail_image": course.thumbnail_image or "",
-        }
-        course_reads.append(CourseRead.model_validate(course_data))
+        course_read = CourseRead.model_validate(
+            {
+                "id": course.id or 0,  # Ensure id is never None
+                "org_id": course.org_id,
+                "name": course.name,
+                "description": course.description or "",
+                "about": course.about or "",
+                "learnings": course.learnings or "",
+                "tags": course.tags or "",
+                "thumbnail_image": course.thumbnail_image or "",
+                "public": course.public,
+                "open_to_contributors": course.open_to_contributors,
+                "course_uuid": course.course_uuid,
+                "creation_date": course.creation_date,
+                "update_date": course.update_date,
+                "authors": authors,
+            }
+        )
+        course_reads.append(course_read)
 
     return course_reads
 
@@ -524,7 +536,7 @@ async def update_course_thumbnail(
             thumbnail_file,
             name_in_disk,
             org.org_uuid,
-            course.course_uuid,
+            course.course_uuid,  # type: ignore
         )
 
     # Update course
@@ -686,51 +698,63 @@ async def get_user_courses(
         return []
 
     # Get courses with the extracted UUIDs
-    offset = (page - 1) * limit
-    query = (
-        select(Course)
-        .where(Course.course_uuid.in_(course_uuids))
-        .offset(offset)
-        .limit(limit)
-    )
-    courses = db_session.exec(query).all()
+    statement = select(Course).where(Course.course_uuid.in_(course_uuids))
 
-    # Get authors for each course
-    course_reads = []
+    # Apply pagination
+    statement = statement.offset((page - 1) * limit).limit(limit)
+
+    courses = db_session.exec(statement).all()
+
+    # Convert to CourseRead objects
+    result = []
     for course in courses:
-        authors_statement = (
-            select(ResourceAuthor, User)
-            .join(User, ResourceAuthor.user_id == User.id)
-            .where(ResourceAuthor.resource_uuid == course.course_uuid)
-            .order_by(ResourceAuthor.id.asc())
+        # Get authors for the course
+        authors_statement = select(ResourceAuthor).where(
+            ResourceAuthor.resource_uuid == course.course_uuid
         )
-        author_results = db_session.exec(authors_statement).all()
+        authors = db_session.exec(authors_statement).all()
 
-        authors = [
-            AuthorWithRole(
-                user=UserRead.model_validate(user),
-                authorship=resource_author.authorship,
-                authorship_status=resource_author.authorship_status,
-                creation_date=resource_author.creation_date,
-                update_date=resource_author.update_date,
-            )
-            for resource_author, user in author_results
-        ]
+        # Convert authors to AuthorWithRole objects
+        authors_with_role = []
+        for author in authors:
+            # Get user for the author
+            user_statement = select(User).where(User.id == author.user_id)
+            user = db_session.exec(user_statement).first()
 
-        course_data = {
-            **course.model_dump(),
-            "authors": authors,
-            # Ensure backwards compatibility by providing defaults for None values
-            "id": course.id or 0,
-            "description": course.description or "",
-            "about": course.about or "",
-            "learnings": course.learnings or "",
-            "tags": course.tags or "",
-            "thumbnail_image": course.thumbnail_image or "",
-        }
-        course_reads.append(CourseRead.model_validate(course_data))
+            if user:
+                authors_with_role.append(
+                    AuthorWithRole(
+                        user=UserRead.model_validate(user),
+                        authorship=author.authorship,
+                        authorship_status=author.authorship_status,
+                        creation_date=author.creation_date,
+                        update_date=author.update_date,
+                    )
+                )
 
-    return course_reads
+        # Create CourseRead object
+        course_read = CourseRead.model_validate(
+            {
+                "id": course.id or 0,  # Ensure id is never None
+                "org_id": course.org_id,
+                "name": course.name,
+                "description": course.description or "",
+                "about": course.about or "",
+                "learnings": course.learnings or "",
+                "tags": course.tags or "",
+                "thumbnail_image": course.thumbnail_image or "",
+                "public": course.public,
+                "open_to_contributors": course.open_to_contributors,
+                "course_uuid": course.course_uuid,
+                "creation_date": course.creation_date,
+                "update_date": course.update_date,
+                "authors": authors_with_role,
+            }
+        )
+
+        result.append(course_read)
+
+    return result
 
 
 ## 🔒 RBAC Utils ##

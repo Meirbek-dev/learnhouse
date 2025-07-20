@@ -123,7 +123,7 @@ export function AssignmentTaskGeneralEdit() {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
           <p className="mt-2 text-gray-600">{t('loadingTask')}</p>
         </div>
       </div>
@@ -293,14 +293,14 @@ function UpdateTaskRef() {
         <div className="flex flex-col items-center justify-center">
           <div className="flex flex-col items-center justify-center">
             {error && (
-              <div className="shadow-xs flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 transition-all">
+              <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 shadow-xs transition-all">
                 <div className="text-sm font-semibold">{error}</div>
               </div>
             )}
           </div>
           {assignmentTaskState.assignmentTask.reference_file && !isLoading && (
             <div className="soft-shadow relative flex flex-col items-center space-y-1 rounded-lg bg-white px-5 py-3 text-gray-400 shadow-lg">
-              <div className="absolute right-0 top-0 flex -translate-y-1/2 translate-x-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
+              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
                 <Cloud size={15} />
               </div>
               <File

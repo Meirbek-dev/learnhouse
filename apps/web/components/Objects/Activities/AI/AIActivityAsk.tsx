@@ -78,7 +78,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
 
   // TODO : come up with a better way to handle this
   const inputClass = clsx(
-    'ring-1 ring-inset ring-white/10 bg-gray-950/40 w-full rounded-lg outline-hidden px-4 py-2 text-white text-sm placeholder:text-white/30',
+    'w-full rounded-lg bg-gray-950/40 px-4 py-2 text-sm text-white ring-1 ring-white/10 outline-hidden ring-inset placeholder:text-white/30',
     { 'opacity-30': aiChatBotState.isWaitingForResponse },
   );
 
@@ -191,7 +191,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
             mass: 0.2,
             velocity: 2,
           }}
-          className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center"
+          className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
           style={{ pointerEvents: 'none' }}
         >
           <div
@@ -201,7 +201,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                        radial-gradient(ellipse at top left, rgba(99, 179, 237, 0.12) 0%, transparent 60%),
                        radial-gradient(ellipse at bottom right, rgba(167, 139, 250, 0.08) 0%, transparent 60%)`,
             }}
-            className="max-w-(--breakpoint-2xl) fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-inset ring-white/10"
+            className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-white/10 ring-inset"
           >
             <div className="flex flex-row-reverse items-center justify-between pb-3">
               <div className="flex items-center space-x-2">
@@ -323,7 +323,7 @@ function AIMessage(props: AIMessageProps) {
       </div>
       <div className="w-full">
         <p
-          className="text-md outline-hidden w-full rounded-lg px-2 py-1 text-white placeholder:text-white/30"
+          className="text-md w-full rounded-lg px-2 py-1 text-white outline-hidden placeholder:text-white/30"
           id=""
         >
           <AnimatePresence>

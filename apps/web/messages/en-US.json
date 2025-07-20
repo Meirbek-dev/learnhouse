@@ -271,8 +271,6 @@
       "newCollection": "New Collection",
       "newCourse": "New Course"
     },
-    "Calendar": {
-    },
     "CollectionThumbnail": {
       "courseCount": "{count, plural, =0 {0 courses} one {# course} other {# courses}}",
       "deleteButtonText": "Delete Collection",

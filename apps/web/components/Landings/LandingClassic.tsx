@@ -20,11 +20,11 @@ interface LandingClassicProps {
 
 const EmptyCollectionsState = memo(({ t }: { t: any }) => (
   <div className="col-span-full flex items-center justify-center py-12">
-    <div className="text-center max-w-md">
+    <div className="max-w-md text-center">
       <div className="mb-6">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-50 to-purple-100">
           <svg
-            className="w-8 h-8 text-primary"
+            className="text-primary h-8 w-8"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -50,11 +50,11 @@ EmptyCollectionsState.displayName = 'EmptyCollectionsState';
 
 const EmptyCoursesState = memo(({ t }: { t: any }) => (
   <div className="col-span-full flex items-center justify-center py-12">
-    <div className="text-center max-w-md">
+    <div className="max-w-md text-center">
       <div className="mb-6">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-blue-100">
           <svg
-            className="w-8 h-8 text-primary"
+            className="text-primary h-8 w-8"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -80,11 +80,11 @@ EmptyCoursesState.displayName = 'EmptyCoursesState';
 
 const CollectionGrid = memo(
   ({ collections, orgslug, org_id }: { collections: any[]; orgslug: string; org_id: number }) => (
-    <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
       {collections.map((collection: any) => (
         <div
           key={collection.collection_uuid}
-          className="p-2 transform transition-transform duration-200 hover:scale-[1.02]"
+          className="transform p-2 transition-transform duration-200 hover:scale-[1.02]"
         >
           <CollectionThumbnail
             collection={collection}
@@ -100,7 +100,7 @@ const CollectionGrid = memo(
 CollectionGrid.displayName = 'CollectionGrid';
 
 const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
-  <div className="grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-12">
+  <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
     {courses.map((course: any) => (
       <div
         key={course.course_uuid}

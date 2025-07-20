@@ -394,7 +394,7 @@ const OrgEditLanding = () => {
               <Switch
                 checked={isLandingEnabled}
                 onCheckedChange={setIsLandingEnabled}
-                className="[&>span]:data-[state=checked]:translate-x-5.5 h-6 w-11 [&>span]:h-5 [&>span]:w-5"
+                className="h-6 w-11 [&>span]:h-5 [&>span]:w-5 [&>span]:data-[state=checked]:translate-x-5.5"
               />
             </div>
             <Button
@@ -434,10 +434,10 @@ const OrgEditLanding = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 onClick={() => setSelectedSection(index)}
-                                className={`backdrop-blur-xs cursor-pointer rounded-lg border bg-white/80 p-4 ${
+                                className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
                                   selectedSection === index
-                                    ? 'shadow-xs border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
-                                    : 'hover:shadow-xs border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
+                                    ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
+                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
                                 } ${snapshot.isDragging ? 'rotate-2 shadow-lg ring-2 ring-blue-500/20' : ''}`}
                               >
                                 <div className="group flex items-center justify-between">
@@ -514,8 +514,11 @@ const OrgEditLanding = () => {
                       }
                     }}
                   >
-                    <SelectTrigger className="hover:bg-primary/90 bg-primary w-full border-0 p-0" withChevron={false}>
-                      <div className="inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-white outline-none transition-all">
+                    <SelectTrigger
+                      className="hover:bg-primary/90 bg-primary w-full border-0 p-0"
+                      withChevron={false}
+                    >
+                      <div className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap text-white transition-all outline-none">
                         <Plus
                           size="8"
                           color="white"

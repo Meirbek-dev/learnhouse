@@ -1,14 +1,13 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
-
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { useLocale, useTranslations } from 'next-intl';
 import { SelectValue } from '@radix-ui/react-select';
 import { type Locale, locales } from '@/i18n/config';
 import { setUserLocale } from '@/i18n/locale';
+import { useRouter } from 'next/navigation';
 import { Languages } from 'lucide-react';
+import { useTransition } from 'react';
 import { cn } from '@/lib/utils';
 
 interface LocaleSwitcherProps {

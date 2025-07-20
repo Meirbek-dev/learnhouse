@@ -110,7 +110,7 @@ function EvaluateAssignment({ user_id }: any) {
                       <div className="flex items-center space-x-2">
                         {task.reference_file && (
                           <span className="relative">
-                            <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
+                            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
                           </span>
                         )}
                         <p className="text-xs font-semibold">{t('refDoc')}</p>

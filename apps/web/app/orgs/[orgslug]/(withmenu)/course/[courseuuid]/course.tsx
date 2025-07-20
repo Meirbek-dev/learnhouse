@@ -145,7 +145,7 @@ const CourseClient = (props: any) => {
               course={course}
               orgslug={orgslug}
             />
-            <div className="flex flex-col items-start justify-between pb-2 pt-3 md:flex-row md:items-center">
+            <div className="flex flex-col items-start justify-between pt-3 pb-2 md:flex-row md:items-center">
               <div>
                 <h1 className="text-3xl font-bold md:text-3xl">{course.name}</h1>
               </div>
@@ -164,9 +164,9 @@ const CourseClient = (props: any) => {
 
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
                         {course.thumbnail_type === 'both' && (
-                          <div className="absolute right-3 top-3 z-10">
+                          <div className="absolute top-3 right-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
                               <button
                                 onClick={() => setActiveThumbnailType('image')}
@@ -217,7 +217,7 @@ const CourseClient = (props: any) => {
                   }
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
                         <img
                           src={getCourseThumbnailMediaDirectory(
                             org?.org_uuid,
@@ -228,7 +228,7 @@ const CourseClient = (props: any) => {
                           className="h-auto w-full object-contain"
                         />
                         {course.thumbnail_type === 'both' && (
-                          <div className="absolute right-3 top-3 z-10">
+                          <div className="absolute top-3 right-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
                               <button
                                 onClick={() => setActiveThumbnailType('image')}
@@ -266,7 +266,7 @@ const CourseClient = (props: any) => {
                   }
                   return (
                     <div
-                      className="relative w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset ring-black/10 h-auto"
+                      className="relative h-auto w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-black/10 ring-inset"
                       style={{
                         backgroundImage: `url('../empty_thumbnail.png')`,
                         backgroundSize: 'auto',
@@ -287,12 +287,13 @@ const CourseClient = (props: any) => {
                     course_uuid={props.course.course_uuid}
                     orgslug={orgslug}
                     course={course}
+                    trailData={trailData}
                   />
                 )}
 
                 <div className="course_metadata_left space-y-2">
                   <div className="">
-                    <p className="w-full hyphens-auto whitespace-pre-line text-pretty break-words py-5 leading-relaxed tracking-normal">
+                    <p className="w-full py-5 leading-relaxed tracking-normal text-pretty break-words hyphens-auto whitespace-pre-line">
                       {course.about}
                     </p>
                   </div>
@@ -407,7 +408,7 @@ const CourseClient = (props: any) => {
                               {idx + 1}
                             </span>
                             <h3
-                              className="min-w-0 truncate text-lg font-semibold leading-tight sm:text-base md:text-lg"
+                              className="min-w-0 truncate text-lg leading-tight font-semibold sm:text-base md:text-lg"
                               style={{ lineHeight: '1.2' }}
                             >
                               {chapter.name}
@@ -447,7 +448,7 @@ const CourseClient = (props: any) => {
                                         />
                                         <Check
                                           size={16}
-                                          className="absolute left-0 top-0 stroke-[2.5] text-teal-600"
+                                          className="absolute top-0 left-0 stroke-[2.5] text-teal-600"
                                         />
                                       </div>
                                     ) : (

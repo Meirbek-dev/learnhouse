@@ -27,7 +27,7 @@ import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivityS
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
@@ -62,8 +62,8 @@ const AIChatBotProvider = lazy(() => import('@components/Contexts/AI/AIChatBotCo
 const LoadingFallback = () => (
   <div className="flex h-64 items-center justify-center">
     <div className="relative h-6 w-6">
-      <div className="absolute left-0 top-0 h-full w-full rounded-full border-2 border-gray-100" />
-      <div className="absolute left-0 top-0 h-full w-full animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+      <div className="absolute top-0 left-0 h-full w-full rounded-full border-2 border-gray-100" />
+      <div className="absolute top-0 left-0 h-full w-full animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
     </div>
   </div>
 );
@@ -344,7 +344,7 @@ function ActivityClient(props: ActivityClientProps) {
                   animate={{ y: 0 }}
                   exit={{ y: -100 }}
                   transition={{ duration: 0.3 }}
-                  className="fixed left-0 right-0 top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-xl"
+                  className="fixed top-0 right-0 left-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-xl"
                 >
                   <div className="container mx-auto px-4 py-2">
                     <div className="flex h-14 items-center justify-between">
@@ -480,7 +480,7 @@ function ActivityClient(props: ActivityClientProps) {
                 </motion.div>
 
                 {/* Focus Mode Content */}
-                <div className="h-full overflow-auto pb-20 pt-16">
+                <div className="h-full overflow-auto pt-16 pb-20">
                   <div className="container mx-auto px-4">
                     {activity &&
                       activity.published === true &&
@@ -507,7 +507,7 @@ function ActivityClient(props: ActivityClientProps) {
                     animate={{ y: 0 }}
                     exit={{ y: 100 }}
                     transition={{ duration: 0.3 }}
-                    className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-100 bg-white/90 backdrop-blur-xl"
+                    className="fixed right-0 bottom-0 left-0 z-50 border-t border-gray-100 bg-white/90 backdrop-blur-xl"
                   >
                     <div className="container mx-auto px-4">
                       <div className="flex h-16 items-center justify-between">
@@ -588,6 +588,8 @@ function ActivityClient(props: ActivityClientProps) {
                   orgslug={orgslug}
                   courseUuid={course.course_uuid}
                   thumbnailImage={course.thumbnail_image}
+                  course={course}
+                  trailData={trailData}
                 />
               ) : (
                 <div className="space-y-4 pt-0">
@@ -634,7 +636,7 @@ function ActivityClient(props: ActivityClientProps) {
                       />
 
                       <div className="flex w-full items-center justify-between">
-                        <div className="flex-1/3 flex items-center space-x-3">
+                        <div className="flex flex-1/3 items-center space-x-3">
                           <div className="flex flex-col -space-y-1">
                             <p className="text-md font-bold text-gray-700">
                               {getChapterNameByActivityId(course, activity.id)}
@@ -777,7 +779,7 @@ function ActivityClient(props: ActivityClientProps) {
                     </div>
 
                     {activity && activity.published === false && (
-                      <div className="drop-shadow-xs rounded-lg bg-gray-800 p-7">
+                      <div className="rounded-lg bg-gray-800 p-7 drop-shadow-xs">
                         <div className="text-white">
                           <h1 className="text-2xl font-bold">{t('activityNotPublished')}</h1>
                         </div>
@@ -789,10 +791,10 @@ function ActivityClient(props: ActivityClientProps) {
                       (activity.content.paid_access === false ? (
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
-                        <div className={`drop-shadow-xs rounded-lg p-7 ${bgColor} relative`}>
+                        <div className={`rounded-lg p-7 drop-shadow-xs ${bgColor} relative`}>
                           <button
                             onClick={() => setIsFocusMode(true)}
-                            className="soft-shadow group pointer-events-auto absolute right-4 top-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
+                            className="soft-shadow group pointer-events-auto absolute top-4 right-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
                             title={t('enterFocusMode')}
                           >
                             <div className="flex items-center">
@@ -800,7 +802,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 size={16}
                                 className="text-gray-700"
                               />
-                              <span className="w-0 whitespace-nowrap text-xs font-bold text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
+                              <span className="w-0 text-xs font-bold whitespace-nowrap text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
                                 {t('focusMode')}
                               </span>
                             </div>
@@ -1177,7 +1179,7 @@ function NextActivityButton({
       onClick={navigateToActivity}
       className="flex flex-col rounded-md bg-gray-200 p-2.5 px-4 text-gray-600 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] transition delay-150 duration-300 ease-in-out hover:cursor-pointer hover:bg-gray-200"
     >
-      <span className="mb-1 text-[10px] font-bold uppercase text-gray-500">{t('next')}</span>
+      <span className="mb-1 text-[10px] font-bold text-gray-500 uppercase">{t('next')}</span>
       <div className="flex items-center space-x-1">
         <span className="max-w-[200px] truncate text-sm font-semibold">{nextActivity.name}</span>
         <ChevronRight size={17} />
@@ -1238,7 +1240,7 @@ function PreviousActivityButton({
       onClick={navigateToActivity}
       className="soft-shadow flex flex-col rounded-md bg-white p-2.5 px-4 text-gray-600 transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
     >
-      <span className="mb-1 text-[10px] font-bold uppercase text-gray-500">{t('previous')}</span>
+      <span className="mb-1 text-[10px] font-bold text-gray-500 uppercase">{t('previous')}</span>
       <div className="flex items-center space-x-1">
         <ChevronLeft size={17} />
         <span className="max-w-[200px] truncate text-sm font-semibold">{previousActivity.name}</span>

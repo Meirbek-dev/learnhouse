@@ -253,14 +253,26 @@ def get_db_health() -> dict:
             logger.debug(f"Health check query result: {health_value}")
 
             # Defensive check for None and tuple/list length
-            if health_value is not None and hasattr(health_value, "__getitem__") and len(health_value) > 0 and health_value[0] == 1:
+            if (
+                health_value is not None
+                and hasattr(health_value, "__getitem__")
+                and len(health_value) > 0
+                and health_value[0] == 1
+            ):
                 return {
                     "status": "healthy",
                     "database_type": str(db_engine.dialect.name),
-                    "pool_size": db_engine.pool.size() if hasattr(db_engine.pool, "size") else "unknown",
-                    "checked_out_connections": db_engine.pool.checkedout() if hasattr(db_engine.pool, "checkedout") else "unknown",
+                    "pool_size": db_engine.pool.size()
+                    if hasattr(db_engine.pool, "size")
+                    else "unknown",
+                    "checked_out_connections": db_engine.pool.checkedout()
+                    if hasattr(db_engine.pool, "checkedout")
+                    else "unknown",
                 }
-            return {"status": "unhealthy", "error": f"Invalid health check response: {health_value}"}
+            return {
+                "status": "unhealthy",
+                "error": f"Invalid health check response: {health_value}",
+            }
 
     except Exception as e:
         logger.error(f"Database health check failed: {e}")

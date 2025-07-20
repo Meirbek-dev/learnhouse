@@ -2,7 +2,7 @@
 
 import { type DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-import { ru, enUS, es, fr, de, type Locale } from 'date-fns/locale';
+import { type Locale, de, enUS, es, fr, ru } from 'date-fns/locale';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -187,7 +187,7 @@ function Calendar({
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
-              <div className="size-(--cell-size) flex items-center justify-center text-center">{children}</div>
+              <div className="flex size-(--cell-size) items-center justify-center text-center">{children}</div>
             </td>
           );
         },

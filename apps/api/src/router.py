@@ -4,7 +4,13 @@ from fastapi import APIRouter, Depends
 
 from src.routers import auth, dev, health, orgs, roles, search, trail, usergroups, users
 from src.routers.ai import ai
-from src.routers.courses import assignments, chapters, collections, courses
+from src.routers.courses import (
+    assignments,
+    certifications,
+    chapters,
+    collections,
+    courses,
+)
 from src.routers.courses.activities import activities, blocks
 from src.routers.ee import cloud_internal, payments
 from src.routers.install import install
@@ -31,6 +37,9 @@ v1_router.include_router(chapters.router, prefix="/chapters", tags=["chapters"])
 v1_router.include_router(activities.router, prefix="/activities", tags=["activities"])
 v1_router.include_router(
     collections.router, prefix="/collections", tags=["collections"]
+)
+v1_router.include_router(
+    certifications.router, prefix="/certifications", tags=["certifications"]
 )
 v1_router.include_router(trail.router, prefix="/trail", tags=["trail"])
 v1_router.include_router(ai.router, prefix="/ai", tags=["ai"])

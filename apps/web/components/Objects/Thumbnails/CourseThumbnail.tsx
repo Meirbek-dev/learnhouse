@@ -3,11 +3,11 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { BookMinus, FilePenLine, MoreVertical, Settings2, Users, Calendar } from 'lucide-react';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { Card, CardContent, CardFooter, CardHeader } from '@components/ui/card';
+import { BookMinus, Calendar, FilePenLine, MoreVertical, Settings2 } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { deleteCourseFromBackend } from '@services/courses/courses';
+import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -17,7 +17,6 @@ import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { cn } from '@/lib/utils';
 import type { FC } from 'react';
 import Link from 'next/link';
 
@@ -84,7 +83,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
   const courseUrl = customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`);
 
   return (
-    <Card className="min-w-[280px] group relative w-full max-w-sm overflow-hidden transition-all duration-300 hover:shadow-xl border-0 shadow-sm bg-card p-0">
+    <Card className="group bg-card relative w-full max-w-sm min-w-[280px] overflow-hidden border-0 p-0 shadow-sm transition-all duration-300 hover:shadow-xl">
       <AdminEditOptions
         course={course}
         orgSlug={orgslug}
@@ -95,25 +94,25 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
       <Link
         prefetch
         href={courseUrl}
-        className="block relative overflow-hidden"
+        className="relative block overflow-hidden"
       >
-        <div className="relative w-full overflow-hidden aspect-video bg-muted">
+        <div className="bg-muted relative aspect-video w-full overflow-hidden">
           <img
             className="h-full w-full object-cover transition-all duration-300 group-hover:scale-110"
             src={thumbnailImage}
             alt={course.name}
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
           {/* Course metadata overlay */}
-          <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between">
+          <div className="absolute right-2 bottom-2 left-2 flex items-end justify-between">
             {course.update_date && (
               <Badge
                 variant="secondary"
-                className="bg-background/90 backdrop-blur-sm text-xs"
+                className="bg-background/90 text-xs backdrop-blur-sm"
               >
-                <Calendar className="w-3 h-3 mr-1" />
+                <Calendar className="mr-1 h-3 w-3" />
                 {t('updated')}{' '}
                 {new Date(course.update_date).toLocaleDateString(locale, {
                   month: 'short',
@@ -126,29 +125,29 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
         </div>
       </Link>
 
-      <CardContent className="px-4 pb-2 space-y-2">
+      <CardContent className="space-y-2 px-4 pb-2">
         {/* Course Title and Description */}
         <div className="space-y-2">
           <Link
             href={courseUrl}
-            className="block group-hover:text-primary transition-colors"
+            className="group-hover:text-primary block transition-colors"
           >
-            <h3 className="line-clamp-2 text-lg font-semibold leading-tight tracking-tight truncate">{course.name}</h3>
+            <h3 className="line-clamp-2 truncate text-lg leading-tight font-semibold tracking-tight">{course.name}</h3>
           </Link>
-          <p className="line-clamp-3 text-sm text-muted-foreground leading-relaxed">{course.description}</p>
+          <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">{course.description}</p>
         </div>
 
         {/* Authors Section */}
         {displayedAuthors.length > 0 && (
           <div className="flex items-center gap-2">
             <div className="flex items-center -space-x-2">
-              <span className="text-xs text-muted-foreground pr-4">
+              <span className="text-muted-foreground pr-4 text-xs">
                 {t('authorLabel', { count: activeAuthors.length })}
               </span>
               {displayedAuthors.map((author, idx) => (
                 <div
                   key={author.user.user_uuid}
-                  className="relative transition-transform hover:scale-110 hover:z-20"
+                  className="relative transition-transform hover:z-20 hover:scale-110"
                   style={{ zIndex: displayedAuthors.length - idx }}
                 >
                   <UserAvatar
@@ -167,7 +166,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
               ))}
               {hasMoreAuthors && (
                 <div className="relative z-0">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium text-muted-foreground hover:bg-muted/80 transition-colors">
+                  <div className="border-background bg-muted text-muted-foreground hover:bg-muted/80 flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium transition-colors">
                     +{remainingAuthorsCount}
                   </div>
                 </div>
@@ -181,7 +180,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
         <Button
           asChild
           size="sm"
-          className="w-full group-hover:bg-primary/90 transition-all duration-200"
+          className="group-hover:bg-primary/90 w-full transition-all duration-200"
         >
           <Link href={courseUrl}>{t('startLearning')}</Link>
         </Button>
@@ -203,25 +202,25 @@ const AdminEditOptions: FC<{
       checkMethod="roles"
       orgId={course.org_id}
     >
-      <div className="absolute right-2 top-2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-200">
+      <div className="absolute top-2 right-2 z-20 opacity-0 transition-all duration-200 group-hover:opacity-100">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="secondary"
               size="icon"
-              className="h-8 w-8 rounded-full bg-background/90 backdrop-blur-md shadow-lg border-0 transition-all hover:bg-background hover:scale-110"
+              className="bg-background/90 hover:bg-background h-8 w-8 rounded-full border-0 shadow-lg backdrop-blur-md transition-all hover:scale-110"
             >
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-56 shadow-xl border-0 bg-background/95 backdrop-blur-md"
+            className="bg-background/95 w-56 border-0 shadow-xl backdrop-blur-md"
             sideOffset={8}
           >
             <DropdownMenuItem
               asChild
-              className="cursor-pointer focus:bg-muted/50"
+              className="focus:bg-muted/50 cursor-pointer"
             >
               <Link
                 prefetch
@@ -233,7 +232,7 @@ const AdminEditOptions: FC<{
             </DropdownMenuItem>
             <DropdownMenuItem
               asChild
-              className="cursor-pointer focus:bg-muted/50"
+              className="focus:bg-muted/50 cursor-pointer"
             >
               <Link
                 prefetch
@@ -245,7 +244,7 @@ const AdminEditOptions: FC<{
             </DropdownMenuItem>
             <DropdownMenuItem
               asChild
-              className="cursor-pointer focus:bg-destructive/10"
+              className="focus:bg-destructive/10 cursor-pointer"
             >
               <ConfirmationModal
                 confirmationButtonText={t('deleteButtonText')}
@@ -254,7 +253,7 @@ const AdminEditOptions: FC<{
                   courseName: course.name,
                 })}
                 dialogTrigger={
-                  <button className="flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm text-destructive transition-all hover:bg-destructive/10 focus:bg-destructive/10">
+                  <button className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10 flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm transition-all">
                     <BookMinus className="mr-2 h-4 w-4" /> {t('delete')}
                   </button>
                 }

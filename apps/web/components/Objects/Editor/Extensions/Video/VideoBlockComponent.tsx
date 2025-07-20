@@ -336,7 +336,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                   className="aspect-video w-full rounded-lg shadow-sm"
                   onPlayerReady={(art: ArtplayerType) => {}}
                 />
-                <div className="absolute right-2 top-2 flex gap-1">
+                <div className="absolute top-2 right-2 flex gap-1">
                   <button
                     onClick={handleExpand}
                     className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
@@ -558,7 +558,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                       )}
                       onPlayerReady={(art: ArtplayerType) => {}}
                     />
-                    <div className="absolute right-2 top-2 flex gap-1">
+                    <div className="absolute top-2 right-2 flex gap-1">
                       <button
                         onClick={handleExpand}
                         className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"

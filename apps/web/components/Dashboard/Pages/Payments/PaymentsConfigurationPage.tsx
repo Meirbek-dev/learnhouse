@@ -121,7 +121,7 @@ const PaymentsConfigurationPage: FC = () => {
 
   return (
     <div>
-      <div className="soft-shadow mx-auto ml-10 mr-10 rounded-xl bg-white px-4 py-4">
+      <div className="soft-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">
         <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
           <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
           <h2 className="text-md text-gray-500">{t('pageDescription')}</h2>
@@ -167,7 +167,7 @@ const PaymentsConfigurationPage: FC = () => {
 
         <div className="subtle-shadow flex flex-col rounded-lg">
           {stripeConfig ? (
-            <div className="bg-linear-to-r flex items-center justify-between rounded-lg from-indigo-500 to-purple-600 p-6 shadow-md">
+            <div className="flex items-center justify-between rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 p-6 shadow-md">
               <div className="flex items-center space-x-3">
                 <SiStripe
                   className="text-white"
@@ -230,7 +230,7 @@ const PaymentsConfigurationPage: FC = () => {
           ) : (
             <Button
               onClick={enableStripe}
-              className="bg-linear-to-r flex items-center justify-center space-x-2 rounded-lg from-indigo-500 to-purple-600 p-3 px-6 text-white shadow-md transition duration-300 hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center space-x-2 rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 p-3 px-6 text-white shadow-md transition duration-300 hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isOnboarding}
             >
               {isOnboarding ? (

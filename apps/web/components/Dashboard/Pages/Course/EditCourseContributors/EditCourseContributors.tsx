@@ -413,12 +413,12 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
       {courseStructure && (
         <div>
           <div className="h-6" />
-          <div className="shadow-xs mx-4 rounded-xl bg-white px-4 py-4 sm:mx-10">
+          <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
               <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('courseContributorsTitle')}</h1>
               <h2 className="text-xs text-gray-500 sm:text-sm">{t('courseContributorsSubtitle')}</h2>
             </div>
-            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+            <div className="mx-auto mb-3 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
               <ConfirmationModal
                 confirmationButtonText={t('openToContributorsButton')}
                 confirmationMessage={t('openToContributorsMessage')}
@@ -476,7 +476,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             </div>
             <div className="space-y-4">
               <div className="relative">
-                <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
+                <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
                 <Input
                   placeholder={t('searchUsersPlaceholder')}
                   value={searchQuery}

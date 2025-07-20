@@ -53,10 +53,10 @@ function Chapter(props: any) {
           {...provided.dragHandleProps}
           {...provided.draggableProps}
           ref={provided.innerRef}
-          className="max-w-(--breakpoint-2xl) mx-auto mb-5 block rounded-lg border border-white/[0.19] bg-white px-5 py-3 text-[15px] shadow-sm transition-all duration-200 ease-in-out [&_h3]:px-5"
+          className="mx-auto mb-5 block max-w-(--breakpoint-2xl) rounded-lg border border-white/[0.19] bg-white px-5 py-3 text-[15px] shadow-sm transition-all duration-200 ease-in-out [&_h3]:px-5"
           key={props.info.list.chapter.id}
         >
-          <div className="text-md flex items-center space-x-2 pr-3 pt-3 font-bold">
+          <div className="text-md flex items-center space-x-2 pt-3 pr-3 font-bold">
             <div className="flex grow items-center space-x-3 rounded-md px-3 py-1 text-lg">
               <div className="rounded-md bg-neutral-100 p-2">
                 <Hexagon
@@ -71,7 +71,7 @@ function Chapter(props: any) {
                   <div className="chapter-modification-zone space-x-3 rounded-lg bg-neutral-100 px-4 py-1">
                     <input
                       type="text"
-                      className="outline-hidden bg-transparent text-sm text-neutral-700"
+                      className="bg-transparent text-sm text-neutral-700 outline-hidden"
                       placeholder={t('chapterNamePlaceholder')}
                       value={modifiedChapter ? modifiedChapter?.chapterName : props.info.list.chapter.name}
                       onChange={(e) =>

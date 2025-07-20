@@ -1,18 +1,18 @@
 'use client';
 
+import EditCourseCertification from '@components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification';
 import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors';
 import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
+import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
-import { GalleryVerticalEnd, Globe, Info, UserPen } from 'lucide-react';
+import { Award, GalleryVerticalEnd, Globe, Info, UserPen } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { use } from 'react';
-
-import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 
 export interface CourseOverviewParams {
   orgslug: string;
@@ -33,7 +33,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
         courseuuid={getEntireCourseUUID(params.courseuuid)}
         withUnpublishedActivities
       >
-        <div className="soft-shadow z-10 bg-[#fcfbfc] pl-10 pr-10 text-sm tracking-tight">
+        <div className="soft-shadow z-10 bg-[#fcfbfc] pr-10 pl-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
           <div className="flex space-x-3 text-sm font-bold">
             <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/general`}>
@@ -81,7 +81,19 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               >
                 <div className="mx-2 flex items-center space-x-2.5">
                   <UserPen size={16} />
-                  <div>{t('contributors')}</div>
+                  <div>Contributors</div>
+                </div>
+              </div>
+            </Link>
+            <Link href={getUriWithOrg(params.orgslug, '') + `/dash/courses/course/${params.courseuuid}/certification`}>
+              <div
+                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
+                  params.subpage.toString() === 'certification' ? 'border-b-4' : 'opacity-50'
+                } cursor-pointer`}
+              >
+                <div className="mx-2 flex items-center space-x-2.5">
+                  <Award size={16} />
+                  <div>Certification</div>
                 </div>
               </div>
             </Link>
@@ -99,6 +111,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
             {params.subpage === 'general' ? <EditCourseGeneral orgslug={params.orgslug} /> : ''}
             {params.subpage === 'access' ? <EditCourseAccess orgslug={params.orgslug} /> : ''}
             {params.subpage === 'contributors' ? <EditCourseContributors orgslug={params.orgslug} /> : ''}
+            {params.subpage === 'certification' ? <EditCourseCertification orgslug={params.orgslug} /> : ''}
           </div>
         </motion.div>
       </CourseProvider>

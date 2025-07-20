@@ -173,9 +173,9 @@ function ImageBlockComponent(props: any) {
                 <img
                   src={imageUrl || ''}
                   alt=""
-                  className="h-auto max-w-full rounded-lg shadow-sm w-full"
+                  className="h-auto w-full max-w-full rounded-lg shadow-sm"
                 />
-                <div className="backdrop-blur-xs shadow-xs absolute right-2 top-2 flex items-center gap-1.5 rounded-lg bg-white bg-opacity-90 p-1 opacity-70 transition-opacity hover:opacity-100">
+                <div className="bg-opacity-90 absolute top-2 right-2 flex items-center gap-1.5 rounded-lg bg-white p-1 opacity-70 shadow-xs backdrop-blur-xs transition-opacity hover:opacity-100">
                   <button
                     onClick={() => handleAlignmentChange('left')}
                     className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'left' ? 'bg-gray-100' : ''}`}
@@ -220,7 +220,7 @@ function ImageBlockComponent(props: any) {
                 className="h-auto max-w-full rounded-lg shadow-sm"
                 style={{ width: imageSize.width }}
               />
-              <div className="absolute right-2 top-2 flex gap-1">
+              <div className="absolute top-2 right-2 flex gap-1">
                 <button
                   onClick={handleExpand}
                   className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"

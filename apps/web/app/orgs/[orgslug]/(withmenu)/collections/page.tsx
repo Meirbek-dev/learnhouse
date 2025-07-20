@@ -90,7 +90,7 @@ const CollectionsPage = async (params: any) => {
             </Link>
           </AuthenticatedClientElement>
         </div>
-        <div className="grid w-full grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
+        <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4">
           {collections.map((collection: any) => (
             <div
               key={collection.collection_uuid}

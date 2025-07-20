@@ -140,8 +140,6 @@ export const getResponseMetadata = async (response: Response): Promise<CustomRes
 
 export const revalidateTags = async (tags: string[], orgslug: string) => {
   const url = getUriWithOrg(orgslug, '');
-  const promises = tags.map((tag) =>
-    fetch(`${url}/api/revalidate?tag=${tag}`)
-  );
+  const promises = tags.map((tag) => fetch(`${url}/api/revalidate?tag=${tag}`));
   await Promise.all(promises);
 };

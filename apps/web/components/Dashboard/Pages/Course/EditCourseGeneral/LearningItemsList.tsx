@@ -368,7 +368,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
             {showLinkInput === item.id && (
               <div
                 ref={linkInputRef}
-                className="shadow-xs mt-1 rounded-lg border border-gray-200 bg-white p-2"
+                className="mt-1 rounded-lg border border-gray-200 bg-white p-2 shadow-xs"
               >
                 <Input
                   ref={setLinkInputRef(item.id)}

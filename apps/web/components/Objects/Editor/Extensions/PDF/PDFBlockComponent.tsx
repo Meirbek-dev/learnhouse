@@ -110,7 +110,7 @@ function PDFBlockComponent(props: any) {
                 src={pdfUrl || ''}
                 title={t('pdfViewer')}
               />
-              <div className="absolute right-2 top-2 flex gap-1">
+              <div className="absolute top-2 right-2 flex gap-1">
                 <button
                   onClick={handleExpand}
                   className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"

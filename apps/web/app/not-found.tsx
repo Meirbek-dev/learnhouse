@@ -20,8 +20,8 @@ export default async function NotFound() {
         />
       </div>
       <div className="space-y-6 text-center">
-        <h1 className="text-8xl font-bold leading-7 text-black drop-shadow-md">404!</h1>
-        <p className="pt-8 text-lg font-medium leading-normal tracking-tight text-black">{t('message')}</p>
+        <h1 className="text-8xl leading-7 font-bold text-black drop-shadow-md">404!</h1>
+        <p className="pt-8 text-lg leading-normal font-medium tracking-tight text-black">{t('message')}</p>
       </div>
       <div className="flex flex-col items-center pt-8">
         <Button className="flex h-[50px] items-center rounded-lg px-6 py-2 text-xl font-bold shadow-md">

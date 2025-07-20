@@ -1,7 +1,7 @@
 import {
-  getResponseMetadata,
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
+  getResponseMetadata,
 } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
@@ -240,7 +240,12 @@ export async function getAssignmentsFromACourse(courseUUID: string, access_token
   return res;
 }
 
-export async function createAssignmentWithActivity(body: any, chapterId: number, activityName: string, access_token: string) {
+export async function createAssignmentWithActivity(
+  body: any,
+  chapterId: number,
+  activityName: string,
+  access_token: string,
+) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/with-activity?chapter_id=${chapterId}&activity_name=${encodeURIComponent(activityName)}`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),
