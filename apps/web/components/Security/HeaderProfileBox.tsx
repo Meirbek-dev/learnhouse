@@ -87,8 +87,10 @@ export const HeaderProfileBox = () => {
           </Tooltip>
           <div className="flex items-center">
             <UserAvatar
+              username={session.data.user.username}
               size="sm"
               variant="outline"
+              showProfilePopup
             />
           </div>
         </div>

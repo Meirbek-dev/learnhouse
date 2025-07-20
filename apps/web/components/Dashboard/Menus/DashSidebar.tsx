@@ -354,8 +354,10 @@ function DashSidebar({ className }: SidebarProps) {
           <div className={`flex items-center gap-3 min-w-0 ${isCollapsed ? 'flex-col gap-2' : ''}`}>
             <div className="relative shrink-0">
               <UserAvatar
+                username={session.data.user.username}
                 size="sm"
                 variant="outline"
+                showProfilePopup
               />
             </div>
             <div
