@@ -355,7 +355,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
             (sub) => sub.questionUUID === question.questionUUID && sub.optionUUID === option.optionUUID,
           );
           if (submission?.answer === option.assigned_right_answer) {
-            correctAnswers++;
+            correctAnswers += 1;
           }
         });
       });

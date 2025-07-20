@@ -48,8 +48,6 @@
   ],
   "rules": {
     "eslint": "warn",
-    "eslint-plugin-import/no-default-export": "off",
-    "eslint-plugin-import/no-default-import": "off",
     "eslint/arrow-body-style": "off",
     "eslint/curly": "off",
     "eslint/func-style": "off",

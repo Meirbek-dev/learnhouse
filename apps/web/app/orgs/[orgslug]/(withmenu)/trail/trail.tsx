@@ -39,7 +39,7 @@ function Trail(params: any) {
     const totalCourses = trail.runs.length;
 
     try {
-      for (let i = 0; i < trail.runs.length; i++) {
+      for (let i = 0; i < trail.runs.length; i += 1) {
         const run = trail.runs[i];
         await removeCourse(run.course.course_uuid, orgslug, access_token);
         setQuittingProgress(Math.round(((i + 1) / totalCourses) * 100));

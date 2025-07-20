@@ -1,5 +1,24 @@
 'use client';
-import { ArrowRight, Backpack, Check, File, ImageIcon, Layers, Square, StickyNote, Video } from 'lucide-react';
+
+import type React from 'react';
+
+import {
+  ArrowRight,
+  Backpack,
+  Check,
+  File,
+  ImageIcon,
+  Layers,
+  Square,
+  StickyNote,
+  Video,
+  MessageCircle,
+  Send,
+  Clock,
+  Reply,
+  ChevronDown,
+} from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesActions';
@@ -8,28 +27,108 @@ import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useTranslations, useFormatter } from 'next-intl';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { Card, CardContent } from '@/components/ui/card';
 import { useCallback, useEffect, useState } from 'react';
+import UserAvatar from '@components/Objects/UserAvatar';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import useSWR from 'swr';
 
+interface DiscussionPost {
+  id: string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  postMessage: string;
+  createDate: string;
+  updateDate: string;
+  replies?: DiscussionReply[];
+}
+
+interface DiscussionReply {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  replyMessage: string;
+  createDate: string;
+}
+
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');
+  const format = useFormatter();
   const [learnings, setLearnings] = useState<any>([]);
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image');
+  const [newDiscussionPost, setNewDiscussionPost] = useState('');
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [discussionPosts, setDiscussionPosts] = useState<DiscussionPost[]>([
+    {
+      id: '1',
+      username: 'Meirbek',
+      firstName: 'Меирбек Канатович',
+      lastName: '',
+      postMessage: 'Отличный курс! Я так многому научился благодаря видеоматериалам и практическим примерам.',
+      createDate: '2023-07-01T10:30:00.000Z',
+      updateDate: '2023-07-01T10:30:00.000Z',
+      replies: [
+        {
+          id: 'r1',
+          username: 'Meirtest',
+          firstName: 'Преподаватель',
+          lastName: 'Преподович',
+          replyMessage: 'Спасибо за положительный отзыв! Рад, что контент оказался вам полезен.',
+          createDate: '2023-07-01T14:20:00.000Z',
+        },
+      ],
+    },
+    {
+      id: '2',
+      username: 'Meirbek',
+      firstName: 'Меирбек Канатович',
+      lastName: '',
+      postMessage: 'Задания сложные, но действительно помогают закрепить знания.',
+      createDate: '2025-01-15T09:15:00.000Z',
+      updateDate: '2025-01-15T09:15:00.000Z',
+    },
+    {
+      id: '3',
+      username: 'Meirtest',
+      firstName: 'Махмет',
+      lastName: 'Махметов',
+      postMessage: 'У кого-нибудь ещё были проблемы с третьим заданием? Я застрял на этапе реализации.',
+      createDate: '2025-01-18T16:45:00.000Z',
+      updateDate: '2025-01-18T16:45:00.000Z',
+      replies: [
+        {
+          id: 'r2',
+          username: 'Meirtest',
+          firstName: 'Махмуд',
+          lastName: 'Махмудов',
+          replyMessage:
+            'У меня была та же проблема! Попробуйте посмотреть документацию в главе 2 — это помогло мне разобраться.',
+          createDate: '2025-01-18T18:30:00.000Z',
+        },
+      ],
+    },
+  ]);
+
   const { courseuuid } = props;
   const { orgslug } = props;
   const { course } = props;
   const org = useOrg() as any;
-  const router = useRouter();
   const isMobile = useIsMobile();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -39,14 +138,11 @@ const CourseClient = (props: any) => {
     swrFetcher(url, access_token),
   );
 
-  console.log(course);
-
   const getLearningTags = useCallback(() => {
     if (!course?.learnings) {
       setLearnings([]);
       return;
     }
-
     try {
       // Try to parse as JSON (new format)
       const parsedLearnings = JSON.parse(course.learnings);
@@ -71,7 +167,6 @@ const CourseClient = (props: any) => {
 
   useEffect(() => {
     getLearningTags();
-
     // Collapse chapters by default if more than 5 activities in total
     if (course?.chapters) {
       const totalActivities = course.chapters.reduce(
@@ -102,27 +197,13 @@ const CourseClient = (props: any) => {
     }
   };
 
-  const getActivityTypeBadgeColor = (activityType: string) => {
-    switch (activityType) {
-      case 'TYPE_VIDEO':
-        return 'bg-neutral-100 text-neutral-500';
-      case 'TYPE_DOCUMENT':
-        return 'bg-neutral-100 text-neutral-500';
-      case 'TYPE_DYNAMIC':
-        return 'bg-neutral-100 text-neutral-500';
-      case 'TYPE_ASSIGNMENT':
-        return 'bg-neutral-100 text-neutral-500';
-      default:
-        return 'bg-neutral-100 text-neutral-500';
-    }
-  };
-
   const isActivityDone = (activity: any) => {
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
     const run = trailData?.runs?.find((run: any) => {
       const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
       return cleanRunCourseUuid === cleanCourseUuid;
     });
+
     if (run) {
       return run.steps.find((step: any) => step.activity_id === activity.id);
     }
@@ -132,6 +213,59 @@ const CourseClient = (props: any) => {
   const isActivityCurrent = (activity: any) => {
     const activity_uuid = activity.activity_uuid.replace('activity_', '');
     return props.current_activity && props.current_activity === activity_uuid;
+  };
+
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    return format.relativeTime(date, now);
+  };
+
+  const getUserDisplayName = (firstName?: string, lastName?: string) => {
+    const first = firstName || '';
+    const last = lastName || '';
+    return `${first} ${last}`.trim() || 'Anonymous';
+  };
+
+  const handleSubmitDiscussion = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDiscussionPost.trim()) return;
+
+    const newPost: DiscussionPost = {
+      id: Date.now().toString(),
+      username: session?.data?.user?.username,
+      firstName: session?.data?.user?.first_name || '',
+      lastName: session?.data?.user?.last_name || '',
+      postMessage: newDiscussionPost.trim(),
+      createDate: new Date().toISOString(),
+      updateDate: new Date().toISOString(),
+      replies: [],
+    };
+
+    setDiscussionPosts((prev) => [newPost, ...prev]);
+    setNewDiscussionPost('');
+  };
+
+  const handleSubmitReply = (e: React.FormEvent, postId: string) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+
+    const newReply: DiscussionReply = {
+      id: Date.now().toString(),
+      username: session?.data?.user?.username,
+      firstName: session?.data?.user?.first_name || '',
+      lastName: session?.data?.user?.last_name || '',
+      replyMessage: replyText.trim(),
+      createDate: new Date().toISOString(),
+    };
+
+    setDiscussionPosts((prev) =>
+      prev.map((post) => (post.id === postId ? { ...post, replies: [...(post.replies || []), newReply] } : post)),
+    );
+
+    setReplyText('');
+    setReplyingTo(null);
   };
 
   return (
@@ -150,7 +284,6 @@ const CourseClient = (props: any) => {
                 <h1 className="text-3xl font-bold md:text-3xl">{course.name}</h1>
               </div>
             </div>
-
             <div className="flex flex-col gap-8 pt-2 md:flex-row">
               <div className="w-full space-y-4 md:w-3/4">
                 {(() => {
@@ -164,38 +297,44 @@ const CourseClient = (props: any) => {
 
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
+                      <Card className="overflow-hidden shadow-xl">
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute right-3 top-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => setActiveThumbnailType('image')}
-                                className={`flex items-center rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                                className={cn(
+                                  'h-8 px-2 text-xs',
                                   activeThumbnailType === 'image'
                                     ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                                }`}
+                                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                                )}
                               >
                                 <ImageIcon
                                   size={12}
                                   className="mr-1"
                                 />
-                                {t('image')}
-                              </button>
-                              <button
+                                {t('thumbnailTypeImage')}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => setActiveThumbnailType('video')}
-                                className={`flex items-center rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                                className={cn(
+                                  'h-8 px-2 text-xs',
                                   activeThumbnailType === 'video'
                                     ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                                }`}
+                                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                                )}
                               >
                                 <Video
                                   size={12}
                                   className="mr-1"
                                 />
-                                {t('video')}
-                              </button>
+                                {t('thumbnailTypeVideo')}
+                              </Button>
                             </div>
                           </div>
                         )}
@@ -205,19 +344,20 @@ const CourseClient = (props: any) => {
                             course?.course_uuid,
                             course?.thumbnail_video,
                           )}
-                          className="h-auto w-full rounded-lg bg-black object-contain"
+                          className="h-auto w-full bg-black object-contain"
                           controls
                           autoPlay
                           muted
                           preload="metadata"
                           playsInline
                         />
-                      </div>
+                      </Card>
                     );
                   }
+
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
+                      <Card className="overflow-hidden shadow-xl">
                         <img
                           src={getCourseThumbnailMediaDirectory(
                             org?.org_uuid,
@@ -230,40 +370,47 @@ const CourseClient = (props: any) => {
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute right-3 top-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => setActiveThumbnailType('image')}
-                                className={`flex items-center rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                                className={cn(
+                                  'h-8 px-2 text-xs',
                                   activeThumbnailType === 'image'
                                     ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                                }`}
+                                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                                )}
                               >
                                 <ImageIcon
                                   size={12}
                                   className="mr-1"
                                 />
-                                {t('image')}
-                              </button>
-                              <button
+                                {t('thumbnailTypeImage')}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => setActiveThumbnailType('video')}
-                                className={`flex items-center rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                                className={cn(
+                                  'h-8 px-2 text-xs',
                                   activeThumbnailType === 'video'
                                     ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                                }`}
+                                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                                )}
                               >
                                 <Video
                                   size={12}
                                   className="mr-1"
                                 />
-                                {t('video')}
-                              </button>
+                                {t('thumbnailTypeVideo')}
+                              </Button>
                             </div>
                           </div>
                         )}
-                      </div>
+                      </Card>
                     );
                   }
+
                   return (
                     <div
                       className="relative w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset ring-black/10 h-auto"
@@ -291,7 +438,7 @@ const CourseClient = (props: any) => {
                 )}
 
                 <div className="course_metadata_left space-y-2">
-                  <div className="">
+                  <div>
                     <p className="w-full hyphens-auto whitespace-pre-line text-pretty break-words py-5 leading-relaxed tracking-normal">
                       {course.about}
                     </p>
@@ -309,125 +456,115 @@ const CourseClient = (props: any) => {
                 />
 
                 {/* Authors & Updates Box */}
-                <div className="overflow-hidden rounded-lg bg-white p-4 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
-                  <CourseProvider courseuuid={course.course_uuid}>
-                    <CourseAuthors authors={course.authors} />
-                  </CourseProvider>
-                </div>
+                <Card>
+                  <CardContent className="p-4">
+                    <CourseProvider courseuuid={course.course_uuid}>
+                      <CourseAuthors authors={course.authors} />
+                    </CourseProvider>
+                  </CardContent>
+                </Card>
               </div>
             </div>
 
             {learnings.length > 0 && learnings[0]?.text !== 'null' && (
               <div className="w-full">
                 <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('whatYouWillLearn')}</h2>
-                <div className="space-y-2 overflow-hidden rounded-lg bg-white px-5 py-5 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
-                  {learnings.map((learning: any) => {
-                    // Handle both new format (object with text and emoji) and legacy format (string)
-                    const learningText = typeof learning === 'string' ? learning : learning.text;
-                    const learningEmoji = typeof learning === 'string' ? null : learning.emoji;
-                    const learningId = typeof learning === 'string' ? learning : learning.id || learning.text;
+                <Card>
+                  <CardContent className="space-y-2 p-5">
+                    {learnings.map((learning: any) => {
+                      // Handle both new format (object with text and emoji) and legacy format (string)
+                      const learningText = typeof learning === 'string' ? learning : learning.text;
+                      const learningEmoji = typeof learning === 'string' ? null : learning.emoji;
+                      const learningId = typeof learning === 'string' ? learning : learning.id || learning.text;
 
-                    if (!learningText) return null;
+                      if (!learningText) return null;
 
-                    return (
-                      <div
-                        key={learningId}
-                        className="flex items-center space-x-2 font-semibold text-gray-500"
-                      >
-                        <div className="rounded-full px-2 py-2">
-                          {learningEmoji ? (
-                            <span>{learningEmoji}</span>
-                          ) : (
-                            <Check
-                              className="text-gray-400"
-                              size={15}
-                            />
+                      return (
+                        <div
+                          key={learningId}
+                          className="flex items-center space-x-2 font-semibold text-gray-500"
+                        >
+                          <div className="rounded-full px-2 py-2">
+                            {learningEmoji ? (
+                              <span>{learningEmoji}</span>
+                            ) : (
+                              <Check
+                                className="text-gray-400"
+                                size={15}
+                              />
+                            )}
+                          </div>
+                          <p>{learningText}</p>
+                          {learning.link && (
+                            <Button
+                              variant="link"
+                              size="sm"
+                              asChild
+                            >
+                              <a
+                                href={learning.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm"
+                              >
+                                <span className="sr-only">{t('linkTo', { learningText })}</span>
+                                <ArrowRight size={14} />
+                              </a>
+                            </Button>
                           )}
                         </div>
-                        <p>{learningText}</p>
-                        {learning.link && (
-                          <a
-                            href={learning.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-500 hover:underline"
-                          >
-                            <span className="sr-only">
-                              {t('linkTo', {
-                                learningText,
-                              })}
-                            </span>
-                            <ArrowRight size={14} />
-                          </a>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </CardContent>
+                </Card>
               </div>
             )}
 
             <div className="my-5 mb-10 w-full">
               <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('courseLessons')}</h2>
-              <div className="overflow-hidden rounded-lg bg-white shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
+              <Card>
                 {course.chapters.map((chapter: any, idx: number) => {
-                  const isExpanded = expandedChapters[chapter.chapter_uuid] ?? idx === 0; // Default to expanded for first chapter
+                  const isExpanded = expandedChapters[chapter.chapter_uuid] ?? idx === 0;
                   return (
-                    <div key={chapter.chapter_uuid || `chapter-${chapter.name}`}>
-                      <div
-                        className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-semibold text-neutral-600 outline-1 outline-neutral-200/40 transition-colors hover:bg-neutral-100"
-                        onClick={() =>
-                          setExpandedChapters((prev) => ({
-                            ...prev,
-                            [chapter.chapter_uuid]: !isExpanded,
-                          }))
-                        }
-                      >
-                        {/* Chevron on the far left, vertically centered with the title */}
-                        <div className="mr-3 flex flex-col justify-center pt-1">
-                          <svg
-                            className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
+                    <Collapsible
+                      key={chapter.chapter_uuid || `chapter-${chapter.name}`}
+                      open={isExpanded}
+                      onOpenChange={(open) =>
+                        setExpandedChapters((prev) => ({
+                          ...prev,
+                          [chapter.chapter_uuid]: open,
+                        }))
+                      }
+                    >
+                      <CollapsibleTrigger asChild>
+                        <div className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-semibold text-neutral-600 transition-colors hover:bg-neutral-100">
+                          <div className="mr-3 flex flex-col justify-center pt-1">
+                            <ChevronDown
+                              className={cn('h-5 w-5 transition-transform', isExpanded ? 'rotate-180' : '')}
                             />
-                          </svg>
-                        </div>
-                        {/* Title and badge column */}
-                        <div className="flex w-full flex-col items-start">
-                          <div className="mb-1 flex w-full min-w-0 flex-wrap items-center">
-                            {/* Numbered badge */}
-                            <span className="mr-2 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-neutral-200 text-xs font-semibold text-neutral-600">
-                              {idx + 1}
-                            </span>
-                            <h3
-                              className="min-w-0 truncate text-lg font-semibold leading-tight sm:text-base md:text-lg"
-                              style={{ lineHeight: '1.2' }}
-                            >
-                              {chapter.name}
-                            </h3>
                           </div>
-                          <div className="flex items-center space-x-1 text-sm font-normal text-neutral-400">
-                            <Layers
-                              size={16}
-                              className="mr-1"
-                            />
-                            <span>
-                              {t('activities', {
-                                activitiesLength: chapter.activities.length,
-                              })}
-                            </span>
+                          <div className="flex w-full flex-col items-start">
+                            <div className="mb-1 flex w-full min-w-0 flex-wrap items-center">
+                              <Badge
+                                variant="secondary"
+                                className="mr-2 h-5 w-5 rounded-full p-0 text-xs"
+                              >
+                                {idx + 1}
+                              </Badge>
+                              <h3 className="min-w-0 truncate text-lg font-semibold leading-tight">{chapter.name}</h3>
+                            </div>
+                            <div className="flex items-center space-x-1 text-sm font-normal text-neutral-400">
+                              <Layers
+                                size={16}
+                                className="mr-1"
+                              />
+                              <span>{t('activitiesCount', { count: chapter.activities.length })}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className={`transition-all duration-200 ${isExpanded ? 'block' : 'hidden'}`}>
-                        <div className="">
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div>
                           {chapter.activities.map((activity: any) => {
                             return (
                               <Link
@@ -435,12 +572,12 @@ const CourseClient = (props: any) => {
                                 href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
                                 rel="noopener noreferrer"
                                 prefetch={false}
-                                className="activity-container group block px-4 py-4 transition-all duration-200"
+                                className="activity-container group block px-4 py-4 transition-all duration-200 hover:bg-gray-50"
                               >
                                 <div className="flex items-center space-x-3">
                                   <div className="flex items-center">
                                     {isActivityDone(activity) ? (
-                                      <div className="relative cursor-pointer">
+                                      <div className="relative">
                                         <Square
                                           size={16}
                                           className="stroke-[2] text-teal-600"
@@ -451,12 +588,10 @@ const CourseClient = (props: any) => {
                                         />
                                       </div>
                                     ) : (
-                                      <div className="cursor-pointer text-neutral-300">
-                                        <Square
-                                          size={16}
-                                          className="stroke-[2]"
-                                        />
-                                      </div>
+                                      <Square
+                                        size={16}
+                                        className="stroke-[2] text-neutral-300"
+                                      />
                                     )}
                                   </div>
                                   <div className="flex grow flex-col">
@@ -465,9 +600,12 @@ const CourseClient = (props: any) => {
                                         {activity.name}
                                       </p>
                                       {isActivityCurrent(activity) && (
-                                        <div className="flex animate-pulse items-center space-x-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600">
-                                          <span>{t('current')}</span>
-                                        </div>
+                                        <Badge
+                                          variant="secondary"
+                                          className="animate-pulse bg-blue-50 text-primary-foreground"
+                                        >
+                                          {t('current')}
+                                        </Badge>
                                       )}
                                     </div>
                                     <div className="mt-0.5 flex items-center space-x-1.5 text-neutral-400">
@@ -480,7 +618,7 @@ const CourseClient = (props: any) => {
                                       </span>
                                     </div>
                                   </div>
-                                  <div className="cursor-pointer text-neutral-300 transition-colors group-hover:text-neutral-400">
+                                  <div className="text-neutral-300 transition-colors group-hover:text-neutral-400">
                                     <ArrowRight size={14} />
                                   </div>
                                 </div>
@@ -488,10 +626,209 @@ const CourseClient = (props: any) => {
                             );
                           })}
                         </div>
-                      </div>
-                    </div>
+                      </CollapsibleContent>
+                      {idx < course.chapters.length - 1 && <Separator />}
+                    </Collapsible>
                   );
                 })}
+              </Card>
+            </div>
+
+            {/* Course Discussions */}
+            <div className="my-5 mb-10 w-full">
+              <div className="flex items-center space-x-2 py-5">
+                <h2 className="text-xl font-semibold md:text-2xl">{t('courseDiscussions')}</h2>
+                <Badge
+                  variant="secondary"
+                  className="rounded-full"
+                >
+                  {discussionPosts.length}
+                </Badge>
+              </div>
+
+              <div className="space-y-4">
+                {/* New Discussion Form */}
+                <Card>
+                  <CardContent className="px-4">
+                    <form
+                      onSubmit={handleSubmitDiscussion}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-start space-x-3">
+                        <UserAvatar
+                          size="sm"
+                          variant="default"
+                          username={session?.data?.user?.username}
+                        />
+                        <div className="flex-1">
+                          <Textarea
+                            value={newDiscussionPost}
+                            onChange={(e) => setNewDiscussionPost(e.target.value)}
+                            placeholder={t('startDiscussionPlaceholder')}
+                            className="resize-none"
+                            rows={3}
+                            maxLength={2048}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          type="submit"
+                          disabled={!newDiscussionPost.trim()}
+                          className="flex items-center space-x-2"
+                        >
+                          <Send size={14} />
+                          <span>{t('postDiscussion')}</span>
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+
+                {/* Discussion Posts */}
+                <div className="space-y-4">
+                  {discussionPosts.map((post) => (
+                    <Card key={post.id}>
+                      {/* Main Post */}
+                      <CardContent className="p-4">
+                        <div className="flex items-start space-x-3">
+                          <UserAvatar
+                            size="md"
+                            variant="default"
+                            username={post.username}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2">
+                              <h4 className="font-semibold text-neutral-800">
+                                {getUserDisplayName(post.firstName, post.lastName)}
+                              </h4>
+                              <span className="text-sm text-neutral-500">@{post.username}</span>
+                              <div className="flex items-center space-x-1 text-xs text-neutral-400">
+                                <Clock size={12} />
+                                <span>{formatRelativeTime(post.createDate)}</span>
+                              </div>
+                            </div>
+                            <p className="mt-2 text-neutral-700 leading-relaxed">{post.postMessage}</p>
+                            <div className="mt-3 flex items-center space-x-4">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}
+                                className="items-center p-1 h-auto text-sm text-neutral-500"
+                              >
+                                <Reply size={14} />
+                                <span>{t('reply')}</span>
+                                {post.replies && post.replies.length > 0 && (
+                                  <span className="text-xs">({post.replies.length})</span>
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Reply Form */}
+                        {replyingTo === post.id && (
+                          <div className="mt-4 ml-13">
+                            <form
+                              onSubmit={(e) => handleSubmitReply(e, post.id)}
+                              className="space-y-3"
+                            >
+                              <div className="flex items-start space-x-3">
+                                <UserAvatar
+                                  size="xs"
+                                  variant="default"
+                                  username={session?.data?.user?.username}
+                                />
+                                <Textarea
+                                  value={replyText}
+                                  onChange={(e) => setReplyText(e.target.value)}
+                                  placeholder={t('writeReplyPlaceholder')}
+                                  className="flex-1 resize-none"
+                                  rows={2}
+                                  maxLength={2048}
+                                />
+                              </div>
+                              <div className="flex justify-end space-x-2">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setReplyingTo(null);
+                                    setReplyText('');
+                                  }}
+                                >
+                                  {t('cancel')}
+                                </Button>
+                                <Button
+                                  type="submit"
+                                  size="sm"
+                                  disabled={!replyText.trim()}
+                                  className="flex items-center space-x-1"
+                                >
+                                  <Send size={12} />
+                                  <span>{t('reply')}</span>
+                                </Button>
+                              </div>
+                            </form>
+                          </div>
+                        )}
+                      </CardContent>
+
+                      {/* Replies */}
+                      {post.replies && post.replies.length > 0 && (
+                        <>
+                          <Separator />
+                          <div className="bg-neutral-50/50">
+                            {post.replies.map((reply) => (
+                              <div
+                                key={reply.id}
+                                className="p-4 border-l-2 border-blue-200 ml-4"
+                              >
+                                <div className="flex items-start space-x-3">
+                                  <UserAvatar
+                                    size="sm"
+                                    variant="default"
+                                    username={reply.username}
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center space-x-2">
+                                      <h5 className="font-medium text-neutral-800">
+                                        {getUserDisplayName(reply.firstName, reply.lastName)}
+                                      </h5>
+                                      <span className="text-sm text-neutral-500">@{reply.username}</span>
+                                      <div className="flex items-center space-x-1 text-xs text-neutral-400">
+                                        <Clock size={10} />
+                                        <span>{formatRelativeTime(reply.createDate)}</span>
+                                      </div>
+                                    </div>
+                                    <p className="mt-1 text-sm text-neutral-700 leading-relaxed">
+                                      {reply.replyMessage}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Empty State */}
+                {discussionPosts.length === 0 && (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <MessageCircle
+                        size={48}
+                        className="mx-auto text-neutral-300 mb-4"
+                      />
+                      <h3 className="text-lg font-semibold text-neutral-600 mb-2">{t('noDiscussions')}</h3>
+                      <p className="text-neutral-500 mb-4">{t('noDiscussionsDesc')}</p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </div>
           </GeneralWrapperStyled>

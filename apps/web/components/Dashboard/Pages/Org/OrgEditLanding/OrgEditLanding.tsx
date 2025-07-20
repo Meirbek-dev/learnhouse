@@ -514,7 +514,10 @@ const OrgEditLanding = () => {
                       }
                     }}
                   >
-                    <SelectTrigger className="hover:bg-primary/90 bg-primary w-full border-0 p-0" withChevron={false}>
+                    <SelectTrigger
+                      className="hover:bg-primary/90 bg-primary w-full border-0 p-0"
+                      withChevron={false}
+                    >
                       <div className="inline-flex w-full shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium text-white outline-none transition-all">
                         <Plus
                           size="8"

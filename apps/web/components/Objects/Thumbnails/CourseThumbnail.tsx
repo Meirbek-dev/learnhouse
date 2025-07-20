@@ -3,11 +3,11 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { BookMinus, FilePenLine, MoreVertical, Settings2, Users, Calendar } from 'lucide-react';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
-import { Card, CardContent, CardFooter, CardHeader } from '@components/ui/card';
+import { BookMinus, FilePenLine, MoreVertical, Settings2, Calendar } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { deleteCourseFromBackend } from '@services/courses/courses';
+import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -17,7 +17,6 @@ import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { cn } from '@/lib/utils';
 import type { FC } from 'react';
 import Link from 'next/link';
 

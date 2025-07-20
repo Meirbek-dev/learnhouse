@@ -40,9 +40,9 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
 
     course.chapters.forEach((chapter: any) => {
       chapter.activities.forEach((activity: any) => {
-        total++;
+        total += 1;
         if (isActivityDone(activity)) {
-          completed++;
+          completed += 1;
         }
       });
     });

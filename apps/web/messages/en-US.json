@@ -271,8 +271,6 @@
       "newCollection": "New Collection",
       "newCourse": "New Course"
     },
-    "Calendar": {
-    },
     "CollectionThumbnail": {
       "courseCount": "{count, plural, =0 {0 courses} one {# course} other {# courses}}",
       "deleteButtonText": "Delete Collection",
@@ -923,15 +921,17 @@
   "CoursePage": {
     "about": "About",
     "access": "Access",
-    "activities": "{activitiesLength} Activities",
+    "activitiesCount": "{count} Activities",
     "activityCount": "{count, plural, =0 {0 Activities} one {# Activity} other {# Activities}}",
     "activityCounter": "{current} of {total}",
     "activityNotPublished": "This activity is not published yet",
     "assignment": "Assignment",
+    "cancel": "Cancel",
     "content": "Content",
     "contributeToActivity": "Contribute to activity",
     "contributors": "Contributors",
     "courseContent": "Course Content",
+    "courseDiscussions": "Course Discussion",
     "courseLessons": "Course Lessons",
     "courseThumbnailAlt": "Course Thumbnail",
     "current": "Current",
@@ -943,11 +943,16 @@
     "markAsComplete": "Mark as complete",
     "next": "Next",
     "nextActivityTitle": "Next: {name}",
+    "noDiscussions": "No discussions yer",
+    "noDiscussionsDesc": "Be the first to start a conversation about this course!",
     "noNextActivity": "No next activity",
     "noPrevActivity": "No previous activity",
     "page": "Page",
+    "postDiscussion": "Post discussion",
     "prevActivityTitle": "Previous: {name}",
     "previous": "Previous",
+    "reply": "Reply",
+    "startDiscussionPlaceholder": "Start a discussion about this course...",
     "statusComplete": "Complete",
     "statusGraded": "Graded",
     "statusGradingInProgress": "Grading in progress",
@@ -957,11 +962,14 @@
     "submitErrorToast": "Failed to submit assignment for review",
     "submitSuccessToast": "Assignment submitted for review",
     "submitTrigger": "Submit for review",
+    "thumbnailTypeImage": "Image",
+    "thumbnailTypeVideo": "Video",
     "title": "Course",
     "unknownGradingType": "Unknown grading type",
     "video": "Video",
     "viewAllActivities": "View all activities",
-    "whatYouWillLearn": "What you will learn"
+    "whatYouWillLearn": "What you will learn",
+    "writeReplyPlaceholder": "Write a reply..."
   },
   "Courses": {
     "CourseActionsMobile": {

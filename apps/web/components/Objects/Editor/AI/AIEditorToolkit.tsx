@@ -313,7 +313,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   async function fillEditorWithText(text: string) {
     const words = text.split(' ');
 
-    for (let i = 0; i < words.length; i++) {
+    for (let i = 0; i < words.length; i += 1) {
       const textNode = {
         type: 'text',
         text: words[i],
@@ -342,7 +342,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     // Delete the selected text
     props.editor.chain().focus().deleteSelection().run();
 
-    for (let i = 0; i < words.length; i++) {
+    for (let i = 0; i < words.length; i += 1) {
       const textNode = {
         type: 'text',
         text: words[i],

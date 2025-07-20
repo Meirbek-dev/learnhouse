@@ -921,7 +921,7 @@
   "CoursePage": {
     "about": "Курс туралы",
     "access": "Қолжетімділік",
-    "activities": "{activitiesLength} белсенділік",
+    "activitiesCount": "{count} белсенділік",
     "activityCount": "{count, plural, =0 {0 белсенділік} one {# белсенділік} few {# белсенділік} other {# белсенділік}}",
     "activityCounter": "{current} / {total}",
     "activityNotPublished": "Бұл белсенділік әлі жарияланған жоқ",

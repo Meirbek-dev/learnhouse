@@ -13,13 +13,7 @@ import {
   TextIcon,
   Trash2,
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useLHSession } from '@components/Contexts/LHSessionContext';

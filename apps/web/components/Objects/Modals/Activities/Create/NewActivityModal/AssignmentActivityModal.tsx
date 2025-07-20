@@ -2,9 +2,10 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { createAssignmentWithActivity } from '@services/courses/assignments';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { createAssignmentWithActivity } from '@services/courses/assignments';
+import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
@@ -21,7 +22,6 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { mutate } from 'swr';
 import { z } from 'zod';
-import { revalidateTags } from '@services/utils/ts/requests';
 
 const createValidationSchema = (t: (key: string) => string) =>
   z.object({
@@ -98,7 +98,9 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal, orgslug 
         // Only revalidate if we have valid course data
         if (course?.courseStructure?.course_uuid) {
           // Revalidate cache with proper parameters
-          mutate(`${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`);
+          mutate(
+            `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+          );
         }
 
         if (orgslug) {

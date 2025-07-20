@@ -124,7 +124,13 @@ function UserAvatar(props: UserAvatarProps) {
       return getUserAvatarMediaDirectory(userData.user_uuid, avatarUrl);
     }
 
-    // If user has an avatar in session (only if session exists)
+    // If username was provided but no user data found, don't fall back to session
+    // This prevents showing the wrong user's avatar for usernames that don't exist
+    if (username) {
+      return getUriWithOrg(params.orgslug, '/empty_avatar.png');
+    }
+
+    // If user has an avatar in session (only if session exists and no username was provided)
     if (session?.data?.user?.avatar_image) {
       const avatarUrl = session.data.user.avatar_image;
       // If it's an external URL (e.g., from Google, Facebook, etc.), use it directly
@@ -145,6 +151,11 @@ function UserAvatar(props: UserAvatarProps) {
     // Try to get initials from userData
     if (userData?.first_name && userData?.last_name) {
       return `${userData.first_name[0]}${userData.last_name[0]}`.toUpperCase();
+    }
+
+    // If we have a username prop, use it for fallback regardless of fetch status
+    if (username && username.length > 0) {
+      return username.charAt(0).toUpperCase();
     }
 
     // Try to get initials from session
