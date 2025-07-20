@@ -17,6 +17,8 @@ import {
   Clock,
   Reply,
   ChevronDown,
+  Trash2,
+  Edit,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
@@ -27,10 +29,10 @@ import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useTranslations, useFormatter } from 'next-intl';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useTranslations, useFormatter } from 'next-intl';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { Card, CardContent } from '@/components/ui/card';
@@ -74,6 +76,9 @@ const CourseClient = (props: any) => {
   const [newDiscussionPost, setNewDiscussionPost] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [editingPost, setEditingPost] = useState<string | null>(null);
+  const [editingReply, setEditingReply] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
   const [discussionPosts, setDiscussionPosts] = useState<DiscussionPost[]>([
     {
       id: '1',
@@ -268,6 +273,67 @@ const CourseClient = (props: any) => {
     setReplyingTo(null);
   };
 
+  const handleDeletePost = (postId: string) => {
+    setDiscussionPosts((prev) => prev.filter((post) => post.id !== postId));
+  };
+
+  const handleDeleteReply = (postId: string, replyId: string) => {
+    setDiscussionPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId ? { ...post, replies: post.replies?.filter((reply) => reply.id !== replyId) } : post,
+      ),
+    );
+  };
+
+  const handleEditPost = (postId: string, newMessage: string) => {
+    setDiscussionPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId ? { ...post, postMessage: newMessage, updateDate: new Date().toISOString() } : post,
+      ),
+    );
+    setEditingPost(null);
+    setEditText('');
+  };
+
+  const handleEditReply = (postId: string, replyId: string, newMessage: string) => {
+    setDiscussionPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              replies: post.replies?.map((reply) =>
+                reply.id === replyId ? { ...reply, replyMessage: newMessage } : reply,
+              ),
+            }
+          : post,
+      ),
+    );
+    setEditingReply(null);
+    setEditText('');
+  };
+
+  const startEditingPost = (postId: string, currentMessage: string) => {
+    setEditingPost(postId);
+    setEditText(currentMessage);
+    setReplyingTo(null); // Close reply form if open
+  };
+
+  const startEditingReply = (replyId: string, currentMessage: string) => {
+    setEditingReply(replyId);
+    setEditText(currentMessage);
+    setReplyingTo(null); // Close reply form if open
+  };
+
+  const cancelEditing = () => {
+    setEditingPost(null);
+    setEditingReply(null);
+    setEditText('');
+  };
+
+  const isOwnPost = (username: string) => {
+    return username === session?.data?.user?.username;
+  };
+
   return (
     <>
       {!(course || org) ? (
@@ -297,7 +363,7 @@ const CourseClient = (props: any) => {
 
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <Card className="overflow-hidden shadow-xl">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute right-3 top-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
@@ -344,20 +410,19 @@ const CourseClient = (props: any) => {
                             course?.course_uuid,
                             course?.thumbnail_video,
                           )}
-                          className="h-auto w-full bg-black object-contain"
+                          className="h-auto w-full rounded-lg bg-black object-contain"
                           controls
                           autoPlay
                           muted
                           preload="metadata"
                           playsInline
                         />
-                      </Card>
+                      </div>
                     );
                   }
-
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <Card className="overflow-hidden shadow-xl">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset ring-black/10">
                         <img
                           src={getCourseThumbnailMediaDirectory(
                             org?.org_uuid,
@@ -407,7 +472,7 @@ const CourseClient = (props: any) => {
                             </div>
                           </div>
                         )}
-                      </Card>
+                      </div>
                     );
                   }
 
@@ -698,17 +763,75 @@ const CourseClient = (props: any) => {
                             username={post.username}
                           />
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2">
-                              <h4 className="font-semibold text-neutral-800">
-                                {getUserDisplayName(post.firstName, post.lastName)}
-                              </h4>
-                              <span className="text-sm text-neutral-500">@{post.username}</span>
-                              <div className="flex items-center space-x-1 text-xs text-neutral-400">
-                                <Clock size={12} />
-                                <span>{formatRelativeTime(post.createDate)}</span>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <h4 className="font-semibold text-neutral-800">
+                                  {getUserDisplayName(post.firstName, post.lastName)}
+                                </h4>
+                                <span className="text-sm text-neutral-500">@{post.username}</span>
+                                <div className="flex items-center space-x-1 text-xs text-neutral-400">
+                                  <Clock size={12} />
+                                  <span>{formatRelativeTime(post.createDate)}</span>
+                                  {post.updateDate !== post.createDate && (
+                                    <span className="text-xs text-neutral-400">({t('edited')})</span>
+                                  )}
+                                </div>
                               </div>
+                              {isOwnPost(post.username) && editingPost !== post.id && (
+                                <div className="flex items-center space-x-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => startEditingPost(post.id, post.postMessage)}
+                                    className="h-6 w-6 p-0 text-neutral-400 transition-colors duration-200 hover:text-blue-500"
+                                  >
+                                    <Edit size={12} />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeletePost(post.id)}
+                                    className="h-6 w-6 p-0 text-neutral-400 transition-colors duration-200 hover:text-red-600"
+                                  >
+                                    <Trash2 size={12} />
+                                  </Button>
+                                </div>
+                              )}
                             </div>
-                            <p className="mt-2 text-neutral-700 leading-relaxed">{post.postMessage}</p>
+
+                            {editingPost === post.id ? (
+                              <div className="mt-2">
+                                <Textarea
+                                  value={editText}
+                                  onChange={(e) => setEditText(e.target.value)}
+                                  className="resize-none"
+                                  rows={3}
+                                  maxLength={2048}
+                                />
+                                <div className="flex justify-end space-x-2 mt-2">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={cancelEditing}
+                                  >
+                                    {t('cancel')}
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    disabled={!editText.trim()}
+                                    onClick={() => handleEditPost(post.id, editText)}
+                                    className="flex items-center space-x-1"
+                                  >
+                                    <span>{t('save')}</span>
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="mt-2 text-neutral-700 leading-relaxed">{post.postMessage}</p>
+                            )}
+
                             <div className="mt-3 flex items-center space-x-4">
                               <Button
                                 variant="ghost"
@@ -727,7 +850,7 @@ const CourseClient = (props: any) => {
                         </div>
 
                         {/* Reply Form */}
-                        {replyingTo === post.id && (
+                        {replyingTo === post.id && !editingPost && !editingReply && (
                           <div className="mt-4 ml-13">
                             <form
                               onSubmit={(e) => handleSubmitReply(e, post.id)}
@@ -792,19 +915,73 @@ const CourseClient = (props: any) => {
                                     username={reply.username}
                                   />
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center space-x-2">
-                                      <h5 className="font-medium text-neutral-800">
-                                        {getUserDisplayName(reply.firstName, reply.lastName)}
-                                      </h5>
-                                      <span className="text-sm text-neutral-500">@{reply.username}</span>
-                                      <div className="flex items-center space-x-1 text-xs text-neutral-400">
-                                        <Clock size={10} />
-                                        <span>{formatRelativeTime(reply.createDate)}</span>
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center space-x-2">
+                                        <h5 className="font-medium text-neutral-800">
+                                          {getUserDisplayName(reply.firstName, reply.lastName)}
+                                        </h5>
+                                        <span className="text-sm text-neutral-500">@{reply.username}</span>
+                                        <div className="flex items-center space-x-1 text-xs text-neutral-400">
+                                          <Clock size={10} />
+                                          <span>{formatRelativeTime(reply.createDate)}</span>
+                                        </div>
                                       </div>
+                                      {isOwnPost(reply.username) && editingReply !== reply.id && (
+                                        <div className="flex items-center space-x-1">
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => startEditingReply(reply.id, reply.replyMessage)}
+                                            className="h-5 w-5 p-0 text-neutral-400 hover:text-neutral-600"
+                                          >
+                                            <Edit size={10} />
+                                          </Button>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDeleteReply(post.id, reply.id)}
+                                            className="h-5 w-5 p-0 text-neutral-400 hover:text-red-600"
+                                          >
+                                            <Trash2 size={10} />
+                                          </Button>
+                                        </div>
+                                      )}
                                     </div>
-                                    <p className="mt-1 text-sm text-neutral-700 leading-relaxed">
-                                      {reply.replyMessage}
-                                    </p>
+
+                                    {editingReply === reply.id ? (
+                                      <div className="mt-2">
+                                        <Textarea
+                                          value={editText}
+                                          onChange={(e) => setEditText(e.target.value)}
+                                          className="resize-none text-sm"
+                                          rows={2}
+                                          maxLength={2048}
+                                        />
+                                        <div className="flex justify-end space-x-2 mt-2">
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={cancelEditing}
+                                          >
+                                            {t('cancel')}
+                                          </Button>
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            disabled={!editText.trim()}
+                                            onClick={() => handleEditReply(post.id, reply.id, editText)}
+                                            className="flex items-center space-x-1"
+                                          >
+                                            <span>{t('save')}</span>
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <p className="mt-1 text-sm text-neutral-700 leading-relaxed">
+                                        {reply.replyMessage}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
                               </div>

@@ -959,7 +959,18 @@
     "unknownGradingType": "Белгісіз бағалау түрі",
     "video": "Бейне",
     "viewAllActivities": "Барлық белсенділіктерді көру",
-    "whatYouWillLearn": "Не үйренесіз"
+    "whatYouWillLearn": "Не үйренесіз",
+    "cancel": "Болдырмау",
+    "courseDiscussions": "Курс талқылауы",
+    "noDiscussions": "Талқылау жоқ",
+    "noDiscussionsDesc": "Бұл курс туралы сұхбатты бастаушы болыңыз!",
+    "postDiscussion": "Жариялау",
+    "reply": "Жауап беру",
+    "save": "Сақтау",
+    "startDiscussionPlaceholder": "Бұл курс туралы талқылау бастаңыз...",
+    "writeReplyPlaceholder": "Жауап жазыңыз...",
+    "thumbnailTypeImage": "Сурет",
+    "thumbnailTypeVideo": "Бейне"
   },
   "Courses": {
     "CourseActionsMobile": {

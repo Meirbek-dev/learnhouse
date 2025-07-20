@@ -952,6 +952,8 @@
     "prevActivityTitle": "Previous: {name}",
     "previous": "Previous",
     "reply": "Reply",
+    "save": "Save",
+    "edited": "Edited",
     "startDiscussionPlaceholder": "Start a discussion about this course...",
     "statusComplete": "Complete",
     "statusGraded": "Graded",
