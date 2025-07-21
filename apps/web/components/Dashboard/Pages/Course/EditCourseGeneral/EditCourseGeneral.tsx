@@ -279,7 +279,7 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
     <div className="h-full">
       <div className="h-6" />
       <div className="px-10 pb-10">
-        <div className="shadow-xs rounded-xl bg-white">
+        <div className="rounded-xl bg-white shadow-xs">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="p-6">

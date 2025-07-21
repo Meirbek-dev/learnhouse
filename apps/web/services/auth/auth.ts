@@ -1,4 +1,4 @@
-import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
+import { getResponseMetadata, RequestBody } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
 // Auth service types and interfaces

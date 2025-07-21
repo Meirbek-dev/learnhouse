@@ -50,10 +50,9 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
 
   // Consistent sizes for both avatars and badge
   const avatarSize = isMobile ? 72 : 86;
-  const borderSize = 'border-4';
 
   return (
-    <div className="flex flex-col items-center space-y-4 px-2 py-2">
+    <div className="flex flex-col items-center space-y-4 px-2 pb-2">
       <div className="self-start text-[12px] font-semibold text-neutral-400">{t('authorsAndUpdates')}</div>
 
       {/* Avatars row */}

@@ -2,7 +2,7 @@
 
 import { type DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-import { type Locale, de, enUS, es, fr, ru } from 'date-fns/locale';
+import { de, enUS, es, fr, type Locale, ru } from 'date-fns/locale';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';

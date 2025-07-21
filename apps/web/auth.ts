@@ -8,7 +8,7 @@ import {
   loginAndGetToken,
   loginWithOAuthToken,
 } from '@/services/auth/auth';
-import { OPENU_TOP_DOMAIN, getUriWithOrg } from '@/services/config/config';
+import { getUriWithOrg, OPENU_TOP_DOMAIN } from '@/services/config/config';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 
 // Improved type declarations for session cache - Edge Runtime compatible

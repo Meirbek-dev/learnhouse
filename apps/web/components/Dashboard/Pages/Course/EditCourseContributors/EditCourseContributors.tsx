@@ -506,12 +506,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                               >
                                 {t('clearButton')}
                               </Button>
-                              <Button
-                                onClick={handleAddContributors}
-                                className="bg-gray-900 text-sm text-white hover:bg-gray-800"
-                              >
-                                {t('addSelectedButton')}
-                              </Button>
+                              <Button onClick={handleAddContributors}>{t('addSelectedButton')}</Button>
                             </div>
                           </div>
                         </div>
