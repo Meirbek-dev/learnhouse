@@ -12,7 +12,7 @@ import InviteOnlySignUpComponent from './InviteOnlySignUp';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { joinOrg } from '@services/organizations/orgs';
-import openuLogoDark from 'public/openu_logo_dark.png';
+import openuLogoDark from 'public/openu_logo_dark.webp';
 import { Button } from '@components/ui/button';
 import OpenSignUpComponent from './OpenSignup';
 import { Input } from '@components/ui/input';

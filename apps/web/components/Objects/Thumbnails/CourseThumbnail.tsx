@@ -78,7 +78,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
 
   const thumbnailImage = course.thumbnail_image
     ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
-    : '../empty_thumbnail.png';
+    : '../empty_thumbnail.webp';
 
   const courseUrl = customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`);
 

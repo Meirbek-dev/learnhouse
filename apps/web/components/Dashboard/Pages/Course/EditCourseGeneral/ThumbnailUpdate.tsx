@@ -186,7 +186,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
             course.courseStructure.course_uuid,
             course.courseStructure.thumbnail_image,
           )
-        : '/empty_thumbnail.png';
+        : '/empty_thumbnail.webp';
     }
     return course.courseStructure.thumbnail_video
       ? getCourseThumbnailMediaDirectory(

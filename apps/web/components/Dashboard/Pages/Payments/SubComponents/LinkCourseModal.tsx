@@ -37,7 +37,7 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
 
   const thumbnailImage = course.thumbnail_image
     ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
-    : '../empty_thumbnail.png';
+    : '../empty_thumbnail.webp';
 
   return (
     <div className="flex gap-4 rounded-lg border border-gray-100 bg-white p-4 transition-colors hover:border-gray-200">

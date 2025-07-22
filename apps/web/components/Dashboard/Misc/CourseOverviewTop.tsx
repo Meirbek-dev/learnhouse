@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import EmptyThumbnailImage from '../../../public/empty_thumbnail.png';
+import EmptyThumbnailImage from '../../../public/empty_thumbnail.webp';
 
 import BreadCrumbs from './BreadCrumbs';
 import SaveState from './SaveState';

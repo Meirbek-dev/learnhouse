@@ -19,7 +19,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import { getUriWithoutOrg } from '@services/config/config';
-import openuLogoLight from '@public/openu_logo_light.png';
+import openuLogoLight from '@public/openu_logo_light.webp';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';

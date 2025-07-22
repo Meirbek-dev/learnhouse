@@ -184,7 +184,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
                         />
                       ) : (
                         <img
-                          src="/empty_thumbnail.png"
+                          src="/empty_thumbnail.webp"
                           alt=""
                           className="h-[100px] w-[200px] rounded-md bg-gray-200 shadow-sm"
                         />

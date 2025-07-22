@@ -438,7 +438,7 @@ export default function OrgEditImages() {
                     src={
                       org?.logo_image
                         ? localLogo || getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)
-                        : '/empty_thumbnail.png'
+                        : '/empty_thumbnail.webp'
                     }
                     alt="Лого организации"
                     className={cn(
@@ -504,7 +504,7 @@ export default function OrgEditImages() {
                     src={
                       org?.thumbnail_image
                         ? localThumbnail || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
-                        : '/empty_thumbnail.png'
+                        : '/empty_thumbnail.webp'
                     }
                     alt="Organization thumbnail"
                     className={cn(

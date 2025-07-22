@@ -13,7 +13,7 @@ import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@comp
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import touEmblemLight from 'public/tou_emblem_light.png';
+import touEmblemLight from 'public/tou_emblem_light.webp';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { Editor } from '@tiptap/react';

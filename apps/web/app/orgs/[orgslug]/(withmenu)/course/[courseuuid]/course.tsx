@@ -479,7 +479,7 @@ const CourseClient = (props: any) => {
                     <div
                       className="relative h-auto w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-black/10 ring-inset"
                       style={{
-                        backgroundImage: `url('../empty_thumbnail.png')`,
+                        backgroundImage: `url('../empty_thumbnail.webp')`,
                         backgroundSize: 'auto',
                       }}
                     />

@@ -91,7 +91,7 @@ const CollectionPage = async (params: any) => {
                         course.course_uuid,
                         course.thumbnail_image,
                       )})`
-                    : `url('/empty_thumbnail.png')`,
+                    : `url('/empty_thumbnail.webp')`,
                 }}
               />
             </Link>

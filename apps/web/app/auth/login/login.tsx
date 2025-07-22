@@ -4,7 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
 import { AlertTriangle, UserRoundPlus } from 'lucide-react';
-import openuLogoDark from 'public/openu_logo_dark.png';
+import openuLogoDark from 'public/openu_logo_dark.webp';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';

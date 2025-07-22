@@ -4,7 +4,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
-import touEmblemDark from 'public/tou_emblem_dark.png';
+import touEmblemDark from 'public/tou_emblem_dark.webp';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';

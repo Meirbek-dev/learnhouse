@@ -94,7 +94,7 @@ function UserAvatar(props: UserAvatarProps) {
   const getAvatarUrl = (): string => {
     // If predefined avatar is specified
     if (predefined_avatar) {
-      const avatarType = predefined_avatar === 'ai' ? 'tou_emblem_light.png' : 'empty_avatar.png';
+      const avatarType = predefined_avatar === 'ai' ? 'tou_emblem_light.webp' : 'empty_avatar.webp';
       return getUriWithOrg(params.orgslug, `/${avatarType}`);
     }
 
@@ -127,7 +127,7 @@ function UserAvatar(props: UserAvatarProps) {
     // If username was provided but no user data found, don't fall back to session
     // This prevents showing the wrong user's avatar for usernames that don't exist
     if (username) {
-      return getUriWithOrg(params.orgslug, '/empty_avatar.png');
+      return getUriWithOrg(params.orgslug, '/empty_avatar.webp');
     }
 
     // If user has an avatar in session (only if session exists and no username was provided)
@@ -142,7 +142,7 @@ function UserAvatar(props: UserAvatarProps) {
     }
 
     // Fallback to empty avatar
-    return getUriWithOrg(params.orgslug, '/empty_avatar.png');
+    return getUriWithOrg(params.orgslug, '/empty_avatar.webp');
   };
 
   const getFallbackText = (): string => {

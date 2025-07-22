@@ -4,7 +4,7 @@ import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/con
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
-import openuLogoDark from 'public/openu_logo_dark.png';
+import openuLogoDark from 'public/openu_logo_dark.webp';
 import { ArrowRightCircle, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';

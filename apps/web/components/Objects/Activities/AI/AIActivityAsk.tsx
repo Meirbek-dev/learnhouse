@@ -4,7 +4,7 @@ import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@c
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import touEmblemLight from 'public/tou_emblem_light.png';
+import touEmblemLight from 'public/tou_emblem_light.webp';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';

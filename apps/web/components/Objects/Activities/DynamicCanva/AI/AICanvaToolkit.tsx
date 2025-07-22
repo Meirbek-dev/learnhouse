@@ -4,7 +4,7 @@ import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
-import touEmblemDark from 'public/tou_emblem_dark.png';
+import touEmblemDark from 'public/tou_emblem_dark.webp';
 import { BubbleMenu } from '@tiptap/react/menus';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';

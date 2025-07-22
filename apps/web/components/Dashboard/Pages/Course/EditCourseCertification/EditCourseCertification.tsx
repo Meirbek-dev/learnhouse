@@ -15,6 +15,7 @@ import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
 import React, { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';

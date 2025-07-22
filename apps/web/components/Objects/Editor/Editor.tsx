@@ -21,7 +21,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import InfoCallout from './Extensions/Callout/Info/InfoCallout';
 import WebPreview from './Extensions/WebPreview/WebPreview';
 import TableHeader from '@tiptap/extension-table-header';
-import touEmblemLight from 'public/tou_emblem_light.png';
+import touEmblemLight from 'public/tou_emblem_light.webp';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { getUriWithOrg } from '@services/config/config';
 import ts from 'highlight.js/lib/languages/typescript';
@@ -250,7 +250,7 @@ function Editor(props: EditorProps) {
                             props.course.course_uuid,
                             props.course.thumbnail_image,
                           )
-                        : getUriWithOrg(props.org?.slug, '/empty_thumbnail.png')
+                        : getUriWithOrg(props.org?.slug, '/empty_thumbnail.webp')
                     }`}
                     alt={`${props.course.name} Thumbnail`}
                   />

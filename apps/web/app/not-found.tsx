@@ -1,4 +1,4 @@
-import openuLogoDark from 'public/openu_logo_dark.png';
+import openuLogoDark from 'public/openu_logo_dark.webp';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@components/ui/button';
 import { ArrowRight } from 'lucide-react';
