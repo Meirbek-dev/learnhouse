@@ -16,9 +16,9 @@ export default function RootLayout(props: { children: React.ReactNode; params: P
     <div>
       <OrgProvider orgslug={params.orgslug}>
         <NextTopLoader
-          color="#2e2e2e"
+          color="#2b75ee"
           initialPosition={0.3}
-          height={4}
+          height={2}
           easing={'ease'}
           speed={1000}
           showSpinner={false}

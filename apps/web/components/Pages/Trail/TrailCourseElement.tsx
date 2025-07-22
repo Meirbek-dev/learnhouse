@@ -82,7 +82,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
           style={{
             backgroundImage: course.thumbnail_image
               ? `url(${getCourseThumbnailMediaDirectory(org.org_uuid, course.course_uuid, course.thumbnail_image)})`
-              : `url('/empty_thumbnail.png')`,
+              : `url('/empty_thumbnail.webp')`,
             boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)',
           }}
         />
@@ -123,13 +123,13 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
             {isLoadingCertificate ? (
               <div className="flex items-center space-x-1 text-xs text-gray-500">
                 <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-500" />
-                <span>Loading...</span>
+                <span>{t('loadingCertificate')}</span>
               </div>
             ) : courseCertificate ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1">
                   <Award className="h-3 w-3 text-yellow-500" />
-                  <span className="text-xs font-medium text-gray-700">Certificate</span>
+                  <span className="text-xs font-medium text-gray-700">{t('viewCertificate')}</span>
                 </div>
                 <Link
                   href={getUriWithOrg(
@@ -140,14 +140,14 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
                   rel="noopener noreferrer"
                   className="inline-flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700"
                 >
-                  <span>Verify</span>
+                  <span>{t('downloadCertificate')}</span>
                   <ExternalLink className="h-3 w-3" />
                 </Link>
               </div>
             ) : (
               <div className="flex items-center space-x-1 text-xs text-gray-500">
                 <Award className="h-3 w-3 text-gray-300" />
-                <span>No certificate</span>
+                <span>{t('noCertificateAvailable')}</span>
               </div>
             )}
           </div>

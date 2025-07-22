@@ -27,7 +27,7 @@ import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivityS
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';

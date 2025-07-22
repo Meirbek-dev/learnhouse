@@ -12,7 +12,7 @@ import {
 } from '@services/media/media';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
-import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Draggable, type DropResult, Droppable } from '@hello-pangea/dnd';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';

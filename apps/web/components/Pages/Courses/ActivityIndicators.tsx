@@ -157,46 +157,47 @@ ChapterTooltipContent.displayName = 'ChapterTooltipContent';
 
 // Add certification badge component
 const CertificationBadge = memo(
-  ({ courseid, orgslug, isCompleted }: { courseid: string; orgslug: string; isCompleted: boolean }) => (
-    <ToolTip
-      sideOffset={8}
-      unstyled
-      content={
-        <div className="soft-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
-          <div className="flex items-center gap-2">
-            <Trophy
-              size={16}
-              className="text-yellow-500"
-            />
-            <span className="text-sm font-medium text-gray-900">
-              {isCompleted ? 'Course Completed!' : 'Course Completion'}
-            </span>
+  ({ courseid, orgslug, isCompleted }: { courseid: string; orgslug: string; isCompleted: boolean }) => {
+    const t = useTranslations('Certificates.ActivityIndicators');
+    return (
+      <ToolTip
+        sideOffset={8}
+        unstyled
+        content={
+          <div className="soft-shadow animate-in fade-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
+            <div className="flex items-center gap-2">
+              <Trophy
+                size={16}
+                className="text-yellow-500"
+              />
+              <span className="text-sm font-medium text-gray-900">
+                {isCompleted ? t('certificationAvailable') : t('earnCertificate')}
+              </span>
+            </div>
+            <div className="mt-1">
+              <span className="text-sm text-gray-700">{isCompleted ? t('viewCertificate') : t('earnCertificate')}</span>
+            </div>
           </div>
-          <div className="mt-1">
-            <span className="text-sm text-gray-700">
-              {isCompleted ? 'View your completion certificate' : 'Complete all activities to unlock your certificate'}
-            </span>
-          </div>
-        </div>
-      }
-    >
-      <Link
-        href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/end`}
-        prefetch={false}
-        className={`mx-2 flex h-[20px] cursor-pointer items-center transition-all focus:outline-none ${
-          isCompleted ? 'opacity-100' : 'cursor-not-allowed opacity-50'
-        }`}
+        }
       >
-        <div
-          className={`flex h-[20px] w-[20px] items-center justify-center rounded-full text-xs font-medium transition-colors ${
-            isCompleted ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-gray-100 text-gray-400'
+        <Link
+          href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/end`}
+          prefetch={false}
+          className={`mx-2 flex h-[20px] cursor-pointer items-center transition-all focus:outline-none ${
+            isCompleted ? 'opacity-100' : 'cursor-not-allowed opacity-50'
           }`}
         >
-          <Trophy size={12} />
-        </div>
-      </Link>
-    </ToolTip>
-  ),
+          <div
+            className={`flex h-[20px] w-[20px] items-center justify-center rounded-full text-xs font-medium transition-colors ${
+              isCompleted ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-gray-100 text-gray-400'
+            }`}
+          >
+            <Trophy size={12} />
+          </div>
+        </Link>
+      </ToolTip>
+    );
+  },
 );
 
 CertificationBadge.displayName = 'CertificationBadge';

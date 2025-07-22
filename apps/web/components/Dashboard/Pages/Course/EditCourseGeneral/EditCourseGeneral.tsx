@@ -173,7 +173,22 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
       reset(newValues);
       setIsFormInitialized(true);
     }
-  }, [courseStructure?.course_uuid, isLoading, isFormInitialized, initializeLearnings, initializeTags, reset]);
+  }, [
+    courseStructure?.course_uuid,
+    isLoading,
+    isFormInitialized,
+    initializeLearnings,
+    initializeTags,
+    reset,
+    courseStructure.description,
+    courseStructure.name,
+    courseStructure.thumbnail_type,
+    courseStructure.tags,
+    courseStructure.about,
+    courseStructure.learnings,
+    courseStructure,
+    courseStructure.public,
+  ]);
 
   useEffect(() => {
     if (!isLoading && isDirty) {
@@ -229,7 +244,7 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
         }, 2000); // 2 second delay
       }
     }
-  }, [formValues, isLoading, isFormInitialized, dispatchCourse, autoSaveCourse]);
+  }, [formValues, isLoading, isFormInitialized, dispatchCourse, autoSaveCourse, isAutoSaving]);
 
   // Cleanup auto-save timeout on unmount
   useEffect(() => {

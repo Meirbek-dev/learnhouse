@@ -98,7 +98,7 @@ function Trail(params: any) {
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-center space-x-3">
             <BookOpen className="h-6 w-6 text-blue-500" />
-            <h2 className="text-xl font-semibold text-gray-900">My Progress</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('myProgress')}</h2>
             {trail?.runs && (
               <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
                 {trail.runs.length}
@@ -111,8 +111,8 @@ function Trail(params: any) {
           ) : trail.runs.length === 0 ? (
             <div className="py-8 text-center">
               <BookOpen className="mx-auto mb-3 h-12 w-12 text-gray-300" />
-              <p className="text-gray-500">No courses in progress</p>
-              <p className="mt-1 text-sm text-gray-400">Start a course to see your progress here</p>
+              <p className="text-gray-500">{t('noCoursesInProgress')}</p>
+              <p className="mt-1 text-sm text-gray-400">{t('startACourseToSeeYourProgress')}</p>
             </div>
           ) : (
             <div className="space-y-6">

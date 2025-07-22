@@ -1,5 +1,5 @@
 'use server';
-import { errorHandling, RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
+import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
 export async function getPaymentConfigs(orgId: number, access_token: string) {

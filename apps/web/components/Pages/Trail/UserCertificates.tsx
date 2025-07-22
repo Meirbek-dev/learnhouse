@@ -4,7 +4,7 @@ import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type React from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -17,6 +17,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const locale = useLocale();
+  const t = useTranslations('Certificates.UserCertificates');
 
   const {
     data: certificates,
@@ -29,7 +30,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
       <div className="rounded-xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center space-x-3">
           <Award className="h-6 w-6 text-yellow-500" />
-          <h2 className="text-xl font-semibold text-gray-900">My Certificates</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('myCertificates')}</h2>
         </div>
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
@@ -48,10 +49,10 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
       <div className="rounded-xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center space-x-3">
           <Award className="h-6 w-6 text-yellow-500" />
-          <h2 className="text-xl font-semibold text-gray-900">My Certificates</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('myCertificates')}</h2>
         </div>
         <div className="py-8 text-center">
-          <p className="text-gray-500">Failed to load certificates</p>
+          <p className="text-gray-500">{t('failedToLoadCertificates')}</p>
         </div>
       </div>
     );
@@ -65,12 +66,12 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
       <div className="rounded-xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center space-x-3">
           <Award className="h-6 w-6 text-yellow-500" />
-          <h2 className="text-xl font-semibold text-gray-900">My Certificates</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('myCertificates')}</h2>
         </div>
         <div className="py-8 text-center">
           <Award className="mx-auto mb-3 h-12 w-12 text-gray-300" />
-          <p className="text-gray-500">No certificates earned yet</p>
-          <p className="mt-1 text-sm text-gray-400">Complete courses to earn certificates</p>
+          <p className="text-gray-500">{t('noCertificatesEarned')}</p>
+          <p className="mt-1 text-sm text-gray-400">{t('completeCoursesToEarn')}</p>
         </div>
       </div>
     );
@@ -80,7 +81,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
     <div className="rounded-xl bg-white p-6 shadow-sm">
       <div className="mb-6 flex items-center space-x-3">
         <Award className="h-6 w-6 text-yellow-500" />
-        <h2 className="text-xl font-semibold text-gray-900">My Certificates</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{t('myCertificates')}</h2>
         <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
           {certificatesData.length}
         </span>
@@ -119,7 +120,9 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
 
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-3 w-3" />
-                    <span>Awarded {awardedDate}</span>
+                    <span>
+                      {t('awardedOn')} {awardedDate}
+                    </span>
                   </div>
 
                   <div className="flex items-center space-x-2">
@@ -140,7 +143,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                     rel="noopener noreferrer"
                     className="inline-flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700"
                   >
-                    <span>Verify</span>
+                    <span>{t('verifyCertificate')}</span>
                     <ExternalLink className="h-3 w-3" />
                   </Link>
                 </div>

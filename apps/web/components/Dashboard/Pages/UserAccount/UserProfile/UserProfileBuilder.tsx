@@ -26,7 +26,7 @@ import { Checkbox } from '@components/ui/checkbox';
 import { Calendar } from '@components/ui/calendar';
 import { getUser } from '@services/users/users';
 import { Button } from '@components/ui/button';
-import { format, type Locale } from 'date-fns';
+import { type Locale, format } from 'date-fns';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { toast } from 'react-hot-toast';

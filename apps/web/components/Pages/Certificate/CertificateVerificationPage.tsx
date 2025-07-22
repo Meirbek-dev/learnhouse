@@ -6,8 +6,8 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCertificateByUuid } from '@services/courses/certifications';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
 import type React from 'react';
 import Link from 'next/link';
 
@@ -22,6 +22,13 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   const [verificationStatus, setVerificationStatus] = useState<'valid' | 'invalid' | 'loading'>('loading');
   const org = useOrg() as any;
   const locale = useLocale();
+  const t = useTranslations('Certificates.CertificateVerificationPage');
+
+  // Certificate type translation helper
+  const getCertificationTypeLabel = (type: string): string => {
+    const typeKey = type as keyof typeof t;
+    return t(typeKey) || t('completion');
+  };
 
   // Fetch certificate data
   useEffect(() => {
@@ -33,12 +40,12 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
           setCertificateData(result.data);
           setVerificationStatus('valid');
         } else {
-          setError('Certificate not found');
+          setError(t('certificateNotFound'));
           setVerificationStatus('invalid');
         }
       } catch (error) {
         console.error('Error fetching certificate:', error);
-        setError('Failed to verify certificate. Please try again later.');
+        setError(t('verificationFailed'));
         setVerificationStatus('invalid');
       } finally {
         setIsLoading(false);
@@ -46,7 +53,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
     };
 
     fetchCertificate();
-  }, [certificateUuid]);
+  }, [certificateUuid, t]);
 
   const getVerificationStatusIcon = () => {
     switch (verificationStatus) {
@@ -64,13 +71,13 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   const getVerificationStatusText = () => {
     switch (verificationStatus) {
       case 'valid':
-        return 'Certificate Verified';
+        return t('certificateVerified');
       case 'invalid':
-        return 'Certificate Not Found';
+        return t('certificateNotFound');
       case 'loading':
-        return 'Verifying Certificate...';
+        return t('verifyingCertificate');
       default:
-        return 'Verification Status Unknown';
+        return t('verificationStatusUnknown');
     }
   };
 
@@ -95,8 +102,8 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
           </div>
           <div className="text-center">
-            <h1 className="mb-2 text-2xl font-bold text-gray-900">Verifying Certificate</h1>
-            <p className="text-gray-600">Please wait while we verify the certificate...</p>
+            <h1 className="mb-2 text-2xl font-bold text-gray-900">{t('verifyingCertificate')}</h1>
+            <p className="text-gray-600">{t('loadingCertificate')}</p>
           </div>
         </div>
       </div>
@@ -111,31 +118,25 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             <div className="rounded-full bg-red-100 p-4">
               <XCircle className="h-16 w-16 text-red-600" />
             </div>
-
-            <h1 className="text-center text-3xl font-bold text-gray-900">Certificate Not Found</h1>
-
-            <p className="text-center text-gray-600">
-              The certificate with ID <span className="rounded bg-gray-100 px-2 py-1 font-mono">{certificateUuid}</span>{' '}
-              could not be found in our system.
-            </p>
-
+            <h1 className="text-center text-3xl font-bold text-gray-900">{t('certificateNotFound')}</h1>
+            <p className="text-center text-gray-600">{t('verificationFailed')}</p>
+            <span className="rounded bg-gray-100 px-2 py-1 font-mono">{certificateUuid}</span>
             <div className="w-full rounded-lg border border-red-200 bg-red-50 p-4">
-              <p className="text-sm text-red-800">This could mean:</p>
+              <p className="text-sm text-red-800">{t('verificationFailedReasons')}</p>
               <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-red-700">
-                <li>The certificate ID is incorrect</li>
-                <li>The certificate has been revoked</li>
-                <li>The certificate has expired</li>
-                <li>The certificate was issued by a different organization</li>
+                <li>{t('incorrectId')}</li>
+                <li>{t('revokedCertificate')}</li>
+                <li>{t('expiredCertificate')}</li>
+                <li>{t('differentOrganization')}</li>
               </ul>
             </div>
-
             <div className="pt-4">
               <Link
                 href="/"
                 className="inline-flex items-center space-x-2 rounded-full bg-gray-800 px-6 py-3 text-white transition duration-200 hover:bg-gray-700"
               >
                 <ArrowLeft className="h-5 w-5" />
-                <span>Go Home</span>
+                <span>{t('backToHome')}</span>
               </Link>
             </div>
           </div>
@@ -164,8 +165,8 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 <Shield className="h-8 w-8 text-green-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Certificate Verification</h1>
-                <p className="text-gray-600">Verify the authenticity of this certificate</p>
+                <h1 className="text-2xl font-bold text-gray-900">{t('certificateInformation')}</h1>
+                <p className="text-gray-600">{t('authenticityGuaranteed')}</p>
               </div>
             </div>
 
@@ -184,7 +185,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
           <div className="space-y-6 lg:col-span-2">
             {/* Certificate Preview */}
             <div className="soft-shadow rounded-2xl bg-white p-6">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900">Certificate Preview</h2>
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">{t('certificatePreview')}</h2>
               <div
                 className="mx-auto max-w-2xl"
                 id="certificate-preview"
@@ -219,7 +220,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                           certificateData.course.course_uuid,
                           certificateData.course.thumbnail_image,
                         )}
-                        alt={`${certificateData.course.name} thumbnail`}
+                        alt={`${certificateData.course.name} ${t('courseThumbnailAlt')}`}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -256,7 +257,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
                     {certificateData.course.authors && certificateData.course.authors.length > 0 && (
                       <div className="flex items-center space-x-1 text-sm font-normal text-neutral-400">
-                        <span>By:</span>
+                        <span>{t('byLabel')}</span>
                         <div className="flex items-center space-x-1">
                           {certificateData.course.authors
                             .filter((author: any) => author.authorship_status === 'ACTIVE')
@@ -282,7 +283,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                               {certificateData.course.authors.filter(
                                 (author: any) => author.authorship_status === 'ACTIVE',
                               ).length - 2}{' '}
-                              more
+                              {t('moreAuthors')}
                             </span>
                           )}
                         </div>
@@ -300,7 +301,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                     )}
                     className="inline-flex items-center space-x-1 text-sm text-neutral-400 transition-colors hover:text-neutral-600"
                   >
-                    <span>View Course</span>
+                    <span>{t('viewCourse')}</span>
                     <svg
                       className="h-3 w-3"
                       fill="none"
@@ -323,11 +324,11 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
           {/* Certificate Details */}
           <div className="space-y-6">
             <div className="soft-shadow rounded-2xl bg-white p-6">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900">Certificate Information</h2>
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">{t('certificationDetails')}</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Certificate ID</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">{t('certificateId')}</label>
                   <div className="rounded-lg bg-gray-50 p-3">
                     <code className="text-sm break-all text-gray-900">
                       {certificateData.certificate_user.user_certification_uuid}
@@ -336,23 +337,23 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Course Name</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">{t('courseName')}</label>
                   <div className="rounded-lg bg-gray-50 p-3">
                     <span className="text-gray-900">{certificateData.course.name}</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Certification Type</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">{t('certificateType')}</label>
                   <div className="rounded-lg bg-gray-50 p-3">
-                    <span className="text-gray-900 capitalize">
-                      {certificateData.certification.config.certification_type.replace('_', ' ')}
+                    <span className="text-gray-900">
+                      {getCertificationTypeLabel(certificateData.certification.config.certification_type)}
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Awarded Date</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">{t('completionDate')}</label>
                   <div className="rounded-lg bg-gray-50 p-3">
                     <span className="text-gray-900">
                       {new Date(certificateData.certificate_user.created_at).toLocaleDateString(locale, {
@@ -368,7 +369,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
                 {certificateData.certification.config.certificate_instructor && (
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Instructor</label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">{t('instructor')}</label>
                     <div className="rounded-lg bg-gray-50 p-3">
                       <span className="text-gray-900">
                         {certificateData.certification.config.certificate_instructor}
@@ -382,13 +383,13 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6">
               <div className="mb-3 flex items-center space-x-3">
                 <Shield className="h-6 w-6 text-blue-600" />
-                <h3 className="text-lg font-semibold text-blue-800">Security Information</h3>
+                <h3 className="text-lg font-semibold text-blue-800">{t('verificationNote')}</h3>
               </div>
               <ul className="space-y-2 text-sm text-blue-700">
-                <li>• Certificate verified against our secure database</li>
-                <li>• QR code contains verification link</li>
-                <li>• Certificate ID is cryptographically secure</li>
-                <li>• Timestamp verified and authenticated</li>
+                <li>• {t('authenticityVerified')}</li>
+                <li>• {t('scanQRCode')}</li>
+                <li>• {t('cryptographicallySecure')}</li>
+                <li>• {t('timestampVerified')}</li>
               </ul>
             </div>
           </div>
@@ -401,7 +402,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             className="inline-flex items-center space-x-2 rounded-full bg-gray-800 px-6 py-3 text-white transition duration-200 hover:bg-gray-700"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>Go Home</span>
+            <span>{t('backToHome')}</span>
           </Link>
         </div>
       </div>

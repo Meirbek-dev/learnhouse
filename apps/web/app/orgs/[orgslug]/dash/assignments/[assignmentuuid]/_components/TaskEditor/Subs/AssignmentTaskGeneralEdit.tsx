@@ -105,7 +105,7 @@ export function AssignmentTaskGeneralEdit() {
         max_grade_value: taskData.max_grade_value || 20,
       });
     }
-  }, [assignmentTaskState.assignmentTask, form, isTaskLoaded]);
+  }, [assignmentTaskState.assignmentTask, form, isTaskLoaded, assignmentTaskState.selectedAssignmentTaskUUID]);
 
   // Show message if no task is selected
   if (!isTaskSelected) {

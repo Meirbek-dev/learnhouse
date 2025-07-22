@@ -1,10 +1,4 @@
-import {
-  CustomSelect,
-  CustomSelectContent,
-  CustomSelectItem,
-  CustomSelectTrigger,
-  CustomSelectValue,
-} from '../EditCourseGeneral/CustomSelect';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { createCertification, deleteCertification } from '@services/courses/certifications';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
@@ -15,8 +9,8 @@ import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
 import React, { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
@@ -27,65 +21,67 @@ interface EditCourseCertificationProps {
   course_uuid?: string;
 }
 
-// Zod schema for form validation
-const formSchema = z
-  .object({
-    enable_certification: z.boolean(),
-    certification_name: z.string().max(100, 'Must be 100 characters or less'),
-    certification_description: z.string().max(500, 'Must be 500 characters or less'),
-    certification_type: z.enum([
-      'completion',
-      'achievement',
-      'assessment',
-      'participation',
-      'mastery',
-      'professional',
-      'continuing',
-      'workshop',
-      'specialization',
-    ]),
-    certificate_pattern: z.enum([
-      'royal',
-      'tech',
-      'nature',
-      'geometric',
-      'vintage',
-      'waves',
-      'minimal',
-      'professional',
-      'academic',
-      'modern',
-    ]),
-    certificate_instructor: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      // Custom validation for conditional required fields
-      if (data.enable_certification) {
-        if (!data.certification_name || data.certification_name.trim() === '') {
-          return false;
-        }
-        if (!data.certification_description || data.certification_description.trim() === '') {
-          return false;
-        }
-      }
-      return true;
-    },
-    {
-      message: 'Certification name and description are required when certification is enabled',
-    },
-  );
-
-type FormValues = z.infer<typeof formSchema>;
-
 function EditCourseCertification(props: EditCourseCertificationProps) {
   const [error, setError] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const course = useCourse();
   const dispatchCourse = useCourseDispatch() as any;
   const { isLoading, courseStructure } = course as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
+  const t = useTranslations('Certificates.EditCourseCertification');
+
+  // Zod schema for form validation with localized messages
+  const formSchema = z
+    .object({
+      enable_certification: z.boolean(),
+      certification_name: z.string().max(100, t('maxCharacters100')),
+      certification_description: z.string().max(500, t('maxCharacters500')),
+      certification_type: z.enum([
+        'completion',
+        'achievement',
+        'assessment',
+        'participation',
+        'mastery',
+        'professional',
+        'continuing',
+        'workshop',
+        'specialization',
+      ]),
+      certificate_pattern: z.enum([
+        'royal',
+        'tech',
+        'nature',
+        'geometric',
+        'vintage',
+        'waves',
+        'minimal',
+        'professional',
+        'academic',
+        'modern',
+      ]),
+      certificate_instructor: z.string().optional(),
+    })
+    .refine(
+      (data) => {
+        // Custom validation for conditional required fields
+        if (data.enable_certification) {
+          if (!data.certification_name || data.certification_name.trim() === '') {
+            return false;
+          }
+          if (!data.certification_description || data.certification_description.trim() === '') {
+            return false;
+          }
+        }
+        return true;
+      },
+      {
+        message: t('validationRequiredFields'),
+      },
+    );
+
+  type FormValues = z.infer<typeof formSchema>;
 
   // Fetch existing certifications
   const {
@@ -118,39 +114,16 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
   const existingCertification = certifications?.data?.[0]; // Assuming one certification per course
   const hasExistingCertification = !!existingCertification;
 
-  // Create initial values object
-  const getInitialValues = (): FormValues => {
-    // Helper function to get instructor name from authors
-    const getInstructorName = () => {
-      if (courseStructure?.authors && courseStructure.authors.length > 0) {
-        const author = courseStructure.authors[0];
-        const firstName = author.first_name || '';
-        const lastName = author.last_name || '';
-
-        // Only return if at least one name exists
-        if (firstName || lastName) {
-          return `${firstName} ${lastName}`.trim();
-        }
-      }
-      return '';
-    };
-
-    // Use existing certification data if available, otherwise fall back to course data
-    const config = existingCertification?.config || {};
-
-    return {
-      enable_certification: hasExistingCertification,
-      certification_name: config.certification_name || courseStructure?.name || '',
-      certification_description: config.certification_description || courseStructure?.description || '',
-      certification_type: (config.certification_type as FormValues['certification_type']) || 'completion',
-      certificate_pattern: (config.certificate_pattern as FormValues['certificate_pattern']) || 'professional',
-      certificate_instructor: config.certificate_instructor || getInstructorName(),
-    };
-  };
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: getInitialValues(),
+    defaultValues: {
+      enable_certification: false,
+      certification_name: '',
+      certification_description: '',
+      certification_type: 'completion',
+      certificate_pattern: 'professional',
+      certificate_instructor: '',
+    },
   });
 
   // Handle enabling/disabling certification
@@ -172,15 +145,15 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
 
         // createCertification uses errorHandling which returns JSON directly on success
         if (result) {
-          toast.success('Certification created successfully');
+          toast.success(t('certificationCreated'));
           mutateCertifications();
           form.setValue('enable_certification', true);
         } else {
           throw new Error('Failed to create certification');
         }
       } catch {
-        setError('Failed to create certification.');
-        toast.error('Failed to create certification');
+        setError(t('certificationError'));
+        toast.error(t('certificationError'));
         form.setValue('enable_certification', false);
       } finally {
         setIsCreating(false);
@@ -192,15 +165,15 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
 
         // deleteCertification uses errorHandling which returns JSON directly on success
         if (result) {
-          toast.success('Certification removed successfully');
+          toast.success(t('certificationRemoved'));
           mutateCertifications();
           form.setValue('enable_certification', false);
         } else {
           throw new Error('Failed to delete certification');
         }
       } catch {
-        setError('Failed to remove certification.');
-        toast.error('Failed to remove certification');
+        setError(t('certificationRemoveError'));
+        toast.error(t('certificationRemoveError'));
         form.setValue('enable_certification', true);
       }
     } else {
@@ -208,25 +181,62 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
     }
   };
 
-  // Reset form when certifications data changes
+  // Reset form when certifications data changes (only on initial load)
   useEffect(() => {
-    if (certifications && !isLoading) {
-      const newValues = getInitialValues();
+    if (certifications && !isLoading && !hasInitialized) {
+      // Helper function to get instructor name from authors
+      const getInstructorName = () => {
+        if (courseStructure?.authors && courseStructure.authors.length > 0) {
+          const author = courseStructure.authors[0];
+          const firstName = author.first_name || '';
+          const lastName = author.last_name || '';
+
+          // Only return if at least one name exists
+          if (firstName || lastName) {
+            return `${firstName} ${lastName}`.trim();
+          }
+        }
+        return '';
+      };
+
+      // Use existing certification data if available, otherwise fall back to course data
+      const config = existingCertification?.config || {};
+
+      const newValues = {
+        enable_certification: hasExistingCertification,
+        certification_name: config.certification_name || courseStructure?.name || '',
+        certification_description: config.certification_description || courseStructure?.description || '',
+        certification_type: (config.certification_type as FormValues['certification_type']) || 'completion',
+        certificate_pattern: (config.certificate_pattern as FormValues['certificate_pattern']) || 'professional',
+        certificate_instructor: config.certificate_instructor || getInstructorName(),
+      };
+
       form.reset(newValues);
+      setHasInitialized(true);
     }
-  }, [certifications, isLoading, form]);
+  }, [
+    certifications,
+    isLoading,
+    hasInitialized,
+    form,
+    existingCertification,
+    hasExistingCertification,
+    courseStructure,
+  ]);
 
-  // Watch form values and update course state
+  // Watch form values and update course state (debounced)
   const watchedValues = form.watch();
-  useEffect(() => {
-    if (!isLoading && hasExistingCertification) {
-      const hasChanges = Object.keys(watchedValues).some((key) => {
-        const currentValue = watchedValues[key as keyof FormValues];
-        const initialValue = getInitialValues()[key as keyof FormValues];
-        return currentValue !== initialValue;
-      });
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
 
-      if (hasChanges) {
+  useEffect(() => {
+    if (!isLoading && hasExistingCertification && hasInitialized && watchedValues) {
+      // Clear previous timeout
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+
+      // Set new timeout to debounce updates
+      const timeout = setTimeout(() => {
         dispatchCourse({ type: 'setIsNotSaved' });
 
         // Store certification data in course context so it gets saved with the main save button
@@ -245,20 +255,41 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
           },
         };
         dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
-      }
+      }, 300); // 300ms debounce
+
+      setDebounceTimeout(timeout);
+
+      // Cleanup function
+      return () => {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+      };
     }
-  }, [watchedValues, isLoading, hasExistingCertification, existingCertification, dispatchCourse, courseStructure]);
+  }, [
+    watchedValues.certification_name,
+    watchedValues.certification_description,
+    watchedValues.certification_type,
+    watchedValues.certificate_pattern,
+    watchedValues.certificate_instructor,
+    isLoading,
+    hasExistingCertification,
+    hasInitialized,
+    existingCertification?.certification_uuid,
+    dispatchCourse,
+    courseStructure?.id,
+  ]);
 
   const onSubmit = (values: FormValues) => {
     // This is no longer used - saving is handled by the main Save button
   };
 
   if (isLoading || !courseStructure || (courseStructure.course_uuid && access_token && certifications === undefined)) {
-    return <div>Loading...</div>;
+    return <div>{t('loading')}</div>;
   }
 
   if (certificationsError) {
-    return <div>Error loading certifications</div>;
+    return <div>{t('errorLoadingCertifications')}</div>;
   }
 
   return (
@@ -270,10 +301,8 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
             {/* Header Section */}
             <div className="mb-3 flex items-center justify-between rounded-md bg-gray-50 px-3 py-3 sm:px-5">
               <div className="flex flex-col -space-y-1">
-                <h1 className="text-lg font-bold text-gray-800 sm:text-xl">Course Certification</h1>
-                <h2 className="text-xs text-gray-500 sm:text-sm">
-                  Enable and configure certificates for students who complete this course
-                </h2>
+                <h1 className="text-lg font-bold text-gray-800 sm:text-xl">{t('courseCertification')}</h1>
+                <h2 className="text-xs text-gray-500 sm:text-sm">{t('enableCertification')}</h2>
               </div>
               <div className="flex items-center space-x-3">
                 <label className="relative inline-flex cursor-pointer items-center">
@@ -315,11 +344,9 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                       <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
                         <h3 className="text-md flex items-center gap-2 font-bold text-gray-800">
                           <FileText size={16} />
-                          Basic Information
+                          {t('basicInfo')}
                         </h3>
-                        <p className="text-xs text-gray-500 sm:text-sm">
-                          Configure the basic details of your certification
-                        </p>
+                        <p className="text-xs text-gray-500 sm:text-sm">{t('basicInfoDesc')}</p>
                       </div>
 
                       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -329,12 +356,12 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                           name="certification_name"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Certification Name</FormLabel>
+                              <FormLabel>{t('certificationName')}</FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
                                   style={{ backgroundColor: 'white' }}
-                                  placeholder="e.g., Advanced JavaScript Certification"
+                                  placeholder={t('certificationNamePlaceholder')}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -348,47 +375,31 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                           name="certification_type"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Certification Type</FormLabel>
+                              <FormLabel>{t('certificationType')}</FormLabel>
                               <FormControl>
-                                <CustomSelect
+                                <Select
                                   value={field.value}
                                   onValueChange={field.onChange}
                                 >
-                                  <CustomSelectTrigger className="w-full bg-white">
-                                    <CustomSelectValue>
-                                      {field.value === 'completion'
-                                        ? 'Course Completion'
-                                        : field.value === 'achievement'
-                                          ? 'Achievement Based'
-                                          : field.value === 'assessment'
-                                            ? 'Assessment Based'
-                                            : field.value === 'participation'
-                                              ? 'Participation'
-                                              : field.value === 'mastery'
-                                                ? 'Skill Mastery'
-                                                : field.value === 'professional'
-                                                  ? 'Professional Development'
-                                                  : field.value === 'continuing'
-                                                    ? 'Continuing Education'
-                                                    : field.value === 'workshop'
-                                                      ? 'Workshop Attendance'
-                                                      : field.value === 'specialization'
-                                                        ? 'Specialization'
-                                                        : 'Course Completion'}
-                                    </CustomSelectValue>
-                                  </CustomSelectTrigger>
-                                  <CustomSelectContent>
-                                    <CustomSelectItem value="completion">Course Completion</CustomSelectItem>
-                                    <CustomSelectItem value="achievement">Achievement Based</CustomSelectItem>
-                                    <CustomSelectItem value="assessment">Assessment Based</CustomSelectItem>
-                                    <CustomSelectItem value="participation">Participation</CustomSelectItem>
-                                    <CustomSelectItem value="mastery">Skill Mastery</CustomSelectItem>
-                                    <CustomSelectItem value="professional">Professional Development</CustomSelectItem>
-                                    <CustomSelectItem value="continuing">Continuing Education</CustomSelectItem>
-                                    <CustomSelectItem value="workshop">Workshop Attendance</CustomSelectItem>
-                                    <CustomSelectItem value="specialization">Specialization</CustomSelectItem>
-                                  </CustomSelectContent>
-                                </CustomSelect>
+                                  <SelectTrigger className="w-full bg-white">
+                                    <SelectValue>{t(`certificationTypes.${field.value}`)}</SelectValue>
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="completion">{t('certificationTypes.completion')}</SelectItem>
+                                    <SelectItem value="achievement">{t('certificationTypes.achievement')}</SelectItem>
+                                    <SelectItem value="assessment">{t('certificationTypes.assessment')}</SelectItem>
+                                    <SelectItem value="participation">
+                                      {t('certificationTypes.participation')}
+                                    </SelectItem>
+                                    <SelectItem value="mastery">{t('certificationTypes.mastery')}</SelectItem>
+                                    <SelectItem value="professional">{t('certificationTypes.professional')}</SelectItem>
+                                    <SelectItem value="continuing">{t('certificationTypes.continuing')}</SelectItem>
+                                    <SelectItem value="workshop">{t('certificationTypes.workshop')}</SelectItem>
+                                    <SelectItem value="specialization">
+                                      {t('certificationTypes.specialization')}
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -402,12 +413,12 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                         name="certification_description"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Certification Description</FormLabel>
+                            <FormLabel>{t('certificationDescription')}</FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
                                 style={{ backgroundColor: 'white', height: '120px', minHeight: '120px' }}
-                                placeholder="Describe what this certification represents and its value..."
+                                placeholder={t('certificationDescriptionPlaceholder')}
                               />
                             </FormControl>
                             <FormMessage />
@@ -419,11 +430,9 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                       <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
                         <h3 className="text-md flex items-center gap-2 font-bold text-gray-800">
                           <Award size={16} />
-                          Certificate Design
+                          {t('certificateDesign')}
                         </h3>
-                        <p className="text-xs text-gray-500 sm:text-sm">
-                          Choose a decorative pattern for your certificate
-                        </p>
+                        <p className="text-xs text-gray-500 sm:text-sm">{t('certificateDesignDesc')}</p>
                       </div>
 
                       {/* Pattern Selection */}
@@ -432,26 +441,66 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                         name="certificate_pattern"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Certificate Pattern</FormLabel>
+                            <FormLabel>{t('certificatePattern')}</FormLabel>
                             <FormControl>
                               <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
                                 {[
-                                  { value: 'royal', name: 'Royal', description: 'Ornate with crown motifs' },
-                                  { value: 'tech', name: 'Tech', description: 'Circuit-inspired patterns' },
-                                  { value: 'nature', name: 'Nature', description: 'Organic leaf patterns' },
-                                  { value: 'geometric', name: 'Geometric', description: 'Abstract shapes & lines' },
-                                  { value: 'vintage', name: 'Vintage', description: 'Art deco styling' },
-                                  { value: 'waves', name: 'Waves', description: 'Flowing water patterns' },
-                                  { value: 'minimal', name: 'Minimal', description: 'Clean and simple' },
-                                  { value: 'professional', name: 'Professional', description: 'Business-ready design' },
-                                  { value: 'academic', name: 'Academic', description: 'Traditional university style' },
-                                  { value: 'modern', name: 'Modern', description: 'Contemporary clean lines' },
+                                  {
+                                    value: 'royal',
+                                    name: t('certificatePatterns.royal'),
+                                    description: t('certificatePatternDescriptions.royal'),
+                                  },
+                                  {
+                                    value: 'tech',
+                                    name: t('certificatePatterns.tech'),
+                                    description: t('certificatePatternDescriptions.tech'),
+                                  },
+                                  {
+                                    value: 'nature',
+                                    name: t('certificatePatterns.nature'),
+                                    description: t('certificatePatternDescriptions.nature'),
+                                  },
+                                  {
+                                    value: 'geometric',
+                                    name: t('certificatePatterns.geometric'),
+                                    description: t('certificatePatternDescriptions.geometric'),
+                                  },
+                                  {
+                                    value: 'vintage',
+                                    name: t('certificatePatterns.vintage'),
+                                    description: t('certificatePatternDescriptions.vintage'),
+                                  },
+                                  {
+                                    value: 'waves',
+                                    name: t('certificatePatterns.waves'),
+                                    description: t('certificatePatternDescriptions.waves'),
+                                  },
+                                  {
+                                    value: 'minimal',
+                                    name: t('certificatePatterns.minimal'),
+                                    description: t('certificatePatternDescriptions.minimal'),
+                                  },
+                                  {
+                                    value: 'professional',
+                                    name: t('certificatePatterns.professional'),
+                                    description: t('certificatePatternDescriptions.professional'),
+                                  },
+                                  {
+                                    value: 'academic',
+                                    name: t('certificatePatterns.academic'),
+                                    description: t('certificatePatternDescriptions.academic'),
+                                  },
+                                  {
+                                    value: 'modern',
+                                    name: t('certificatePatterns.modern'),
+                                    description: t('certificatePatternDescriptions.modern'),
+                                  },
                                 ].map((pattern) => (
                                   <div
                                     key={pattern.value}
                                     className={`cursor-pointer rounded-lg border-2 p-3 transition-all ${
                                       field.value === pattern.value
-                                        ? 'border-blue-500 bg-blue-50'
+                                        ? 'border-primary bg-blue-50'
                                         : 'border-gray-200 hover:border-gray-300'
                                     }`}
                                     onClick={() => field.onChange(pattern.value)}
@@ -475,12 +524,12 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                         name="certificate_instructor"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Instructor Name (Optional)</FormLabel>
+                            <FormLabel>{t('certificateInstructor')}</FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 style={{ backgroundColor: 'white' }}
-                                placeholder="e.g., Dr. Jane Smith"
+                                placeholder={t('certificateInstructorPlaceholder')}
                               />
                             </FormControl>
                             <FormMessage />
@@ -497,9 +546,9 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                     <div className="mb-3 flex flex-col -space-y-1 rounded-t-xl bg-gray-50 px-3 py-3 sm:px-5">
                       <h3 className="text-md flex items-center gap-2 font-bold text-gray-800">
                         <Award size={16} />
-                        Certificate Preview
+                        {t('previewCertificate')}
                       </h3>
-                      <p className="text-xs text-gray-500 sm:text-sm">Live preview of your certificate</p>
+                      <p className="text-xs text-gray-500 sm:text-sm">{t('livePreviewCertificate')}</p>
                     </div>
 
                     <div className="p-4">
@@ -520,10 +569,8 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
             {!form.watch('enable_certification') && (
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
                 <Award className="mx-auto mb-4 h-16 w-16 text-gray-300" />
-                <h3 className="mb-2 font-medium text-gray-700">No Certification Configured</h3>
-                <p className="mb-4 text-sm text-gray-500">
-                  Enable certification to provide students with certificates upon course completion.
-                </p>
+                <h3 className="mb-2 font-medium text-gray-700">{t('noCertificationConfigured')}</h3>
+                <p className="mb-4 text-sm text-gray-500">{t('noCertificationDescription')}</p>
                 <button
                   type="button"
                   onClick={() => handleCertificationToggle(true)}
@@ -531,7 +578,7 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                   className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Award size={16} />
-                  {isCreating ? 'Creating...' : 'Enable Certification'}
+                  {isCreating ? t('creatingCertification') : t('enableCertificationButton')}
                 </button>
               </div>
             )}
@@ -542,8 +589,8 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                 <div className="mx-auto mb-4 animate-spin">
                   <Settings className="h-16 w-16 text-blue-500" />
                 </div>
-                <h3 className="mb-2 font-medium text-blue-700">Creating Certification...</h3>
-                <p className="text-sm text-blue-600">Please wait while we set up your course certification.</p>
+                <h3 className="mb-2 font-medium text-blue-700">{t('creatingCertification')}</h3>
+                <p className="text-sm text-blue-600">{t('creatingCertificationDescription')}</p>
               </div>
             )}
           </div>

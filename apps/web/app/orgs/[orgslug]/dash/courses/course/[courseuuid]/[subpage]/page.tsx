@@ -81,19 +81,19 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               >
                 <div className="mx-2 flex items-center space-x-2.5">
                   <UserPen size={16} />
-                  <div>Contributors</div>
+                  <div>{t('contributors')}</div>
                 </div>
               </div>
             </Link>
             <Link href={getUriWithOrg(params.orgslug, '') + `/dash/courses/course/${params.courseuuid}/certification`}>
               <div
-                className={`flex w-fit space-x-4 border-black py-2 text-center transition-all ease-linear ${
-                  params.subpage.toString() === 'certification' ? 'border-b-4' : 'opacity-50'
+                className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
+                  params.subpage === 'certification' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
               >
                 <div className="mx-2 flex items-center space-x-2.5">
                   <Award size={16} />
-                  <div>Certification</div>
+                  <div>{t('certification')}</div>
                 </div>
               </div>
             </Link>

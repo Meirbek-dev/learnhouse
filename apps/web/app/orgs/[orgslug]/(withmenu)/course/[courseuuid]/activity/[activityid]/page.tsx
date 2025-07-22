@@ -45,11 +45,11 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     access_token || null,
   );
 
-  // Check if this is the course end page
+  // Localized page title
   const isCourseEnd = activityid === 'end';
   const pageTitle = isCourseEnd
-    ? `Congratulations — ${course_meta.name} Course`
-    : activity.name + ` — ${course_meta.name} Course`;
+    ? t('courseEndTitle', { course: course_meta.name })
+    : t('activityTitle', { activity: activity.name, course: course_meta.name });
 
   // SEO
   return {
