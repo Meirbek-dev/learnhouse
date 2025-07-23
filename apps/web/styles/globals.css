@@ -242,7 +242,6 @@
 }
 
 @layer utilities {
-
   /* Shadow utilities */
   .soft-shadow {
     @apply shadow-md shadow-black/[0.08] outline-1 outline-black/[0.06];
@@ -302,7 +301,7 @@
   }
 
   /* Editor styles */
-  .ProseMirror>*+* {
+  .ProseMirror > * + * {
     margin-top: 1em;
   }
 
@@ -364,7 +363,7 @@
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
     font-size: 0.875rem;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
   }
 
   .prose-editor .ProseMirror pre {
@@ -413,7 +412,9 @@
     scrollbar-color: var(--color-muted-foreground) var(--color-background);
   }
 
-  em, i, .italic {
-  font-style: italic !important;
-}
+  em,
+  i,
+  .italic {
+    font-style: italic !important;
+  }
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import DOMPurify from 'dompurify';
+import { cn } from '@/lib/utils';
 
 interface RichContentRendererProps {
   content: string;
@@ -10,26 +10,52 @@ interface RichContentRendererProps {
 
 export default function RichContentRenderer({ content, className = '' }: RichContentRendererProps) {
   // Sanitize the HTML content to prevent XSS attacks
-  const sanitizedContent = typeof window !== 'undefined'
-    ? DOMPurify.sanitize(content, {
-        ALLOWED_TAGS: [
-          'p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre',
-          'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-          'ul', 'ol', 'li',
-          'blockquote',
-          'a', 'img',
-          'div', 'span',
-          'iframe' // For YouTube embeds
-        ],
-        ALLOWED_ATTR: [
-          'href', 'target', 'rel',
-          'src', 'alt', 'width', 'height',
-          'class', 'style',
-          'frameborder', 'allowfullscreen', 'allow' // For YouTube embeds
-        ],
-        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-      })
-    : content;
+  const sanitizedContent =
+    typeof window !== 'undefined'
+      ? DOMPurify.sanitize(content, {
+          ALLOWED_TAGS: [
+            'p',
+            'br',
+            'strong',
+            'em',
+            'u',
+            's',
+            'code',
+            'pre',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'ul',
+            'ol',
+            'li',
+            'blockquote',
+            'a',
+            'img',
+            'div',
+            'span',
+            'iframe', // For YouTube embeds
+          ],
+          ALLOWED_ATTR: [
+            'href',
+            'target',
+            'rel',
+            'src',
+            'alt',
+            'width',
+            'height',
+            'class',
+            'style',
+            'frameborder',
+            'allowfullscreen',
+            'allow', // For YouTube embeds
+          ],
+          ALLOWED_URI_REGEXP:
+            /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+        })
+      : content;
 
   return (
     <div

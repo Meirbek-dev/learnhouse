@@ -10,8 +10,6 @@ import {
   Redo,
   Link as LinkIcon,
   Image as ImageIcon,
-  Video,
-  Type,
   Code,
   Upload,
   YoutubeIcon,
@@ -225,9 +223,9 @@ export default function RichTextEditor({
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="overflow-hidden rounded-lg border">
       {/* Toolbar */}
-      <div className="border-b bg-gray-50 p-2 flex flex-wrap items-center gap-1">
+      <div className="flex flex-wrap items-center gap-1 border-b bg-gray-50 p-2">
         {/* Text formatting */}
         <Button
           type="button"
@@ -257,7 +255,7 @@ export default function RichTextEditor({
           <Code size={16} />
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="mx-1 h-6 w-px bg-gray-300" />
 
         {/* Lists */}
         <Button
@@ -288,7 +286,7 @@ export default function RichTextEditor({
           <Quote size={16} />
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="mx-1 h-6 w-px bg-gray-300" />
 
         {/* Headings */}
         <Button
@@ -310,7 +308,7 @@ export default function RichTextEditor({
           H3
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="mx-1 h-6 w-px bg-gray-300" />
 
         {/* Media */}
         <Dialog
@@ -452,11 +450,11 @@ export default function RichTextEditor({
         </Dialog>
 
         {/* File Upload */}
-        <div className="relative hover:bg-accent rounded-md">
+        <div className="hover:bg-accent relative rounded-md">
           <input
             type="file"
             id="file-upload"
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             onChange={handleFileUpload}
             accept="image/*,video/*"
             disabled={isUploading}
@@ -473,7 +471,7 @@ export default function RichTextEditor({
           </Button>
         </div>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        <div className="mx-1 h-6 w-px bg-gray-300" />
 
         {/* Undo/Redo */}
         <Button

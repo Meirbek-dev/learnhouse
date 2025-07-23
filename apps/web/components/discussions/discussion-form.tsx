@@ -4,9 +4,9 @@ import type React from 'react';
 
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@/components/ui/button';
+import RichTextEditor from './rich-text-editor';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
-import RichTextEditor from './rich-text-editor';
 
 interface DiscussionFormProps {
   currentUser: any;
@@ -30,7 +30,7 @@ export default function DiscussionForm({ currentUser, onSubmit, t }: DiscussionF
   };
 
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-5">
+    <div className="bg-card text-card-foreground rounded-lg border p-5 shadow-sm">
       <form
         onSubmit={handleSubmit}
         className="space-y-4"

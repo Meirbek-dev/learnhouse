@@ -432,7 +432,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           />
         </div>
 
-        <div className="soft-shadow relative z-10 w-full space-y-6 rounded-2xl bg-white p-8 mb-2">
+        <div className="soft-shadow relative z-10 mb-2 w-full space-y-6 rounded-2xl bg-white p-8">
           <div className="flex flex-col items-center space-y-6">
             {thumbnailImage && (
               <img

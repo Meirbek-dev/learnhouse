@@ -3,18 +3,18 @@
 import type React from 'react';
 
 import { ArrowBigUp, ArrowBigDown, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import RichContentRenderer from './rich-content-renderer';
+import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Separator } from '@/components/ui/separator';
 import DiscussionReply from './discussion-reply';
-import { Button } from '@/components/ui/button';
 import { useFormatter, useNow } from 'next-intl';
+import { Button } from '@/components/ui/button';
+import RichTextEditor from './rich-text-editor';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { useOrg } from '@components/Contexts/OrgContext';
-import RichTextEditor from './rich-text-editor';
-import RichContentRenderer from './rich-content-renderer';
 
 interface DiscussionPostProps {
   post: any;
@@ -92,7 +92,7 @@ export default function DiscussionPost({
   };
 
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
+    <div className="bg-card text-card-foreground overflow-hidden rounded-lg border shadow-sm">
       <div className="p-5">
         <div className="flex items-start gap-4">
           <UserAvatar
@@ -106,7 +106,12 @@ export default function DiscussionPost({
                 <h4 className="font-semibold text-neutral-800">{getUserDisplayName(post.firstName, post.lastName)}</h4>
                 <span className="text-sm text-neutral-500">@{post.username}</span>
                 {isAuthorAdmin(post.username) && (
-                  <Badge variant="destructive" className="ml-1">{t('admin')}</Badge>
+                  <Badge
+                    variant="destructive"
+                    className="ml-1"
+                  >
+                    {t('admin')}
+                  </Badge>
                 )}
                 <div className="flex items-center gap-1 text-xs text-neutral-400">
                   <Clock size={12} />
@@ -125,21 +130,17 @@ export default function DiscussionPost({
                       setEditingPost(true);
                       setEditContent(post.postMessage);
                     }}
-                    className="h-8 px-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50"
+                    className="h-8 px-2 text-neutral-500 hover:bg-blue-50 hover:text-blue-600"
                   >
-                    <Edit
-                      size={14}
-                    />
+                    <Edit size={14} />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onDeletePost(post.id)}
-                    className="h-8 px-2 text-neutral-500 hover:text-red-600 hover:bg-red-50"
+                    className="h-8 px-2 text-neutral-500 hover:bg-red-50 hover:text-red-600"
                   >
-                    <Trash2
-                      size={14}
-                    />
+                    <Trash2 size={14} />
                   </Button>
                 </div>
               )}

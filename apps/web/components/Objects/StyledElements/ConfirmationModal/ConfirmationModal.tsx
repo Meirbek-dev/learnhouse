@@ -105,7 +105,7 @@ const ConfirmationModal = (params: ModalParams) => {
     } finally {
       setIsExecuting(false);
     }
-  }, [params.disabled, params.functionToExecute, isExecuting, params]);
+  }, [isExecuting, params]);
 
   const statusConfig = getStatusConfig();
   const sizeConfig = getSizeConfig();
