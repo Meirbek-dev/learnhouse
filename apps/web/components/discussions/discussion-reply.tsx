@@ -4,7 +4,6 @@ import type React from 'react';
 
 import { ArrowBigUp, ArrowBigDown, Clock, Edit, Trash2 } from 'lucide-react';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { Textarea } from '@/components/ui/textarea';
 import { useFormatter, useNow } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -12,6 +11,8 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
+import RichTextEditor from './rich-text-editor';
+import RichContentRenderer from './rich-content-renderer';
 
 interface DiscussionReplyProps {
   reply: any;
@@ -33,7 +34,7 @@ export default function DiscussionReply({
   t,
 }: DiscussionReplyProps) {
   const [editing, setEditing] = useState(false);
-  const [editText, setEditText] = useState(reply.replyMessage);
+  const [editContent, setEditContent] = useState(reply.replyMessage);
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
@@ -50,8 +51,13 @@ export default function DiscussionReply({
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editText.trim()) return;
-    onEditReply(postId, reply.id, editText);
+    // Check if content has meaningful text (not just empty HTML tags)
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = editContent;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+    if (!textContent.trim()) return;
+    onEditReply(postId, reply.id, editContent);
     setEditing(false);
   };
 
@@ -90,7 +96,7 @@ export default function DiscussionReply({
                   size="sm"
                   onClick={() => {
                     setEditing(true);
-                    setEditText(reply.replyMessage);
+                    setEditContent(reply.replyMessage);
                   }}
                   className="h-7 px-2 text-xs text-neutral-500 hover:text-blue-600 hover:bg-blue-50"
                 >
@@ -113,12 +119,11 @@ export default function DiscussionReply({
               onSubmit={handleEditSubmit}
               className="mt-2"
             >
-              <Textarea
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                className="resize-none text-sm"
-                rows={2}
-                maxLength={2048}
+              <RichTextEditor
+                content={editContent}
+                onChange={setEditContent}
+                placeholder={t('editReplyPlaceholder')}
+                minHeight="80px"
               />
               <div className="mt-2 flex justify-end gap-2">
                 <Button
@@ -133,7 +138,7 @@ export default function DiscussionReply({
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={!editText.trim()}
+                  disabled={!editContent.trim()}
                   className="h-7 text-xs"
                 >
                   {t('save')}
@@ -141,7 +146,12 @@ export default function DiscussionReply({
               </div>
             </form>
           ) : (
-            <p className="mt-1 text-sm leading-relaxed text-neutral-700 whitespace-pre-line">{reply.replyMessage}</p>
+            <div className="mt-1">
+              <RichContentRenderer
+                content={reply.replyMessage}
+                className="text-sm"
+              />
+            </div>
           )}
 
           {!editing && (

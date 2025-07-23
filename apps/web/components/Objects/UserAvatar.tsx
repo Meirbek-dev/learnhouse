@@ -176,10 +176,11 @@ function UserAvatar(props: UserAvatarProps) {
   };
 
   const avatarElement = (
-    <Avatar className={cn(sizeVariants[size], variantStyles[variant], className)}>
+    <Avatar className={cn(sizeVariants[size], variantStyles[variant], 'bg-background', className)}>
       <AvatarImage
         src={getAvatarUrl()}
         alt={t('altText')}
+        className="bg-background"
       />
       <AvatarFallback className="bg-muted text-muted-foreground">
         {predefined_avatar === 'ai' ? <User className="h-[60%] w-[60%]" /> : getFallbackText()}

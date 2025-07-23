@@ -5,7 +5,6 @@ import type React from 'react';
 import { ArrowBigUp, ArrowBigDown, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
 import { useFormatter, useNow } from 'next-intl';
@@ -14,6 +13,8 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useOrg } from '@components/Contexts/OrgContext';
+import RichTextEditor from './rich-text-editor';
+import RichContentRenderer from './rich-content-renderer';
 
 interface DiscussionPostProps {
   post: any;
@@ -41,9 +42,9 @@ export default function DiscussionPost({
   t,
 }: DiscussionPostProps) {
   const [replyingTo, setReplyingTo] = useState<boolean>(false);
-  const [replyText, setReplyText] = useState('');
+  const [replyContent, setReplyContent] = useState('');
   const [editingPost, setEditingPost] = useState(false);
-  const [editText, setEditText] = useState(post.postMessage);
+  const [editContent, setEditContent] = useState(post.postMessage);
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
@@ -60,16 +61,26 @@ export default function DiscussionPost({
 
   const handleSubmitReply = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!replyText.trim()) return;
-    onSubmitReply(post.id, replyText);
-    setReplyText('');
+    // Check if content has meaningful text (not just empty HTML tags)
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = replyContent;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+    if (!textContent.trim()) return;
+    onSubmitReply(post.id, replyContent);
+    setReplyContent('');
     setReplyingTo(false);
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editText.trim()) return;
-    onEditPost(post.id, editText);
+    // Check if content has meaningful text (not just empty HTML tags)
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = editContent;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+    if (!textContent.trim()) return;
+    onEditPost(post.id, editContent);
     setEditingPost(false);
   };
 
@@ -112,7 +123,7 @@ export default function DiscussionPost({
                     size="sm"
                     onClick={() => {
                       setEditingPost(true);
-                      setEditText(post.postMessage);
+                      setEditContent(post.postMessage);
                     }}
                     className="h-8 px-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50"
                   >
@@ -139,12 +150,11 @@ export default function DiscussionPost({
                 onSubmit={handleEditSubmit}
                 className="mt-3"
               >
-                <Textarea
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  className="resize-none"
-                  rows={3}
-                  maxLength={2048}
+                <RichTextEditor
+                  content={editContent}
+                  onChange={setEditContent}
+                  placeholder={t('editPostPlaceholder')}
+                  minHeight="120px"
                 />
                 <div className="mt-3 flex justify-end gap-2">
                   <Button
@@ -158,14 +168,16 @@ export default function DiscussionPost({
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={!editText.trim()}
+                    disabled={!editContent.trim()}
                   >
                     {t('save')}
                   </Button>
                 </div>
               </form>
             ) : (
-              <p className="mt-3 text-neutral-700 leading-relaxed whitespace-pre-line">{post.postMessage}</p>
+              <div className="mt-3">
+                <RichContentRenderer content={post.postMessage} />
+              </div>
             )}
 
             <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -244,13 +256,11 @@ export default function DiscussionPost({
                     username={currentUser?.username}
                   />
                   <div className="flex-1">
-                    <Textarea
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
+                    <RichTextEditor
+                      content={replyContent}
+                      onChange={setReplyContent}
                       placeholder={t('writeReplyPlaceholder')}
-                      className="resize-none"
-                      rows={2}
-                      maxLength={2048}
+                      minHeight="100px"
                     />
                     <div className="mt-2 flex justify-end gap-2">
                       <Button
@@ -259,7 +269,7 @@ export default function DiscussionPost({
                         size="sm"
                         onClick={() => {
                           setReplyingTo(false);
-                          setReplyText('');
+                          setReplyContent('');
                         }}
                       >
                         {t('cancel')}
@@ -267,7 +277,7 @@ export default function DiscussionPost({
                       <Button
                         type="submit"
                         size="sm"
-                        disabled={!replyText.trim()}
+                        disabled={!replyContent.trim()}
                         className="flex items-center gap-1"
                       >
                         <Send size={14} />

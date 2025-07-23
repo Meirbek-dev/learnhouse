@@ -1194,6 +1194,8 @@
     "reply": "Reply",
     "save": "Save",
     "startDiscussionPlaceholder": "Start a discussion about this course...",
+    "editPostPlaceholder": "Edit your post...",
+    "editReplyPlaceholder": "Edit your reply...",
     "statusComplete": "Complete",
     "statusGraded": "Graded",
     "statusGradingInProgress": "Grading in progress",

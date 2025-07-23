@@ -16,13 +16,13 @@ interface DiscussionListProps {
 export default function DiscussionList({ initialPosts, currentUser, t }: DiscussionListProps) {
   const [posts, setPosts] = useState(initialPosts);
 
-  const handleSubmitDiscussion = (text: string) => {
+  const handleSubmitDiscussion = (content: string) => {
     const newPost = {
       id: Date.now().toString(),
       username: currentUser?.username,
       firstName: currentUser?.first_name || '',
       lastName: currentUser?.last_name || '',
-      postMessage: text.trim(),
+      postMessage: content,
       createDate: new Date().toISOString(),
       updateDate: new Date().toISOString(),
       upvotes: 0,
@@ -33,13 +33,13 @@ export default function DiscussionList({ initialPosts, currentUser, t }: Discuss
     setPosts([newPost, ...posts]);
   };
 
-  const handleSubmitReply = (postId: string, replyText: string) => {
+  const handleSubmitReply = (postId: string, replyContent: string) => {
     const newReply = {
       id: Date.now().toString(),
       username: currentUser?.username,
       firstName: currentUser?.first_name || '',
       lastName: currentUser?.last_name || '',
-      replyMessage: replyText.trim(),
+      replyMessage: replyContent,
       createDate: new Date().toISOString(),
       upvotes: 0,
       downvotes: 0,

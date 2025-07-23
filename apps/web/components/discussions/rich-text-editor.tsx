@@ -1,0 +1,509 @@
+'use client';
+
+import {
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  Undo,
+  Redo,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Video,
+  Type,
+  Code,
+  Upload,
+  YoutubeIcon,
+} from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { useEditor, EditorContent } from '@tiptap/react';
+import { useCallback, useState, useEffect } from 'react';
+import Youtube from '@tiptap/extension-youtube';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+import { cn } from '@/lib/utils';
+
+interface RichTextEditorProps {
+  content: string;
+  onChange: (content: string) => void;
+  placeholder?: string;
+  className?: string;
+  minHeight?: string;
+}
+
+export default function RichTextEditor({
+  content,
+  onChange,
+  placeholder = '',
+  className = '',
+  minHeight = '150px',
+}: RichTextEditorProps) {
+  const [linkUrl, setLinkUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        bulletList: {
+          HTMLAttributes: {
+            class: 'list-disc list-outside ml-4 space-y-1',
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: 'list-decimal list-outside ml-4 space-y-1',
+          },
+        },
+        listItem: {
+          HTMLAttributes: {
+            class: 'ml-0',
+          },
+        },
+        heading: {
+          levels: [1, 2, 3, 4, 5, 6],
+          HTMLAttributes: {
+            class: 'font-semibold text-gray-900 mt-4 mb-2',
+          },
+        },
+        blockquote: {
+          HTMLAttributes: {
+            class: 'border-l-4 border-gray-300 pl-4 italic',
+          },
+        },
+        code: {
+          HTMLAttributes: {
+            class: 'bg-gray-100 px-1 py-0.5 rounded text-sm font-mono',
+          },
+        },
+        codeBlock: {
+          HTMLAttributes: {
+            class: 'bg-gray-100 p-3 rounded-md overflow-x-auto',
+          },
+        },
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 hover:text-blue-800 underline',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg',
+        },
+      }),
+      Youtube.configure({
+        controls: true,
+        modestBranding: true,
+        HTMLAttributes: {
+          class: 'w-full aspect-video rounded-lg',
+        },
+      }),
+    ],
+    content,
+    immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: cn(
+          'prose prose-sm max-w-none focus:outline-none p-3',
+          'prose-headings:font-semibold prose-headings:text-gray-900 prose-headings:mt-4 prose-headings:mb-2',
+          'prose-p:text-gray-700 prose-p:leading-relaxed',
+          'prose-strong:text-gray-900 prose-em:text-gray-700',
+          'prose-code:text-gray-900 prose-code:bg-gray-100',
+          'prose-pre:bg-gray-100 prose-pre:text-gray-900',
+          'prose-blockquote:text-gray-700 prose-blockquote:border-gray-300',
+          'prose-ul:text-gray-700 prose-ul:list-disc prose-ul:list-outside prose-ul:ml-4',
+          'prose-ol:text-gray-700 prose-ol:list-decimal prose-ol:list-outside prose-ol:ml-4',
+          'prose-li:text-gray-700 prose-li:ml-0',
+          className,
+        ),
+        style: `min-height: ${minHeight}`,
+      },
+    },
+  });
+
+  // Sync content prop changes with editor
+  useEffect(() => {
+    if (editor && editor.getHTML() !== content) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
+
+  const addLink = useCallback(() => {
+    if (!editor || !linkUrl) return;
+
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to);
+
+    if (selectedText) {
+      editor.chain().focus().setLink({ href: linkUrl }).run();
+    } else {
+      editor.chain().focus().insertContent(`<a href="${linkUrl}">${linkUrl}</a>`).run();
+    }
+
+    setLinkUrl('');
+    setIsLinkDialogOpen(false);
+  }, [editor, linkUrl]);
+
+  const addImage = useCallback(() => {
+    if (!editor || !imageUrl) return;
+
+    editor.chain().focus().setImage({ src: imageUrl, alt: 'Uploaded image' }).run();
+    setImageUrl('');
+    setIsImageDialogOpen(false);
+  }, [editor, imageUrl]);
+
+  const addVideo = useCallback(() => {
+    if (!editor || !videoUrl) return;
+
+    // Extract YouTube video ID from URL
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = videoUrl.match(youtubeRegex);
+
+    if (match) {
+      editor.chain().focus().setYoutubeVideo({ src: videoUrl }).run();
+    } else {
+      // For other video URLs, insert as a link
+      editor.chain().focus().insertContent(`<a href="${videoUrl}" target="_blank">${videoUrl}</a>`).run();
+    }
+
+    setVideoUrl('');
+    setIsVideoDialogOpen(false);
+  }, [editor, videoUrl]);
+
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !editor) return;
+
+      setIsUploading(true);
+
+      try {
+        // Create a temporary URL for the file
+        const tempUrl = URL.createObjectURL(file);
+
+        if (file.type.startsWith('image/')) {
+          editor.chain().focus().setImage({ src: tempUrl, alt: file.name }).run();
+        } else {
+          // For non-image files, insert as a link
+          editor.chain().focus().insertContent(`<a href="${tempUrl}" target="_blank">${file.name}</a>`).run();
+        }
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      } finally {
+        setIsUploading(false);
+        // Clear the input
+        e.target.value = '';
+      }
+    },
+    [editor],
+  );
+
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      {/* Toolbar */}
+      <div className="border-b bg-gray-50 p-2 flex flex-wrap items-center gap-1">
+        {/* Text formatting */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('bold') && 'bg-gray-200')}
+        >
+          <Bold size={16} />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('italic') && 'bg-gray-200')}
+        >
+          <Italic size={16} />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleCode().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('code') && 'bg-gray-200')}
+        >
+          <Code size={16} />
+        </Button>
+
+        <div className="w-px h-6 bg-gray-300 mx-1" />
+
+        {/* Lists */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('bulletList') && 'bg-gray-200')}
+        >
+          <List size={16} />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('orderedList') && 'bg-gray-200')}
+        >
+          <ListOrdered size={16} />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('blockquote') && 'bg-gray-200')}
+        >
+          <Quote size={16} />
+        </Button>
+
+        <div className="w-px h-6 bg-gray-300 mx-1" />
+
+        {/* Headings */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={cn('h-8 px-2 text-sm', editor.isActive('heading', { level: 2 }) && 'bg-gray-200')}
+        >
+          H2
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className={cn('h-8 px-2 text-sm', editor.isActive('heading', { level: 3 }) && 'bg-gray-200')}
+        >
+          H3
+        </Button>
+
+        <div className="w-px h-6 bg-gray-300 mx-1" />
+
+        {/* Media */}
+        <Dialog
+          open={isLinkDialogOpen}
+          onOpenChange={setIsLinkDialogOpen}
+        >
+          <DialogTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <LinkIcon size={16} />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Link</DialogTitle>
+              <DialogDescription>Enter the URL you want to link to.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="link-url">URL</Label>
+              <Input
+                id="link-url"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://example.com"
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsLinkDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={addLink}
+              >
+                Add Link
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={isImageDialogOpen}
+          onOpenChange={setIsImageDialogOpen}
+        >
+          <DialogTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <ImageIcon size={16} />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Image</DialogTitle>
+              <DialogDescription>Enter the URL of the image you want to embed.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="image-url">Image URL</Label>
+              <Input
+                id="image-url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsImageDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={addImage}
+              >
+                Add Image
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={isVideoDialogOpen}
+          onOpenChange={setIsVideoDialogOpen}
+        >
+          <DialogTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <YoutubeIcon size={16} />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Video</DialogTitle>
+              <DialogDescription>Enter a YouTube URL or video link.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="video-url">Video URL</Label>
+              <Input
+                id="video-url"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsVideoDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={addVideo}
+              >
+                Add Video
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* File Upload */}
+        <div className="relative hover:bg-accent rounded-md">
+          <input
+            type="file"
+            id="file-upload"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            onChange={handleFileUpload}
+            accept="image/*,video/*"
+            disabled={isUploading}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            disabled={isUploading}
+            title="Upload file"
+          >
+            <Upload size={16} />
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-gray-300 mx-1" />
+
+        {/* Undo/Redo */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          className="h-8 w-8 p-0"
+        >
+          <Undo size={16} />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          className="h-8 w-8 p-0"
+        >
+          <Redo size={16} />
+        </Button>
+      </div>
+
+      {/* Editor Content */}
+      <EditorContent
+        editor={editor}
+        className="prose-editor"
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}

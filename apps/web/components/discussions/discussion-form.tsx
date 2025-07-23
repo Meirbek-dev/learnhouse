@@ -3,25 +3,30 @@
 import type React from 'react';
 
 import UserAvatar from '@components/Objects/UserAvatar';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
+import RichTextEditor from './rich-text-editor';
 
 interface DiscussionFormProps {
   currentUser: any;
-  onSubmit: (text: string) => void;
+  onSubmit: (content: string) => void;
   t: (key: string) => string;
 }
 
 export default function DiscussionForm({ currentUser, onSubmit, t }: DiscussionFormProps) {
-  const [text, setText] = useState('');
+  const [content, setContent] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim()) return;
-    onSubmit(text);
-    setText('');
+    // Check if content has meaningful text (not just empty HTML tags)
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+    if (!textContent.trim()) return;
+    onSubmit(content);
+    setContent('');
   };
 
   return (
@@ -37,20 +42,18 @@ export default function DiscussionForm({ currentUser, onSubmit, t }: DiscussionF
             username={currentUser?.username}
           />
           <div className="flex-1">
-            <Textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+            <RichTextEditor
+              content={content}
+              onChange={setContent}
               placeholder={t('startDiscussionPlaceholder')}
-              className="resize-none min-h-[100px]"
-              rows={3}
-              maxLength={2048}
+              minHeight="120px"
             />
           </div>
         </div>
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={!text.trim()}
+            disabled={!content.trim()}
             className="flex items-center gap-2"
           >
             <Send size={16} />
