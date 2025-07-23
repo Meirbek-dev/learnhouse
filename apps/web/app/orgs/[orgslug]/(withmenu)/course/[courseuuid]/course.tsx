@@ -1,23 +1,39 @@
 'use client';
 
+// Import existing components and utilities
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useFormatter, useTranslations } from 'next-intl';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { useState, useCallback, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import Link from 'next/link';
+import useSWR from 'swr';
+
+// Import UI components
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
+// Import Lucide icons
 import {
   ArrowRight,
   Backpack,
   Check,
   ChevronDown,
-  Clock,
-  Edit,
   File,
   ImageIcon,
   Layers,
-  MessageCircle,
-  Reply,
-  Send,
   Square,
   StickyNote,
-  Trash2,
   Video,
 } from 'lucide-react';
+
+// Import custom components
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
@@ -25,46 +41,11 @@ import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesAct
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useFormatter, useTranslations } from 'next-intl';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { Card, CardContent } from '@/components/ui/card';
-import { useCallback, useEffect, useState } from 'react';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import type React from 'react';
-import Link from 'next/link';
-import useSWR from 'swr';
 
-interface DiscussionPost {
-  id: string;
-  username: string;
-  firstName?: string;
-  lastName?: string;
-  postMessage: string;
-  createDate: string;
-  updateDate: string;
-  replies?: DiscussionReply[];
-}
-
-interface DiscussionReply {
-  id: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  replyMessage: string;
-  createDate: string;
-}
+// Import the new discussions component
+import CourseDiscussions from '@/components/discussions';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');
@@ -72,13 +53,9 @@ const CourseClient = (props: any) => {
   const [learnings, setLearnings] = useState<any>([]);
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image');
-  const [newDiscussionPost, setNewDiscussionPost] = useState('');
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyText, setReplyText] = useState('');
-  const [editingPost, setEditingPost] = useState<string | null>(null);
-  const [editingReply, setEditingReply] = useState<string | null>(null);
-  const [editText, setEditText] = useState('');
-  const [discussionPosts, setDiscussionPosts] = useState<DiscussionPost[]>([
+
+  // Sample discussion posts - in a real app, this would come from an API
+  const [discussionPosts, setDiscussionPosts] = useState<any[]>([
     {
       id: '1',
       username: 'Meirbek',
@@ -87,6 +64,9 @@ const CourseClient = (props: any) => {
       postMessage: 'Отличный курс! Я так многому научился благодаря видеоматериалам и практическим примерам.',
       createDate: '2023-07-01T10:30:00.000Z',
       updateDate: '2023-07-01T10:30:00.000Z',
+      upvotes: 12,
+      downvotes: 1,
+      userVote: null,
       replies: [
         {
           id: 'r1',
@@ -95,6 +75,9 @@ const CourseClient = (props: any) => {
           lastName: 'Преподович',
           replyMessage: 'Спасибо за положительный отзыв! Рад, что контент оказался вам полезен.',
           createDate: '2023-07-01T14:20:00.000Z',
+          upvotes: 8,
+          downvotes: 0,
+          userVote: null,
         },
       ],
     },
@@ -106,6 +89,9 @@ const CourseClient = (props: any) => {
       postMessage: 'Задания сложные, но действительно помогают закрепить знания.',
       createDate: '2025-01-15T09:15:00.000Z',
       updateDate: '2025-01-15T09:15:00.000Z',
+      upvotes: 5,
+      downvotes: 2,
+      userVote: null,
     },
     {
       id: '3',
@@ -115,6 +101,9 @@ const CourseClient = (props: any) => {
       postMessage: 'У кого-нибудь ещё были проблемы с третьим заданием? Я застрял на этапе реализации.',
       createDate: '2025-01-18T16:45:00.000Z',
       updateDate: '2025-01-18T16:45:00.000Z',
+      upvotes: 3,
+      downvotes: 0,
+      userVote: null,
       replies: [
         {
           id: 'r2',
@@ -124,6 +113,9 @@ const CourseClient = (props: any) => {
           replyMessage:
             'У меня была та же проблема! Попробуйте посмотреть документацию в главе 2 — это помогло мне разобраться.',
           createDate: '2025-01-18T18:30:00.000Z',
+          upvotes: 6,
+          downvotes: 1,
+          userVote: null,
         },
       ],
     },
@@ -147,26 +139,13 @@ const CourseClient = (props: any) => {
       setLearnings([]);
       return;
     }
-    try {
-      // Try to parse as JSON (new format)
-      const parsedLearnings = JSON.parse(course.learnings);
-      if (Array.isArray(parsedLearnings)) {
-        // New format: array of learning items with text and emoji
-        setLearnings(parsedLearnings);
-        return;
-      }
-    } catch {
-      // Not valid JSON, continue to legacy format handling
+    // Try to parse as JSON (new format)
+    const parsedLearnings = JSON.parse(course.learnings);
+    if (Array.isArray(parsedLearnings)) {
+      // New format: array of learning items with text and emoji
+      setLearnings(parsedLearnings);
+      return;
     }
-
-    // Legacy format: comma-separated string (changed from pipe-separated)
-    const learningItems = course.learnings.split(',').map((text: string) => ({
-      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
-      text: text.trim(), // Trim whitespace that might be present after commas
-      emoji: '📝', // Default emoji for legacy items
-    }));
-
-    setLearnings(learningItems);
   }, [course?.learnings]);
 
   useEffect(() => {
@@ -207,7 +186,6 @@ const CourseClient = (props: any) => {
       const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
       return cleanRunCourseUuid === cleanCourseUuid;
     });
-
     if (run) {
       return run.steps.find((step: any) => step.activity_id === activity.id);
     }
@@ -217,120 +195,6 @@ const CourseClient = (props: any) => {
   const isActivityCurrent = (activity: any) => {
     const activity_uuid = activity.activity_uuid.replace('activity_', '');
     return props.current_activity && props.current_activity === activity_uuid;
-  };
-
-  const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-
-    return format.relativeTime(date, now);
-  };
-
-  const getUserDisplayName = (firstName?: string, lastName?: string) => {
-    const first = firstName || '';
-    const last = lastName || '';
-    return `${first} ${last}`.trim() || 'Anonymous';
-  };
-
-  const handleSubmitDiscussion = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newDiscussionPost.trim()) return;
-
-    const newPost: DiscussionPost = {
-      id: Date.now().toString(),
-      username: session?.data?.user?.username,
-      firstName: session?.data?.user?.first_name || '',
-      lastName: session?.data?.user?.last_name || '',
-      postMessage: newDiscussionPost.trim(),
-      createDate: new Date().toISOString(),
-      updateDate: new Date().toISOString(),
-      replies: [],
-    };
-
-    setDiscussionPosts((prev) => [newPost, ...prev]);
-    setNewDiscussionPost('');
-  };
-
-  const handleSubmitReply = (e: React.FormEvent, postId: string) => {
-    e.preventDefault();
-    if (!replyText.trim()) return;
-
-    const newReply: DiscussionReply = {
-      id: Date.now().toString(),
-      username: session?.data?.user?.username,
-      firstName: session?.data?.user?.first_name || '',
-      lastName: session?.data?.user?.last_name || '',
-      replyMessage: replyText.trim(),
-      createDate: new Date().toISOString(),
-    };
-
-    setDiscussionPosts((prev) =>
-      prev.map((post) => (post.id === postId ? { ...post, replies: [...(post.replies || []), newReply] } : post)),
-    );
-
-    setReplyText('');
-    setReplyingTo(null);
-  };
-
-  const handleDeletePost = (postId: string) => {
-    setDiscussionPosts((prev) => prev.filter((post) => post.id !== postId));
-  };
-
-  const handleDeleteReply = (postId: string, replyId: string) => {
-    setDiscussionPosts((prev) =>
-      prev.map((post) =>
-        post.id === postId ? { ...post, replies: post.replies?.filter((reply) => reply.id !== replyId) } : post,
-      ),
-    );
-  };
-
-  const handleEditPost = (postId: string, newMessage: string) => {
-    setDiscussionPosts((prev) =>
-      prev.map((post) =>
-        post.id === postId ? { ...post, postMessage: newMessage, updateDate: new Date().toISOString() } : post,
-      ),
-    );
-    setEditingPost(null);
-    setEditText('');
-  };
-
-  const handleEditReply = (postId: string, replyId: string, newMessage: string) => {
-    setDiscussionPosts((prev) =>
-      prev.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              replies: post.replies?.map((reply) =>
-                reply.id === replyId ? { ...reply, replyMessage: newMessage } : reply,
-              ),
-            }
-          : post,
-      ),
-    );
-    setEditingReply(null);
-    setEditText('');
-  };
-
-  const startEditingPost = (postId: string, currentMessage: string) => {
-    setEditingPost(postId);
-    setEditText(currentMessage);
-    setReplyingTo(null); // Close reply form if open
-  };
-
-  const startEditingReply = (replyId: string, currentMessage: string) => {
-    setEditingReply(replyId);
-    setEditText(currentMessage);
-    setReplyingTo(null); // Close reply form if open
-  };
-
-  const cancelEditing = () => {
-    setEditingPost(null);
-    setEditingReply(null);
-    setEditText('');
-  };
-
-  const isOwnPost = (username: string) => {
-    return username === session?.data?.user?.username;
   };
 
   return (
@@ -359,7 +223,6 @@ const CourseClient = (props: any) => {
                     course.thumbnail_type === 'image' ||
                     (course.thumbnail_type === 'both' && activeThumbnailType === 'image') ||
                     !course.thumbnail_type;
-
                   if (showVideo && course.thumbnail_video) {
                     return (
                       <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
@@ -474,7 +337,6 @@ const CourseClient = (props: any) => {
                       </div>
                     );
                   }
-
                   return (
                     <div
                       className="relative h-auto w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-black/10 ring-inset"
@@ -485,7 +347,6 @@ const CourseClient = (props: any) => {
                     />
                   );
                 })()}
-
                 {(() => {
                   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
                   const run = trailData?.runs?.find((run: any) => {
@@ -501,7 +362,6 @@ const CourseClient = (props: any) => {
                     trailData={trailData}
                   />
                 )}
-
                 <div className="course_metadata_left space-y-2">
                   <div>
                     <p className="w-full py-5 leading-relaxed tracking-normal text-pretty break-words hyphens-auto whitespace-pre-line">
@@ -510,7 +370,6 @@ const CourseClient = (props: any) => {
                   </div>
                 </div>
               </div>
-
               <div className="course_metadata_right w-full space-y-4 md:w-1/4">
                 {/* Actions Box */}
                 <CoursesActions
@@ -519,7 +378,6 @@ const CourseClient = (props: any) => {
                   course={course}
                   trailData={trailData}
                 />
-
                 {/* Authors & Updates Box */}
                 <Card>
                   <CardContent className="p-4">
@@ -530,20 +388,16 @@ const CourseClient = (props: any) => {
                 </Card>
               </div>
             </div>
-
             {learnings.length > 0 && learnings[0]?.text !== 'null' && (
               <div className="w-full">
                 <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('whatYouWillLearn')}</h2>
                 <Card>
                   <CardContent className="space-y-2 p-5">
                     {learnings.map((learning: any) => {
-                      // Handle both new format (object with text and emoji) and legacy format (string)
                       const learningText = typeof learning === 'string' ? learning : learning.text;
                       const learningEmoji = typeof learning === 'string' ? null : learning.emoji;
                       const learningId = typeof learning === 'string' ? learning : learning.id || learning.text;
-
                       if (!learningText) return null;
-
                       return (
                         <div
                           key={learningId}
@@ -584,7 +438,6 @@ const CourseClient = (props: any) => {
                 </Card>
               </div>
             )}
-
             <div className="my-5 mb-10 w-full">
               <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('courseLessons')}</h2>
               <Card>
@@ -699,317 +552,13 @@ const CourseClient = (props: any) => {
               </Card>
             </div>
 
-            {/* Course Discussions */}
-            <div className="my-5 mb-10 w-full">
-              <div className="flex items-center space-x-2 py-5">
-                <h2 className="text-xl font-semibold md:text-2xl">{t('courseDiscussions')}</h2>
-                <Badge
-                  variant="secondary"
-                  className="rounded-full"
-                >
-                  {discussionPosts.length}
-                </Badge>
-              </div>
-
-              <div className="space-y-4">
-                {/* New Discussion Form */}
-                <Card>
-                  <CardContent className="px-4">
-                    <form
-                      onSubmit={handleSubmitDiscussion}
-                      className="space-y-3"
-                    >
-                      <div className="flex items-start space-x-3">
-                        <UserAvatar
-                          size="sm"
-                          variant="default"
-                          username={session?.data?.user?.username}
-                        />
-                        <div className="flex-1">
-                          <Textarea
-                            value={newDiscussionPost}
-                            onChange={(e) => setNewDiscussionPost(e.target.value)}
-                            placeholder={t('startDiscussionPlaceholder')}
-                            className="resize-none"
-                            rows={3}
-                            maxLength={2048}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
-                        <Button
-                          type="submit"
-                          disabled={!newDiscussionPost.trim()}
-                          className="flex items-center space-x-2"
-                        >
-                          <Send size={14} />
-                          <span>{t('postDiscussion')}</span>
-                        </Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-
-                {/* Discussion Posts */}
-                <div className="space-y-4">
-                  {discussionPosts.map((post) => (
-                    <Card key={post.id}>
-                      {/* Main Post */}
-                      <CardContent className="p-4">
-                        <div className="flex items-start space-x-3">
-                          <UserAvatar
-                            size="md"
-                            variant="default"
-                            username={post.username}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-2">
-                                <h4 className="font-semibold text-neutral-800">
-                                  {getUserDisplayName(post.firstName, post.lastName)}
-                                </h4>
-                                <span className="text-sm text-neutral-500">@{post.username}</span>
-                                <div className="flex items-center space-x-1 text-xs text-neutral-400">
-                                  <Clock size={12} />
-                                  <span>{formatRelativeTime(post.createDate)}</span>
-                                  {post.updateDate !== post.createDate && (
-                                    <span className="text-xs text-neutral-400">({t('edited')})</span>
-                                  )}
-                                </div>
-                              </div>
-                              {isOwnPost(post.username) && editingPost !== post.id && (
-                                <div className="flex items-center space-x-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => startEditingPost(post.id, post.postMessage)}
-                                    className="h-6 w-6 p-0 text-neutral-400 transition-colors duration-200 hover:text-blue-500"
-                                  >
-                                    <Edit size={12} />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDeletePost(post.id)}
-                                    className="h-6 w-6 p-0 text-neutral-400 transition-colors duration-200 hover:text-red-600"
-                                  >
-                                    <Trash2 size={12} />
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-
-                            {editingPost === post.id ? (
-                              <div className="mt-2">
-                                <Textarea
-                                  value={editText}
-                                  onChange={(e) => setEditText(e.target.value)}
-                                  className="resize-none"
-                                  rows={3}
-                                  maxLength={2048}
-                                />
-                                <div className="mt-2 flex justify-end space-x-2">
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={cancelEditing}
-                                  >
-                                    {t('cancel')}
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    disabled={!editText.trim()}
-                                    onClick={() => handleEditPost(post.id, editText)}
-                                    className="flex items-center space-x-1"
-                                  >
-                                    <span>{t('save')}</span>
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <p className="mt-2 leading-relaxed text-neutral-700">{post.postMessage}</p>
-                            )}
-
-                            <div className="mt-3 flex items-center space-x-4">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}
-                                className="h-auto items-center p-1 text-sm text-neutral-500"
-                              >
-                                <Reply size={14} />
-                                <span>{t('reply')}</span>
-                                {post.replies && post.replies.length > 0 && (
-                                  <span className="text-xs">({post.replies.length})</span>
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Reply Form */}
-                        {replyingTo === post.id && !editingPost && !editingReply && (
-                          <div className="mt-4 ml-13">
-                            <form
-                              onSubmit={(e) => handleSubmitReply(e, post.id)}
-                              className="space-y-3"
-                            >
-                              <div className="flex items-start space-x-3">
-                                <UserAvatar
-                                  size="xs"
-                                  variant="default"
-                                  username={session?.data?.user?.username}
-                                />
-                                <Textarea
-                                  value={replyText}
-                                  onChange={(e) => setReplyText(e.target.value)}
-                                  placeholder={t('writeReplyPlaceholder')}
-                                  className="flex-1 resize-none"
-                                  rows={2}
-                                  maxLength={2048}
-                                />
-                              </div>
-                              <div className="flex justify-end space-x-2">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setReplyingTo(null);
-                                    setReplyText('');
-                                  }}
-                                >
-                                  {t('cancel')}
-                                </Button>
-                                <Button
-                                  type="submit"
-                                  size="sm"
-                                  disabled={!replyText.trim()}
-                                  className="flex items-center space-x-1"
-                                >
-                                  <Send size={12} />
-                                  <span>{t('reply')}</span>
-                                </Button>
-                              </div>
-                            </form>
-                          </div>
-                        )}
-                      </CardContent>
-
-                      {/* Replies */}
-                      {post.replies && post.replies.length > 0 && (
-                        <>
-                          <Separator />
-                          <div className="bg-neutral-50/50">
-                            {post.replies.map((reply) => (
-                              <div
-                                key={reply.id}
-                                className="ml-4 border-l-2 border-blue-200 p-4"
-                              >
-                                <div className="flex items-start space-x-3">
-                                  <UserAvatar
-                                    size="sm"
-                                    variant="default"
-                                    username={reply.username}
-                                  />
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center space-x-2">
-                                        <h5 className="font-medium text-neutral-800">
-                                          {getUserDisplayName(reply.firstName, reply.lastName)}
-                                        </h5>
-                                        <span className="text-sm text-neutral-500">@{reply.username}</span>
-                                        <div className="flex items-center space-x-1 text-xs text-neutral-400">
-                                          <Clock size={10} />
-                                          <span>{formatRelativeTime(reply.createDate)}</span>
-                                        </div>
-                                      </div>
-                                      {isOwnPost(reply.username) && editingReply !== reply.id && (
-                                        <div className="flex items-center space-x-1">
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => startEditingReply(reply.id, reply.replyMessage)}
-                                            className="h-6 w-6 p-0 text-neutral-400 transition-colors duration-200 hover:text-blue-500"
-                                          >
-                                            <Edit size={12} />
-                                          </Button>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleDeleteReply(post.id, reply.id)}
-                                            className="h-6 w-6 p-0 text-neutral-400 transition-colors duration-200 hover:text-red-600"
-                                          >
-                                            <Trash2 size={12} />
-                                          </Button>
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    {editingReply === reply.id ? (
-                                      <div className="mt-2">
-                                        <Textarea
-                                          value={editText}
-                                          onChange={(e) => setEditText(e.target.value)}
-                                          className="resize-none text-sm"
-                                          rows={2}
-                                          maxLength={2048}
-                                        />
-                                        <div className="mt-2 flex justify-end space-x-2">
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={cancelEditing}
-                                          >
-                                            {t('cancel')}
-                                          </Button>
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            disabled={!editText.trim()}
-                                            onClick={() => handleEditReply(post.id, reply.id, editText)}
-                                            className="flex items-center space-x-1"
-                                          >
-                                            <span>{t('save')}</span>
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <p className="mt-1 text-sm leading-relaxed text-neutral-700">
-                                        {reply.replyMessage}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Empty State */}
-                {discussionPosts.length === 0 && (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <MessageCircle
-                        size={48}
-                        className="mx-auto mb-4 text-neutral-300"
-                      />
-                      <h3 className="mb-2 text-lg font-semibold text-neutral-600">{t('noDiscussions')}</h3>
-                      <p className="mb-4 text-neutral-500">{t('noDiscussionsDesc')}</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
+            {/* Course Discussions - Using the new component */}
+            <CourseDiscussions
+              initialPosts={discussionPosts}
+              currentUser={session?.data?.user}
+              t={t}
+            />
           </GeneralWrapperStyled>
-
           {/* Mobile Actions Box */}
           {isMobile && (
             <CourseActionsMobile
