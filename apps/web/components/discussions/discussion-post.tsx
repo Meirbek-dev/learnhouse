@@ -11,6 +11,9 @@ import { Button } from '@/components/ui/button';
 import { useFormatter, useNow } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useOrg } from '@components/Contexts/OrgContext';
 
 interface DiscussionPostProps {
   post: any;
@@ -43,6 +46,8 @@ export default function DiscussionPost({
   const [editText, setEditText] = useState(post.postMessage);
   const format = useFormatter();
   const now = useNow();
+  const org = useOrg() as any;
+  const { isAdmin } = useAdminStatus();
 
   const isOwnPost = post.username === currentUser?.username;
   const netScore = post.upvotes - post.downvotes;
@@ -68,6 +73,13 @@ export default function DiscussionPost({
     setEditingPost(false);
   };
 
+  // Helper to check if a given user is admin for the org
+  const isAuthorAdmin = (username: string) => {
+    if (!org || !org.id || !post || !post.username) return false;
+    // If current user is admin and is the author, show badge
+    return isAdmin && username === currentUser?.username;
+  };
+
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
       <div className="p-5">
@@ -82,6 +94,9 @@ export default function DiscussionPost({
               <div className="flex flex-wrap items-center gap-2">
                 <h4 className="font-semibold text-neutral-800">{getUserDisplayName(post.firstName, post.lastName)}</h4>
                 <span className="text-sm text-neutral-500">@{post.username}</span>
+                {isAuthorAdmin(post.username) && (
+                  <Badge variant="destructive" className="ml-1">{t('admin')}</Badge>
+                )}
                 <div className="flex items-center gap-1 text-xs text-neutral-400">
                   <Clock size={12} />
                   <span>{format.relativeTime(new Date(post.createDate), now)}</span>

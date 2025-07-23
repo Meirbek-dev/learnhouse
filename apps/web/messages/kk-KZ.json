@@ -1163,6 +1163,7 @@
     "activityCount": "{count, plural, =0 {0 белсенділік} one {# белсенділік} few {# белсенділік} other {# белсенділік}}",
     "activityCounter": "{current} / {total}",
     "activityNotPublished": "Бұл белсенділік әлі жарияланған жоқ",
+    "admin": "Жауапты",
     "assignment": "Тапсырма",
     "cancel": "Болдырмау",
     "content": "Мазмұны",

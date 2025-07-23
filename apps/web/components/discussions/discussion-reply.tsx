@@ -9,6 +9,9 @@ import { useFormatter, useNow } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { useOrg } from '@components/Contexts/OrgContext';
 
 interface DiscussionReplyProps {
   reply: any;
@@ -33,6 +36,8 @@ export default function DiscussionReply({
   const [editText, setEditText] = useState(reply.replyMessage);
   const format = useFormatter();
   const now = useNow();
+  const org = useOrg() as any;
+  const { isAdmin } = useAdminStatus();
 
   const isOwnReply = reply.username === currentUser?.username;
   const netScore = reply.upvotes - reply.downvotes;
@@ -50,6 +55,13 @@ export default function DiscussionReply({
     setEditing(false);
   };
 
+  // Helper to check if a given user is admin for the org
+  const isAuthorAdmin = (username: string) => {
+    if (!org || !org.id || !reply || !reply.username) return false;
+    // If current user is admin and is the author, show badge
+    return isAdmin && username === currentUser?.username;
+  };
+
   return (
     <div className="border-l-2 border-blue-200 mx-4 my-2 pl-4 py-3">
       <div className="flex items-start gap-3">
@@ -63,6 +75,9 @@ export default function DiscussionReply({
             <div className="flex flex-wrap items-center gap-2">
               <h5 className="font-medium text-neutral-800">{getUserDisplayName(reply.firstName, reply.lastName)}</h5>
               <span className="text-sm text-neutral-500">@{reply.username}</span>
+              {isAuthorAdmin(reply.username) && (
+                <Badge variant="destructive" className="ml-1">{t('admin')}</Badge>
+              )}
               <div className="flex items-center gap-1 text-xs text-neutral-400">
                 <Clock size={10} />
                 <span>{format.relativeTime(new Date(reply.createDate), now)}</span>

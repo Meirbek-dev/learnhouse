@@ -243,24 +243,6 @@
     "passwordPlaceholder": "Enter your password"
   },
   "Certificates": {
-    "CertificateVerifyPage": {
-      "title": "Certificate Verification — {certificationName} ({courseName})",
-      "description": "Verify the authenticity of the {certificationName} certificate for the course {courseName}.",
-      "keywords": "{certificationName}, {courseName}, certificate, verification",
-      "openGraph": {
-        "title": "Verify {certificationName} Certificate — {courseName}",
-        "description": "Check and verify the authenticity of the {certificationName} certificate for {courseName}.",
-        "siteName": "OpenU"
-      },
-      "twitter": {
-        "title": "Verify {certificationName} Certificate — {courseName}",
-        "description": "Check and verify the authenticity of the {certificationName} certificate for {courseName}."
-      },
-      "fallback": {
-        "title": "Certificate Verification",
-        "description": "Verify the authenticity of a certificate."
-      }
-    },
     "ActivityIndicators": {
       "certificationAvailable": "Course Completed!",
       "earnCertificate": "Complete all activities to earn a certificate",
@@ -350,6 +332,24 @@
       "verifyingCertificate": "Verifying Certificate...",
       "viewCourse": "View Course",
       "viewFullCertificate": "View Full Certificate"
+    },
+    "CertificateVerifyPage": {
+      "description": "Verify the authenticity of the {certificationName} certificate for the course {courseName}.",
+      "fallback": {
+        "description": "Verify the authenticity of a certificate.",
+        "title": "Certificate Verification"
+      },
+      "keywords": "{certificationName}, {courseName}, certificate, verification",
+      "openGraph": {
+        "description": "Check and verify the authenticity of the {certificationName} certificate for {courseName}.",
+        "siteName": "OpenU",
+        "title": "Verify {certificationName} Certificate — {courseName}"
+      },
+      "title": "Certificate Verification — {certificationName} ({courseName})",
+      "twitter": {
+        "description": "Check and verify the authenticity of the {certificationName} certificate for {courseName}.",
+        "title": "Verify {certificationName} Certificate — {courseName}"
+      }
     },
     "CourseEndView": {
       "authRequired": "Authentication required to view certificate",
@@ -1163,6 +1163,7 @@
     "activityCount": "{count, plural, =0 {0 Activities} one {# Activity} other {# Activities}}",
     "activityCounter": "{current} of {total}",
     "activityNotPublished": "This activity is not published yet",
+    "admin": "Admin",
     "assignment": "Assignment",
     "cancel": "Cancel",
     "content": "Content",
