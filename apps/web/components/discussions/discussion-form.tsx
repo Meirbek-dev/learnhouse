@@ -1,20 +1,21 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+import { Send } from 'lucide-react';
+import { useState } from 'react';
 import type React from 'react';
 
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
-import { Send } from 'lucide-react';
-import { useState } from 'react';
 
 interface DiscussionFormProps {
   currentUser: any;
   onSubmit: (content: string) => void;
-  t: (key: string) => string;
 }
 
-export default function DiscussionForm({ currentUser, onSubmit, t }: DiscussionFormProps) {
+export default function DiscussionForm({ currentUser, onSubmit }: DiscussionFormProps) {
+  const t = useTranslations('CoursePage');
   const [content, setContent] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {

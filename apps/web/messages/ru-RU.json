@@ -268,6 +268,7 @@
       "loading": "Загрузка сертификата...",
       "myCertificate": "Мой сертификат",
       "noCertificate": "Сертификат для этого курса отсутствует",
+      "noCertificatesMessage": "Вы еще не получили ни одного сертификата",
       "printButton": "Распечатать сертификат",
       "qrCodeAlt": "QR-код",
       "qrCodeInstructions": "PDF содержит QR-код для проверки подлинности сертификата.",
@@ -481,6 +482,7 @@
     }
   },
   "Common": {
+    "close": "Закрыть",
     "save": "Сохранить",
     "saved": "Сохранено",
     "saving": "Сохранение...",
@@ -954,6 +956,9 @@
       "visitSite": "Посетить сайт",
       "websitePreview": "Предпросмотр веб-сайта",
       "websiteUrl": "URL веб-сайта"
+    },
+    "TagsInput": {
+      "removeTag": "Удалить тег"
     }
   },
   "Contexts": {
@@ -1194,6 +1199,23 @@
     "reply": "Ответить",
     "save": "Сохранить",
     "startDiscussionPlaceholder": "Начните дискуссию об этом курсе...",
+    "editPostPlaceholder": "Редактируйте ваш пост...",
+    "editReplyPlaceholder": "Редактируйте ваш ответ...",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "saveChanges": "Сохранить изменения",
+    "upvote": "Лайк",
+    "downvote": "Дизлайк",
+    "votes": "голосов",
+    "vote": "голос",
+    "timeAgo": "{time} назад",
+    "confirmDelete": "Вы уверены, что хотите удалить это?",
+    "confirmDeletePost": "Вы уверены, что хотите удалить этот пост?",
+    "confirmDeleteReply": "Вы уверены, что хотите удалить этот ответ?",
+    "deletedContent": "[Этот контент был удален]",
+    "noReplies": "Пока нет ответов",
+    "showReplies": "Показать {count} ответов",
+    "hideReplies": "Скрыть ответы",
     "statusComplete": "Завершено",
     "statusGraded": "Оценено",
     "statusGradingInProgress": "В процессе оценивания",
@@ -1365,7 +1387,7 @@
       "paidContent": "Платный контент"
     },
     "access": "Доступ",
-    "content": "Содержание",
+    "content": "Содержимое",
     "contributors": "Авторы",
     "createACourse": "Создайте курс, чтобы добавить контент",
     "error": "Ошибка загрузки курсов",
@@ -1545,7 +1567,8 @@
       },
       "Courses": {
         "description": "Создавайте и управляйте курсами, главами и заданиями",
-        "title": "Курсы"
+        "title": "Курсы",
+        "errorOccurred": "Произошла ошибка"
       },
       "Organization": {
         "description": "Настройте общие параметры",
@@ -1594,7 +1617,7 @@
       "CoursePage": {
         "access": "Доступ",
         "certification": "Сертификация",
-        "content": "Содержание",
+        "content": "Содержимое",
         "contributors": "Соавторы",
         "general": "Общее"
       },
@@ -2331,23 +2354,23 @@
         },
         "SectionTypes": {
           "featuredCourses": {
-            "description": "Добавьте раздел для демонстрации выбранных курсов",
+            "description": "Добавить раздел для демонстрации выбранных курсов",
             "label": "Курсы"
           },
           "hero": {
-            "description": "Добавьте главный раздел с заголовком и призывом к действию",
+            "description": "Добавить главный раздел с заголовком и призывом к действию",
             "label": "Главный"
           },
           "logos": {
-            "description": "Добавьте раздел для демонстрации логотипов",
+            "description": "Добавить раздел для демонстрации логотипов",
             "label": "Логотипы"
           },
           "people": {
-            "description": "Добавьте раздел для выделения членов команды",
+            "description": "Добавить раздел для выделения членов команды",
             "label": "Люди"
           },
           "textAndImage": {
-            "description": "Добавьте раздел с текстом и изображением",
+            "description": "Добавить раздел с текстом и изображением",
             "label": "Текст и изображение"
           }
         },
@@ -3317,6 +3340,7 @@
   "SearchPage": {
     "collections": "Коллекции",
     "courses": "Курсы",
+    "coursesCount": "{count, plural, =0 {0 курсов} one {# курс} few {# курса} many {# курсов} other {# курсов}}",
     "filterAll": "Все",
     "filterCollections": "Коллекции",
     "filterCourses": "Курсы",
@@ -3482,5 +3506,25 @@
   "seconds": "Секунд",
   "selectDeadline": "Выберите крайний срок выполнения задания",
   "touUniversity": "Торайгыров Университет",
-  "webPreview": "Предварительный просмотр в браузере"
+  "webPreview": "Предварительный просмотр в браузере",
+  "Errors": {
+    "somethingWentWrong": "Что-то пошло не так!",
+    "tryAgain": "Попробовать снова"
+  },
+  "RichTextEditor": {
+    "addLink": "Добавить ссылку",
+    "enterUrlToLink": "Введите URL, на который хотите сослаться.",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "cancel": "Отмена",
+    "addImage": "Добавить изображение",
+    "enterImageUrl": "Введите URL изображения, которое хотите встроить.",
+    "imageUrl": "URL изображения",
+    "imagePlaceholder": "https://example.com/image.jpg",
+    "addVideo": "Добавить видео",
+    "enterVideoUrl": "Введите URL YouTube или ссылку на видео.",
+    "videoUrl": "URL видео",
+    "videoPlaceholder": "https://youtube.com/watch?v=...",
+    "uploadFile": "Загрузить файл"
+  }
 }

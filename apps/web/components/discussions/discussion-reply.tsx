@@ -1,18 +1,18 @@
 'use client';
 
+import { ArrowBigUp, ArrowBigDown, Clock, Edit, Trash2 } from 'lucide-react';
+import { useFormatter, useNow, useTranslations } from 'next-intl';
+import { useState } from 'react';
 import type React from 'react';
 
-import { ArrowBigUp, ArrowBigDown, Clock, Edit, Trash2 } from 'lucide-react';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { useFormatter, useNow } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 interface DiscussionReplyProps {
   reply: any;
@@ -21,7 +21,6 @@ interface DiscussionReplyProps {
   onVoteReply: (postId: string, replyId: string, voteType: 'up' | 'down') => void;
   onDeleteReply: (postId: string, replyId: string) => void;
   onEditReply: (postId: string, replyId: string, newMessage: string) => void;
-  t: (key: string) => string;
 }
 
 export default function DiscussionReply({
@@ -31,8 +30,8 @@ export default function DiscussionReply({
   onVoteReply,
   onDeleteReply,
   onEditReply,
-  t,
 }: DiscussionReplyProps) {
+  const t = useTranslations('CoursePage');
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.replyMessage);
   const format = useFormatter();

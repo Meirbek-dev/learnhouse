@@ -3,6 +3,7 @@
 import { X as RemoveIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import React from 'react';
 
@@ -38,6 +39,7 @@ const TagInputContext = React.createContext<TagsInputContextProps | null>(null);
 
 export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
   ({ children, value, onValueChange, placeholder, maxItems, minItems, className, dir, ...props }, ref) => {
+    const t = useTranslations('Components.TagsInput');
     const [activeIndex, setActiveIndex] = React.useState(-1);
     const [inputValue, setInputValue] = React.useState('');
     const [disableInput, setDisableInput] = React.useState(false);
@@ -253,7 +255,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
                 onClick={() => RemoveValue(item)}
                 className="disabled:cursor-not-allowed"
               >
-                <span className="sr-only">Remove {item} option</span>
+                <span className="sr-only">{t('removeOption', { item })}</span>
                 <RemoveIcon className="hover:stroke-destructive h-5 w-5" />
               </button>
             </Badge>

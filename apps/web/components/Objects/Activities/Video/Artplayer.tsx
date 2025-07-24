@@ -133,7 +133,7 @@ export default function ArtPlayer({
         art.destroy(false);
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div

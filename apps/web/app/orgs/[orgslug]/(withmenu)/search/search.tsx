@@ -473,7 +473,7 @@ function SearchPage() {
                         <div>
                           <h3 className="mb-1 text-sm font-medium text-black/80">{collection.name}</h3>
                           <p className="line-clamp-2 text-xs text-black/50">{collection.description}</p>
-                          <p className="text-xs text-black/50">{collection.courses.length} курсов</p>
+                          <p className="text-xs text-black/50">{t('coursesCount', { count: collection.courses.length })}</p>
                         </div>
                       </Link>
                     ))}

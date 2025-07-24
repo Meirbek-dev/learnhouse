@@ -1,19 +1,21 @@
 'use client';
 
+import { MessageCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+
 import { Card, CardContent } from '@/components/ui/card';
 import DiscussionPost from './discussion-post';
 import DiscussionForm from './discussion-form';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle } from 'lucide-react';
-import { useState } from 'react';
 
 interface DiscussionListProps {
   initialPosts: any[];
   currentUser: any;
-  t: (key: string) => string;
 }
 
-export default function DiscussionList({ initialPosts, currentUser, t }: DiscussionListProps) {
+export default function DiscussionList({ initialPosts, currentUser }: DiscussionListProps) {
+  const t = useTranslations('CoursePage');
   const [posts, setPosts] = useState(initialPosts);
 
   const handleSubmitDiscussion = (content: string) => {
@@ -186,7 +188,6 @@ export default function DiscussionList({ initialPosts, currentUser, t }: Discuss
       <DiscussionForm
         currentUser={currentUser}
         onSubmit={handleSubmitDiscussion}
-        t={t}
       />
 
       <div className="space-y-4">
@@ -202,7 +203,6 @@ export default function DiscussionList({ initialPosts, currentUser, t }: Discuss
             onEditPost={handleEditPost}
             onEditReply={handleEditReply}
             onSubmitReply={handleSubmitReply}
-            t={t}
           />
         ))}
 

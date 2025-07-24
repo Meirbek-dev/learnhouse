@@ -268,6 +268,7 @@
       "loading": "Сертификат жүктелуде...",
       "myCertificate": "Менің сертификатым",
       "noCertificate": "Бұл курс үшін сертификат жоқ",
+      "noCertificatesMessage": "Сіз әлі ешқандай сертификат алмадыңыз",
       "printButton": "Сертификатты басып шығару",
       "qrCodeAlt": "QR коды",
       "qrCodeInstructions": "PDF сертификатты тексеруге арналған QR кодпен бірге келеді.",
@@ -481,6 +482,7 @@
     }
   },
   "Common": {
+    "close": "Жабу",
     "save": "Сақтау",
     "saved": "Сақталды",
     "saving": "Сақталуда...",
@@ -954,6 +956,9 @@
       "visitSite": "Сайтқа кіру",
       "websitePreview": "Веб-сайтты алдын ала қарау",
       "websiteUrl": "Веб-сайт URL мекенжайы"
+    },
+    "TagsInput": {
+      "removeTag": "Тегті жою"
     }
   },
   "Contexts": {
@@ -1160,7 +1165,7 @@
     "about": "Курс туралы",
     "access": "Қолжетімділік",
     "activitiesCount": "{count} белсенділік",
-    "activityCount": "{count, plural, =0 {0 белсенділік} one {# белсенділік} few {# белсенділік} other {# белсенділік}}",
+    "activityCount": "{count, plural, =0 {0 белсенділік} one {# белсенділік} few {# белсенділік} many {# белсенділік} other {# белсенділік}}",
     "activityCounter": "{current} / {total}",
     "activityNotPublished": "Бұл белсенділік әлі жарияланған жоқ",
     "admin": "Жауапты",
@@ -1194,6 +1199,23 @@
     "reply": "Жауап беру",
     "save": "Сақтау",
     "startDiscussionPlaceholder": "Бұл курс туралы талқылау бастаңыз...",
+    "editPostPlaceholder": "Жазбаңызды өңдеңіз...",
+    "editReplyPlaceholder": "Жауабыңызды өңдеңіз...",
+    "edit": "Өңдеу",
+    "delete": "Жою",
+    "saveChanges": "Өзгерістерді сақтау",
+    "upvote": "Ұнатамын",
+    "downvote": "Ұнатпаймын",
+    "votes": "дауыс",
+    "vote": "дауыс",
+    "timeAgo": "{time} бұрын",
+    "confirmDelete": "Мұны жойғыңыз келетініне сенімдісіз бе?",
+    "confirmDeletePost": "Бұл жазбаны жойғыңыз келетініне сенімдісіз бе?",
+    "confirmDeleteReply": "Бұл жауапты жойғыңыз келетініне сенімдісіз бе?",
+    "deletedContent": "[Бұл мазмұн жойылды]",
+    "noReplies": "Әзірше жауап жоқ",
+    "showReplies": "{count} жауапты көрсету",
+    "hideReplies": "Жауаптарды жасыру",
     "statusComplete": "Аяқталды",
     "statusGraded": "Бағаланды",
     "statusGradingInProgress": "Бағалау жүріп жатыр",
@@ -1545,7 +1567,8 @@
       },
       "Courses": {
         "description": "Курстарды, тарауларды және тапсырмаларды жасаңыз және басқарыңыз",
-        "title": "Курстар"
+        "title": "Курстар",
+        "errorOccurred": "Қате орын алды"
       },
       "Organization": {
         "description": "Ұйымыңыз үшін жалпы параметрлерді реттеңіз",
@@ -1604,7 +1627,7 @@
         "createCourse": "Курс жасау",
         "createCourseDescription": "Жаңа курс жасау",
         "noCourses": "Әзірге курстар жоқ",
-        "noCoursesAvailable": "Әзірге қолжетімді курстар жоқ"
+        "noCoursesAvailable": "Әзірге қол жетімді курстар жоқ"
       },
       "error": "Курстарды жүктеу қатесі",
       "myCourses": "Менің курстарым",
@@ -1661,7 +1684,7 @@
       "openConfirmTitle": "Қатысушылар үшін ашу керек пе?",
       "openDescription": "Курс қатысушылар үшін ашық. Пайдаланушылар қатысушы болуға өтініш бере алады және курс мазмұнын жақсартуға көмектеседі.",
       "openToContributorsButton": "Қатысушылар үшін ашу",
-      "openToContributorsDescription": "Курс қатысушылар үшін ашық. Пайдаланушылар қатысушы болуға өтініш бере алады және курс мазмұнын жақсартуға көмектеседі.",
+      "openToContributorsDescription": "Курс қатысушылар үшін ашық. Пайдаланушылар қатысушы болуға өтінім бере алады және курс мазмұнын жақсартуға көмектеседі.",
       "openToContributorsMessage": "Бұл курсты қатысушылар үшін ашқыңыз келетініне сенімдісіз бе?",
       "openToContributorsTitle": "Қатысушылар үшін ашу керек пе?",
       "pending": "Күтуде",
@@ -2335,7 +2358,7 @@
             "label": "Курстар"
           },
           "hero": {
-            "description": "Тақырыбы және әрекетке шақыруы бар Hero бөлімін қосу",
+            "description": "Тақырыбы және әрекетке шақыруы бар батыр бөлімін қосу",
             "label": "Батыр"
           },
           "logos": {
@@ -2750,11 +2773,11 @@
       "profileSection": {
         "addButton": "Бөлім қосу",
         "affiliation": {
-          "addAffiliation": "Аффилиация қосу",
+          "addAffiliation": "Тиістілікті қосу",
           "descriptionLabel": "Сипаттамасы",
           "logoUrlLabel": "Логотип URL",
-          "nameLabel": "Аффилиация атауы",
-          "removeAffiliation": "Аффилиацияны жою"
+          "nameLabel": "Тиістілігі атауы",
+          "removeAffiliation": "Тиістілікті жою"
         },
         "courses": {
           "loadError": "Курстарды жүктеу мүмкін болмады",
@@ -3081,7 +3104,6 @@
         "userGroupDeletedSuccess": "Пайдаланушылар тобы жойылды",
         "userGroupHeader": "Пайдаланушылар тобы"
       },
-      "usergroupsTitle": "Пайдаланушы топтары",
       "users": "Пайдаланушылар",
       "usersDescription": "Ұйымыңыздағы пайдаланушыларды басқарыңыз, рөлдер мен рұқсаттарды тағайындаңыз",
       "usersSection": {
@@ -3114,7 +3136,7 @@
     },
     "NavigationButtons": {
       "currentOfTotal": "{totalActivities} ішінен {currentIndex}",
-      "next": "Келесі",
+      "next": "Сосын",
       "nextActivityTitle": "Келесі: {activityName}",
       "noNextActivity": "Келесі әрекет жоқ",
       "noPreviousActivity": "Алдыңғы әрекет жоқ",
@@ -3317,6 +3339,7 @@
   "SearchPage": {
     "collections": "Жинақтар",
     "courses": "Курстар",
+    "coursesCount": "{count, plural, =0 {0 курс} one {# курс} few {# курс} many {# курс} other {# курс}}",
     "filterAll": "Барлығы",
     "filterCollections": "Жинақтар",
     "filterCourses": "Курстар",
@@ -3482,5 +3505,25 @@
   "seconds": "Секундтар",
   "selectDeadline": "Тапсырманың соңғы мерзімін таңдаңыз",
   "touUniversity": "Торайгыров Университет",
-  "webPreview": "Веб алдын ала қарау"
+  "webPreview": "Веб алдын ала қарау",
+  "Errors": {
+    "somethingWentWrong": "Бірдеңе дұрыс болмады!",
+    "tryAgain": "Қайталап көру"
+  },
+  "RichTextEditor": {
+    "addLink": "Сілтеме қосу",
+    "enterUrlToLink": "Сілтегіңіз келетін URL мекенжайын енгізіңіз.",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "cancel": "Болдырмау",
+    "addImage": "Сурет қосу",
+    "enterImageUrl": "Енгізгіңіз келетін суреттің URL мекенжайын енгізіңіз.",
+    "imageUrl": "Сурет URL",
+    "imagePlaceholder": "https://example.com/image.jpg",
+    "addVideo": "Бейне қосу",
+    "enterVideoUrl": "YouTube URL немесе бейне сілтемесін енгізіңіз.",
+    "videoUrl": "Бейне URL",
+    "videoPlaceholder": "https://youtube.com/watch?v=...",
+    "uploadFile": "Файл жүктеу"
+  }
 }

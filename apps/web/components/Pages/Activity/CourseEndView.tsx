@@ -514,9 +514,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
             </div>
           ) : (
             <div className="rounded-lg bg-gray-50 p-6">
-              <p className="text-gray-600">
-                No certificate is available for this course. Contact your instructor for more information.
-              </p>
+              <p className="text-gray-600">{t('noCertificateAvailable')}</p>
             </div>
           )}
 

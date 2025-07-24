@@ -383,7 +383,7 @@ const CourseClient = (props: any) => {
                   trailData={trailData}
                 />
                 {/* Authors & Updates Box */}
-                <Card>
+                <Card className="p-0">
                   <CardContent className="p-4">
                     <CourseProvider courseuuid={course.course_uuid}>
                       <CourseAuthors authors={course.authors} />
@@ -395,7 +395,7 @@ const CourseClient = (props: any) => {
             {learnings.length > 0 && learnings[0]?.text !== 'null' && (
               <div className="w-full">
                 <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('whatYouWillLearn')}</h2>
-                <Card>
+                <Card className="p-0">
                   <CardContent className="space-y-2 p-5">
                     {learnings.map((learning: any) => {
                       const learningText = typeof learning === 'string' ? learning : learning.text;
@@ -443,8 +443,8 @@ const CourseClient = (props: any) => {
               </div>
             )}
             <div className="my-5 mb-10 w-full">
-              <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('courseLessons')}</h2>
-              <Card>
+              <h2 className="pb-5 text-xl font-semibold md:text-2xl">{t('courseLessons')}</h2>
+              <Card className="p-0">
                 {course.chapters.map((chapter: any, idx: number) => {
                   const isExpanded = expandedChapters[chapter.chapter_uuid] ?? idx === 0;
                   return (
@@ -560,7 +560,6 @@ const CourseClient = (props: any) => {
             <CourseDiscussions
               initialPosts={discussionPosts}
               currentUser={session?.data?.user}
-              t={t}
             />
           </GeneralWrapperStyled>
           {/* Mobile Actions Box */}

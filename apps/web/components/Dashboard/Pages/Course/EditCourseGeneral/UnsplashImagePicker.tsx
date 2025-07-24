@@ -113,7 +113,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
       setImages([]);
       setPage(1);
     }
-  }, [query, debouncedFetchImages, page]);
+  }, [query, debouncedFetchImages, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (isOpen && images.length === 0 && !query && !loading) {

@@ -1,20 +1,20 @@
 'use client';
 
+import { ArrowBigUp, ArrowBigDown, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
+import { useFormatter, useNow, useTranslations } from 'next-intl';
+import { useState } from 'react';
 import type React from 'react';
 
-import { ArrowBigUp, ArrowBigDown, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Separator } from '@/components/ui/separator';
 import DiscussionReply from './discussion-reply';
-import { useFormatter, useNow } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 interface DiscussionPostProps {
   post: any;
@@ -26,7 +26,6 @@ interface DiscussionPostProps {
   onEditPost: (postId: string, newMessage: string) => void;
   onEditReply: (postId: string, replyId: string, newMessage: string) => void;
   onSubmitReply: (postId: string, replyText: string) => void;
-  t: (key: string) => string;
 }
 
 export default function DiscussionPost({
@@ -39,8 +38,8 @@ export default function DiscussionPost({
   onEditPost,
   onEditReply,
   onSubmitReply,
-  t,
 }: DiscussionPostProps) {
+  const t = useTranslations('CoursePage');
   const [replyingTo, setReplyingTo] = useState<boolean>(false);
   const [replyContent, setReplyContent] = useState('');
   const [editingPost, setEditingPost] = useState(false);
@@ -307,7 +306,6 @@ export default function DiscussionPost({
                 onVoteReply={onVoteReply}
                 onDeleteReply={onDeleteReply}
                 onEditReply={onEditReply}
-                t={t}
               />
             ))}
           </div>

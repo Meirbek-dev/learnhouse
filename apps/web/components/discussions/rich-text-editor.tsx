@@ -31,6 +31,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
+import { useTranslations } from 'next-intl';
 import Link from '@tiptap/extension-link';
 import { cn } from '@/lib/utils';
 
@@ -49,6 +50,7 @@ export default function RichTextEditor({
   className = '',
   minHeight = '150px',
 }: RichTextEditorProps) {
+  const t = useTranslations('RichTextEditor');
   const [linkUrl, setLinkUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
@@ -327,16 +329,16 @@ export default function RichTextEditor({
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Link</DialogTitle>
-              <DialogDescription>Enter the URL you want to link to.</DialogDescription>
+              <DialogTitle>{t('addLink')}</DialogTitle>
+              <DialogDescription>{t('enterUrlToLink')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
-              <Label htmlFor="link-url">URL</Label>
+              <Label htmlFor="link-url">{t('url')}</Label>
               <Input
                 id="link-url"
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
-                placeholder="https://example.com"
+                placeholder={t('urlPlaceholder')}
               />
             </div>
             <DialogFooter>
@@ -345,13 +347,13 @@ export default function RichTextEditor({
                 variant="outline"
                 onClick={() => setIsLinkDialogOpen(false)}
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button
                 type="button"
                 onClick={addLink}
               >
-                Add Link
+                {t('addLink')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -373,16 +375,16 @@ export default function RichTextEditor({
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Image</DialogTitle>
-              <DialogDescription>Enter the URL of the image you want to embed.</DialogDescription>
+              <DialogTitle>{t('addImage')}</DialogTitle>
+              <DialogDescription>{t('enterImageUrl')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
-              <Label htmlFor="image-url">Image URL</Label>
+              <Label htmlFor="image-url">{t('imageUrl')}</Label>
               <Input
                 id="image-url"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
+                placeholder={t('imagePlaceholder')}
               />
             </div>
             <DialogFooter>
@@ -391,13 +393,13 @@ export default function RichTextEditor({
                 variant="outline"
                 onClick={() => setIsImageDialogOpen(false)}
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button
                 type="button"
                 onClick={addImage}
               >
-                Add Image
+                {t('addImage')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -419,16 +421,16 @@ export default function RichTextEditor({
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Video</DialogTitle>
-              <DialogDescription>Enter a YouTube URL or video link.</DialogDescription>
+              <DialogTitle>{t('addVideo')}</DialogTitle>
+              <DialogDescription>{t('enterVideoUrl')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
-              <Label htmlFor="video-url">Video URL</Label>
+              <Label htmlFor="video-url">{t('videoUrl')}</Label>
               <Input
                 id="video-url"
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://youtube.com/watch?v=..."
+                placeholder={t('videoPlaceholder')}
               />
             </div>
             <DialogFooter>
@@ -437,13 +439,13 @@ export default function RichTextEditor({
                 variant="outline"
                 onClick={() => setIsVideoDialogOpen(false)}
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button
                 type="button"
                 onClick={addVideo}
               >
-                Add Video
+                {t('addVideo')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -465,7 +467,7 @@ export default function RichTextEditor({
             size="sm"
             className="h-8 w-8 p-0"
             disabled={isUploading}
-            title="Upload file"
+            title={t('uploadFile')}
           >
             <Upload size={16} />
           </Button>

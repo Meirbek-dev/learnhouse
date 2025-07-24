@@ -74,7 +74,7 @@ function OwnedCoursesPage() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-xl font-bold text-red-700">{t('error')}</h1>
-              <h2 className="text-sm text-red-500">Failed to load courses</h2>
+              <h2 className="text-sm text-red-500">{t('failedToLoadCourses')}</h2>
             </div>
           </div>
         </div>
@@ -97,7 +97,7 @@ function OwnedCoursesPage() {
           {ownedCourses && ownedCourses.length > 0 && (
             <div className="ml-auto">
               <span className="text-primary inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium">
-                {ownedCourses.length} {ownedCourses.length === 1 ? 'course' : 'courses'}
+                {ownedCourses.length} {ownedCourses.length === 1 ? t('course') : t('courses')}
               </span>
             </div>
           )}
