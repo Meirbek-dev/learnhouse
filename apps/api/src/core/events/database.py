@@ -2,7 +2,6 @@ import importlib
 import logging
 import os
 from collections.abc import Iterator
-from typing import Optional
 
 import logfire
 from fastapi import FastAPI
@@ -72,7 +71,7 @@ def import_all_models() -> None:
 
 
 @event.listens_for(Engine, "first_connect")
-def set_postgres_optimization(dbapi_connection, connection_record):
+def set_postgres_optimization(dbapi_connection, connection_record) -> None:
     """Optimize PostgreSQL connections if using PostgreSQL."""
     if hasattr(dbapi_connection, "server_version"):
         cursor = dbapi_connection.cursor()

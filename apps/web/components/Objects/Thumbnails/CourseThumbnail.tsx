@@ -28,7 +28,7 @@ export interface Course {
   thumbnail_image: string;
   org_id: number;
   update_date: string;
-  authors?: {
+  authors?: Array<{
     user: {
       id: number;
       user_uuid: string;
@@ -39,7 +39,7 @@ export interface Course {
     };
     authorship: 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER';
     authorship_status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
-  }[];
+  }>;
 }
 
 export interface PropsType {
@@ -107,7 +107,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
 
           {/* Course metadata overlay */}
           <div className="absolute right-2 bottom-2 left-2 flex items-end justify-between">
-            {course.update_date && (
+            {course.update_date ? (
               <Badge
                 variant="secondary"
                 className="bg-background/90 text-xs backdrop-blur-sm"
@@ -120,7 +120,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
                   year: 'numeric',
                 })}
               </Badge>
-            )}
+            ) : null}
           </div>
         </div>
       </Link>
@@ -164,13 +164,13 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
                   />
                 </div>
               ))}
-              {hasMoreAuthors && (
+              {hasMoreAuthors ? (
                 <div className="relative z-0">
                   <div className="border-background bg-muted text-muted-foreground hover:bg-muted/80 flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium transition-colors">
                     +{remainingAuthorsCount}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         )}

@@ -10,8 +10,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function ResetPasswordPage() {
+const ResetPasswordPage = () => {
   return <ResetPasswordClient />;
-}
+};
 
 export default ResetPasswordPage;

@@ -229,7 +229,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
+      const isLoggedIn = Boolean(auth?.user);
       const isAuthPage = nextUrl.pathname.startsWith('/auth');
 
       if (isAuthPage) {

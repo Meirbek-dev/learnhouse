@@ -14,7 +14,7 @@ interface SessionContextType {
 
 export const SessionContext = createContext<SessionContextType | null>(null);
 
-function LHSessionProvider({ children }: { children: ReactNode }) {
+const LHSessionProvider = ({ children }: { children: ReactNode }) => {
   const session = useSession();
 
   if (session.status === 'loading') {
@@ -22,7 +22,7 @@ function LHSessionProvider({ children }: { children: ReactNode }) {
   }
 
   return <SessionContext value={session}>{children}</SessionContext>;
-}
+};
 
 export function useLHSession(): SessionContextType {
   const context = use(SessionContext);

@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 
 import NewTaskModal from './Modals/NewTaskModal';
 
-function AssignmentTasks({ assignment_uuid }: any) {
+const AssignmentTasks = ({ assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.Tasks');
   const assignments = useAssignments() as any;
   const assignmentTask = useAssignmentsTask() as any;
@@ -29,7 +29,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
   return (
     <div className="flex h-full w-full overflow-auto">
       <div className="mx-auto flex flex-col space-y-3 p-4">
-        {assignments && assignments?.assignment_tasks?.length < 10 && (
+        {assignments && assignments?.assignment_tasks?.length < 10 ? (
           <Modal
             isDialogOpen={isNewTaskModalOpen}
             onOpenChange={setIsNewTaskModalOpen}
@@ -50,7 +50,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
               </div>
             }
           />
-        )}
+        ) : null}
         {assignments?.assignment_tasks?.map((task: any) => {
           return (
             <div
@@ -78,6 +78,6 @@ function AssignmentTasks({ assignment_uuid }: any) {
       </div>
     </div>
   );
-}
+};
 
 export default AssignmentTasks;

@@ -22,7 +22,7 @@ interface FormValues {
   file: File;
 }
 
-function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
+const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.DocumentPdfModal');
   const validationSchema = createValidationSchema(validationT);
@@ -135,6 +135,6 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
       </form>
     </Form>
   );
-}
+};
 
 export default DocumentPdfModal;

@@ -5,14 +5,13 @@ import CollectionsLogo from 'public/svg/collections.svg';
 import CoursesLogo from 'public/svg/courses.svg';
 import TrailLogo from 'public/svg/trail.svg';
 
-function TypeOfContentTitle({ title, type }: { title: string; type: string }) {
+const TypeOfContentTitle = ({ title, type }: { title: string; type: string }) => {
   const t = useTranslations('Components.TypeOfContentTitle');
 
   function getLogo() {
     if (type === 'col') return CollectionsLogo;
     if (type === 'cou') return CoursesLogo;
     if (type === 'tra') return TrailLogo;
-    return;
   }
 
   let logoAltType = 'unknown';
@@ -33,6 +32,6 @@ function TypeOfContentTitle({ title, type }: { title: string; type: string }) {
       <h1 className="text-2xl font-bold">{title}</h1>
     </div>
   );
-}
+};
 
 export default TypeOfContentTitle;

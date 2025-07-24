@@ -138,7 +138,9 @@ export const SearchBar: FC<SearchBarProps> = ({
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -163,7 +165,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         console.log('Search API Response:', response); // Debug log
 
         // Type assertion and safe access
-        const typedResponse = response.data as any;
+        const typedResponse = response.data;
 
         // Ensure we have the correct structure and handle potential undefined values
         const processedResults: SearchResults = {
@@ -432,7 +434,9 @@ export const SearchBar: FC<SearchBarProps> = ({
           className="peer ps-10 pe-2"
           value={searchQuery}
           onChange={handleSearchChange}
-          onFocus={() => setShowResults(true)}
+          onFocus={() => {
+            setShowResults(true);
+          }}
           onKeyDown={handleKeyDown}
           placeholder={t('placeholder')}
         />
@@ -445,13 +449,13 @@ export const SearchBar: FC<SearchBarProps> = ({
       </div>
 
       <div
-        className={`soft-shadow absolute z-50 mt-2 w-full transform divide-y divide-black/5 overflow-hidden rounded-xl bg-white transition-all duration-200 ease-in-out ${showResults ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
+        className={`soft-shadow absolute z-50 mt-2 w-full divide-y divide-black/5 overflow-hidden rounded-xl bg-white transition-all duration-200 ease-in-out${showResults ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
       >
         {!searchQuery.trim() || isInitialLoad ? (
           MemoizedEmptyState
         ) : (
           <>
-            {showSearchSuggestions && MemoizedSearchSuggestions}
+            {showSearchSuggestions ? MemoizedSearchSuggestions : null}
             {isLoading ? (
               <CourseResultsSkeleton />
             ) : (

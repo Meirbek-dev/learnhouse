@@ -3,7 +3,7 @@ import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-function UnconfiguredPaymentsDisclaimer() {
+const UnconfiguredPaymentsDisclaimer = () => {
   const t = useTranslations('DashPage.Payments');
 
   return (
@@ -44,6 +44,6 @@ function UnconfiguredPaymentsDisclaimer() {
       </div>
     </div>
   );
-}
+};
 
 export default UnconfiguredPaymentsDisclaimer;

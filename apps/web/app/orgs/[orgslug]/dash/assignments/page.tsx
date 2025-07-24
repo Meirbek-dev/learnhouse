@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import useSWR from 'swr';
 
-function AssignmentsHome() {
+const AssignmentsHome = () => {
   const t = useTranslations('DashPage.Assignments.HomePage');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -154,7 +154,7 @@ function AssignmentsHome() {
       </div>
     </div>
   );
-}
+};
 
 const MiniThumbnail = (props: { course: any }) => {
   const org = useOrg() as any;

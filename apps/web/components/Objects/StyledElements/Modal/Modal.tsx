@@ -68,7 +68,7 @@ const Modal = (params: ModalParams) => {
       open={params.isDialogOpen ?? false}
       onOpenChange={params.onOpenChange}
     >
-      {params.dialogTrigger && <DialogTrigger asChild>{params.dialogTrigger}</DialogTrigger>}
+      {params.dialogTrigger ? <DialogTrigger asChild>{params.dialogTrigger}</DialogTrigger> : null}
       <DialogContent
         className={cn(
           'overflow-auto',
@@ -91,22 +91,22 @@ const Modal = (params: ModalParams) => {
               <DialogTitle>{t('dialog')}</DialogTitle>
             </VisuallyHidden.Root>
           )}
-          {params.dialogDescription && <DialogDescription>{params.dialogDescription}</DialogDescription>}
+          {params.dialogDescription ? <DialogDescription>{params.dialogDescription}</DialogDescription> : null}
         </DialogHeader>
         <div>{params.dialogContent}</div>
-        {(params.dialogClose || params.addDefCloseButton) && (
+        {params.dialogClose || params.addDefCloseButton ? (
           <DialogFooter>
             {params.dialogClose}
-            {params.addDefCloseButton && (
+            {params.addDefCloseButton ? (
               <Button
                 type="submit"
                 className="transition-colors disabled:pointer-events-none disabled:opacity-50"
               >
                 {t('closeButtonDefault')}
               </Button>
-            )}
+            ) : null}
           </DialogFooter>
-        )}
+        ) : null}
       </DialogContent>
     </Dialog>
   );

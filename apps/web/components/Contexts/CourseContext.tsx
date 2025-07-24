@@ -21,7 +21,7 @@ interface CourseState {
 export const CourseContext = createContext<CourseState | null>(null);
 export const CourseDispatchContext = createContext<CourseDispatch | null>(null);
 
-export function CourseProvider({ children, courseuuid, withUnpublishedActivities = false }: any) {
+export const CourseProvider = ({ children, courseuuid, withUnpublishedActivities = false }: any) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Course');
@@ -66,9 +66,7 @@ export function CourseProvider({ children, courseuuid, withUnpublishedActivities
       </CourseContext.Provider>
     );
   }
-
-  return;
-}
+};
 
 export function useCourse() {
   const context = use(CourseContext);

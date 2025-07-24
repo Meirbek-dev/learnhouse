@@ -13,8 +13,7 @@ export async function getCourseChaptersMetadata(course_uuid: string, next: any, 
     `${getAPIUrl()}chapters/meta/course_${course_uuid}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function updateChaptersMetadata(course_uuid: string, data: any, access_token: string) {
@@ -22,8 +21,7 @@ export async function updateChaptersMetadata(course_uuid: string, data: any, acc
     `${getAPIUrl()}chapters/course/course_${course_uuid}/order`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function updateChapter(coursechapter_id: number, data: any, access_token: string) {
@@ -31,8 +29,7 @@ export async function updateChapter(coursechapter_id: number, data: any, access_
     `${getAPIUrl()}chapters/${coursechapter_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function updateCourseOrderStructure(course_uuid: string, data: OrderPayload, access_token: string) {
@@ -40,8 +37,7 @@ export async function updateCourseOrderStructure(course_uuid: string, data: Orde
     `${getAPIUrl()}chapters/course/${course_uuid}/order`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function createChapter(data: any, access_token: string) {
@@ -49,9 +45,7 @@ export async function createChapter(data: any, access_token: string) {
     `${getAPIUrl()}chapters/`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
   );
-  const res = await errorHandling(result);
-
-  return res;
+  return await errorHandling(result);
 }
 
 export async function deleteChapter(coursechapter_id: number, access_token: string) {
@@ -59,6 +53,5 @@ export async function deleteChapter(coursechapter_id: number, access_token: stri
     `${getAPIUrl()}chapters/${coursechapter_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }

@@ -408,7 +408,7 @@ const OrgEditLanding = () => {
           </div>
         </div>
 
-        {isLandingEnabled && (
+        {isLandingEnabled ? (
           <>
             {/* Section List */}
             <div className="grid grid-cols-4 gap-6">
@@ -433,7 +433,9 @@ const OrgEditLanding = () => {
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                onClick={() => setSelectedSection(index)}
+                                onClick={() => {
+                                  setSelectedSection(index);
+                                }}
                                 className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
                                   selectedSection === index
                                     ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
@@ -459,7 +461,7 @@ const OrgEditLanding = () => {
                                           : 'bg-gray-100/50 text-gray-600'
                                       }`}
                                     >
-                                      {createElement(SECTION_TYPES[section.type as keyof typeof SECTION_TYPES].icon, {
+                                      {createElement(SECTION_TYPES[section.type].icon, {
                                         size: 16,
                                       })}
                                     </div>
@@ -557,7 +559,9 @@ const OrgEditLanding = () => {
                   <SectionEditor
                     t={t}
                     section={landingData.sections[selectedSection]}
-                    onChange={(updatedSection) => updateSection(selectedSection, updatedSection)}
+                    onChange={(updatedSection) => {
+                      updateSection(selectedSection, updatedSection);
+                    }}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-gray-500">
@@ -567,7 +571,7 @@ const OrgEditLanding = () => {
               </div>
             </div>
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -664,7 +668,9 @@ const HeroSectionEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Editor.sectionTitlePlaceholder')}
           />
         </div>
@@ -715,12 +721,12 @@ const HeroSectionEditor: FC<{
                 <Input
                   id="heading"
                   value={section.heading.text}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     onChange({
                       ...section,
                       heading: { ...section.heading, text: e.target.value },
-                    })
-                  }
+                    });
+                  }}
                   placeholder={t('HeroEditor.Content.headingPlaceholder')}
                 />
               </div>
@@ -731,22 +737,22 @@ const HeroSectionEditor: FC<{
                     id="headingColor"
                     type="color"
                     value={section.heading.color}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       onChange({
                         ...section,
                         heading: { ...section.heading, color: e.target.value },
-                      })
-                    }
+                      });
+                    }}
                     className="h-10 w-20 p-1"
                   />
                   <Input
                     value={section.heading.color}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       onChange({
                         ...section,
                         heading: { ...section.heading, color: e.target.value },
-                      })
-                    }
+                      });
+                    }}
                     placeholder="#000000"
                     className="font-mono"
                   />
@@ -761,15 +767,15 @@ const HeroSectionEditor: FC<{
                 <Input
                   id="subheading"
                   value={section.subheading.text}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     onChange({
                       ...section,
                       subheading: {
                         ...section.subheading,
                         text: e.target.value,
                       },
-                    })
-                  }
+                    });
+                  }}
                   placeholder={t('HeroEditor.Content.subheadingPlaceholder')}
                 />
               </div>
@@ -780,28 +786,28 @@ const HeroSectionEditor: FC<{
                     id="subheadingColor"
                     type="color"
                     value={section.subheading.color}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       onChange({
                         ...section,
                         subheading: {
                           ...section.subheading,
                           color: e.target.value,
                         },
-                      })
-                    }
+                      });
+                    }}
                     className="h-10 w-20 p-1"
                   />
                   <Input
                     value={section.subheading.color}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       onChange({
                         ...section,
                         subheading: {
                           ...section.subheading,
                           color: e.target.value,
                         },
-                      })
-                    }
+                      });
+                    }}
                     placeholder="#666666"
                     className="font-mono"
                   />
@@ -849,28 +855,28 @@ const HeroSectionEditor: FC<{
                     id="backgroundColor"
                     type="color"
                     value={section.background.color || '#ffffff'}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       onChange({
                         ...section,
                         background: {
                           ...section.background,
                           color: e.target.value,
                         },
-                      })
-                    }
+                      });
+                    }}
                     className="h-10 w-20 p-1"
                   />
                   <Input
                     value={section.background.color || '#ffffff'}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       onChange({
                         ...section,
                         background: {
                           ...section.background,
                           color: e.target.value,
                         },
-                      })
-                    }
+                      });
+                    }}
                     placeholder="#ffffff"
                     className="font-mono"
                   />
@@ -936,28 +942,28 @@ const HeroSectionEditor: FC<{
                         <Input
                           type="color"
                           value={section.background.colors?.[0] || '#ffffff'}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             onChange({
                               ...section,
                               background: {
                                 ...section.background,
                                 colors: [e.target.value, section.background.colors?.[1] || '#f0f0f0'],
                               },
-                            })
-                          }
+                            });
+                          }}
                           className="h-10 w-20 p-1"
                         />
                         <Input
                           value={section.background.colors?.[0] || '#ffffff'}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             onChange({
                               ...section,
                               background: {
                                 ...section.background,
                                 colors: [e.target.value, section.background.colors?.[1] || '#f0f0f0'],
                               },
-                            })
-                          }
+                            });
+                          }}
                           placeholder="#ffffff"
                           className="font-mono"
                         />
@@ -970,28 +976,28 @@ const HeroSectionEditor: FC<{
                         <Input
                           type="color"
                           value={section.background.colors?.[1] || '#f0f0f0'}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             onChange({
                               ...section,
                               background: {
                                 ...section.background,
                                 colors: [section.background.colors?.[0] || '#ffffff', e.target.value],
                               },
-                            })
-                          }
+                            });
+                          }}
                           className="h-10 w-20 p-1"
                         />
                         <Input
                           value={section.background.colors?.[1] || '#f0f0f0'}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             onChange({
                               ...section,
                               background: {
                                 ...section.background,
                                 colors: [section.background.colors?.[0] || '#ffffff', e.target.value],
                               },
-                            })
-                          }
+                            });
+                          }}
                           placeholder="#f0f0f0"
                           className="font-mono"
                         />
@@ -1009,7 +1015,7 @@ const HeroSectionEditor: FC<{
                             gradient.colors[1] === section.background.colors?.[1],
                         )?.[0] || 'sunrise'
                       }
-                      onValueChange={(value) =>
+                      onValueChange={(value) => {
                         onChange({
                           ...section,
                           background: {
@@ -1017,8 +1023,8 @@ const HeroSectionEditor: FC<{
                             colors: PREDEFINED_GRADIENTS[value as keyof typeof PREDEFINED_GRADIENTS].colors,
                             direction: PREDEFINED_GRADIENTS[value as keyof typeof PREDEFINED_GRADIENTS].direction,
                           },
-                        })
-                      }
+                        });
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={t('HeroEditor.Background.gradientPresetPlaceholder')} />
@@ -1049,12 +1055,12 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Background.gradientDirectionLabel')}</Label>
                   <Select
                     value={section.background.direction || '45deg'}
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
                       onChange({
                         ...section,
                         background: { ...section.background, direction: value },
-                      })
-                    }
+                      });
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Background.gradientDirectionPlaceholder')} />
@@ -1106,7 +1112,7 @@ const HeroSectionEditor: FC<{
                       title={t('ImageUploader.selectFile')}
                     />
                   </div>
-                  {section.background.image && (
+                  {section.background.image ? (
                     <div className="mt-4">
                       <img
                         src={section.background.image}
@@ -1114,7 +1120,7 @@ const HeroSectionEditor: FC<{
                         className="max-h-40 rounded-lg object-cover"
                       />
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             )}
@@ -1279,7 +1285,7 @@ const HeroSectionEditor: FC<{
                 />
                 <ImageUploader
                   id="hero-illustration"
-                  onImageUploaded={(url) =>
+                  onImageUploaded={(url) => {
                     onChange({
                       ...section,
                       illustration: {
@@ -1291,18 +1297,18 @@ const HeroSectionEditor: FC<{
                         verticalAlign: 'center',
                         size: 'medium',
                       },
-                    })
-                  }
+                    });
+                  }}
                   buttonText={t('HeroEditor.Illustration.uploadButton')}
                   t={t}
                 />
-                {section.illustration?.image.url && (
+                {section.illustration?.image.url ? (
                   <img
                     src={section.illustration?.image.url}
                     alt={t('HeroEditor.Illustration.imagePreviewAlt')}
                     className="h-12 object-contain"
                   />
-                )}
+                ) : null}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -1310,7 +1316,7 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Illustration.positionLabel')}</Label>
                   <Select
                     value={section.illustration?.position || 'left'}
-                    onValueChange={(value: 'left' | 'right') =>
+                    onValueChange={(value: 'left' | 'right') => {
                       onChange({
                         ...section,
                         illustration: {
@@ -1323,8 +1329,8 @@ const HeroSectionEditor: FC<{
                           size: section.illustration?.size || 'medium',
                           verticalAlign: section.illustration?.verticalAlign || 'center',
                         },
-                      })
-                    }
+                      });
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Illustration.positionPlaceholder')} />
@@ -1340,7 +1346,7 @@ const HeroSectionEditor: FC<{
                   <Label>{t('HeroEditor.Illustration.sizeLabel')}</Label>
                   <Select
                     value={section.illustration?.size || 'medium'}
-                    onValueChange={(value: 'small' | 'medium' | 'large') =>
+                    onValueChange={(value: 'small' | 'medium' | 'large') => {
                       onChange({
                         ...section,
                         illustration: {
@@ -1350,11 +1356,11 @@ const HeroSectionEditor: FC<{
                             url: '',
                             alt: '',
                           },
-                          position: (section.illustration?.position || 'left') as 'left' | 'right',
+                          position: section.illustration?.position || 'left',
                           verticalAlign: section.illustration?.verticalAlign || 'center',
                         },
-                      })
-                    }
+                      });
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('HeroEditor.Illustration.sizePlaceholder')} />
@@ -1368,20 +1374,20 @@ const HeroSectionEditor: FC<{
                 </div>
               </div>
 
-              {section.illustration?.image.url && (
+              {section.illustration?.image.url ? (
                 <Button
                   variant="ghost"
-                  onClick={() =>
+                  onClick={() => {
                     onChange({
                       ...section,
                       illustration: undefined,
-                    })
-                  }
+                    });
+                  }}
                   className="w-full text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                 </Button>
-              )}
+              ) : null}
             </div>
           </TabsContent>
         </Tabs>
@@ -1474,7 +1480,9 @@ const TextAndImageSectionEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Editor.sectionTitlePlaceholder')}
           />
         </div>
@@ -1485,7 +1493,9 @@ const TextAndImageSectionEditor: FC<{
           <Textarea
             id="content"
             value={section.text}
-            onChange={(e) => onChange({ ...section, text: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, text: e.target.value });
+            }}
             placeholder={t('TextAndImageEditor.contentPlaceholder')}
             className="min-h-[100px]"
           />
@@ -1496,7 +1506,9 @@ const TextAndImageSectionEditor: FC<{
           <Label htmlFor="flow">{t('TextAndImageEditor.imagePositionLabel')}</Label>
           <Select
             value={section.flow}
-            onValueChange={(value) => onChange({ ...section, flow: value as 'left' | 'right' })}
+            onValueChange={(value) => {
+              onChange({ ...section, flow: value as 'left' | 'right' });
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder={t('TextAndImageEditor.imagePositionPlaceholder')} />
@@ -1515,22 +1527,22 @@ const TextAndImageSectionEditor: FC<{
             <div className="space-y-2">
               <Input
                 value={section.image.url}
-                onChange={(e) =>
+                onChange={(e) => {
                   onChange({
                     ...section,
                     image: { ...section.image, url: e.target.value },
-                  })
-                }
+                  });
+                }}
                 placeholder={t('TextAndImageEditor.imageUrlPlaceholder')}
               />
               <ImageUploader
                 id="text-image-section"
-                onImageUploaded={(url) =>
+                onImageUploaded={(url) => {
                   onChange({
                     ...section,
                     image: { ...section.image, url },
-                  })
-                }
+                  });
+                }}
                 buttonText={t('TextAndImageEditor.uploadImageButton')}
                 t={t}
               />
@@ -1538,17 +1550,17 @@ const TextAndImageSectionEditor: FC<{
             <div>
               <Input
                 value={section.image.alt}
-                onChange={(e) =>
+                onChange={(e) => {
                   onChange({
                     ...section,
                     image: { ...section.image, alt: e.target.value },
-                  })
-                }
+                  });
+                }}
                 placeholder={t('TextAndImageEditor.imageAltPlaceholder')}
               />
             </div>
           </div>
-          {section.image.url && (
+          {section.image.url ? (
             <div className="mt-4">
               <img
                 src={section.image.url}
@@ -1556,7 +1568,7 @@ const TextAndImageSectionEditor: FC<{
                 className="max-h-40 rounded-lg object-cover"
               />
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -1586,7 +1598,9 @@ const LogosSectionEditor: FC<{
             <Input
               id="title"
               value={section.title}
-              onChange={(e) => onChange({ ...section, title: e.target.value })}
+              onChange={(e) => {
+                onChange({ ...section, title: e.target.value });
+              }}
               placeholder={t('Editor.sectionTitlePlaceholder')}
             />
           </div>
@@ -1628,13 +1642,13 @@ const LogosSectionEditor: FC<{
                   }}
                   placeholder={t('LogosEditor.logoAltPlaceholder')}
                 />
-                {logo.url && (
+                {logo.url ? (
                   <img
                     src={logo.url}
                     alt={logo.alt}
                     className="h-10 object-contain"
                   />
-                )}
+                ) : null}
               </div>
               <Button
                 variant="ghost"
@@ -1694,7 +1708,9 @@ const PeopleSectionEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Editor.sectionTitlePlaceholder')}
           />
         </div>
@@ -1770,13 +1786,13 @@ const PeopleSectionEditor: FC<{
                       buttonText={t('PeopleEditor.uploadAvatarButton')}
                       t={t}
                     />
-                    {person.image_url && (
+                    {person.image_url ? (
                       <img
                         src={person.image_url}
                         alt={person.name}
                         className="h-12 w-12 rounded-full object-cover"
                       />
-                    )}
+                    ) : null}
                   </div>
                 </div>
 
@@ -1868,7 +1884,9 @@ const FeaturedCoursesEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Editor.sectionTitlePlaceholder')}
           />
         </div>
@@ -1886,13 +1904,13 @@ const FeaturedCoursesEditor: FC<{
                   >
                     <div className="flex items-center space-x-3">
                       <div className="h-12 w-12 overflow-hidden rounded-md bg-gray-100">
-                        {course.course_thumbnail && (
+                        {course.course_thumbnail ? (
                           <img
                             src={course.course_thumbnail}
                             alt={course.name}
                             className="h-full w-full object-cover"
                           />
-                        )}
+                        ) : null}
                       </div>
                       <div>
                         <h4 className="font-medium">{course.name}</h4>

@@ -9,7 +9,13 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
     <html lang="en">
       <body>
         <h2>{t('somethingWentWrong')}</h2>
-        <button onClick={() => reset()}>{t('tryAgain')}</button>
+        <button
+          onClick={() => {
+            reset();
+          }}
+        >
+          {t('tryAgain')}
+        </button>
       </body>
     </html>
   );

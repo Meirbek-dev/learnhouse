@@ -1,11 +1,11 @@
 import UserProfileBuilder from './UserProfileBuilder';
 
-function UserProfile() {
+const UserProfile = () => {
   return (
     <div>
       <UserProfileBuilder />
     </div>
   );
-}
+};
 
 export default UserProfile;

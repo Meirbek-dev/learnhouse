@@ -65,7 +65,7 @@ export default async function middleware(req: NextRequest) {
 
   // Check if the request is for the Stripe callback URL
   if (req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
-    const searchParams = req.nextUrl.searchParams;
+    const { searchParams } = req.nextUrl;
     const orgslug = searchParams.get('state')?.split('_')[0]; // Assuming state parameter contains orgslug_randomstring
 
     // Construct the new URL with the required parameters

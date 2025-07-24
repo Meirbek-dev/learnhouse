@@ -13,8 +13,7 @@ import { getAPIUrl } from '@services/config/config';
 
 export async function createNewOrganization(body: any, access_token: string) {
   const result = await fetch(`${getAPIUrl()}orgs/`, RequestBodyWithAuthHeader('POST', body, null, access_token));
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function deleteOrganizationFromBackend(org_id: number, access_token: string) {
@@ -22,8 +21,7 @@ export async function deleteOrganizationFromBackend(org_id: number, access_token
     `${getAPIUrl()}orgs/${org_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getOrganizationContextInfo(org_slug: any, next: any, access_token?: string) {
@@ -31,8 +29,7 @@ export async function getOrganizationContextInfo(org_slug: any, next: any, acces
     `${getAPIUrl()}orgs/slug/${org_slug}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getOrganizationContextInfoWithId(org_id: number, next: any, access_token: string) {
@@ -40,8 +37,7 @@ export async function getOrganizationContextInfoWithId(org_id: number, next: any
     `${getAPIUrl()}orgs/${org_id}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getOrganizationContextInfoWithoutCredentials(org_slug: any, next: any) {
@@ -55,16 +51,11 @@ export async function getOrganizationContextInfoWithoutCredentials(org_slug: any
   };
 
   const result = await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, options);
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export function getOrganizationContextInfoNoAsync(org_slug: any, next: any, access_token: string) {
-  const result = fetch(
-    `${getAPIUrl()}orgs/slug/${org_slug}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
-  return result;
+  return fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, RequestBodyWithAuthHeader('GET', null, next, access_token));
 }
 
 export async function updateUserRole(org_id: number, user_id: number, role_uuid: string, access_token: string) {
@@ -72,8 +63,7 @@ export async function updateUserRole(org_id: number, user_id: number, role_uuid:
     `${getAPIUrl()}orgs/${org_id}/users/${user_id}/role/${role_uuid}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function updateOrgLanding(org_id: number, landing_object: any, access_token: string) {
@@ -81,8 +71,7 @@ export async function updateOrgLanding(org_id: number, landing_object: any, acce
     `${getAPIUrl()}orgs/${org_id}/landing`,
     RequestBodyWithAuthHeader('PUT', landing_object, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function uploadLandingContent(org_uuid: string, content_file: File, access_token: string) {
@@ -93,8 +82,7 @@ export async function uploadLandingContent(org_uuid: string, content_file: File,
     `${getAPIUrl()}orgs/${org_uuid}/landing/content`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function removeUserFromOrg(org_id: number, user_id: number, access_token: string) {
@@ -102,8 +90,7 @@ export async function removeUserFromOrg(org_id: number, user_id: number, access_
     `${getAPIUrl()}orgs/${org_id}/users/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function joinOrg(
@@ -125,6 +112,5 @@ export async function joinOrg(
     `${getAPIUrl()}orgs/join`,
     RequestBodyWithAuthHeader('POST', cleanArgs, next, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

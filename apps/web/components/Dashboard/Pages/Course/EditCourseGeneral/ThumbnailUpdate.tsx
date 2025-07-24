@@ -27,7 +27,7 @@ interface ThumbnailUpdateProps {
 
 type TabType = 'image' | 'video';
 
-function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
+const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const course = useCourse() as any;
@@ -162,7 +162,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
       );
       await new Promise((r) => setTimeout(r, 1500));
 
-      if (res.success === false) {
+      if (!res.success) {
         showError(res.HTTPmessage);
       } else {
         setLocalThumbnail(null);
@@ -277,7 +277,7 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           />
           <Button
             type="button"
-            variant={'outline'}
+            variant="outline"
             className="flex items-center gap-2 px-4 py-2"
             onClick={() => imageInputRef.current?.click()}
           >
@@ -286,9 +286,11 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
           </Button>
           <Button
             type="button"
-            variant={'outline'}
+            variant="outline"
             className="flex items-center gap-2 px-4 py-2"
-            onClick={() => setShowUnsplashPicker(true)}
+            onClick={() => {
+              setShowUnsplashPicker(true);
+            }}
           >
             <ImageIcon size={16} />
             {t('gallery')}
@@ -331,7 +333,9 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
                 ? 'border-b-2 border-blue-600 bg-blue-50/50 text-blue-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
-            onClick={() => setActiveTab('image')}
+            onClick={() => {
+              setActiveTab('image');
+            }}
           >
             <ImageIcon size={16} />
             {t('image')}
@@ -342,7 +346,9 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
                 ? 'border-b-2 border-blue-600 bg-blue-50/50 text-blue-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
-            onClick={() => setActiveTab('video')}
+            onClick={() => {
+              setActiveTab('video');
+            }}
           >
             <Video size={16} />
             {t('video')}
@@ -362,14 +368,16 @@ function ThumbnailUpdate({ thumbnailType }: ThumbnailUpdateProps) {
         </div>
       </div>
 
-      {showUnsplashPicker && (
+      {showUnsplashPicker ? (
         <UnsplashImagePicker
           onSelect={handleUnsplashSelect}
-          onClose={() => setShowUnsplashPicker(false)}
+          onClose={() => {
+            setShowUnsplashPicker(false);
+          }}
         />
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 export default ThumbnailUpdate;

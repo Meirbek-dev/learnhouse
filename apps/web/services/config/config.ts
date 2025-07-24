@@ -25,7 +25,7 @@ export const getOrgFromUri = () => {
   if (multi_org) {
     getDefaultOrg();
   } else if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
+    const { hostname } = window.location;
 
     return hostname.replace(`.${OPENU_DOMAIN}`, '');
   }

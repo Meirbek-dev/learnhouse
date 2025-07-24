@@ -15,7 +15,7 @@ interface ManageUsersProps {
   usergroup_id: number;
 }
 
-function ManageUsers(props: ManageUsersProps) {
+const ManageUsers = (props: ManageUsersProps) => {
   const t = useTranslations('Components.ManageUsers');
   const org = useOrg() as any;
   const session = useLHSession() as any;
@@ -112,6 +112,6 @@ function ManageUsers(props: ManageUsersProps) {
       </Table>
     </div>
   );
-}
+};
 
 export default ManageUsers;

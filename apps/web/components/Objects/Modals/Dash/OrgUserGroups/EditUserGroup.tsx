@@ -30,7 +30,7 @@ const createValidationSchema = (t: (key: string) => string) =>
 
 type UserGroupFormValues = z.infer<ReturnType<typeof createValidationSchema>>;
 
-function EditUserGroup(props: EditUserGroupProps) {
+const EditUserGroup = (props: EditUserGroupProps) => {
   const t = useTranslations('Components.EditUserGroup');
   const org = useOrg() as any;
   const session = useLHSession() as any;
@@ -108,6 +108,6 @@ function EditUserGroup(props: EditUserGroupProps) {
       </form>
     </Form>
   );
-}
+};
 
 export default EditUserGroup;

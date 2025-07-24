@@ -116,7 +116,9 @@ const ConfirmationModal = (params: ModalParams) => {
       open={isDialogOpen}
       onOpenChange={onOpenChange}
     >
-      {params.dialogTrigger && <DialogTrigger asChild>{getSafeDialogTrigger(params.dialogTrigger)}</DialogTrigger>}
+      {params.dialogTrigger ? (
+        <DialogTrigger asChild>{getSafeDialogTrigger(params.dialogTrigger)}</DialogTrigger>
+      ) : null}
       <DialogContent
         className={cn(sizeConfig)}
         aria-describedby="confirmation-description"
@@ -149,7 +151,9 @@ const ConfirmationModal = (params: ModalParams) => {
           {params.showCancelButton !== false && (
             <Button
               variant="outline"
-              onClick={() => setIsDialogOpen(false)}
+              onClick={() => {
+                setIsDialogOpen(false);
+              }}
               className="w-full sm:w-auto"
               disabled={isExecuting}
               type="button"

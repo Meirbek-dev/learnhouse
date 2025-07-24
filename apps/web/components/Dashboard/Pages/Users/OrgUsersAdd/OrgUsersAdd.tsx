@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 
-function OrgUsersAdd() {
+const OrgUsersAdd = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -84,7 +84,9 @@ function OrgUsersAdd() {
             <div className="mx-auto flex space-x-2">
               <Textarea
                 value={invitedUsers}
-                onChange={(e) => setInvitedUsers(e.target.value)}
+                onChange={(e) => {
+                  setInvitedUsers(e.target.value);
+                }}
                 className="h-[200px] w-full italic"
                 placeholder={t('textAreaPlaceholder')}
                 name="invitedUsers"
@@ -203,6 +205,6 @@ function OrgUsersAdd() {
       )}
     </>
   );
-}
+};
 
 export default OrgUsersAdd;

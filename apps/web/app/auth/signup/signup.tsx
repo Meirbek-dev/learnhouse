@@ -26,7 +26,7 @@ interface SignUpClientProps {
   org: any;
 }
 
-function SignUpClient(props: SignUpClientProps) {
+const SignUpClient = (props: SignUpClientProps) => {
   const session = useLHSession() as any;
   const [joinMethod, setJoinMethod] = useState('open');
   const [inviteCode, setInviteCode] = useState('');
@@ -78,7 +78,7 @@ function SignUpClient(props: SignUpClientProps) {
       </div>
     </div>
   );
-}
+};
 
 const LoggedInJoinScreen = (props: any) => {
   const t = useTranslations('Auth.Signup');

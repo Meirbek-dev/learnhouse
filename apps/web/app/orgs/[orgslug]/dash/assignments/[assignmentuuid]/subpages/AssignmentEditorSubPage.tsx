@@ -10,12 +10,12 @@ import AssignmentTasks from '../_components/Tasks';
 
 const AssignmentTaskEditor = dynamic(() => import('../_components/TaskEditor/TaskEditor'));
 
-function AssignmentEditorSubPage({ assignmentuuid }: { assignmentuuid: string }) {
+const AssignmentEditorSubPage = ({ assignmentuuid }: { assignmentuuid: string }) => {
   const t = useTranslations('DashPage.Assignments');
 
   return (
     <AssignmentsTaskProvider>
-      <div className="custom-dots-bg flex h-full w-[350px] flex-shrink-0 flex-col">
+      <div className="custom-dots-bg flex h-full w-[350px] shrink-0 flex-col">
         <div className="mx-auto my-5 flex items-center space-x-2 rounded-full bg-neutral-600/80 px-3.5 py-1 text-sm font-bold text-white">
           <LayoutList size={18} />
           <p>{t('tasks')}</p>
@@ -31,6 +31,6 @@ function AssignmentEditorSubPage({ assignmentuuid }: { assignmentuuid: string })
       </div>
     </AssignmentsTaskProvider>
   );
-}
+};
 
 export default AssignmentEditorSubPage;

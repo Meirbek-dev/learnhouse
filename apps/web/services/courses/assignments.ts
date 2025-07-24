@@ -10,8 +10,7 @@ export async function createAssignment(body: any, access_token: string) {
     `${getAPIUrl()}assignments/`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function updateAssignment(body: any, assignmentUUID: string, access_token: string) {
@@ -19,8 +18,7 @@ export async function updateAssignment(body: any, assignmentUUID: string, access
     `${getAPIUrl()}assignments/${assignmentUUID}`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getAssignmentFromActivityUUID(activityUUID: string, access_token: string) {
@@ -28,8 +26,7 @@ export async function getAssignmentFromActivityUUID(activityUUID: string, access
     `${getAPIUrl()}assignments/activity/${activityUUID}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 // Delete an assignment
@@ -38,8 +35,7 @@ export async function deleteAssignment(assignmentUUID: string, access_token: str
     `${getAPIUrl()}assignments/${assignmentUUID}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function deleteAssignmentUsingActivityUUID(activityUUID: string, access_token: string) {
@@ -47,8 +43,7 @@ export async function deleteAssignmentUsingActivityUUID(activityUUID: string, ac
     `${getAPIUrl()}assignments/activity/${activityUUID}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 // tasks
@@ -58,8 +53,7 @@ export async function createAssignmentTask(body: any, assignmentUUID: string, ac
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getAssignmentTask(assignmentTaskUUID: string, access_token: string) {
@@ -67,8 +61,7 @@ export async function getAssignmentTask(assignmentTaskUUID: string, access_token
     `${getAPIUrl()}assignments/task/${assignmentTaskUUID}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getAssignmentTaskSubmissionsMe(
@@ -80,8 +73,7 @@ export async function getAssignmentTaskSubmissionsMe(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/submissions/me`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getAssignmentTaskSubmissionsUser(
@@ -94,8 +86,7 @@ export async function getAssignmentTaskSubmissionsUser(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/submissions/user/${user_id}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function handleAssignmentTaskSubmission(
@@ -108,8 +99,7 @@ export async function handleAssignmentTaskSubmission(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/submissions`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function updateAssignmentTask(
@@ -122,8 +112,7 @@ export async function updateAssignmentTask(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function deleteAssignmentTask(assignmentTaskUUID: string, assignmentUUID: string, access_token: string) {
@@ -131,8 +120,7 @@ export async function deleteAssignmentTask(assignmentTaskUUID: string, assignmen
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function updateReferenceFile(
@@ -151,8 +139,7 @@ export async function updateReferenceFile(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/ref_file`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function updateSubFile(
@@ -171,8 +158,7 @@ export async function updateSubFile(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/sub_file`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 // submissions
@@ -182,8 +168,7 @@ export async function submitAssignmentForGrading(assignmentUUID: string, access_
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function deleteUserSubmission(user_id: number, assignmentUUID: string, access_token: string) {
@@ -191,8 +176,7 @@ export async function deleteUserSubmission(user_id: number, assignmentUUID: stri
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function putUserSubmission(body: any, user_id: number, assignmentUUID: string, access_token: string) {
@@ -200,8 +184,7 @@ export async function putUserSubmission(body: any, user_id: number, assignmentUU
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function putFinalGrade(user_id: number, assignmentUUID: string, access_token: string) {
@@ -209,8 +192,7 @@ export async function putFinalGrade(user_id: number, assignmentUUID: string, acc
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}/grade`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getFinalGrade(user_id: number, assignmentUUID: string, access_token: string) {
@@ -218,8 +200,7 @@ export async function getFinalGrade(user_id: number, assignmentUUID: string, acc
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}/grade`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function markActivityAsDoneForUser(user_id: number, assignmentUUID: string, access_token: string) {
@@ -227,8 +208,7 @@ export async function markActivityAsDoneForUser(user_id: number, assignmentUUID:
     `${getAPIUrl()}assignments/${assignmentUUID}/submissions/${user_id}/done`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getAssignmentsFromACourse(courseUUID: string, access_token: string) {
@@ -236,8 +216,7 @@ export async function getAssignmentsFromACourse(courseUUID: string, access_token
     `${getAPIUrl()}assignments/course/${courseUUID}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function createAssignmentWithActivity(
@@ -250,6 +229,5 @@ export async function createAssignmentWithActivity(
     `${getAPIUrl()}assignments/with-activity?chapter_id=${chapterId}&activity_name=${encodeURIComponent(activityName)}`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

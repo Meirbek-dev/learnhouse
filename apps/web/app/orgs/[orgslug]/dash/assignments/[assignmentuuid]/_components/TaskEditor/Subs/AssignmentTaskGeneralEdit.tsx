@@ -35,7 +35,7 @@ const createValidationSchema = (t: (key: string) => string) =>
 
 type TaskFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
-export function AssignmentTaskGeneralEdit() {
+export const AssignmentTaskGeneralEdit = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -211,7 +211,9 @@ export function AssignmentTaskGeneralEdit() {
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -229,9 +231,9 @@ export function AssignmentTaskGeneralEdit() {
       </form>
     </Form>
   );
-}
+};
 
-function UpdateTaskRef() {
+const UpdateTaskRef = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
   const session = useLHSession() as any;
   const org = useOrg() as any;
@@ -257,7 +259,7 @@ function UpdateTaskRef() {
     assignmentTaskStateHook({ type: 'reload' });
     // wait for 1.5 second to show loading animation
     await new Promise((r) => setTimeout(r, 1500));
-    if (res.success === false) {
+    if (!res.success) {
       setError(res.data.detail);
       setIsLoading(false);
     } else {
@@ -292,15 +294,15 @@ function UpdateTaskRef() {
       <div className="flex h-full flex-col items-center justify-center">
         <div className="flex flex-col items-center justify-center">
           <div className="flex flex-col items-center justify-center">
-            {error && (
+            {error ? (
               <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-2 text-red-950 shadow-xs transition-all">
                 <div className="text-sm font-semibold">{error}</div>
               </div>
-            )}
+            ) : null}
           </div>
-          {assignmentTaskState.assignmentTask.reference_file && !isLoading && (
+          {assignmentTaskState.assignmentTask.reference_file && !isLoading ? (
             <div className="soft-shadow relative flex flex-col items-center space-y-1 rounded-lg bg-white px-5 py-3 text-gray-400 shadow-lg">
-              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
+              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-green-500 px-1.5 py-1.5 text-white">
                 <Cloud size={15} />
               </div>
               <File
@@ -323,7 +325,7 @@ function UpdateTaskRef() {
                                     className='bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>{t('delete')}</button> */}
               </div>
             </div>
-          )}
+          ) : null}
 
           {isLoading ? (
             <div className="flex items-center justify-center">
@@ -371,4 +373,4 @@ function UpdateTaskRef() {
       </div>
     </div>
   );
-}
+};

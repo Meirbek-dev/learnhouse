@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
-function PDFBlockComponent(props: any) {
+const PDFBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.PDFBlock');
   const org = useOrg() as any;
   const course = useCourse() as any;
@@ -102,7 +102,7 @@ function PDFBlockComponent(props: any) {
             disabled={!pdf}
           />
         </FileUploadBlock>
-        {blockObject && (
+        {blockObject ? (
           <div className="flex flex-col">
             <div className="relative">
               <iframe
@@ -130,17 +130,17 @@ function PDFBlockComponent(props: any) {
               </div>
             </div>
           </div>
-        )}
-        {isLoading && (
+        ) : null}
+        {isLoading ? (
           <div>
             <AlertTriangle
               color="#e1e0e0"
               size={50}
             />
           </div>
-        )}
+        ) : null}
       </NodeViewWrapper>
-      {blockObject && pdfUrl && (
+      {blockObject && pdfUrl ? (
         <Modal
           isDialogOpen={isModalOpen}
           onOpenChange={setIsModalOpen}
@@ -157,9 +157,9 @@ function PDFBlockComponent(props: any) {
             </div>
           }
         />
-      )}
+      ) : null}
     </>
   );
-}
+};
 
 export default PDFBlockComponent;

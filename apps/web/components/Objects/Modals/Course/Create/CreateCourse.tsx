@@ -215,7 +215,9 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
                           type="button"
                           variant="ghost"
                           className="mt-6"
-                          onClick={() => setShowUnsplashPicker(true)}
+                          onClick={() => {
+                            setShowUnsplashPicker(true);
+                          }}
                         >
                           <ImageIcon
                             size={16}
@@ -277,7 +279,9 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
               <FormLabel>{t('labelVisibility')}</FormLabel>
               <Select
                 value={field.value.toString()}
-                onValueChange={(value) => field.onChange(value === 'true')}
+                onValueChange={(value) => {
+                  field.onChange(value === 'true');
+                }}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -311,12 +315,14 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
           </Button>
         </div>
 
-        {showUnsplashPicker && (
+        {showUnsplashPicker ? (
           <UnsplashImagePicker
             onSelect={handleUnsplashSelect}
-            onClose={() => setShowUnsplashPicker(false)}
+            onClose={() => {
+              setShowUnsplashPicker(false);
+            }}
           />
-        )}
+        ) : null}
       </form>
     </Form>
   );

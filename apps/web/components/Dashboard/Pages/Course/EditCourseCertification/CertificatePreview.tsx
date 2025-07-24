@@ -149,7 +149,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             <div className="absolute inset-4 rounded-md border-2 border-amber-300 opacity-40" />
 
             {/* Crown-like decorations in corners */}
-            <div className="absolute top-1 left-1/2 -translate-x-1/2 transform">
+            <div className="absolute top-1 left-1/2 -translate-x-1/2">
               <div
                 className="h-4 w-8 bg-amber-200 opacity-50"
                 style={{
@@ -157,7 +157,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 }}
               />
             </div>
-            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 rotate-180 transform">
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 rotate-180">
               <div
                 className="h-4 w-8 bg-amber-200 opacity-50"
                 style={{
@@ -224,17 +224,17 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             <div className="absolute inset-3 rounded-2xl border-2 border-green-200 opacity-50" />
 
             {/* Leaf-like decorations */}
-            <div className="absolute top-2 left-2 h-6 w-4 rotate-45 transform rounded-full bg-green-200 opacity-50" />
-            <div className="absolute top-2 left-4 h-4 w-3 rotate-12 transform rounded-full bg-green-300 opacity-40" />
+            <div className="absolute top-2 left-2 h-6 w-4 rotate-45 rounded-full bg-green-200 opacity-50" />
+            <div className="absolute top-2 left-4 h-4 w-3 rotate-12 rounded-full bg-green-300 opacity-40" />
 
-            <div className="absolute top-2 right-2 h-6 w-4 -rotate-45 transform rounded-full bg-green-200 opacity-50" />
-            <div className="absolute top-2 right-4 h-4 w-3 -rotate-12 transform rounded-full bg-green-300 opacity-40" />
+            <div className="absolute top-2 right-2 h-6 w-4 -rotate-45 rounded-full bg-green-200 opacity-50" />
+            <div className="absolute top-2 right-4 h-4 w-3 -rotate-12 rounded-full bg-green-300 opacity-40" />
 
-            <div className="absolute bottom-2 left-2 h-6 w-4 -rotate-45 transform rounded-full bg-green-200 opacity-50" />
-            <div className="absolute bottom-2 left-4 h-4 w-3 -rotate-12 transform rounded-full bg-green-300 opacity-40" />
+            <div className="absolute bottom-2 left-2 h-6 w-4 -rotate-45 rounded-full bg-green-200 opacity-50" />
+            <div className="absolute bottom-2 left-4 h-4 w-3 -rotate-12 rounded-full bg-green-300 opacity-40" />
 
-            <div className="absolute right-2 bottom-2 h-6 w-4 rotate-45 transform rounded-full bg-green-200 opacity-50" />
-            <div className="absolute right-4 bottom-2 h-4 w-3 rotate-12 transform rounded-full bg-green-300 opacity-40" />
+            <div className="absolute right-2 bottom-2 h-6 w-4 rotate-45 rounded-full bg-green-200 opacity-50" />
+            <div className="absolute right-4 bottom-2 h-4 w-3 rotate-12 rounded-full bg-green-300 opacity-40" />
 
             {/* Organic background pattern */}
             <div className="absolute inset-0 opacity-3">
@@ -263,16 +263,16 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             />
 
             {/* Geometric corner elements */}
-            <div className="absolute top-1 left-1 h-6 w-6 rotate-45 transform border-2 border-purple-300 opacity-60" />
-            <div className="absolute top-1 right-1 h-6 w-6 rotate-45 transform border-2 border-purple-300 opacity-60" />
-            <div className="absolute bottom-1 left-1 h-6 w-6 rotate-45 transform border-2 border-purple-300 opacity-60" />
-            <div className="absolute right-1 bottom-1 h-6 w-6 rotate-45 transform border-2 border-purple-300 opacity-60" />
+            <div className="absolute top-1 left-1 h-6 w-6 rotate-45 border-2 border-purple-300 opacity-60" />
+            <div className="absolute top-1 right-1 h-6 w-6 rotate-45 border-2 border-purple-300 opacity-60" />
+            <div className="absolute bottom-1 left-1 h-6 w-6 rotate-45 border-2 border-purple-300 opacity-60" />
+            <div className="absolute right-1 bottom-1 h-6 w-6 rotate-45 border-2 border-purple-300 opacity-60" />
 
             {/* Abstract geometric shapes */}
-            <div className="absolute top-1/4 left-1 h-8 w-2 rotate-12 transform bg-purple-200 opacity-30" />
-            <div className="absolute top-1/4 right-1 h-8 w-2 -rotate-12 transform bg-purple-200 opacity-30" />
-            <div className="absolute bottom-1/4 left-1 h-8 w-2 -rotate-12 transform bg-purple-200 opacity-30" />
-            <div className="absolute right-1 bottom-1/4 h-8 w-2 rotate-12 transform bg-purple-200 opacity-30" />
+            <div className="absolute top-1/4 left-1 h-8 w-2 rotate-12 bg-purple-200 opacity-30" />
+            <div className="absolute top-1/4 right-1 h-8 w-2 -rotate-12 bg-purple-200 opacity-30" />
+            <div className="absolute bottom-1/4 left-1 h-8 w-2 -rotate-12 bg-purple-200 opacity-30" />
+            <div className="absolute right-1 bottom-1/4 h-8 w-2 rotate-12 bg-purple-200 opacity-30" />
 
             {/* Geometric background */}
             <div className="absolute inset-0 opacity-4">
@@ -442,10 +442,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             <div className="absolute right-2 bottom-2 h-8 w-8 rounded-br-lg border-2 border-indigo-400 opacity-50" />
 
             {/* Academic laurel-like decorations */}
-            <div className="absolute top-1/2 left-1 -translate-y-1/2 transform">
+            <div className="absolute top-1/2 left-1 -translate-y-1/2">
               <div className="h-6 w-1 rounded-full bg-indigo-300 opacity-40" />
             </div>
-            <div className="absolute top-1/2 right-1 -translate-y-1/2 transform">
+            <div className="absolute top-1/2 right-1 -translate-y-1/2">
               <div className="h-6 w-1 rounded-full bg-indigo-300 opacity-40" />
             </div>
 
@@ -564,16 +564,16 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
               {/* Decorative rays */}
               <div className="absolute inset-0 rounded-full">
                 <div
-                  className={`absolute top-0 left-1/2 h-2 w-px sm:h-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1/2 -translate-y-1 transform opacity-60`}
+                  className={`absolute top-0 left-1/2 h-2 w-px sm:h-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1/2 -translate-y-1 opacity-60`}
                 />
                 <div
-                  className={`absolute bottom-0 left-1/2 h-2 w-px sm:h-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1/2 translate-y-1 transform opacity-60`}
+                  className={`absolute bottom-0 left-1/2 h-2 w-px sm:h-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1/2 translate-y-1 opacity-60`}
                 />
                 <div
-                  className={`absolute top-1/2 left-0 h-px w-2 sm:w-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1 -translate-y-1/2 transform opacity-60`}
+                  className={`absolute top-1/2 left-0 h-px w-2 sm:w-3 ${theme.secondary.replace('text-', 'bg-')} -translate-x-1 -translate-y-1/2 opacity-60`}
                 />
                 <div
-                  className={`absolute top-1/2 right-0 h-px w-2 sm:w-3 ${theme.secondary.replace('text-', 'bg-')} translate-x-1 -translate-y-1/2 transform opacity-60`}
+                  className={`absolute top-1/2 right-0 h-px w-2 sm:w-3 ${theme.secondary.replace('text-', 'bg-')} translate-x-1 -translate-y-1/2 opacity-60`}
                 />
               </div>
             </div>
@@ -626,7 +626,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
 
             {/* Center: Logo */}
             <div className="flex flex-1 flex-col items-center space-y-1">
-              <div className={'flex h-8 w-8 items-center justify-center sm:h-10 sm:w-10'}>
+              <div className="flex h-8 w-8 items-center justify-center sm:h-10 sm:w-10">
                 {org?.logo_image ? (
                   <img
                     src={`${getOrgLogoMediaDirectory(org.org_uuid, org?.logo_image)}`}

@@ -14,7 +14,7 @@ import useSWR from 'swr';
 
 export const OrgContext = createContext(null);
 
-export function OrgProvider({ children, orgslug }: { children: ReactNode; orgslug: string }) {
+export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslug: string }) => {
   const session = useLHSession() as any;
   const pathname = usePathname();
   const accessToken = session?.data?.tokens?.access_token;
@@ -48,7 +48,7 @@ export function OrgProvider({ children, orgslug }: { children: ReactNode; orgslu
   }
 
   return <OrgContext value={org}>{children}</OrgContext>;
-}
+};
 
 export function useOrg() {
   return use(OrgContext);

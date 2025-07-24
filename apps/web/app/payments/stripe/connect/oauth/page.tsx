@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-function StripeConnectCallback() {
+const StripeConnectCallback = () => {
   const t = useTranslations('Stripe');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -109,6 +109,6 @@ function StripeConnectCallback() {
       </div>
     </div>
   );
-}
+};
 
 export default StripeConnectCallback;

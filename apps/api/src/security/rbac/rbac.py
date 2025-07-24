@@ -57,7 +57,7 @@ async def authorization_verify_if_element_is_public(
 
 # Tested and working
 async def authorization_verify_if_user_is_author(
-    request,
+    request: Request,
     user_id: int,
     action: Literal["read", "update", "delete", "create"],
     element_uuid: str,

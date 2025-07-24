@@ -822,6 +822,10 @@
     "Sidebar": {
       "toggleSidebar": "Toggle Sidebar"
     },
+    "TagsInput": {
+      "removeTag": "Remove tag",
+      "removeOption": "Remove option"
+    },
     "TypeOfContentTitle": {
       "logoAlt": "{type} logo"
     },
@@ -956,9 +960,6 @@
       "visitSite": "Visit Site",
       "websitePreview": "Website Preview",
       "websiteUrl": "Website URL"
-    },
-    "TagsInput": {
-      "removeTag": "Remove tag"
     }
   },
   "Contexts": {
@@ -1171,6 +1172,9 @@
     "admin": "Admin",
     "assignment": "Assignment",
     "cancel": "Cancel",
+    "confirmDelete": "Are you sure you want to delete this?",
+    "confirmDeletePost": "Are you sure you want to delete this post?",
+    "confirmDeleteReply": "Are you sure you want to delete this reply?",
     "content": "Content",
     "contributeToActivity": "Contribute to activity",
     "contributors": "Contributors",
@@ -1179,9 +1183,16 @@
     "courseLessons": "Course Lessons",
     "courseThumbnailAlt": "Course Thumbnail",
     "current": "Current",
+    "delete": "Delete",
+    "deletedContent": "[This content has been deleted]",
     "document": "Document",
+    "downvote": "Downvote",
+    "edit": "Edit",
+    "editPostPlaceholder": "Edit your post...",
+    "editReplyPlaceholder": "Edit your reply...",
     "edited": "Edited",
     "general": "General",
+    "hideReplies": "Hide replies",
     "image": "Image",
     "learningMaterial": "Learning Material",
     "linkTo": "Link to {learningText}",
@@ -1192,30 +1203,16 @@
     "noDiscussionsDesc": "Be the first to start a conversation about this course!",
     "noNextActivity": "No next activity",
     "noPrevActivity": "No previous activity",
+    "noReplies": "No replies yet",
     "page": "Page",
     "postDiscussion": "Post",
     "prevActivityTitle": "Previous: {name}",
     "previous": "Previous",
     "reply": "Reply",
     "save": "Save",
-    "startDiscussionPlaceholder": "Start a discussion about this course...",
-    "editPostPlaceholder": "Edit your post...",
-    "editReplyPlaceholder": "Edit your reply...",
-    "edit": "Edit",
-    "delete": "Delete",
     "saveChanges": "Save Changes",
-    "upvote": "Upvote",
-    "downvote": "Downvote",
-    "votes": "votes",
-    "vote": "vote",
-    "timeAgo": "{time} ago",
-    "confirmDelete": "Are you sure you want to delete this?",
-    "confirmDeletePost": "Are you sure you want to delete this post?",
-    "confirmDeleteReply": "Are you sure you want to delete this reply?",
-    "deletedContent": "[This content has been deleted]",
-    "noReplies": "No replies yet",
     "showReplies": "Show {count} replies",
-    "hideReplies": "Hide replies",
+    "startDiscussionPlaceholder": "Start a discussion about this course...",
     "statusComplete": "Complete",
     "statusGraded": "Graded",
     "statusGradingInProgress": "Grading in progress",
@@ -1227,10 +1224,14 @@
     "submitTrigger": "Submit for review",
     "thumbnailTypeImage": "Image",
     "thumbnailTypeVideo": "Video",
+    "timeAgo": "{time} ago",
     "title": "Course",
     "unknownGradingType": "Unknown grading type",
+    "upvote": "Upvote",
     "video": "Video",
     "viewAllActivities": "View all activities",
+    "vote": "vote",
+    "votes": "votes",
     "whatYouWillLearn": "What you will learn",
     "writeReplyPlaceholder": "Write a reply..."
   },
@@ -1567,8 +1568,8 @@
       },
       "Courses": {
         "description": "Create and manage courses, chapters, and assignments",
-        "title": "Courses",
-        "errorOccurred": "An error occurred"
+        "errorOccurred": "An error occurred",
+        "title": "Courses"
       },
       "Organization": {
         "description": "Configure general settings for your organization",
@@ -1935,6 +1936,14 @@
       },
       "activity": "Activity",
       "metaTitleEdit": "Edit - {activityName} Activity"
+    },
+    "Metrics": {
+      "desktopOnlyMessage1": "This page is only available on a desktop device.",
+      "desktopOnlyMessage2": "Please switch to a desktop device to view and manage the assignment.",
+      "desktopOnlyTitle": "Desktop Only",
+      "generalDescription": "Metrics",
+      "generalTitle": "Metrics",
+      "title": "Metrics"
     },
     "Notifications": {
       "Editor": {
@@ -3131,6 +3140,10 @@
       "usersTitle": "Users"
     }
   },
+  "Errors": {
+    "somethingWentWrong": "Something went wrong!",
+    "tryAgain": "Try again"
+  },
   "FixedActivitySecondaryBar": {
     "CourseInfo": {
       "course": "Course"
@@ -3337,6 +3350,22 @@
     "message": "We apologize for the inconvenience. It seems you are trying to access a page that has been deleted or never existed."
   },
   "OpenuUniversity": "OpenU University",
+  "RichTextEditor": {
+    "addImage": "Add Image",
+    "addLink": "Add Link",
+    "addVideo": "Add Video",
+    "cancel": "Cancel",
+    "enterImageUrl": "Enter the URL of the image you want to embed.",
+    "enterUrlToLink": "Enter the URL you want to link to.",
+    "enterVideoUrl": "Enter a YouTube URL or video link.",
+    "imagePlaceholder": "https://example.com/image.jpg",
+    "imageUrl": "Image URL",
+    "uploadFile": "Upload file",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "videoPlaceholder": "https://youtube.com/watch?v=...",
+    "videoUrl": "Video URL"
+  },
   "SearchPage": {
     "collections": "Collections",
     "courses": "Courses",
@@ -3390,6 +3419,7 @@
       "courses": "Courses",
       "home": "Dashboard Home",
       "logout": "Logout",
+      "metrics": "Metrics",
       "organization": "Organization Settings",
       "payments": "Payments",
       "userSettings": "@{username}'s Settings",
@@ -3506,25 +3536,5 @@
   "seconds": "Seconds",
   "selectDeadline": "Select a deadline for completing the task",
   "touUniversity": "Toraighyrov University",
-  "webPreview": "Web Preview",
-  "Errors": {
-    "somethingWentWrong": "Something went wrong!",
-    "tryAgain": "Try again"
-  },
-  "RichTextEditor": {
-    "addLink": "Add Link",
-    "enterUrlToLink": "Enter the URL you want to link to.",
-    "url": "URL",
-    "urlPlaceholder": "https://example.com",
-    "cancel": "Cancel",
-    "addImage": "Add Image",
-    "enterImageUrl": "Enter the URL of the image you want to embed.",
-    "imageUrl": "Image URL",
-    "imagePlaceholder": "https://example.com/image.jpg",
-    "addVideo": "Add Video",
-    "enterVideoUrl": "Enter a YouTube URL or video link.",
-    "videoUrl": "Video URL",
-    "videoPlaceholder": "https://youtube.com/watch?v=...",
-    "uploadFile": "Upload file"
-  }
+  "webPreview": "Web Preview"
 }

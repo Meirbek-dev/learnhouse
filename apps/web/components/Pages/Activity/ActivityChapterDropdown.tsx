@@ -86,14 +86,16 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
         <span className="text-xs font-bold">{t('chapters')}</span>
       </button>
 
-      {isOpen && (
+      {isOpen ? (
         <div
           className={`absolute z-50 mt-2 ${isMobile ? 'right-0 w-[90vw] sm:w-72' : 'right-0 w-72'} animate-in fade-in max-h-[70vh] cursor-pointer overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-xl duration-200`}
         >
           <div className="flex items-center justify-between border-b border-gray-100 px-3 py-1.5">
             <h3 className="text-sm font-semibold text-gray-800">{t('courseContent')}</h3>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+              }}
               className="cursor-pointer rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
             >
               <X size={14} />
@@ -134,7 +136,9 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
                         key={activity.id}
                         href={`${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`}
                         prefetch={false}
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => {
+                          setIsOpen(false);
+                        }}
                       >
                         <div
                           className={`group px-3 py-2 transition-colors hover:bg-neutral-50 ${
@@ -164,11 +168,11 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
                                 <p className="text-sm font-medium text-neutral-600 transition-colors group-hover:text-neutral-800">
                                   {activity.name}
                                 </p>
-                                {isCurrent && (
+                                {isCurrent ? (
                                   <div className="flex animate-pulse items-center space-x-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600">
                                     <span>{t('current')}</span>
                                   </div>
-                                )}
+                                ) : null}
                               </div>
                               <div className="mt-0.5 flex items-center space-x-1 text-neutral-400">
                                 {getActivityTypeIcon(activity.activity_type)}
@@ -190,7 +194,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

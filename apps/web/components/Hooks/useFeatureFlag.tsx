@@ -8,7 +8,7 @@ interface FeatureType {
 
 function useFeatureFlag(feature: FeatureType) {
   const org = useOrg() as any;
-  const [isEnabled, setIsEnabled] = useState<boolean>(!!feature.defaultValue);
+  const [isEnabled, setIsEnabled] = useState<boolean>(Boolean(feature.defaultValue));
 
   useEffect(() => {
     if (org?.config?.config) {
@@ -24,9 +24,9 @@ function useFeatureFlag(feature: FeatureType) {
         }
       }
 
-      setIsEnabled(!!currentValue);
+      setIsEnabled(Boolean(currentValue));
     } else {
-      setIsEnabled(!!feature.defaultValue);
+      setIsEnabled(Boolean(feature.defaultValue));
     }
   }, [org, feature]);
 

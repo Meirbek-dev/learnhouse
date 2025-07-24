@@ -23,7 +23,7 @@ export default function RootLayout(props: { children: React.ReactNode; params: P
           speed={1000}
           showSpinner={false}
           shadow="0 0 10px #2b75ee, 0 0 5px #2b75ee"
-          crawl={true}
+          crawl
         />
         <Toast />
         {children}

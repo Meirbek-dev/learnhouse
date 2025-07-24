@@ -3,7 +3,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 
-function DocumentPdfActivity({ activity, course }: { activity: any; course: any }) {
+const DocumentPdfActivity = ({ activity, course }: { activity: any; course: any }) => {
   const t = useTranslations('Activities.DocumentPdf');
   const org = useOrg() as any;
 
@@ -24,6 +24,6 @@ function DocumentPdfActivity({ activity, course }: { activity: any; course: any 
       />
     </div>
   );
-}
+};
 
 export default DocumentPdfActivity;

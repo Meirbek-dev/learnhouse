@@ -96,7 +96,7 @@ export default function OrgEditSocials() {
     form.setValue('links', newLinks);
   }, [form, t]);
 
-  const linksEntries = useMemo(() => Object.entries(links), [links]);
+  const linksEntries = useMemo(() => Object.entries(links || {}), [links]);
 
   const socialFields = useMemo(
     () => [
@@ -211,19 +211,25 @@ export default function OrgEditSocials() {
                             placeholder={t('Form.customLinkLabelPlaceholder')}
                             value={linkKey}
                             className="h-9 w-1/3 bg-white"
-                            onChange={(e) => handleLinkChange(linkKey, e.target.value, linkValue)}
+                            onChange={(e) => {
+                              handleLinkChange(linkKey, e.target.value, linkValue);
+                            }}
                           />
                           <Input
                             placeholder={t('Form.customLinkUrlPlaceholder')}
                             value={linkValue}
                             className="h-9 flex-1 bg-white"
-                            onChange={(e) => handleLinkChange(linkKey, linkKey, e.target.value)}
+                            onChange={(e) => {
+                              handleLinkChange(linkKey, linkKey, e.target.value);
+                            }}
                           />
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            onClick={() => removeLink(linkKey)}
+                            onClick={() => {
+                              removeLink(linkKey);
+                            }}
                           >
                             <XIcon className="h-4 w-4" />
                           </Button>

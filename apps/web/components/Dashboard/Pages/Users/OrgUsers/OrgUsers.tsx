@@ -17,7 +17,7 @@ import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
 
-function OrgUsers() {
+const OrgUsers = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -97,19 +97,19 @@ function OrgUsers() {
                           {user.role.name !== 'Admin' ? (
                             <>
                               <Modal
-                                isDialogOpen={rolesModal && selectedUser?.user?.user_uuid === user.user.user_uuid}
+                                isDialogOpen={rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false}
                                 onOpenChange={(isOpen) => {
                                   if (!isOpen) handleCloseRolesModal();
                                 }}
                                 minHeight="no-min"
                                 dialogContent={
-                                  selectedUser && (
+                                  selectedUser ? (
                                     <RolesUpdate
                                       alreadyAssignedRole={selectedUser.role.role_uuid}
                                       setRolesModal={setRolesModal}
                                       user={selectedUser}
                                     />
-                                  )
+                                  ) : null
                                 }
                                 dialogTitle={t('updateRoleModalTitle')}
                                 dialogDescription={t('updateRoleModalDescription', {
@@ -119,7 +119,9 @@ function OrgUsers() {
                                   <span>
                                     <button
                                       className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
-                                      onClick={() => handleRolesModal(user)}
+                                      onClick={() => {
+                                        handleRolesModal(user);
+                                      }}
                                     >
                                       <KeyRound className="h-4 w-4" />
                                       <span>{t('editRoleButton')}</span>
@@ -176,6 +178,6 @@ function OrgUsers() {
       )}
     </div>
   );
-}
+};
 
 export default OrgUsers;

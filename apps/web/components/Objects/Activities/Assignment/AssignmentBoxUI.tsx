@@ -20,7 +20,7 @@ interface AssignmentBoxProps {
   children: ReactNode;
 }
 
-function AssignmentBoxUI({
+const AssignmentBoxUI = ({
   type,
   view,
   currentPoints,
@@ -31,7 +31,7 @@ function AssignmentBoxUI({
   gradeCustomFC,
   showSavingDisclaimer,
   children,
-}: AssignmentBoxProps) {
+}: AssignmentBoxProps) => {
   const t = useTranslations('Activities.AssignmentBoxUI');
   const [customGrade, setCustomGrade] = useState<number>(0);
   const submission = useAssignmentSubmission() as any;
@@ -73,22 +73,22 @@ function AssignmentBoxUI({
               <p>{t('teacherView')}</p>
             </div>
           )}
-          {maxPoints && (
+          {maxPoints ? (
             <div className="flex items-center space-x-1 rounded-full bg-emerald-200/20 px-2 py-0.5 text-xs font-bold text-emerald-600 outline-emerald-300/40">
               <BookPlus size={12} />
               <p>{t('points', { count: maxPoints })}</p>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Right side with buttons and actions */}
         <div className="flex flex-wrap items-center gap-2">
-          {showSavingDisclaimer && (
+          {showSavingDisclaimer ? (
             <div className="mb-2 flex w-full items-center space-x-2 rounded-full px-3 py-1 font-semibold text-red-400 outline-red-200 outline-dashed sm:mr-5 sm:mb-0 sm:w-auto">
               <InfoIcon size={14} />
               <p className="text-xs">{t('savingDisclaimer')}</p>
             </div>
-          )}
+          ) : null}
 
           {/* Teacher button */}
           {view === 'teacher' && (
@@ -102,7 +102,7 @@ function AssignmentBoxUI({
           )}
 
           {/* Student button - only show if authenticated */}
-          {view === 'student' && isAuthenticated && submission && submission.length <= 0 && (
+          {view === 'student' && isAuthenticated && submission && submission.length <= 0 ? (
             <div
               onClick={() => submitFC?.()}
               className="linear mx-auto flex w-full cursor-pointer items-center justify-center space-x-2 rounded-md bg-emerald-300/20 bg-linear-to-bl px-2 py-1 text-emerald-700 outline-offset-2 outline-emerald-500/60 transition-all outline-dashed hover:bg-emerald-300/10 hover:outline-offset-4 active:outline-offset-1 sm:w-auto"
@@ -110,7 +110,7 @@ function AssignmentBoxUI({
               <Forward size={14} />
               <p className="text-xs font-semibold">{t('saveProgress')}</p>
             </div>
-          )}
+          ) : null}
 
           {/* Grading button */}
           {view === 'grading' && (
@@ -129,14 +129,16 @@ function AssignmentBoxUI({
           )}
 
           {/* CustomGrading button */}
-          {view === 'custom-grading' && maxPoints && (
+          {view === 'custom-grading' && maxPoints ? (
             <div className="linear flex w-full cursor-pointer flex-wrap items-center gap-2 rounded-md bg-linear-to-bl px-0.5 py-0.5 outline-offset-2 outline-orange-500/60 transition-all outline-dashed hover:outline-offset-4 active:outline-offset-1 sm:w-auto sm:flex-nowrap sm:space-x-2">
               <p className="w-full px-2 text-xs font-semibold text-orange-700 sm:w-auto">
                 {t('currentPoints', { points: currentPoints ?? 0 })}
               </p>
               <div className="flex w-full items-center gap-2 sm:w-auto">
                 <input
-                  onChange={(e) => setCustomGrade(Number.parseInt(e.target.value, 10))}
+                  onChange={(e) => {
+                    setCustomGrade(Number.parseInt(e.target.value, 10));
+                  }}
                   placeholder={maxPoints.toString()}
                   className="subtle-shadow w-full rounded-lg px-2 py-0.5 text-sm outline outline-gray-200 sm:w-[100px]"
                   type="number"
@@ -150,12 +152,12 @@ function AssignmentBoxUI({
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
       {children}
     </div>
   );
-}
+};
 
 export default AssignmentBoxUI;

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-function ErrorUI({ message, submessage }: { message?: string; submessage?: string }) {
+const ErrorUI = ({ message, submessage }: { message?: string; submessage?: string }) => {
   const t = useTranslations('Components.ErrorUI');
   const router = useRouter();
 
@@ -24,12 +24,14 @@ function ErrorUI({ message, submessage }: { message?: string; submessage?: strin
         />
         <div className="flex flex-col">
           <p className="text-3xl font-bold text-rose-700">{message || t('defaultMessage')}</p>
-          {submessage && <p className="text-lg font-bold text-rose-700">{submessage}</p>}
+          {submessage ? <p className="text-lg font-bold text-rose-700">{submessage}</p> : null}
         </div>
       </div>
       <div className="flex space-x-4">
         <button
-          onClick={() => reloadPage()}
+          onClick={() => {
+            reloadPage();
+          }}
           className="flex items-center space-x-2 rounded-full bg-rose-700 px-4 py-1 text-rose-200 shadow-lg transition-all ease-linear hover:bg-rose-800"
         >
           <RefreshCcw
@@ -51,6 +53,6 @@ function ErrorUI({ message, submessage }: { message?: string; submessage?: strin
       </div>
     </div>
   );
-}
+};
 
 export default ErrorUI;

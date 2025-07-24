@@ -19,7 +19,7 @@ import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';
 
 const AssignmentTaskContentEdit = dynamic(() => import('./Subs/AssignmentTaskContentEdit'));
 
-function AssignmentTaskEditor({ page }: any) {
+const AssignmentTaskEditor = ({ page }: any) => {
   const t = useTranslations('DashPage.Assignments.TaskEditor');
   const [selectedSubPage, setSelectedSubPage] = useState(page);
   const assignment = useAssignments() as any;
@@ -65,9 +65,9 @@ function AssignmentTaskEditor({ page }: any) {
 
   return (
     <div className="z-20 flex h-full w-full flex-col overflow-auto text-sm font-bold">
-      {assignmentTaskState.assignmentTask && Object.keys(assignmentTaskState.assignmentTask).length > 0 && (
+      {assignmentTaskState.assignmentTask && Object.keys(assignmentTaskState.assignmentTask).length > 0 ? (
         <div className="flex h-full flex-col space-y-3">
-          <div className="soft-shadow z-10 mb-3 flex flex-shrink-0 flex-col bg-white pt-5 pr-10 pl-10 text-sm tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="soft-shadow z-10 mb-3 flex shrink-0 flex-col bg-white pt-5 pr-10 pl-10 text-sm tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between py-1">
               <div className="text-lg font-semibold">{assignmentTaskState?.assignmentTask.title}</div>
               <div>
@@ -82,7 +82,9 @@ function AssignmentTaskEditor({ page }: any) {
             </div>
             <div className="flex space-x-2">
               <div
-                onClick={() => setSelectedSubPage('general')}
+                onClick={() => {
+                  setSelectedSubPage('general');
+                }}
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   selectedSubPage === 'general' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
@@ -93,7 +95,9 @@ function AssignmentTaskEditor({ page }: any) {
                 </div>
               </div>
               <div
-                onClick={() => setSelectedSubPage('content')}
+                onClick={() => {
+                  setSelectedSubPage('content');
+                }}
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   selectedSubPage === 'content' ? 'border-b-4' : 'opacity-50'
                 } cursor-pointer`}
@@ -110,7 +114,7 @@ function AssignmentTaskEditor({ page }: any) {
             {selectedSubPage === 'content' && <AssignmentTaskContentEdit />}
           </div>
         </div>
-      )}
+      ) : null}
       {Object.keys(assignmentTaskState.assignmentTask).length === 0 && (
         <div className="z-10 flex flex-1 flex-col bg-white pt-5 pr-10 pl-10 text-sm tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
           <div className="flex h-full items-center justify-center text-gray-300 antialiased">
@@ -123,6 +127,6 @@ function AssignmentTaskEditor({ page }: any) {
       )}
     </div>
   );
-}
+};
 
 export default AssignmentTaskEditor;

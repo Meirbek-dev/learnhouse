@@ -216,10 +216,10 @@ const UserProfileBuilder = () => {
   const getDateFnsLocale = (locale: string): Locale => {
     const localeMap: Record<string, Locale> = {
       en: enUS,
-      es: es,
-      fr: fr,
-      de: de,
-      ru: ru,
+      es,
+      fr,
+      de,
+      ru,
     };
     return localeMap[locale] || enUS;
   };
@@ -439,7 +439,9 @@ const UserProfileBuilder = () => {
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            onClick={() => setSelectedSection(index)}
+                            onClick={() => {
+                              setSelectedSection(index);
+                            }}
                             className={`cursor-pointer rounded-lg border bg-white/80 p-4 backdrop-blur-xs ${
                               selectedSection === index
                                 ? 'border-blue-500 bg-blue-50 shadow-xs ring-2 ring-blue-500/20'
@@ -560,7 +562,9 @@ const UserProfileBuilder = () => {
               <SectionEditor
                 t={t}
                 section={profileData.sections[selectedSection]}
-                onChange={(updatedSection) => updateSection(selectedSection, updatedSection as ProfileSection)}
+                onChange={(updatedSection) => {
+                  updateSection(selectedSection, updatedSection);
+                }}
               />
             ) : (
               <div className="flex h-full items-center justify-center text-gray-500">{t('EmptyEditor.message')}</div>
@@ -712,7 +716,9 @@ const ImageGalleryEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
@@ -764,7 +770,7 @@ const ImageGalleryEditor: FC<{
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                {image.url && (
+                {image.url ? (
                   <div className="col-span-3">
                     <img
                       src={image.url}
@@ -772,7 +778,7 @@ const ImageGalleryEditor: FC<{
                       className="mt-2 max-h-32 rounded-lg object-cover"
                     />
                   </div>
-                )}
+                ) : null}
               </div>
             ))}
             <Button
@@ -818,7 +824,9 @@ const TextEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
@@ -829,7 +837,9 @@ const TextEditor: FC<{
           <Textarea
             id="content"
             value={section.content}
-            onChange={(e) => onChange({ ...section, content: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, content: e.target.value });
+            }}
             placeholder={t('TextEditor.contentPlaceholder')}
             className="min-h-[200px]"
           />
@@ -858,7 +868,9 @@ const LinksEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
@@ -946,7 +958,9 @@ const SkillsEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
@@ -1046,10 +1060,10 @@ const ExperienceEditor: FC<{
   const dateFnsLocale = (() => {
     const localeMap: Record<string, Locale> = {
       en: enUS,
-      es: es,
-      fr: fr,
-      de: de,
-      ru: ru,
+      es,
+      fr,
+      de,
+      ru,
     };
     return localeMap[locale] || enUS;
   })();
@@ -1068,7 +1082,9 @@ const ExperienceEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
@@ -1158,7 +1174,7 @@ const ExperienceEditor: FC<{
                           const newExperiences = [...section.experiences];
                           newExperiences[index] = {
                             ...experience,
-                            current: !!checked,
+                            current: Boolean(checked),
                             endDate: checked ? undefined : experience.endDate,
                           };
                           onChange({ ...section, experiences: newExperiences });
@@ -1240,10 +1256,10 @@ const EducationEditor: FC<{
   const dateFnsLocale = (() => {
     const localeMap: Record<string, Locale> = {
       en: enUS,
-      es: es,
-      fr: fr,
-      de: de,
-      ru: ru,
+      es,
+      fr,
+      de,
+      ru,
     };
     return localeMap[locale] || enUS;
   })();
@@ -1262,7 +1278,9 @@ const EducationEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
@@ -1365,7 +1383,7 @@ const EducationEditor: FC<{
                           const newEducation = [...section.education];
                           newEducation[index] = {
                             ...edu,
-                            current: !!checked,
+                            current: Boolean(checked),
                             endDate: checked ? undefined : edu.endDate,
                           };
                           onChange({ ...section, education: newEducation });
@@ -1456,7 +1474,9 @@ const AffiliationEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>
@@ -1579,7 +1599,9 @@ const CoursesEditor: FC<{
           <Input
             id="title"
             value={section.title}
-            onChange={(e) => onChange({ ...section, title: e.target.value })}
+            onChange={(e) => {
+              onChange({ ...section, title: e.target.value });
+            }}
             placeholder={t('Common.enterSectionTitlePlaceholder')}
           />
         </div>

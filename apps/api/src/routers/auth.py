@@ -130,7 +130,7 @@ async def third_party_login(
 
 
 @router.delete("/logout")
-def logout(Authorize: Annotated[AuthJWT, Depends()]):
+def logout(Authorize: Annotated[AuthJWT, Depends()]) -> dict[str, str]:
     """
     Because the JWT are stored in an httponly cookie now, we cannot
     log the user out by simply deleting the cookies in the frontend.

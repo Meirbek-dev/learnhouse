@@ -43,13 +43,13 @@ PreviewImage.displayName = 'PreviewImage';
 
 const FaviconDisplay = memo(({ favicon, url, faviconAlt }: { favicon?: string; url: string; faviconAlt: string }) => (
   <div className="mt-0 flex items-center border-t border-gray-100 pt-2">
-    {favicon && (
+    {favicon ? (
       <img
         src={favicon}
         alt={faviconAlt}
         className="mr-2 h-[18px] w-[18px] rounded bg-gray-100"
       />
-    )}
+    ) : null}
     <span className="truncate text-xs text-gray-500">{url}</span>
   </div>
 ));
@@ -74,7 +74,9 @@ const AlignmentControls = memo(
           <button
             key={opt.value}
             aria-pressed={alignment === opt.value}
-            onClick={() => onAlignmentChange(opt.value)}
+            onClick={() => {
+              onAlignmentChange(opt.value);
+            }}
             title={t('alignOption', { value: t(opt.value) })}
             type="button"
             className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:ring-2 focus:ring-blue-300 focus:outline-none ${
@@ -116,7 +118,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
   );
 
   const alignment = node.attrs.alignment || 'left';
-  const hasPreview = !!previewData.title;
+  const hasPreview = Boolean(previewData.title);
 
   const [buttonLabel, setButtonLabel] = useState(node.attrs.buttonLabel || t('visitSite'));
   const [showButton, setShowButton] = useState(node.attrs.showButton !== false);
@@ -167,8 +169,8 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
   }, [editing]);
   useEffect(() => {
     setButtonLabel(node.attrs.buttonLabel || t('visitSite'));
-    setShowButton(!!node.attrs.showButton);
-    setOpenInPopup(!!node.attrs.openInPopup);
+    setShowButton(Boolean(node.attrs.showButton));
+    setOpenInPopup(Boolean(node.attrs.openInPopup));
   }, [node.attrs.buttonLabel, node.attrs.showButton, node.attrs.openInPopup, t]);
 
   useEffect(() => {
@@ -256,7 +258,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
         <div className="soft-shadow relative my-2 max-w-[420px] min-w-[260px] rounded-xl bg-white px-6 pt-6 pb-4">
           {/* PreviewCard */}
           {/* Floating edit and delete buttons (only if not editing and isEditable) */}
-          {isEditable && !editing && (
+          {isEditable && !editing ? (
             <div className="absolute -top-3 -right-3 z-20 flex flex-col gap-2">
               <button
                 className="flex items-center justify-center rounded-md border border-yellow-200 bg-yellow-50 p-1.5 text-yellow-700 shadow-md hover:bg-yellow-100"
@@ -275,7 +277,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                 <Trash size={16} />
               </button>
             </div>
-          )}
+          ) : null}
           {/* Modal for editing */}
           <Modal
             isDialogOpen={modalOpen}
@@ -302,7 +304,9 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                     type="text"
                     placeholder={t('enterWebsiteUrl')}
                     value={inputUrl}
-                    onChange={(e) => setInputUrl(e.target.value)}
+                    onChange={(e) => {
+                      setInputUrl(e.target.value);
+                    }}
                     disabled={loading}
                   />
                 </div>
@@ -313,7 +317,9 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                       <Checkbox
                         id="show-button"
                         checked={showButton}
-                        onCheckedChange={(checked) => setShowButton(!!checked)}
+                        onCheckedChange={(checked) => {
+                          setShowButton(Boolean(checked));
+                        }}
                       />
                       <Label
                         htmlFor="show-button"
@@ -322,13 +328,15 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                         {t('showButton')}
                       </Label>
                     </div>
-                    {showButton && (
+                    {showButton ? (
                       <>
                         <div className="flex items-center gap-2">
                           <Checkbox
                             id="open-in-popup"
                             checked={openInPopup}
-                            onCheckedChange={(checked) => setOpenInPopup(!!checked)}
+                            onCheckedChange={(checked) => {
+                              setOpenInPopup(Boolean(checked));
+                            }}
                           />
                           <Label
                             htmlFor="open-in-popup"
@@ -348,13 +356,15 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                             id="button-label"
                             type="text"
                             value={buttonLabel}
-                            onChange={(e) => setButtonLabel(e.target.value)}
+                            onChange={(e) => {
+                              setButtonLabel(e.target.value);
+                            }}
                             placeholder={t('buttonLabelPlaceholder')}
                             className="w-36"
                           />
                         </div>
                       </>
-                    )}
+                    ) : null}
                   </div>
                 </div>
                 <div className="space-y-">
@@ -367,7 +377,9 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                         variant={alignment === opt.value ? 'default' : 'outline'}
                         size="sm"
                         aria-pressed={alignment === opt.value}
-                        onClick={() => handleAlignmentChange(opt.value)}
+                        onClick={() => {
+                          handleAlignmentChange(opt.value);
+                        }}
                         className={`rounded-full px-2 py-1 ${alignment === opt.value ? 'bg-black text-white' : ''}`}
                       >
                         {opt.label}
@@ -375,7 +387,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                     ))}
                   </div>
                 </div>
-                {error && <div className="mt-2 text-xs text-red-600">{error}</div>}
+                {error ? <div className="mt-2 text-xs text-red-600">{error}</div> : null}
                 <div className="mt-2 flex justify-end gap-2">
                   <Button
                     type="button"
@@ -407,7 +419,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
             }
           />
           {/* Only show preview card when not editing */}
-          {hasPreview && !editing && (
+          {hasPreview && !editing ? (
             <>
               <a
                 href={previewData.url}
@@ -416,12 +428,12 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                 className="no-underline hover:no-underline focus:no-underline active:no-underline"
                 style={{ textDecoration: 'none', borderBottom: 'none' }}
               >
-                {previewData.og_image && (
+                {previewData.og_image ? (
                   <PreviewImage
                     src={previewData.og_image}
                     alt={t('previewImageAlt')}
                   />
-                )}
+                ) : null}
                 <div className="pt-4 pb-2">
                   <span
                     className="mb-1.5 text-lg leading-tight font-semibold text-[#232323] no-underline hover:no-underline focus:no-underline active:no-underline"
@@ -442,14 +454,15 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                 url={previewData.url}
                 faviconAlt={t('faviconAlt')}
               />
-              {showButton &&
-                previewData.url &&
-                (openInPopup ? (
+              {showButton && previewData.url ? (
+                openInPopup ? (
                   <button
                     type="button"
                     className="soft-shadow mt-4 block w-full rounded-xl bg-black px-4 py-2.5 text-center text-[16px] font-semibold text-white no-underline transition-all hover:bg-gray-900 hover:shadow-lg"
                     style={{ textDecoration: 'none', color: 'white' }}
-                    onClick={() => setPopupOpen(true)}
+                    onClick={() => {
+                      setPopupOpen(true);
+                    }}
                   >
                     {buttonLabel || t('visitSite')}
                   </button>
@@ -463,18 +476,19 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
                   >
                     {buttonLabel || t('visitSite')}
                   </a>
-                ))}
+                )
+              ) : null}
               {/* Alignment bar in view mode */}
-              {isEditable && (
+              {isEditable ? (
                 <AlignmentControls
                   alignment={alignment}
                   onAlignmentChange={handleAlignmentChange}
                   alignments={ALIGNMENTS}
                   t={t}
                 />
-              )}
+              ) : null}
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </NodeViewWrapper>

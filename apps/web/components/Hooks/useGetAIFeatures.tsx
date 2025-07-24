@@ -11,8 +11,7 @@ function useGetAIFeatures(props: UseGetAIFeatures) {
 
   const checkAvailableAIFeaturesOnOrg = useCallback(
     (_feature: string) => {
-      const config = org?.config?.config?.features.ai.enabled;
-      return config;
+      return org?.config?.config?.features.ai.enabled;
     },
     [org],
   );

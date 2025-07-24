@@ -29,7 +29,7 @@ interface FormValues {
   role: string;
 }
 
-function RolesUpdate(props: Props) {
+const RolesUpdate = (props: Props) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
   const org = useOrg() as any;
@@ -97,11 +97,11 @@ function RolesUpdate(props: Props) {
             )}
           />
 
-          {form.formState.errors.root && (
+          {form.formState.errors.root ? (
             <div className="mb-2 rounded-md bg-red-100 px-3 py-2 text-xs font-bold text-red-500">
               {form.formState.errors.root.message}
             </div>
-          )}
+          ) : null}
 
           <div className="mt-6 flex justify-end">
             <Button
@@ -124,6 +124,6 @@ function RolesUpdate(props: Props) {
       </Form>
     </div>
   );
-}
+};
 
 export default RolesUpdate;

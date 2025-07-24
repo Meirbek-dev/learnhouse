@@ -12,8 +12,7 @@ export async function getUser(user_id: number, access_token?: string) {
     `${getAPIUrl()}users/id/${user_id}`,
     access_token ? RequestBodyWithAuthHeader('GET', null, null, access_token) : RequestBody('GET', null, null),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getUserByUsername(username: string, access_token?: string) {
@@ -21,8 +20,7 @@ export async function getUserByUsername(username: string, access_token?: string)
     `${getAPIUrl()}users/username/${username}`,
     access_token ? RequestBodyWithAuthHeader('GET', null, null, access_token) : RequestBody('GET', null, null),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getCoursesByUser(user_id: number, access_token?: string) {
@@ -30,8 +28,7 @@ export async function getCoursesByUser(user_id: number, access_token?: string) {
     `${getAPIUrl()}users/${user_id}/courses`,
     access_token ? RequestBodyWithAuthHeader('GET', null, null, access_token) : RequestBody('GET', null, null),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 export async function updateUserAvatar(user_id: number, avatar_file: any, access_token: string) {
   const formData = new FormData();
@@ -40,6 +37,5 @@ export async function updateUserAvatar(user_id: number, avatar_file: any, access
     `${getAPIUrl()}users/update_avatar/${user_id}`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

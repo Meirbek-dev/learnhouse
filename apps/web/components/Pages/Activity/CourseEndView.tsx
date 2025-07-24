@@ -375,7 +375,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
       pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
 
       // Save the PDF
-      const fileName = `${userCertificate.certification.config.certification_name.replace(/[^a-zA-Z0-9]/g, '_')}_Certificate.pdf`;
+      const fileName = `${userCertificate.certification.config.certification_name.replaceAll(/[^\dA-Za-z]/g, '_')}_Certificate.pdf`;
       pdf.save(fileName);
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -434,13 +434,13 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
 
         <div className="soft-shadow relative z-10 mb-2 w-full space-y-6 rounded-2xl bg-white p-8">
           <div className="flex flex-col items-center space-y-6">
-            {thumbnailImage && (
+            {thumbnailImage ? (
               <img
                 className="h-[114px] w-[200px] rounded-lg object-cover shadow-md"
                 src={`${getCourseThumbnailMediaDirectory(org?.org_uuid, courseUuid, thumbnailImage)}`}
                 alt={courseName}
               />
-            )}
+            ) : null}
 
             <div className="rounded-full bg-emerald-100 p-4">
               <Trophy className="h-16 w-16 text-emerald-600" />
@@ -536,13 +536,13 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
       <div className="soft-shadow w-full max-w-2xl space-y-6 rounded-2xl bg-white p-8">
         <div className="flex flex-col items-center space-y-6">
-          {thumbnailImage && (
+          {thumbnailImage ? (
             <img
               className="h-[114px] w-[200px] rounded-lg object-cover shadow-md"
               src={`${getCourseThumbnailMediaDirectory(org?.org_uuid, courseUuid, thumbnailImage)}`}
               alt={courseName}
             />
-          )}
+          ) : null}
 
           <div className="rounded-full bg-blue-100 p-4">
             <Target className="h-16 w-16 text-blue-600" />
@@ -556,7 +556,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           <span className="font-semibold text-gray-900"> {courseName}</span>
         </p>
 
-        {progressInfo && (
+        {progressInfo ? (
           <div className="space-y-4 rounded-lg bg-gray-50 p-6">
             <div className="flex items-center justify-center space-x-2">
               <BookOpen className="h-5 w-5 text-gray-600" />
@@ -581,7 +581,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
         <p className="text-gray-500">{t('encouragementMessage')}</p>
 

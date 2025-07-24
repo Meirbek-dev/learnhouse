@@ -23,7 +23,7 @@ const removeCollectionPrefix = (collectionid: string) => {
   return collectionid.replace('collection_', '');
 };
 
-function CollectionThumbnail(props: PropsType) {
+const CollectionThumbnail = (props: PropsType) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const org = useOrg() as any;
   return (
@@ -71,7 +71,7 @@ function CollectionThumbnail(props: PropsType) {
       </div>
     </div>
   );
-}
+};
 
 const CollectionAdminEditsArea = (props: any) => {
   const t = useTranslations('Components.CollectionThumbnail');

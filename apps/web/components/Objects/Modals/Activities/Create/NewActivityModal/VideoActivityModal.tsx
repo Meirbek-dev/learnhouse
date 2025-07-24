@@ -149,12 +149,12 @@ const VideoSettingsForm = ({
         <Label className="flex items-center space-x-2">
           <Checkbox
             checked={videoDetails.autoplay}
-            onCheckedChange={(checked) =>
+            onCheckedChange={(checked) => {
               setVideoDetails({
                 ...videoDetails,
-                autoplay: !!checked,
-              })
-            }
+                autoplay: Boolean(checked),
+              });
+            }}
           />
           <span className="text-sm text-gray-700">{t('autoplay')}</span>
         </Label>
@@ -162,12 +162,12 @@ const VideoSettingsForm = ({
         <Label className="flex items-center space-x-2">
           <Checkbox
             checked={videoDetails.muted}
-            onCheckedChange={(checked) =>
+            onCheckedChange={(checked) => {
               setVideoDetails({
                 ...videoDetails,
-                muted: !!checked,
-              })
-            }
+                muted: Boolean(checked),
+              });
+            }}
           />
           <span className="text-sm text-gray-700">{t('startMuted')}</span>
         </Label>
@@ -176,7 +176,7 @@ const VideoSettingsForm = ({
   );
 };
 
-function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course }: any) {
+const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course }: any) => {
   const t = useTranslations('Components.VideoModal');
   const [video, setVideo] = React.useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -243,7 +243,9 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
         <Input
           id="video-activity-name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
           type="text"
           required
           placeholder={t('activityNamePlaceholder')}
@@ -254,7 +256,9 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
         <div className="grid grid-cols-2 gap-0">
           <button
             type="button"
-            onClick={() => setSelectedView('file')}
+            onClick={() => {
+              setSelectedView('file');
+            }}
             className={`flex items-center justify-center gap-2 p-4 ${
               selectedView === 'file'
                 ? 'border-primary border-b-2 bg-gray-100'
@@ -266,7 +270,9 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
           </button>
           <button
             type="button"
-            onClick={() => setSelectedView('youtube')}
+            onClick={() => {
+              setSelectedView('youtube');
+            }}
             className={`flex items-center justify-center gap-2 p-4 ${
               selectedView === 'youtube'
                 ? 'border-primary border-b-2 bg-gray-100'
@@ -301,11 +307,11 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
                   >
                     {t('chooseVideoFile')}
                   </Label>
-                  {video && (
+                  {video ? (
                     <div className="pl-2 text-sm text-green-700">
                       <i>{video.name}</i> {t('fileUploadedSuffix')}
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <VideoSettingsForm
@@ -323,7 +329,9 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
                 <Input
                   id="youtube-url"
                   value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  onChange={(e) => {
+                    setYoutubeUrl(e.target.value);
+                  }}
                   type="text"
                   required
                   placeholder={t('youtubeUrlPlaceholder')}
@@ -357,6 +365,6 @@ function VideoModal({ submitFileActivity, submitExternalVideo, chapterId, course
       </div>
     </Form.Root>
   );
-}
+};
 
 export default VideoModal;

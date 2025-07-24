@@ -21,7 +21,7 @@ import { useState } from 'react';
 import * as React from 'react';
 import useSWR from 'swr';
 
-function NewCollection({ params }: { params: { orgslug: string } }) {
+const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const t = useTranslations('NewCollectionPage');
   const org = useOrg() as any;
   const session = useLHSession() as any;
@@ -199,9 +199,9 @@ function NewCollection({ params }: { params: { orgslug: string } }) {
                         </div>
                         <div className="min-w-0 flex-1">
                           <h3 className="truncate text-sm font-medium text-gray-900">{course.name}</h3>
-                          {course.description && (
+                          {course.description ? (
                             <p className="mt-1 line-clamp-2 text-xs text-gray-500">{course.description}</p>
-                          )}
+                          ) : null}
                         </div>
                       </Label>
                     ))}
@@ -217,8 +217,10 @@ function NewCollection({ params }: { params: { orgslug: string } }) {
           <div className="flex items-center justify-end space-x-4">
             <Button
               type="button"
-              onClick={() => router.back()}
-              variant={'outline'}
+              onClick={() => {
+                router.back();
+              }}
+              variant="outline"
             >
               {t('cancelButton')}
             </Button>
@@ -227,7 +229,7 @@ function NewCollection({ params }: { params: { orgslug: string } }) {
               disabled={isSubmitting}
               className="flex items-center space-x-2 px-6 py-2"
             >
-              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               <span>{isSubmitting ? t('creatingButton') : t('createButton')}</span>
             </Button>
           </div>
@@ -235,6 +237,6 @@ function NewCollection({ params }: { params: { orgslug: string } }) {
       </div>
     </div>
   );
-}
+};
 
 export default NewCollection;

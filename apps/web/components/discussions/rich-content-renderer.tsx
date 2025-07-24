@@ -53,7 +53,7 @@ export default function RichContentRenderer({ content, className = '' }: RichCon
             'allow', // For YouTube embeds
           ],
           ALLOWED_URI_REGEXP:
-            /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+            /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|data):|[^a-z]|[+.a-z-]+(?:[^+.:a-z-]|$))/i,
         })
       : content;
 

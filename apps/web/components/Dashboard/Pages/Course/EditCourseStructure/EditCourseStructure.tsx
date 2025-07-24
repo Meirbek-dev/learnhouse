@@ -94,7 +94,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
     if (type === 'activity') {
       const newChapterOrder = [...newCourseStructure.chapters];
-      const sourceChapter = newChapterOrder.find((chapter: any) => chapter.chapter_uuid === source.droppableId) as any;
+      const sourceChapter = newChapterOrder.find((chapter: any) => chapter.chapter_uuid === source.droppableId);
       const destinationChapter =
         newChapterOrder.find((chapter: any) => chapter.chapter_uuid === destination.droppableId) ?? sourceChapter;
 

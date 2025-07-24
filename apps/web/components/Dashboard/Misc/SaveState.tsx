@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { mutate } from 'swr';
 
-function SaveState(props: { orgslug: string }) {
+const SaveState = (props: { orgslug: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const course = useCourse() as any;
   const session = useLHSession() as any;
@@ -169,6 +169,6 @@ function SaveState(props: { orgslug: string }) {
       </div>
     </div>
   );
-}
+};
 
 export default SaveState;

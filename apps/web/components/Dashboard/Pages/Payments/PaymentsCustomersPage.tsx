@@ -35,7 +35,7 @@ interface PaymentUserData {
   creation_date: string;
 }
 
-function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
+const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
   const t = useTranslations('Payments.CustomersPage');
   const locale = useLocale();
   if (!data || data.length === 0) {
@@ -111,9 +111,9 @@ function PaymentsUsersTable({ data }: { data: PaymentUserData[] }) {
       </TableBody>
     </Table>
   );
-}
+};
 
-function PaymentsCustomersPage() {
+const PaymentsCustomersPage = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -146,6 +146,6 @@ function PaymentsCustomersPage() {
       <PaymentsUsersTable data={customers} />
     </div>
   );
-}
+};
 
 export default PaymentsCustomersPage;

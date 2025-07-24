@@ -37,7 +37,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 
 type SignUpFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
-function OpenSignUpComponent() {
+const OpenSignUpComponent = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Signup');
   const org = useOrg() as any;
@@ -90,13 +90,13 @@ function OpenSignUpComponent() {
 
   return (
     <div className="m-auto w-72">
-      {error && (
+      {error ? (
         <div className="my-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 shadow-xs transition-all">
           <AlertTriangle size={22} />
           <div className="text-sm font-semibold">{error}</div>
         </div>
-      )}
-      {message && (
+      ) : null}
+      {message ? (
         <div className="mb-4 flex flex-col items-center justify-center space-y-4 space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
           <div className="flex space-x-2">
             <Check size={18} />
@@ -110,7 +110,7 @@ function OpenSignUpComponent() {
             <User size={14} /> <div>{t('loginToAccount')}</div>
           </Link>
         </div>
-      )}
+      ) : null}
 
       <Form {...form}>
         <form
@@ -220,6 +220,6 @@ function OpenSignUpComponent() {
       </div>
     </div>
   );
-}
+};
 
 export default OpenSignUpComponent;

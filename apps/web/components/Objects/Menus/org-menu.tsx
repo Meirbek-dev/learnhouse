@@ -25,7 +25,7 @@ interface NavigationLinkProps {
 }
 
 // Navigation link component with icon and label
-function NavigationLinkItem({ href, type, orgslug }: NavigationLinkProps) {
+const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
   const t = useTranslations('Components.OrgMenuLinks');
   const pathname = usePathname();
 
@@ -48,13 +48,13 @@ function NavigationLinkItem({ href, type, orgslug }: NavigationLinkProps) {
       >
         <Icon
           size={20}
-          className={`flex-shrink-0 ${isActive ? 'text-primary' : ''}`}
+          className={`shrink-0 ${isActive ? 'text-primary' : ''}`}
         />
         <span className={`text-base font-medium whitespace-nowrap ${isActive ? 'font-semibold' : ''}`}>{label}</span>
       </Link>
     </div>
   );
-}
+};
 
 export default function OrgMenu({ orgslug }: OrgMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -86,7 +86,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
 
     // Scroll detection for header background
     const handleScroll = () => {
-      const scrollY = window.scrollY;
+      const { scrollY } = window;
       setIsScrolled(scrollY > 20);
     };
 
@@ -247,12 +247,14 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
       </header>
 
       {/* Mobile menu */}
-      {isMenuOpen && (
+      {isMenuOpen ? (
         <div className="fixed inset-0 z-[60] md:hidden">
           {/* Overlay */}
           <div
             className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-            onClick={() => setIsMenuOpen(false)}
+            onClick={() => {
+              setIsMenuOpen(false);
+            }}
             role="button"
             tabIndex={-1}
             aria-label="Close menu overlay"
@@ -262,7 +264,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
           <div
             className="bg-background/95 border-border/60 absolute right-0 left-0 border-b shadow-lg backdrop-blur-sm"
             data-mobile-menu
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
             style={{
               maxHeight: 'calc(100vh - 52px)',
               overflowY: 'auto',
@@ -298,14 +302,22 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                 <div className="bg-accent/20 border-border/30 rounded-xl border p-3">
                   <nav className="space-y-1">
                     <div className="space-y-1">
-                      <div onClick={() => setIsMenuOpen(false)}>
+                      <div
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                        }}
+                      >
                         <NavigationLinkItem
                           href="/courses"
                           type="courses"
                           orgslug={orgslug}
                         />
                       </div>
-                      <div onClick={() => setIsMenuOpen(false)}>
+                      <div
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                        }}
+                      >
                         <NavigationLinkItem
                           href="/collections"
                           type="collections"
@@ -313,7 +325,11 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                         />
                       </div>
                       <AuthenticatedClientElement checkMethod="authentication">
-                        <div onClick={() => setIsMenuOpen(false)}>
+                        <div
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                          }}
+                        >
                           <NavigationLinkItem
                             href="/trail"
                             type="trail"
@@ -337,7 +353,9 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                 <div className="bg-accent/20 border-border/30 rounded-xl border p-4">
                   <div
                     className="flex min-h-[44px] items-center"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
                     <LocaleSwitcher
                       className="w-full"
@@ -364,7 +382,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   );
 }

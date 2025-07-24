@@ -23,9 +23,7 @@ function getArtplayerLocale(locale: string) {
   // Only import the required language object
   try {
     return require('@/messages/Artplayer')[locale] || undefined;
-  } catch {
-    return;
-  }
+  } catch {}
 }
 
 export default function ArtPlayer({

@@ -65,10 +65,10 @@ interface Contributor {
 
 interface BulkAddResponse {
   successful: string[];
-  failed: {
+  failed: Array<{
     username: string;
     reason: string;
-  }[];
+  }>;
 }
 
 // Helper function for date formatting
@@ -97,7 +97,7 @@ const RoleDropdown = ({
         className="w-[200px] justify-between"
         disabled={contributor.authorship === 'CREATOR'}
       >
-        {t(contributor.authorship.toLowerCase() as string) || contributor.authorship}
+        {t(contributor.authorship.toLowerCase()) || contributor.authorship}
         <ChevronDown className="text-muted-foreground ml-2 h-4 w-4" />
       </Button>
     </DropdownMenuTrigger>
@@ -115,7 +115,7 @@ const RoleDropdown = ({
           }
           className="justify-between"
         >
-          {t(role.toLowerCase() as string)}
+          {t(role.toLowerCase())}
           {contributor.authorship === role && <Check className="ml-2 h-4 w-4" />}
         </DropdownMenuItem>
       ))}
@@ -141,7 +141,7 @@ const StatusDropdown = ({
         className={`w-[200px] justify-between ${getStatusStyle(contributor.authorship_status)}`}
         disabled={contributor.authorship === 'CREATOR'}
       >
-        {t(contributor.authorship_status.toLowerCase() as string) || contributor.authorship_status}
+        {t(contributor.authorship_status.toLowerCase()) || contributor.authorship_status}
         <ChevronDown className="ml-2 h-4 w-4" />
       </Button>
     </DropdownMenuTrigger>
@@ -159,7 +159,7 @@ const StatusDropdown = ({
           }
           className="justify-between"
         >
-          {t(status.toLowerCase() as string)}
+          {t(status.toLowerCase())}
           {contributor.authorship_status === status && <Check className="ml-2 h-4 w-4" />}
         </DropdownMenuItem>
       ))}
@@ -167,13 +167,13 @@ const StatusDropdown = ({
   </DropdownMenu>
 );
 
-function EditCourseContributors(props: EditCourseContributorsProps) {
+const EditCourseContributors = (props: EditCourseContributorsProps) => {
   const t = useTranslations('DashPage.EditCourseContributors');
   const locale = useLocale() as Locale;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse() as any;
-  const { isLoading, courseStructure } = course as any;
+  const { isLoading, courseStructure } = course;
   const dispatchCourse = useCourseDispatch() as any;
   const org = useOrg() as any;
 
@@ -410,7 +410,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
 
   return (
     <div>
-      {courseStructure && (
+      {courseStructure ? (
         <div>
           <div className="h-6" />
           <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
@@ -425,11 +425,11 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 dialogTitle={t('openToContributorsTitle')}
                 dialogTrigger={
                   <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
-                    {isOpenToContributors && (
+                    {isOpenToContributors ? (
                       <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                         {t('activeStatus')}
                       </div>
-                    )}
+                    ) : null}
                     <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
                       <UserPen
                         className="text-slate-400"
@@ -442,7 +442,9 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     </div>
                   </div>
                 }
-                functionToExecute={() => setIsOpenToContributors(true)}
+                functionToExecute={() => {
+                  setIsOpenToContributors(true);
+                }}
                 status="info"
               />
               <ConfirmationModal
@@ -470,7 +472,9 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     </div>
                   </div>
                 }
-                functionToExecute={() => setIsOpenToContributors(false)}
+                functionToExecute={() => {
+                  setIsOpenToContributors(false);
+                }}
                 status="info"
               />
             </div>
@@ -480,11 +484,13 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 <Input
                   placeholder={t('searchUsersPlaceholder')}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                  }}
                   className="pl-8"
                 />
               </div>
-              {searchQuery && (
+              {searchQuery ? (
                 <div className="soft-shadow divide-y rounded-xl bg-white">
                   {isSearching ? (
                     <div className="p-4 text-center text-sm text-gray-500">{t('searchingMessage')}</div>
@@ -500,7 +506,9 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                             </span>
                             <div className="flex gap-2">
                               <Button
-                                onClick={() => setSelectedUsers([])}
+                                onClick={() => {
+                                  setSelectedUsers([]);
+                                }}
                                 variant="outline"
                                 className="text-sm"
                               >
@@ -532,7 +540,11 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                             }}
                           >
                             <div className="flex items-center space-x-3">
-                              <div onClick={(e) => e.stopPropagation()}>
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                              >
                                 <Checkbox
                                   checked={isSelected}
                                   onCheckedChange={() => !isExistingContributor && handleUserSelect(user.username)}
@@ -553,11 +565,11 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 <div className="text-sm text-gray-500">@{user.username}</div>
                               </div>
                             </div>
-                            {isExistingContributor && (
+                            {isExistingContributor ? (
                               <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600">
                                 {t('alreadyContributorMessage')}
                               </span>
-                            )}
+                            ) : null}
                           </div>
                         );
                       })}
@@ -566,7 +578,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     <div className="p-4 text-center text-sm text-gray-500">{t('noUsersFoundMessage')}</div>
                   )}
                 </div>
-              )}
+              ) : null}
               <div className="soft-shadow rounded-xl bg-white">
                 {selectedContributors.length > 0 && (
                   <div className="rounded-t-xl border-b bg-gray-100 p-3">
@@ -578,7 +590,9 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                       </span>
                       <div className="flex gap-2">
                         <Button
-                          onClick={() => setSelectedContributors([])}
+                          onClick={() => {
+                            setSelectedContributors([]);
+                          }}
                           variant="outline"
                           className="text-sm"
                         >
@@ -602,7 +616,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                           <Checkbox
                             checked={masterCheckboxChecked}
                             onCheckedChange={(checked) => {
-                              setMasterCheckboxChecked(!!checked);
+                              setMasterCheckboxChecked(Boolean(checked));
                               if (contributors) {
                                 if (checked) {
                                   // Select all non-creator contributors
@@ -644,10 +658,16 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                             }
                           }}
                         >
-                          <TableCell onClick={(e) => e.stopPropagation()}>
+                          <TableCell
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
                             <Checkbox
                               checked={selectedContributors.includes(contributor.user_id)}
-                              onCheckedChange={() => handleContributorSelect(contributor.user_id)}
+                              onCheckedChange={() => {
+                                handleContributorSelect(contributor.user_id);
+                              }}
                               disabled={contributor.authorship === 'CREATOR'}
                             />
                           </TableCell>
@@ -698,9 +718,9 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 export default EditCourseContributors;

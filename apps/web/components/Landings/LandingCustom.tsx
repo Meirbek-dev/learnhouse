@@ -16,7 +16,7 @@ interface LandingCustomProps {
   orgslug: string;
 }
 
-function LandingCustom({ landing, orgslug }: LandingCustomProps) {
+const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('LandingCustom');
@@ -48,7 +48,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               } items-stretch`}
             >
               {/* Logo */}
-              {section.illustration?.image.url && section.illustration.image.url.trim() !== '' && (
+              {section.illustration?.image.url && section.illustration.image.url.trim() !== '' ? (
                 <div
                   className={`items- flex${section.illustration.verticalAlign} w-full p-6 ${
                     section.illustration.size === 'small'
@@ -64,7 +64,7 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                     className="w-full object-contain"
                   />
                 </div>
-              )}
+              ) : null}
 
               {/* Content */}
               <div
@@ -154,13 +154,13 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
               <div className="w-full flex-1 md:w-auto">
                 <div className="relative mx-auto w-full max-w-[500px] px-4 md:px-8">
                   <div className="relative aspect-4/3 w-full">
-                    {section.image.url && section.image.url.trim() !== '' && (
+                    {section.image.url && section.image.url.trim() !== '' ? (
                       <img
                         src={section.image.url}
                         alt={section.image.alt}
                         className="h-full w-full rounded-lg object-contain"
                       />
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -173,9 +173,9 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
             key={`logos-${section.type}`}
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
-            {section.title && (
+            {section.title ? (
               <h2 className="mb-16 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
-            )}
+            ) : null}
             <div className="flex w-full justify-center">
               <div className="flex max-w-7xl flex-wrap justify-center gap-16">
                 {section.logos.map((logo, index) => (
@@ -183,13 +183,13 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
                     key={index}
                     className="flex h-[120px] w-[220px] items-center justify-center"
                   >
-                    {logo.url && logo.url.trim() !== '' && (
+                    {logo.url && logo.url.trim() !== '' ? (
                       <img
                         src={logo.url}
                         alt={logo.alt}
                         className="max-h-24 max-w-[200px] object-contain transition-opacity hover:opacity-80"
                       />
-                    )}
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -286,6 +286,6 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
       {landing.sections.map((section) => renderSection(section))}
     </div>
   );
-}
+};
 
 export default LandingCustom;

@@ -17,7 +17,7 @@ import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
 
-function OrgUserGroups() {
+const OrgUserGroups = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -74,13 +74,14 @@ function OrgUserGroups() {
     }
   };
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <Loader
         size={16}
         className="mr-2 animate-spin"
       />
     );
+  }
   if (error) return <div>{t('errorLoadingUserGroups')}</div>;
 
   return (
@@ -108,20 +109,22 @@ function OrgUserGroups() {
                   <TableCell>{usergroup.description}</TableCell>
                   <TableCell>
                     <Modal
-                      isDialogOpen={userGroupManagementModal && selectedUserGroupIdForManage === usergroup.id}
+                      isDialogOpen={userGroupManagementModal ? selectedUserGroupIdForManage === usergroup.id : false}
                       onOpenChange={(isOpen) => {
                         if (!isOpen) handleCloseModal('manage');
                       }}
                       minHeight="lg"
                       minWidth="lg"
-                      dialogContent={selectedUserGroup && <ManageUsers usergroup_id={selectedUserGroup.id} />}
+                      dialogContent={selectedUserGroup ? <ManageUsers usergroup_id={selectedUserGroup.id} /> : null}
                       dialogTitle={t('manageUsersModalTitle')}
                       dialogDescription={t('manageUsersModalDescription')}
                       dialogTrigger={
                         <span>
                           <button
                             className="flex items-center space-x-2 rounded-md bg-yellow-700 p-1 px-3 text-sm font-bold text-yellow-100 hover:cursor-pointer"
-                            onClick={() => handleOpenModal('manage', usergroup)}
+                            onClick={() => {
+                              handleOpenModal('manage', usergroup);
+                            }}
                             type="button"
                           >
                             <Users className="h-4 w-4" />
@@ -134,7 +137,7 @@ function OrgUserGroups() {
                   <TableCell>
                     <div className="flex space-x-2">
                       <Modal
-                        isDialogOpen={editUserGroupModal && selectedUserGroupIdForEdit === usergroup.id}
+                        isDialogOpen={editUserGroupModal ? selectedUserGroupIdForEdit === usergroup.id : false}
                         onOpenChange={(isOpen) => {
                           if (!isOpen) handleCloseModal('edit');
                         }}
@@ -142,7 +145,9 @@ function OrgUserGroups() {
                           <span>
                             <button
                               className="flex items-center space-x-2 rounded-md bg-sky-700 p-1 px-3 text-sm font-bold text-sky-100 hover:cursor-pointer"
-                              onClick={() => handleOpenModal('edit', usergroup)}
+                              onClick={() => {
+                                handleOpenModal('edit', usergroup);
+                              }}
                               type="button"
                             >
                               <Pencil className="size-4" />
@@ -152,7 +157,7 @@ function OrgUserGroups() {
                         }
                         minHeight="sm"
                         minWidth="sm"
-                        dialogContent={selectedUserGroup && <EditUserGroup usergroup={selectedUserGroup} />}
+                        dialogContent={selectedUserGroup ? <EditUserGroup usergroup={selectedUserGroup} /> : null}
                       />
                       <ConfirmationModal
                         confirmationButtonText={t('deleteModalConfirmButton')}
@@ -212,6 +217,6 @@ function OrgUserGroups() {
       </div>
     </>
   );
-}
+};
 
 export default OrgUserGroups;

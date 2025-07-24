@@ -71,13 +71,13 @@ const ImageModal: FC<{
           height={600}
           className="h-auto w-full rounded-lg"
         />
-        {image.caption && <p className="mt-4 text-center text-lg text-white">{image.caption}</p>}
+        {image.caption ? <p className="mt-4 text-center text-lg text-white">{image.caption}</p> : null}
       </div>
     </div>
   );
 };
 
-function UserProfileClient({ userData, profile }: UserProfileClientProps) {
+const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('UserProfilePage');
@@ -171,18 +171,19 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
 
               {/* Details */}
               <div className="flex flex-col space-y-3">
-                {userData.details &&
-                  Object.values(userData.details).map((detail: any) => (
-                    <div
-                      key={detail.id}
-                      className="flex items-center gap-4"
-                    >
-                      <div className="flex-shrink-0">
-                        <IconComponent iconName={detail.icon} />
+                {userData.details
+                  ? Object.values(userData.details).map((detail: any) => (
+                      <div
+                        key={detail.id}
+                        className="flex items-center gap-4"
+                      >
+                        <div className="shrink-0">
+                          <IconComponent iconName={detail.icon} />
+                        </div>
+                        <span className="text-[15px] font-medium text-gray-700">{detail.text}</span>
                       </div>
-                      <span className="text-[15px] font-medium text-gray-700">{detail.text}</span>
-                    </div>
-                  ))}
+                    ))
+                  : null}
               </div>
             </div>
 
@@ -198,7 +199,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
               </div>
 
               {/* Profile sections from profile builder */}
-              {profile.sections && profile.sections.length > 0 && (
+              {profile.sections && profile.sections.length > 0 ? (
                 <div>
                   {profile.sections.map((section: any, index: number) => (
                     <div
@@ -214,7 +215,9 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                             <div
                               key={imageIndex}
                               className="group relative cursor-pointer"
-                              onClick={() => setSelectedImage(image)}
+                              onClick={() => {
+                                setSelectedImage(image);
+                              }}
                             >
                               <Image
                                 src={image.url}
@@ -223,11 +226,11 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                                 height={192}
                                 className="h-48 w-full rounded-lg object-cover"
                               />
-                              {image.caption && (
+                              {image.caption ? (
                                 <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                                   <p className="text-center text-sm text-white">{image.caption}</p>
                                 </div>
-                              )}
+                              ) : null}
                             </div>
                           ))}
                         </div>
@@ -260,7 +263,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               className="rounded-full bg-gray-100 px-3 py-1 text-sm"
                             >
                               {skill.name}
-                              {skill.level && ` • ${skill.level}`}
+                              {skill.level ? ` • ${skill.level}` : null}
                             </span>
                           ))}
                         </div>
@@ -278,7 +281,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               <p className="text-sm text-gray-500">
                                 {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
                               </p>
-                              {exp.description && <p className="mt-2 text-gray-700">{exp.description}</p>}
+                              {exp.description ? <p className="mt-2 text-gray-700">{exp.description}</p> : null}
                             </div>
                           ))}
                         </div>
@@ -298,7 +301,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               <p className="text-sm text-gray-500">
                                 {edu.startDate} - {edu.current ? 'Present' : edu.endDate}
                               </p>
-                              {edu.description && <p className="mt-2 text-gray-700">{edu.description}</p>}
+                              {edu.description ? <p className="mt-2 text-gray-700">{edu.description}</p> : null}
                             </div>
                           ))}
                         </div>
@@ -312,7 +315,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                               className="border-l-2 border-gray-200 pl-4"
                             >
                               <div className="flex items-start gap-4">
-                                {affiliation.logoUrl && (
+                                {affiliation.logoUrl ? (
                                   <Image
                                     src={affiliation.logoUrl}
                                     alt={affiliation.name}
@@ -320,12 +323,12 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                                     height={48}
                                     className="h-12 w-12 object-contain"
                                   />
-                                )}
+                                ) : null}
                                 <div>
                                   <h3 className="font-medium">{affiliation.name}</h3>
-                                  {affiliation.description && (
+                                  {affiliation.description ? (
                                     <p className="mt-2 text-gray-700">{affiliation.description}</p>
-                                  )}
+                                  ) : null}
                                 </div>
                               </div>
                             </div>
@@ -361,24 +364,26 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
                     </div>
                   ))}
                 </div>
-              )}
-              {isLoadingCourses && (
+              ) : null}
+              {isLoadingCourses ? (
                 <div className="py-8 text-center text-gray-500">{t('courseSection.loadingCourses')}</div>
-              )}
-              {error && <div className="text-red-500">{t('courseSection.errorLoadingCourses')}</div>}
+              ) : null}
+              {error ? <div className="text-red-500">{t('courseSection.errorLoadingCourses')}</div> : null}
             </div>
           </div>
         </div>
       </div>
       {/* Image Modal */}
-      {selectedImage && (
+      {selectedImage ? (
         <ImageModal
           image={selectedImage}
-          onClose={() => setSelectedImage(null)}
+          onClose={() => {
+            setSelectedImage(null);
+          }}
         />
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 export default UserProfileClient;

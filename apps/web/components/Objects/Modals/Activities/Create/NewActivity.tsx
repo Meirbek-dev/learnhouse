@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import Image from 'next/image';
 
-function NewActivityModal({
+const NewActivityModal = ({
   closeModal,
   submitActivity,
   submitFileActivity,
@@ -19,7 +19,7 @@ function NewActivityModal({
   chapterId,
   course,
   orgslug,
-}: any) {
+}: any) => {
   const t = useTranslations('Components.NewActivity');
   const [selectedView, setSelectedView] = useState('home');
 
@@ -134,7 +134,7 @@ function NewActivityModal({
       )}
     </>
   );
-}
+};
 
 const ActivityOption = ({ onClick, children }: any) => (
   <div

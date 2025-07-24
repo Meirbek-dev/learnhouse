@@ -18,7 +18,9 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     const [isVisible, setIsVisible] = useState<boolean>(false);
     const t = useTranslations('Auth');
 
-    const toggleVisibility = () => setIsVisible((prevState) => !prevState);
+    const toggleVisibility = () => {
+      setIsVisible((prevState) => !prevState);
+    };
 
     return (
       <div className="relative">

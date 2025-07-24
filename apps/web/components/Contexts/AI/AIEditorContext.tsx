@@ -25,7 +25,7 @@ interface AIError {
   error_message: string;
 }
 
-function AIEditorProvider({ children }: { children: ReactNode }) {
+const AIEditorProvider = ({ children }: { children: ReactNode }) => {
   const [aIEditorState, dispatchAIEditor] = useReducer(aIEditorReducer, {
     messages: [] as AIMessage[],
     isModalOpen: false,
@@ -42,7 +42,7 @@ function AIEditorProvider({ children }: { children: ReactNode }) {
       <AIEditorDispatchContext value={dispatchAIEditor}>{children}</AIEditorDispatchContext>
     </AIEditorContext>
   );
-}
+};
 
 export default AIEditorProvider;
 

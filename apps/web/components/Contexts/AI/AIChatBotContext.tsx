@@ -22,7 +22,7 @@ interface AIError {
   error_message: string;
 }
 
-function AIChatBotProvider({ children }: { children: ReactNode }) {
+const AIChatBotProvider = ({ children }: { children: ReactNode }) => {
   const [aiChatBotState, dispatchAIChatBot] = useReducer(aiChatBotReducer, {
     messages: [] as AIMessage[],
     isModalOpen: false,
@@ -36,7 +36,7 @@ function AIChatBotProvider({ children }: { children: ReactNode }) {
       <AIChatBotDispatchContext value={dispatchAIChatBot}>{children}</AIChatBotDispatchContext>
     </AIChatBotContext>
   );
-}
+};
 
 export default AIChatBotProvider;
 

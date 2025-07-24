@@ -19,7 +19,7 @@ export interface SettingsParams {
   orgslug: string;
 }
 
-function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
+const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
   const params = use(props.params);
   const session = useLHSession() as any;
   const org = useOrg() as any;
@@ -143,6 +143,6 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
       </motion.div>
     </div>
   );
-}
+};
 
 export default UsersSettingsPage;

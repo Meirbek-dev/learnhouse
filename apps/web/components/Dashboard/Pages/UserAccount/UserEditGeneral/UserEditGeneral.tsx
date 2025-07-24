@@ -121,11 +121,11 @@ const DetailCard = React.memo(
     onUpdate: (id: string, field: keyof DetailItem, value: string) => void;
     onRemove: (id: string) => void;
     onLabelChange: (id: string, newLabel: string) => void;
-    availableIcons: readonly {
+    availableIcons: ReadonlyArray<{
       name: string;
       label: string;
       component: React.ElementType;
-    }[];
+    }>;
   }) => {
     // Add local state for label input
     const [localLabel, setLocalLabel] = useState(detail.label);
@@ -209,12 +209,12 @@ const DetailCard = React.memo(
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={t('detailSelectIconPlaceholder')}>
-                  {detail.icon && (
+                  {detail.icon ? (
                     <div className="flex items-center gap-2">
                       <IconComponent iconName={detail.icon} />
                       <span>{availableIcons.find((i) => i.name === detail.icon)?.label}</span>
                     </div>
-                  )}
+                  ) : null}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -466,7 +466,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                       size="sm"
                       className="flex items-center gap-2"
                       onClick={() => {
-                        const currentIds = new Set(Object.keys(details));
+                        const currentIds = new Set(Object.keys(details || {}));
                         const newDetails = { ...details };
 
                         template.forEach((item) => {
@@ -488,11 +488,11 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
               </div>
 
               <div className="space-y-3">
-                {Object.entries(details).map(([id, detail]) => (
+                {Object.entries(details || {}).map(([id, detail]) => (
                   <DetailCard
                     key={id}
                     id={id}
-                    detail={detail as DetailItem}
+                    detail={detail}
                     onUpdate={(id, field, value) => {
                       const newDetails = { ...details };
                       const existingDetail = newDetails[id];
@@ -535,7 +535,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
             <div className="soft-shadow h-full rounded-lg bg-gray-50/50 p-6">
               <div className="flex flex-col items-center space-y-6">
                 <Label className="font-bold">{t('profilePicture')}</Label>
-                {profilePicture.error && (
+                {profilePicture.error ? (
                   <div className="flex items-center rounded-md bg-red-200 px-4 py-2 text-sm text-red-950">
                     <FileWarning
                       size={16}
@@ -545,8 +545,8 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                       {t('avatarError', { error: profilePicture.error })}
                     </span>
                   </div>
-                )}
-                {profilePicture.success && (
+                ) : null}
+                {profilePicture.success ? (
                   <div className="flex items-center rounded-md bg-green-200 px-4 py-2 text-sm text-green-950">
                     <Check
                       size={16}
@@ -554,7 +554,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                     />
                     <span className="font-semibold first-letter:uppercase">{t('avatarSuccess')}</span>
                   </div>
-                )}
+                ) : null}
                 {profilePicture.localAvatar ? (
                   <UserAvatar
                     size="3xl"
@@ -624,7 +624,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
   );
 };
 
-function UserEditGeneral() {
+const UserEditGeneral = () => {
   const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const [localAvatar, setLocalAvatar] = React.useState<File | null>(null);
@@ -702,7 +702,7 @@ function UserEditGeneral() {
 
     try {
       const res = await updateUserAvatar(session.data.user.id, file, access_token);
-      if (res.success === false) {
+      if (!res.success) {
         setError(res.HTTPmessage || t('avatarError'));
       } else {
         setSuccess(t('avatarSuccess'));
@@ -797,6 +797,6 @@ function UserEditGeneral() {
       </Form>
     </div>
   );
-}
+};
 
 export default UserEditGeneral;

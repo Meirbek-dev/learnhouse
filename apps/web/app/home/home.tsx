@@ -13,7 +13,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import useSWR from 'swr';
 
-function HomeClient() {
+const HomeClient = () => {
   const t = useTranslations('HomeClient');
   const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
@@ -43,12 +43,12 @@ function HomeClient() {
       <div className="mx-auto mt-12 flex items-center space-x-4 rounded-md bg-slate-200 px-3 py-2 text-sm font-semibold text-gray-600 uppercase">
         {t('yourOrganizations')}
       </div>
-      {orgs && orgs.length === 0 && (
+      {orgs && orgs.length === 0 ? (
         <div className="mx-auto my-5 flex space-x-3 rounded-lg bg-rose-200 px-3 py-2">
           <Info />
           <span>{t('noOrganizations')}</span>
         </div>
-      )}
+      ) : null}
       <div className="mx-auto flex rounded-lg pt-10">
         {orgs?.map((org: any) => (
           <Link
@@ -66,6 +66,6 @@ function HomeClient() {
       </div>
     </div>
   );
-}
+};
 
 export default HomeClient;

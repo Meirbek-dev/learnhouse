@@ -1,24 +1,5 @@
 'use client';
 
-// Import existing components and utilities
-import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
-import { useFormatter, useTranslations } from 'next-intl';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { swrFetcher } from '@services/utils/ts/requests';
-import { useState, useCallback, useEffect } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import Link from 'next/link';
-import useSWR from 'swr';
-
-// Import UI components
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-
 // Import Lucide icons
 import {
   ArrowRight,
@@ -32,7 +13,6 @@ import {
   StickyNote,
   Video,
 } from 'lucide-react';
-
 // Import custom components
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile';
@@ -41,11 +21,27 @@ import CoursesActions from '@components/Objects/Courses/CourseActions/CoursesAct
 import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAuthors';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
+// Import existing components and utilities
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { CourseProvider } from '@components/Contexts/CourseContext';
+import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-
+import { useFormatter, useTranslations } from 'next-intl';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
 // Import the new discussions component
 import CourseDiscussions from '@/components/discussions';
+// Import UI components
+import { Card, CardContent } from '@/components/ui/card';
+import { useCallback, useEffect, useState } from 'react';
+import { Separator } from '@/components/ui/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import useSWR from 'swr';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');
@@ -148,7 +144,6 @@ const CourseClient = (props: any) => {
     if (Array.isArray(parsedLearnings)) {
       // New format: array of learning items with text and emoji
       setLearnings(parsedLearnings);
-      return;
     }
   }, [course?.learnings]);
 
@@ -236,7 +231,9 @@ const CourseClient = (props: any) => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setActiveThumbnailType('image')}
+                                onClick={() => {
+                                  setActiveThumbnailType('image');
+                                }}
                                 className={cn(
                                   'h-8 px-2 text-xs',
                                   activeThumbnailType === 'image'
@@ -253,7 +250,9 @@ const CourseClient = (props: any) => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setActiveThumbnailType('video')}
+                                onClick={() => {
+                                  setActiveThumbnailType('video');
+                                }}
                                 className={cn(
                                   'h-8 px-2 text-xs',
                                   activeThumbnailType === 'video'
@@ -304,7 +303,9 @@ const CourseClient = (props: any) => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setActiveThumbnailType('image')}
+                                onClick={() => {
+                                  setActiveThumbnailType('image');
+                                }}
                                 className={cn(
                                   'h-8 px-2 text-xs',
                                   activeThumbnailType === 'image'
@@ -321,7 +322,9 @@ const CourseClient = (props: any) => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setActiveThumbnailType('video')}
+                                onClick={() => {
+                                  setActiveThumbnailType('video');
+                                }}
                                 className={cn(
                                   'h-8 px-2 text-xs',
                                   activeThumbnailType === 'video'
@@ -353,11 +356,10 @@ const CourseClient = (props: any) => {
                 })()}
                 {(() => {
                   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-                  const run = trailData?.runs?.find((run: any) => {
+                  return trailData?.runs?.find((run: any) => {
                     const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
                     return cleanRunCourseUuid === cleanCourseUuid;
                   });
-                  return run;
                 })() && (
                   <ActivityIndicators
                     course_uuid={props.course.course_uuid}
@@ -418,7 +420,7 @@ const CourseClient = (props: any) => {
                             )}
                           </div>
                           <p>{learningText}</p>
-                          {learning.link && (
+                          {learning.link ? (
                             <Button
                               variant="link"
                               size="sm"
@@ -434,7 +436,7 @@ const CourseClient = (props: any) => {
                                 <ArrowRight size={14} />
                               </a>
                             </Button>
-                          )}
+                          ) : null}
                         </div>
                       );
                     })}
@@ -451,12 +453,12 @@ const CourseClient = (props: any) => {
                     <Collapsible
                       key={chapter.chapter_uuid || `chapter-${chapter.name}`}
                       open={isExpanded}
-                      onOpenChange={(open) =>
+                      onOpenChange={(open) => {
                         setExpandedChapters((prev) => ({
                           ...prev,
                           [chapter.chapter_uuid]: open,
-                        }))
-                      }
+                        }));
+                      }}
                     >
                       <CollapsibleTrigger asChild>
                         <div className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-semibold text-neutral-600 transition-colors hover:bg-neutral-100">
@@ -563,14 +565,14 @@ const CourseClient = (props: any) => {
             />
           </GeneralWrapperStyled>
           {/* Mobile Actions Box */}
-          {isMobile && (
+          {isMobile ? (
             <CourseActionsMobile
               courseuuid={courseuuid}
               orgslug={orgslug}
               course={course}
               trailData={trailData}
             />
-          )}
+          ) : null}
         </>
       )}
     </>

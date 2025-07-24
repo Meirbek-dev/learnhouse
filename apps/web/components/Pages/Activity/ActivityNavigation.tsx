@@ -35,7 +35,9 @@ const NavigationButtons = ({
       // Floating navigation - original flex layout
       <>
         <button
-          onClick={() => navigateToActivity(prevActivity)}
+          onClick={() => {
+            navigateToActivity(prevActivity);
+          }}
           className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
             prevActivity ? 'text-gray-700' : 'cursor-not-allowed text-gray-400 opacity-50'
           }`}
@@ -54,7 +56,9 @@ const NavigationButtons = ({
           </div>
         </button>
         <button
-          onClick={() => navigateToActivity(nextActivity)}
+          onClick={() => {
+            navigateToActivity(nextActivity);
+          }}
           className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
             nextActivity ? 'text-gray-700' : 'cursor-not-allowed text-gray-400 opacity-50'
           }`}
@@ -78,7 +82,9 @@ const NavigationButtons = ({
       <>
         <div className="justify-self-start">
           <button
-            onClick={() => navigateToActivity(prevActivity)}
+            onClick={() => {
+              navigateToActivity(prevActivity);
+            }}
             className={`flex cursor-pointer items-center space-x-1.5 rounded-md px-3.5 py-2 transition-all duration-200 ${
               prevActivity ? 'soft-shadow bg-white text-gray-700' : 'cursor-not-allowed bg-gray-100 text-gray-400'
             }`}
@@ -105,7 +111,9 @@ const NavigationButtons = ({
         </div>
         <div className="justify-self-end">
           <button
-            onClick={() => navigateToActivity(nextActivity)}
+            onClick={() => {
+              navigateToActivity(nextActivity);
+            }}
             className={`flex cursor-pointer items-center space-x-1.5 rounded-md px-3.5 py-2 transition-all duration-200 ${
               nextActivity ? 'soft-shadow bg-white text-gray-700' : 'cursor-not-allowed bg-gray-100 text-gray-400'
             }`}
@@ -231,7 +239,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
 
       {/* Floating bottom navigation - shown when bottom nav is not visible */}
       {!isBottomNavVisible && (
-        <div className="fixed bottom-8 left-1/2 z-50 w-[85%] max-w-lg -translate-x-1/2 transform transition-all duration-300 ease-in-out sm:w-auto sm:min-w-[350px]">
+        <div className="fixed bottom-8 left-1/2 z-50 w-[85%] max-w-lg -translate-x-1/2 transition-all duration-300 ease-in-out sm:w-auto sm:min-w-[350px]">
           <div className="animate-in fade-in slide-in-from-bottom rounded-full bg-white/90 px-2.5 py-1.5 shadow-xs backdrop-blur-xl duration-300">
             <NavigationButtons
               isFloating

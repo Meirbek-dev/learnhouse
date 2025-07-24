@@ -4,7 +4,7 @@ import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-function MenuLinks(props: { orgslug: string }) {
+const MenuLinks = (props: { orgslug: string }) => {
   return (
     <div className="pl-1">
       <ul className="flex space-x-5">
@@ -28,7 +28,7 @@ function MenuLinks(props: { orgslug: string }) {
       </ul>
     </div>
   );
-}
+};
 const LinkItem = (props: any) => {
   const t = useTranslations('Components.OrgMenuLinks');
   const { link } = props;

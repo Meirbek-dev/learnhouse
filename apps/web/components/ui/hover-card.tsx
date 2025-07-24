@@ -5,30 +5,30 @@ import type { ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils';
 
-function HoverCard({ ...props }: ComponentProps<typeof HoverCardPrimitive.Root>) {
+const HoverCard = ({ ...props }: ComponentProps<typeof HoverCardPrimitive.Root>) => {
   return (
     <HoverCardPrimitive.Root
       data-slot="hover-card"
       {...props}
     />
   );
-}
+};
 
-function HoverCardTrigger({ ...props }: ComponentProps<typeof HoverCardPrimitive.Trigger>) {
+const HoverCardTrigger = ({ ...props }: ComponentProps<typeof HoverCardPrimitive.Trigger>) => {
   return (
     <HoverCardPrimitive.Trigger
       data-slot="hover-card-trigger"
       {...props}
     />
   );
-}
+};
 
-function HoverCardContent({
+const HoverCardContent = ({
   className,
   align = 'center',
   sideOffset = 4,
   ...props
-}: ComponentProps<typeof HoverCardPrimitive.Content>) {
+}: ComponentProps<typeof HoverCardPrimitive.Content>) => {
   return (
     <HoverCardPrimitive.Portal data-slot="hover-card-portal">
       <HoverCardPrimitive.Content
@@ -43,6 +43,6 @@ function HoverCardContent({
       />
     </HoverCardPrimitive.Portal>
   );
-}
+};
 
 export { HoverCard, HoverCardContent, HoverCardTrigger };

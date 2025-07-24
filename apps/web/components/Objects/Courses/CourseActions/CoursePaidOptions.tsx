@@ -20,7 +20,7 @@ interface CoursePaidOptionsProps {
   };
 }
 
-function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
+const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const t = useTranslations('Courses.CoursePaidOptions');
   const org = useOrg() as any;
   const session = useLHSession() as any;
@@ -107,18 +107,20 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
               } overflow-hidden`}
             >
               <p className="text-gray-600">{product.description}</p>
-              {product.benefits && (
+              {product.benefits ? (
                 <div className="mt-2">
                   <h4 className="text-sm font-semibold">{t('benefits')}</h4>
                   <p className="text-sm text-gray-600">{product.benefits}</p>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
 
           <div className="mt-2">
             <button
-              onClick={() => toggleProductExpansion(product.id)}
+              onClick={() => {
+                toggleProductExpansion(product.id);
+              }}
               className="flex items-center text-sm text-slate-500 hover:text-slate-700"
             >
               {expandedProducts[product.id] ? (
@@ -171,6 +173,6 @@ function CoursePaidOptions({ course }: CoursePaidOptionsProps) {
       ))}
     </div>
   );
-}
+};
 
 export default CoursePaidOptions;

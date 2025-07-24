@@ -127,48 +127,60 @@ const ButtonsExtension: FC = (props: any) => {
           <NodeViewContent className="content" />
           <ArrowRight size={14} />
         </button>
-        {isEditable && (
+        {isEditable ? (
           <div className="mt-2 flex space-x-2">
             <button
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              onClick={() => {
+                setShowEmojiPicker(!showEmojiPicker);
+              }}
               className="rounded-md bg-gray-200 p-1"
             >
               <ChevronDown size={14} />
             </button>
             <button
-              onClick={() => setShowLinkInput(!showLinkInput)}
+              onClick={() => {
+                setShowLinkInput(!showLinkInput);
+              }}
               className="rounded-md bg-gray-200 p-1"
             >
               <Link size={14} />
             </button>
             <button
-              onClick={() => handleAlignmentChange('left')}
+              onClick={() => {
+                handleAlignmentChange('left');
+              }}
               className="rounded-md bg-gray-200 p-1"
             >
               <AlignLeft size={14} />
             </button>
             <button
-              onClick={() => handleAlignmentChange('center')}
+              onClick={() => {
+                handleAlignmentChange('center');
+              }}
               className="rounded-md bg-gray-200 p-1"
             >
               <AlignCenter size={14} />
             </button>
             <button
-              onClick={() => handleAlignmentChange('right')}
+              onClick={() => {
+                handleAlignmentChange('right');
+              }}
               className="rounded-md bg-gray-200 p-1"
             >
               <AlignRight size={14} />
             </button>
             <button
-              onClick={() => setShowColorPicker(!showColorPicker)}
+              onClick={() => {
+                setShowColorPicker(!showColorPicker);
+              }}
               className="rounded-md bg-gray-200 p-1"
             >
               <Palette size={14} />
             </button>
           </div>
-        )}
+        ) : null}
       </div>
-      {isEditable && showEmojiPicker && (
+      {isEditable && showEmojiPicker ? (
         <div ref={pickerRef}>
           <EmojiPicker
             onEmojiClick={handleEmojiSelect}
@@ -181,8 +193,8 @@ const ButtonsExtension: FC = (props: any) => {
             skinTonesDisabled
           />
         </div>
-      )}
-      {isEditable && showLinkInput && (
+      ) : null}
+      {isEditable && showLinkInput ? (
         <input
           ref={linkInputRef}
           type="text"
@@ -191,8 +203,8 @@ const ButtonsExtension: FC = (props: any) => {
           placeholder={t('linkPlaceholder')}
           className="mt-2 w-full rounded-md border p-2"
         />
-      )}
-      {isEditable && showColorPicker && (
+      ) : null}
+      {isEditable && showColorPicker ? (
         <div
           ref={colorPickerRef}
           className="soft-shadow absolute mt-2 rounded-md bg-white p-2"
@@ -202,12 +214,14 @@ const ButtonsExtension: FC = (props: any) => {
               <button
                 key={c}
                 className={`h-6 w-6 rounded-full ${getButtonColor(c)} hover:ring-opacity-50 focus:ring-opacity-50 hover:ring-2 focus:ring-2 focus:outline-hidden`}
-                onClick={() => handleColorSelect(c)}
+                onClick={() => {
+                  handleColorSelect(c);
+                }}
               />
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </NodeViewWrapper>
   );
 };

@@ -20,7 +20,7 @@ export interface PaymentsParams {
   orgslug: string;
 }
 
-function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
+const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
   const params = use(props.params);
   const t = useTranslations('DashPage.Payments');
   const _session = useLHSession() as any;
@@ -73,7 +73,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
 
   return (
     <div className="flex h-screen w-full flex-col bg-[#f8f8f8]">
-      <div className="soft-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="soft-shadow z-10 shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
         <BreadCrumbs type="payments" />
         <div className="my-2 py-2">
           <div className="flex w-100 flex-col space-y-1">
@@ -102,7 +102,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
           />
         </div>
       </div>
-      <div className="h-6 flex-shrink-0" />
+      <div className="h-6 shrink-0" />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -116,7 +116,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
       </motion.div>
     </div>
   );
-}
+};
 
 const TabLink = ({
   href,

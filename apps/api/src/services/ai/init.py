@@ -1,6 +1,5 @@
 import logging
 from functools import lru_cache
-from typing import Optional
 
 import chromadb
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings

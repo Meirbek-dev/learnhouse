@@ -88,12 +88,12 @@ const LoginClient = (props: LoginClientProps) => {
           </div>
           <div className="flex flex-row bg-white">
             <div className="m-auto w-72">
-              {error && (
+              {error ? (
                 <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
                   <AlertTriangle size={22} />
                   <div className="text-sm font-semibold">{t('wrongCredentials')}</div>
                 </div>
-              )}
+              ) : null}
 
               <Form {...form}>
                 <form

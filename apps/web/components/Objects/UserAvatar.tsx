@@ -45,10 +45,10 @@ const variantStyles = {
   ghost: 'border-0',
 };
 
-function UserAvatar(props: UserAvatarProps) {
+const UserAvatar = (props: UserAvatarProps) => {
   const t = useTranslations('Components.UserAvatar');
   const session = useLHSession() as any;
-  const params = useParams() as any;
+  const params = useParams();
   const [userData, setUserData] = useState<any>(null);
 
   const {
@@ -95,7 +95,7 @@ function UserAvatar(props: UserAvatarProps) {
     // If predefined avatar is specified
     if (predefined_avatar) {
       const avatarType = predefined_avatar === 'ai' ? 'tou_emblem_light.webp' : 'empty_avatar.webp';
-      return getUriWithOrg(params.orgslug, `/${avatarType}`);
+      return getUriWithOrg(params.orgslug as string, `/${avatarType}`);
     }
 
     // If avatar_url prop is provided
@@ -127,7 +127,7 @@ function UserAvatar(props: UserAvatarProps) {
     // If username was provided but no user data found, don't fall back to session
     // This prevents showing the wrong user's avatar for usernames that don't exist
     if (username) {
-      return getUriWithOrg(params.orgslug, '/empty_avatar.webp');
+      return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
     }
 
     // If user has an avatar in session (only if session exists and no username was provided)
@@ -142,7 +142,7 @@ function UserAvatar(props: UserAvatarProps) {
     }
 
     // Fallback to empty avatar
-    return getUriWithOrg(params.orgslug, '/empty_avatar.webp');
+    return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
   };
 
   const getFallbackText = (): string => {
@@ -193,6 +193,6 @@ function UserAvatar(props: UserAvatarProps) {
   }
 
   return avatarElement;
-}
+};
 
 export default UserAvatar;

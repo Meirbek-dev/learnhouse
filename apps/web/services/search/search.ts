@@ -13,6 +13,5 @@ export async function searchOrgContent(
     `${getAPIUrl()}search/org_slug/${org_slug}?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

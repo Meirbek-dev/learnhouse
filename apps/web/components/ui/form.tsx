@@ -68,7 +68,7 @@ interface FormItemContextValue {
 
 const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
 
-function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
+const FormItem = ({ className, ...props }: React.ComponentProps<'div'>) => {
   const id = React.useId();
 
   return (
@@ -80,23 +80,23 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
       />
     </FormItemContext.Provider>
   );
-}
+};
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+const FormLabel = ({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) => {
   const { error, formItemId } = useFormField();
 
   return (
     <Label
       data-slot="form-label"
-      data-error={!!error}
+      data-error={Boolean(error)}
       className={cn('data-[error=true]:text-destructive', className)}
       htmlFor={formItemId}
       {...props}
     />
   );
-}
+};
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
+const FormControl = ({ ...props }: React.ComponentProps<typeof Slot>) => {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
   return (
@@ -104,13 +104,13 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
       data-slot="form-control"
       id={formItemId}
       aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
-      aria-invalid={!!error}
+      aria-invalid={Boolean(error)}
       {...props}
     />
   );
-}
+};
 
-function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
+const FormDescription = ({ className, ...props }: React.ComponentProps<'p'>) => {
   const { formDescriptionId } = useFormField();
 
   return (
@@ -121,9 +121,9 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
       {...props}
     />
   );
-}
+};
 
-function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
+const FormMessage = ({ className, ...props }: React.ComponentProps<'p'>) => {
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message ?? '') : props.children;
 
@@ -141,6 +141,6 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
       {body}
     </p>
   );
-}
+};
 
 export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };

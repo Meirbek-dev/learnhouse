@@ -17,7 +17,7 @@ interface EditorWrapperProps {
   org: any;
 }
 
-function EditorWrapper(props: EditorWrapperProps): JSX.Element {
+const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   const t = useTranslations('DashPage.Editor.EditorWrapper');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -56,7 +56,7 @@ function EditorWrapper(props: EditorWrapperProps): JSX.Element {
     <>
       <Toast />
       <OrgProvider orgslug={props.org.slug}>
-        {isReady && (
+        {isReady ? (
           <Editor
             org={props.org}
             course={props.course}
@@ -65,10 +65,10 @@ function EditorWrapper(props: EditorWrapperProps): JSX.Element {
             setContent={setContent}
             session={session}
           />
-        )}
+        ) : null}
       </OrgProvider>
     </>
   );
-}
+};
 
 export default EditorWrapper;

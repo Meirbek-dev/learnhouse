@@ -20,11 +20,11 @@ interface EditCourseAccessProps {
   course_uuid?: string;
 }
 
-function EditCourseAccess(_props: EditCourseAccessProps) {
+const EditCourseAccess = (_props: EditCourseAccessProps) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse() as any;
-  const { isLoading, courseStructure } = course as any;
+  const { isLoading, courseStructure } = course;
   const dispatchCourse = useCourseDispatch() as any;
   const t = useTranslations('DashPage.Courses.Access');
 
@@ -58,7 +58,7 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
 
   return (
     <div>
-      {courseStructure && (
+      {courseStructure ? (
         <div>
           <div className="h-6" />
           <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
@@ -73,11 +73,11 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
                 dialogTitle={t('changeToPublicConfirmTitle')}
                 dialogTrigger={
                   <div className="h-[200px] w-full cursor-pointer rounded-lg bg-slate-100 transition-all hover:bg-slate-200">
-                    {isClientPublic && (
+                    {isClientPublic ? (
                       <div className="absolute mx-3 my-3 w-fit rounded-lg bg-green-200 px-3 py-1 text-sm font-bold text-green-600">
                         {t('activeBadge')}
                       </div>
-                    )}
+                    ) : null}
                     <div className="flex h-full flex-col items-center justify-center space-y-1 p-2 sm:p-4">
                       <Globe
                         className="text-slate-400"
@@ -90,7 +90,9 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
                     </div>
                   </div>
                 }
-                functionToExecute={() => setIsClientPublic(true)}
+                functionToExecute={() => {
+                  setIsClientPublic(true);
+                }}
                 status="info"
               />
               <ConfirmationModal
@@ -116,19 +118,21 @@ function EditCourseAccess(_props: EditCourseAccessProps) {
                     </div>
                   </div>
                 }
-                functionToExecute={() => setIsClientPublic(false)}
+                functionToExecute={() => {
+                  setIsClientPublic(false);
+                }}
                 status="info"
               />
             </div>
             {!isClientPublic && <UserGroupsSection usergroups={usergroups} />}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
-function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
+const UserGroupsSection = ({ usergroups }: { usergroups: any[] }) => {
   const course = useCourse() as any;
   const [userGroupModal, setUserGroupModal] = useState(false);
   const session = useLHSession() as any;
@@ -196,7 +200,9 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
       <div className="mt-3 mr-2 flex flex-row-reverse">
         <Modal
           isDialogOpen={userGroupModal}
-          onOpenChange={() => setUserGroupModal(!userGroupModal)}
+          onOpenChange={() => {
+            setUserGroupModal(!userGroupModal);
+          }}
           minHeight="no-min"
           minWidth="md"
           dialogContent={<LinkToUserGroup setUserGroupModal={setUserGroupModal} />}
@@ -214,6 +220,6 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
       </div>
     </>
   );
-}
+};
 
 export default EditCourseAccess;

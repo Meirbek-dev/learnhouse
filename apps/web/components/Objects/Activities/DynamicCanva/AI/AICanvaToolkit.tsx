@@ -16,7 +16,7 @@ interface AICanvaToolkitProps {
   activity: any;
 }
 
-function AICanvaToolkit(props: AICanvaToolkitProps) {
+const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   const t = useTranslations('Activities.AICanvaToolkit');
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
   const [isBubbleMenuAvailable, setIsButtonAvailable] = useState(false);
@@ -29,7 +29,7 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
 
   return (
     <>
-      {isBubbleMenuAvailable && (
+      {isBubbleMenuAvailable ? (
         <BubbleMenu
           className="w-fit"
           editor={props.editor}
@@ -84,12 +84,12 @@ function AICanvaToolkit(props: AICanvaToolkitProps) {
             </div>
           </div>
         </BubbleMenu>
-      )}
+      ) : null}
     </>
   );
-}
+};
 
-function AIActionButton(props: { editor: Editor; label: string; activity: any }) {
+const AIActionButton = (props: { editor: Editor; label: string; activity: any }) => {
   const t = useTranslations('Activities.AICanvaToolkit');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -107,8 +107,7 @@ function AIActionButton(props: { editor: Editor; label: string; activity: any })
     const { selection } = props.editor.state;
     const { from } = selection;
     const { to } = selection;
-    const text = props.editor.state.doc.textBetween(from, to);
-    return text;
+    return props.editor.state.doc.textBetween(from, to);
   };
 
   const getPrompt = (label: string, selection: string) => {
@@ -139,7 +138,7 @@ function AIActionButton(props: { editor: Editor; label: string; activity: any })
         props.activity.activity_uuid,
         access_token,
       );
-      if (response.success == false) {
+      if (!response.success) {
         await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
         await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
         await dispatchAIChatBot({
@@ -165,7 +164,7 @@ function AIActionButton(props: { editor: Editor; label: string; activity: any })
       });
       await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
       const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
-      if (response.success == false) {
+      if (!response.success) {
         await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
         await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
         await dispatchAIChatBot({
@@ -241,6 +240,6 @@ function AIActionButton(props: { editor: Editor; label: string; activity: any })
       </ToolTip>
     </div>
   );
-}
+};
 
 export default AICanvaToolkit;

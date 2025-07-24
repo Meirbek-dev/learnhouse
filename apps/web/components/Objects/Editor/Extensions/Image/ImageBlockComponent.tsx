@@ -15,7 +15,7 @@ import { Resizable } from 're-resizable';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
 
-function ImageBlockComponent(props: any) {
+const ImageBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.ImageBlock');
   const org = useOrg() as any;
   const course = useCourse() as any;
@@ -28,7 +28,7 @@ function ImageBlockComponent(props: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
   const [imageSize, setImageSize] = useState({
-    width: props.node.attrs.size ? props.node.attrs.size.width : 300,
+    width: props.node.attrs.size > 0 ? props.node.attrs.size.width : 300,
   });
   const [alignment, setAlignment] = useState(props.node.attrs.alignment || 'center');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -130,7 +130,7 @@ function ImageBlockComponent(props: any) {
           />
         </FileUploadBlock>
 
-        {blockObject && isEditable && (
+        {blockObject && isEditable ? (
           <div className={`flex w-full ${getAlignmentClass()}`}>
             <Resizable
               defaultSize={{ width: imageSize.width, height: '100%' }}
@@ -177,21 +177,27 @@ function ImageBlockComponent(props: any) {
                 />
                 <div className="bg-opacity-90 absolute top-2 right-2 flex items-center gap-1.5 rounded-lg bg-white p-1 opacity-70 shadow-xs backdrop-blur-xs transition-opacity hover:opacity-100">
                   <button
-                    onClick={() => handleAlignmentChange('left')}
+                    onClick={() => {
+                      handleAlignmentChange('left');
+                    }}
                     className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'left' ? 'bg-gray-100' : ''}`}
                     title={t('alignLeft')}
                   >
                     <AlignLeft size={16} />
                   </button>
                   <button
-                    onClick={() => handleAlignmentChange('center')}
+                    onClick={() => {
+                      handleAlignmentChange('center');
+                    }}
                     className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'center' ? 'bg-gray-100' : ''}`}
                     title={t('alignCenter')}
                   >
                     <AlignCenter size={16} />
                   </button>
                   <button
-                    onClick={() => handleAlignmentChange('right')}
+                    onClick={() => {
+                      handleAlignmentChange('right');
+                    }}
                     className={`rounded-md p-1.5 text-gray-600 hover:bg-gray-100 ${alignment === 'right' ? 'bg-gray-100' : ''}`}
                     title={t('alignRight')}
                   >
@@ -209,9 +215,9 @@ function ImageBlockComponent(props: any) {
               </div>
             </Resizable>
           </div>
-        )}
+        ) : null}
 
-        {blockObject && !isEditable && (
+        {blockObject && !isEditable ? (
           <div className={`flex w-full ${getAlignmentClass()}`}>
             <div className="relative">
               <img
@@ -238,19 +244,19 @@ function ImageBlockComponent(props: any) {
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {isLoading && (
+        {isLoading ? (
           <div>
             <AlertTriangle
               color="#e1e0e0"
               size={50}
             />
           </div>
-        )}
+        ) : null}
       </NodeViewWrapper>
 
-      {blockObject && imageUrl && (
+      {blockObject && imageUrl ? (
         <Modal
           isDialogOpen={isModalOpen}
           onOpenChange={setIsModalOpen}
@@ -267,9 +273,9 @@ function ImageBlockComponent(props: any) {
             </div>
           }
         />
-      )}
+      ) : null}
     </>
   );
-}
+};
 
 export default ImageBlockComponent;

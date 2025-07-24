@@ -19,7 +19,7 @@ interface TrailCourseElementProps {
   orgslug: string;
 }
 
-function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
+const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -111,7 +111,7 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
         <div className="indicator w-full">
           <div className="h-1.5 w-full rounded-full bg-gray-200">
             <div
-              className={'h-1.5 rounded-full bg-teal-600'}
+              className="h-1.5 rounded-full bg-teal-600"
               style={{ width: `${course_progress}%` }}
             />
           </div>
@@ -155,6 +155,6 @@ function TrailCourseElement({ course, run, orgslug }: TrailCourseElementProps) {
       </div>
     </div>
   );
-}
+};
 
 export default TrailCourseElement;

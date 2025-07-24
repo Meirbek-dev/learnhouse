@@ -19,7 +19,7 @@ interface LinkToUserGroupProps {
   setUserGroupModal: any;
 }
 
-function LinkToUserGroup(props: LinkToUserGroupProps) {
+const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const t = useTranslations('Components.LinkToUserGroup');
   const course = useCourse() as any;
   const org = useOrg() as any;
@@ -109,6 +109,6 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
       </div>
     </div>
   );
-}
+};
 
 export default LinkToUserGroup;

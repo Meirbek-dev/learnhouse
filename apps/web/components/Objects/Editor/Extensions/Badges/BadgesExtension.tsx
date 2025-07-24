@@ -161,19 +161,27 @@ const BadgesExtension: FC = (props: any) => {
         >
           <div className="flex items-center justify-center space-x-1">
             <span className="text">{emoji}</span>
-            {isEditable && (
-              <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+            {isEditable ? (
+              <button
+                onClick={() => {
+                  setShowEmojiPicker(!showEmojiPicker);
+                }}
+              >
                 <ChevronDown size={14} />
               </button>
-            )}
+            ) : null}
           </div>
           <NodeViewContent className="content text tracking-wide capitalize" />
-          {isEditable && (
+          {isEditable ? (
             <div className="relative flex items-center justify-center space-x-2">
-              <button onClick={() => setShowColorPicker(!showColorPicker)}>
+              <button
+                onClick={() => {
+                  setShowColorPicker(!showColorPicker);
+                }}
+              >
                 <Palette size={14} />
               </button>
-              {showColorPicker && (
+              {showColorPicker ? (
                 <div
                   ref={colorPickerRef}
                   className="soft-shadow absolute left-full ml-2 rounded-full bg-white p-2"
@@ -183,31 +191,37 @@ const BadgesExtension: FC = (props: any) => {
                       <button
                         key={c}
                         className={`h-8 w-8 rounded-full ${getBadgeColor(c)} hover:ring-opacity-50 focus:ring-opacity-50 hover:ring-2 focus:ring-2 focus:outline-hidden`}
-                        onClick={() => handleColorSelect(c)}
+                        onClick={() => {
+                          handleColorSelect(c);
+                        }}
                       />
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
 
-        {isEditable && (
+        {isEditable ? (
           <button
-            onClick={() => setShowPredefinedCallouts(!showPredefinedCallouts)}
+            onClick={() => {
+              setShowPredefinedCallouts(!showPredefinedCallouts);
+            }}
             className="text-neutral-300 transition-colors hover:text-neutral-400"
           >
             <ChevronRight size={16} />
           </button>
-        )}
+        ) : null}
 
-        {isEditable && showPredefinedCallouts && (
+        {isEditable && showPredefinedCallouts ? (
           <div className="soft-shadow absolute top-full left-0 z-10 mt-2 flex flex-wrap gap-2 rounded-lg bg-white/90 p-2 backdrop-blur-md">
             {predefinedBadges.map((badge, index) => (
               <button
                 key={index}
-                onClick={() => handlePredefinedBadgeSelect(badge)}
+                onClick={() => {
+                  handlePredefinedBadgeSelect(badge);
+                }}
                 className={`flex items-center space-x-2 rounded-xl px-3 py-1 text-xs ${getBadgeColor(badge.color)} subtle-shadow font-bold text-gray-600 transition-all duration-100 ease-linear hover:opacity-80`}
               >
                 <span className="text-xs">{badge.emoji}</span>
@@ -215,10 +229,10 @@ const BadgesExtension: FC = (props: any) => {
               </button>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
-      {isEditable && showEmojiPicker && (
+      {isEditable && showEmojiPicker ? (
         <div ref={pickerRef}>
           <EmojiPicker
             onEmojiClick={handleEmojiSelect}
@@ -231,7 +245,7 @@ const BadgesExtension: FC = (props: any) => {
             skinTonesDisabled
           />
         </div>
-      )}
+      ) : null}
     </NodeViewWrapper>
   );
 };

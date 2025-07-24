@@ -36,11 +36,11 @@ interface OnboardingStep {
   imageSrc: StaticImageData;
   title: string;
   description: string;
-  buttons?: {
+  buttons?: Array<{
     label: string;
     action: () => void;
     icon?: ReactNode;
-  }[];
+  }>;
 }
 
 const Onboarding: FC = () => {
@@ -71,7 +71,9 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step2Button'),
-          action: () => router.push(getUriWithOrg(org?.slug, '/courses?new=true')),
+          action: () => {
+            router.push(getUriWithOrg(org?.slug, '/courses?new=true'));
+          },
           icon: <Book size={16} />,
         },
       ],
@@ -119,7 +121,9 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step6Button'),
-          action: () => router.push(getUriWithOrg(org?.slug, '/dash/users/settings/usergroups')),
+          action: () => {
+            router.push(getUriWithOrg(org?.slug, '/dash/users/settings/usergroups'));
+          },
           icon: <SquareUser size={16} />,
         },
       ],
@@ -137,7 +141,9 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step8Button'),
-          action: () => router.push(getUriWithOrg(org?.slug, '/dash/assignments?new=true')),
+          action: () => {
+            router.push(getUriWithOrg(org?.slug, '/dash/assignments?new=true'));
+          },
           icon: <Book size={16} />,
         },
       ],
@@ -149,7 +155,9 @@ const Onboarding: FC = () => {
       buttons: [
         {
           label: t('step9Button'),
-          action: () => router.push(getUriWithOrg(org?.slug, '/dash/payments/customers')),
+          action: () => {
+            router.push(getUriWithOrg(org?.slug, '/dash/payments/customers'));
+          },
           icon: <CreditCard size={16} />,
         },
       ],
@@ -235,7 +243,7 @@ const Onboarding: FC = () => {
 
   return (
     <div>
-      {isUserAdmin.isAdmin && !isUserAdmin.loading && !isOnboardingComplete && !isMobile && (
+      {isUserAdmin.isAdmin && !isUserAdmin.loading && !isOnboardingComplete && !isMobile ? (
         <Modal
           isDialogOpen={isModalOpen}
           onOpenChange={setIsModalOpen}
@@ -276,7 +284,7 @@ const Onboarding: FC = () => {
             </div>
           }
         />
-      )}
+      ) : null}
     </div>
   );
 };
@@ -321,7 +329,9 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
           {onboardingData.map((_, index) => (
             <div
               key={index}
-              onClick={() => goToStep(index)}
+              onClick={() => {
+                goToStep(index);
+              }}
               className={`h-[7px] w-auto ${index === currentStep ? 'bg-black' : 'bg-gray-300'} cursor-pointer rounded-lg shadow-md hover:bg-gray-700`}
             />
           ))}
@@ -336,7 +346,9 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
           <div className="utils_buttons flex flex-row space-x-2">
             <div
               className="inline-flex cursor-pointer items-center space-x-1 rounded-full bg-gray-100 px-5 py-1 font-bold text-gray-600 antialiased hover:bg-gray-200"
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => {
+                setIsModalOpen(false);
+              }}
             >
               <PictureInPicture size={16} />
             </div>

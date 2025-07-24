@@ -251,15 +251,17 @@ const PaymentsConfigurationPage: FC = () => {
           )}
         </div>
       </div>
-      {stripeConfig && (
+      {stripeConfig ? (
         <EditStripeConfigModal
           orgId={org.id}
           configId={stripeConfig.id}
           accessToken={access_token}
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
         />
-      )}
+      ) : null}
     </div>
   );
 };

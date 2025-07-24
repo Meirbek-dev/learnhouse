@@ -1,13 +1,12 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-
 import { Card, CardContent } from '@/components/ui/card';
 import DiscussionPost from './discussion-post';
 import DiscussionForm from './discussion-form';
 import { Badge } from '@/components/ui/badge';
+import { MessageCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 interface DiscussionListProps {
   initialPosts: any[];

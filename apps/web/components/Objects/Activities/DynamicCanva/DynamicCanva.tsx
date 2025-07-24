@@ -41,7 +41,7 @@ interface Editor {
   activity: any;
 }
 
-function Canva(props: Editor) {
+const Canva = (props: Editor) => {
   /**
    * Important Note : This is a workaround to enable user interaction features to be implemented easily, like text selection, AI features and other planned features, this is set to true but otherwise it should be set to false.
    * Another workaround is implemented below to disable the editor from being edited by the user by setting the caret-color to transparent and using a custom extension to filter out transactions that add/edit/remove text.
@@ -169,7 +169,7 @@ function Canva(props: Editor) {
       </CanvaWrapper>
     </EditorOptionsProvider>
   );
-}
+};
 
 const CanvaWrapper = styled.div`
   width: 100%;

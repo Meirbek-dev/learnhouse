@@ -120,7 +120,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
               <div className="relative px-5 pt-5 pb-4">
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="rounded-full">{children}</div>
                   </div>
 
@@ -131,34 +131,34 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                         <h4 className="truncate font-semibold text-gray-900">
                           {userData.first_name} {userData.last_name}
                         </h4>
-                        {userData.username && (
+                        {userData.username ? (
                           <Badge
                             variant="outline"
                             className="truncate px-2 text-xs font-normal text-gray-500"
                           >
                             @{userData.username}
                           </Badge>
-                        )}
+                        ) : null}
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 flex-shrink-0 text-gray-600 hover:text-gray-900"
+                        className="h-6 w-6 shrink-0 text-gray-600 hover:text-gray-900"
                         onClick={() => userData.username && router.push(`/user/${userData.username}`)}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                     </div>
-                    {userData.bio && (
+                    {userData.bio ? (
                       <p className="mt-1.5 line-clamp-4 text-sm leading-normal text-gray-500">{userData.bio}</p>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Details */}
-            {userData.details && Object.values(userData.details).length > 0 && (
+            {userData.details && Object.values(userData.details).length > 0 ? (
               <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
                 {Object.values(userData.details).map((detail) => (
                   <div
@@ -173,7 +173,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                   </div>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         ) : null}
       </HoverCardContent>

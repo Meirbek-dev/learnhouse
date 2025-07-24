@@ -69,7 +69,7 @@ const SettingsNavigation = ({
   );
 };
 
-function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
+const SettingsPage = ({ params }: { params: Promise<SettingsParams> }) => {
   const t = useTranslations('DashPage.UserAccountSettings');
   const { subpage, orgslug } = use(params);
   const session = useLHSession() as Session;
@@ -101,7 +101,7 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="soft-shadow z-10 flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="soft-shadow z-10 shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
         <BreadCrumbs
           type="user"
           last_breadcrumb={session?.user?.username}
@@ -117,7 +117,7 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
           orgslug={orgslug}
         />
       </div>
-      <div className="h-6 flex-shrink-0" />
+      <div className="h-6 shrink-0" />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -125,10 +125,10 @@ function SettingsPage({ params }: { params: Promise<SettingsParams> }) {
         transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
         className="flex-1 overflow-y-auto"
       >
-        {CurrentComponent && <CurrentComponent />}
+        {CurrentComponent ? <CurrentComponent /> : null}
       </motion.div>
     </div>
   );
-}
+};
 
 export default SettingsPage;

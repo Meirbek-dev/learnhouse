@@ -7,8 +7,7 @@ export async function getProducts(orgId: number, access_token: string) {
     `${getAPIUrl()}payments/${orgId}/products`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function createProduct(orgId: number, data: any, access_token: string) {
@@ -16,8 +15,7 @@ export async function createProduct(orgId: number, data: any, access_token: stri
     `${getAPIUrl()}payments/${orgId}/products`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function updateProduct(orgId: number, productId: string, data: any, access_token: string) {
@@ -25,8 +23,7 @@ export async function updateProduct(orgId: number, productId: string, data: any,
     `${getAPIUrl()}payments/${orgId}/products/${productId}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function archiveProduct(orgId: number, productId: string, access_token: string) {
@@ -34,8 +31,7 @@ export async function archiveProduct(orgId: number, productId: string, access_to
     `${getAPIUrl()}payments/${orgId}/products/${productId}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getProductDetails(orgId: number, productId: string, access_token: string) {
@@ -43,8 +39,7 @@ export async function getProductDetails(orgId: number, productId: string, access
     `${getAPIUrl()}payments/${orgId}/products/${productId}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function linkCourseToProduct(orgId: number, productId: string, courseId: string, access_token: string) {
@@ -52,8 +47,7 @@ export async function linkCourseToProduct(orgId: number, productId: string, cour
     `${getAPIUrl()}payments/${orgId}/products/${productId}/courses/${courseId}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function unlinkCourseFromProduct(
@@ -66,8 +60,7 @@ export async function unlinkCourseFromProduct(
     `${getAPIUrl()}payments/${orgId}/products/${productId}/courses/${courseId}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getCoursesLinkedToProduct(orgId: number, productId: string, access_token: string) {
@@ -75,8 +68,7 @@ export async function getCoursesLinkedToProduct(orgId: number, productId: string
     `${getAPIUrl()}payments/${orgId}/products/${productId}/courses`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getProductsByCourse(orgId: number, courseId: string, access_token: string) {
@@ -84,8 +76,7 @@ export async function getProductsByCourse(orgId: number, courseId: string, acces
     `${getAPIUrl()}payments/${orgId}/courses/${courseId}/products`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function getStripeProductCheckoutSession(
@@ -98,6 +89,5 @@ export async function getStripeProductCheckoutSession(
     `${getAPIUrl()}payments/${orgId}/stripe/checkout/product/${productId}?redirect_uri=${redirect_uri}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

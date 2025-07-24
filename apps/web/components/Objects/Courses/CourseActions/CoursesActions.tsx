@@ -21,10 +21,10 @@ import { mutate } from 'swr';
 interface CourseRun {
   status: string;
   course_id: number;
-  steps: {
+  steps: Array<{
     activity_id: number;
     complete: boolean;
-  }[];
+  }>;
 }
 
 interface Course {
@@ -33,14 +33,14 @@ interface Course {
   trail?: {
     runs: CourseRun[];
   };
-  chapters?: {
+  chapters?: Array<{
     name: string;
-    activities: {
+    activities: Array<{
       activity_uuid: string;
       name: string;
       activity_type: string;
-    }[];
-  }[];
+    }>;
+  }>;
   open_to_contributors?: boolean;
 }
 
@@ -53,7 +53,7 @@ interface CourseActionsProps {
   trailData?: any;
 }
 
-function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseActionsProps) {
+const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseActionsProps) => {
   const router = useRouter();
   const session = useLHSession() as any;
   const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
@@ -219,7 +219,9 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     if (!session.data?.user) {
       return (
         <button
-          onClick={() => router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))}
+          onClick={() => {
+            router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
+          }}
           className="soft-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
         >
           <UserPen className="h-5 w-5" />
@@ -293,7 +295,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
               <div className="flex-1">
                 <div className="flex items-center gap-4">
                   <div className="relative h-16 w-16">
-                    <svg className="h-full w-full -rotate-90 transform">
+                    <svg className="h-full w-full -rotate-90">
                       <circle
                         cx="32"
                         cy="32"
@@ -335,7 +337,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
             <div className="flex-1">
               <div className="flex items-center gap-4">
                 <div className="relative h-16 w-16">
-                  <svg className="h-full w-full -rotate-90 transform">
+                  <svg className="h-full w-full -rotate-90">
                     <circle
                       cx="32"
                       cy="32"
@@ -364,7 +366,9 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
                   </div>
                 </div>
                 <button
-                  onClick={() => setIsProgressOpen(true)}
+                  onClick={() => {
+                    setIsProgressOpen(true);
+                  }}
                   className="flex-1 rounded-lg p-2 text-left transition-colors hover:bg-neutral-50/50"
                 >
                   <div className="text-sm font-medium text-gray-900">{t('courseProgress')}</div>
@@ -436,7 +440,9 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
               />
               <button
                 className="soft-shadow bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-colors"
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => {
+                  setIsModalOpen(true);
+                }}
               >
                 <ShoppingCart className="h-5 w-5" />
                 {t('purchaseCourse')}
@@ -480,12 +486,14 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           course={course}
           orgslug={orgslug}
           isOpen={isProgressOpen}
-          onClose={() => setIsProgressOpen(false)}
+          onClose={() => {
+            setIsProgressOpen(false);
+          }}
           trailData={trailData}
         />
       </div>
     </div>
   );
-}
+};
 
 export default CoursesActions;

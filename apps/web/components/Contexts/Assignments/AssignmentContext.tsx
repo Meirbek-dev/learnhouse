@@ -12,13 +12,13 @@ import useSWR from 'swr';
 
 export const AssignmentContext = createContext({});
 
-export function AssignmentProvider({
+export const AssignmentProvider = ({
   children,
   assignment_uuid,
 }: {
   children: ReactNode;
   assignment_uuid: string | undefined;
-}) {
+}) => {
   const session = useLHSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Assignment');
@@ -73,7 +73,7 @@ export function AssignmentProvider({
   if (isLoading) return <PageLoading />;
 
   return <AssignmentContext value={assignmentsFull}>{children}</AssignmentContext>;
-}
+};
 
 export function useAssignments() {
   return use(AssignmentContext);

@@ -38,7 +38,7 @@ interface FormValues {
   gradingType: 'ALPHABET' | 'NUMERIC' | 'PERCENTAGE';
 }
 
-function NewAssignment({ submitActivity, chapterId, course, closeModal, orgslug }: any) {
+const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewAssignmentModal');
   const fullLocale = useLocale();
@@ -52,10 +52,10 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal, orgslug 
   const getDateFnsLocale = (locale: string) => {
     const localeMap: Record<string, any> = {
       en: enUS,
-      es: es,
-      fr: fr,
-      de: de,
-      ru: ru,
+      es,
+      fr,
+      de,
+      ru,
     };
     return localeMap[locale] || enUS;
   };
@@ -260,6 +260,6 @@ function NewAssignment({ submitActivity, chapterId, course, closeModal, orgslug 
       </form>
     </Form>
   );
-}
+};
 
 export default NewAssignment;
