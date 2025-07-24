@@ -9,7 +9,6 @@ import { use } from 'react';
 
 export default function RootLayout(props: { children: React.ReactNode; params: Promise<any> }) {
   const params = use(props.params);
-
   const { children } = props;
 
   return (
@@ -17,14 +16,16 @@ export default function RootLayout(props: { children: React.ReactNode; params: P
       <OrgProvider orgslug={params.orgslug}>
         <NextTopLoader
           color="#2b75ee"
-          initialPosition={0.3}
+          initialPosition={0.1}
+          crawlSpeed={300}
           height={2}
-          easing={'ease'}
+          easing="ease"
           speed={1000}
           showSpinner={false}
+          shadow="0 0 10px #2b75ee, 0 0 5px #2b75ee"
+          crawl={true}
         />
         <Toast />
-        {/* <Onboarding /> */}
         {children}
         <Footer />
       </OrgProvider>
