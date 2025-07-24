@@ -84,7 +84,7 @@ const InfoCalloutWrapper = styled.div.withConfig({
   }
 `;
 
-function InfoCalloutComponent(props: any) {
+const InfoCalloutComponent = (props: any) => {
   const editorState = useEditorProvider() as any;
   const { isEditable } = editorState;
   const [dismissed, setDismissed] = useState(false);
@@ -133,14 +133,18 @@ function InfoCalloutComponent(props: any) {
         <ContentWrapper className="grow">
           <NodeViewContent className="content" />
         </ContentWrapper>
-        {options.dismissible && !isEditable && (
-          <DismissButton onClick={() => setDismissed(true)}>
+        {options.dismissible && !isEditable ? (
+          <DismissButton
+            onClick={() => {
+              setDismissed(true);
+            }}
+          >
             <X size={16} />
           </DismissButton>
-        )}
+        ) : null}
       </InfoCalloutWrapper>
     </NodeViewWrapper>
   );
-}
+};
 
 export default InfoCalloutComponent;

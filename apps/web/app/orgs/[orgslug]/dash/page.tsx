@@ -64,7 +64,7 @@ async function DashboardHome() {
           <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100" />
           <div className="flex items-center justify-center">
             <Link
-              href={'https://tou.edu.kz/ru/'}
+              href="https://tou.edu.kz/ru/"
               target="_blank"
               className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-sky-900 px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
             >
@@ -80,7 +80,7 @@ async function DashboardHome() {
         </AdminAuthorization>
 
         <Link
-          href={'/dash/user-account/settings/general'}
+          href="/dash/user-account/settings/general"
           className="bg-background mx-auto flex max-w-md cursor-pointer items-center rounded-lg p-4 shadow-lg transition-all ease-linear hover:scale-105"
         >
           <div className="mx-auto flex flex-col items-center gap-2 text-center sm:flex-row sm:gap-3 sm:text-left">
@@ -99,7 +99,7 @@ async function DashboardHome() {
   );
 }
 
-function DashboardCard({
+const DashboardCard = ({
   href,
   icon,
   title,
@@ -109,7 +109,7 @@ function DashboardCard({
   icon: ReactNode;
   title: string;
   description: string;
-}) {
+}) => {
   return (
     <Link
       href={href}

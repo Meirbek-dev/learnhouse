@@ -66,7 +66,9 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
           </Button>
         ) : (
           <Button
-            onClick={() => onLink(course.id)}
+            onClick={() => {
+              onLink(course.id);
+            }}
             size="sm"
           >
             {t('linkCourseButton')}
@@ -115,7 +117,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
   };
 
   const isLinked = (courseId: number): boolean => {
-    return !!linkedCoursesData?.data?.some((course: any) => course.id === courseId);
+    return Boolean(linkedCoursesData?.data?.some((course: any) => course.id === courseId));
   };
 
   const filteredCourses =
@@ -132,11 +134,13 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
           type="text"
           placeholder={t('searchPlaceholder')}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+          }}
           className="w-full pl-10"
         />
         <Search
-          className="absolute top-1/2 left-6 -translate-y-1/2 transform text-gray-400"
+          className="absolute top-1/2 left-6 -translate-y-1/2 text-gray-400"
           size={20}
         />
       </div>

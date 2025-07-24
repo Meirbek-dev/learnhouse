@@ -23,7 +23,7 @@ import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';
 
 const AssignmentSubmissionsSubPage = dynamic(() => import('./subpages/AssignmentSubmissionsSubPage'));
 
-function AssignmentEdit() {
+const AssignmentEdit = () => {
   const t = useTranslations('DashPage.Assignments.AssignmentPage');
   const params = useParams<{ assignmentuuid: string }>();
   const searchParams = useSearchParams();
@@ -50,7 +50,7 @@ function AssignmentEdit() {
   return (
     <div className="flex h-screen w-full flex-col">
       <AssignmentProvider assignment_uuid={`assignment_${params.assignmentuuid}`}>
-        <div className="soft-shadow z-10 flex flex-shrink-0 flex-col bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="soft-shadow z-10 flex shrink-0 flex-col bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
           <div className="mr-10 flex h-full justify-between">
             <div className="mr-10 pl-10 tracking-tighter">
               <BrdCmpx />
@@ -66,7 +66,9 @@ function AssignmentEdit() {
           </div>
           <div className="mr-10 flex space-x-2 pt-2 pl-10 text-sm font-semibold tracking-tight">
             <div
-              onClick={() => setSelectedSubPage('editor')}
+              onClick={() => {
+                setSelectedSubPage('editor');
+              }}
               className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                 selectedSubPage === 'editor' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
@@ -77,7 +79,9 @@ function AssignmentEdit() {
               </div>
             </div>
             <div
-              onClick={() => setSelectedSubPage('submissions')}
+              onClick={() => {
+                setSelectedSubPage('submissions');
+              }}
               className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                 selectedSubPage === 'submissions' ? 'border-b-4' : 'opacity-50'
               } cursor-pointer`}
@@ -98,11 +102,11 @@ function AssignmentEdit() {
       </AssignmentProvider>
     </div>
   );
-}
+};
 
 export default AssignmentEdit;
 
-function BrdCmpx() {
+const BrdCmpx = () => {
   const assignment = useAssignments() as any;
 
   useEffect(() => {}, [assignment]);
@@ -113,9 +117,9 @@ function BrdCmpx() {
       last_breadcrumb={assignment?.assignment_object?.title}
     />
   );
-}
+};
 
-function PublishingState() {
+const PublishingState = () => {
   const t = useTranslations('DashPage.Assignments.AssignmentPage');
   const assignment = useAssignments() as any;
   const session = useLHSession() as any;
@@ -167,7 +171,9 @@ function PublishingState() {
           content={t('editDetailsTooltip')}
         >
           <div
-            onClick={() => setIsEditModalOpen(true)}
+            onClick={() => {
+              setIsEditModalOpen(true);
+            }}
             className="flex cursor-pointer items-center space-x-2 rounded-md border border-blue-600/10 bg-linear-to-bl from-blue-400/50 to-blue-200/80 px-3 py-2 font-medium text-blue-800 shadow-lg shadow-blue-900/10"
           >
             <Pencil size={18} />
@@ -190,7 +196,7 @@ function PublishingState() {
             <p className="text-sm font-bold">{t('preview')}</p>
           </Link>
         </ToolTip>
-        {assignment?.assignment_object?.published && (
+        {assignment?.assignment_object?.published ? (
           <ToolTip
             side="left"
             slateBlack
@@ -205,7 +211,7 @@ function PublishingState() {
               <p className="text-sm font-bold">{t('unpublish')}</p>
             </div>
           </ToolTip>
-        )}
+        ) : null}
         {!assignment?.assignment_object?.published && (
           <ToolTip
             side="left"
@@ -223,14 +229,16 @@ function PublishingState() {
           </ToolTip>
         )}
       </div>
-      {isEditModalOpen && (
+      {isEditModalOpen ? (
         <EditAssignmentModal
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => {
+            setIsEditModalOpen(false);
+          }}
           assignment={assignment?.assignment_object}
           accessToken={access_token}
         />
-      )}
+      ) : null}
     </>
   );
-}
+};

@@ -84,7 +84,7 @@ const CollectionGrid = memo(
       {collections.map((collection: any) => (
         <div
           key={collection.collection_uuid}
-          className="transform p-2 transition-transform duration-200 hover:scale-[1.02]"
+          className="p-2 transition-transform duration-200 hover:scale-[1.02]"
         >
           <CollectionThumbnail
             collection={collection}
@@ -117,7 +117,7 @@ const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string
 
 CourseGrid.displayName = 'CourseGrid';
 
-function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassicProps) {
+const LandingClassic = ({ courses, collections, orgslug, org_id }: LandingClassicProps) => {
   const t = useTranslations('HomePage');
 
   return (
@@ -190,6 +190,6 @@ function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassi
       </GeneralWrapperStyled>
     </div>
   );
-}
+};
 
 export default memo(LandingClassic);

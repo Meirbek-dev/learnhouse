@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
 import useSWR from 'swr';
 
-function Trail(params: any) {
+const Trail = (params: any) => {
   const { orgslug } = params;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -99,11 +99,11 @@ function Trail(params: any) {
           <div className="mb-6 flex items-center space-x-3">
             <BookOpen className="h-6 w-6 text-blue-500" />
             <h2 className="text-xl font-semibold text-gray-900">{t('myProgress')}</h2>
-            {trail?.runs && (
+            {trail?.runs ? (
               <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
                 {trail.runs.length}
               </span>
-            )}
+            ) : null}
           </div>
 
           {!trail ? (
@@ -133,6 +133,6 @@ function Trail(params: any) {
       </div>
     </GeneralWrapperStyled>
   );
-}
+};
 
 export default Trail;

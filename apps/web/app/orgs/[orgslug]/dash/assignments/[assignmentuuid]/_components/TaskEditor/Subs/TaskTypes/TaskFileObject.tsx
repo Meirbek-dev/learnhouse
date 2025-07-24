@@ -73,7 +73,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
 
     // wait for 1.5 second to show loading animation
     await new Promise((r) => setTimeout(r, 1500));
-    if (res.success === false) {
+    if (!res.success) {
       setError(res.data.detail);
       setIsLoading(false);
     } else {
@@ -99,7 +99,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success && res.data && res.data.task_submission) {
+      if (res.success && res.data?.task_submission) {
         setUserSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -177,7 +177,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success && res.data && res.data.task_submission) {
+      if (res.success && res.data?.task_submission) {
         setUserSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -300,7 +300,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
             />
             <p>{t('gradingViewInfo')}</p>
           </div>
-          {userSubmissions.fileUUID && !isLoading && assignmentTaskUUID && (
+          {userSubmissions.fileUUID && !isLoading && assignmentTaskUUID ? (
             <Link
               href={getTaskFileSubmissionDir(
                 org?.org_uuid,
@@ -313,7 +313,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
               target="_blank"
               className="relative mx-auto flex w-full flex-col items-center space-y-1 rounded-lg border border-gray-100 bg-white px-4 py-4 text-gray-500 shadow-xs transition-shadow hover:shadow-md sm:w-auto sm:px-5"
             >
-              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
+              <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
                 <Cloud size={14} />
               </div>
 
@@ -327,7 +327,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                 </div>
               </div>
             </Link>
-          )}
+          ) : null}
         </div>
       )}
       {view === 'student' && (
@@ -335,15 +335,15 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
           <div className="flex h-full w-full flex-col items-center justify-center">
             <div className="flex w-full max-w-full flex-col items-center justify-center">
               <div className="flex w-full flex-col items-center justify-center">
-                {error && (
+                {error ? (
                   <div className="mb-4 flex w-full items-center justify-center space-x-2 rounded-md border border-red-100 bg-red-50 p-3 text-red-600 shadow-xs transition-all sm:w-auto">
                     <div className="text-xs font-medium sm:text-sm">{error}</div>
                   </div>
-                )}
+                ) : null}
               </div>
-              {localUploadFile && !isLoading && (
+              {localUploadFile && !isLoading ? (
                 <div className="relative mt-3 flex w-full flex-col items-center space-y-1 rounded-lg border border-gray-100 bg-white px-4 py-4 text-gray-500 shadow-xs sm:w-auto sm:px-5">
-                  <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
+                  <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
                     <Cloud size={14} />
                   </div>
 
@@ -359,10 +359,10 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     </div>
                   </div>
                 </div>
-              )}
-              {userSubmissions.fileUUID && !isLoading && !localUploadFile && (
+              ) : null}
+              {userSubmissions.fileUUID && !isLoading && !localUploadFile ? (
                 <div className="relative mt-3 flex w-full flex-col items-center space-y-1 rounded-lg border border-gray-100 bg-white px-4 py-4 text-gray-500 shadow-xs sm:w-auto sm:px-5">
-                  <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
+                  <div className="absolute top-0 right-0 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 p-1.5 text-white shadow-xs">
                     <Cloud size={14} />
                   </div>
 
@@ -376,7 +376,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     </div>
                   </div>
                 </div>
-              )}
+              ) : null}
               <div className="mt-5 flex w-full flex-col items-center space-y-1 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 pt-5 text-center text-xs font-medium text-slate-500 sm:w-auto sm:flex-row sm:space-y-0 sm:space-x-2 sm:text-left">
                 <Info
                   size={15}

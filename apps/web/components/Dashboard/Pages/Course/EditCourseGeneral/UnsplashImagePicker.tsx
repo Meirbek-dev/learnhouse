@@ -152,7 +152,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
             className="w-full rounded-lg border p-2 pl-10 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
           />
           <Search
-            className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400"
+            className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
             size={20}
           />
         </div>
@@ -162,7 +162,9 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
               {predefinedLabels.map((label) => (
                 <button
                   key={label.key}
-                  onClick={() => handleLabelClick(label.key)}
+                  onClick={() => {
+                    handleLabelClick(label.key);
+                  }}
                   className="soft-shadow flex items-center gap-1 space-x-1 rounded-lg bg-neutral-100 px-3 py-1 transition-colors hover:bg-neutral-200"
                 >
                   <label.icon size={16} />
@@ -185,12 +187,14 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
                 src={image.urls.small}
                 alt={image.alt_description || 'Unsplash image'}
                 className="absolute inset-0 h-full w-full cursor-pointer rounded-lg object-cover transition-opacity hover:opacity-80"
-                onClick={() => handleImageSelect(image.urls.regular)}
+                onClick={() => {
+                  handleImageSelect(image.urls.regular);
+                }}
               />
             </div>
           ))}
         </div>
-        {loading && <p className="mt-4 text-center">{t('loading')}</p>}
+        {loading ? <p className="mt-4 text-center">{t('loading')}</p> : null}
         {!loading && images.length > 0 && (
           <Button
             onClick={handleLoadMore}
@@ -199,7 +203,7 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
             {t('loadMoreButton')}
           </Button>
         )}
-        {!loading && images.length === 0 && query && <p className="mt-4 text-center">{t('noResults')}</p>}
+        {!loading && images.length === 0 && query ? <p className="mt-4 text-center">{t('noResults')}</p> : null}
       </div>
     </div>
   );

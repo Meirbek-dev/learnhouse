@@ -304,7 +304,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
 
       // Save the PDF
-      const fileName = `${userCertificate.certification.config.certification_name.replace(/[^a-zA-Z0-9]/g, '_')}_${t('certificateFileName')}.pdf`;
+      const fileName = `${userCertificate.certification.config.certification_name.replaceAll(/[^\dA-Za-z]/g, '_')}_${t('certificateFileName')}.pdf`;
       pdf.save(fileName);
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -331,7 +331,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <h2 className="mb-2 text-xl font-semibold text-red-800">{t('errorNonAvailable')}</h2>
             <p className="mb-4 text-red-600">{error}</p>
             <Link
-              href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
+              href={`${getUriWithOrg(orgslug, '')}/course/${courseid}`}
               className="inline-flex items-center space-x-2 rounded-full bg-blue-600 px-6 py-3 text-white transition duration-200 hover:bg-blue-700"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -351,7 +351,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <h2 className="mb-2 text-xl font-semibold text-yellow-800">{t('noCertificate')}</h2>
             <p className="mb-4 text-yellow-600">{t('noCertificate')}</p>
             <Link
-              href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
+              href={`${getUriWithOrg(orgslug, '')}/course/${courseid}`}
               className="inline-flex items-center space-x-2 rounded-full bg-blue-600 px-6 py-3 text-white transition duration-200 hover:bg-blue-700"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -369,7 +369,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <Link
-            href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
+            href={`${getUriWithOrg(orgslug, '')}/course/${courseid}`}
             className="inline-flex items-center space-x-2 text-gray-600 transition duration-200 hover:text-gray-900"
           >
             <ArrowLeft className="h-5 w-5" />

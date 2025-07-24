@@ -20,7 +20,7 @@ interface NewActivityButtonProps {
   orgslug: string;
 }
 
-function NewActivityButton(props: NewActivityButtonProps) {
+const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
   const router = useRouter();
   const course = useCourse() as any;
@@ -121,6 +121,6 @@ function NewActivityButton(props: NewActivityButtonProps) {
       />
     </div>
   );
-}
+};
 
 export default NewActivityButton;

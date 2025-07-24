@@ -17,7 +17,7 @@ interface ModifiedActivityInterface {
   activityName: string;
 }
 
-function Activity(props: any) {
+const Activity = (props: any) => {
   const router = useRouter();
   const session = useLHSession() as any;
   const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>();
@@ -103,12 +103,12 @@ function Activity(props: any) {
                   className="bg-transparent text-xs text-gray-500 outline-hidden"
                   placeholder={t('activityNamePlaceholder')}
                   value={modifiedActivity ? modifiedActivity?.activityName : props.activity.name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setModifiedActivity({
                       activityId: props.activity.id,
                       activityName: e.target.value,
-                    })
-                  }
+                    });
+                  }}
                 />
                 <button
                   onClick={() => updateActivityName(props.activity.id)}
@@ -124,7 +124,9 @@ function Activity(props: any) {
               <p className="first-letter:uppercase"> {props.activity.name} </p>
             )}
             <Pencil
-              onClick={() => setSelectedActivity(props.activity.id)}
+              onClick={() => {
+                setSelectedActivity(props.activity.id);
+              }}
               size={12}
               className="text-neutral-400 hover:cursor-pointer"
             />
@@ -186,6 +188,6 @@ function Activity(props: any) {
       )}
     </Draggable>
   );
-}
+};
 
 export default Activity;

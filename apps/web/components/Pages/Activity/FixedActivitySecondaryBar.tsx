@@ -35,7 +35,9 @@ const NavigationButtons = memo(
   }) => (
     <div className="flex items-center space-x-2 sm:space-x-3">
       <button
-        onClick={() => navigateToActivity(prevActivity)}
+        onClick={() => {
+          navigateToActivity(prevActivity);
+        }}
         className={`flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2 ${
           prevActivity ? 'text-gray-700 hover:bg-gray-100' : 'cursor-not-allowed text-gray-300'
         }`}
@@ -68,10 +70,10 @@ const NavigationButtons = memo(
       </span>
 
       <button
-        onClick={() => navigateToActivity(nextActivity)}
-        className={
-          'flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2'
-        }
+        onClick={() => {
+          navigateToActivity(nextActivity);
+        }}
+        className="flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2"
         disabled={!nextActivity}
         title={
           nextActivity
@@ -103,9 +105,9 @@ NavigationButtons.displayName = 'NavigationButtons';
 // Memoized course info component
 const CourseInfo = memo(
   ({ course, org, t }: { course: any; org: any; t: (key: string, values?: Record<string, any>) => string }) => (
-    <div className="flex min-w-0 flex-shrink items-center space-x-2 sm:space-x-4">
+    <div className="flex min-w-0 shrink items-center space-x-2 sm:space-x-4">
       <img
-        className="h-[20px] w-[35px] flex-shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"
+        className="h-[20px] w-[35px] shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"
         src={
           course.thumbnail_image
             ? `${getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)}`
@@ -213,7 +215,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
             t={t}
           />
 
-          <div className="flex flex-shrink-0 items-center">
+          <div className="flex shrink-0 items-center">
             <NavigationButtons
               prevActivity={prevActivity}
               nextActivity={nextActivity}

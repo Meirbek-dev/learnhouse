@@ -62,7 +62,7 @@ interface EditorProps {
   setContent: (content: any) => void;
 }
 
-function Editor(props: EditorProps) {
+const Editor = (props: EditorProps) => {
   const t = useTranslations('DashPage.Editor.Editor');
 
   // Add defensive checks for context hooks
@@ -266,7 +266,7 @@ function Editor(props: EditorProps) {
             <EditorUsersSection className="space-x-2">
               <div>
                 <div className="rounded-md text-teal-100 transition-all ease-linear hover:cursor-pointer">
-                  {isButtonAvailable && dispatchAIEditor && aiEditorState && (
+                  {isButtonAvailable && dispatchAIEditor && aiEditorState ? (
                     <div
                       onClick={() =>
                         dispatchAIEditor({
@@ -290,7 +290,7 @@ function Editor(props: EditorProps) {
                       </i>
                       <i className="text-xs font-bold not-italic">{t('aiEditor')}</i>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <DividerVerticalIcon
@@ -363,7 +363,7 @@ function Editor(props: EditorProps) {
       </CourseProvider>
     </Page>
   );
-}
+};
 
 const Page = styled.div`
   height: 100vh;

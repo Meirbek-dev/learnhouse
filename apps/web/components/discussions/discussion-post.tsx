@@ -1,10 +1,7 @@
 'use client';
 
-import { ArrowBigUp, ArrowBigDown, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
+import { ArrowBigDown, ArrowBigUp, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import { useState } from 'react';
-import type React from 'react';
-
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -15,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import type React from 'react';
 
 interface DiscussionPostProps {
   post: any;
@@ -63,7 +62,7 @@ export default function DiscussionPost({
     // Check if content has meaningful text (not just empty HTML tags)
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = replyContent;
-    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    const textContent = tempDiv.textContent || tempDiv.textContent || '';
 
     if (!textContent.trim()) return;
     onSubmitReply(post.id, replyContent);
@@ -76,7 +75,7 @@ export default function DiscussionPost({
     // Check if content has meaningful text (not just empty HTML tags)
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = editContent;
-    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    const textContent = tempDiv.textContent || tempDiv.textContent || '';
 
     if (!textContent.trim()) return;
     onEditPost(post.id, editContent);
@@ -85,7 +84,7 @@ export default function DiscussionPost({
 
   // Helper to check if a given user is admin for the org
   const isAuthorAdmin = (username: string) => {
-    if (!org || !org.id || !post || !post.username) return false;
+    if (!(org?.id && post?.username)) return false;
     // If current user is admin and is the author, show badge
     return isAdmin && username === currentUser?.username;
   };
@@ -120,7 +119,7 @@ export default function DiscussionPost({
                   )}
                 </div>
               </div>
-              {isOwnPost && !editingPost && (
+              {isOwnPost && !editingPost ? (
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
@@ -136,13 +135,15 @@ export default function DiscussionPost({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onDeletePost(post.id)}
+                    onClick={() => {
+                      onDeletePost(post.id);
+                    }}
                     className="h-8 px-2 text-neutral-500 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 size={14} />
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
 
             {editingPost ? (
@@ -161,7 +162,9 @@ export default function DiscussionPost({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setEditingPost(false)}
+                    onClick={() => {
+                      setEditingPost(false);
+                    }}
                   >
                     {t('cancel')}
                   </Button>
@@ -185,7 +188,9 @@ export default function DiscussionPost({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onVotePost(post.id, 'up')}
+                  onClick={() => {
+                    onVotePost(post.id, 'up');
+                  }}
                   className={cn(
                     'h-8 rounded-full px-2 transition-colors',
                     post.userVote === 'up'
@@ -202,7 +207,9 @@ export default function DiscussionPost({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onVotePost(post.id, 'down')}
+                  onClick={() => {
+                    onVotePost(post.id, 'down');
+                  }}
                   className={cn(
                     'h-8 rounded-full px-2 transition-colors',
                     post.userVote === 'down'
@@ -230,7 +237,9 @@ export default function DiscussionPost({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setReplyingTo(!replyingTo)}
+                onClick={() => {
+                  setReplyingTo(!replyingTo);
+                }}
                 className={cn('h-8 rounded-full px-3 text-neutral-600', replyingTo && 'bg-blue-50 text-blue-700')}
               >
                 <Reply
@@ -238,13 +247,13 @@ export default function DiscussionPost({
                   className="mr-1"
                 />
                 <span>{t('reply')}</span>
-                {post.replies && post.replies.length > 0 && (
+                {post.replies && post.replies.length > 0 ? (
                   <span className="ml-1 rounded-full bg-neutral-200 px-1.5 py-0.5 text-xs">{post.replies.length}</span>
-                )}
+                ) : null}
               </Button>
             </div>
 
-            {replyingTo && (
+            {replyingTo ? (
               <form
                 onSubmit={handleSubmitReply}
                 className="mt-4"
@@ -287,13 +296,13 @@ export default function DiscussionPost({
                   </div>
                 </div>
               </form>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
 
       {/* Replies */}
-      {post.replies && post.replies.length > 0 && (
+      {post.replies && post.replies.length > 0 ? (
         <>
           <Separator />
           <div className="bg-neutral-50/80 py-1">
@@ -310,7 +319,7 @@ export default function DiscussionPost({
             ))}
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }

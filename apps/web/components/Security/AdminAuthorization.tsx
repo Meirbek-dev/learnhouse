@@ -39,7 +39,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
   const checkPathname = useCallback((pattern: string, pathname: string) => {
     if (typeof pattern !== 'string' || typeof pathname !== 'string') return false;
     const regexPattern = new RegExp(
-      `^${pattern.replaceAll(/[$()+./?[\\\]^{|}]/g, String.raw`\$&`).replaceAll(/\\\*/g, '.*')}$`,
+      `^${pattern.replaceAll(/[$()+./?[\\\]^{|}]/g, String.raw`\$&`).replaceAll(String.raw`\*`, '.*')}$`,
     );
     return regexPattern.test(pathname);
   }, []);

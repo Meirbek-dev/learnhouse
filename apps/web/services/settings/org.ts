@@ -11,8 +11,7 @@ export async function updateOrganization(org_id: number, data: any, access_token
     `${getAPIUrl()}orgs/${org_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function uploadOrganizationLogo(org_id: number, logo_file: any, access_token: string) {
@@ -23,8 +22,7 @@ export async function uploadOrganizationLogo(org_id: number, logo_file: any, acc
     `${getAPIUrl()}orgs/${org_id}/logo`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function uploadOrganizationThumbnail(org_id: number, thumbnail_file: any, access_token: string) {
@@ -35,8 +33,7 @@ export async function uploadOrganizationThumbnail(org_id: number, thumbnail_file
     `${getAPIUrl()}orgs/${org_id}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export const uploadOrganizationPreview = async (orgId: number, file: File, access_token: string) => {
@@ -47,6 +44,5 @@ export const uploadOrganizationPreview = async (orgId: number, file: File, acces
     `${getAPIUrl()}orgs/${orgId}/preview`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 };

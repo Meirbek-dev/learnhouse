@@ -55,44 +55,42 @@ type UploadBlockComponentProps = {
   children: ReactNode;
 } & HTMLAttributes<HTMLDivElement>;
 
-function FileUploadBlock({ isLoading, isEditable, isEmpty, Icon, children }: UploadBlockComponentProps) {
+const FileUploadBlock = ({ isLoading, isEditable, isEmpty, Icon, children }: UploadBlockComponentProps) => {
   const t = useTranslations('DashPage.Editor.FileUploadBlock');
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <Loader
         className="animate-spin text-gray-200"
         size={50}
       />
     );
+  }
 
-  if (!isEditable && isEmpty)
+  if (!isEditable && isEmpty) {
     return (
       <div className="flex items-center gap-5">
-        {
-          <Icon
-            className="text-gray-200"
-            size={50}
-          />
-        }
-        <p>{t('noFilePreview')}</p>
-      </div>
-    );
-
-  return (
-    <>
-      {
         <Icon
           className="text-gray-200"
           size={50}
         />
-      }
+        <p>{t('noFilePreview')}</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Icon
+        className="text-gray-200"
+        size={50}
+      />
       {children}
     </>
   );
-}
+};
 
-function FileUploadBlockWrapper({ children, isEmpty, ...props }: UploadBlockComponentProps) {
+const FileUploadBlockWrapper = ({ children, isEmpty, ...props }: UploadBlockComponentProps) => {
   return (
     isEmpty && (
       <div
@@ -108,6 +106,6 @@ function FileUploadBlockWrapper({ children, isEmpty, ...props }: UploadBlockComp
       </div>
     )
   );
-}
+};
 
 export { FileUploadBlockWrapper as FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput };

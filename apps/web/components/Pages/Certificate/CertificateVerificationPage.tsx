@@ -211,7 +211,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             <div className="overflow-hidden rounded-lg bg-white p-4 shadow-md shadow-gray-300/25 outline-1 outline-neutral-200/40">
               <div className="flex items-start space-x-4">
                 {/* Course Thumbnail */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <div className="h-12 w-20 overflow-hidden rounded-lg bg-gray-100 ring-1 ring-black/10 ring-inset">
                     {certificateData.course.thumbnail_image ? (
                       <img
@@ -250,12 +250,12 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                       <h4 className="text-base leading-tight font-semibold text-gray-900">
                         {certificateData.course.name}
                       </h4>
-                      {certificateData.course.description && (
+                      {certificateData.course.description ? (
                         <p className="mt-1 line-clamp-2 text-sm text-gray-600">{certificateData.course.description}</p>
-                      )}
+                      ) : null}
                     </div>
 
-                    {certificateData.course.authors && certificateData.course.authors.length > 0 && (
+                    {certificateData.course.authors && certificateData.course.authors.length > 0 ? (
                       <div className="flex items-center space-x-1 text-sm font-normal text-neutral-400">
                         <span>{t('byLabel')}</span>
                         <div className="flex items-center space-x-1">
@@ -288,12 +288,12 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                           )}
                         </div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
 
                 {/* View Course Link */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <Link
                     href={getUriWithOrg(
                       org?.org_slug || '',
@@ -367,7 +367,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                   </div>
                 </div>
 
-                {certificateData.certification.config.certificate_instructor && (
+                {certificateData.certification.config.certificate_instructor ? (
                   <div>
                     <label className="mb-1 block text-sm font-medium text-gray-700">{t('instructor')}</label>
                     <div className="rounded-lg bg-gray-50 p-3">
@@ -376,7 +376,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                       </span>
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 

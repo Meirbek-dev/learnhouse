@@ -41,14 +41,14 @@ interface Course {
   trail?: {
     runs: CourseRun[];
   };
-  chapters?: {
+  chapters?: Array<{
     name: string;
-    activities: {
+    activities: Array<{
       activity_uuid: string;
       name: string;
       activity_type: string;
-    }[];
-  }[];
+    }>;
+  }>;
 }
 
 interface CourseActionsMobileProps {
@@ -307,7 +307,9 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                   minWidth="sm"
                 />
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => {
+                    setIsModalOpen(true);
+                  }}
                   disabled={isActionLoading}
                   className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
                 >

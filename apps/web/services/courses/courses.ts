@@ -16,8 +16,7 @@ export async function getOrgCourses(org_slug: string, next: any, access_token?: 
     `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/10`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function searchOrgCourses(
@@ -32,8 +31,7 @@ export async function searchOrgCourses(
     `${getAPIUrl()}courses/org_slug/${org_slug}/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getCourseMetadata(course_uuid: string, next: any, access_token: string | null | undefined) {
@@ -41,8 +39,7 @@ export async function getCourseMetadata(course_uuid: string, next: any, access_t
     `${getAPIUrl()}courses/course_${course_uuid}/meta`,
     RequestBodyWithAuthHeader('GET', null, next, access_token || undefined),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function updateCourse(course_uuid: string, data: any, access_token: string) {
@@ -50,8 +47,7 @@ export async function updateCourse(course_uuid: string, data: any, access_token:
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getCourse(course_uuid: string, next: any, access_token: string) {
@@ -59,8 +55,7 @@ export async function getCourse(course_uuid: string, next: any, access_token: st
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getCourseById(course_id: number, next: any, access_token: string) {
@@ -68,8 +63,7 @@ export async function getCourseById(course_id: number, next: any, access_token: 
     `${getAPIUrl()}courses/id/${course_id}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function updateCourseThumbnail(course_uuid: string, formData: FormData, access_token: string) {
@@ -77,8 +71,7 @@ export async function updateCourseThumbnail(course_uuid: string, formData: FormD
     `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function createNewCourse(org_id: number, course_body: any, thumbnail: any, access_token: string) {
@@ -99,8 +92,7 @@ export async function createNewCourse(org_id: number, course_body: any, thumbnai
     `${getAPIUrl()}courses/?org_id=${org_id}`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function deleteCourseFromBackend(course_uuid: string, access_token: string) {
@@ -108,8 +100,7 @@ export async function deleteCourseFromBackend(course_uuid: string, access_token:
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getCourseContributors(course_uuid: string, access_token: string | null | undefined) {
@@ -117,8 +108,7 @@ export async function getCourseContributors(course_uuid: string, access_token: s
     `${getAPIUrl()}courses/${course_uuid}/contributors`,
     RequestBodyWithAuthHeader('GET', null, null, access_token || undefined),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function editContributor(
@@ -132,8 +122,7 @@ export async function editContributor(
     `${getAPIUrl()}courses/${course_uuid}/contributors/${contributor_id}?authorship=${authorship}&authorship_status=${authorship_status}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token || undefined),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function applyForContributor(course_uuid: string, data: any, access_token: string | null | undefined) {
@@ -141,8 +130,7 @@ export async function applyForContributor(course_uuid: string, data: any, access
     `${getAPIUrl()}courses/${course_uuid}/apply-contributor`,
     RequestBodyWithAuthHeader('POST', data, null, access_token || undefined),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function bulkAddContributors(course_uuid: string, data: any, access_token: string | null | undefined) {
@@ -150,8 +138,7 @@ export async function bulkAddContributors(course_uuid: string, data: any, access
     `${getAPIUrl()}courses/${course_uuid}/bulk-add-contributors`,
     RequestBodyWithAuthHeader('POST', data, null, access_token || undefined),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function bulkRemoveContributors(course_uuid: string, data: any, access_token: string | null | undefined) {
@@ -159,6 +146,5 @@ export async function bulkRemoveContributors(course_uuid: string, data: any, acc
     `${getAPIUrl()}courses/${course_uuid}/bulk-remove-contributors`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token || undefined),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

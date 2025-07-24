@@ -30,7 +30,7 @@ interface ModifiedActivityInterface {
   activityName: string;
 }
 
-function ActivityElement(props: ActivitiyElementProps) {
+const ActivityElement = (props: ActivitiyElementProps) => {
   const router = useRouter();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -142,12 +142,12 @@ function ActivityElement(props: ActivitiyElementProps) {
                   className="bg-transparent text-xs text-gray-500 outline-hidden"
                   placeholder={t('activityNamePlaceholder')}
                   value={modifiedActivity ? modifiedActivity?.activityName : props.activity.name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setModifiedActivity({
                       activityId: props.activity.id,
                       activityName: e.target.value,
-                    })
-                  }
+                    });
+                  }}
                   disabled={isUpdatingName}
                 />
                 <button
@@ -257,7 +257,7 @@ function ActivityElement(props: ActivitiyElementProps) {
       )}
     </Draggable>
   );
-}
+};
 
 const ACTIVITIES = {
   TYPE_VIDEO: {
@@ -362,7 +362,7 @@ const ActivityElementOptions = ({
           </div>
         </Link>
       )}
-      {activity.activity_type === 'TYPE_ASSIGNMENT' && assignmentUUID && (
+      {activity.activity_type === 'TYPE_ASSIGNMENT' && assignmentUUID ? (
         <Link
           href={`${getUriWithOrg(org.slug, '')}/dash/assignments/${assignmentUUID}`}
           className={`p-1 hover:cursor-pointer ${isMobile ? 'px-2' : 'px-3'} items-center rounded-md bg-teal-700`}
@@ -371,7 +371,7 @@ const ActivityElementOptions = ({
             <FilePenLine size={12} /> {!isMobile && <span>{t('editAssignmentButton')}</span>}
           </div>
         </Link>
-      )}
+      ) : null}
     </>
   );
 };

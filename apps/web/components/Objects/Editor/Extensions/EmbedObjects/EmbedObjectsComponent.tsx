@@ -159,7 +159,7 @@ const MemoizedEmbed = React.memo(
 );
 MemoizedEmbed.displayName = 'MemoizedEmbed';
 
-function EmbedObjectsComponent(props: any) {
+const EmbedObjectsComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.EmbedObjects');
   const { updateAttributes } = props;
   const [embedType, setEmbedType] = useState<'url' | 'code'>(props.node.attrs.embedType || 'url');
@@ -517,10 +517,12 @@ function EmbedObjectsComponent(props: any) {
           <>
             {embedContent}
             {/* Minimal toolbar for existing embeds */}
-            {isEditable && (
+            {isEditable ? (
               <div className="bg-opacity-90 absolute top-2 right-2 flex items-center gap-1.5 rounded-lg bg-white p-1 opacity-70 shadow-xs backdrop-blur-xs transition-opacity hover:opacity-100">
                 <button
-                  onClick={() => setActiveInput(embedType)}
+                  onClick={() => {
+                    setActiveInput(embedType);
+                  }}
                   className="rounded-md p-1.5 text-gray-600 hover:bg-gray-100"
                   title={t('editEmbedTitle')}
                 >
@@ -574,7 +576,7 @@ function EmbedObjectsComponent(props: any) {
                   </svg>
                 </button>
               </div>
-            )}
+            ) : null}
           </>
         ) : (
           // Show the embed selection UI if we don't have content yet
@@ -587,7 +589,9 @@ function EmbedObjectsComponent(props: any) {
                 <button
                   key={product.name}
                   className="group flex flex-col items-center transition-transform hover:scale-110"
-                  onClick={() => handleProductSelection(product)}
+                  onClick={() => {
+                    handleProductSelection(product);
+                  }}
                   title={t('addProductEmbedTitle', {
                     productName: product.name,
                   })}
@@ -609,7 +613,7 @@ function EmbedObjectsComponent(props: any) {
             </div>
             <p className="mt-3 mb-2 max-w-md text-center text-xs text-gray-500">{t('clickServiceToAdd')}</p>
             {/* Direct input options */}
-            {isEditable && (
+            {isEditable ? (
               <div className="mt-4 flex justify-center gap-3">
                 <button
                   onClick={() => {
@@ -632,12 +636,12 @@ function EmbedObjectsComponent(props: any) {
                   <span>{t('codeButton')}</span>
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
         {/* Inline input UI - appears in place without covering content */}
-        {isEditable && activeInput !== 'none' && (
+        {isEditable && activeInput !== 'none' ? (
           <div className="bg-opacity-95 absolute inset-0 z-10 flex items-center justify-center bg-gray-100 p-4 backdrop-blur-xs">
             <form
               onSubmit={handleInputSubmit}
@@ -646,7 +650,7 @@ function EmbedObjectsComponent(props: any) {
             >
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  {selectedProduct && activeInput === 'url' && (
+                  {selectedProduct && activeInput === 'url' ? (
                     <div
                       className="flex h-8 w-8 items-center justify-center rounded-lg"
                       style={{ backgroundColor: selectedProduct.color }}
@@ -656,7 +660,7 @@ function EmbedObjectsComponent(props: any) {
                         color="#FFFFFF"
                       />
                     </div>
-                  )}
+                  ) : null}
                   <h3 className="text-lg font-medium text-gray-800">
                     {activeInput === 'url'
                       ? selectedProduct
@@ -669,7 +673,9 @@ function EmbedObjectsComponent(props: any) {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setActiveInput('none')}
+                  onClick={() => {
+                    setActiveInput('none');
+                  }}
                   className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
                 >
                   <svg
@@ -702,7 +708,7 @@ function EmbedObjectsComponent(props: any) {
               {activeInput === 'url' ? (
                 <>
                   <div className="relative mb-2">
-                    <div className="absolute top-1/2 left-3 -translate-y-1/2 transform text-blue-500">
+                    <div className="absolute top-1/2 left-3 -translate-y-1/2 text-blue-500">
                       <LinkIcon size={16} />
                     </div>
                     <input
@@ -724,10 +730,12 @@ function EmbedObjectsComponent(props: any) {
                     <p className="text-xs text-gray-500">
                       {selectedProduct ? t('urlTip', { productName: selectedProduct.name }) : t('defaultUrlTip')}
                     </p>
-                    {selectedProduct && (
+                    {selectedProduct ? (
                       <button
                         type="button"
-                        onClick={() => handleOpenDocs(selectedProduct.guide)}
+                        onClick={() => {
+                          handleOpenDocs(selectedProduct.guide);
+                        }}
                         className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
                       >
                         <svg
@@ -756,7 +764,7 @@ function EmbedObjectsComponent(props: any) {
                         </svg>
                         {t('howToEmbed', { productName: selectedProduct.name })}
                       </button>
-                    )}
+                    ) : null}
                   </div>
                 </>
               ) : (
@@ -772,10 +780,12 @@ function EmbedObjectsComponent(props: any) {
                   </div>
                   <div className="mb-4 flex items-center justify-between">
                     <p className="text-xs text-gray-500">{t('codeTip')}</p>
-                    {selectedProduct && (
+                    {selectedProduct ? (
                       <button
                         type="button"
-                        onClick={() => handleOpenDocs(selectedProduct.guide)}
+                        onClick={() => {
+                          handleOpenDocs(selectedProduct.guide);
+                        }}
                         className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
                       >
                         <svg
@@ -804,7 +814,7 @@ function EmbedObjectsComponent(props: any) {
                         </svg>
                         {t('howToEmbed', { productName: selectedProduct.name })}
                       </button>
-                    )}
+                    ) : null}
                   </div>
                 </>
               )}
@@ -812,7 +822,9 @@ function EmbedObjectsComponent(props: any) {
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setActiveInput('none')}
+                  onClick={() => {
+                    setActiveInput('none');
+                  }}
                   className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
                 >
                   {t('cancel')}
@@ -827,14 +839,16 @@ function EmbedObjectsComponent(props: any) {
               </div>
             </form>
           </div>
-        )}
+        ) : null}
 
         {/* Resize handles */}
-        {isEditable && (
+        {isEditable ? (
           <>
             <div
               className="bg-opacity-70 hover:bg-opacity-100 absolute top-0 right-0 bottom-0 flex w-4 cursor-ew-resize items-center justify-center bg-white transition-opacity"
-              onMouseDown={(e) => handleResizeStart(e, 'horizontal')}
+              onMouseDown={(e) => {
+                handleResizeStart(e, 'horizontal');
+              }}
             >
               <GripVertical
                 size={16}
@@ -843,7 +857,9 @@ function EmbedObjectsComponent(props: any) {
             </div>
             <div
               className="bg-opacity-70 hover:bg-opacity-100 absolute right-0 bottom-0 left-0 flex h-4 cursor-ns-resize items-center justify-center bg-white transition-opacity"
-              onMouseDown={(e) => handleResizeStart(e, 'vertical')}
+              onMouseDown={(e) => {
+                handleResizeStart(e, 'vertical');
+              }}
             >
               <GripHorizontal
                 size={16}
@@ -851,10 +867,10 @@ function EmbedObjectsComponent(props: any) {
               />
             </div>
           </>
-        )}
+        ) : null}
       </div>
     </NodeViewWrapper>
   );
-}
+};
 
 export default EmbedObjectsComponent;

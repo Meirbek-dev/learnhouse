@@ -11,6 +11,5 @@ export async function updatePassword(user_id: number, data: any, access_token: s
     `${getAPIUrl()}users/change_password/${user_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

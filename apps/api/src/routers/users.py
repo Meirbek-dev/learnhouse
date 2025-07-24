@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, Request, UploadFile
 from pydantic import EmailStr
 from sqlmodel import Session
 
@@ -23,8 +23,6 @@ from src.services.users.password_reset import (
 )
 from src.services.users.users import (
     authorize_user_action,
-    create_user,
-    create_user_with_invite,
     create_user_with_invite_validation,
     create_user_with_org_validation,
     create_user_without_org,

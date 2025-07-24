@@ -20,7 +20,7 @@ import useSWR, { mutate } from 'swr';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
-function OrgAccess() {
+const OrgAccess = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -233,7 +233,9 @@ function OrgAccess() {
               <div className="mt-3 mr-2 flex flex-row-reverse">
                 <Modal
                   isDialogOpen={invitesModal}
-                  onOpenChange={() => setInvitesModal(!invitesModal)}
+                  onOpenChange={() => {
+                    setInvitesModal(!invitesModal);
+                  }}
                   minHeight="no-min"
                   minWidth="lg"
                   dialogContent={<OrgInviteCodeGenerate setInvitesModal={setInvitesModal} />}
@@ -255,6 +257,6 @@ function OrgAccess() {
       )}
     </>
   );
-}
+};
 
 export default OrgAccess;

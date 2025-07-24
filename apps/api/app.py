@@ -4,11 +4,10 @@ import os
 import sys
 import time
 from contextlib import asynccontextmanager
-from typing import Optional
 
 import logfire
 import uvicorn
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware

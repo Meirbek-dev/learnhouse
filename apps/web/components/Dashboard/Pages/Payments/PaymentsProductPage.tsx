@@ -52,7 +52,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 
 type EditProductFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
-function PaymentsProductPage() {
+const PaymentsProductPage = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -77,7 +77,7 @@ function PaymentsProductPage() {
   useEffect(() => {
     if (paymentConfigs) {
       const stripeConfig = paymentConfigs.find((config: any) => config.provider === 'stripe');
-      setIsStripeEnabled(!!stripeConfig);
+      setIsStripeEnabled(Boolean(stripeConfig));
     }
   }, [paymentConfigs]);
 
@@ -121,7 +121,13 @@ function PaymentsProductPage() {
           onOpenChange={setIsCreateModalOpen}
           dialogTitle={t('createModalTitle')}
           dialogDescription={t('createModalDescription')}
-          dialogContent={<CreateProductForm onSuccess={() => setIsCreateModalOpen(false)} />}
+          dialogContent={
+            <CreateProductForm
+              onSuccess={() => {
+                setIsCreateModalOpen(false);
+              }}
+            />
+          }
         />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -133,8 +139,12 @@ function PaymentsProductPage() {
               {editingProductId === product.id ? (
                 <EditProductForm
                   product={product}
-                  onSuccess={() => setEditingProductId(null)}
-                  onCancel={() => setEditingProductId(null)}
+                  onSuccess={() => {
+                    setEditingProductId(null);
+                  }}
+                  onCancel={() => {
+                    setEditingProductId(null);
+                  }}
                 />
               ) : (
                 <div className="flex h-full flex-col">
@@ -153,7 +163,9 @@ function PaymentsProductPage() {
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => setEditingProductId(product.id)}
+                        onClick={() => {
+                          setEditingProductId(product.id);
+                        }}
                         className={`text-blue-500 hover:text-blue-700 ${isStripeEnabled ? '' : 'cursor-not-allowed opacity-50'}`}
                         disabled={!isStripeEnabled}
                         title={t('editButton')}
@@ -186,17 +198,19 @@ function PaymentsProductPage() {
                       className={`transition-all duration-300 ease-in-out ${expandedProducts[product.id] ? 'max-h-[1000px]' : 'max-h-24'} overflow-hidden`}
                     >
                       <p className="text-gray-600">{product.description}</p>
-                      {product.benefits && (
+                      {product.benefits ? (
                         <div className="mt-2">
                           <h4 className="text-sm font-semibold">{t('benefitsLabel')}</h4>
                           <p className="text-sm text-gray-600">{product.benefits}</p>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                   <div className="mt-2">
                     <button
-                      onClick={() => toggleProductExpansion(product.id)}
+                      onClick={() => {
+                        toggleProductExpansion(product.id);
+                      }}
                       className="flex items-center text-sm text-slate-500 hover:text-slate-700"
                     >
                       {expandedProducts[product.id] ? (
@@ -236,7 +250,9 @@ function PaymentsProductPage() {
 
         <div className="flex items-center justify-center py-10">
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => {
+              setIsCreateModalOpen(true);
+            }}
             className={`soft-shadow mb-4 flex items-center space-x-2 rounded-lg border border-gray-600 bg-linear-to-bl from-gray-700 to-gray-900 px-3 py-1.5 font-medium text-white shadow-gray-900/20 transition duration-300 ${
               isStripeEnabled ? 'hover:from-gray-600 hover:to-gray-800' : 'cursor-not-allowed opacity-50'
             }`}
@@ -249,7 +265,7 @@ function PaymentsProductPage() {
       </div>
     </div>
   );
-}
+};
 
 const EditProductForm = ({
   product,
@@ -262,7 +278,7 @@ const EditProductForm = ({
 }) => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
-  const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
+  const [currencies, setCurrencies] = useState<Array<{ code: string; name: string }>>([]);
   const t = useTranslations('DashPage.Payments.ProductPage.editForm');
   const validationSchema = useMemo(() => createValidationSchema(t), [t]);
 
@@ -351,7 +367,9 @@ const EditProductForm = ({
                         type="number"
                         placeholder={t('pricePlaceholder')}
                         {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value));
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

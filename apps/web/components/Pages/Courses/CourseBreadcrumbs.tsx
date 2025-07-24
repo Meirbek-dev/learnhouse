@@ -1,15 +1,15 @@
-import { getUriWithOrg } from '@services/config/config';
-import { Book } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
+  BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { getUriWithOrg } from '@services/config/config';
+import { useTranslations } from 'next-intl';
+import { Book } from 'lucide-react';
+import Link from 'next/link';
 
 interface CourseBreadcrumbsProps {
   course: any;
@@ -24,17 +24,21 @@ export default function CourseBreadcrumbs({ course, orgslug }: CourseBreadcrumbs
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={`${getUriWithOrg(orgslug, '')}/courses`} className="flex items-center space-x-2">
-                <Book className="text-gray" size={14} />
+              <Link
+                href={`${getUriWithOrg(orgslug, '')}/courses`}
+                className="flex items-center space-x-2"
+              >
+                <Book
+                  className="text-gray"
+                  size={14}
+                />
                 <span>{t('courses')}</span>
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="first-letter:uppercase">
-              {course.name}
-            </BreadcrumbPage>
+            <BreadcrumbPage className="first-letter:uppercase">{course.name}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

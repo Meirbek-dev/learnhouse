@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
-function EvaluateAssignment({ user_id }: any) {
+const EvaluateAssignment = ({ user_id }: any) => {
   const t = useTranslations('DashPage.Assignments.EvaluateModal');
   const assignments = useAssignments() as any;
   const session = useLHSession() as any;
@@ -83,7 +83,7 @@ function EvaluateAssignment({ user_id }: any) {
                   <p className="text-slate-500">{task.description}</p>
                 </div>
                 <div className="flex space-x-2">
-                  {task.hint && (
+                  {task.hint ? (
                     <Popover>
                       <PopoverTrigger className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
                         <Info size={13} />
@@ -91,8 +91,8 @@ function EvaluateAssignment({ user_id }: any) {
                       </PopoverTrigger>
                       <PopoverContent className="max-h-[200px] overflow-y-auto">{task.hint}</PopoverContent>
                     </Popover>
-                  )}
-                  {task.reference_file && (
+                  ) : null}
+                  {task.reference_file ? (
                     <Link
                       href={getTaskRefFileDir(
                         org?.org_uuid,
@@ -108,15 +108,15 @@ function EvaluateAssignment({ user_id }: any) {
                     >
                       <Download size={13} />
                       <div className="flex items-center space-x-2">
-                        {task.reference_file && (
+                        {task.reference_file ? (
                           <span className="relative">
                             <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
                           </span>
-                        )}
+                        ) : null}
                         <p className="text-xs font-semibold">{t('refDoc')}</p>
                       </div>
                     </Link>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <div className="min-h-full">
@@ -171,6 +171,6 @@ function EvaluateAssignment({ user_id }: any) {
       </div>
     </div>
   );
-}
+};
 
 export default EvaluateAssignment;

@@ -1,5 +1,4 @@
 import asyncio
-from typing import Optional
 
 from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select

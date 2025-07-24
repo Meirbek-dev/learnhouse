@@ -1,5 +1,5 @@
-import { Plugin, PluginKey } from 'prosemirror-state';
 import { Extension } from '@tiptap/core';
+import { Plugin, PluginKey } from 'prosemirror-state';
 
 export const NoTextInput = Extension.create({
   name: 'noTextInput',

@@ -9,12 +9,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t('home'),
   };
 }
-function Home() {
+const Home = () => {
   return (
     <div>
       <HomeClient />
     </div>
   );
-}
+};
 
 export default Home;

@@ -17,7 +17,7 @@ export const ACCEPTED_FILE_FORMATS = {
 /**
  * Constructs the 'accept' attribute value for an input element.
  */
-export function constructAcceptValue(types: (keyof typeof ACCEPTED_FILE_FORMATS)[]): string {
+export function constructAcceptValue(types: Array<keyof typeof ACCEPTED_FILE_FORMATS>): string {
   return types
     .map((type) => ACCEPTED_FILE_FORMATS[type])
     .filter(Boolean)

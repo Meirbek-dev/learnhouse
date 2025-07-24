@@ -16,7 +16,7 @@ import useSWR from 'swr';
 
 import EvaluateAssignment from './Modals/EvaluateAssignment';
 
-function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: string }) {
+const AssignmentSubmissionsSubPage = ({ assignment_uuid }: { assignment_uuid: string }) => {
   const t = useTranslations('DashPage.Assignments');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -70,9 +70,9 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
       </div>
     </div>
   );
-}
+};
 
-function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
+const SubmissionBox = ({ assignment_uuid, user_id, submission }: any) => {
   const t = useTranslations('DashPage.Assignments');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -121,14 +121,14 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
           <div className="flex flex-col">
             <Modal
               isDialogOpen={
-                gradeSudmissionModal.open && gradeSudmissionModal.submission_id === submission.submission_uuid
+                gradeSudmissionModal.open ? gradeSudmissionModal.submission_id === submission.submission_uuid : false
               }
-              onOpenChange={(open: boolean) =>
+              onOpenChange={(open: boolean) => {
                 setGradeSubmissionModal({
                   open,
                   submission_id: submission.submission_uuid,
-                })
-              }
+                });
+              }}
               minHeight="lg"
               minWidth="lg"
               dialogContent={
@@ -153,6 +153,6 @@ function SubmissionBox({ assignment_uuid, user_id, submission }: any) {
       </div>
     </div>
   );
-}
+};
 
 export default AssignmentSubmissionsSubPage;

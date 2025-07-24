@@ -1,10 +1,7 @@
 'use client';
 
-import { ArrowBigUp, ArrowBigDown, Clock, Edit, Trash2 } from 'lucide-react';
+import { ArrowBigDown, ArrowBigUp, Clock, Edit, Trash2 } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import { useState } from 'react';
-import type React from 'react';
-
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import RichContentRenderer from './rich-content-renderer';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -13,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import type React from 'react';
 
 interface DiscussionReplyProps {
   reply: any;
@@ -53,7 +52,7 @@ export default function DiscussionReply({
     // Check if content has meaningful text (not just empty HTML tags)
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = editContent;
-    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    const textContent = tempDiv.textContent || tempDiv.textContent || '';
 
     if (!textContent.trim()) return;
     onEditReply(postId, reply.id, editContent);
@@ -62,7 +61,7 @@ export default function DiscussionReply({
 
   // Helper to check if a given user is admin for the org
   const isAuthorAdmin = (username: string) => {
-    if (!org || !org.id || !reply || !reply.username) return false;
+    if (!(org?.id && reply?.username)) return false;
     // If current user is admin and is the author, show badge
     return isAdmin && username === currentUser?.username;
   };
@@ -93,7 +92,7 @@ export default function DiscussionReply({
                 <span>{format.relativeTime(new Date(reply.createDate), now)}</span>
               </div>
             </div>
-            {isOwnReply && !editing && (
+            {isOwnReply && !editing ? (
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
@@ -109,13 +108,15 @@ export default function DiscussionReply({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onDeleteReply(postId, reply.id)}
+                  onClick={() => {
+                    onDeleteReply(postId, reply.id);
+                  }}
                   className="h-7 px-2 text-xs text-neutral-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 size={12} />
                 </Button>
               </div>
-            )}
+            ) : null}
           </div>
 
           {editing ? (
@@ -134,7 +135,9 @@ export default function DiscussionReply({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEditing(false)}
+                  onClick={() => {
+                    setEditing(false);
+                  }}
                   className="h-7 text-xs"
                 >
                   {t('cancel')}
@@ -164,7 +167,9 @@ export default function DiscussionReply({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onVoteReply(postId, reply.id, 'up')}
+                  onClick={() => {
+                    onVoteReply(postId, reply.id, 'up');
+                  }}
                   className={cn(
                     'h-6 rounded-full px-1.5 text-xs transition-colors',
                     reply.userVote === 'up'
@@ -181,7 +186,9 @@ export default function DiscussionReply({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onVoteReply(postId, reply.id, 'down')}
+                  onClick={() => {
+                    onVoteReply(postId, reply.id, 'down');
+                  }}
                   className={cn(
                     'h-6 rounded-full px-1.5 text-xs transition-colors',
                     reply.userVote === 'down'

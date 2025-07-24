@@ -822,6 +822,9 @@
     "Sidebar": {
       "toggleSidebar": "Бүйірлік тақтаны ауыстырыңыз"
     },
+    "TagsInput": {
+      "removeTag": "Тегті жою"
+    },
     "TypeOfContentTitle": {
       "logoAlt": "{type} логотипі"
     },
@@ -956,9 +959,6 @@
       "visitSite": "Сайтқа кіру",
       "websitePreview": "Веб-сайтты алдын ала қарау",
       "websiteUrl": "Веб-сайт URL мекенжайы"
-    },
-    "TagsInput": {
-      "removeTag": "Тегті жою"
     }
   },
   "Contexts": {
@@ -1171,6 +1171,9 @@
     "admin": "Жауапты",
     "assignment": "Тапсырма",
     "cancel": "Болдырмау",
+    "confirmDelete": "Мұны жойғыңыз келетініне сенімдісіз бе?",
+    "confirmDeletePost": "Бұл жазбаны жойғыңыз келетініне сенімдісіз бе?",
+    "confirmDeleteReply": "Бұл жауапты жойғыңыз келетініне сенімдісіз бе?",
     "content": "Мазмұны",
     "contributeToActivity": "Белсенділікті өзгерту",
     "contributors": "Авторлар",
@@ -1179,9 +1182,16 @@
     "courseLessons": "Курс сабақтары",
     "courseThumbnailAlt": "Курстың мұқабасы",
     "current": "Ағымдағы",
+    "delete": "Жою",
+    "deletedContent": "[Бұл мазмұн жойылды]",
     "document": "Құжат",
+    "downvote": "Ұнатпаймын",
+    "edit": "Өңдеу",
+    "editPostPlaceholder": "Жазбаңызды өңдеңіз...",
+    "editReplyPlaceholder": "Жауабыңызды өңдеңіз...",
     "edited": "Өңделген",
     "general": "Жалпы",
+    "hideReplies": "Жауаптарды жасыру",
     "image": "Сурет",
     "learningMaterial": "Оқу материалы",
     "linkTo": "{learningText} сілтеме",
@@ -1192,30 +1202,16 @@
     "noDiscussionsDesc": "Бұл курс туралы сұхбатты бастаушы болыңыз!",
     "noNextActivity": "Келесі белсенділік жоқ",
     "noPrevActivity": "Алдыңғы белсенділік жоқ",
+    "noReplies": "Әзірше жауап жоқ",
     "page": "Бет",
     "postDiscussion": "Жариялау",
     "prevActivityTitle": "Алдыңғы: {name}",
     "previous": "Алдыңғы",
     "reply": "Жауап беру",
     "save": "Сақтау",
-    "startDiscussionPlaceholder": "Бұл курс туралы талқылау бастаңыз...",
-    "editPostPlaceholder": "Жазбаңызды өңдеңіз...",
-    "editReplyPlaceholder": "Жауабыңызды өңдеңіз...",
-    "edit": "Өңдеу",
-    "delete": "Жою",
     "saveChanges": "Өзгерістерді сақтау",
-    "upvote": "Ұнатамын",
-    "downvote": "Ұнатпаймын",
-    "votes": "дауыс",
-    "vote": "дауыс",
-    "timeAgo": "{time} бұрын",
-    "confirmDelete": "Мұны жойғыңыз келетініне сенімдісіз бе?",
-    "confirmDeletePost": "Бұл жазбаны жойғыңыз келетініне сенімдісіз бе?",
-    "confirmDeleteReply": "Бұл жауапты жойғыңыз келетініне сенімдісіз бе?",
-    "deletedContent": "[Бұл мазмұн жойылды]",
-    "noReplies": "Әзірше жауап жоқ",
     "showReplies": "{count} жауапты көрсету",
-    "hideReplies": "Жауаптарды жасыру",
+    "startDiscussionPlaceholder": "Бұл курс туралы талқылау бастаңыз...",
     "statusComplete": "Аяқталды",
     "statusGraded": "Бағаланды",
     "statusGradingInProgress": "Бағалау жүріп жатыр",
@@ -1227,10 +1223,14 @@
     "submitTrigger": "Тексеруге жіберу",
     "thumbnailTypeImage": "Сурет",
     "thumbnailTypeVideo": "Бейне",
+    "timeAgo": "{time} бұрын",
     "title": "Курс",
     "unknownGradingType": "Белгісіз бағалау түрі",
+    "upvote": "Ұнатамын",
     "video": "Бейне",
     "viewAllActivities": "Барлық белсенділіктерді көру",
+    "vote": "дауыс",
+    "votes": "дауыс",
     "whatYouWillLearn": "Не үйренесіз",
     "writeReplyPlaceholder": "Жауап жазыңыз..."
   },
@@ -1567,8 +1567,8 @@
       },
       "Courses": {
         "description": "Курстарды, тарауларды және тапсырмаларды жасаңыз және басқарыңыз",
-        "title": "Курстар",
-        "errorOccurred": "Қате орын алды"
+        "errorOccurred": "Қате орын алды",
+        "title": "Курстар"
       },
       "Organization": {
         "description": "Ұйымыңыз үшін жалпы параметрлерді реттеңіз",
@@ -3130,6 +3130,10 @@
       "usersTitle": "Пайдаланушылар"
     }
   },
+  "Errors": {
+    "somethingWentWrong": "Бірдеңе дұрыс болмады!",
+    "tryAgain": "Қайталап көру"
+  },
   "FixedActivitySecondaryBar": {
     "CourseInfo": {
       "course": "Курс"
@@ -3336,6 +3340,22 @@
     "message": "Қолайсыздықтар үшін кешірім сұраймыз. Сіз жойылған немесе ешқашан болмаған бетке кіруге тырысып жатқан сияқтысыз."
   },
   "OpenuUniversity": "Торайгыров университеті",
+  "RichTextEditor": {
+    "addImage": "Сурет қосу",
+    "addLink": "Сілтеме қосу",
+    "addVideo": "Бейне қосу",
+    "cancel": "Болдырмау",
+    "enterImageUrl": "Енгізгіңіз келетін суреттің URL мекенжайын енгізіңіз.",
+    "enterUrlToLink": "Сілтегіңіз келетін URL мекенжайын енгізіңіз.",
+    "enterVideoUrl": "YouTube URL немесе бейне сілтемесін енгізіңіз.",
+    "imagePlaceholder": "https://example.com/image.jpg",
+    "imageUrl": "Сурет URL",
+    "uploadFile": "Файл жүктеу",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "videoPlaceholder": "https://youtube.com/watch?v=...",
+    "videoUrl": "Бейне URL"
+  },
   "SearchPage": {
     "collections": "Жинақтар",
     "courses": "Курстар",
@@ -3389,6 +3409,7 @@
       "courses": "Курстар",
       "home": "Бақылау тақтасы",
       "logout": "Кіру",
+      "metrics": "Метрика",
       "organization": "Ұйымның параметрлері",
       "payments": "Төлемдер",
       "userSettings": "@ {{Пайдаланушы аты} параметрлері",
@@ -3505,25 +3526,5 @@
   "seconds": "Секундтар",
   "selectDeadline": "Тапсырманың соңғы мерзімін таңдаңыз",
   "touUniversity": "Торайгыров Университет",
-  "webPreview": "Веб алдын ала қарау",
-  "Errors": {
-    "somethingWentWrong": "Бірдеңе дұрыс болмады!",
-    "tryAgain": "Қайталап көру"
-  },
-  "RichTextEditor": {
-    "addLink": "Сілтеме қосу",
-    "enterUrlToLink": "Сілтегіңіз келетін URL мекенжайын енгізіңіз.",
-    "url": "URL",
-    "urlPlaceholder": "https://example.com",
-    "cancel": "Болдырмау",
-    "addImage": "Сурет қосу",
-    "enterImageUrl": "Енгізгіңіз келетін суреттің URL мекенжайын енгізіңіз.",
-    "imageUrl": "Сурет URL",
-    "imagePlaceholder": "https://example.com/image.jpg",
-    "addVideo": "Бейне қосу",
-    "enterVideoUrl": "YouTube URL немесе бейне сілтемесін енгізіңіз.",
-    "videoUrl": "Бейне URL",
-    "videoPlaceholder": "https://youtube.com/watch?v=...",
-    "uploadFile": "Файл жүктеу"
-  }
+  "webPreview": "Веб алдын ала қарау"
 }

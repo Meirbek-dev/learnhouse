@@ -1,15 +1,15 @@
-import { getUriWithOrg } from '@services/config/config';
-import { Book } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
+  BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { getUriWithOrg } from '@services/config/config';
+import { useTranslations } from 'next-intl';
+import { Book } from 'lucide-react';
+import Link from 'next/link';
 
 interface ActivityBreadcrumbsProps {
   course: any;
@@ -27,8 +27,14 @@ export default function ActivityBreadcrumbs({ course, activity, orgslug }: Activ
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={`${getUriWithOrg(orgslug, '')}/courses`} className="flex items-center space-x-2">
-                <Book className="text-gray" size={14} />
+              <Link
+                href={`${getUriWithOrg(orgslug, '')}/courses`}
+                className="flex items-center space-x-2"
+              >
+                <Book
+                  className="text-gray"
+                  size={14}
+                />
                 <span>{t('courses')}</span>
               </Link>
             </BreadcrumbLink>
@@ -36,16 +42,12 @@ export default function ActivityBreadcrumbs({ course, activity, orgslug }: Activ
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}`}>
-                {course.name}
-              </Link>
+              <Link href={`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}`}>{course.name}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="first-letter:uppercase">
-              {activity.name}
-            </BreadcrumbPage>
+            <BreadcrumbPage className="first-letter:uppercase">{activity.name}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

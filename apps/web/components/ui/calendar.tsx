@@ -8,7 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
 
-function Calendar({
+const Calendar = ({
   className,
   classNames,
   showOutsideDays = true,
@@ -19,14 +19,14 @@ function Calendar({
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant'];
-}) {
+}) => {
   const getDayPickerLocale = (locale: string): Locale => {
     const localeMap: Record<string, Locale> = {
       en: enUS,
-      es: es,
-      fr: fr,
-      de: de,
-      ru: ru,
+      es,
+      fr,
+      de,
+      ru,
     };
     return localeMap[locale] || enUS;
   };
@@ -196,9 +196,9 @@ function Calendar({
       {...props}
     />
   );
-}
+};
 
-function CalendarDayButton({ className, day, modifiers, ...props }: React.ComponentProps<typeof DayButton>) {
+const CalendarDayButton = ({ className, day, modifiers, ...props }: React.ComponentProps<typeof DayButton>) => {
   const defaultClassNames = getDefaultClassNames();
 
   const ref = React.useRef<HTMLButtonElement>(null);
@@ -213,7 +213,7 @@ function CalendarDayButton({ className, day, modifiers, ...props }: React.Compon
       size="icon"
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
-        modifiers.selected && !modifiers.range_start && !modifiers.range_end && !modifiers.range_middle
+        modifiers.selected && !modifiers.range_start && !modifiers.range_end ? !modifiers.range_middle : null
       }
       data-range-start={modifiers.range_start}
       data-range-end={modifiers.range_end}
@@ -226,6 +226,6 @@ function CalendarDayButton({ className, day, modifiers, ...props }: React.Compon
       {...props}
     />
   );
-}
+};
 
 export { Calendar, CalendarDayButton };

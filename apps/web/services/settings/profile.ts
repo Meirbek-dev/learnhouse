@@ -11,6 +11,5 @@ export async function updateProfile(data: any, user_id: number, access_token: st
     `${getAPIUrl()}users/${user_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

@@ -17,9 +17,9 @@ interface CourseProps {
   org_id: number;
 }
 
-function CoursesHome(params: CourseProps) {
+const CoursesHome = (params: CourseProps) => {
   const searchParams = useSearchParams();
-  const isCreatingCourse = !!searchParams.get('new');
+  const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const { orgslug } = params;
   const { courses } = params;
@@ -59,7 +59,11 @@ function CoursesHome(params: CourseProps) {
             ressourceType="courses"
             orgId={params.org_id}
           >
-            <NewCourseButton onClick={() => setNewCourseModal(true)} />
+            <NewCourseButton
+              onClick={() => {
+                setNewCourseModal(true);
+              }}
+            />
           </AuthenticatedClientElement>
         </div>
       </div>
@@ -82,7 +86,7 @@ function CoursesHome(params: CourseProps) {
             <div className="text-center">
               <h2 className="mb-2 text-2xl font-bold text-gray-600">{t('noCourses')}</h2>
               <p className="text-lg text-gray-400">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
-              {isUserAdmin && (
+              {isUserAdmin ? (
                 <div className="mt-6 flex justify-center">
                   <AuthenticatedClientElement
                     action="create"
@@ -90,10 +94,14 @@ function CoursesHome(params: CourseProps) {
                     checkMethod="roles"
                     orgId={params.org_id}
                   >
-                    <NewCourseButton onClick={() => setNewCourseModal(true)} />
+                    <NewCourseButton
+                      onClick={() => {
+                        setNewCourseModal(true);
+                      }}
+                    />
                   </AuthenticatedClientElement>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         )}
@@ -101,6 +109,6 @@ function CoursesHome(params: CourseProps) {
       {modal}
     </div>
   );
-}
+};
 
 export default CoursesHome;

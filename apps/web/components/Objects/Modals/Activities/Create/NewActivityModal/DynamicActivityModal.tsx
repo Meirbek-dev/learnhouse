@@ -20,7 +20,7 @@ interface FormValues {
   description: string;
 }
 
-function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
+const DynamicCanvaModal = ({ submitActivity, chapterId, course }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.DynamicCanvaModal');
   const validationSchema = createValidationSchema(validationT);
@@ -102,6 +102,6 @@ function DynamicCanvaModal({ submitActivity, chapterId, course }: any) {
       </form>
     </Form>
   );
-}
+};
 
 export default DynamicCanvaModal;

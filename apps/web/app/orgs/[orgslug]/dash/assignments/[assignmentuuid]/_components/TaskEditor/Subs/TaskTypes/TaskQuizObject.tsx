@@ -20,22 +20,22 @@ import { toast } from 'react-hot-toast';
 interface QuizSchema {
   questionText: string;
   questionUUID?: string;
-  options: {
+  options: Array<{
     optionUUID?: string;
     text: string;
     fileID: string;
     type: 'text' | 'image' | 'audio' | 'video';
     assigned_right_answer: boolean;
-  }[];
+  }>;
 }
 
 interface QuizSubmitSchema {
   questions: QuizSchema[];
-  submissions: {
+  submissions: Array<{
     questionUUID: string;
     optionUUID: string;
     answer: boolean;
-  }[];
+  }>;
   assignment_task_submission_uuid?: string;
 }
 
@@ -51,7 +51,7 @@ interface Submission {
   answer: boolean;
 }
 
-function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectProps) {
+const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectProps) => {
   const t = useTranslations('DashPage.Assignments.TaskQuizObject');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -236,7 +236,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success && res.data && res.data.task_submission) {
+      if (res.success && res.data?.task_submission) {
         setUserSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -324,7 +324,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
-      if (res.success && res.data && res.data.task_submission) {
+      if (res.success && res.data?.task_submission) {
         setUserSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -443,13 +443,17 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                   <>
                     <input
                       value={question.questionText}
-                      onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
+                      onChange={(e) => {
+                        handleQuestionChange(qIndex, e.target.value);
+                      }}
                       placeholder={t('questionPlaceholder')}
                       className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 text-sm font-bold text-neutral-600"
                     />
                     <div
                       className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
-                      onClick={() => removeQuestion(qIndex)}
+                      onClick={() => {
+                        removeQuestion(qIndex);
+                      }}
                     >
                       <Minus
                         size={12}
@@ -494,7 +498,9 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                           <input
                             type="text"
                             value={option.text}
-                            onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
+                            onChange={(e) => {
+                              handleOptionChange(qIndex, oIndex, e.target.value);
+                            }}
                             placeholder={t('optionPlaceholder')}
                             className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 pr-6 text-sm font-semibold text-neutral-600"
                           />
@@ -504,7 +510,9 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                 ? 'bg-lime-200 text-lime-600'
                                 : 'bg-rose-200/60 text-rose-500'
                             } cursor-pointer text-sm transition-all ease-linear hover:bg-lime-300`}
-                            onClick={() => toggleOption(qIndex, oIndex)}
+                            onClick={() => {
+                              toggleOption(qIndex, oIndex);
+                            }}
                           >
                             {option.assigned_right_answer ? (
                               <>
@@ -526,7 +534,9 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                           </div>
                           <div
                             className="flex h-[20px] w-[20px] flex-none cursor-pointer items-center rounded-lg bg-slate-200/60 text-sm text-slate-500 transition-all ease-linear hover:bg-slate-300"
-                            onClick={() => removeOption(qIndex, oIndex)}
+                            onClick={() => {
+                              removeOption(qIndex, oIndex);
+                            }}
                           >
                             <Minus
                               size={12}
@@ -634,7 +644,9 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                         <div className="mx-auto flex justify-center px-2">
                           <div
                             className="soft-shadow hover:bg-opacity-100 flex h-[30px] w-full cursor-pointer items-center rounded-lg bg-white px-2 text-xs shadow-sm outline-3 outline-white duration-150 ease-linear hover:shadow-md"
-                            onClick={() => addOption(qIndex)}
+                            onClick={() => {
+                              addOption(qIndex);
+                            }}
                           >
                             <Plus
                               size={14}
@@ -672,6 +684,6 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
       <p>{t('noQuestionsFound')}</p>
     </div>
   );
-}
+};
 
 export default TaskQuizObject;

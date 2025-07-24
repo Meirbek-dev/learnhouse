@@ -1,5 +1,5 @@
-import { ReactNodeViewRenderer } from '@tiptap/react';
 import { Node, mergeAttributes } from '@tiptap/core';
+import { ReactNodeViewRenderer } from '@tiptap/react';
 
 import ImageBlockComponent from './ImageBlockComponent';
 

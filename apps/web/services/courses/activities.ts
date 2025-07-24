@@ -129,6 +129,5 @@ export async function getUrlPreview(url: string) {
     `${getAPIUrl()}utils/link-preview?url=${url}`,
     RequestBodyWithAuthHeader('GET', null, null),
   );
-  const res = await result.json();
-  return res;
+  return await result.json();
 }

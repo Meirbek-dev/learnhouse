@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from functools import lru_cache
 from typing import Any
 
-import chromadb
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_chroma import Chroma
 from langchain_community.chat_message_histories import RedisChatMessageHistory

@@ -822,6 +822,10 @@
     "Sidebar": {
       "toggleSidebar": "Переключить боковую панель"
     },
+    "TagsInput": {
+      "removeTag": "Удалить тег",
+      "removeOption": "Удалить опцию"
+    },
     "TypeOfContentTitle": {
       "logoAlt": "Логотип {type}"
     },
@@ -956,9 +960,6 @@
       "visitSite": "Посетить сайт",
       "websitePreview": "Предпросмотр веб-сайта",
       "websiteUrl": "URL веб-сайта"
-    },
-    "TagsInput": {
-      "removeTag": "Удалить тег"
     }
   },
   "Contexts": {
@@ -1171,6 +1172,9 @@
     "admin": "Админ",
     "assignment": "Задание",
     "cancel": "Отменить",
+    "confirmDelete": "Вы уверены, что хотите удалить это?",
+    "confirmDeletePost": "Вы уверены, что хотите удалить этот пост?",
+    "confirmDeleteReply": "Вы уверены, что хотите удалить этот ответ?",
     "content": "Содержание",
     "contributeToActivity": "Изменить активность",
     "contributors": "Авторы",
@@ -1179,9 +1183,16 @@
     "courseLessons": "Уроки курса",
     "courseThumbnailAlt": "Обложка курса",
     "current": "Текущая",
+    "delete": "Удалить",
+    "deletedContent": "[Этот контент был удален]",
     "document": "Документ",
+    "downvote": "Дизлайк",
+    "edit": "Редактировать",
+    "editPostPlaceholder": "Редактируйте ваш пост...",
+    "editReplyPlaceholder": "Редактируйте ваш ответ...",
     "edited": "Редактировано",
     "general": "Общие",
+    "hideReplies": "Скрыть ответы",
     "image": "Изображение",
     "learningMaterial": "Учебный материал",
     "linkTo": "Ссылка на {learningText}",
@@ -1192,30 +1203,16 @@
     "noDiscussionsDesc": "Будьте первым, кто начнет разговор об этом курсе!",
     "noNextActivity": "Нет следующей активности",
     "noPrevActivity": "Нет предыдущей активности",
+    "noReplies": "Пока нет ответов",
     "page": "Страница",
     "postDiscussion": "Отправить",
     "prevActivityTitle": "Предыдущая: {name}",
     "previous": "Предыдущая",
     "reply": "Ответить",
     "save": "Сохранить",
-    "startDiscussionPlaceholder": "Начните дискуссию об этом курсе...",
-    "editPostPlaceholder": "Редактируйте ваш пост...",
-    "editReplyPlaceholder": "Редактируйте ваш ответ...",
-    "edit": "Редактировать",
-    "delete": "Удалить",
     "saveChanges": "Сохранить изменения",
-    "upvote": "Лайк",
-    "downvote": "Дизлайк",
-    "votes": "голосов",
-    "vote": "голос",
-    "timeAgo": "{time} назад",
-    "confirmDelete": "Вы уверены, что хотите удалить это?",
-    "confirmDeletePost": "Вы уверены, что хотите удалить этот пост?",
-    "confirmDeleteReply": "Вы уверены, что хотите удалить этот ответ?",
-    "deletedContent": "[Этот контент был удален]",
-    "noReplies": "Пока нет ответов",
     "showReplies": "Показать {count} ответов",
-    "hideReplies": "Скрыть ответы",
+    "startDiscussionPlaceholder": "Начните дискуссию об этом курсе...",
     "statusComplete": "Завершено",
     "statusGraded": "Оценено",
     "statusGradingInProgress": "В процессе оценивания",
@@ -1227,10 +1224,14 @@
     "submitTrigger": "Отправить на проверку",
     "thumbnailTypeImage": "Изображение",
     "thumbnailTypeVideo": "Видео",
+    "timeAgo": "{time} назад",
     "title": "Курс",
     "unknownGradingType": "Неизвестный тип оценивания",
+    "upvote": "Лайк",
     "video": "Видео",
     "viewAllActivities": "Просмотреть все активности",
+    "vote": "голос",
+    "votes": "голосов",
     "whatYouWillLearn": "Чему вы научитесь",
     "writeReplyPlaceholder": "Напишите ответ..."
   },
@@ -1567,8 +1568,8 @@
       },
       "Courses": {
         "description": "Создавайте и управляйте курсами, главами и заданиями",
-        "title": "Курсы",
-        "errorOccurred": "Произошла ошибка"
+        "errorOccurred": "Произошла ошибка",
+        "title": "Курсы"
       },
       "Organization": {
         "description": "Настройте общие параметры",
@@ -3131,6 +3132,10 @@
       "usersTitle": "Пользователи"
     }
   },
+  "Errors": {
+    "somethingWentWrong": "Что-то пошло не так!",
+    "tryAgain": "Попробовать снова"
+  },
   "FixedActivitySecondaryBar": {
     "CourseInfo": {
       "course": "Курс"
@@ -3337,6 +3342,22 @@
     "message": "Приносим извинения за неудобства. Похоже, вы пытаетесь получить доступ к странице, которая была удалена или никогда не существовала."
   },
   "OpenuUniversity": "Торайгыров Университет",
+  "RichTextEditor": {
+    "addImage": "Добавить изображение",
+    "addLink": "Добавить ссылку",
+    "addVideo": "Добавить видео",
+    "cancel": "Отмена",
+    "enterImageUrl": "Введите URL изображения, которое хотите встроить.",
+    "enterUrlToLink": "Введите URL, на который хотите сослаться.",
+    "enterVideoUrl": "Введите URL YouTube или ссылку на видео.",
+    "imagePlaceholder": "https://example.com/image.jpg",
+    "imageUrl": "URL изображения",
+    "uploadFile": "Загрузить файл",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "videoPlaceholder": "https://youtube.com/watch?v=...",
+    "videoUrl": "URL видео"
+  },
   "SearchPage": {
     "collections": "Коллекции",
     "courses": "Курсы",
@@ -3390,6 +3411,7 @@
       "courses": "Курсы",
       "home": "Главная панель",
       "logout": "Выйти",
+      "metrics": "Статистика",
       "organization": "Настройки организации",
       "payments": "Платежи",
       "userSettings": "Настройки @{username}",
@@ -3506,25 +3528,5 @@
   "seconds": "Секунд",
   "selectDeadline": "Выберите крайний срок выполнения задания",
   "touUniversity": "Торайгыров Университет",
-  "webPreview": "Предварительный просмотр в браузере",
-  "Errors": {
-    "somethingWentWrong": "Что-то пошло не так!",
-    "tryAgain": "Попробовать снова"
-  },
-  "RichTextEditor": {
-    "addLink": "Добавить ссылку",
-    "enterUrlToLink": "Введите URL, на который хотите сослаться.",
-    "url": "URL",
-    "urlPlaceholder": "https://example.com",
-    "cancel": "Отмена",
-    "addImage": "Добавить изображение",
-    "enterImageUrl": "Введите URL изображения, которое хотите встроить.",
-    "imageUrl": "URL изображения",
-    "imagePlaceholder": "https://example.com/image.jpg",
-    "addVideo": "Добавить видео",
-    "enterVideoUrl": "Введите URL YouTube или ссылку на видео.",
-    "videoUrl": "URL видео",
-    "videoPlaceholder": "https://youtube.com/watch?v=...",
-    "uploadFile": "Загрузить файл"
-  }
+  "webPreview": "Предварительный просмотр в браузере"
 }

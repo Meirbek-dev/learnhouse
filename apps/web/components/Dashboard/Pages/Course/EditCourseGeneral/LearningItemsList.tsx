@@ -296,19 +296,23 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
               <Input
                 ref={setInputRef(item.id)}
                 value={item.text}
-                onChange={(e) => updateItemText(item.id, e.target.value)}
-                onFocus={() => handleInputFocus(item.id)}
+                onChange={(e) => {
+                  updateItemText(item.id, e.target.value);
+                }}
+                onFocus={() => {
+                  handleInputFocus(item.id);
+                }}
                 onBlur={handleInputBlur}
                 placeholder={t('placeholder')}
                 className="learning-item-input h-8 grow border-0 bg-transparent px-0 text-sm focus-visible:ring-0"
               />
 
-              {item.link && (
+              {item.link ? (
                 <div className="flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-500">
                   <LinkIcon size={12} />
                   <span className="max-w-[100px] truncate">{item.link}</span>
                 </div>
-              )}
+              ) : null}
 
               <div className="flex items-center gap-1">
                 <button
@@ -335,7 +339,9 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
                 <button
                   type="button"
-                  onClick={() => removeItem(item.id)}
+                  onClick={() => {
+                    removeItem(item.id);
+                  }}
                   className="text-gray-300 transition-colors hover:text-gray-500"
                   aria-label={t('removeItemAriaLabel')}
                   title={t('removeItemTooltip')}
@@ -355,7 +361,9 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                 <EmojiPicker
                   height="25rem"
                   width="25rem"
-                  onEmojiClick={(emoji: any) => handleEmojiSelect(item.id, emoji)}
+                  onEmojiClick={(emoji: any) => {
+                    handleEmojiSelect(item.id, emoji);
+                  }}
                   theme={Theme.LIGHT}
                   previewConfig={{ showPreview: false }}
                   searchPlaceHolder={t('searchEmojis')}
@@ -373,8 +381,12 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                 <Input
                   ref={setLinkInputRef(item.id)}
                   value={item.link || ''} // Use current item's link directly
-                  onChange={(e) => updateItemLink(item.id, e.target.value)}
-                  onFocus={() => handleInputFocus(item.id)} // Keep focus context
+                  onChange={(e) => {
+                    updateItemLink(item.id, e.target.value);
+                  }}
+                  onFocus={() => {
+                    handleInputFocus(item.id);
+                  }} // Keep focus context
                   onBlur={handleInputBlur}
                   placeholder={t('linkInputPlaceholder')}
                   className="learning-item-input w-full text-sm"

@@ -6,8 +6,7 @@ export async function createInviteCode(org_id: number, access_token: string) {
     `${getAPIUrl()}orgs/${org_id}/invites`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function createInviteCodeWithUserGroup(org_id: number, usergroup_id: number, access_token: string) {
@@ -15,8 +14,7 @@ export async function createInviteCodeWithUserGroup(org_id: number, usergroup_id
     `${getAPIUrl()}orgs/${org_id}/invites_with_usergroups?usergroup_id=${usergroup_id}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function deleteInviteCode(org_id: number, org_invite_code_uuid: string, access_token: string) {
@@ -24,8 +22,7 @@ export async function deleteInviteCode(org_id: number, org_invite_code_uuid: str
     `${getAPIUrl()}orgs/${org_id}/invites/${org_invite_code_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function changeSignupMechanism(org_id: number, signup_mechanism: string, access_token: string) {
@@ -33,8 +30,7 @@ export async function changeSignupMechanism(org_id: number, signup_mechanism: st
     `${getAPIUrl()}orgs/${org_id}/signup_mechanism?signup_mechanism=${signup_mechanism}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function validateInviteCode(org_id: number, invite_code: string, access_token: string) {
@@ -42,8 +38,7 @@ export async function validateInviteCode(org_id: number, invite_code: string, ac
     `${getAPIUrl()}orgs/${org_id}/invites/code/${invite_code}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function inviteBatchUsers(org_id: number, emails: string, invite_code_uuid: string, access_token: string) {
@@ -51,6 +46,5 @@ export async function inviteBatchUsers(org_id: number, emails: string, invite_co
     `${getAPIUrl()}orgs/${org_id}/invites/users/batch?emails=${emails}&invite_code_uuid=${invite_code_uuid}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }

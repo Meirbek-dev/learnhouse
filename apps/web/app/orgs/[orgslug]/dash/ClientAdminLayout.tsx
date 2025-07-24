@@ -6,7 +6,7 @@ import DashSidebar from '@components/Dashboard/Menus/DashSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { ReactNode } from 'react';
 
-function ClientAdminLayout({ children, params }: { children: ReactNode; params: any }) {
+const ClientAdminLayout = ({ children, params }: { children: ReactNode; params: any }) => {
   const isMobile = useIsMobile();
 
   return (
@@ -24,6 +24,6 @@ function ClientAdminLayout({ children, params }: { children: ReactNode; params: 
       )}
     </AdminAuthorization>
   );
-}
+};
 
 export default ClientAdminLayout;

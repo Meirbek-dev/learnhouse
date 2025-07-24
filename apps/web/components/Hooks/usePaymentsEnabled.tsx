@@ -21,7 +21,7 @@ export function usePaymentsEnabled() {
   const isStripeEnabled = paymentConfigs?.some((config: any) => config.provider === 'stripe' && config.active);
 
   return {
-    isEnabled: !!isStripeEnabled,
+    isEnabled: Boolean(isStripeEnabled),
     isLoading,
     error,
   };

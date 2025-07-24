@@ -60,14 +60,14 @@ export const HeaderProfileBox = () => {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium capitalize">{session.data.user.username}</span>
-            {isUserAdmin.isAdmin && (
+            {isUserAdmin.isAdmin ? (
               <Badge
                 className="px-2 py-0.5 text-xs"
                 variant="destructive"
               >
                 {t('adminBadge')}
               </Badge>
-            )}
+            ) : null}
           </div>
           <Tooltip
             content={t('tooltips.yourSettings')}
@@ -80,7 +80,7 @@ export const HeaderProfileBox = () => {
               size="icon"
               className="h-8 w-8"
             >
-              <Link href={'/dash'}>
+              <Link href="/dash">
                 <Settings size={16} />
               </Link>
             </Button>

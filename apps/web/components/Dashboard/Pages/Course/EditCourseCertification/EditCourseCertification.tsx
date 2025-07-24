@@ -21,7 +21,7 @@ interface EditCourseCertificationProps {
   course_uuid?: string;
 }
 
-function EditCourseCertification(props: EditCourseCertificationProps) {
+const EditCourseCertification = (props: EditCourseCertificationProps) => {
   const [error, setError] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
@@ -112,7 +112,7 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
   );
 
   const existingCertification = certifications?.data?.[0]; // Assuming one certification per course
-  const hasExistingCertification = !!existingCertification;
+  const hasExistingCertification = Boolean(existingCertification);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -294,7 +294,7 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
 
   return (
     <div>
-      {courseStructure && (
+      {courseStructure ? (
         <div>
           <div className="h-6" />
           <div className="mx-4 rounded-xl bg-white px-4 py-4 shadow-xs sm:mx-10">
@@ -315,23 +315,23 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                   />
                   <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
                 </label>
-                {isCreating && (
+                {isCreating ? (
                   <div className="animate-spin">
                     <Settings size={16} />
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 
-            {error && (
+            {error ? (
               <div className="mb-6 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
                 <AlertTriangle size={18} />
                 <div className="text-sm font-bold">{error}</div>
               </div>
-            )}
+            ) : null}
 
             {/* Certification Configuration - Only show if enabled and has existing certification */}
-            {form.watch('enable_certification') && hasExistingCertification && (
+            {form.watch('enable_certification') && hasExistingCertification ? (
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
                 {/* Form Section */}
                 <div className="lg:col-span-3">
@@ -503,7 +503,9 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                                         ? 'border-primary bg-blue-50'
                                         : 'border-gray-200 hover:border-gray-300'
                                     }`}
-                                    onClick={() => field.onChange(pattern.value)}
+                                    onClick={() => {
+                                      field.onChange(pattern.value);
+                                    }}
                                   >
                                     <div className="text-center">
                                       <div className="text-sm font-medium text-gray-900">{pattern.name}</div>
@@ -553,17 +555,17 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
 
                     <div className="p-4">
                       <CertificatePreview
-                        certificationName={form.watch('certification_name')}
-                        certificationDescription={form.watch('certification_description')}
-                        certificationType={form.watch('certification_type')}
-                        certificatePattern={form.watch('certificate_pattern')}
+                        certificationName={form.watch('certification_name') || ''}
+                        certificationDescription={form.watch('certification_description') || ''}
+                        certificationType={form.watch('certification_type') || 'completion'}
+                        certificatePattern={form.watch('certificate_pattern') || 'professional'}
                         certificateInstructor={form.watch('certificate_instructor')}
                       />
                     </div>
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Disabled State */}
             {!form.watch('enable_certification') && (
@@ -584,7 +586,7 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
             )}
 
             {/* Creating State - when toggle is on but no certification exists yet */}
-            {form.watch('enable_certification') && !hasExistingCertification && isCreating && (
+            {form.watch('enable_certification') && !hasExistingCertification && isCreating ? (
               <div className="rounded-lg border border-blue-200 bg-blue-50 p-8 text-center">
                 <div className="mx-auto mb-4 animate-spin">
                   <Settings className="h-16 w-16 text-blue-500" />
@@ -592,12 +594,12 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                 <h3 className="mb-2 font-medium text-blue-700">{t('creatingCertification')}</h3>
                 <p className="text-sm text-blue-600">{t('creatingCertificationDescription')}</p>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 export default EditCourseCertification;

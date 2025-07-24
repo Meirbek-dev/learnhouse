@@ -27,7 +27,7 @@ interface ModifiedChapterInterface {
   chapterName: string;
 }
 
-function ChapterElement(props: ChapterElementProps) {
+const ChapterElement = (props: ChapterElementProps) => {
   const activities = props.chapter.activities || [];
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -94,12 +94,12 @@ function ChapterElement(props: ChapterElementProps) {
                       className="w-full max-w-[150px] bg-transparent text-sm text-neutral-700 outline-hidden sm:max-w-none"
                       placeholder={t('chapterNamePlaceholder')}
                       value={modifiedChapter ? modifiedChapter?.chapterName : props.chapter.name}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setModifiedChapter({
                           chapterId: props.chapter.id,
                           chapterName: e.target.value,
-                        })
-                      }
+                        });
+                      }}
                     />
                     <button
                       onClick={() => updateChapterName(props.chapter.id)}
@@ -113,7 +113,9 @@ function ChapterElement(props: ChapterElementProps) {
                 )}
                 <Pencil
                   size={15}
-                  onClick={() => setSelectedChapter(props.chapter.id)}
+                  onClick={() => {
+                    setSelectedChapter(props.chapter.id);
+                  }}
                   className="text-neutral-600 hover:cursor-pointer"
                 />
               </div>
@@ -189,6 +191,6 @@ function ChapterElement(props: ChapterElementProps) {
       )}
     </Draggable>
   );
-}
+};
 
 export default ChapterElement;

@@ -92,7 +92,9 @@ const FilterButton = ({
   t: (key: string) => string;
 }) => (
   <button
-    onClick={() => onTypeChange(type)}
+    onClick={() => {
+      onTypeChange(type);
+    }}
     className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${
       selectedType === type ? 'bg-black/10 font-medium text-black/80' : 'text-black/60 hover:bg-black/5'
     }`}
@@ -119,7 +121,9 @@ const Pagination = ({
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
         <button
           key={pageNum}
-          onClick={() => onPageChange(pageNum)}
+          onClick={() => {
+            onPageChange(pageNum);
+          }}
           className={`h-8 w-8 rounded-lg text-sm transition-colors ${
             currentPage === pageNum ? 'bg-black/10 font-medium text-black/80' : 'text-black/60 hover:bg-black/5'
           }`}
@@ -158,7 +162,7 @@ const EmptyState = ({ query, t }: { query: string; t: (key: string, params?: any
   </div>
 );
 
-function SearchPage() {
+const SearchPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const session = useLHSession() as any;
@@ -284,7 +288,9 @@ function SearchPage() {
               <Input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                }}
                 placeholder={t('searchInputPlaceholder')}
                 className="soft-shadow h-12 w-full rounded-xl bg-white pr-4 pl-12 text-sm transition-all placeholder:text-black/40 focus:border-black/20 focus:ring-1 focus:ring-black/5 focus:outline-none"
               />
@@ -368,9 +374,9 @@ function SearchPage() {
       {/* Search Results */}
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-7xl">
-          {query && (
+          {query ? (
             <div className="mb-6 text-sm text-black/60">{t('resultsFound', { count: totalResults, query })}</div>
-          )}
+          ) : null}
 
           {isLoading ? (
             <LoadingState />
@@ -416,7 +422,7 @@ function SearchPage() {
                         <div className="p-4">
                           <h3 className="mb-1 text-sm font-medium text-black/80">{course.name}</h3>
                           <p className="line-clamp-2 text-xs text-black/50">{course.description}</p>
-                          {course.authors && course.authors.length > 0 && course.authors[0]?.user && (
+                          {course.authors && course.authors.length > 0 && course.authors[0]?.user ? (
                             <div className="mt-3 flex items-center gap-2">
                               <UserAvatar
                                 size="xs"
@@ -436,7 +442,7 @@ function SearchPage() {
                                 {course.authors[0].user.first_name} {course.authors[0].user.last_name}
                               </span>
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </Link>
                     ))}
@@ -464,7 +470,7 @@ function SearchPage() {
                         )}
                         className="soft-shadow flex items-start gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                       >
-                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-black/5">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-black/5">
                           <Book
                             size={24}
                             className="text-black/40"
@@ -473,7 +479,9 @@ function SearchPage() {
                         <div>
                           <h3 className="mb-1 text-sm font-medium text-black/80">{collection.name}</h3>
                           <p className="line-clamp-2 text-xs text-black/50">{collection.description}</p>
-                          <p className="text-xs text-black/50">{t('coursesCount', { count: collection.courses.length })}</p>
+                          <p className="text-xs text-black/50">
+                            {t('coursesCount', { count: collection.courses.length })}
+                          </p>
                         </div>
                       </Link>
                     ))}
@@ -512,9 +520,9 @@ function SearchPage() {
                             {user.first_name} {user.last_name}
                           </h3>
                           <p className="text-xs text-black/50">@{user.username}</p>
-                          {user.details?.title?.text && (
+                          {user.details?.title?.text ? (
                             <p className="mt-1 text-xs text-black/40">{user.details.title.text}</p>
-                          )}
+                          ) : null}
                         </div>
                       </Link>
                     ))}
@@ -527,12 +535,14 @@ function SearchPage() {
           <Pagination
             totalPages={totalPages}
             currentPage={page}
-            onPageChange={(pageNum) => updateSearchParams({ page: pageNum.toString() })}
+            onPageChange={(pageNum) => {
+              updateSearchParams({ page: pageNum.toString() });
+            }}
           />
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default SearchPage;

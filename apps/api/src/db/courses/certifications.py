@@ -1,4 +1,3 @@
-from typing import Optional
 
 from sqlalchemy import JSON, Column, ForeignKey
 from sqlmodel import Field, SQLModel

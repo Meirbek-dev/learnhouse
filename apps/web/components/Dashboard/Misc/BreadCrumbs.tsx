@@ -1,38 +1,68 @@
 'use client';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Backpack, Book, CreditCard, School, User, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from '@/components/ui/breadcrumb';
 
 interface BreadCrumbsProps {
   type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments';
   last_breadcrumb?: string;
 }
 
-function BreadCrumbs(props: BreadCrumbsProps) {
+const BreadCrumbs = (props: BreadCrumbsProps) => {
   const t = useTranslations('DashPage');
 
   const getBreadcrumbIcon = (type: string) => {
     switch (type) {
       case 'courses':
-        return <Book className="text-gray" size={14} />;
+        return (
+          <Book
+            className="text-gray"
+            size={14}
+          />
+        );
       case 'assignments':
-        return <Backpack className="text-gray" size={14} />;
+        return (
+          <Backpack
+            className="text-gray"
+            size={14}
+          />
+        );
       case 'user':
-        return <User className="text-gray" size={14} />;
+        return (
+          <User
+            className="text-gray"
+            size={14}
+          />
+        );
       case 'orgusers':
-        return <Users className="text-gray" size={14} />;
+        return (
+          <Users
+            className="text-gray"
+            size={14}
+          />
+        );
       case 'org':
-        return <School className="text-gray" size={14} />;
+        return (
+          <School
+            className="text-gray"
+            size={14}
+          />
+        );
       case 'payments':
-        return <CreditCard className="text-gray" size={14} />;
+        return (
+          <CreditCard
+            className="text-gray"
+            size={14}
+          />
+        );
       default:
         return null;
     }
@@ -83,26 +113,27 @@ function BreadCrumbs(props: BreadCrumbsProps) {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={getBreadcrumbLink(props.type)} className="flex items-center space-x-2">
+              <Link
+                href={getBreadcrumbLink(props.type)}
+                className="flex items-center space-x-2"
+              >
                 {getBreadcrumbIcon(props.type)}
                 <span>{getBreadcrumbTitle(props.type)}</span>
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
-          {props.last_breadcrumb && (
+          {props.last_breadcrumb ? (
             <>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage className="first-letter:uppercase">
-                  {props.last_breadcrumb}
-                </BreadcrumbPage>
+                <BreadcrumbPage className="first-letter:uppercase">{props.last_breadcrumb}</BreadcrumbPage>
               </BreadcrumbItem>
             </>
-          )}
+          ) : null}
         </BreadcrumbList>
       </Breadcrumb>
     </div>
   );
-}
+};
 
 export default BreadCrumbs;

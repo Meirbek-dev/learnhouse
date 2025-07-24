@@ -40,7 +40,7 @@ const EmptyStateMessage = memo(({ isUserAdmin, t, newCourseButtonTrigger }: any)
       </div>
       <h1 className="mb-3 text-2xl font-bold text-gray-700">{t('noCourses')}</h1>
       <p className="mb-6 text-lg text-gray-500">{isUserAdmin ? t('createACourse') : t('noCoursesAvailable')}</p>
-      {isUserAdmin && <div className="flex justify-center">{newCourseButtonTrigger}</div>}
+      {isUserAdmin ? <div className="flex justify-center">{newCourseButtonTrigger}</div> : null}
     </div>
   </div>
 ));
@@ -65,11 +65,11 @@ const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string
 
 CourseGrid.displayName = 'CourseGrid';
 
-function Courses(props: CourseProps) {
+const Courses = (props: CourseProps) => {
   const t = useTranslations('CoursesPage');
   const { orgslug, courses, org_id } = props;
   const searchParams = useSearchParams();
-  const isCreatingCourse = !!searchParams.get('new');
+  const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const isUserAdmin = useAdminStatus() as any;
 
@@ -85,7 +85,11 @@ function Courses(props: CourseProps) {
       ressourceType="courses"
       orgId={org_id}
     >
-      <NewCourseButton onClick={() => setNewCourseModal(true)} />
+      <NewCourseButton
+        onClick={() => {
+          setNewCourseModal(true);
+        }}
+      />
     </AuthenticatedClientElement>
   );
 
@@ -132,6 +136,6 @@ function Courses(props: CourseProps) {
       </GeneralWrapperStyled>
     </div>
   );
-}
+};
 
 export default memo(Courses);

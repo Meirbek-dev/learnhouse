@@ -47,7 +47,8 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
       setIsAllowed(session.status === 'authenticated');
     } else if (props.checkMethod === 'roles') {
       if (props.action && props.ressourceType) {
-        return setIsAllowed(isUserAllowed(session?.data?.roles, props.action, props.ressourceType, org?.org_uuid));
+        setIsAllowed(isUserAllowed(session?.data?.roles, props.action, props.ressourceType, org?.org_uuid));
+        return;
       }
       setIsAllowed(false);
     } else {
@@ -71,7 +72,7 @@ export const AuthenticatedClientElement = (props: AuthenticatedClientElementProp
     check();
   }, [session.status, check]);
 
-  return <>{isAllowed && props.children}</>;
+  return <>{isAllowed ? props.children : null}</>;
 };
 
 export default AuthenticatedClientElement;

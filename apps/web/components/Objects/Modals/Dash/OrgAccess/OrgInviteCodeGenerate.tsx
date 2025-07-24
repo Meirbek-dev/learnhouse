@@ -17,7 +17,7 @@ interface OrgInviteCodeGenerateProps {
   setInvitesModal: any;
 }
 
-function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
+const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
   const t = useTranslations('Components.OrgInviteCodeGenerate');
   const org = useOrg() as any;
   const session = useLHSession() as any;
@@ -72,7 +72,9 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
               <div className="flex items-center space-x-4">
                 <Select
                   value={String(usergroup_id)}
-                  onValueChange={(value) => setUsergroup_id(Number(value))}
+                  onValueChange={(value) => {
+                    setUsergroup_id(Number(value));
+                  }}
                 >
                   <SelectTrigger className="w-fit min-w-32">
                     <SelectValue placeholder={t('selectUserGroup')} />
@@ -134,6 +136,6 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
       </div>
     </div>
   );
-}
+};
 
 export default OrgInviteCodeGenerate;

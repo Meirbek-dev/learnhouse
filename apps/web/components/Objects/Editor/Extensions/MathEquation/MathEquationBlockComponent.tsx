@@ -205,7 +205,7 @@ const HelpDropdown = styled.div`
   overflow: hidden;
 `;
 
-function MathEquationBlockComponent(props: any) {
+const MathEquationBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.MathEquationBlock');
   const [equation, setEquation] = useState(props.node.attrs.math_equation);
   const [isEditing, _setIsEditing] = useState(true);
@@ -302,7 +302,7 @@ function MathEquationBlockComponent(props: any) {
             <BlockMath>{equation}</BlockMath>
           </div>
 
-          {isEditing && isEditable && (
+          {isEditing && isEditable ? (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -315,7 +315,9 @@ function MathEquationBlockComponent(props: any) {
                   className="relative"
                 >
                   <TemplateButton
-                    onClick={() => setShowTemplates(!showTemplates)}
+                    onClick={() => {
+                      setShowTemplates(!showTemplates);
+                    }}
                     className="flex items-center space-x-1"
                   >
                     <BookOpen size={14} />
@@ -326,13 +328,15 @@ function MathEquationBlockComponent(props: any) {
                     />
                   </TemplateButton>
 
-                  {showTemplates && (
+                  {showTemplates ? (
                     <TemplateDropdown className="absolute left-0 z-10 mt-1 max-h-80 w-64 overflow-y-auto">
                       <div className="border-b p-2 text-xs text-zinc-500">{t('selectTemplate')}</div>
                       {mathTemplates.map((template, index) => (
                         <TemplateItem
                           key={index}
-                          onClick={() => insertTemplate(template.latex)}
+                          onClick={() => {
+                            insertTemplate(template.latex);
+                          }}
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">{t(template.name)}</span>
@@ -341,7 +345,7 @@ function MathEquationBlockComponent(props: any) {
                         </TemplateItem>
                       ))}
                     </TemplateDropdown>
-                  )}
+                  ) : null}
                 </div>
 
                 <div
@@ -349,7 +353,9 @@ function MathEquationBlockComponent(props: any) {
                   className="relative"
                 >
                   <TemplateButton
-                    onClick={() => setShowSymbols(!showSymbols)}
+                    onClick={() => {
+                      setShowSymbols(!showSymbols);
+                    }}
                     className="flex items-center space-x-1"
                   >
                     <Sigma size={14} />
@@ -360,14 +366,16 @@ function MathEquationBlockComponent(props: any) {
                     />
                   </TemplateButton>
 
-                  {showSymbols && (
+                  {showSymbols ? (
                     <SymbolsDropdown className="absolute left-0 z-10 mt-1 w-64">
                       <div className="border-b p-2 text-xs text-zinc-500">{t('insertSymbol')}</div>
                       <div className="flex flex-wrap p-2">
                         {mathSymbols.map((symbol, index) => (
                           <SymbolButton
                             key={index}
-                            onClick={() => insertSymbol(symbol.symbol)}
+                            onClick={() => {
+                              insertSymbol(symbol.symbol);
+                            }}
                             title={symbol.symbol}
                           >
                             {symbol.display}
@@ -375,7 +383,7 @@ function MathEquationBlockComponent(props: any) {
                         ))}
                       </div>
                     </SymbolsDropdown>
-                  )}
+                  ) : null}
                 </div>
 
                 <div
@@ -383,7 +391,9 @@ function MathEquationBlockComponent(props: any) {
                   className="relative"
                 >
                   <TemplateButton
-                    onClick={() => setShowHelp(!showHelp)}
+                    onClick={() => {
+                      setShowHelp(!showHelp);
+                    }}
                     className="flex items-center space-x-1"
                   >
                     <Lightbulb size={14} />
@@ -394,7 +404,7 @@ function MathEquationBlockComponent(props: any) {
                     />
                   </TemplateButton>
 
-                  {showHelp && (
+                  {showHelp ? (
                     <HelpDropdown className="absolute left-0 z-10 mt-1 w-72">
                       <div className="border-b p-2 text-xs font-medium text-zinc-700">{t('quickReference')}</div>
                       <div className="space-y-2 p-3 text-xs">
@@ -441,7 +451,7 @@ function MathEquationBlockComponent(props: any) {
                         </div>
                       </div>
                     </HelpDropdown>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
@@ -455,7 +465,9 @@ function MathEquationBlockComponent(props: any) {
                   className="focus:ring-1 focus:ring-blue-300"
                 />
                 <SaveButton
-                  onClick={() => saveEquation()}
+                  onClick={() => {
+                    saveEquation();
+                  }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   title={t('save')}
@@ -480,11 +492,11 @@ function MathEquationBlockComponent(props: any) {
                 <span>{t('supportedFunctions')}</span>
               </InfoLink>
             </motion.div>
-          )}
+          ) : null}
         </MathEqWrapper>
       </motion.div>
     </NodeViewWrapper>
   );
-}
+};
 
 export default MathEquationBlockComponent;

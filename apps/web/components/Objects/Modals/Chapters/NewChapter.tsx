@@ -20,7 +20,7 @@ interface FormValues {
   description: string;
 }
 
-function NewChapterModal({ submitChapter, closeModal, course }: any) {
+const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewChapterModal');
   const validationSchema = createValidationSchema(validationT);
@@ -101,6 +101,6 @@ function NewChapterModal({ submitChapter, closeModal, course }: any) {
       </form>
     </Form>
   );
-}
+};
 
 export default NewChapterModal;

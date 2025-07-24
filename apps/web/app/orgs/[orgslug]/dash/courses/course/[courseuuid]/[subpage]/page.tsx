@@ -20,7 +20,7 @@ export interface CourseOverviewParams {
   subpage: string;
 }
 
-function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
+const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) => {
   const t = useTranslations('DashPage.Courses.CoursePage');
   const params = use(props.params);
   function getEntireCourseUUID(courseuuid: string) {
@@ -85,7 +85,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
                 </div>
               </div>
             </Link>
-            <Link href={getUriWithOrg(params.orgslug, '') + `/dash/courses/course/${params.courseuuid}/certification`}>
+            <Link href={`${getUriWithOrg(params.orgslug, '')}/dash/courses/course/${params.courseuuid}/certification`}>
               <div
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   params.subpage === 'certification' ? 'border-b-4' : 'opacity-50'
@@ -117,6 +117,6 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
       </CourseProvider>
     </div>
   );
-}
+};
 
 export default CourseOverviewPage;

@@ -11,7 +11,7 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { useEffect } from 'react';
 import Link from 'next/link';
 
-function AssignmentStudentActivity() {
+const AssignmentStudentActivity = () => {
   const t = useTranslations('Activities.AssignmentStudentActivity');
   const format = useFormatter();
   const assignments = useAssignments() as any;
@@ -51,7 +51,7 @@ function AssignmentStudentActivity() {
         </div>
       </div>
 
-      {assignments?.assignment_object?.description && (
+      {assignments?.assignment_object?.description ? (
         <div className="soft-shadow flex flex-col space-y-2 rounded-md bg-slate-100/30 p-4 md:p-6">
           <div className="flex flex-col space-y-3">
             <div className="flex items-center gap-2 text-slate-700">
@@ -66,7 +66,7 @@ function AssignmentStudentActivity() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {assignments?.assignment_tasks
         ?.sort((a: any, b: any) => a.id - b.id)
@@ -82,7 +82,7 @@ function AssignmentStudentActivity() {
                   <p className="break-words text-slate-500">{task.description}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {task.hint && (
+                  {task.hint ? (
                     <Popover>
                       <PopoverTrigger className="soft-shadow flex cursor-pointer items-center space-x-2 rounded-full bg-amber-50/40 px-3 py-1 text-amber-900">
                         <Info size={13} />
@@ -90,8 +90,8 @@ function AssignmentStudentActivity() {
                       </PopoverTrigger>
                       <PopoverContent className="max-h-[200px] overflow-y-auto">{task.hint}</PopoverContent>
                     </Popover>
-                  )}
-                  {task.reference_file && (
+                  ) : null}
+                  {task.reference_file ? (
                     <Link
                       href={getTaskRefFileDir(
                         org?.org_uuid,
@@ -107,15 +107,15 @@ function AssignmentStudentActivity() {
                     >
                       <Download size={13} />
                       <div className="flex items-center space-x-1 md:space-x-2">
-                        {task.reference_file && (
+                        {task.reference_file ? (
                           <span className="relative">
                             <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white" />
                           </span>
-                        )}
+                        ) : null}
                         <p className="text-xs font-semibold">{t('referenceDocument')}</p>
                       </div>
                     </Link>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <div className="w-full">
@@ -139,6 +139,6 @@ function AssignmentStudentActivity() {
         })}
     </div>
   );
-}
+};
 
 export default AssignmentStudentActivity;

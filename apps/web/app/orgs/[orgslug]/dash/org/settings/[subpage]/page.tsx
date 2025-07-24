@@ -32,7 +32,7 @@ const SETTING_TABS: TabItem[] = [
   { id: 'other', label: 'other', icon: CodeIcon },
 ];
 
-function TabLink({ tab, isActive, orgslug }: { tab: TabItem; isActive: boolean; orgslug: string }) {
+const TabLink = ({ tab, isActive, orgslug }: { tab: TabItem; isActive: boolean; orgslug: string }) => {
   const t = useTranslations('DashPage.OrgSettings');
   return (
     <Link href={`${getUriWithOrg(orgslug, '')}/dash/org/settings/${tab.id}`}>
@@ -48,9 +48,9 @@ function TabLink({ tab, isActive, orgslug }: { tab: TabItem; isActive: boolean; 
       </div>
     </Link>
   );
-}
+};
 
-function OrgPage(props: { params: Promise<OrgParams> }) {
+const OrgPage = (props: { params: Promise<OrgParams> }) => {
   const t = useTranslations('DashPage.OrgSettings');
   const params = use(props.params);
   const [H1Label, setH1Label] = useState('');
@@ -81,7 +81,7 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f8f8f8]">
-      <div className="soft-shadow flex-shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="soft-shadow shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
         <BreadCrumbs type="org" />
         <div className="my-2 py-2">
           <div className="flex w-100 flex-col space-y-1">
@@ -100,7 +100,7 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
           ))}
         </div>
       </div>
-      <div className="h-6 flex-shrink-0" />
+      <div className="h-6 shrink-0" />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -116,6 +116,6 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
       </motion.div>
     </div>
   );
-}
+};
 
 export default OrgPage;

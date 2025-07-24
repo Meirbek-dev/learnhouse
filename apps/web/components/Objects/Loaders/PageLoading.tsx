@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
-function PageLoading() {
+const PageLoading = () => {
   return (
     <div className="fixed inset-0 flex items-center justify-center">
       <motion.div
@@ -37,6 +37,6 @@ function PageLoading() {
       </motion.div>
     </div>
   );
-}
+};
 
 export default PageLoading;

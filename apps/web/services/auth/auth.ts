@@ -134,11 +134,9 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
       credentials: 'include',
     };
 
-    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.login}`, requestOptions);
-
     // For backward compatibility, return raw response
     // Calling code can use handleAuthResponse if needed
-    return response;
+    return await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.login}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`Login request failed: ${error.message}`, undefined, 'NETWORK_ERROR');
@@ -184,8 +182,7 @@ export async function loginWithOAuthToken(email: string, provider: string, acces
       credentials: 'include',
     };
 
-    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.oauth}`, requestOptions);
-    return response;
+    return await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.oauth}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`OAuth login failed: ${error.message}`, undefined, 'OAUTH_ERROR');
@@ -286,8 +283,7 @@ export async function logout(): Promise<Response> {
       credentials: 'include',
     };
 
-    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.logout}`, requestOptions);
-    return response;
+    return await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.logout}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`Logout failed: ${error.message}`, undefined, 'LOGOUT_ERROR');
@@ -506,8 +502,7 @@ export async function signup(body: NewAccountBody): Promise<Response> {
       redirect: 'follow',
     };
 
-    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}`, requestOptions);
-    return response;
+    return await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`Signup failed: ${error.message}`, undefined, 'SIGNUP_ERROR');
@@ -573,12 +568,10 @@ export async function signUpWithInviteCode(body: NewAccountBody, inviteCode: str
     };
 
     const sanitizedInviteCode = inviteCode.trim();
-    const response = await fetch(
+    return await fetch(
       `${getAPIUrl()}${AUTH_ENDPOINTS.signup}/${org_id}/invite/${encodeURIComponent(sanitizedInviteCode)}`,
       requestOptions,
     );
-
-    return response;
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`Invite signup failed: ${error.message}`, undefined, 'INVITE_SIGNUP_ERROR');
@@ -654,7 +647,7 @@ export const parseJWTPayload = (token: string): any | null => {
     const payload = parts[1];
     if (!payload) return null;
 
-    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const decoded = atob(payload.replaceAll('-', '+').replaceAll('_', '/'));
     return JSON.parse(decoded);
   } catch {
     return null;

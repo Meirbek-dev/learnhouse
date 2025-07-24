@@ -31,7 +31,7 @@ const CourseGrid = memo(({ ownedCourses, orgSlug }: { ownedCourses: any[]; orgSl
     {ownedCourses.map((course: any) => (
       <div
         key={course.course_uuid}
-        className="mx-auto w-full max-w-[300px] transform transition-transform duration-200 hover:scale-[1.02]"
+        className="mx-auto w-full max-w-[300px] transition-transform duration-200 hover:scale-[1.02]"
       >
         <CourseThumbnail
           course={course}
@@ -44,7 +44,7 @@ const CourseGrid = memo(({ ownedCourses, orgSlug }: { ownedCourses: any[]; orgSl
 
 CourseGrid.displayName = 'CourseGrid';
 
-function OwnedCoursesPage() {
+const OwnedCoursesPage = () => {
   const t = useTranslations('DashPage.Courses');
   const org = useOrg() as any;
   const session = useLHSession() as any;
@@ -94,13 +94,13 @@ function OwnedCoursesPage() {
             <h1 className="text-2xl font-bold text-gray-800">{t('myCourses')}</h1>
             <h2 className="text-sm text-gray-600">{t('purchasedCourses')}</h2>
           </div>
-          {ownedCourses && ownedCourses.length > 0 && (
+          {ownedCourses && ownedCourses.length > 0 ? (
             <div className="ml-auto">
               <span className="text-primary inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium">
                 {ownedCourses.length} {ownedCourses.length === 1 ? t('course') : t('courses')}
               </span>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -115,6 +115,6 @@ function OwnedCoursesPage() {
       )}
     </div>
   );
-}
+};
 
 export default memo(OwnedCoursesPage);

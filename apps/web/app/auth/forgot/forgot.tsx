@@ -23,7 +23,7 @@ const createValidationSchema = (t: (key: string) => string) =>
 
 type ForgotPasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
-function ForgotPasswordClient() {
+const ForgotPasswordClient = () => {
   const t = useTranslations('Auth.Forgot');
   const org = useOrg() as any;
   const [error, setError] = useState('');
@@ -70,18 +70,18 @@ function ForgotPasswordClient() {
               <h1 className="mb-4 text-2xl font-bold">{t('title')}</h1>
               <p className="mb-4 text-sm">{t('enterEmailMessage')}</p>
 
-              {error && (
+              {error ? (
                 <div className="my-4 flex items-center justify-center space-x-2 rounded-md bg-red-200 p-3 text-red-950 shadow-xs transition-all">
                   <AlertTriangle size={22} />
                   <div className="text-sm font-bold">{error}</div>
                 </div>
-              )}
-              {message && (
+              ) : null}
+              {message ? (
                 <div className="flex items-center justify-center space-x-2 rounded-md bg-green-200 p-4 text-green-950 shadow-xs transition-all">
                   <Info size={18} />
                   <div className="text-sm font-bold">{t('checkEmail')}</div>
                 </div>
-              )}
+              ) : null}
 
               <Form {...form}>
                 <form
@@ -124,6 +124,6 @@ function ForgotPasswordClient() {
       </div>
     </div>
   );
-}
+};
 
 export default ForgotPasswordClient;

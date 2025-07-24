@@ -7,7 +7,7 @@ interface PaidCourseActivityProps {
   course: any;
 }
 
-function PaidCourseActivityDisclaimer({ course }: PaidCourseActivityProps) {
+const PaidCourseActivityDisclaimer = ({ course }: PaidCourseActivityProps) => {
   const t = useTranslations('Components.CourseParidActivityDisclaimer');
   return (
     <div className="mx-auto max-w-lg space-y-4">
@@ -21,6 +21,6 @@ function PaidCourseActivityDisclaimer({ course }: PaidCourseActivityProps) {
       <CoursePaidOptions course={course} />
     </div>
   );
-}
+};
 
 export default PaidCourseActivityDisclaimer;

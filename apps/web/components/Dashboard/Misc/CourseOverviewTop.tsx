@@ -13,7 +13,7 @@ import EmptyThumbnailImage from '../../../public/empty_thumbnail.webp';
 import BreadCrumbs from './BreadCrumbs';
 import SaveState from './SaveState';
 
-export function CourseOverviewTop({ params }: { params: CourseOverviewParams }) {
+export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) => {
   const course = useCourse() as any;
   const org = useOrg() as any;
   const t = useTranslations('DashPage.CourseOverview');
@@ -61,4 +61,4 @@ export function CourseOverviewTop({ params }: { params: CourseOverviewParams }) 
       </div>
     </>
   );
-}
+};

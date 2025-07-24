@@ -8,7 +8,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-function DashMobileMenu() {
+const DashMobileMenu = () => {
   const session = useLHSession() as any;
   const t = useTranslations('SidebarMenu');
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
@@ -30,7 +30,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={'/'}
+              href="/"
               className="flex flex-col items-center p-2"
             >
               <Home size={20} />
@@ -44,7 +44,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={'/dash/courses'}
+              href="/dash/courses"
               className="flex flex-col items-center p-2"
             >
               <BookCopy size={20} />
@@ -58,14 +58,14 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={'/dash/assignments'}
+              href="/dash/assignments"
               className="flex flex-col items-center p-2"
             >
               <Backpack size={20} />
               <span className="mt-1 text-xs">{t('mobile.assignments')}</span>
             </Link>
           </ToolTip>
-          {arePaymentsEnabled && (
+          {arePaymentsEnabled ? (
             <ToolTip
               content={t('tooltips.payments')}
               slateBlack
@@ -73,14 +73,14 @@ function DashMobileMenu() {
               side="top"
             >
               <Link
-                href={'/dash/payments/customers'}
+                href="/dash/payments/customers"
                 className="flex flex-col items-center p-2"
               >
                 <BadgeDollarSign size={20} />
                 <span className="mt-1 text-xs">{t('mobile.payments')}</span>
               </Link>
             </ToolTip>
-          )}
+          ) : null}
           <ToolTip
             content={t('tooltips.users')}
             slateBlack
@@ -88,7 +88,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={'/dash/users/settings/users'}
+              href="/dash/users/settings/users"
               className="flex flex-col items-center p-2"
             >
               <Users size={20} />
@@ -102,7 +102,7 @@ function DashMobileMenu() {
             side="top"
           >
             <Link
-              href={'/dash/org/settings/general'}
+              href="/dash/org/settings/general"
               className="flex flex-col items-center p-2"
             >
               <School size={20} />
@@ -119,7 +119,7 @@ function DashMobileMenu() {
           side="top"
         >
           <Link
-            href={'/dash/user-account/settings/general'}
+            href="/dash/user-account/settings/general"
             className="flex flex-col items-center p-2"
           >
             <Settings size={20} />
@@ -129,6 +129,6 @@ function DashMobileMenu() {
       </div>
     </div>
   );
-}
+};
 
 export default DashMobileMenu;

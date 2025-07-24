@@ -110,14 +110,14 @@ function useActivityPosition(course: any, activityId: string) {
   }, [course, activityId]);
 }
 
-function ActivityActions({
+const ActivityActions = ({
   activity,
   activityid,
   course,
   orgslug,
   assignment,
   showNavigation = true,
-}: ActivityActionsProps) {
+}: ActivityActionsProps) => {
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
   const org = useOrg() as any;
@@ -131,7 +131,7 @@ function ActivityActions({
 
   return (
     <div className="flex items-center space-x-2">
-      {activity && activity.published === true && activity.content.paid_access !== false && (
+      {activity && activity.published === true && activity.content.paid_access !== false ? (
         <AuthenticatedClientElement checkMethod="authentication">
           {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
             <MarkStatus
@@ -143,7 +143,7 @@ function ActivityActions({
               t={t}
             />
           )}
-          {activity.activity_type === 'TYPE_ASSIGNMENT' && assignment?.assignment_uuid && (
+          {activity.activity_type === 'TYPE_ASSIGNMENT' && assignment?.assignment_uuid ? (
             <AssignmentSubmissionProvider assignment_uuid={assignment.assignment_uuid}>
               <AssignmentTools
                 assignment={assignment}
@@ -154,19 +154,19 @@ function ActivityActions({
                 t={t}
               />
             </AssignmentSubmissionProvider>
-          )}
-          {showNavigation && (
+          ) : null}
+          {showNavigation ? (
             <NextActivityButton
               course={course}
               currentActivityId={activity.id}
               orgslug={orgslug}
             />
-          )}
+          ) : null}
         </AuthenticatedClientElement>
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 // Helper to ensure Tiptap always receives a valid document
 function getValidTiptapContent(content: any): any {
@@ -176,7 +176,7 @@ function getValidTiptapContent(content: any): any {
   return { type: 'doc', content: [{ type: 'paragraph' }] };
 }
 
-function ActivityClient(props: ActivityClientProps) {
+const ActivityClient = (props: ActivityClientProps) => {
   const { activityid } = props;
   const { courseuuid } = props;
   const { orgslug } = props;
@@ -356,7 +356,7 @@ function ActivityClient(props: ActivityClientProps) {
                         className="flex items-center space-x-2"
                       >
                         <div className="relative h-8 w-8">
-                          <svg className="h-full w-full -rotate-90 transform">
+                          <svg className="h-full w-full -rotate-90">
                             <circle
                               cx="16"
                               cy="16"
@@ -465,7 +465,9 @@ function ActivityClient(props: ActivityClientProps) {
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => setIsFocusMode(false)}
+                          onClick={() => {
+                            setIsFocusMode(false);
+                          }}
                           className="soft-shadow cursor-pointer rounded-full bg-white p-2 hover:bg-gray-50"
                           title={t('exitFocusMode')}
                         >
@@ -482,9 +484,8 @@ function ActivityClient(props: ActivityClientProps) {
                 {/* Focus Mode Content */}
                 <div className="h-full overflow-auto pt-16 pb-20">
                   <div className="container mx-auto px-4">
-                    {activity &&
-                      activity.published === true &&
-                      (activity.content.paid_access === false ? (
+                    {activity && activity.published === true ? (
+                      activity.content.paid_access === false ? (
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
                         <motion.div
@@ -496,12 +497,13 @@ function ActivityClient(props: ActivityClientProps) {
                           {/* Activity Types */}
                           <div>{activityContent}</div>
                         </motion.div>
-                      ))}
+                      )
+                    ) : null}
                   </div>
                 </div>
 
                 {/* Focus Mode Bottom Bar */}
-                {activity && activity.published === true && activity.content.paid_access !== false && (
+                {activity && activity.published === true && activity.content.paid_access !== false ? (
                   <motion.div
                     initial={isInitialRender.current ? false : { y: 100 }}
                     animate={{ y: 0 }}
@@ -513,7 +515,9 @@ function ActivityClient(props: ActivityClientProps) {
                       <div className="flex h-16 items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => navigateToActivity(prevActivity)}
+                            onClick={() => {
+                              navigateToActivity(prevActivity);
+                            }}
                             className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
                               prevActivity ? 'text-gray-700' : 'cursor-not-allowed text-gray-400 opacity-50'
                             }`}
@@ -548,7 +552,9 @@ function ActivityClient(props: ActivityClientProps) {
                             showNavigation={false}
                           />
                           <button
-                            onClick={() => navigateToActivity(nextActivity)}
+                            onClick={() => {
+                              navigateToActivity(nextActivity);
+                            }}
                             className={`flex cursor-pointer items-center space-x-1.5 rounded-md p-2 transition-all duration-200 ${
                               nextActivity ? 'text-gray-700' : 'cursor-not-allowed text-gray-400 opacity-50'
                             }`}
@@ -576,7 +582,7 @@ function ActivityClient(props: ActivityClientProps) {
                       </div>
                     </div>
                   </motion.div>
-                )}
+                ) : null}
               </motion.div>
             </AnimatePresence>
           ) : (
@@ -645,7 +651,7 @@ function ActivityClient(props: ActivityClientProps) {
                             {/* Authors and Dates Section */}
                             <div className="mt-2 flex flex-wrap items-center gap-3">
                               {/* Avatars */}
-                              {course.authors && course.authors.length > 0 && (
+                              {course.authors && course.authors.length > 0 ? (
                                 <div className="flex -space-x-3">
                                   {course.authors
                                     .filter((a: any) => a.authorship_status === 'ACTIVE')
@@ -678,9 +684,9 @@ function ActivityClient(props: ActivityClientProps) {
                                     </div>
                                   )}
                                 </div>
-                              )}
+                              ) : null}
                               {/* Author names */}
-                              {course.authors && course.authors.length > 0 && (
+                              {course.authors && course.authors.length > 0 ? (
                                 <div className="flex items-center gap-1 text-xs font-medium text-gray-700">
                                   {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 1 && (
                                     <span>{t('coCreatedBy')} </span>
@@ -723,7 +729,7 @@ function ActivityClient(props: ActivityClientProps) {
                                     </ToolTip>
                                   )}
                                 </div>
-                              )}
+                              ) : null}
                               {/* Dates */}
                               <div className="flex items-center gap-2 text-xs text-gray-500">
                                 <span>
@@ -746,7 +752,7 @@ function ActivityClient(props: ActivityClientProps) {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {activity && activity.published === true && activity.content.paid_access !== false && (
+                          {activity && activity.published === true && activity.content.paid_access !== false ? (
                             <AuthenticatedClientElement checkMethod="authentication">
                               {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
                                 <>
@@ -773,27 +779,28 @@ function ActivityClient(props: ActivityClientProps) {
                                 </>
                               )}
                             </AuthenticatedClientElement>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     </div>
 
-                    {activity && activity.published === false && (
+                    {activity && activity.published === false ? (
                       <div className="rounded-lg bg-gray-800 p-7 drop-shadow-xs">
                         <div className="text-white">
                           <h1 className="text-2xl font-bold">{t('activityNotPublished')}</h1>
                         </div>
                       </div>
-                    )}
+                    ) : null}
 
-                    {activity &&
-                      activity.published === true &&
-                      (activity.content.paid_access === false ? (
+                    {activity && activity.published === true ? (
+                      activity.content.paid_access === false ? (
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
                         <div className={`rounded-lg p-7 drop-shadow-xs ${bgColor} relative`}>
                           <button
-                            onClick={() => setIsFocusMode(true)}
+                            onClick={() => {
+                              setIsFocusMode(true);
+                            }}
                             className="soft-shadow group pointer-events-auto absolute top-4 right-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
                             title={t('enterFocusMode')}
                           >
@@ -809,10 +816,11 @@ function ActivityClient(props: ActivityClientProps) {
                           </button>
                           {activityContent}
                         </div>
-                      ))}
+                      )
+                    ) : null}
 
                     {/* Activity Actions below the content box */}
-                    {activity && activity.published === true && activity.content.paid_access !== false && (
+                    {activity && activity.published === true && activity.content.paid_access !== false ? (
                       <div className="mt-4 flex w-full items-center justify-between">
                         <div>
                           <PreviousActivityButton
@@ -837,17 +845,17 @@ function ActivityClient(props: ActivityClientProps) {
                           />
                         </div>
                       </div>
-                    )}
+                    ) : null}
 
                     {/* Fixed Activity Secondary Bar */}
-                    {activity && activity.published === true && activity.content.paid_access !== false && (
+                    {activity && activity.published === true && activity.content.paid_access !== false ? (
                       <FixedActivitySecondaryBar
                         course={course}
                         currentActivityId={activityid}
                         orgslug={orgslug}
                         activity={activity}
                       />
-                    )}
+                    ) : null}
 
                     <div className="h-[100px]" />
                   </div>
@@ -859,16 +867,16 @@ function ActivityClient(props: ActivityClientProps) {
       </Suspense>
     </CourseProvider>
   );
-}
+};
 
-export function MarkStatus(props: {
+export const MarkStatus = (props: {
   activity: any;
   activityid: string;
   course: any;
   orgslug: string;
   trailData: any;
   t: ReturnType<typeof useTranslations<'ActivityPage'>>;
-}) {
+}) => {
   const { t } = props;
   const router = useRouter();
   const session = useLHSession() as any;
@@ -1051,7 +1059,7 @@ export function MarkStatus(props: {
               functionToExecute={unmarkActivityAsCompleteFront}
               status="warning"
             />
-            {showMarkedTooltip && (
+            {showMarkedTooltip ? (
               <MiniInfoTooltip
                 icon={infoIcon}
                 message={t('markStatus.unmarkTooltipMessage')}
@@ -1060,7 +1068,7 @@ export function MarkStatus(props: {
                 iconSize={24}
                 width="w-64"
               />
-            )}
+            ) : null}
           </div>
         </div>
       ) : (
@@ -1110,7 +1118,7 @@ export function MarkStatus(props: {
                 <span className="min-w-[90px] text-xs font-bold">{isLoading ? t('marking') : t('markAsComplete')}</span>
               </div>
             </div>
-            {showUnmarkedTooltip && (
+            {showUnmarkedTooltip ? (
               <MiniInfoTooltip
                 icon={infoIcon}
                 message={t('markStatus.markTooltipMessage')}
@@ -1119,15 +1127,15 @@ export function MarkStatus(props: {
                 iconSize={24}
                 width="w-64"
               />
-            )}
+            ) : null}
           </div>
         </div>
       )}
     </>
   );
-}
+};
 
-function NextActivityButton({
+const NextActivityButton = ({
   course,
   currentActivityId,
   orgslug,
@@ -1135,7 +1143,7 @@ function NextActivityButton({
   course: any;
   currentActivityId: string;
   orgslug: string;
-}) {
+}) => {
   const router = useRouter();
   const t = useTranslations('ActivityPage');
   const isMobile = useIsMobile();
@@ -1186,9 +1194,9 @@ function NextActivityButton({
       </div>
     </div>
   );
-}
+};
 
-function PreviousActivityButton({
+const PreviousActivityButton = ({
   course,
   currentActivityId,
   orgslug,
@@ -1196,7 +1204,7 @@ function PreviousActivityButton({
   course: any;
   currentActivityId: string;
   orgslug: string;
-}) {
+}) => {
   const router = useRouter();
   const isMobile = useIsMobile();
   const t = useTranslations('ActivityPage');
@@ -1247,16 +1255,16 @@ function PreviousActivityButton({
       </div>
     </div>
   );
-}
+};
 
-function AssignmentTools(props: {
+const AssignmentTools = (props: {
   activity: any;
   activityid: string;
   course: any;
   orgslug: string;
   assignment: any;
   t: ReturnType<typeof useTranslations<'ActivityPage'>>;
-}) {
+}) => {
   const submission = useAssignmentSubmission() as any;
   const session = useLHSession() as any;
   const [finalGrade, setFinalGrade] = React.useState(null) as any;
@@ -1373,6 +1381,6 @@ function AssignmentTools(props: {
 
   // Default return in case none of the conditions are met
   return null;
-}
+};
 
 export default ActivityClient;

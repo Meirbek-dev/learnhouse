@@ -10,13 +10,13 @@ import React from 'react';
 /**
  * used for identifying the split char and use will pasting
  */
-const SPLITTER_REGEX = /[\n#?=&\t,./-]+/;
+const SPLITTER_REGEX = /[\t\n#&,./=?-]+/;
 
 /**
  * used for formatting the pasted element for the correct value format to be added
  */
 
-const FORMATTING_REGEX = /^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$/g;
+const FORMATTING_REGEX = /^[^\dA-Za-z]*|[^\dA-Za-z]*$/g;
 
 interface TagsInputProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string[];
@@ -243,7 +243,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               className={cn(
                 "data-[active='true']:ring-muted-foreground relative flex items-center gap-1 truncate rounded-sm px-2 py-1 text-xs aria-disabled:cursor-not-allowed aria-disabled:opacity-50 data-[active='true']:ring-2",
               )}
-              variant={'secondary'}
+              variant="secondary"
             >
               <span>{item}</span>
               <button
@@ -252,7 +252,9 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
                 aria-roledescription="button to remove option"
                 disabled={disableButton}
                 onMouseDown={mousePreventDefault}
-                onClick={() => RemoveValue(item)}
+                onClick={() => {
+                  RemoveValue(item);
+                }}
                 className="disabled:cursor-not-allowed"
               >
                 <span className="sr-only">{t('removeOption', { item })}</span>
@@ -270,7 +272,9 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             onSelect={handleSelect}
             onChange={activeIndex === -1 ? handleChange : undefined}
             placeholder={placeholder}
-            onClick={() => setActiveIndex(-1)}
+            onClick={() => {
+              setActiveIndex(-1);
+            }}
             className={cn(
               'h-auto min-h-0 min-w-fit flex-1 border-none bg-transparent px-0 py-0 shadow-none outline-0 focus-visible:border-0 focus-visible:outline-0 focus-visible:ring-0 focus-visible:ring-offset-0',
               activeIndex !== -1 && 'caret-transparent',

@@ -159,15 +159,17 @@ const UpdatesSection = () => {
             />
             <span className="text-sm font-semibold text-neutral-600">{t('courseUpdates')}</span>
           </div>
-          {updates && updates.length > 0 && (
+          {updates && updates.length > 0 ? (
             <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
               {updates.length} {updates.length === 1 ? t('update') : t('updates')}
             </span>
-          )}
+          ) : null}
         </div>
-        {adminStatus.isAdmin && (
+        {adminStatus.isAdmin ? (
           <button
-            onClick={() => setSelectedView(selectedView === 'new' ? 'list' : 'new')}
+            onClick={() => {
+              setSelectedView(selectedView === 'new' ? 'list' : 'new');
+            }}
             className={`inline-flex items-center space-x-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
               selectedView === 'new'
                 ? 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
@@ -177,7 +179,7 @@ const UpdatesSection = () => {
             <PencilLine size={12} />
             <span>{selectedView === 'new' ? t('cancel') : t('newUpdate')}</span>
           </button>
-        )}
+        ) : null}
       </div>
 
       <motion.div
@@ -339,11 +341,11 @@ const UpdatesListView = () => {
               </div>
               <p className="line-clamp-3 text-sm text-neutral-600">{update.content}</p>
             </div>
-            {adminStatus.isAdmin && !adminStatus.loading && (
+            {adminStatus.isAdmin && !adminStatus.loading ? (
               <div className="ml-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <DeleteUpdateButton update={update} />
               </div>
-            )}
+            ) : null}
           </div>
         </motion.div>
       ))}

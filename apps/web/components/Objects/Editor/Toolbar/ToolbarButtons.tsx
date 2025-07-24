@@ -175,13 +175,15 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       </ToolBtn>
       <ListMenuWrapper>
         <ToolBtn
-          onClick={() => setShowListMenu(!showListMenu)}
+          onClick={() => {
+            setShowListMenu(!showListMenu);
+          }}
           className={showListMenu || editor.isActive('bulletList') || editor.isActive('orderedList') ? 'is-active' : ''}
         >
           <ListBulletIcon />
           <ChevronDownIcon />
         </ToolBtn>
-        {showListMenu && (
+        {showListMenu ? (
           <ListDropdown>
             {listOptions.map((option, index) => (
               <ListMenuItem
@@ -199,7 +201,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               </ListMenuItem>
             ))}
           </ListDropdown>
-        )}
+        ) : null}
       </ListMenuWrapper>
       <ToolSelect
         value={
@@ -242,14 +244,16 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       <TableMenuWrapper>
         <ToolTip content={t('table')}>
           <ToolBtn
-            onClick={() => setShowTableMenu(!showTableMenu)}
+            onClick={() => {
+              setShowTableMenu(!showTableMenu);
+            }}
             className={showTableMenu ? 'is-active' : ''}
           >
             <TableIcon width={18} />
             <ChevronDownIcon />
           </ToolBtn>
         </ToolTip>
-        {showTableMenu && (
+        {showTableMenu ? (
           <TableDropdown>
             {tableOptions.map((option, index) => (
               <TableMenuItem
@@ -264,7 +268,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
               </TableMenuItem>
             ))}
           </TableDropdown>
-        )}
+        ) : null}
       </TableMenuWrapper>
       <DividerVerticalIcon style={{ marginTop: 'auto', marginBottom: 'auto', color: 'grey' }} />
       <ToolTip content={t('infoCallout')}>
@@ -318,13 +322,13 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           >
             <Link2 size={15} />
           </ToolBtn>
-          {showLinkInput && (
+          {showLinkInput ? (
             <LinkInputTooltip
               onSave={handleLinkSave}
               onCancel={handleLinkCancel}
               currentUrl={getCurrentLinkUrl()}
             />
-          )}
+          ) : null}
         </div>
       </ToolTip>
       <ToolTip content={t('image')}>

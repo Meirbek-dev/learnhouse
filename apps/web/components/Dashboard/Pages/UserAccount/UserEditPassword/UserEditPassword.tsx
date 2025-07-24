@@ -36,7 +36,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 
 type PasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;
 
-function UserEditPassword() {
+const UserEditPassword = () => {
   const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.Notifications');
@@ -121,7 +121,7 @@ function UserEditPassword() {
                 {...register('old_password')}
                 className="mt-1"
               />
-              {errors.old_password && <p className="mt-1 text-sm text-red-500">{errors.old_password.message}</p>}
+              {errors.old_password ? <p className="mt-1 text-sm text-red-500">{errors.old_password.message}</p> : null}
             </div>
 
             <div>
@@ -131,7 +131,7 @@ function UserEditPassword() {
                 {...register('new_password')}
                 className="mt-1"
               />
-              {errors.new_password && <p className="mt-1 text-sm text-red-500">{errors.new_password.message}</p>}
+              {errors.new_password ? <p className="mt-1 text-sm text-red-500">{errors.new_password.message}</p> : null}
             </div>
 
             <div className="flex items-center space-x-2 rounded-md bg-amber-50 p-3 text-amber-600">
@@ -152,6 +152,6 @@ function UserEditPassword() {
       </div>
     </div>
   );
-}
+};
 
 export default UserEditPassword;

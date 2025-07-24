@@ -7,7 +7,7 @@ import TaskQuizObject from './TaskTypes/TaskQuizObject';
 import TaskFileObject from './TaskTypes/TaskFileObject';
 import { useEffect } from 'react';
 
-function AssignmentTaskContentEdit() {
+const AssignmentTaskContentEdit = () => {
   const session = useLHSession() as any;
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
   const assignment_task = useAssignmentsTask() as any;
@@ -20,6 +20,6 @@ function AssignmentTaskContentEdit() {
       {assignment_task?.assignmentTask.assignment_type === 'FILE_SUBMISSION' && <TaskFileObject view="teacher" />}
     </div>
   );
-}
+};
 
 export default AssignmentTaskContentEdit;

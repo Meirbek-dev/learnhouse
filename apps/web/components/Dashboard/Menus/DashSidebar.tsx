@@ -197,15 +197,15 @@ const NavigationItem = memo(({ item, isCollapsed }: { item: NavigationItem; isCo
         {!isCollapsed && (
           <>
             <span className="truncate font-medium">{item.title}</span>
-            {item.badge && (
+            {item.badge ? (
               <Badge
                 variant="secondary"
                 className="ml-auto text-xs"
               >
                 {item.badge}
               </Badge>
-            )}
-            {item.isActive && <div className="bg-primary ml-auto h-2 w-2 animate-pulse rounded-full" />}
+            ) : null}
+            {item.isActive ? <div className="bg-primary ml-auto h-2 w-2 animate-pulse rounded-full" /> : null}
           </>
         )}
       </Link>
@@ -215,7 +215,7 @@ const NavigationItem = memo(({ item, isCollapsed }: { item: NavigationItem; isCo
 
 NavigationItem.displayName = 'NavigationItem';
 
-function DashSidebar({ className }: SidebarProps) {
+const DashSidebar = ({ className }: SidebarProps) => {
   const org = useOrg() as any;
   const session = useLHSession();
   const { state, toggleSidebar } = useSidebar();
@@ -433,6 +433,6 @@ function DashSidebar({ className }: SidebarProps) {
       </SidebarFooter>
     </Sidebar>
   );
-}
+};
 
 export default memo(DashSidebar);

@@ -63,7 +63,7 @@ const createCourseFormSchema = (t: any) =>
     thumbnail_type: z.enum(['image', 'video', 'both']),
   });
 
-function EditCourseGeneral(props: EditCourseGeneralProps) {
+const EditCourseGeneral = (props: EditCourseGeneralProps) => {
   const [error, setError] = useState('');
   const [isFormInitialized, setIsFormInitialized] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -298,12 +298,12 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="p-6">
-                {error && (
+                {error ? (
                   <div className="mb-6 flex items-center rounded-md bg-red-50 p-4 text-red-700">
                     <AlertTriangle className="mr-2 h-4 w-4" />
                     {error}
                   </div>
-                )}
+                ) : null}
 
                 <div className="space-y-6">
                   <FormField
@@ -437,6 +437,6 @@ function EditCourseGeneral(props: EditCourseGeneralProps) {
       </div>
     </div>
   );
-}
+};
 
 export default EditCourseGeneral;

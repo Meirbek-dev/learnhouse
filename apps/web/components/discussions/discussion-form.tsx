@@ -1,13 +1,12 @@
 'use client';
 
+import UserAvatar from '@components/Objects/UserAvatar';
+import { Button } from '@/components/ui/button';
+import RichTextEditor from './rich-text-editor';
 import { useTranslations } from 'next-intl';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
 import type React from 'react';
-
-import UserAvatar from '@components/Objects/UserAvatar';
-import { Button } from '@/components/ui/button';
-import RichTextEditor from './rich-text-editor';
 
 interface DiscussionFormProps {
   currentUser: any;
@@ -23,7 +22,7 @@ export default function DiscussionForm({ currentUser, onSubmit }: DiscussionForm
     // Check if content has meaningful text (not just empty HTML tags)
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = content;
-    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    const textContent = tempDiv.textContent || tempDiv.textContent || '';
 
     if (!textContent.trim()) return;
     onSubmit(content);

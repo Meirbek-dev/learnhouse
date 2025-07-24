@@ -32,7 +32,7 @@ interface AIPromptsLabels {
   selection: string;
 }
 
-function AIEditorToolkit(props: AIEditorToolkitProps) {
+const AIEditorToolkit = (props: AIEditorToolkitProps) => {
   const dispatchAIEditor = useAIEditorDispatch() as any;
   const aiEditorState = useAIEditor() as AIEditorStateTypes;
   const t = useTranslations('Activities.AIEditorToolkit');
@@ -47,10 +47,10 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
 
   return (
     <>
-      {isToolkitAvailable && (
+      {isToolkitAvailable ? (
         <div className="flex space-x-2">
           <AnimatePresence>
-            {aiEditorState.isModalOpen && (
+            {aiEditorState.isModalOpen ? (
               <motion.div
                 initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
                 animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
@@ -65,12 +65,12 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                 className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
-                {aiEditorState.isFeedbackModalOpen && (
+                {aiEditorState.isFeedbackModalOpen ? (
                   <UserFeedbackModal
                     activity={props.activity}
                     editor={props.editor}
                   />
-                )}
+                ) : null}
                 <div
                   style={{
                     pointerEvents: 'auto',
@@ -85,7 +85,7 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                 ),
                 radial-gradient(circle at 75% 25%, oklch(0.6231 0.188 259.8145 / 0.12) 0%, transparent 40%)`,
                   }}
-                  className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 ring-inset"
+                  className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 w-fit max-w-(--breakpoint-2xl) -translate-x-1/2 flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 ring-inset"
                 >
                   <div className="flex space-x-2">
                     <div className="pr-1">
@@ -126,13 +126,13 @@ function AIEditorToolkit(props: AIEditorToolkitProps) {
                   </div>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
-      )}
+      ) : null}
     </>
   );
-}
+};
 
 const UserFeedbackModal = (props: AIEditorToolkitProps) => {
   const dispatchAIEditor = useAIEditorDispatch() as any;
@@ -161,7 +161,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         props.activity.activity_uuid,
         access_token,
       );
-      if (response.success === false) {
+      if (!response.success) {
         await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
         await dispatchAIEditor({ type: 'setIsModalClose' });
         // wait for 200ms before opening the modal again
@@ -191,7 +191,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     });
     await dispatchAIEditor({ type: 'setIsWaitingForResponse' });
     const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
-    if (response.success === false) {
+    if (!response.success) {
       await dispatchAIEditor({ type: 'setIsNoLongerWaitingForResponse' });
       await dispatchAIEditor({ type: 'setIsModalClose' });
       // wait for 200ms before opening the modal again
@@ -304,8 +304,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 
     if (original.includes(phrase)) {
       const regex = new RegExp(phrase, 'g');
-      const newText = original.replace(regex, '');
-      return newText;
+      return original.replace(regex, '');
     }
     return originalText;
   };
@@ -391,8 +390,6 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         selection,
       });
     }
-
-    return;
   };
 
   const getTipTapEditorSelectedTextGlobal = () => {
@@ -401,14 +398,13 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
     const resolvedPos = props.editor.state.doc.resolve(pos); // resolve the position in the document
     const start = resolvedPos.before(1); // get the start position of the node
     const end = resolvedPos.after(1); // get the end position of the node
-    const paragraph = props.editor.state.doc.textBetween(start, end, '\n', '\n'); // get the text of the node
-    return paragraph;
+    // get the text of the node
+    return props.editor.state.doc.textBetween(start, end, '\n', '\n');
   };
 
   const getTipTapEditorSelectedText = () => {
     const { selection } = props.editor.state;
-    const text = props.editor.state.doc.textBetween(selection.from, selection.to);
-    return text;
+    return props.editor.state.doc.textBetween(selection.from, selection.to);
   };
 
   return (
@@ -440,7 +436,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
                 ),
                 radial-gradient(circle at 75% 25%, oklch(0.6231 0.188 259.8145 / 0.12) 0%, transparent 40%)`,
         }}
-        className="fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 ring-inset "
+        className="fixed bottom-16 left-1/2 z-50 mx-auto my-10 h-[200px] w-[500px] max-w-(--breakpoint-2xl) -translate-x-1/2 flex-col-reverse rounded-2xl p-3 text-white shadow-xl ring-1 ring-white/10 ring-inset"
       >
         <div className="flex justify-center">
           <Image
@@ -454,7 +450,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
             <AiEditorActionScreen handleOperation={handleOperation} />
           </div>
         </div>
-        {aiEditorState.isUserInputEnabled && !aiEditorState.error.isError && (
+        {aiEditorState.isUserInputEnabled && !aiEditorState.error.isError ? (
           <div className="flex cursor-pointer items-center space-x-2">
             <input
               onKeyDown={handleKeyPress}
@@ -473,7 +469,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
               />
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </motion.div>
   );
@@ -586,7 +582,7 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
             </div>
           </div>
         )}
-      {aiEditorState.isWaitingForResponse && !aiEditorState.error.isError && (
+      {aiEditorState.isWaitingForResponse && !aiEditorState.error.isError ? (
         <div className="mx-auto flex flex-col items-center justify-center align-middle">
           <svg
             className="mt-10 h-10 w-10 animate-spin text-white"
@@ -610,9 +606,9 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
           </svg>
           <p className="mt-4 font-bold text-white/90">{t('thinking')}</p>
         </div>
-      )}
+      ) : null}
 
-      {aiEditorState.error.isError && (
+      {aiEditorState.error.isError ? (
         <div className="flex h-auto items-center pt-7">
           <div className="mx-auto flex w-full flex-col space-y-2 rounded-lg bg-red-500/20 p-5 outline-red-500">
             <AlertTriangle
@@ -625,7 +621,7 @@ const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => 
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

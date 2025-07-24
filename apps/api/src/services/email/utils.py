@@ -4,7 +4,7 @@ from pydantic import EmailStr
 from config.config import get_openu_config
 
 
-def send_email(to: EmailStr, subject: str, body: str):
+def send_email(to: EmailStr, subject: str, body: str) -> None:
     print("We don't have email domain configured, so we're not sending emails, duh...")
 
 

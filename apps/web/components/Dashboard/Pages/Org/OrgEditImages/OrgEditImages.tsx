@@ -759,7 +759,9 @@ export default function OrgEditImages() {
                                           </div>
                                         </div>
                                         <button
-                                          onClick={() => setSelectedService(null)}
+                                          onClick={() => {
+                                            setSelectedService(null);
+                                          }}
                                           className="text-gray-400 transition-colors hover:text-gray-500"
                                         >
                                           <X size={20} />
@@ -775,7 +777,9 @@ export default function OrgEditImages() {
                                               : t('Dialog.AddVideo.loomPlaceholder')
                                           }
                                           value={videoUrl}
-                                          onChange={(e) => setVideoUrl(e.target.value)}
+                                          onChange={(e) => {
+                                            setVideoUrl(e.target.value);
+                                          }}
                                           className="w-full"
                                         />
                                         <Button

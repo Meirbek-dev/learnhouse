@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal
+from typing import Literal
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select

@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import { mutate } from 'swr';
 
-function NewTaskModal({ closeModal, assignment_uuid }: any) {
+const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.NewTaskModal');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -83,6 +83,6 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
       </div>
     </div>
   );
-}
+};
 
 export default NewTaskModal;

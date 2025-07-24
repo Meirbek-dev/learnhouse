@@ -122,7 +122,7 @@ type ExtendedNodeViewProps = {
   };
 } & Omit<NodeViewProps, 'extension'>;
 
-function VideoBlockComponent(props: ExtendedNodeViewProps) {
+const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const t = useTranslations('DashPage.Editor.VideoBlock');
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0];
@@ -145,7 +145,6 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
     if ('size' in node.attrs.blockObject && typeof node.attrs.blockObject.size === 'string') {
       return node.attrs.blockObject as VideoBlockObject;
     }
-    return;
   }, [node.attrs.blockObject]);
 
   const [_video, setVideo] = useState<File | null>(null);
@@ -396,7 +395,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               <Video size={16} />
               <span className="font-medium">{t('title')}</span>
             </div>
-            {blockObject && (
+            {blockObject ? (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -406,7 +405,7 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               >
                 <X size={16} />
               </motion.button>
-            )}
+            ) : null}
           </div>
 
           {!(blockObject && videoUrl) && (
@@ -472,16 +471,16 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                 </AnimatePresence>
               </UploadZone>
 
-              {error && (
+              {error ? (
                 <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-500">
                   <AlertCircle size={16} />
                   {error}
                 </div>
-              )}
+              ) : null}
             </motion.div>
           )}
 
-          {blockObject && videoUrl && (
+          {blockObject && videoUrl ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -497,7 +496,9 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                   <SizeButton
                     key={size}
                     isActive={selectedSize === size}
-                    onClick={() => handleSizeChange(size)}
+                    onClick={() => {
+                      handleSizeChange(size);
+                    }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -526,11 +527,11 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                   }}
                 >
                   <div className="relative overflow-hidden rounded-lg bg-black/5">
-                    {isLoading && (
+                    {isLoading ? (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm">
                         <Loader2 className="h-8 w-8 animate-spin text-white" />
                       </div>
-                    )}
+                    ) : null}
                     <ArtPlayer
                       option={{
                         url: videoUrl,
@@ -578,9 +579,9 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
                 </div>
               </VideoContainer>
             </motion.div>
-          )}
+          ) : null}
         </VideoWrapper>
-        {blockObject && videoUrl && (
+        {blockObject && videoUrl ? (
           <Modal
             isDialogOpen={isModalOpen}
             onOpenChange={setIsModalOpen}
@@ -599,10 +600,10 @@ function VideoBlockComponent(props: ExtendedNodeViewProps) {
               </div>
             }
           />
-        )}
+        ) : null}
       </motion.div>
     </NodeViewWrapper>
   );
-}
+};
 
 export default VideoBlockComponent;

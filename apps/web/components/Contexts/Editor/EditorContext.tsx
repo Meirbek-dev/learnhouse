@@ -13,11 +13,11 @@ interface EditorProviderState {
   isEditable: boolean;
 }
 
-function EditorOptionsProvider({ children, options }: EditorProviderProps) {
+const EditorOptionsProvider = ({ children, options }: EditorProviderProps) => {
   const [editorOptions, _setEditorOptions] = useState<EditorProviderState>(options);
 
   return <EditorProviderContext value={editorOptions}>{children}</EditorProviderContext>;
-}
+};
 
 export default EditorOptionsProvider;
 

@@ -18,7 +18,7 @@ interface ModifiedChapterInterface {
   chapterName: string;
 }
 
-function Chapter(props: any) {
+const Chapter = (props: any) => {
   const router = useRouter();
   const session = useLHSession() as any;
   const t = useTranslations('CourseEdit');
@@ -74,12 +74,12 @@ function Chapter(props: any) {
                       className="bg-transparent text-sm text-neutral-700 outline-hidden"
                       placeholder={t('chapterNamePlaceholder')}
                       value={modifiedChapter ? modifiedChapter?.chapterName : props.info.list.chapter.name}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setModifiedChapter({
                           chapterId: props.info.list.chapter.id,
                           chapterName: e.target.value,
-                        })
-                      }
+                        });
+                      }}
                     />
                     <button
                       onClick={() => updateChapterName(props.info.list.chapter.id)}
@@ -97,7 +97,9 @@ function Chapter(props: any) {
                 <Pencil
                   size={15}
                   className="text-neutral-600 hover:cursor-pointer"
-                  onClick={() => setSelectedChapter(props.info.list.chapter.id)}
+                  onClick={() => {
+                    setSelectedChapter(props.info.list.chapter.id);
+                  }}
                 />
               </div>
             </div>
@@ -170,6 +172,6 @@ function Chapter(props: any) {
       )}
     </Draggable>
   );
-}
+};
 
 export default Chapter;

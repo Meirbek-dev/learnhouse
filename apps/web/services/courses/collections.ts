@@ -12,8 +12,7 @@ export async function deleteCollection(collection_uuid: string, access_token: st
     `${getAPIUrl()}collections/${collection_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 // Create a new collection
@@ -22,8 +21,7 @@ export async function createCollection(collection: any, access_token: string) {
     `${getAPIUrl()}collections/`,
     RequestBodyWithAuthHeader('POST', collection, null, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getCollectionById(collection_uuid: string, access_token: string, next: any) {
@@ -31,8 +29,7 @@ export async function getCollectionById(collection_uuid: string, access_token: s
     `${getAPIUrl()}collections/collection_${collection_uuid}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }
 
 export async function getOrgCollections(org_id: number, access_token?: string, next?: any) {
@@ -40,6 +37,5 @@ export async function getOrgCollections(org_id: number, access_token?: string, n
     `${getAPIUrl()}collections/org/${org_id}/page/1/limit/10`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
-  const res = await errorHandling(result);
-  return res;
+  return await errorHandling(result);
 }

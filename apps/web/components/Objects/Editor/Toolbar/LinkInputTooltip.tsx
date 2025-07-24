@@ -34,7 +34,9 @@ const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, c
           type="text"
           placeholder="Enter URL"
           value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          onChange={(e) => {
+            setUrl(e.target.value);
+          }}
           className="w-[200px] rounded border border-gray-300/50 px-2 py-1 text-xs focus:border-gray-300/80 focus:outline-none"
         />
         <div className="flex gap-0.5">

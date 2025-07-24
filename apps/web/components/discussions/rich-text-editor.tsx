@@ -2,15 +2,15 @@
 
 import {
   Bold,
+  Code,
+  Image as ImageIcon,
   Italic,
+  Link as LinkIcon,
   List,
   ListOrdered,
   Quote,
-  Undo,
   Redo,
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Code,
+  Undo,
   Upload,
   YoutubeIcon,
 } from 'lucide-react';
@@ -23,8 +23,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useEditor, EditorContent } from '@tiptap/react';
-import { useCallback, useState, useEffect } from 'react';
+import { EditorContent, useEditor } from '@tiptap/react';
+import { useCallback, useEffect, useState } from 'react';
 import Youtube from '@tiptap/extension-youtube';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -151,7 +151,7 @@ export default function RichTextEditor({
   }, [editor, content]);
 
   const addLink = useCallback(() => {
-    if (!editor || !linkUrl) return;
+    if (!(editor && linkUrl)) return;
 
     const { from, to } = editor.state.selection;
     const selectedText = editor.state.doc.textBetween(from, to);
@@ -167,7 +167,7 @@ export default function RichTextEditor({
   }, [editor, linkUrl]);
 
   const addImage = useCallback(() => {
-    if (!editor || !imageUrl) return;
+    if (!(editor && imageUrl)) return;
 
     editor.chain().focus().setImage({ src: imageUrl, alt: 'Uploaded image' }).run();
     setImageUrl('');
@@ -175,10 +175,10 @@ export default function RichTextEditor({
   }, [editor, imageUrl]);
 
   const addVideo = useCallback(() => {
-    if (!editor || !videoUrl) return;
+    if (!(editor && videoUrl)) return;
 
     // Extract YouTube video ID from URL
-    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const youtubeRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[&?]v=)|youtu\.be\/)([^\s"&/?]{11})/;
     const match = videoUrl.match(youtubeRegex);
 
     if (match) {
@@ -195,7 +195,7 @@ export default function RichTextEditor({
   const handleFileUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (!file || !editor) return;
+      if (!(file && editor)) return;
 
       setIsUploading(true);
 
@@ -337,7 +337,9 @@ export default function RichTextEditor({
               <Input
                 id="link-url"
                 value={linkUrl}
-                onChange={(e) => setLinkUrl(e.target.value)}
+                onChange={(e) => {
+                  setLinkUrl(e.target.value);
+                }}
                 placeholder={t('urlPlaceholder')}
               />
             </div>
@@ -345,7 +347,9 @@ export default function RichTextEditor({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsLinkDialogOpen(false)}
+                onClick={() => {
+                  setIsLinkDialogOpen(false);
+                }}
               >
                 {t('cancel')}
               </Button>
@@ -383,7 +387,9 @@ export default function RichTextEditor({
               <Input
                 id="image-url"
                 value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
+                onChange={(e) => {
+                  setImageUrl(e.target.value);
+                }}
                 placeholder={t('imagePlaceholder')}
               />
             </div>
@@ -391,7 +397,9 @@ export default function RichTextEditor({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsImageDialogOpen(false)}
+                onClick={() => {
+                  setIsImageDialogOpen(false);
+                }}
               >
                 {t('cancel')}
               </Button>
@@ -429,7 +437,9 @@ export default function RichTextEditor({
               <Input
                 id="video-url"
                 value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
+                onChange={(e) => {
+                  setVideoUrl(e.target.value);
+                }}
                 placeholder={t('videoPlaceholder')}
               />
             </div>
@@ -437,7 +447,9 @@ export default function RichTextEditor({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsVideoDialogOpen(false)}
+                onClick={() => {
+                  setIsVideoDialogOpen(false);
+                }}
               >
                 {t('cancel')}
               </Button>

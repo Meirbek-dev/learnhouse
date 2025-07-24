@@ -29,7 +29,7 @@ const initialState: State = {
 export const AssignmentsTaskContext = createContext<State | undefined>(undefined);
 export const AssignmentsTaskDispatchContext = createContext<React.Dispatch<Action> | undefined>(undefined);
 
-export function AssignmentsTaskProvider({ children }: { children: ReactNode }) {
+export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignment = useAssignments() as any;
@@ -59,7 +59,7 @@ export function AssignmentsTaskProvider({ children }: { children: ReactNode }) {
       <AssignmentsTaskDispatchContext value={dispatch}>{children}</AssignmentsTaskDispatchContext>
     </AssignmentsTaskContext>
   );
-}
+};
 
 export function useAssignmentsTask() {
   const context = use(AssignmentsTaskContext);

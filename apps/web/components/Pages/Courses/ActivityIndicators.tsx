@@ -100,11 +100,11 @@ const ActivityTooltipContent = memo(
         <div className="flex items-center gap-2">
           <ActivityTypeIcon activityType={activity.activity_type} />
           <span className="text-sm text-gray-700">{activity.name}</span>
-          {isDone && (
+          {isDone ? (
             <span className="ml-auto text-gray-400">
               <Check size={14} />
             </span>
-          )}
+          ) : null}
         </div>
         <div className="mt-2 flex items-center gap-2">
           <span className={`rounded-full px-2 py-0.5 text-xs ${getActivityTypeBadgeColor(activity.activity_type)}`}>
@@ -202,7 +202,7 @@ const CertificationBadge = memo(
 
 CertificationBadge.displayName = 'CertificationBadge';
 
-function ActivityIndicators(props: Props) {
+const ActivityIndicators = (props: Props) => {
   const t = useTranslations('ActivityIndicators');
   const { course } = props;
   const { orgslug } = props;
@@ -314,11 +314,11 @@ function ActivityIndicators(props: Props) {
 
   return (
     <div className="flex items-center gap-4">
-      {enableNavigation && (
+      {enableNavigation ? (
         <button
           onClick={navigateToPrevious}
           disabled={currentActivityIndex <= 0}
-          className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="shrink-0 rounded-full p-1 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label={t('previousActivity')}
         >
           <ChevronLeft
@@ -326,7 +326,7 @@ function ActivityIndicators(props: Props) {
             className="text-gray-600"
           />
         </button>
-      )}
+      ) : null}
 
       <div className="flex w-full items-center">
         {course.chapters.map((chapter: any, chapterIndex: number) => {
@@ -421,11 +421,11 @@ function ActivityIndicators(props: Props) {
         />
       </div>
 
-      {enableNavigation && (
+      {enableNavigation ? (
         <button
           onClick={navigateToNext}
           disabled={currentActivityIndex >= allActivities.length - 1}
-          className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="shrink-0 rounded-full p-1 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label={t('nextActivity')}
         >
           <ChevronRight
@@ -433,9 +433,9 @@ function ActivityIndicators(props: Props) {
             className="text-gray-600"
           />
         </button>
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 export default memo(ActivityIndicators);

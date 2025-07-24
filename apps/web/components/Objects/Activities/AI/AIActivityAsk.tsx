@@ -20,7 +20,7 @@ interface AIActivityAskProps {
   activity: any;
 }
 
-function AIActivityAsk(props: AIActivityAskProps) {
+const AIActivityAsk = (props: AIActivityAskProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
   const [isButtonAvailable, setIsButtonAvailable] = useState(false);
@@ -34,7 +34,7 @@ function AIActivityAsk(props: AIActivityAskProps) {
 
   return (
     <>
-      {isButtonAvailable && (
+      {isButtonAvailable ? (
         <div>
           <ActivityChatMessageBox activity={props.activity} />
           <div
@@ -54,10 +54,10 @@ function AIActivityAsk(props: AIActivityAskProps) {
             <i className="text-xs font-bold not-italic">{t('askAI')}</i>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   );
-}
+};
 
 export interface AIMessage {
   sender: string;
@@ -69,7 +69,7 @@ interface ActivityChatMessageBoxProps {
   activity: any;
 }
 
-function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
+const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -113,7 +113,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
         props.activity.activity_uuid,
         access_token,
       );
-      if (response.success == false) {
+      if (!response.success) {
         await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
         await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
         await dispatchAIChatBot({
@@ -139,7 +139,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
       });
       await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
       const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
-      if (response.success == false) {
+      if (!response.success) {
         await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
         await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
         await dispatchAIChatBot({
@@ -179,7 +179,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
 
   return (
     <AnimatePresence>
-      {aiChatBotState.isModalOpen && (
+      {aiChatBotState.isModalOpen ? (
         <motion.div
           initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
           animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
@@ -201,7 +201,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                        radial-gradient(ellipse at top left, rgba(99, 179, 237, 0.12) 0%, transparent 60%),
                        radial-gradient(ellipse at bottom right, rgba(167, 139, 250, 0.08) 0%, transparent 60%)`,
             }}
-            className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 max-w-(--breakpoint-2xl) -translate-x-1/2 transform flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-white/10 ring-inset"
+            className="fixed bottom-0 left-1/2 z-50 mx-auto my-10 h-[350px] w-10/12 max-w-(--breakpoint-2xl) -translate-x-1/2 flex-col-reverse rounded-2xl bg-black p-4 text-white shadow-lg ring-1 ring-white/10 ring-inset"
           >
             <div className="flex flex-row-reverse items-center justify-between pb-3">
               <div className="flex items-center space-x-2">
@@ -248,7 +248,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                 activity_uuid={props.activity.activity_uuid}
               />
             )}
-            {aiChatBotState.error.isError && (
+            {aiChatBotState.error.isError ? (
               <div className="flex h-[237px] items-center">
                 <div className="mx-auto flex w-[600px] flex-col space-y-2 rounded-lg bg-red-500/20 p-5 outline-red-500">
                   <AlertTriangle
@@ -261,7 +261,7 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
             <div className="flex items-center space-x-2">
               <div className="">
                 <UserAvatar
@@ -292,17 +292,17 @@ function ActivityChatMessageBox(props: ActivityChatMessageBoxProps) {
             </div>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   );
-}
+};
 
 interface AIMessageProps {
   message: AIMessage;
   animated: boolean;
 }
 
-function AIMessage(props: AIMessageProps) {
+const AIMessage = (props: AIMessageProps) => {
   const words = props.message.message.split(' ');
 
   return (
@@ -343,7 +343,7 @@ function AIMessage(props: AIMessageProps) {
       </div>
     </div>
   );
-}
+};
 
 const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }) => {
   const t = useTranslations('Activities.AIActivityAsk');
@@ -411,8 +411,6 @@ const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }
       </div>
     );
   }
-
-  return;
 };
 
 const AIChatPredefinedQuestion = (props: { sendMessage: any; label: string }) => {

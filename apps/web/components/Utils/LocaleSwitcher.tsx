@@ -15,7 +15,7 @@ interface LocaleSwitcherProps {
   isMobile?: boolean;
 }
 
-export function LocaleSwitcher({ className, isMobile }: LocaleSwitcherProps) {
+export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => {
   const router = useRouter();
   const currentLocale = useLocale();
   const [isPending, startTransition] = useTransition();
@@ -40,7 +40,7 @@ export function LocaleSwitcher({ className, isMobile }: LocaleSwitcherProps) {
           aria-label={t('selectLanguage')}
         >
           <Languages size={22} />
-          {isMobile && <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>}
+          {isMobile ? <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue> : null}
         </SelectTrigger>
       ) : (
         <SelectTrigger
@@ -49,7 +49,7 @@ export function LocaleSwitcher({ className, isMobile }: LocaleSwitcherProps) {
           withChevron={false}
         >
           <Languages size={22} />
-          {isMobile && <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue>}
+          {isMobile ? <SelectValue placeholder={t('selectLanguage')}>{t(currentLocale)}</SelectValue> : null}
         </SelectTrigger>
       )}
       <SelectContent
@@ -69,4 +69,4 @@ export function LocaleSwitcher({ className, isMobile }: LocaleSwitcherProps) {
       </SelectContent>
     </Select>
   );
-}
+};

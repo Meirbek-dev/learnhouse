@@ -5,7 +5,7 @@ import { getUriWithoutOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
-function InfoUI({
+const InfoUI = ({
   message,
   submessage,
   cta,
@@ -15,7 +15,7 @@ function InfoUI({
   submessage?: string;
   cta?: string;
   href: string;
-}) {
+}) => {
   const t = useTranslations('Components.InfoUI');
   return (
     <div className="mx-auto flex flex-col items-center space-y-6 bg-linear-to-b from-yellow-100 to-yellow-100/5 py-10 antialiased">
@@ -26,10 +26,10 @@ function InfoUI({
         />
         <div className="flex flex-col">
           <p className="text-3xl font-bold text-yellow-700">{message || t('defaultMessage')}</p>
-          {submessage && <p className="text-lg font-bold text-yellow-700">{submessage}</p>}
+          {submessage ? <p className="text-lg font-bold text-yellow-700">{submessage}</p> : null}
         </div>
       </div>
-      {cta && (
+      {cta ? (
         <div className="flex space-x-4">
           <Link
             href={href}
@@ -52,9 +52,9 @@ function InfoUI({
             <span className="text-md font-bold">{t('homeButton')}</span>
           </Link>
         </div>
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 export default InfoUI;

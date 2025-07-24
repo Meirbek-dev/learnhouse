@@ -24,7 +24,7 @@ import { motion } from 'framer-motion';
 import useSWR, { mutate } from 'swr';
 import { z } from 'zod';
 
-function CourseUpdates() {
+const CourseUpdates = () => {
   const course = useCourse() as any;
   const session = useLHSession() as any;
   const locale = useDateFnsLocale();
@@ -46,7 +46,9 @@ function CourseUpdates() {
       setIsModelOpen(false);
     }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   return (
@@ -60,14 +62,14 @@ function CourseUpdates() {
         </div>
         <div className="flex items-center space-x-2">
           <span>{t('updates')}</span>
-          {updates && (
+          {updates ? (
             <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-900">
               {updates.length}
             </span>
-          )}
+          ) : null}
         </div>
       </div>
-      {isModelOpen && (
+      {isModelOpen ? (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -80,10 +82,10 @@ function CourseUpdates() {
         >
           <UpdatesSection />
         </motion.div>
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
@@ -96,15 +98,17 @@ const UpdatesSection = () => {
           <Rss size={16} />
           <span>{t('updates')}</span>
         </div>
-        {adminStatus.isAdmin && (
+        {adminStatus.isAdmin ? (
           <div
-            onClick={() => setSelectedView('new')}
+            onClick={() => {
+              setSelectedView('new');
+            }}
             className="flex cursor-pointer items-center space-x-2 bg-gray-100 px-4 py-2 text-xs font-medium outline-1 outline-neutral-200/40 hover:bg-gray-200"
           >
             <PencilLine size={14} />
             <span>{t('newUpdate')}</span>
           </div>
-        )}
+        ) : null}
       </div>
       <div className="">
         {selectedView === 'list' && <UpdatesListView />}
@@ -238,30 +242,30 @@ const UpdatesListView = () => {
 
   return (
     <div className="max-h-[400px] overflow-y-auto bg-white px-5">
-      {updates &&
-        !adminStatus.loading &&
-        updates.map((update: any) => (
-          <div
-            key={update.id}
-            className="border-b border-neutral-200 py-2 antialiased"
-          >
-            <div className="flex items-center justify-between space-x-2 font-semibold text-gray-500">
-              <div className="flex items-center space-x-2">
-                <span> {update.title}</span>{' '}
-                <span
-                  title={
-                    t('createdAtTooltipPrefix') + format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })
-                  }
-                  className="text-xs font-semibold text-gray-300"
-                >
-                  {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
-                </span>
+      {updates && !adminStatus.loading
+        ? updates.map((update: any) => (
+            <div
+              key={update.id}
+              className="border-b border-neutral-200 py-2 antialiased"
+            >
+              <div className="flex items-center justify-between space-x-2 font-semibold text-gray-500">
+                <div className="flex items-center space-x-2">
+                  <span> {update.title}</span>{' '}
+                  <span
+                    title={
+                      t('createdAtTooltipPrefix') + format(new Date(update.creation_date), 'MMMM d, yyyy', { locale })
+                    }
+                    className="text-xs font-semibold text-gray-300"
+                  >
+                    {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
+                  </span>
+                </div>
+                {adminStatus.isAdmin && !adminStatus.loading ? <DeleteUpdateButton update={update} /> : null}
               </div>
-              {adminStatus.isAdmin && !adminStatus.loading && <DeleteUpdateButton update={update} />}
+              <div className="text-gray-600">{update.content}</div>
             </div>
-            <div className="text-gray-600">{update.content}</div>
-          </div>
-        ))}
+          ))
+        : null}
       {(!updates || updates.length === 0) && (
         <div className="my-10 flex flex-col space-y-2 py-2 text-center text-gray-500">
           <TentTree

@@ -10,13 +10,13 @@ import { useLHSession } from '../LHSessionContext';
 
 export const AssignmentSubmissionContext = createContext({});
 
-function AssignmentSubmissionProvider({
+const AssignmentSubmissionProvider = ({
   children,
   assignment_uuid,
 }: {
   children: ReactNode;
   assignment_uuid: string | undefined;
-}) {
+}) => {
   const session = useLHSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
 
@@ -28,7 +28,7 @@ function AssignmentSubmissionProvider({
   );
 
   return <AssignmentSubmissionContext value={assignmentSubmission}>{children}</AssignmentSubmissionContext>;
-}
+};
 
 export function useAssignmentSubmission() {
   return use(AssignmentSubmissionContext);

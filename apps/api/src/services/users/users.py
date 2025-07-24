@@ -308,7 +308,7 @@ async def authorize_user_action(
     action: Literal["create", "read", "update", "delete"],
 ) -> bool:
     # Get user
-    user = await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
+    await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
 
     # RBAC check
     authorized = await authorization_verify_based_on_roles_and_authorship(

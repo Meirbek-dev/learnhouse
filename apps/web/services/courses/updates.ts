@@ -6,8 +6,7 @@ export async function createCourseUpdate(body: any, access_token: string) {
     `${getAPIUrl()}courses/${body.course_uuid}/updates`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
 
 export async function deleteCourseUpdate(course_uuid: string, update_uuid: number, access_token: string) {
@@ -15,6 +14,5 @@ export async function deleteCourseUpdate(course_uuid: string, update_uuid: numbe
     `${getAPIUrl()}courses/${course_uuid}/update/${update_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const res = await getResponseMetadata(result);
-  return res;
+  return await getResponseMetadata(result);
 }
