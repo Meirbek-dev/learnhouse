@@ -1,7 +1,15 @@
 'use client';
-import { Backpack, Book, ChevronRight, CreditCard, School, User, Users } from 'lucide-react';
+import { Backpack, Book, CreditCard, School, User, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
 
 interface BreadCrumbsProps {
   type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments';
@@ -11,84 +19,88 @@ interface BreadCrumbsProps {
 function BreadCrumbs(props: BreadCrumbsProps) {
   const t = useTranslations('DashPage');
 
+  const getBreadcrumbIcon = (type: string) => {
+    switch (type) {
+      case 'courses':
+        return <Book className="text-gray" size={14} />;
+      case 'assignments':
+        return <Backpack className="text-gray" size={14} />;
+      case 'user':
+        return <User className="text-gray" size={14} />;
+      case 'orgusers':
+        return <Users className="text-gray" size={14} />;
+      case 'org':
+        return <School className="text-gray" size={14} />;
+      case 'payments':
+        return <CreditCard className="text-gray" size={14} />;
+      default:
+        return null;
+    }
+  };
+
+  const getBreadcrumbLink = (type: string) => {
+    switch (type) {
+      case 'courses':
+        return '/dash/courses';
+      case 'assignments':
+        return '/dash/assignments';
+      case 'user':
+        return '/dash/user-account/settings/general';
+      case 'orgusers':
+        return '/dash/users/settings/users';
+      case 'org':
+        return '/dash/users';
+      case 'payments':
+        return '/dash/payments';
+      default:
+        return '#';
+    }
+  };
+
+  const getBreadcrumbTitle = (type: string) => {
+    switch (type) {
+      case 'courses':
+        return t('Courses.title');
+      case 'assignments':
+        return t('Assignments.title');
+      case 'user':
+        return t('UserAccountSettings.title');
+      case 'orgusers':
+        return t('Card.Users.title');
+      case 'org':
+        return t('Card.Organization.title');
+      case 'payments':
+        return t('Payments.title');
+      default:
+        return '';
+    }
+  };
+
   return (
     <div>
       <div className="h-7" />
-      <div className="flex space-x-1 text-sm font-medium tracking-tight text-gray-400">
-        <div className="flex items-center space-x-1">
-          {props.type == 'courses' ? (
-            <div className="flex items-center space-x-2">
-              <Book
-                className="text-gray"
-                size={14}
-              />
-              <Link href="/dash/courses">{t('Courses.title')}</Link>
-            </div>
-          ) : (
-            ''
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={getBreadcrumbLink(props.type)} className="flex items-center space-x-2">
+                {getBreadcrumbIcon(props.type)}
+                <span>{getBreadcrumbTitle(props.type)}</span>
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {props.last_breadcrumb && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="first-letter:uppercase">
+                  {props.last_breadcrumb}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
           )}
-          {props.type == 'assignments' ? (
-            <div className="flex items-center space-x-2">
-              <Backpack
-                className="text-gray"
-                size={14}
-              />
-              <Link href="/dash/assignments">{t('Assignments.title')}</Link>
-            </div>
-          ) : (
-            ''
-          )}
-          {props.type == 'user' ? (
-            <div className="flex items-center space-x-2">
-              <User
-                className="text-gray"
-                size={14}
-              />
-              <Link href="/dash/user-account/settings/general">{t('UserAccountSettings.title')}</Link>
-            </div>
-          ) : (
-            ''
-          )}
-          {props.type == 'orgusers' ? (
-            <div className="flex items-center space-x-2">
-              <Users
-                className="text-gray"
-                size={14}
-              />
-              <Link href="/dash/users/settings/users">{t('Card.Users.title')}</Link>
-            </div>
-          ) : (
-            ''
-          )}
-
-          {props.type == 'org' ? (
-            <div className="flex items-center space-x-2">
-              <School
-                className="text-gray"
-                size={14}
-              />
-              <Link href="/dash/users">{t('Card.Organization.title')}</Link>
-            </div>
-          ) : (
-            ''
-          )}
-          {props.type == 'payments' ? (
-            <div className="flex items-center space-x-2">
-              <CreditCard
-                className="text-gray"
-                size={14}
-              />
-              <Link href="/dash/payments">{t('Payments.title')}</Link>
-            </div>
-          ) : (
-            ''
-          )}
-          <div className="flex items-center space-x-1 first-letter:uppercase">
-            {props.last_breadcrumb ? <ChevronRight size={17} /> : ''}
-            <div className="first-letter:uppercase"> {props.last_breadcrumb}</div>
-          </div>
-        </div>
-      </div>
+        </BreadcrumbList>
+      </Breadcrumb>
     </div>
   );
 }
