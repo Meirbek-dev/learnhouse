@@ -51,7 +51,7 @@ async def create_image_block(
         image_file,
         activity_uuid,
         block_uuid,
-        ["jpg", "jpeg", "png", "gif", "webp", "wp2"],
+        ["jpg", "jpeg", "png", "gif", "webp"],
         block_type,
         org.org_uuid,
         str(course.course_uuid),

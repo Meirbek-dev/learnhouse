@@ -340,7 +340,7 @@ def _mount_static_files(app: FastAPI) -> None:
                     "public, max-age=31536000, immutable"
                 )
             elif path.endswith(
-                (".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", "wp2")
+                (".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp")
             ):
                 # Long-term caching for images
                 response.headers["Cache-Control"] = "public, max-age=2592000"  # 30 days

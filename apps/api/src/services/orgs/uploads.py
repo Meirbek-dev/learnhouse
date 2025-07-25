@@ -68,7 +68,6 @@ async def upload_org_landing_content(file: UploadFile, org_uuid: str) -> str:
             "jpg",
             "jpeg",
             "png",
-            "wp2",
             "gif",
             "webp",
             "mp4",

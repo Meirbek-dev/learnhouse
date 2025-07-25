@@ -451,7 +451,8 @@ async def _get_user_by_field(db_session: Session, field: str, value: str | int) 
     elif field == "email":
         statement = select(User).where(User.email == value)
     else:
-        raise ValueError(f"Invalid field: {field}")
+        msg = f"Invalid field: {field}"
+        raise ValueError(msg)
 
     user = db_session.exec(statement).first()
     if not user:
