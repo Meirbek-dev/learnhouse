@@ -119,19 +119,21 @@ export default function DiscussionPost({
                   )}
                 </div>
               </div>
-              {isOwnPost && !editingPost ? (
+              {(isAdmin || isOwnPost) && !editingPost ? (
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditingPost(true);
-                      setEditContent(post.postMessage);
-                    }}
-                    className="h-8 px-2 text-neutral-500 hover:bg-blue-50 hover:text-blue-600"
-                  >
-                    <Edit size={14} />
-                  </Button>
+                  {isOwnPost ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setEditingPost(true);
+                        setEditContent(post.postMessage);
+                      }}
+                      className="h-8 px-2 text-neutral-500 hover:bg-blue-50 hover:text-blue-600"
+                    >
+                      <Edit size={14} />
+                    </Button>
+                  ) : null}
                   <Button
                     variant="ghost"
                     size="sm"

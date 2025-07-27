@@ -92,19 +92,21 @@ export default function DiscussionReply({
                 <span>{format.relativeTime(new Date(reply.createDate), now)}</span>
               </div>
             </div>
-            {isOwnReply && !editing ? (
+            {(isAdmin || isOwnReply) && !editing ? (
               <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEditing(true);
-                    setEditContent(reply.replyMessage);
-                  }}
-                  className="h-7 px-2 text-xs text-neutral-500 hover:bg-blue-50 hover:text-blue-600"
-                >
-                  <Edit size={12} />
-                </Button>
+                {isOwnReply ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditing(true);
+                      setEditContent(reply.replyMessage);
+                    }}
+                    className="h-7 px-2 text-xs text-neutral-500 hover:bg-blue-50 hover:text-blue-600"
+                  >
+                    <Edit size={12} />
+                  </Button>
+                ) : null}
                 <Button
                   variant="ghost"
                   size="sm"
