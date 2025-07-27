@@ -134,7 +134,7 @@ export default async function middleware(req: NextRequest) {
     response.cookies.set({
       name: 'openu_current_orgslug',
       value: orgslug,
-      domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+      domain: OPENU_TOP_DOMAIN === 'localhost' ? '' : OPENU_TOP_DOMAIN,
       path: '/',
     });
 
@@ -151,7 +151,7 @@ export default async function middleware(req: NextRequest) {
     response.cookies.set({
       name: 'openu_current_orgslug',
       value: orgslug,
-      domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+      domain: OPENU_TOP_DOMAIN === 'localhost' ? '' : OPENU_TOP_DOMAIN,
       path: '/',
     });
 

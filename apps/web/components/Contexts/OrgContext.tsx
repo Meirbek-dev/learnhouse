@@ -37,7 +37,7 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
   if (hasError) return <ErrorUI message={t('fetchError')} />;
   if (isLoading) return <PageLoading />;
   if (!isOrgActive) return <ErrorUI message={t('orgInactiveError')} />;
-  if (!isUserPartOfTheOrg && session.status == 'authenticated' && !isAllowedPathname) {
+  if (!isUserPartOfTheOrg && session.status === 'authenticated' && !isAllowedPathname) {
     return (
       <InfoUI
         href={getUriWithoutOrg(`/signup?orgslug=${orgslug}`)}

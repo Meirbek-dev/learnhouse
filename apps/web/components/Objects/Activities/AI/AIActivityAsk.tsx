@@ -235,7 +235,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                       <AIMessage
                         key={index}
                         message={message}
-                        animated={message.sender == 'ai'}
+                        animated={message.sender === 'ai'}
                       />
                     );
                   })}
@@ -308,7 +308,7 @@ const AIMessage = (props: AIMessageProps) => {
   return (
     <div className="flex w-full space-x-2 font-medium antialiased">
       <div className="">
-        {props.message.sender == 'ai' ? (
+        {props.message.sender === 'ai' ? (
           <UserAvatar
             size="sm"
             variant="outline"

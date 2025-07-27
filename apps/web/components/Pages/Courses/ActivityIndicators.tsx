@@ -256,7 +256,7 @@ const ActivityIndicators = (props: Props) => {
   const isActivityCurrent = useMemo(
     () => (activity: any) => {
       const activity_uuid = activity.activity_uuid.replace('activity_', '');
-      if (props.current_activity && props.current_activity == activity_uuid) {
+      if (props.current_activity && props.current_activity === activity_uuid) {
         return true;
       }
       return false;

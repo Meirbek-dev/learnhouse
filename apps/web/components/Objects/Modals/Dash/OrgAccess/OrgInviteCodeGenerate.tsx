@@ -102,7 +102,7 @@ const OrgInviteCodeGenerate = (props: OrgInviteCodeGenerateProps) => {
                 </div>
               </div>
             )}
-            {usergroups?.length == 0 && (
+            {usergroups?.length === 0 && (
               <div className="flex items-center space-x-3 pt-3 text-xs">
                 <span className="mx-3 rounded-full px-3 py-1 font-bold text-yellow-700">
                   {t('noUserGroupsAvailable')}

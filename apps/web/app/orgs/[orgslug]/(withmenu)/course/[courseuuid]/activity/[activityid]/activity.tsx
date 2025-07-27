@@ -72,12 +72,12 @@ interface ActivityClientProps {
   activityid: string;
   courseuuid: string;
   orgslug: string;
-  activity: any;
+  activity: any | null;
   course: any;
 }
 
 interface ActivityActionsProps {
-  activity: any;
+  activity: any | null;
   activityid: string;
   course: any;
   orgslug: string;
@@ -217,7 +217,7 @@ const ActivityClient = (props: ActivityClientProps) => {
 
   // Memoize activity content
   const activityContent = useMemo(() => {
-    if (!activity?.published || activity.content.paid_access === false) {
+    if (!activity?.published || activity?.content?.paid_access === false) {
       return null;
     }
 
@@ -309,11 +309,14 @@ const ActivityClient = (props: ActivityClientProps) => {
     return null; // return null if no matching activity is found
   }
   const getAssignmentUI = useCallback(async () => {
+    if (!activity?.activity_uuid) return;
     const assignment = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
     setAssignment(assignment.data);
-  }, [activity.activity_uuid, access_token, setAssignment]);
+  }, [activity?.activity_uuid, access_token, setAssignment]);
 
   useEffect(() => {
+    if (!activity) return;
+
     if (activity.activity_type === 'TYPE_DYNAMIC') {
       setBgColor(isFocusMode ? 'bg-white' : 'bg-white soft-shadow');
     } else if (activity.activity_type === 'TYPE_ASSIGNMENT') {
@@ -455,7 +458,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <ActivityChapterDropdown
                           course={course}
                           currentActivityId={
-                            activity.activity_uuid
+                            activity?.activity_uuid
                               ? activity.activity_uuid.replace('activity_', '')
                               : activityid.replace('activity_', '')
                           }
