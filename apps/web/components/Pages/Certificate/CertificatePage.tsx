@@ -7,7 +7,7 @@ import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowLeft, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import type React from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
@@ -69,47 +69,132 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
     try {
       // Create a temporary div for the certificate
       const certificateDiv = document.createElement('div');
-      certificateDiv.style.position = 'absolute';
-      certificateDiv.style.left = '-9999px';
-      certificateDiv.style.top = '0';
-      certificateDiv.style.width = '800px';
-      certificateDiv.style.height = '600px';
-      certificateDiv.style.background = 'white';
-      certificateDiv.style.padding = '40px';
-      certificateDiv.style.fontFamily = 'Arial, sans-serif';
-      certificateDiv.style.textAlign = 'center';
-      certificateDiv.style.display = 'flex';
-      certificateDiv.style.flexDirection = 'column';
-      certificateDiv.style.justifyContent = 'center';
-      certificateDiv.style.alignItems = 'center';
-      certificateDiv.style.position = 'relative';
-      certificateDiv.style.overflow = 'hidden';
+      // Use a completely isolated style approach
+      const baseStyle = `
+        position: absolute !important;
+        left: -9999px !important;
+        top: 0 !important;
+        width: 800px !important;
+        height: 600px !important;
+        background: #ffffff !important;
+        padding: 40px !important;
+        font-family: Arial, sans-serif !important;
+        text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        border: none !important;
+        outline: none !important;
+        color: #000000 !important;
+      `;
+      certificateDiv.style.cssText = baseStyle;
 
       // Get theme colors based on pattern
       const getPatternTheme = (pattern: string) => {
         switch (pattern) {
           case 'royal':
-            return { primary: '#b45309', secondary: '#d97706', icon: '#d97706' };
+            return {
+              primary: '#b45309',
+              secondary: '#d97706',
+              icon: '#d97706',
+              iconLight: 'rgba(217, 119, 6, 0.2)',
+              iconMedium: 'rgba(217, 119, 6, 0.4)',
+              iconBorder: 'rgba(217, 119, 6, 0.2)',
+            };
           case 'tech':
-            return { primary: '#0e7490', secondary: '#0891b2', icon: '#0891b2' };
+            return {
+              primary: '#0e7490',
+              secondary: '#0891b2',
+              icon: '#0891b2',
+              iconLight: 'rgba(8, 145, 178, 0.2)',
+              iconMedium: 'rgba(8, 145, 178, 0.4)',
+              iconBorder: 'rgba(8, 145, 178, 0.2)',
+            };
           case 'nature':
-            return { primary: '#15803d', secondary: '#16a34a', icon: '#16a34a' };
+            return {
+              primary: '#15803d',
+              secondary: '#16a34a',
+              icon: '#16a34a',
+              iconLight: 'rgba(22, 163, 74, 0.2)',
+              iconMedium: 'rgba(22, 163, 74, 0.4)',
+              iconBorder: 'rgba(22, 163, 74, 0.2)',
+            };
           case 'geometric':
-            return { primary: '#7c3aed', secondary: '#9333ea', icon: '#9333ea' };
+            return {
+              primary: '#7c3aed',
+              secondary: '#9333ea',
+              icon: '#9333ea',
+              iconLight: 'rgba(147, 51, 234, 0.2)',
+              iconMedium: 'rgba(147, 51, 234, 0.4)',
+              iconBorder: 'rgba(147, 51, 234, 0.2)',
+            };
           case 'vintage':
-            return { primary: '#c2410c', secondary: '#ea580c', icon: '#ea580c' };
+            return {
+              primary: '#c2410c',
+              secondary: '#ea580c',
+              icon: '#ea580c',
+              iconLight: 'rgba(234, 88, 12, 0.2)',
+              iconMedium: 'rgba(234, 88, 12, 0.4)',
+              iconBorder: 'rgba(234, 88, 12, 0.2)',
+            };
           case 'waves':
-            return { primary: '#1d4ed8', secondary: '#2563eb', icon: '#2563eb' };
+            return {
+              primary: '#1d4ed8',
+              secondary: '#2563eb',
+              icon: '#2563eb',
+              iconLight: 'rgba(37, 99, 235, 0.2)',
+              iconMedium: 'rgba(37, 99, 235, 0.4)',
+              iconBorder: 'rgba(37, 99, 235, 0.2)',
+            };
           case 'minimal':
-            return { primary: '#374151', secondary: '#4b5563', icon: '#4b5563' };
+            return {
+              primary: '#374151',
+              secondary: '#4b5563',
+              icon: '#4b5563',
+              iconLight: 'rgba(75, 85, 99, 0.2)',
+              iconMedium: 'rgba(75, 85, 99, 0.4)',
+              iconBorder: 'rgba(75, 85, 99, 0.2)',
+            };
           case 'professional':
-            return { primary: '#334155', secondary: '#475569', icon: '#475569' };
+            return {
+              primary: '#334155',
+              secondary: '#475569',
+              icon: '#475569',
+              iconLight: 'rgba(71, 85, 105, 0.2)',
+              iconMedium: 'rgba(71, 85, 105, 0.4)',
+              iconBorder: 'rgba(71, 85, 105, 0.2)',
+            };
           case 'academic':
-            return { primary: '#3730a3', secondary: '#4338ca', icon: '#4338ca' };
+            return {
+              primary: '#3730a3',
+              secondary: '#4338ca',
+              icon: '#4338ca',
+              iconLight: 'rgba(67, 56, 202, 0.2)',
+              iconMedium: 'rgba(67, 56, 202, 0.4)',
+              iconBorder: 'rgba(67, 56, 202, 0.2)',
+            };
           case 'modern':
-            return { primary: '#1d4ed8', secondary: '#2563eb', icon: '#2563eb' };
+            return {
+              primary: '#1d4ed8',
+              secondary: '#2563eb',
+              icon: '#2563eb',
+              iconLight: 'rgba(37, 99, 235, 0.2)',
+              iconMedium: 'rgba(37, 99, 235, 0.4)',
+              iconBorder: 'rgba(37, 99, 235, 0.2)',
+            };
           default:
-            return { primary: '#374151', secondary: '#4b5563', icon: '#4b5563' };
+            return {
+              primary: '#374151',
+              secondary: '#4b5563',
+              icon: '#4b5563',
+              iconLight: 'rgba(75, 85, 99, 0.2)',
+              iconMedium: 'rgba(75, 85, 99, 0.4)',
+              iconBorder: 'rgba(75, 85, 99, 0.2)',
+            };
         }
       };
 
@@ -176,7 +261,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         <div style="
           width: 80px;
           height: 80px;
-          background: linear-gradient(135deg, ${theme.icon}20 0%, ${theme.icon}40 100%);
+          background: linear-gradient(135deg, ${theme.iconLight} 0%, ${theme.iconMedium} 100%);
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -221,10 +306,10 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
           gap: 8px;
           font-size: 16px;
           color: ${theme.primary};
-          background: ${theme.icon}10;
+          background: ${theme.iconLight};
           padding: 12px 24px;
           border-radius: 20px;
-          border: 1px solid ${theme.icon}20;
+          border: 1px solid ${theme.iconBorder};
           font-weight: 500;
           margin-bottom: 30px;
           white-space: nowrap;
@@ -282,6 +367,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
+        logging: false,
       });
 
       // Remove temporary div

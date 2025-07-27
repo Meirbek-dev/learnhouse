@@ -387,6 +387,7 @@
       "labelAwarded": "Берілді",
       "loadingCertificate": "Сертификатыңыз жүктелуде...",
       "loadingError": "Сертификатты жүктеу қатесі. Кейінірек қайталап көріңіз.",
+      "noCertificateAvailable": "Сертификат жоқ",
       "noCertificateFound": "Бұл курсқа сертификат табылмады",
       "progress": "Прогресс",
       "progressCompleted": "{completed} / {total} тапсырма аяқталды",
@@ -823,6 +824,7 @@
       "toggleSidebar": "Бүйірлік тақтаны ауыстырыңыз"
     },
     "TagsInput": {
+      "removeOption": "Опцияны алып тастаңыз",
       "removeTag": "Тегті жою"
     },
     "TypeOfContentTitle": {
@@ -1935,6 +1937,14 @@
       },
       "activity": "Белсенділік",
       "metaTitleEdit": "Өңдеу - Белсенділік {activityName}"
+    },
+    "Metrics": {
+      "desktopOnlyMessage1": "Бұл бет тек жұмыс үстеліндегі құрылғыда қол жетімді.",
+      "desktopOnlyMessage2": "Тапсырманы көру және басқару үшін жұмыс үстеліндегі құрылғыға ауысыңыз.",
+      "desktopOnlyTitle": "Тек жұмыс үстелі",
+      "generalDescription": "Метрика",
+      "generalTitle": "Метрика",
+      "title": "Метрика"
     },
     "Notifications": {
       "Editor": {
@@ -3104,6 +3114,7 @@
         "userGroupDeletedSuccess": "Пайдаланушылар тобы жойылды",
         "userGroupHeader": "Пайдаланушылар тобы"
       },
+      "usergroupsTitle": "Пайдаланушылар тобы",
       "users": "Пайдаланушылар",
       "usersDescription": "Ұйымыңыздағы пайдаланушыларды басқарыңыз, рөлдер мен рұқсаттарды тағайындаңыз",
       "usersSection": {

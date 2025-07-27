@@ -387,6 +387,7 @@
       "labelAwarded": "Awarded",
       "loadingCertificate": "Loading your certificate...",
       "loadingError": "Failed to load certificate. Please try again later.",
+      "noCertificateAvailable": "No certificate available",
       "noCertificateFound": "No certificate found for this course",
       "progress": "Progress",
       "progressCompleted": "{completed} of {total} activities completed",
@@ -823,8 +824,8 @@
       "toggleSidebar": "Toggle Sidebar"
     },
     "TagsInput": {
-      "removeTag": "Remove tag",
-      "removeOption": "Remove option"
+      "removeOption": "Remove option",
+      "removeTag": "Remove tag"
     },
     "TypeOfContentTitle": {
       "logoAlt": "{type} logo"

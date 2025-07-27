@@ -387,6 +387,7 @@
       "labelAwarded": "Выдан",
       "loadingCertificate": "Загрузка вашего сертификата...",
       "loadingError": "Не удалось загрузить сертификат. Повторите попытку позже.",
+      "noCertificateAvailable": "Нет сертификата",
       "noCertificateFound": "Сертификат для этого курса не найден",
       "progress": "Прогресс",
       "progressCompleted": "{completed} из {total} заданий выполнено",
@@ -823,8 +824,8 @@
       "toggleSidebar": "Переключить боковую панель"
     },
     "TagsInput": {
-      "removeTag": "Удалить тег",
-      "removeOption": "Удалить опцию"
+      "removeOption": "Удалить опцию",
+      "removeTag": "Удалить тег"
     },
     "TypeOfContentTitle": {
       "logoAlt": "Логотип {type}"
@@ -1936,6 +1937,14 @@
       },
       "activity": "Активность",
       "metaTitleEdit": "Редактировать - Активность {activityName}"
+    },
+    "Metrics": {
+      "desktopOnlyMessage1": "Эта страница доступна только на настольном устройстве.",
+      "desktopOnlyMessage2": "Пожалуйста, переключитесь на настольное устройство для просмотра и управления заданием.",
+      "desktopOnlyTitle": "Только для настольных устройств",
+      "generalDescription": "Статистика",
+      "generalTitle": "Статистика",
+      "title": "Статистика"
     },
     "Notifications": {
       "Editor": {
