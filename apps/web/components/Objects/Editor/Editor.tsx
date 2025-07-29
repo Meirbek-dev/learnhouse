@@ -23,6 +23,7 @@ import WebPreview from './Extensions/WebPreview/WebPreview';
 import touEmblemLight from 'public/tou_emblem_light.webp';
 import TableHeader from '@tiptap/extension-table-header';
 import { EditorContent, useEditor } from '@tiptap/react';
+import touEmblemDark from 'public/tou_emblem_dark.webp';
 import { getUriWithOrg } from '@services/config/config';
 import ts from 'highlight.js/lib/languages/typescript';
 import js from 'highlight.js/lib/languages/javascript';
@@ -234,7 +235,7 @@ const Editor = (props: EditorProps) => {
                   <EditorInfoOpenULogo
                     width={25}
                     height={25}
-                    src={touEmblemLight}
+                    src={touEmblemDark}
                     alt="OpenU Logo"
                   />
                 </Link>
