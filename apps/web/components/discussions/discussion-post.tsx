@@ -54,7 +54,7 @@ export default function DiscussionPost({
   const getUserDisplayName = (firstName?: string, lastName?: string) => {
     const first = firstName || '';
     const last = lastName || '';
-    return `${first} ${last}`.trim() || 'Anonymous';
+    return `${first} ${last}`.trim() || post.username;
   };
 
   const handleSubmitReply = (e: React.FormEvent) => {
@@ -90,7 +90,7 @@ export default function DiscussionPost({
   };
 
   return (
-    <div className="bg-card text-card-foreground overflow-hidden rounded-lg border shadow-sm">
+    <div className="group bg-card text-card-foreground overflow-hidden rounded-lg border shadow-sm">
       <div className="p-5">
         <div className="flex items-start gap-4">
           <UserAvatar
@@ -101,27 +101,27 @@ export default function DiscussionPost({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
-                <h4 className="font-semibold text-neutral-800">{getUserDisplayName(post.firstName, post.lastName)}</h4>
-                <span className="text-sm text-neutral-500">@{post.username}</span>
+                <h4 className="font-semibold text-slate-900">{getUserDisplayName(post.firstName, post.lastName)}</h4>
+                <span className="text-sm text-slate-500">@{post.username}</span>
                 {isAuthorAdmin(post.username) && (
                   <Badge
                     variant="destructive"
-                    className="ml-1"
+                    className="h-auto px-1.5 py-0.5 text-xs"
                   >
                     {t('admin')}
                   </Badge>
                 )}
-                <div className="flex items-center gap-1 text-xs text-neutral-400">
+                <div className="flex items-center gap-1 text-xs text-slate-400">
                   <Clock size={12} />
                   <span>{format.relativeTime(new Date(post.createDate), now)}</span>
                   {post.updateDate !== post.createDate && (
-                    <span className="text-xs text-neutral-400">({t('edited')})</span>
+                    <span className="text-xs text-slate-400">({t('edited')})</span>
                   )}
                 </div>
               </div>
-              {(isAdmin || isOwnPost) && !editingPost ? (
-                <div className="flex items-center gap-2">
-                  {isOwnPost ? (
+              {(isAdmin || isOwnPost) && !editingPost && (
+                <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  {isOwnPost && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -129,23 +129,21 @@ export default function DiscussionPost({
                         setEditingPost(true);
                         setEditContent(post.postMessage);
                       }}
-                      className="h-8 px-2 text-neutral-500 hover:bg-blue-50 hover:text-blue-600"
+                      className="h-7 w-7 p-0 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
                     >
-                      <Edit size={14} />
+                      <Edit size={12} />
                     </Button>
-                  ) : null}
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      onDeletePost(post.id);
-                    }}
-                    className="h-8 px-2 text-neutral-500 hover:bg-red-50 hover:text-red-600"
+                    onClick={() => onDeletePost(post.id)}
+                    className="h-7 w-7 p-0 text-slate-500 hover:bg-red-50 hover:text-red-600"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={12} />
                   </Button>
                 </div>
-              ) : null}
+              )}
             </div>
 
             {editingPost ? (
@@ -186,72 +184,80 @@ export default function DiscussionPost({
             )}
 
             <div className="mt-4 flex flex-wrap items-center gap-4">
-              <div className="flex items-center rounded-full bg-neutral-100 p-0.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    onVotePost(post.id, 'up');
-                  }}
-                  className={cn(
-                    'h-8 rounded-full px-2 transition-colors',
-                    post.userVote === 'up'
-                      ? 'bg-green-100 text-green-700'
-                      : 'text-neutral-600 hover:bg-green-50 hover:text-green-700',
-                  )}
-                >
-                  <ArrowBigUp
-                    size={16}
-                    className="mr-1"
-                  />
-                  <span>{post.upvotes}</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    onVotePost(post.id, 'down');
-                  }}
-                  className={cn(
-                    'h-8 rounded-full px-2 transition-colors',
-                    post.userVote === 'down'
-                      ? 'bg-red-100 text-red-700'
-                      : 'text-neutral-600 hover:bg-red-50 hover:text-red-700',
-                  )}
-                >
-                  <ArrowBigDown
-                    size={16}
-                    className="mr-1"
-                  />
-                  <span>{post.downvotes}</span>
-                </Button>
-                <div
-                  className={cn(
-                    'px-2 text-sm font-medium',
-                    netScore > 0 ? 'text-green-700' : netScore < 0 ? 'text-red-700' : 'text-neutral-600',
-                  )}
-                >
-                  {netScore > 0 && '+'}
-                  {netScore}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onVotePost(post.id, 'up')}
+                    className={cn(
+                      'h-8 px-3 rounded-none border-r border-slate-200 transition-all',
+                      post.userVote === 'up'
+                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-green-600',
+                    )}
+                  >
+                    <ArrowBigUp
+                      size={16}
+                      className="mr-1"
+                    />
+                    <span className="text-sm font-medium">{post.upvotes}</span>
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onVotePost(post.id, 'down')}
+                    className={cn(
+                      'h-8 px-3 rounded-none transition-all',
+                      post.userVote === 'down'
+                        ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-red-600',
+                    )}
+                  >
+                    <ArrowBigDown
+                      size={16}
+                      className="mr-1"
+                    />
+                    <span className="text-sm font-medium">{post.downvotes}</span>
+                  </Button>
                 </div>
+
+                {/* Net score indicator */}
+                {Math.abs(netScore) > 0 && (
+                  <div className="flex items-center">
+                    <div
+                      className={cn(
+                        'text-xs font-medium px-2 py-1 rounded-full',
+                        netScore > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
+                      )}
+                    >
+                      {netScore > 0 ? '+' : ''}
+                      {netScore}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setReplyingTo(!replyingTo);
-                }}
-                className={cn('h-8 rounded-full px-3 text-neutral-600', replyingTo && 'bg-blue-50 text-blue-700')}
+                onClick={() => setReplyingTo(!replyingTo)}
+                className={cn(
+                  'h-8 rounded-full px-3 text-slate-600 transition-all',
+                  replyingTo && 'bg-blue-50 text-blue-700',
+                )}
               >
                 <Reply
                   size={16}
                   className="mr-1"
                 />
                 <span>{t('reply')}</span>
-                {post.replies && post.replies.length > 0 ? (
-                  <span className="ml-1 rounded-full bg-neutral-200 px-1.5 py-0.5 text-xs">{post.replies.length}</span>
-                ) : null}
+                {post.replies && post.replies.length > 0 && (
+                  <span className="ml-1 rounded-full bg-slate-200 px-1.5 py-0.5 text-xs font-medium">
+                    {post.replies.length}
+                  </span>
+                )}
               </Button>
             </div>
 
@@ -307,7 +313,7 @@ export default function DiscussionPost({
       {post.replies && post.replies.length > 0 ? (
         <>
           <Separator />
-          <div className="bg-neutral-50/80 py-1">
+          <div className="bg-slate-50/80 py-1">
             {post.replies.map((reply: any) => (
               <DiscussionReply
                 key={reply.id}

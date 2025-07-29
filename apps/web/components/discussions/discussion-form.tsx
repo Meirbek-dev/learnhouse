@@ -6,7 +6,6 @@ import RichTextEditor from './rich-text-editor';
 import { useTranslations } from 'next-intl';
 import { Send } from 'lucide-react';
 import { useState } from 'react';
-import type React from 'react';
 
 interface DiscussionFormProps {
   currentUser: any;
@@ -27,6 +26,15 @@ export default function DiscussionForm({ currentUser, onSubmit }: DiscussionForm
     if (!textContent.trim()) return;
     onSubmit(content);
     setContent('');
+  };
+
+  // Helper function to check if content is empty
+  const isContentEmpty = () => {
+    if (!content) return true;
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    const textContent = tempDiv.textContent || tempDiv.textContent || '';
+    return !textContent.trim();
   };
 
   return (
@@ -53,7 +61,7 @@ export default function DiscussionForm({ currentUser, onSubmit }: DiscussionForm
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={!content.trim()}
+            disabled={isContentEmpty()}
             className="flex items-center gap-2"
           >
             <Send size={16} />

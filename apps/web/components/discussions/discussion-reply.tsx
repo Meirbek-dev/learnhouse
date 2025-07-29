@@ -44,7 +44,7 @@ export default function DiscussionReply({
   const getUserDisplayName = (firstName?: string, lastName?: string) => {
     const first = firstName || '';
     const last = lastName || '';
-    return `${first} ${last}`.trim() || 'Anonymous';
+    return `${first} ${last}`.trim() || reply.username;
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
@@ -67,34 +67,47 @@ export default function DiscussionReply({
   };
 
   return (
-    <div className="mx-4 my-2 border-l-2 border-blue-200 py-3 pl-4">
-      <div className="flex items-start gap-3">
+    <div className="group relative ml-6 border-l-2 border-slate-200 py-4 pl-6 transition-colors hover:border-slate-300">
+      {/* Connection line dot */}
+      <div className="absolute top-6 -left-[5px] h-2 w-2 rounded-full bg-slate-300 transition-colors group-hover:bg-slate-400" />
+
+      <div className="flex gap-3">
         <UserAvatar
           size="sm"
           variant="default"
           username={reply.username}
+          className="flex-shrink-0"
         />
+
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h5 className="font-medium text-neutral-800">{getUserDisplayName(reply.firstName, reply.lastName)}</h5>
-              <span className="text-sm text-neutral-500">@{reply.username}</span>
+          {/* Header */}
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="truncate font-medium text-slate-900">
+                {getUserDisplayName(reply.firstName, reply.lastName)}
+              </span>
+              <span className="truncate text-sm text-slate-500">@{reply.username}</span>
               {isAuthorAdmin(reply.username) && (
                 <Badge
                   variant="destructive"
-                  className="ml-1"
+                  className="h-auto px-1.5 py-0.5 text-xs"
                 >
                   {t('admin')}
                 </Badge>
               )}
-              <div className="flex items-center gap-1 text-xs text-neutral-400">
-                <Clock size={10} />
+              <div className="flex flex-shrink-0 items-center gap-1 text-xs text-slate-400">
+                <Clock size={12} />
                 <span>{format.relativeTime(new Date(reply.createDate), now)}</span>
+                {reply.updateDate !== reply.createDate && (
+                  <span className="text-xs text-slate-400">({t('edited')})</span>
+                )}
               </div>
             </div>
-            {(isAdmin || isOwnReply) && !editing ? (
-              <div className="flex items-center gap-1">
-                {isOwnReply ? (
+
+            {/* Action buttons */}
+            {(isAdmin || isOwnReply) && !editing && (
+              <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                {isOwnReply && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -102,29 +115,28 @@ export default function DiscussionReply({
                       setEditing(true);
                       setEditContent(reply.replyMessage);
                     }}
-                    className="h-7 px-2 text-xs text-neutral-500 hover:bg-blue-50 hover:text-blue-600"
+                    className="h-7 w-7 p-0 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
                   >
                     <Edit size={12} />
                   </Button>
-                ) : null}
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    onDeleteReply(postId, reply.id);
-                  }}
-                  className="h-7 px-2 text-xs text-neutral-500 hover:bg-red-50 hover:text-red-600"
+                  onClick={() => onDeleteReply(postId, reply.id)}
+                  className="h-7 w-7 p-0 text-slate-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 size={12} />
                 </Button>
               </div>
-            ) : null}
+            )}
           </div>
 
+          {/* Content */}
           {editing ? (
             <form
               onSubmit={handleEditSubmit}
-              className="mt-2"
+              className="space-y-3"
             >
               <RichTextEditor
                 content={editContent}
@@ -132,15 +144,13 @@ export default function DiscussionReply({
                 placeholder={t('editReplyPlaceholder')}
                 minHeight="80px"
               />
-              <div className="mt-2 flex justify-end gap-2">
+              <div className="flex justify-end gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    setEditing(false);
-                  }}
-                  className="h-7 text-xs"
+                  onClick={() => setEditing(false)}
+                  className="h-8 px-3 text-sm"
                 >
                   {t('cancel')}
                 </Button>
@@ -148,73 +158,77 @@ export default function DiscussionReply({
                   type="submit"
                   size="sm"
                   disabled={!editContent.trim()}
-                  className="h-7 text-xs"
+                  className="h-8 px-3 text-sm"
                 >
                   {t('save')}
                 </Button>
               </div>
             </form>
           ) : (
-            <div className="mt-1">
-              <RichContentRenderer
-                content={reply.replyMessage}
-                className="text-sm"
-              />
-            </div>
-          )}
-
-          {!editing && (
-            <div className="mt-2 flex items-center">
-              <div className="flex items-center rounded-full bg-neutral-100 p-0.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    onVoteReply(postId, reply.id, 'up');
-                  }}
-                  className={cn(
-                    'h-6 rounded-full px-1.5 text-xs transition-colors',
-                    reply.userVote === 'up'
-                      ? 'bg-green-100 text-green-700'
-                      : 'text-neutral-600 hover:bg-green-50 hover:text-green-700',
-                  )}
-                >
-                  <ArrowBigUp
-                    size={12}
-                    className="mr-0.5"
-                  />
-                  <span>{reply.upvotes}</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    onVoteReply(postId, reply.id, 'down');
-                  }}
-                  className={cn(
-                    'h-6 rounded-full px-1.5 text-xs transition-colors',
-                    reply.userVote === 'down'
-                      ? 'bg-red-100 text-red-700'
-                      : 'text-neutral-600 hover:bg-red-50 hover:text-red-700',
-                  )}
-                >
-                  <ArrowBigDown
-                    size={12}
-                    className="mr-0.5"
-                  />
-                  <span>{reply.downvotes}</span>
-                </Button>
-                <div
-                  className={cn(
-                    'px-1.5 text-xs font-medium',
-                    netScore > 0 ? 'text-green-700' : netScore < 0 ? 'text-red-700' : 'text-neutral-600',
-                  )}
-                >
-                  {netScore > 0 && '+'}
-                  {netScore}
-                </div>
+            <>
+              <div className="mb-3">
+                <RichContentRenderer
+                  content={reply.replyMessage}
+                  className="text-sm leading-relaxed text-slate-700"
+                />
               </div>
-            </div>
+
+              {/* Voting section */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onVoteReply(postId, reply.id, 'up')}
+                    className={cn(
+                      'h-8 px-3 rounded-none border-r border-slate-200 transition-all',
+                      reply.userVote === 'up'
+                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-green-600',
+                    )}
+                  >
+                    <ArrowBigUp
+                      size={14}
+                      className="mr-1"
+                    />
+                    <span className="text-sm font-medium">{reply.upvotes}</span>
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onVoteReply(postId, reply.id, 'down')}
+                    className={cn(
+                      'h-8 px-3 rounded-none transition-all',
+                      reply.userVote === 'down'
+                        ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-red-600',
+                    )}
+                  >
+                    <ArrowBigDown
+                      size={14}
+                      className="mr-1"
+                    />
+                    <span className="text-sm font-medium">{reply.downvotes}</span>
+                  </Button>
+                </div>
+
+                {/* Net score indicator */}
+                {Math.abs(netScore) > 0 && (
+                  <div className="flex items-center">
+                    <div
+                      className={cn(
+                        'text-xs font-medium px-2 py-1 rounded-full',
+                        netScore > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
+                      )}
+                    >
+                      {netScore > 0 ? '+' : ''}
+                      {netScore}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
       </div>

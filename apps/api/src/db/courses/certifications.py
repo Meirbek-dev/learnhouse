@@ -1,8 +1,10 @@
 from sqlalchemy import JSON, Column, ForeignKey
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+
+from src.db.strict_base_model import SQLModelStrictBaseModel
 
 
-class CertificationBase(SQLModel):
+class CertificationBase(SQLModelStrictBaseModel):
     course_id: int = Field(
         sa_column=Column("course_id", ForeignKey("course.id", ondelete="CASCADE"))
     )
@@ -20,16 +22,16 @@ class Certifications(CertificationBase, table=True):
     update_date: str = ""
 
 
-class CertificationCreate(SQLModel):
+class CertificationCreate(SQLModelStrictBaseModel):
     course_id: int
     config: dict = Field(default={})
 
 
-class CertificationUpdate(SQLModel):
+class CertificationUpdate(SQLModelStrictBaseModel):
     config: dict | None = None
 
 
-class CertificationRead(SQLModel):
+class CertificationRead(SQLModelStrictBaseModel):
     id: int
     certification_uuid: str
     course_id: int
@@ -38,7 +40,7 @@ class CertificationRead(SQLModel):
     update_date: str
 
 
-class CertificateUserBase(SQLModel):
+class CertificateUserBase(SQLModelStrictBaseModel):
     user_id: int = Field(
         sa_column=Column("user_id", ForeignKey("user.id", ondelete="CASCADE"))
     )
@@ -65,13 +67,13 @@ class CertificateUser(CertificateUserBase, table=True):
     updated_at: str = ""
 
 
-class CertificateUserCreate(SQLModel):
+class CertificateUserCreate(SQLModelStrictBaseModel):
     user_id: int
     certification_id: int
     user_certification_uuid: str
 
 
-class CertificateUserRead(SQLModel):
+class CertificateUserRead(SQLModelStrictBaseModel):
     id: int
     user_id: int
     certification_id: int
@@ -80,7 +82,7 @@ class CertificateUserRead(SQLModel):
     updated_at: str
 
 
-class CertificateUserUpdate(SQLModel):
+class CertificateUserUpdate(SQLModelStrictBaseModel):
     user_id: int | None = None
     certification_id: int | None = None
     user_certification_uuid: str | None = None
