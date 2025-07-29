@@ -105,7 +105,6 @@ async def get_user_trails(
     )
 
 
-
 async def check_trail_presence(
     org_id: int,
     user_id: int,
@@ -189,7 +188,6 @@ async def get_user_trail_with_orgid(
         **trail.model_dump(),
         runs=trail_runs,
     )
-
 
 
 async def add_activity_to_trail(
@@ -308,7 +306,6 @@ async def add_activity_to_trail(
     )
 
 
-
 async def remove_activity_from_trail(
     request: Request,
     user: PublicUser,
@@ -387,7 +384,6 @@ async def remove_activity_from_trail(
         **trail.model_dump(),
         runs=trail_runs,
     )
-
 
 
 async def add_course_to_trail(
@@ -479,7 +475,6 @@ async def add_course_to_trail(
     )
 
 
-
 async def remove_course_from_trail(
     request: Request,
     user: PublicUser,
@@ -557,4 +552,3 @@ async def remove_course_from_trail(
         **trail.model_dump(),
         runs=trail_runs,
     )
-

@@ -4,8 +4,8 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.4"
 dependencies = [
-  "boto3>=1.39.14",
-  "botocore>=1.39.14",
+  "boto3>=1.39.15",
+  "botocore>=1.39.15",
   "fastapi[standard-no-fastapi-cloud-cli]==0.116.1",
   "fastapi-another-jwt-auth>=0.1.11",
   "langchain>=0.3.27",
@@ -36,15 +36,38 @@ dependencies = [
   "httptools>=0.6.4",
   "brotli>=1.1.0",
   "cachetools>=6.1.0",
+  "python-jose>=3.5.0",
 ]
 
 [dependency-groups]
 
-dev = ["faker>=37.4.0", "pytest>=8.4.1", "ruff>=0.12.5"]
+dev = [
+  "faker>=37.4.2",
+  "pytest>=8.4.1",
+  "pytest-asyncio>=1.1.0",
+  "pytest-cov<6.0.0",
+  "ruff>=0.12.5",
+]
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["asyncio: mark test as async"]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::UserWarning",
+  "ignore:.*crypt.*deprecated.*",
+  "ignore:.*utcnow.*deprecated.*",
+  "ignore:.*obj.dict.*deprecated.*",
+  "ignore:.*Instrumentation will have no effect.*",
+  "ignore:.*handler names should be lower-case.*",
+  "ignore:.*Importing tools from langchain is deprecated.*",
+]
 
 [tool.ruff]
 target-version = "py314"
-lint.select = []
+# lint.select = ["ALL"]
 lint.fixable = ["ALL"]
 lint.ignore = [
   "F401",

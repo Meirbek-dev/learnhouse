@@ -19,6 +19,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Check if we're in test mode
+is_testing = os.getenv("TESTING", "false").lower() == "true"
+
 
 def import_all_models() -> None:
     """
@@ -110,51 +113,62 @@ def get_database_engine() -> Engine:
     global _engine
 
     if _engine is None:
-        openu_config = get_openu_config()
-        connection_string = openu_config.database_config.sql_connection_string
-
-        # Determine database type for optimization
-        is_postgres = connection_string.startswith(
-            ("postgresql+psycopg://", "postgresql://")
-        )
-
-        # Base engine configuration
-        engine_kwargs = {
-            "echo": False,  # Set to True for SQL debugging
-            "future": True,  # Use SQLAlchemy 2.0 style
-            "pool_pre_ping": True,  # Test connections for liveness
-            "pool_recycle": 3600,  # Recycle connections every hour
-        }
-
-        # Database-specific optimizations
-        if is_postgres:
-            engine_kwargs.update(
-                {
-                    "poolclass": QueuePool,
-                    "pool_size": 20,  # Increased pool size for PostgreSQL
-                    "max_overflow": 30,
-                    "pool_timeout": 30,
-                }
+        # Check if we're in test mode and use SQLite
+        if is_testing:
+            # Use SQLite for tests
+            _engine = create_engine(
+                "sqlite:///:memory:",
+                echo=False,
+                connect_args={"check_same_thread": False},
             )
         else:
-            # Default configuration for other databases
-            engine_kwargs.update(
-                {
-                    "pool_size": 10,
-                    "max_overflow": 20,
-                    "pool_timeout": 30,
-                }
+            openu_config = get_openu_config()
+            connection_string = openu_config.database_config.sql_connection_string
+
+            # Determine database type for optimization
+            is_postgres = connection_string.startswith(
+                ("postgresql+psycopg://", "postgresql://")
             )
 
-        # Create engine with optimized configuration
-        _engine = create_engine(connection_string, **engine_kwargs)
+            # Base engine configuration
+            engine_kwargs = {
+                "echo": False,  # Set to True for SQL debugging
+                "future": True,  # Use SQLAlchemy 2.0 style
+                "pool_pre_ping": True,  # Test connections for liveness
+                "pool_recycle": 3600,  # Recycle connections every hour
+            }
 
-        # Instrument with Logfire if not in development
-        if not openu_config.general_config.development_mode:
-            try:
-                logfire.instrument_sqlalchemy(engine=_engine)
-            except Exception as e:
-                logger.warning(f"Failed to instrument SQLAlchemy: {e}")
+            # Database-specific optimizations
+            if is_postgres:
+                engine_kwargs.update(
+                    {
+                        "poolclass": QueuePool,
+                        "pool_size": 20,  # Increased pool size for PostgreSQL
+                        "max_overflow": 30,
+                        "pool_timeout": 30,
+                    }
+                )
+            else:
+                # Default configuration for other databases
+                engine_kwargs.update(
+                    {
+                        "pool_size": 10,
+                        "max_overflow": 20,
+                        "pool_timeout": 30,
+                    }
+                )
+
+            # Create engine with optimized configuration
+            _engine = create_engine(connection_string, **engine_kwargs)
+
+        # Instrument with Logfire if not in development or testing
+        if not is_testing:
+            openu_config = get_openu_config()
+            if not openu_config.general_config.development_mode:
+                try:
+                    logfire.instrument_sqlalchemy(engine=_engine)
+                except Exception as e:
+                    logger.warning(f"Failed to instrument SQLAlchemy: {e}")
 
     return _engine
 
@@ -180,7 +194,9 @@ async def connect_to_db(app: FastAPI) -> None:
 
         # Create all tables defined by SQLModel metadata
         # This is only called once at application startup
-        SQLModel.metadata.create_all(db_engine)
+        # Only create tables if not in test mode
+        if not is_testing:
+            SQLModel.metadata.create_all(db_engine)
 
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
@@ -224,15 +240,21 @@ def get_db_session() -> Iterator[Session]:
     """
     db_engine = get_database_engine()
 
-    session = Session(db_engine)
-    try:
-        yield session
-    except Exception as e:
-        logger.error(f"Database session error: {e}")
-        session.rollback()
-        raise
-    finally:
-        session.close()
+    if is_testing:
+        # Simpler session handling for tests
+        with Session(db_engine) as session:
+            yield session
+    else:
+        # More robust session handling for production
+        session = Session(db_engine)
+        try:
+            yield session
+        except Exception as e:
+            logger.error(f"Database session error: {e}")
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
 
 # --- Additional Database Utilities ---

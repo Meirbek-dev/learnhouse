@@ -1,3 +1,4 @@
+from pydantic import EmailStr
 from sqlmodel import Session, select
 
 from src.db.organizations import OrganizationCreate
@@ -19,10 +20,12 @@ async def create_initial_data_for_tests(db_session: Session) -> bool:
     test_org = OrganizationCreate(
         name="OpenU",
         description=None,
+        about=None,
         slug="openu",
         email="meirbek.b2k@gmail.com",
         logo_image=None,
         thumbnail_image=None,
+        label=None,
     )
 
     # Create test organization
@@ -53,7 +56,7 @@ async def create_initial_data_for_tests(db_session: Session) -> bool:
     statement = select(UserOrganization).join(User).where(User.username == "testo")
     user_org = db_session.exec(statement).first()
 
-    user_org.role_id = 3
+    user_org.role_id = 3  # type: ignore
     db_session.add(user_org)
     db_session.commit()
 
