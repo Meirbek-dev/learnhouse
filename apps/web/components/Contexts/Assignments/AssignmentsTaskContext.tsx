@@ -79,18 +79,23 @@ export function useAssignmentsTaskDispatch() {
 
 function assignmentsTaskReducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'setSelectedAssignmentTaskUUID':
+    case 'setSelectedAssignmentTaskUUID': {
       return { ...state, selectedAssignmentTaskUUID: action.payload };
-    case 'setAssignmentTask':
+    }
+    case 'setAssignmentTask': {
       return { ...state, assignmentTask: action.payload };
-    case 'reload':
+    }
+    case 'reload': {
       return { ...state, reloadTrigger: state.reloadTrigger + 1 };
-    case 'SET_MULTIPLE_STATES':
+    }
+    case 'SET_MULTIPLE_STATES': {
       return {
         ...state,
         ...action.payload,
       };
-    default:
+    }
+    default: {
       return state;
+    }
   }
 }

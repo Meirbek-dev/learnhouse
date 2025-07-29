@@ -96,7 +96,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       // Get theme colors based on pattern
       const getPatternTheme = (pattern: string) => {
         switch (pattern) {
-          case 'royal':
+          case 'royal': {
             return {
               primary: '#b45309',
               secondary: '#d97706',
@@ -105,7 +105,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(217, 119, 6, 0.4)',
               iconBorder: 'rgba(217, 119, 6, 0.2)',
             };
-          case 'tech':
+          }
+          case 'tech': {
             return {
               primary: '#0e7490',
               secondary: '#0891b2',
@@ -114,7 +115,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(8, 145, 178, 0.4)',
               iconBorder: 'rgba(8, 145, 178, 0.2)',
             };
-          case 'nature':
+          }
+          case 'nature': {
             return {
               primary: '#15803d',
               secondary: '#16a34a',
@@ -123,7 +125,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(22, 163, 74, 0.4)',
               iconBorder: 'rgba(22, 163, 74, 0.2)',
             };
-          case 'geometric':
+          }
+          case 'geometric': {
             return {
               primary: '#7c3aed',
               secondary: '#9333ea',
@@ -132,7 +135,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(147, 51, 234, 0.4)',
               iconBorder: 'rgba(147, 51, 234, 0.2)',
             };
-          case 'vintage':
+          }
+          case 'vintage': {
             return {
               primary: '#c2410c',
               secondary: '#ea580c',
@@ -141,7 +145,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(234, 88, 12, 0.4)',
               iconBorder: 'rgba(234, 88, 12, 0.2)',
             };
-          case 'waves':
+          }
+          case 'waves': {
             return {
               primary: '#1d4ed8',
               secondary: '#2563eb',
@@ -150,7 +155,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(37, 99, 235, 0.4)',
               iconBorder: 'rgba(37, 99, 235, 0.2)',
             };
-          case 'minimal':
+          }
+          case 'minimal': {
             return {
               primary: '#374151',
               secondary: '#4b5563',
@@ -159,7 +165,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(75, 85, 99, 0.4)',
               iconBorder: 'rgba(75, 85, 99, 0.2)',
             };
-          case 'professional':
+          }
+          case 'professional': {
             return {
               primary: '#334155',
               secondary: '#475569',
@@ -168,7 +175,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(71, 85, 105, 0.4)',
               iconBorder: 'rgba(71, 85, 105, 0.2)',
             };
-          case 'academic':
+          }
+          case 'academic': {
             return {
               primary: '#3730a3',
               secondary: '#4338ca',
@@ -177,7 +185,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(67, 56, 202, 0.4)',
               iconBorder: 'rgba(67, 56, 202, 0.2)',
             };
-          case 'modern':
+          }
+          case 'modern': {
             return {
               primary: '#1d4ed8',
               secondary: '#2563eb',
@@ -186,7 +195,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(37, 99, 235, 0.4)',
               iconBorder: 'rgba(37, 99, 235, 0.2)',
             };
-          default:
+          }
+          default: {
             return {
               primary: '#374151',
               secondary: '#4b5563',
@@ -195,6 +205,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               iconMedium: 'rgba(75, 85, 99, 0.4)',
               iconBorder: 'rgba(75, 85, 99, 0.2)',
             };
+          }
         }
       };
 

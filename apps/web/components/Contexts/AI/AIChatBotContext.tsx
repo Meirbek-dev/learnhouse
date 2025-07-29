@@ -50,26 +50,36 @@ export function useAIChatBotDispatch() {
 
 function aiChatBotReducer(state: any, action: any) {
   switch (action.type) {
-    case 'setMessages':
+    case 'setMessages': {
       return { ...state, messages: action.payload };
-    case 'addMessage':
+    }
+    case 'addMessage': {
       return { ...state, messages: [...state.messages, action.payload] };
-    case 'setIsModalOpen':
+    }
+    case 'setIsModalOpen': {
       return { ...state, isModalOpen: true };
-    case 'setIsModalClose':
+    }
+    case 'setIsModalClose': {
       return { ...state, isModalOpen: false };
-    case 'setAichat_uuid':
+    }
+    case 'setAichat_uuid': {
       return { ...state, aichat_uuid: action.payload };
-    case 'setIsWaitingForResponse':
+    }
+    case 'setIsWaitingForResponse': {
       return { ...state, isWaitingForResponse: true };
-    case 'setIsNoLongerWaitingForResponse':
+    }
+    case 'setIsNoLongerWaitingForResponse': {
       return { ...state, isWaitingForResponse: false };
-    case 'setChatInputValue':
+    }
+    case 'setChatInputValue': {
       return { ...state, chatInputValue: action.payload };
-    case 'setError':
+    }
+    case 'setError': {
       return { ...state, error: action.payload };
+    }
 
-    default:
+    default: {
       throw new Error(`Unhandled action type: ${action.type}`);
+    }
   }
 }

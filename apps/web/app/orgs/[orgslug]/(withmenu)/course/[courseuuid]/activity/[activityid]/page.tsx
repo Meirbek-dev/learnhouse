@@ -44,11 +44,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const isCourseEnd = activityid === 'end';
   const activity = isCourseEnd
     ? null
-    : await getActivityWithAuthHeader(
-        activityid,
-        { revalidate: 0, tags: ['activities'] },
-        access_token || null,
-      );
+    : await getActivityWithAuthHeader(activityid, { revalidate: 0, tags: ['activities'] }, access_token || null);
 
   // Localized page title
   const pageTitle = isCourseEnd

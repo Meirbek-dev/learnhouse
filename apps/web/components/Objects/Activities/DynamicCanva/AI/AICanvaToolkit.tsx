@@ -112,16 +112,21 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
 
   const getPrompt = (label: string, selection: string) => {
     switch (label) {
-      case 'Explain':
+      case 'Explain': {
         return t('explainPrompt', { selection });
-      case 'Summarize':
+      }
+      case 'Summarize': {
         return t('summarizePrompt', { selection });
-      case 'Translate':
+      }
+      case 'Translate': {
         return t('translatePrompt', { selection });
-      case 'Examples':
+      }
+      case 'Examples': {
         return t('examplesPrompt', { selection });
-      default:
+      }
+      default: {
         return '';
+      }
     }
   };
 
@@ -192,31 +197,41 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
 
   const getTooltipLabel = (label: string) => {
     switch (label) {
-      case 'Explain':
+      case 'Explain': {
         return t('explainTooltip');
-      case 'Summarize':
+      }
+      case 'Summarize': {
         return t('summarizeTooltip');
-      case 'Translate':
+      }
+      case 'Translate': {
         return t('translateTooltip');
-      case 'Examples':
+      }
+      case 'Examples': {
         return t('examplesTooltip');
-      default:
+      }
+      default: {
         return '';
+      }
     }
   };
 
   const getButtonLabel = (label: string) => {
     switch (label) {
-      case 'Explain':
+      case 'Explain': {
         return t('explainLabel');
-      case 'Summarize':
+      }
+      case 'Summarize': {
         return t('summarizeLabel');
-      case 'Translate':
+      }
+      case 'Translate': {
         return t('translateLabel');
-      case 'Examples':
+      }
+      case 'Examples': {
         return t('examplesLabel');
-      default:
+      }
+      default: {
         return label;
+      }
     }
   };
 

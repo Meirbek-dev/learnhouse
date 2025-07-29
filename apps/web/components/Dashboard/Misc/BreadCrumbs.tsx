@@ -21,88 +21,109 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
 
   const getBreadcrumbIcon = (type: string) => {
     switch (type) {
-      case 'courses':
+      case 'courses': {
         return (
           <Book
             className="text-gray"
             size={14}
           />
         );
-      case 'assignments':
+      }
+      case 'assignments': {
         return (
           <Backpack
             className="text-gray"
             size={14}
           />
         );
-      case 'user':
+      }
+      case 'user': {
         return (
           <User
             className="text-gray"
             size={14}
           />
         );
-      case 'orgusers':
+      }
+      case 'orgusers': {
         return (
           <Users
             className="text-gray"
             size={14}
           />
         );
-      case 'org':
+      }
+      case 'org': {
         return (
           <School
             className="text-gray"
             size={14}
           />
         );
-      case 'payments':
+      }
+      case 'payments': {
         return (
           <CreditCard
             className="text-gray"
             size={14}
           />
         );
-      default:
+      }
+      default: {
         return null;
+      }
     }
   };
 
   const getBreadcrumbLink = (type: string) => {
     switch (type) {
-      case 'courses':
+      case 'courses': {
         return '/dash/courses';
-      case 'assignments':
+      }
+      case 'assignments': {
         return '/dash/assignments';
-      case 'user':
+      }
+      case 'user': {
         return '/dash/user-account/settings/general';
-      case 'orgusers':
+      }
+      case 'orgusers': {
         return '/dash/users/settings/users';
-      case 'org':
+      }
+      case 'org': {
         return '/dash/users';
-      case 'payments':
+      }
+      case 'payments': {
         return '/dash/payments';
-      default:
+      }
+      default: {
         return '#';
+      }
     }
   };
 
   const getBreadcrumbTitle = (type: string) => {
     switch (type) {
-      case 'courses':
+      case 'courses': {
         return t('Courses.title');
-      case 'assignments':
+      }
+      case 'assignments': {
         return t('Assignments.title');
-      case 'user':
+      }
+      case 'user': {
         return t('UserAccountSettings.title');
-      case 'orgusers':
+      }
+      case 'orgusers': {
         return t('Card.Users.title');
-      case 'org':
+      }
+      case 'org': {
         return t('Card.Organization.title');
-      case 'payments':
+      }
+      case 'payments': {
         return t('Payments.title');
-      default:
+      }
+      default: {
         return '';
+      }
     }
   };
 

@@ -259,7 +259,7 @@ const OrgEditLanding = () => {
 
   const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): LandingSection => {
     switch (type) {
-      case 'hero':
+      case 'hero': {
         return {
           type: 'hero',
           title: t('EmptySections.hero.title'),
@@ -281,7 +281,8 @@ const OrgEditLanding = () => {
           illustration: undefined,
           contentAlign: 'center',
         };
-      case 'text-and-image':
+      }
+      case 'text-and-image': {
         return {
           type: 'text-and-image',
           title: t('EmptySections.textAndImage.title'),
@@ -293,26 +294,31 @@ const OrgEditLanding = () => {
           },
           buttons: [],
         };
-      case 'logos':
+      }
+      case 'logos': {
         return {
           type: 'logos',
           title: t('EmptySections.logos.title'),
           logos: [],
         };
-      case 'people':
+      }
+      case 'people': {
         return {
           type: 'people',
           title: t('EmptySections.people.title'),
           people: [],
         };
-      case 'featured-courses':
+      }
+      case 'featured-courses': {
         return {
           type: 'featured-courses',
           title: t('EmptySections.featuredCourses.title'),
           courses: [],
         };
-      default:
+      }
+      default: {
         throw new Error(t('Errors.invalidSectionType'));
+      }
     }
   };
 
@@ -585,7 +591,7 @@ interface SectionEditorProps {
 
 const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
   switch (section.type) {
-    case 'hero':
+    case 'hero': {
       return (
         <HeroSectionEditor
           t={t}
@@ -593,7 +599,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'text-and-image':
+    }
+    case 'text-and-image': {
       return (
         <TextAndImageSectionEditor
           t={t}
@@ -601,7 +608,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'logos':
+    }
+    case 'logos': {
       return (
         <LogosSectionEditor
           t={t}
@@ -609,7 +617,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'people':
+    }
+    case 'people': {
       return (
         <PeopleSectionEditor
           t={t}
@@ -617,7 +626,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'featured-courses':
+    }
+    case 'featured-courses': {
       return (
         <FeaturedCoursesEditor
           t={t}
@@ -625,8 +635,10 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    default:
+    }
+    default: {
       return <div>{t('Errors.unknownSectionType')}</div>;
+    }
   }
 };
 

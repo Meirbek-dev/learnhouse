@@ -34,26 +34,30 @@ const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
 
   const getPageTitle = () => {
     switch (subpage) {
-      case 'customers':
+      case 'customers': {
         return {
           h1: t('customers'),
           h2: t('customerInfo'),
         };
-      case 'paid-products':
+      }
+      case 'paid-products': {
         return {
           h1: t('paidProducts'),
           h2: t('paidProductsInfo'),
         };
-      case 'configuration':
+      }
+      case 'configuration': {
         return {
           h1: t('configuration'),
           h2: t('configurationInfo'),
         };
-      default:
+      }
+      default: {
         return {
           h1: t('title'),
           h2: t('overview'),
         };
+      }
     }
   };
 

@@ -97,7 +97,9 @@ const OrgUsers = () => {
                           {user.role.name !== 'Admin' ? (
                             <>
                               <Modal
-                                isDialogOpen={rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false}
+                                isDialogOpen={
+                                  rolesModal ? selectedUser?.user?.user_uuid === user.user.user_uuid : false
+                                }
                                 onOpenChange={(isOpen) => {
                                   if (!isOpen) handleCloseRolesModal();
                                 }}

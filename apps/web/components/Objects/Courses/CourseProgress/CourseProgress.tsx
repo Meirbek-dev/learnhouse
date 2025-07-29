@@ -53,41 +53,46 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
 
   const getActivityTypeIcon = (activityType: string) => {
     switch (activityType) {
-      case 'TYPE_VIDEO':
+      case 'TYPE_VIDEO': {
         return (
           <Video
             size={16}
             className="text-gray-400"
           />
         );
-      case 'TYPE_DOCUMENT':
+      }
+      case 'TYPE_DOCUMENT': {
         return (
           <FileText
             size={16}
             className="text-gray-400"
           />
         );
-      case 'TYPE_DYNAMIC':
+      }
+      case 'TYPE_DYNAMIC': {
         return (
           <Layers
             size={16}
             className="text-gray-400"
           />
         );
-      case 'TYPE_ASSIGNMENT':
+      }
+      case 'TYPE_ASSIGNMENT': {
         return (
           <BookOpenCheck
             size={16}
             className="text-gray-400"
           />
         );
-      default:
+      }
+      default: {
         return (
           <FileText
             size={16}
             className="text-gray-400"
           />
         );
+      }
     }
   };
 

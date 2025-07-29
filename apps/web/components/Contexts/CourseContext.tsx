@@ -86,17 +86,23 @@ export function useCourseDispatch() {
 
 function courseReducer(state: any, action: any) {
   switch (action.type) {
-    case 'setCourseStructure':
+    case 'setCourseStructure': {
       return { ...state, courseStructure: action.payload };
-    case 'setCourseOrder':
+    }
+    case 'setCourseOrder': {
       return { ...state, courseOrder: action.payload };
-    case 'setIsSaved':
+    }
+    case 'setIsSaved': {
       return { ...state, isSaved: true };
-    case 'setIsNotSaved':
+    }
+    case 'setIsNotSaved': {
       return { ...state, isSaved: false };
-    case 'setIsLoaded':
+    }
+    case 'setIsLoaded': {
       return { ...state, isLoading: false };
-    default:
+    }
+    default: {
       throw new Error(`Unhandled action type: ${action.type}`);
+    }
   }
 }

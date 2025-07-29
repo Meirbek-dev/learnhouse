@@ -83,12 +83,15 @@ const ConfirmationModal = (params: ModalParams) => {
 
   const getSizeConfig = useCallback(() => {
     switch (params.size) {
-      case 'sm':
+      case 'sm': {
         return 'sm:max-w-sm';
-      case 'lg':
+      }
+      case 'lg': {
         return 'sm:max-w-lg';
-      default:
+      }
+      default: {
         return 'sm:max-w-md';
+      }
     }
   }, [params.size]);
 

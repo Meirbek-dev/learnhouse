@@ -65,14 +65,18 @@ const ButtonsExtension: FC = (props: any) => {
 
   const getAlignmentClass = () => {
     switch (alignment) {
-      case 'left':
+      case 'left': {
         return 'text-left';
-      case 'center':
+      }
+      case 'center': {
         return 'text-center';
-      case 'right':
+      }
+      case 'right': {
         return 'text-right';
-      default:
+      }
+      default: {
         return 'text-left';
+      }
     }
   };
 
@@ -86,26 +90,36 @@ const ButtonsExtension: FC = (props: any) => {
 
   const getButtonColor = (color: string) => {
     switch (color) {
-      case 'sky':
+      case 'sky': {
         return 'bg-sky-500 hover:bg-sky-600';
-      case 'green':
+      }
+      case 'green': {
         return 'bg-green-500 hover:bg-green-600';
-      case 'yellow':
+      }
+      case 'yellow': {
         return 'bg-yellow-500 hover:bg-yellow-600';
-      case 'red':
+      }
+      case 'red': {
         return 'bg-red-500 hover:bg-red-600';
-      case 'purple':
+      }
+      case 'purple': {
         return 'bg-purple-500 hover:bg-purple-600';
-      case 'teal':
+      }
+      case 'teal': {
         return 'bg-teal-500 hover:bg-teal-600';
-      case 'amber':
+      }
+      case 'amber': {
         return 'bg-amber-500 hover:bg-amber-600';
-      case 'indigo':
+      }
+      case 'indigo': {
         return 'bg-indigo-500 hover:bg-indigo-600';
-      case 'neutral':
+      }
+      case 'neutral': {
         return 'bg-neutral-500 hover:bg-neutral-600';
-      default:
+      }
+      default: {
         return 'bg-blue-500 hover:bg-blue-600';
+      }
     }
   };
 

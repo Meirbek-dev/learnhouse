@@ -21,10 +21,10 @@ import { mutate } from 'swr';
 interface CourseRun {
   status: string;
   course_id: number;
-  steps: Array<{
+  steps: {
     activity_id: number;
     complete: boolean;
-  }>;
+  }[];
 }
 
 interface Course {
@@ -33,14 +33,14 @@ interface Course {
   trail?: {
     runs: CourseRun[];
   };
-  chapters?: Array<{
+  chapters?: {
     name: string;
     activities: Array<{
       activity_uuid: string;
       name: string;
       activity_type: string;
     }>;
-  }>;
+  }[];
   open_to_contributors?: boolean;
 }
 

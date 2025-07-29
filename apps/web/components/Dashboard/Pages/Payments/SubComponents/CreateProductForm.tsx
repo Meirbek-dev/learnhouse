@@ -38,7 +38,7 @@ type ProductFormValues = z.infer<ReturnType<typeof createValidationSchema>>;
 const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
-  const [currencies, setCurrencies] = useState<Array<{ code: string; name: string }>>([]);
+  const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('Payments.ProductForm');
   const validationSchema = useMemo(() => createValidationSchema(t), [t]);

@@ -28,7 +28,7 @@ const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
 
   const renderSection = (section: LandingSection) => {
     switch (section.type) {
-      case 'hero':
+      case 'hero': {
         return (
           <div
             key={`hero-${section.title}`}
@@ -117,7 +117,8 @@ const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
             </div>
           </div>
         );
-      case 'text-and-image':
+      }
+      case 'text-and-image': {
         return (
           <div
             key={`text-image-${section.title}`}
@@ -167,7 +168,8 @@ const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
             </div>
           </div>
         );
-      case 'logos':
+      }
+      case 'logos': {
         return (
           <div
             key={`logos-${section.type}`}
@@ -196,7 +198,8 @@ const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
             </div>
           </div>
         );
-      case 'people':
+      }
+      case 'people': {
         return (
           <div
             key={`people-${section.title}`}
@@ -236,6 +239,7 @@ const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
             </div>
           </div>
         );
+      }
       case 'featured-courses': {
         if (!allCourses) {
           return (
@@ -276,8 +280,9 @@ const LandingCustom = ({ landing, orgslug }: LandingCustomProps) => {
           </div>
         );
       }
-      default:
+      default: {
         return null;
+      }
     }
   };
 

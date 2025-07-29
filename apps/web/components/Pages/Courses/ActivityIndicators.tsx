@@ -20,72 +20,87 @@ interface Props {
 // Helper functions
 function getActivityTypeLabel(activityType: string, t: (key: string) => string): string {
   switch (activityType) {
-    case 'TYPE_VIDEO':
+    case 'TYPE_VIDEO': {
       return t('activityTypes.video');
-    case 'TYPE_DOCUMENT':
+    }
+    case 'TYPE_DOCUMENT': {
       return t('activityTypes.document');
-    case 'TYPE_DYNAMIC':
+    }
+    case 'TYPE_DYNAMIC': {
       return t('activityTypes.interactive');
-    case 'TYPE_ASSIGNMENT':
+    }
+    case 'TYPE_ASSIGNMENT': {
       return t('activityTypes.assignment');
-    default:
+    }
+    default: {
       return t('unknownActivity');
+    }
   }
 }
 
 function getActivityTypeBadgeColor(activityType: string): string {
   switch (activityType) {
-    case 'TYPE_VIDEO':
+    case 'TYPE_VIDEO': {
       return 'bg-blue-100 text-blue-700';
-    case 'TYPE_DOCUMENT':
+    }
+    case 'TYPE_DOCUMENT': {
       return 'bg-purple-100 text-purple-700';
-    case 'TYPE_DYNAMIC':
+    }
+    case 'TYPE_DYNAMIC': {
       return 'bg-green-100 text-green-700';
-    case 'TYPE_ASSIGNMENT':
+    }
+    case 'TYPE_ASSIGNMENT': {
       return 'bg-orange-100 text-orange-700';
-    default:
+    }
+    default: {
       return 'bg-gray-100 text-gray-700';
+    }
   }
 }
 
 // Memoized activity type icon component
 const ActivityTypeIcon = memo(({ activityType }: { activityType: string }) => {
   switch (activityType) {
-    case 'TYPE_VIDEO':
+    case 'TYPE_VIDEO': {
       return (
         <Video
           size={16}
           className="text-gray-400"
         />
       );
-    case 'TYPE_DOCUMENT':
+    }
+    case 'TYPE_DOCUMENT': {
       return (
         <FileText
           size={16}
           className="text-gray-400"
         />
       );
-    case 'TYPE_DYNAMIC':
+    }
+    case 'TYPE_DYNAMIC': {
       return (
         <Layers
           size={16}
           className="text-gray-400"
         />
       );
-    case 'TYPE_ASSIGNMENT':
+    }
+    case 'TYPE_ASSIGNMENT': {
       return (
         <BookOpenCheck
           size={16}
           className="text-gray-400"
         />
       );
-    default:
+    }
+    default: {
       return (
         <FileText
           size={16}
           className="text-gray-400"
         />
       );
+    }
   }
 });
 

@@ -43,31 +43,41 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
   // Function to get the appropriate icon for activity type
   const getActivityTypeIcon = (activityType: string) => {
     switch (activityType) {
-      case 'TYPE_VIDEO':
+      case 'TYPE_VIDEO': {
         return <Video size={10} />;
-      case 'TYPE_DOCUMENT':
+      }
+      case 'TYPE_DOCUMENT': {
         return <FileText size={10} />;
-      case 'TYPE_DYNAMIC':
+      }
+      case 'TYPE_DYNAMIC': {
         return <StickyNote size={10} />;
-      case 'TYPE_ASSIGNMENT':
+      }
+      case 'TYPE_ASSIGNMENT': {
         return <Backpack size={10} />;
-      default:
+      }
+      default: {
         return <FileText size={10} />;
+      }
     }
   };
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {
-      case 'TYPE_VIDEO':
+      case 'TYPE_VIDEO': {
         return t('activityTypes.video');
-      case 'TYPE_DOCUMENT':
+      }
+      case 'TYPE_DOCUMENT': {
         return t('activityTypes.document');
-      case 'TYPE_DYNAMIC':
+      }
+      case 'TYPE_DYNAMIC': {
         return t('activityTypes.dynamic');
-      case 'TYPE_ASSIGNMENT':
+      }
+      case 'TYPE_ASSIGNMENT': {
         return t('activityTypes.assignment');
-      default:
+      }
+      default: {
         return t('activityTypes.learningMaterial');
+      }
     }
   };
 

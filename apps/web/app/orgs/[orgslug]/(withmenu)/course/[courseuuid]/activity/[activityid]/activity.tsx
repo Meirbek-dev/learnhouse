@@ -222,7 +222,7 @@ const ActivityClient = (props: ActivityClientProps) => {
     }
 
     switch (activity.activity_type) {
-      case 'TYPE_DYNAMIC':
+      case 'TYPE_DYNAMIC': {
         return (
           <Suspense fallback={<LoadingFallback />}>
             <Canva
@@ -231,7 +231,8 @@ const ActivityClient = (props: ActivityClientProps) => {
             />
           </Suspense>
         );
-      case 'TYPE_VIDEO':
+      }
+      case 'TYPE_VIDEO': {
         return (
           <Suspense fallback={<LoadingFallback />}>
             <VideoActivity
@@ -240,7 +241,8 @@ const ActivityClient = (props: ActivityClientProps) => {
             />
           </Suspense>
         );
-      case 'TYPE_DOCUMENT':
+      }
+      case 'TYPE_DOCUMENT': {
         return (
           <Suspense fallback={<LoadingFallback />}>
             <DocumentPdfActivity
@@ -249,7 +251,8 @@ const ActivityClient = (props: ActivityClientProps) => {
             />
           </Suspense>
         );
-      case 'TYPE_ASSIGNMENT':
+      }
+      case 'TYPE_ASSIGNMENT': {
         return assignment?.assignment_uuid ? (
           <Suspense fallback={<LoadingFallback />}>
             <AssignmentProvider assignment_uuid={assignment.assignment_uuid}>
@@ -261,8 +264,10 @@ const ActivityClient = (props: ActivityClientProps) => {
             </AssignmentProvider>
           </Suspense>
         ) : null;
-      default:
+      }
+      default: {
         return null;
+      }
     }
   }, [activity, course, assignment]);
 
@@ -1310,19 +1315,22 @@ const AssignmentTools = (props: {
       let displayGrade: string;
 
       switch (grading_type) {
-        case 'ALPHABET':
+        case 'ALPHABET': {
           displayGrade = convertNumericToAlphabet(grade, max_grade);
           break;
-        case 'NUMERIC':
+        }
+        case 'NUMERIC': {
           displayGrade = `${grade}/${max_grade}`;
           break;
+        }
         case 'PERCENTAGE': {
           const percentage = (grade / max_grade) * 100;
           displayGrade = `${percentage.toFixed(2)}%`;
           break;
         }
-        default:
+        default: {
           displayGrade = t('unknownGradingType');
+        }
       } // Use displayGrade here, e.g., update state or display it
       setFinalGrade(displayGrade);
     }

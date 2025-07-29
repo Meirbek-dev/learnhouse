@@ -278,7 +278,7 @@ const EditProductForm = ({
 }) => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
-  const [currencies, setCurrencies] = useState<Array<{ code: string; name: string }>>([]);
+  const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
   const t = useTranslations('DashPage.Payments.ProductPage.editForm');
   const validationSchema = useMemo(() => createValidationSchema(t), [t]);
 

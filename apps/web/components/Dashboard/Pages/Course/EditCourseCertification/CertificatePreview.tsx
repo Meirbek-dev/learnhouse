@@ -58,90 +58,101 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   // Function to get theme colors for each pattern
   const getPatternTheme = (pattern: string) => {
     switch (pattern) {
-      case 'royal':
+      case 'royal': {
         return {
           primary: 'text-amber-700',
           secondary: 'text-amber-600',
           icon: 'text-amber-600',
           badge: 'bg-amber-50 text-amber-700 border-amber-200',
         };
-      case 'tech':
+      }
+      case 'tech': {
         return {
           primary: 'text-cyan-700',
           secondary: 'text-cyan-600',
           icon: 'text-cyan-600',
           badge: 'bg-cyan-50 text-cyan-700 border-cyan-200',
         };
-      case 'nature':
+      }
+      case 'nature': {
         return {
           primary: 'text-green-700',
           secondary: 'text-green-600',
           icon: 'text-green-600',
           badge: 'bg-green-50 text-green-700 border-green-200',
         };
-      case 'geometric':
+      }
+      case 'geometric': {
         return {
           primary: 'text-purple-700',
           secondary: 'text-purple-600',
           icon: 'text-purple-600',
           badge: 'bg-purple-50 text-purple-700 border-purple-200',
         };
-      case 'vintage':
+      }
+      case 'vintage': {
         return {
           primary: 'text-orange-700',
           secondary: 'text-orange-600',
           icon: 'text-orange-600',
           badge: 'bg-orange-50 text-orange-700 border-orange-200',
         };
-      case 'waves':
+      }
+      case 'waves': {
         return {
           primary: 'text-blue-700',
           secondary: 'text-blue-600',
           icon: 'text-blue-600',
           badge: 'bg-blue-50 text-blue-700 border-blue-200',
         };
-      case 'minimal':
+      }
+      case 'minimal': {
         return {
           primary: 'text-gray-700',
           secondary: 'text-gray-600',
           icon: 'text-gray-600',
           badge: 'bg-gray-50 text-gray-700 border-gray-200',
         };
-      case 'professional':
+      }
+      case 'professional': {
         return {
           primary: 'text-slate-700',
           secondary: 'text-slate-600',
           icon: 'text-slate-600',
           badge: 'bg-slate-50 text-slate-700 border-slate-200',
         };
-      case 'academic':
+      }
+      case 'academic': {
         return {
           primary: 'text-indigo-700',
           secondary: 'text-indigo-600',
           icon: 'text-indigo-600',
           badge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
         };
-      case 'modern':
+      }
+      case 'modern': {
         return {
           primary: 'text-blue-700',
           secondary: 'text-blue-600',
           icon: 'text-blue-600',
           badge: 'bg-blue-50 text-blue-700 border-blue-200',
         };
-      default:
+      }
+      default: {
         return {
           primary: 'text-gray-700',
           secondary: 'text-gray-600',
           icon: 'text-gray-600',
           badge: 'bg-gray-50 text-gray-700 border-gray-200',
         };
+      }
     }
   };
 
   // Function to render different certificate patterns
   const renderCertificatePattern = (pattern: string) => {
     switch (pattern) {
-      case 'royal':
+      case 'royal': {
         return (
           <>
             {/* Royal ornate border with crown elements */}
@@ -179,8 +190,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      case 'tech':
+      case 'tech': {
         return (
           <>
             {/* Tech circuit board borders */}
@@ -216,8 +228,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      case 'nature':
+      case 'nature': {
         return (
           <>
             {/* Nature organic border */}
@@ -249,8 +262,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      case 'geometric':
+      case 'geometric': {
         return (
           <>
             {/* Geometric angular borders */}
@@ -287,8 +301,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      case 'vintage':
+      case 'vintage': {
         return (
           <>
             {/* Art deco style borders */}
@@ -334,8 +349,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      case 'waves':
+      case 'waves': {
         return (
           <>
             {/* Flowing wave borders */}
@@ -386,8 +402,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      case 'minimal':
+      case 'minimal': {
         return (
           <>
             {/* Minimal clean border */}
@@ -400,8 +417,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             <div className="absolute right-5 bottom-5 h-3 w-3 border-r border-b border-gray-400 opacity-40" />
           </>
         );
+      }
 
-      case 'professional':
+      case 'professional': {
         return (
           <>
             {/* Professional double border */}
@@ -427,8 +445,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      case 'academic':
+      case 'academic': {
         return (
           <>
             {/* Academic traditional border */}
@@ -461,8 +480,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      case 'modern':
+      case 'modern': {
         return (
           <>
             {/* Modern clean asymmetric border */}
@@ -497,9 +517,11 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             </div>
           </>
         );
+      }
 
-      default:
+      default: {
         return null;
+      }
     }
   };
 

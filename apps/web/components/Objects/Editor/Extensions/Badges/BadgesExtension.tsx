@@ -125,28 +125,39 @@ const BadgesExtension: FC = (props: any) => {
 
   const getBadgeColor = (color: string) => {
     switch (color) {
-      case 'sky':
+      case 'sky': {
         return 'bg-sky-400 text-sky-50';
-      case 'green':
+      }
+      case 'green': {
         return 'bg-green-400 text-green-50';
-      case 'yellow':
+      }
+      case 'yellow': {
         return 'bg-yellow-400 text-black';
-      case 'red':
+      }
+      case 'red': {
         return 'bg-red-500 text-red-50';
-      case 'purple':
+      }
+      case 'purple': {
         return 'bg-purple-400 text-purple-50';
-      case 'pink':
+      }
+      case 'pink': {
         return 'bg-pink-400 text-pink-50';
-      case 'teal':
+      }
+      case 'teal': {
         return 'bg-teal-400 text-teal-900';
-      case 'amber':
+      }
+      case 'amber': {
         return 'bg-amber-600 text-amber-100';
-      case 'indigo':
+      }
+      case 'indigo': {
         return 'bg-indigo-400 text-indigo-50';
-      case 'neutral':
+      }
+      case 'neutral': {
         return 'bg-neutral-800 text-white';
-      default:
+      }
+      default: {
         return 'bg-sky-400 text-white';
+      }
     }
   };
 

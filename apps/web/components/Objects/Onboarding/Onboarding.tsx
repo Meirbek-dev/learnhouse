@@ -36,11 +36,11 @@ interface OnboardingStep {
   imageSrc: StaticImageData;
   title: string;
   description: string;
-  buttons?: Array<{
+  buttons?: {
     label: string;
     action: () => void;
     icon?: ReactNode;
-  }>;
+  }[];
 }
 
 const Onboarding: FC = () => {

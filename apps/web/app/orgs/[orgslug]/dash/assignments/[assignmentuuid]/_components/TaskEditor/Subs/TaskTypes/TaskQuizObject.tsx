@@ -20,22 +20,22 @@ import { toast } from 'react-hot-toast';
 interface QuizSchema {
   questionText: string;
   questionUUID?: string;
-  options: Array<{
+  options: {
     optionUUID?: string;
     text: string;
     fileID: string;
     type: 'text' | 'image' | 'audio' | 'video';
     assigned_right_answer: boolean;
-  }>;
+  }[];
 }
 
 interface QuizSubmitSchema {
   questions: QuizSchema[];
-  submissions: Array<{
+  submissions: {
     questionUUID: string;
     optionUUID: string;
     answer: boolean;
-  }>;
+  }[];
   assignment_task_submission_uuid?: string;
 }
 

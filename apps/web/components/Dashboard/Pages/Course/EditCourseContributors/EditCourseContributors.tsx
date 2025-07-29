@@ -65,10 +65,10 @@ interface Contributor {
 
 interface BulkAddResponse {
   successful: string[];
-  failed: Array<{
+  failed: {
     username: string;
     reason: string;
-  }>;
+  }[];
 }
 
 // Helper function for date formatting
@@ -348,14 +348,18 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
 
   const getStatusStyle = (status: ContributorStatus) => {
     switch (status) {
-      case 'ACTIVE':
+      case 'ACTIVE': {
         return 'bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800';
-      case 'INACTIVE':
+      }
+      case 'INACTIVE': {
         return 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-800';
-      case 'PENDING':
+      }
+      case 'PENDING': {
         return 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 hover:text-yellow-800';
-      default:
+      }
+      default: {
         return 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-800';
+      }
     }
   };
 

@@ -35,31 +35,41 @@ const Modal = (params: ModalParams) => {
 
   const getMinHeight = () => {
     switch (params.minHeight) {
-      case 'sm':
+      case 'sm': {
         return 'md:min-h-[300px]';
-      case 'md':
+      }
+      case 'md': {
         return 'md:min-h-[500px]';
-      case 'lg':
+      }
+      case 'lg': {
         return 'md:min-h-[700px]';
-      case 'xl':
+      }
+      case 'xl': {
         return 'md:min-h-[900px]';
-      default:
+      }
+      default: {
         return '';
+      }
     }
   };
 
   const getMinWidth = () => {
     switch (params.minWidth) {
-      case 'sm':
+      case 'sm': {
         return 'md:min-w-[600px]';
-      case 'md':
+      }
+      case 'md': {
         return 'md:min-w-[800px]';
-      case 'lg':
+      }
+      case 'lg': {
         return 'md:min-w-[1000px]';
-      case 'xl':
+      }
+      case 'xl': {
         return 'md:min-w-[1200px]';
-      default:
+      }
+      default: {
         return '';
+      }
     }
   };
 

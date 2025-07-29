@@ -100,23 +100,29 @@ const InfoCalloutComponent = (props: any) => {
 
   const getVariantClasses = () => {
     switch (options.variant) {
-      case 'filled':
+      case 'filled': {
         return 'bg-gray-300 text-gray-700';
-      case 'outlined':
+      }
+      case 'outlined': {
         return 'bg-transparent border-2 border-gray-300 text-gray-500';
-      default:
+      }
+      default: {
         return 'bg-gray-100 text-gray-600';
+      }
     }
   };
 
   const getSizeClasses = () => {
     switch (options.size) {
-      case 'sm':
+      case 'sm': {
         return 'py-1 px-2 text-sm';
-      case 'lg':
+      }
+      case 'lg': {
         return 'py-3 px-4 text-lg';
-      default:
+      }
+      default: {
         return 'py-2 px-3';
+      }
     }
   };
 

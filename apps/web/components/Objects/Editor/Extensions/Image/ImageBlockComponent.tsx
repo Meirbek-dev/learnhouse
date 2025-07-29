@@ -102,12 +102,15 @@ const ImageBlockComponent = (props: any) => {
 
   const getAlignmentClass = () => {
     switch (alignment) {
-      case 'left':
+      case 'left': {
         return 'justify-start';
-      case 'right':
+      }
+      case 'right': {
         return 'justify-end';
-      default:
+      }
+      default: {
         return 'justify-center';
+      }
     }
   };
 

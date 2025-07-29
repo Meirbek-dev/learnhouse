@@ -145,7 +145,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
         // ? Suggest : the multi select should support the same pattern
 
         switch (e.key) {
-          case 'ArrowLeft':
+          case 'ArrowLeft': {
             if (dir === 'rtl') {
               if (value.length > 0 && activeIndex !== -1) {
                 moveNext();
@@ -154,8 +154,9 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               movePrev();
             }
             break;
+          }
 
-          case 'ArrowRight':
+          case 'ArrowRight': {
             if (dir === 'rtl') {
               if (value.length > 0 && target.selectionStart === 0) {
                 movePrev();
@@ -164,9 +165,10 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               moveNext();
             }
             break;
+          }
 
           case 'Backspace':
-          case 'Delete':
+          case 'Delete': {
             if (value.length > 0) {
               if (activeIndex !== -1 && activeIndex < value.length) {
                 const tag = value[activeIndex];
@@ -184,6 +186,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               }
             }
             break;
+          }
 
           case 'Escape': {
             const newIndex = activeIndex === -1 ? value.length - 1 : -1;
@@ -191,13 +194,14 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             break;
           }
 
-          case 'Enter':
+          case 'Enter': {
             if (inputValue.trim() !== '') {
               e.preventDefault();
               onValueChangeHandler(inputValue);
               setInputValue('');
             }
             break;
+          }
         }
       },
       [activeIndex, value, inputValue, RemoveValue, dir, selectedValue, isValueSelected, onValueChangeHandler],

@@ -122,6 +122,6 @@ const DashboardCard = ({
       </div>
     </Link>
   );
-}
+};
 
 export default DashboardHome;

@@ -57,40 +57,52 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
   const getVerificationStatusIcon = () => {
     switch (verificationStatus) {
-      case 'valid':
+      case 'valid': {
         return <CheckCircle className="h-8 w-8 text-green-600" />;
-      case 'invalid':
+      }
+      case 'invalid': {
         return <XCircle className="h-8 w-8 text-red-600" />;
-      case 'loading':
+      }
+      case 'loading': {
         return <AlertTriangle className="h-8 w-8 text-yellow-600" />;
-      default:
+      }
+      default: {
         return <AlertTriangle className="h-8 w-8 text-yellow-600" />;
+      }
     }
   };
 
   const getVerificationStatusText = () => {
     switch (verificationStatus) {
-      case 'valid':
+      case 'valid': {
         return t('certificateVerified');
-      case 'invalid':
+      }
+      case 'invalid': {
         return t('certificateNotFound');
-      case 'loading':
+      }
+      case 'loading': {
         return t('verifyingCertificate');
-      default:
+      }
+      default: {
         return t('verificationStatusUnknown');
+      }
     }
   };
 
   const getVerificationStatusColor = () => {
     switch (verificationStatus) {
-      case 'valid':
+      case 'valid': {
         return 'text-green-600 bg-green-50 border-green-200';
-      case 'invalid':
+      }
+      case 'invalid': {
         return 'text-red-600 bg-red-50 border-red-200';
-      case 'loading':
+      }
+      case 'loading': {
         return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      default:
+      }
+      default: {
         return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      }
     }
   };
 

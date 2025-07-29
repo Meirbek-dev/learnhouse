@@ -22,7 +22,7 @@ export default defineConfig([
 
     plugins: {
       'unused-imports': unusedImports,
-      'tailwindcss': tailwind,
+      tailwindcss: tailwind,
     },
 
     settings: {

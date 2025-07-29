@@ -41,14 +41,14 @@ interface Course {
   trail?: {
     runs: CourseRun[];
   };
-  chapters?: Array<{
+  chapters?: {
     name: string;
     activities: Array<{
       activity_uuid: string;
       name: string;
       activity_type: string;
     }>;
-  }>;
+  }[];
 }
 
 interface CourseActionsMobileProps {

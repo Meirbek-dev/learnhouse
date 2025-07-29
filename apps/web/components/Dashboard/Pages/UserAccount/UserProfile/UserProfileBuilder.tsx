@@ -270,53 +270,61 @@ const UserProfileBuilder = () => {
     };
 
     switch (type) {
-      case 'image-gallery':
+      case 'image-gallery': {
         return {
           ...baseSection,
           type: 'image-gallery',
           images: [],
         };
-      case 'text':
+      }
+      case 'text': {
         return {
           ...baseSection,
           type: 'text',
           content: '',
         };
-      case 'links':
+      }
+      case 'links': {
         return {
           ...baseSection,
           type: 'links',
           links: [],
         };
-      case 'skills':
+      }
+      case 'skills': {
         return {
           ...baseSection,
           type: 'skills',
           skills: [],
         };
-      case 'experience':
+      }
+      case 'experience': {
         return {
           ...baseSection,
           type: 'experience',
           experiences: [],
         };
-      case 'education':
+      }
+      case 'education': {
         return {
           ...baseSection,
           type: 'education',
           education: [],
         };
-      case 'affiliation':
+      }
+      case 'affiliation': {
         return {
           ...baseSection,
           type: 'affiliation',
           affiliations: [],
         };
-      case 'courses':
+      }
+      case 'courses': {
         return {
           ...baseSection,
           type: 'courses',
         };
+      }
     }
   };
 
@@ -628,7 +636,7 @@ interface SectionEditorProps {
 
 const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
   switch (section.type) {
-    case 'image-gallery':
+    case 'image-gallery': {
       return (
         <ImageGalleryEditor
           t={t}
@@ -636,7 +644,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'text':
+    }
+    case 'text': {
       return (
         <TextEditor
           t={t}
@@ -644,7 +653,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'links':
+    }
+    case 'links': {
       return (
         <LinksEditor
           t={t}
@@ -652,7 +662,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'skills':
+    }
+    case 'skills': {
       return (
         <SkillsEditor
           t={t}
@@ -660,7 +671,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'experience':
+    }
+    case 'experience': {
       return (
         <ExperienceEditor
           t={t}
@@ -668,7 +680,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'education':
+    }
+    case 'education': {
       return (
         <EducationEditor
           t={t}
@@ -676,7 +689,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'affiliation':
+    }
+    case 'affiliation': {
       return (
         <AffiliationEditor
           t={t}
@@ -684,7 +698,8 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    case 'courses':
+    }
+    case 'courses': {
       return (
         <CoursesEditor
           t={t}
@@ -692,8 +707,10 @@ const SectionEditor: FC<SectionEditorProps> = ({ t, section, onChange }) => {
           onChange={onChange}
         />
       );
-    default:
+    }
+    default: {
       return <div>{t('Errors.unknownSectionType')}</div>;
+    }
   }
 };
 

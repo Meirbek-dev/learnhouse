@@ -28,7 +28,7 @@ export interface Course {
   thumbnail_image: string;
   org_id: number;
   update_date: string;
-  authors?: Array<{
+  authors?: {
     user: {
       id: number;
       user_uuid: string;
@@ -39,7 +39,7 @@ export interface Course {
     };
     authorship: 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER';
     authorship_status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
-  }>;
+  }[];
 }
 
 export interface PropsType {

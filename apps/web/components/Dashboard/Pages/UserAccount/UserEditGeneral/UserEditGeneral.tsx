@@ -121,11 +121,11 @@ const DetailCard = React.memo(
     onUpdate: (id: string, field: keyof DetailItem, value: string) => void;
     onRemove: (id: string) => void;
     onLabelChange: (id: string, newLabel: string) => void;
-    availableIcons: ReadonlyArray<{
+    availableIcons: readonly {
       name: string;
       label: string;
       component: React.ElementType;
-    }>;
+    }[];
   }) => {
     // Add local state for label input
     const [localLabel, setLocalLabel] = useState(detail.label);

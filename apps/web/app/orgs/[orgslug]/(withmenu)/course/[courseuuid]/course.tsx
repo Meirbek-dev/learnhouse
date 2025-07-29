@@ -166,16 +166,21 @@ const CourseClient = (props: any) => {
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {
-      case 'TYPE_VIDEO':
+      case 'TYPE_VIDEO': {
         return t('video');
-      case 'TYPE_DOCUMENT':
+      }
+      case 'TYPE_DOCUMENT': {
         return t('document');
-      case 'TYPE_DYNAMIC':
+      }
+      case 'TYPE_DYNAMIC': {
         return t('page');
-      case 'TYPE_ASSIGNMENT':
+      }
+      case 'TYPE_ASSIGNMENT': {
         return t('assignment');
-      default:
+      }
+      default: {
         return t('learningMaterial');
+      }
     }
   };
 
