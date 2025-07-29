@@ -24,6 +24,7 @@ import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 // Import existing components and utilities
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { getDiscussionsSwrKey } from '@services/courses/discussions';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -50,77 +51,6 @@ const CourseClient = (props: any) => {
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image');
 
-  // Sample discussion posts - in a real app, this would come from an API
-  const [discussionPosts, setDiscussionPosts] = useState<any[]>([
-    {
-      id: '1',
-      username: 'Meirbek',
-      firstName: 'Меирбек Канатович',
-      lastName: '',
-      postMessage:
-        '<p><strong>Отличный курс!</strong> Я так многому научился благодаря видеоматериалам и практическим примерам.</p><p>Особенно понравились:</p><ul><li>Интерактивные упражнения</li><li>Подробные объяснения</li><li>Практические примеры</li></ul><p>Рекомендую всем! 👍</p>',
-      createDate: '2023-07-01T10:30:00.000Z',
-      updateDate: '2023-07-01T10:30:00.000Z',
-      upvotes: 12,
-      downvotes: 1,
-      userVote: null,
-      replies: [
-        {
-          id: 'r1',
-          username: 'Meirtest',
-          firstName: 'Преподаватель',
-          lastName: 'Преподович',
-          replyMessage:
-            '<p>Спасибо за <em>положительный отзыв</em>! Рад, что контент оказался вам полезен.</p><p>Если у вас есть вопросы, не стесняйтесь задавать их в комментариях.</p>',
-          createDate: '2023-07-01T14:20:00.000Z',
-          upvotes: 8,
-          downvotes: 0,
-          userVote: null,
-        },
-      ],
-    },
-    {
-      id: '2',
-      username: 'Meirbek',
-      firstName: 'Меирбек Канатович',
-      lastName: '',
-      postMessage:
-        '<p>Задания сложные, но действительно помогают закрепить знания.</p><blockquote><p>Практика — лучший учитель!</p></blockquote><p>Особенно понравилось <code>практическое задание №3</code> — очень познавательно.</p>',
-      createDate: '2025-01-15T09:15:00.000Z',
-      updateDate: '2025-01-15T09:15:00.000Z',
-      upvotes: 5,
-      downvotes: 2,
-      userVote: null,
-    },
-    {
-      id: '3',
-      username: 'Meirtest',
-      firstName: 'Махмет',
-      lastName: 'Махметов',
-      postMessage:
-        '<p>У кого-нибудь ещё были проблемы с <strong>третьим заданием</strong>? Я застрял на этапе реализации.</p><p>Вот код, с которым работаю:</p><pre><code>function calculateResult() {\n  // Здесь моя логика\n  return result;\n}</code></pre><p>Буду благодарен за помощь! 🙏</p>',
-      createDate: '2025-01-18T16:45:00.000Z',
-      updateDate: '2025-01-18T16:45:00.000Z',
-      upvotes: 3,
-      downvotes: 0,
-      userVote: null,
-      replies: [
-        {
-          id: 'r2',
-          username: 'Meirtest',
-          firstName: 'Махмуд',
-          lastName: 'Махмудов',
-          replyMessage:
-            '<p>У меня была та же проблема! Попробуйте посмотреть <a href="#chapter2">документацию в главе 2</a> — это помогло мне разобраться.</p><p>Также рекомендую посмотреть это видео:</p><p><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Полезное объяснение</a></p>',
-          createDate: '2025-01-18T18:30:00.000Z',
-          upvotes: 6,
-          downvotes: 1,
-          userVote: null,
-        },
-      ],
-    },
-  ]);
-
   const { courseuuid } = props;
   const { orgslug } = props;
   const { course } = props;
@@ -128,6 +58,15 @@ const CourseClient = (props: any) => {
   const isMobile = useIsMobile();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
+
+  const {
+    data: discussionPosts = [],
+    error: discussionsError,
+    mutate: mutateDiscussions,
+  } = useSWR(
+    course?.course_uuid && access_token ? getDiscussionsSwrKey(course.course_uuid, true, 50, 0) : null,
+    (url) => swrFetcher(url, access_token),
+  );
 
   // Add SWR for trail data
   const { data: trailData } = useSWR(`${getAPIUrl()}trail/org/${org?.id}/trail`, (url) =>
@@ -567,6 +506,8 @@ const CourseClient = (props: any) => {
             <CourseDiscussions
               initialPosts={discussionPosts}
               currentUser={session?.data?.user}
+              courseUuid={course?.course_uuid}
+              onMutate={mutateDiscussions}
             />
           </GeneralWrapperStyled>
           {/* Mobile Actions Box */}

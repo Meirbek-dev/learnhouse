@@ -35,11 +35,11 @@ interface Course {
   };
   chapters?: {
     name: string;
-    activities: Array<{
+    activities: {
       activity_uuid: string;
       name: string;
       activity_type: string;
-    }>;
+    }[];
   }[];
   open_to_contributors?: boolean;
 }

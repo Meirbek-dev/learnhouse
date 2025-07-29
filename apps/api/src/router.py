@@ -10,6 +10,7 @@ from src.routers.courses import (
     chapters,
     collections,
     courses,
+    discussions,
 )
 from src.routers.courses.activities import activities, blocks
 from src.routers.ee import cloud_internal, payments
@@ -35,6 +36,7 @@ v1_router.include_router(
 )
 v1_router.include_router(chapters.router, prefix="/chapters", tags=["chapters"])
 v1_router.include_router(activities.router, prefix="/activities", tags=["activities"])
+v1_router.include_router(discussions.router, prefix="/courses", tags=["discussions"])
 v1_router.include_router(
     collections.router, prefix="/collections", tags=["collections"]
 )
