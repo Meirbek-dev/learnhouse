@@ -23,7 +23,7 @@ from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_user_is_anon,
 )
-from src.services.courses.activities.uploads.videos import upload_video, upload_subtitle
+from src.services.courses.activities.uploads.videos import upload_subtitle, upload_video
 
 
 def _get_language_label(language_code: str) -> str:
@@ -80,7 +80,7 @@ async def create_video_activity(
     db_session: Session,
     video_file: UploadFile | None = None,
     details: str = "{}",
-    subtitle_files: list[UploadFile] = None,
+    subtitle_files: list[UploadFile] | None = None,
 ):
     # RBAC check
     await rbac_check(request, "activity_x", current_user, "create", db_session)

@@ -43,4 +43,4 @@ async def upload_subtitle(
         return {"success": True, "filename": f"subtitle.{language}.{subtitle_format}"}
 
     except Exception as e:
-        return {"success": False, "message": f"Error uploading subtitle: {str(e)}"}
+        return {"success": False, "message": f"Error uploading subtitle: {e!s}"}

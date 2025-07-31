@@ -1,6 +1,6 @@
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityMediaDirectory } from '@services/media/media';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
@@ -21,12 +21,12 @@ interface VideoDetails {
   endTime?: number | null;
   autoplay?: boolean;
   muted?: boolean;
-  subtitles?: Array<{
+  subtitles?: {
     language: string;
     filename: string;
     label: string;
     url: string;
-  }>;
+  }[];
 }
 
 interface SubtitleEntry {

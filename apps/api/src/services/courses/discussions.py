@@ -11,12 +11,12 @@ from src.db.courses.discussions import (
     CourseDiscussionCreate,
     CourseDiscussionRead,
     CourseDiscussionUpdate,
-    DiscussionLike,
-    DiscussionLikeCreate,
-    DiscussionLikeRead,
     DiscussionDislike,
     DiscussionDislikeCreate,
     DiscussionDislikeRead,
+    DiscussionLike,
+    DiscussionLikeCreate,
+    DiscussionLikeRead,
     DiscussionStatusEnum,
     DiscussionType,
 )
@@ -147,7 +147,9 @@ async def get_discussions_by_course_uuid(
 
     result = []
     for discussion in discussions:
-        discussion_data = await get_discussion_with_details(discussion.id, db_session, current_user)
+        discussion_data = await get_discussion_with_details(
+            discussion.id, db_session, current_user
+        )
 
         if include_replies:
             # Get replies for this discussion
@@ -163,7 +165,9 @@ async def get_discussions_by_course_uuid(
 
             reply_data = []
             for reply in replies:
-                reply_detail = await get_discussion_with_details(reply.id, db_session, current_user)
+                reply_detail = await get_discussion_with_details(
+                    reply.id, db_session, current_user
+                )
                 reply_data.append(reply_detail)
 
             discussion_data.replies = reply_data
@@ -618,7 +622,9 @@ async def get_discussion_replies(
 
     result = []
     for reply in replies:
-        reply_data = await get_discussion_with_details(reply.id, db_session, current_user)
+        reply_data = await get_discussion_with_details(
+            reply.id, db_session, current_user
+        )
         result.append(reply_data)
 
     return result

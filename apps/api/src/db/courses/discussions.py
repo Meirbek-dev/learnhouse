@@ -1,7 +1,8 @@
 from enum import Enum
+
+from pydantic import field_validator
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field
-from pydantic import field_validator
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
 from src.db.users import UserRead
@@ -80,13 +81,16 @@ class CourseDiscussionCreate(SQLModelStrictBaseModel):
     @classmethod
     def validate_content(cls, v):
         if not v:
-            raise ValueError("Content cannot be empty")
+            msg = "Content cannot be empty"
+            raise ValueError(msg)
 
         # Strip HTML tags to check if there's actual text content
         import re
-        clean_text = re.sub(r'<[^>]+>', '', str(v)).strip()
+
+        clean_text = re.sub(r"<[^>]+>", "", str(v)).strip()
         if not clean_text:
-            raise ValueError("Content cannot be empty")
+            msg = "Content cannot be empty"
+            raise ValueError(msg)
 
         return v
 
@@ -94,7 +98,8 @@ class CourseDiscussionCreate(SQLModelStrictBaseModel):
     @classmethod
     def validate_org_id(cls, v):
         if v is None or v <= 0:
-            raise ValueError("Valid organization ID is required")
+            msg = "Valid organization ID is required"
+            raise ValueError(msg)
         return v
 
 

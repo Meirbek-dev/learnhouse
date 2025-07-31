@@ -1,26 +1,26 @@
 import {
-  Upload,
-  Youtube,
-  ChevronDown,
-  Plus,
-  Clock,
-  Play,
-  VolumeX,
-  FileVideo,
-  Settings,
-  Languages,
-  CheckCircle2,
   AlertCircle,
-  UploadCloud,
-  Trash2,
-  Info,
   AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  FileVideo,
+  Info,
+  Languages,
+  Play,
+  Plus,
+  Settings,
+  Trash2,
+  Upload,
+  UploadCloud,
+  VolumeX,
+  Youtube,
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
-import React, { useState, useCallback, useMemo } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';
+import { useCallback, useMemo, useState } from 'react';
 import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
@@ -31,6 +31,7 @@ import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
+import type React from 'react';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 const SUPPORTED_SUBTITLE_FILES = constructAcceptValue(['srt', 'vtt']);
@@ -165,7 +166,7 @@ const SubtitleManager = ({
   const validateSubtitleFile = useCallback(
     (file: File): { valid: boolean; error?: string } => {
       // Check file type
-      if (!file.name.toLowerCase().endsWith('.srt') && !file.name.toLowerCase().endsWith('.vtt')) {
+      if (!(file.name.toLowerCase().endsWith('.srt') || file.name.toLowerCase().endsWith('.vtt'))) {
         return { valid: false, error: t('errorSubtitleFileType') };
       }
 
@@ -214,13 +215,13 @@ const SubtitleManager = ({
 
         setSubtitles([...subtitles, newSubtitle]);
         toast.success(t('successSubtitleAdded', { label }));
-      } catch (error) {
+      } catch {
         toast.error(t('errorFailedToAddSubtitle'));
       } finally {
         setUploadingFiles((prev) => prev.filter((id) => id !== fileId));
       }
     },
-    [subtitles, setSubtitles, validateSubtitleFile],
+    [subtitles, setSubtitles, validateSubtitleFile, t],
   );
 
   const removeSubtitle = useCallback(
@@ -231,7 +232,7 @@ const SubtitleManager = ({
         toast.success(t('successSubtitleRemoved', { label: subtitleToRemove.label }));
       }
     },
-    [subtitles, setSubtitles],
+    [subtitles, setSubtitles, t],
   );
 
   const updateSubtitle = useCallback(
@@ -239,12 +240,12 @@ const SubtitleManager = ({
       setSubtitles(subtitles.map((s) => (s.id === id ? { ...s, language, label } : s)));
       toast.success(t('successSubtitleLanguageUpdated'));
     },
-    [subtitles, setSubtitles],
+    [subtitles, setSubtitles, t],
   );
 
   const handleSubtitleUpload = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(event.target.files || []);
+      const files = [...(event.target.files || [])];
 
       if (files.length === 0) return;
 
@@ -265,7 +266,7 @@ const SubtitleManager = ({
 
       event.target.value = '';
     },
-    [addSubtitle],
+    [addSubtitle, t],
   );
 
   const handleDrop = useCallback(
@@ -273,7 +274,7 @@ const SubtitleManager = ({
       event.preventDefault();
       setDragOver(false);
 
-      const files = Array.from(event.dataTransfer.files);
+      const files = [...event.dataTransfer.files];
       const subtitleFiles = files.filter(
         (file) => file.name.toLowerCase().endsWith('.srt') || file.name.toLowerCase().endsWith('.vtt'),
       );
@@ -302,7 +303,7 @@ const SubtitleManager = ({
         addSubtitle(file, defaultLang, defaultLabel);
       });
     },
-    [addSubtitle],
+    [addSubtitle, t],
   );
 
   const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -438,10 +439,8 @@ const SubtitleManager = ({
             className="rounded-lg border border-blue-200 bg-blue-50 p-3"
           >
             <div className="flex items-center gap-2 text-sm text-blue-700">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
-              <span>
-                {t('processingFiles', { count: uploadingFiles.length })}
-              </span>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              <span>{t('processingFiles', { count: uploadingFiles.length })}</span>
             </div>
           </motion.div>
         )}
@@ -635,11 +634,11 @@ const VideoSettingsForm = ({
 
   const settingsCount = useMemo(() => {
     let count = 0;
-    if (videoDetails.startTime > 0) count++;
-    if (videoDetails.endTime) count++;
-    if (videoDetails.autoplay) count++;
-    if (videoDetails.muted) count++;
-    if (subtitles.length > 0) count++;
+    if (videoDetails.startTime > 0) count += 1;
+    if (videoDetails.endTime) count += 1;
+    if (videoDetails.autoplay) count += 1;
+    if (videoDetails.muted) count += 1;
+    if (subtitles.length > 0) count += 1;
     return count;
   }, [videoDetails, subtitles.length]);
 
@@ -883,7 +882,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [name, selectedView, video, youtubeUrl, videoDetails, isYouTubeUrlValid]);
+  }, [name, selectedView, video, youtubeUrl, videoDetails, isYouTubeUrlValid, t]);
 
   const handleVideoChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -915,7 +914,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
         toast.success(t('successVideoFileSelected'));
       }
     },
-    [name],
+    [name, t],
   );
 
   const canSubmit = useMemo(() => {
@@ -986,9 +985,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
         {/* Header */}
         <div className="border-b border-gray-200 pb-4 text-center">
           <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('createVideoActivity')}</h2>
-          <p className="text-sm text-gray-600">
-            {t('createVideoActivityDescription')}
-          </p>
+          <p className="text-sm text-gray-600">{t('createVideoActivityDescription')}</p>
         </div>
 
         {/* Activity Name */}
@@ -1252,7 +1249,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 <span>{t('creating')}</span>
               </div>
             ) : (
