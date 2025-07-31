@@ -67,15 +67,6 @@ export function getActivityMediaDirectory(
   return undefined;
 }
 
-export function getVideoSubtitlesDirectory(
-  orgUUID: string,
-  courseUUID: string,
-  activityUUID: string,
-  fileId: string,
-): string | undefined {
-  return `${getMediaUrl()}content/orgs/${orgUUID}/courses/${courseUUID}/activities/${activityUUID}/video/subtitles`;
-}
-
 export function getOrgLogoMediaDirectory(orgUUID: string, fileId: string): string {
   return `${getMediaUrl()}content/orgs/${orgUUID}/logos/${fileId}`;
 }

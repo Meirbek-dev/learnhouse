@@ -106,7 +106,7 @@ export default function DiscussionReply({
 
             {/* Action buttons */}
             {(isAdmin || isOwnReply) && !editing && (
-              <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="mr-5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                 {isOwnReply && (
                   <Button
                     variant="ghost"

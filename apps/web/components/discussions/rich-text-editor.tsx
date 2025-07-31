@@ -32,7 +32,6 @@ import { Input } from '@/components/ui/input';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { useTranslations } from 'next-intl';
-import Link from '@tiptap/extension-link';
 import { cn } from '@/lib/utils';
 
 interface RichTextEditorProps {
@@ -98,11 +97,11 @@ export default function RichTextEditor({
             class: 'bg-gray-100 p-3 rounded-md overflow-x-auto',
           },
         },
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-blue-600 hover:text-blue-800 underline',
+        link: {
+          openOnClick: false,
+          HTMLAttributes: {
+            class: 'text-blue-600 hover:text-blue-800 underline',
+          },
         },
       }),
       Image.configure({
@@ -127,15 +126,17 @@ export default function RichTextEditor({
       attributes: {
         class: cn(
           'prose prose-sm max-w-none focus:outline-none p-3',
+          'overflow-wrap-anywhere break-words word-break-break-word',
           'prose-headings:font-semibold prose-headings:text-gray-900 prose-headings:mt-4 prose-headings:mb-2',
-          'prose-p:text-gray-700 prose-p:leading-relaxed',
+          'prose-p:text-gray-700 prose-p:leading-relaxed prose-p:break-words',
           'prose-strong:text-gray-900 prose-em:text-gray-700',
-          'prose-code:text-gray-900 prose-code:bg-gray-100',
-          'prose-pre:bg-gray-100 prose-pre:text-gray-900',
+          'prose-code:text-gray-900 prose-code:bg-gray-100 prose-code:break-all',
+          'prose-pre:bg-gray-100 prose-pre:text-gray-900 prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap',
           'prose-blockquote:text-gray-700 prose-blockquote:border-gray-300',
           'prose-ul:text-gray-700 prose-ul:list-disc prose-ul:list-outside prose-ul:ml-4',
           'prose-ol:text-gray-700 prose-ol:list-decimal prose-ol:list-outside prose-ol:ml-4',
-          'prose-li:text-gray-700 prose-li:ml-0',
+          'prose-li:text-gray-700 prose-li:ml-0 prose-li:break-words',
+          'prose-a:break-all',
           className,
         ),
         style: `min-height: ${minHeight}`,
@@ -513,7 +514,7 @@ export default function RichTextEditor({
       {/* Editor Content */}
       <EditorContent
         editor={editor}
-        className="prose-editor"
+        className="prose-editor overflow-hidden"
         placeholder={placeholder}
       />
     </div>
