@@ -130,7 +130,7 @@ const CourseClient = (props: any) => {
       return cleanRunCourseUuid === cleanCourseUuid;
     });
     if (run) {
-      return run.steps.find((step: any) => step.activity_id === activity.id);
+      return run.steps.find((step: any) => step.activity_id === activity.id && step.complete === true);
     }
     return false;
   };

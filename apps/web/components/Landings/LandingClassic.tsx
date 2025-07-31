@@ -6,6 +6,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
+import { LearnerDashboard } from '@components/Dashboard/LearnerDashboard';
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -16,6 +17,7 @@ interface LandingClassicProps {
   collections: any[];
   orgslug: string;
   org_id: number;
+  showLearnerDashboard?: boolean;
 }
 
 const EmptyCollectionsState = memo(({ t }: { t: any }) => (
@@ -100,7 +102,7 @@ const CollectionGrid = memo(
 CollectionGrid.displayName = 'CollectionGrid';
 
 const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
-  <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+  <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
     {courses.map((course: any) => (
       <div
         key={course.course_uuid}
@@ -117,44 +119,28 @@ const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string
 
 CourseGrid.displayName = 'CourseGrid';
 
-const LandingClassic = ({ courses, collections, orgslug, org_id }: LandingClassicProps) => {
+const LandingClassic = ({
+  courses,
+  collections,
+  orgslug,
+  org_id,
+  showLearnerDashboard = false,
+}: LandingClassicProps) => {
   const t = useTranslations('HomePage');
 
   return (
     <div className="w-full">
       <GeneralWrapperStyled>
-        {/* Collections Section */}
-        <section className="mb-12 flex flex-col space-y-6">
-          <div className="flex items-center justify-between">
-            <TypeOfContentTitle
-              title={t('Collections.title')}
-              type="col"
-            />
-            <AuthenticatedClientElement
-              checkMethod="roles"
-              ressourceType="collections"
-              action="create"
+        {/* Learner Dashboard Section */}
+        {showLearnerDashboard && (
+          <section className="mb-8">
+            <LearnerDashboard
               orgId={org_id}
-            >
-              <Link
-                href={getUriWithOrg(orgslug, '/collections/new')}
-                className="transition-transform duration-200 hover:scale-105"
-              >
-                <NewCollectionButton />
-              </Link>
-            </AuthenticatedClientElement>
-          </div>
-
-          {collections.length === 0 ? (
-            <EmptyCollectionsState t={t} />
-          ) : (
-            <CollectionGrid
-              collections={collections}
-              orgslug={orgslug}
-              org_id={org_id}
+              orgSlug={orgslug}
+              courses={courses}
             />
-          )}
-        </section>
+          </section>
+        )}
 
         {/* Courses Section */}
         <section className="flex flex-col space-y-6">
@@ -184,6 +170,39 @@ const LandingClassic = ({ courses, collections, orgslug, org_id }: LandingClassi
             <CourseGrid
               courses={courses}
               orgslug={orgslug}
+            />
+          )}
+        </section>
+
+        {/* Collections Section */}
+        <section className="mb-12 flex flex-col space-y-6">
+          <div className="flex items-center justify-between">
+            <TypeOfContentTitle
+              title={t('Collections.title')}
+              type="col"
+            />
+            <AuthenticatedClientElement
+              checkMethod="roles"
+              ressourceType="collections"
+              action="create"
+              orgId={org_id}
+            >
+              <Link
+                href={getUriWithOrg(orgslug, '/collections/new')}
+                className="transition-transform duration-200 hover:scale-105"
+              >
+                <NewCollectionButton />
+              </Link>
+            </AuthenticatedClientElement>
+          </div>
+
+          {collections.length === 0 ? (
+            <EmptyCollectionsState t={t} />
+          ) : (
+            <CollectionGrid
+              collections={collections}
+              orgslug={orgslug}
+              org_id={org_id}
             />
           )}
         </section>

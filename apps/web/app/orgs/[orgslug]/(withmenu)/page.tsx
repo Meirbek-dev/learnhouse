@@ -72,6 +72,9 @@ const OrgHomePage = async (params: any) => {
   // Check if custom landing is enabled
   const hasCustomLanding = org.config?.config?.landing?.enabled;
 
+  // Show enhanced dashboard for authenticated users
+  const showEnhancedDashboard = session?.user && !hasCustomLanding;
+
   return (
     <div className="w-full">
       {hasCustomLanding ? (
@@ -85,6 +88,7 @@ const OrgHomePage = async (params: any) => {
           collections={collections}
           orgslug={orgslug}
           org_id={org_id}
+          showLearnerDashboard={showEnhancedDashboard}
         />
       )}
     </div>

@@ -33,8 +33,12 @@ async def api_get_course_discussions(
     course_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    include_replies: Annotated[bool, Query(description="Include replies in response")] = False,
-    limit: Annotated[int, Query(le=100, description="Number of discussions to return")] = 50,
+    include_replies: Annotated[
+        bool, Query(description="Include replies in response")
+    ] = False,
+    limit: Annotated[
+        int, Query(le=100, description="Number of discussions to return")
+    ] = 50,
     offset: Annotated[int, Query(description="Number of discussions to skip")] = 0,
 ) -> list[CourseDiscussionRead]:
     """
@@ -159,7 +163,9 @@ async def api_get_discussion_replies(
     discussion_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    limit: Annotated[int, Query(le=100, description="Number of replies to return")] = 50,
+    limit: Annotated[
+        int, Query(le=100, description="Number of replies to return")
+    ] = 50,
     offset: Annotated[int, Query(description="Number of replies to skip")] = 0,
 ) -> list[CourseDiscussionRead]:
     """

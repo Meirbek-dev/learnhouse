@@ -272,6 +272,22 @@ async def add_activity_to_trail(
             request, user.id, course.id, db_session
         )
 
+    # 🎮 GAMIFICATION: Award XP and update learning streak for activity completion
+    try:
+        from src.services.gamification import update_learning_streak
+
+        await update_learning_streak(
+            request=request,
+            user=user,
+            org_id=course.org_id,
+            db_session=db_session,
+            activity_id=activity.id,
+            course_id=course.id,
+        )
+    except ImportError:
+        # Gamification service not available, continue without it
+        pass
+
     statement = select(TrailRun).where(
         TrailRun.trail_id == trail.id, TrailRun.user_id == user.id
     )
