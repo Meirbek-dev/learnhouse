@@ -18,10 +18,10 @@ from src.services.courses.discussions import (
     get_discussion_replies,
     get_discussions_by_course_uuid,
     like_discussion,
+    toggle_discussion_dislike,
+    toggle_discussion_like,
     unlike_discussion,
     update_discussion,
-    toggle_discussion_like,
-    toggle_discussion_dislike,
 )
 
 router = APIRouter()
@@ -33,13 +33,9 @@ async def api_get_course_discussions(
     course_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    include_replies: bool = Query(
-        default=False, description="Include replies in response"
-    ),
-    limit: int = Query(
-        default=50, le=100, description="Number of discussions to return"
-    ),
-    offset: int = Query(default=0, description="Number of discussions to skip"),
+    include_replies: Annotated[bool, Query(description="Include replies in response")] = False,
+    limit: Annotated[int, Query(le=100, description="Number of discussions to return")] = 50,
+    offset: Annotated[int, Query(description="Number of discussions to skip")] = 0,
 ) -> list[CourseDiscussionRead]:
     """
     Get Course Discussions by course_uuid
@@ -135,7 +131,9 @@ async def api_toggle_course_discussion_like(
     """
     Toggle like status for a Course Discussion (like if not liked, unlike if liked)
     """
-    return await toggle_discussion_like(request, discussion_uuid, current_user, db_session)
+    return await toggle_discussion_like(
+        request, discussion_uuid, current_user, db_session
+    )
 
 
 @router.put("/{course_uuid}/discussions/{discussion_uuid}/dislike")
@@ -149,7 +147,9 @@ async def api_toggle_course_discussion_dislike(
     """
     Toggle dislike status for a Course Discussion (dislike if not disliked, undislike if disliked)
     """
-    return await toggle_discussion_dislike(request, discussion_uuid, current_user, db_session)
+    return await toggle_discussion_dislike(
+        request, discussion_uuid, current_user, db_session
+    )
 
 
 @router.get("/{course_uuid}/discussions/{discussion_uuid}/replies")
@@ -159,8 +159,8 @@ async def api_get_discussion_replies(
     discussion_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    limit: int = Query(default=50, le=100, description="Number of replies to return"),
-    offset: int = Query(default=0, description="Number of replies to skip"),
+    limit: Annotated[int, Query(le=100, description="Number of replies to return")] = 50,
+    offset: Annotated[int, Query(description="Number of replies to skip")] = 0,
 ) -> list[CourseDiscussionRead]:
     """
     Get replies for a specific discussion

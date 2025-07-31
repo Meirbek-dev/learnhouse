@@ -32,7 +32,6 @@ import { Input } from '@/components/ui/input';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { useTranslations } from 'next-intl';
-import Link from '@tiptap/extension-link';
 import { cn } from '@/lib/utils';
 
 interface RichTextEditorProps {

@@ -1,3 +1,5 @@
+from fastapi import UploadFile
+
 from src.services.utils.upload_content import upload_content
 
 
@@ -16,3 +18,29 @@ async def upload_video(video_file, activity_uuid, org_uuid, course_uuid):
 
     except Exception:
         return {"message": "There was an error uploading the file"}
+
+
+async def upload_subtitle(
+    subtitle_file: UploadFile,
+    activity_uuid: str,
+    org_uuid: str,
+    course_uuid: str,
+    language: str,
+    subtitle_id: str | None = None,
+) -> dict:
+    """Upload subtitle file to storage in the same directory as video"""
+    contents = subtitle_file.file.read()
+    subtitle_format = subtitle_file.filename.split(".")[-1]
+
+    try:
+        await upload_content(
+            f"courses/{course_uuid}/activities/{activity_uuid}/video",
+            "orgs",
+            org_uuid,
+            contents,
+            f"subtitle.{language}.{subtitle_format}",
+        )
+        return {"success": True, "filename": f"subtitle.{language}.{subtitle_format}"}
+
+    except Exception as e:
+        return {"success": False, "message": f"Error uploading subtitle: {e!s}"}

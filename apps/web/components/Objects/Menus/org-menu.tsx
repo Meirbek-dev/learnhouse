@@ -165,7 +165,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
             {/* Logo */}
             <Link
               href={getUriWithOrg(orgslug, '/')}
-              className="hover:bg-accent/60 flex items-center justify-center rounded-xl p-2 transition-colors"
+              className="hover:bg-accent/60 flex items-center justify-center rounded-md p-2 transition-colors"
             >
               <OpenULogoSVG />
             </Link>

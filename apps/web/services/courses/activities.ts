@@ -30,17 +30,35 @@ export async function createFileActivity(
   if (type === 'video') {
     formData.append('name', data.name);
     formData.append('video_file', file);
+
+    // Add subtitle files if present
+    if (data.details?.subtitles && Array.isArray(data.details.subtitles)) {
+      data.details.subtitles.forEach((subtitle: any) => {
+        if (subtitle.file) {
+          formData.append('subtitle_files', subtitle.file);
+        }
+      });
+    }
+
     // Add video details
     if (data.details) {
-      formData.append(
-        'details',
-        JSON.stringify({
-          startTime: data.details.startTime || 0,
-          endTime: data.details.endTime || null,
-          autoplay: data.details.autoplay,
-          muted: data.details.muted,
-        }),
-      );
+      const detailsToSend: any = {
+        startTime: data.details.startTime || 0,
+        endTime: data.details.endTime || null,
+        autoplay: data.details.autoplay,
+        muted: data.details.muted,
+      };
+
+      // Include subtitle metadata (without files)
+      if (data.details.subtitles) {
+        detailsToSend.subtitles = data.details.subtitles.map((subtitle: any) => ({
+          id: subtitle.id,
+          language: subtitle.language,
+          label: subtitle.label,
+        }));
+      }
+
+      formData.append('details', JSON.stringify(detailsToSend));
     }
     endpoint = `${getAPIUrl()}activities/video`;
   } else if (type === 'documentpdf') {
