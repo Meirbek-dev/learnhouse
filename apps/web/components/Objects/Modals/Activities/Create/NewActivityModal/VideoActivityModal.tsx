@@ -1,21 +1,53 @@
-import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import {
+  Upload,
+  Youtube,
+  ChevronDown,
+  Plus,
+  Clock,
+  Play,
+  VolumeX,
+  FileVideo,
+  Settings,
+  Languages,
+  CheckCircle2,
+  AlertCircle,
+  UploadCloud,
+  Trash2,
+  Info,
+  AlertTriangle,
+} from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
+import React, { useState, useCallback, useMemo } from 'react';
+import * as Collapsible from '@radix-ui/react-collapsible';
+import { motion, AnimatePresence } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';
+import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
-import { Upload, Youtube } from 'lucide-react';
 import * as Form from '@radix-ui/react-form';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
+import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
-import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { cn } from '@/lib/utils';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
+const SUPPORTED_SUBTITLE_FILES = constructAcceptValue(['srt', 'vtt']);
+
+interface SubtitleFile {
+  id: string;
+  file: File;
+  language: string;
+  label: string;
+}
 
 interface VideoDetails {
   startTime: number;
   endTime: number | null;
   autoplay: boolean;
   muted: boolean;
+  subtitles?: SubtitleFile[];
 }
 
 interface ExternalVideoObject {
@@ -26,6 +58,520 @@ interface ExternalVideoObject {
   details: VideoDetails;
 }
 
+const LANGUAGE_OPTIONS = [
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'kz', label: 'Қазақша', flag: '🇰🇿' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+];
+
+const getLocalizedLanguageOptions = (t: any) => [
+  { code: 'en', label: t('languageEnglish'), flag: '🇺🇸' },
+  { code: 'ru', label: t('languageRussian'), flag: '🇷🇺' },
+  { code: 'kz', label: t('languageKazakh'), flag: '🇰🇿' },
+  { code: 'fr', label: t('languageFrench'), flag: '🇫🇷' },
+  { code: 'es', label: t('languageSpanish'), flag: '🇪🇸' },
+  { code: 'de', label: t('languageGerman'), flag: '🇩🇪' },
+];
+
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+const TimeInput = ({
+  label,
+  icon: Icon,
+  minutes,
+  seconds,
+  onMinutesChange,
+  onSecondsChange,
+  placeholder,
+  disabled = false,
+  t,
+}: {
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  minutes: number;
+  seconds: number;
+  onMinutesChange: (minutes: number) => void;
+  onSecondsChange: (seconds: number) => void;
+  placeholder: string;
+  disabled?: boolean;
+  t: any;
+}) => (
+  <div className="space-y-3">
+    <Label className="flex items-center gap-2 text-sm font-medium text-gray-900">
+      <Icon
+        size={16}
+        className="text-blue-600"
+      />
+      {label}
+    </Label>
+    <div className="flex items-center gap-3">
+      <div className="flex-1">
+        <Input
+          type="number"
+          min="0"
+          value={minutes}
+          onChange={(e) => onMinutesChange(Math.max(0, Number.parseInt(e.target.value, 10) || 0))}
+          placeholder="0"
+          className="text-center"
+          disabled={disabled}
+        />
+        <span className="mt-1 block text-center text-xs font-medium text-gray-500">{t('minutes')}</span>
+      </div>
+      <div className="flex items-center text-xl font-bold text-gray-400">:</div>
+      <div className="flex-1">
+        <Input
+          type="number"
+          min="0"
+          max="59"
+          value={seconds}
+          onChange={(e) => onSecondsChange(Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0)))}
+          placeholder="00"
+          className="text-center"
+          disabled={disabled}
+        />
+        <span className="mt-1 block text-center text-xs font-medium text-gray-500">{t('seconds')}</span>
+      </div>
+    </div>
+    <div className="text-center">
+      <Badge
+        variant="outline"
+        className="text-xs"
+      >
+        {formatTime(minutes * 60 + seconds)}
+      </Badge>
+    </div>
+  </div>
+);
+
+const SubtitleManager = ({
+  subtitles,
+  setSubtitles,
+  t,
+}: {
+  subtitles: SubtitleFile[];
+  setSubtitles: (subtitles: SubtitleFile[]) => void;
+  t: any;
+}) => {
+  const [dragOver, setDragOver] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState<string[]>([]);
+
+  const validateSubtitleFile = useCallback(
+    (file: File): { valid: boolean; error?: string } => {
+      // Check file type
+      if (!file.name.toLowerCase().endsWith('.srt') && !file.name.toLowerCase().endsWith('.vtt')) {
+        return { valid: false, error: t('errorSubtitleFileType') };
+      }
+
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        return { valid: false, error: t('errorSubtitleFileSize') };
+      }
+
+      // Check if language already exists
+      const fileName = file.name.toLowerCase();
+      const potentialLang = fileName.split('.').slice(-2, -1)[0];
+      const existingLang = subtitles.find(
+        (s) => s.language === potentialLang || s.file.name.toLowerCase() === fileName,
+      );
+
+      if (existingLang) {
+        return { valid: false, error: t('errorSubtitleLanguageExists', { language: potentialLang }) };
+      }
+
+      return { valid: true };
+    },
+    [subtitles, t],
+  );
+
+  const addSubtitle = useCallback(
+    async (file: File, language: string, label: string) => {
+      const validation = validateSubtitleFile(file);
+      if (!validation.valid) {
+        toast.error(validation.error || t('errorInvalidSubtitleFile'));
+        return;
+      }
+
+      const fileId = crypto.randomUUID();
+      setUploadingFiles((prev) => [...prev, fileId]);
+
+      try {
+        // Simulate file processing
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const newSubtitle: SubtitleFile = {
+          id: fileId,
+          file,
+          language,
+          label,
+        };
+
+        setSubtitles([...subtitles, newSubtitle]);
+        toast.success(t('successSubtitleAdded', { label }));
+      } catch (error) {
+        toast.error(t('errorFailedToAddSubtitle'));
+      } finally {
+        setUploadingFiles((prev) => prev.filter((id) => id !== fileId));
+      }
+    },
+    [subtitles, setSubtitles, validateSubtitleFile],
+  );
+
+  const removeSubtitle = useCallback(
+    (id: string) => {
+      const subtitleToRemove = subtitles.find((s) => s.id === id);
+      setSubtitles(subtitles.filter((subtitle) => subtitle.id !== id));
+      if (subtitleToRemove) {
+        toast.success(t('successSubtitleRemoved', { label: subtitleToRemove.label }));
+      }
+    },
+    [subtitles, setSubtitles],
+  );
+
+  const updateSubtitle = useCallback(
+    (id: string, language: string, label: string) => {
+      setSubtitles(subtitles.map((s) => (s.id === id ? { ...s, language, label } : s)));
+      toast.success(t('successSubtitleLanguageUpdated'));
+    },
+    [subtitles, setSubtitles],
+  );
+
+  const handleSubtitleUpload = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(event.target.files || []);
+
+      if (files.length === 0) return;
+
+      files.forEach((file) => {
+        // Enhanced language detection
+        const fileName = file.name.toLowerCase();
+        const parts = fileName.split('.');
+        const potentialLang = parts.length > 2 ? parts[parts.length - 2] : '';
+        const detectedLang = getLocalizedLanguageOptions(t).find(
+          (lang) => lang.code === potentialLang || fileName.includes(lang.code),
+        );
+
+        const defaultLang = detectedLang ? detectedLang.code : 'en';
+        const defaultLabel = detectedLang ? detectedLang.label : t('languageEnglish');
+
+        addSubtitle(file, defaultLang, defaultLabel);
+      });
+
+      event.target.value = '';
+    },
+    [addSubtitle],
+  );
+
+  const handleDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setDragOver(false);
+
+      const files = Array.from(event.dataTransfer.files);
+      const subtitleFiles = files.filter(
+        (file) => file.name.toLowerCase().endsWith('.srt') || file.name.toLowerCase().endsWith('.vtt'),
+      );
+
+      if (subtitleFiles.length === 0) {
+        toast.error(t('errorDropSubtitleFilesOnly'));
+        return;
+      }
+
+      if (subtitleFiles.length > 5) {
+        toast.error(t('errorMaxSubtitleFiles'));
+        return;
+      }
+
+      subtitleFiles.forEach((file) => {
+        const fileName = file.name.toLowerCase();
+        const parts = fileName.split('.');
+        const potentialLang = parts.length > 2 ? parts[parts.length - 2] : '';
+        const detectedLang = getLocalizedLanguageOptions(t).find(
+          (lang) => lang.code === potentialLang || fileName.includes(lang.code),
+        );
+
+        const defaultLang = detectedLang ? detectedLang.code : 'en';
+        const defaultLabel = detectedLang ? detectedLang.label : t('languageEnglish');
+
+        addSubtitle(file, defaultLang, defaultLabel);
+      });
+    },
+    [addSubtitle],
+  );
+
+  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragOver(false);
+  }, []);
+
+  const fileInputId = useMemo(() => `subtitle-upload-${Date.now()}`, []);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label className="flex items-center gap-2 text-sm font-medium text-gray-900">
+          <Languages
+            size={16}
+            className="text-blue-600"
+          />
+          {t('subtitles')}
+          {subtitles.length > 0 && (
+            <Badge
+              variant="secondary"
+              className="bg-blue-100 text-blue-800 hover:bg-blue-100"
+            >
+              {subtitles.length}
+            </Badge>
+          )}
+        </Label>
+        <div className="flex items-center gap-2">
+          {subtitles.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSubtitles([]);
+                toast.success(t('successAllSubtitlesRemoved'));
+              }}
+              className="text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
+            >
+              <Trash2
+                size={12}
+                className="mr-1"
+              />
+              {t('clearAll')}
+            </Button>
+          )}
+          <input
+            type="file"
+            accept={SUPPORTED_SUBTITLE_FILES}
+            onChange={handleSubtitleUpload}
+            className="hidden"
+            id={fileInputId}
+            multiple
+            aria-label={t('ariaUploadSubtitleFile')}
+          />
+          <Label
+            htmlFor={fileInputId}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md disabled:opacity-50"
+          >
+            <Plus size={14} />
+            {t('addSubtitle')}
+          </Label>
+        </div>
+      </div>
+
+      {/* Drag and Drop Zone */}
+      <motion.div
+        className={cn(
+          'relative rounded-xl border-2 border-dashed transition-all duration-200',
+          dragOver ? 'border-blue-400 bg-blue-50/50 scale-102' : 'border-gray-200 hover:border-gray-300',
+          subtitles.length === 0 ? 'p-8' : 'p-4',
+        )}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        animate={{
+          scale: dragOver ? 1.02 : 1,
+        }}
+        transition={{ duration: 0.2 }}
+      >
+        {dragOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-blue-100/50"
+          >
+            <div className="flex flex-col items-center text-blue-700">
+              <UploadCloud className="mb-2 h-8 w-8" />
+              <p className="font-medium">{t('dropSubtitleFilesHere')}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {subtitles.length === 0 ? (
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+              <UploadCloud className="h-6 w-6 text-blue-600" />
+            </div>
+            <h3 className="mb-2 text-sm font-medium text-gray-900">{t('noSubtitlesYet')}</h3>
+            <p className="mb-4 text-xs text-gray-500">{t('dragDropSubtitlesInstruction')}</p>
+            <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
+              <div className="flex items-center gap-1">
+                <CheckCircle2 size={12} />
+                <span>{t('subtitleFormatsSupported')}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Info size={12} />
+                <span>{t('subtitleFileSizeLimit')}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="py-2 text-center">
+            <p className="flex items-center justify-center gap-2 text-xs text-gray-500">
+              <UploadCloud size={12} />
+              {t('dragAdditionalSubtitles')}
+            </p>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Upload Progress */}
+      <AnimatePresence>
+        {uploadingFiles.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="rounded-lg border border-blue-200 bg-blue-50 p-3"
+          >
+            <div className="flex items-center gap-2 text-sm text-blue-700">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+              <span>
+                {t('processingFiles', { count: uploadingFiles.length })}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Subtitle List */}
+      <AnimatePresence>
+        {subtitles.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-3"
+          >
+            <Separator />
+            {subtitles.map((subtitle, index) => (
+              <motion.div
+                key={subtitle.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2, delay: index * 0.1 }}
+                className="group flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-blue-200">
+                    <span className="text-xs font-semibold text-blue-700">{index + 1}</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="truncate text-sm font-medium text-gray-900"
+                      title={subtitle.file.name}
+                    >
+                      {subtitle.file.name}
+                    </p>
+                    <div className="mt-1 flex items-center gap-3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 border-gray-200 text-xs hover:bg-gray-50"
+                          >
+                            <span className="mr-2">
+                              {getLocalizedLanguageOptions(t).find((lang) => lang.code === subtitle.language)?.flag}
+                            </span>
+                            {subtitle.label}
+                            <ChevronDown
+                              size={12}
+                              className="ml-1 opacity-50"
+                            />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="w-48"
+                        >
+                          {getLocalizedLanguageOptions(t).map((lang) => (
+                            <DropdownMenuItem
+                              key={lang.code}
+                              onClick={() => updateSubtitle(subtitle.id, lang.code, lang.label)}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <span>{lang.flag}</span>
+                              {lang.label}
+                              {subtitle.language === lang.code && (
+                                <CheckCircle2
+                                  size={14}
+                                  className="ml-auto text-blue-600"
+                                />
+                              )}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <Badge
+                        variant="outline"
+                        className="text-xs"
+                      >
+                        {(subtitle.file.size / 1024).toFixed(1)} KB
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="border-green-200 bg-green-50 text-xs text-green-700"
+                      >
+                        {subtitle.file.name.split('.').pop()?.toUpperCase()}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeSubtitle(subtitle.id)}
+                  className="h-8 w-8 p-0 text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-red-50 hover:text-red-600"
+                  aria-label={t('removeSubtitleAriaLabel', { filename: subtitle.file.name })}
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Help text */}
+      {subtitles.length === 0 && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+          <div className="flex items-start gap-2 text-sm text-gray-600">
+            <Info
+              size={14}
+              className="mt-0.5 text-gray-400"
+            />
+            <div>
+              <p className="mb-1 font-medium">{t('subtitleGuidelines')}</p>
+              <ul className="space-y-1 text-xs text-gray-500">
+                <li>• {t('subtitleFormatsInfo')}</li>
+                <li>• {t('subtitleFileSizeInfo')}</li>
+                <li>• {t('subtitleAutoDetectionInfo')}</li>
+                <li>• {t('subtitleBatchUploadInfo')}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const VideoSettingsForm = ({
   videoDetails,
   setVideoDetails,
@@ -35,170 +581,358 @@ const VideoSettingsForm = ({
   setVideoDetails: (details: VideoDetails) => void;
   t: any;
 }) => {
-  const convertToSeconds = (minutes: number, seconds: number) => {
-    return minutes * 60 + seconds;
-  };
+  const [isOpen, setIsOpen] = useState(false);
+  const subtitles = videoDetails.subtitles || [];
 
-  const convertFromSeconds = (totalSeconds: number) => {
+  const setSubtitles = useCallback(
+    (newSubtitles: SubtitleFile[]) => {
+      setVideoDetails({
+        ...videoDetails,
+        subtitles: newSubtitles,
+      });
+    },
+    [videoDetails, setVideoDetails],
+  );
+
+  const convertToSeconds = useCallback((minutes: number, seconds: number) => {
+    return minutes * 60 + seconds;
+  }, []);
+
+  const convertFromSeconds = useCallback((totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return { minutes, seconds };
-  };
+  }, []);
 
   const startTimeParts = convertFromSeconds(videoDetails.startTime);
   const endTimeParts = videoDetails.endTime ? convertFromSeconds(videoDetails.endTime) : { minutes: 0, seconds: 0 };
 
+  const updateStartTime = useCallback(
+    (minutes: number, seconds: number) => {
+      const newStartTime = convertToSeconds(minutes, seconds);
+      setVideoDetails({
+        ...videoDetails,
+        startTime: newStartTime,
+        // Auto-adjust end time if it's now invalid
+        endTime: videoDetails.endTime && videoDetails.endTime <= newStartTime ? null : videoDetails.endTime,
+      });
+    },
+    [videoDetails, setVideoDetails, convertToSeconds],
+  );
+
+  const updateEndTime = useCallback(
+    (minutes: number, seconds: number) => {
+      const totalSeconds = convertToSeconds(minutes, seconds);
+      if (totalSeconds > videoDetails.startTime) {
+        setVideoDetails({
+          ...videoDetails,
+          endTime: totalSeconds,
+        });
+      }
+    },
+    [videoDetails, setVideoDetails, convertToSeconds],
+  );
+
+  const settingsCount = useMemo(() => {
+    let count = 0;
+    if (videoDetails.startTime > 0) count++;
+    if (videoDetails.endTime) count++;
+    if (videoDetails.autoplay) count++;
+    if (videoDetails.muted) count++;
+    if (subtitles.length > 0) count++;
+    return count;
+  }, [videoDetails, subtitles.length]);
+
+  const hasTimingErrors = useMemo(() => {
+    return Boolean(videoDetails.endTime && videoDetails.endTime <= videoDetails.startTime);
+  }, [videoDetails.startTime, videoDetails.endTime]);
+
   return (
-    <div className="mt-4 space-y-4 rounded-lg bg-gray-50 p-4">
-      <h3 className="mb-3 font-medium text-gray-900">{t('videoSettingsHeading')}</h3>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>{t('startTimeLabel')}</Label>
-          <div className="mt-1 flex gap-2">
-            <div className="flex-1">
-              <Input
-                type="number"
-                min="0"
-                value={startTimeParts.minutes}
-                onChange={(e) => {
-                  const minutes = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
-                  const { seconds } = startTimeParts;
-                  setVideoDetails({
-                    ...videoDetails,
-                    startTime: convertToSeconds(minutes, seconds),
-                  });
-                }}
+    <Collapsible.Root
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      className="mt-6"
+    >
+      <Collapsible.Trigger asChild>
+        <Button
+          variant="outline"
+          className="flex w-full items-center justify-between border-2 p-8 transition-colors duration-200 hover:border-gray-300 hover:bg-gray-50"
+          type="button"
+        >
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-gray-100 p-2">
+              <Settings
+                size={16}
+                className="text-gray-600"
+              />
+            </div>
+            <div className="text-left">
+              <span className="font-medium text-gray-900">{t('additionalSettings')}</span>
+              <p className="mt-0.5 text-xs text-gray-500">{t('additionalSettingsDescription')}</p>
+            </div>
+            {settingsCount > 0 && (
+              <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                {t('settingsActiveCount', { count: settingsCount })}
+              </Badge>
+            )}
+          </div>
+          <ChevronDown
+            size={18}
+            className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </Button>
+      </Collapsible.Trigger>
+
+      <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp overflow-hidden">
+        <div className="mt-3 space-y-6 rounded-lg border-2 border-gray-100 bg-gradient-to-br from-gray-50 to-white p-6 shadow-sm">
+          {/* Timing Controls */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
+              <div className="rounded-lg bg-blue-100 p-2">
+                <Clock
+                  size={16}
+                  className="text-blue-600"
+                />
+              </div>
+              <h4 className="text-sm font-semibold text-gray-900">{t('timingControls')}</h4>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <TimeInput
+                label={t('startTimeLabel')}
+                icon={Play}
+                minutes={startTimeParts.minutes}
+                seconds={startTimeParts.seconds}
+                onMinutesChange={(minutes) => updateStartTime(minutes, startTimeParts.seconds)}
+                onSecondsChange={(seconds) => updateStartTime(startTimeParts.minutes, seconds)}
                 placeholder={t('minutesPlaceholder')}
-                className="w-full"
+                t={t}
               />
-              <span className="mt-1 block text-xs text-gray-500">{t('minutes')}</span>
+              <TimeInput
+                label={t('endTimeLabel')}
+                icon={Clock}
+                minutes={endTimeParts.minutes}
+                seconds={endTimeParts.seconds}
+                onMinutesChange={(minutes) => updateEndTime(minutes, endTimeParts.seconds)}
+                onSecondsChange={(seconds) => updateEndTime(endTimeParts.minutes, seconds)}
+                placeholder={t('minutesPlaceholder')}
+                disabled={hasTimingErrors}
+                t={t}
+              />
             </div>
-            <div className="flex-1">
-              <Input
-                type="number"
-                min="0"
-                max="59"
-                value={startTimeParts.seconds}
-                onChange={(e) => {
-                  const { minutes } = startTimeParts;
-                  const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0));
-                  setVideoDetails({
-                    ...videoDetails,
-                    startTime: convertToSeconds(minutes, seconds),
-                  });
-                }}
-                placeholder={t('secondsPlaceholder')}
-                className="w-full"
-              />
-              <span className="mt-1 block text-xs text-gray-500">{t('seconds')}</span>
+
+            {hasTimingErrors && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3"
+              >
+                <AlertTriangle
+                  size={16}
+                  className="mt-0.5 flex-shrink-0 text-amber-600"
+                />
+                <div>
+                  <p className="text-sm font-medium text-amber-800">{t('invalidTimeRange')}</p>
+                  <p className="mt-1 text-xs text-amber-700">
+                    {t('endTimeGreaterThanStartTime', { startTime: formatTime(videoDetails.startTime) })}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Playback Options */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
+              <div className="rounded-lg bg-green-100 p-2">
+                <Play
+                  size={16}
+                  className="text-green-600"
+                />
+              </div>
+              <h4 className="text-sm font-semibold text-gray-900">{t('playbackOptions')}</h4>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Label className="flex cursor-pointer items-center space-x-3 rounded-lg border-2 border-gray-200 bg-white p-4 transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/50">
+                  <Checkbox
+                    checked={videoDetails.autoplay}
+                    onCheckedChange={(checked) => {
+                      setVideoDetails({
+                        ...videoDetails,
+                        autoplay: Boolean(checked),
+                      });
+                    }}
+                    className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Play
+                      size={16}
+                      className="text-blue-600"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-gray-700">{t('autoplay')}</span>
+                      <p className="text-xs text-gray-500">{t('autoplayDescription')}</p>
+                    </div>
+                  </div>
+                </Label>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Label className="flex cursor-pointer items-center space-x-3 rounded-lg border-2 border-gray-200 bg-white p-4 transition-all duration-200 hover:border-red-300 hover:bg-red-50/50">
+                  <Checkbox
+                    checked={videoDetails.muted}
+                    onCheckedChange={(checked) => {
+                      setVideoDetails({
+                        ...videoDetails,
+                        muted: Boolean(checked),
+                      });
+                    }}
+                    className="data-[state=checked]:border-red-600 data-[state=checked]:bg-red-600"
+                  />
+                  <div className="flex items-center gap-2">
+                    <VolumeX
+                      size={16}
+                      className="text-red-600"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-gray-700">{t('startMuted')}</span>
+                      <p className="text-xs text-gray-500">{t('startMutedDescription')}</p>
+                    </div>
+                  </div>
+                </Label>
+              </motion.div>
             </div>
           </div>
-        </div>
 
-        <div>
-          <Label>{t('endTimeLabel')}</Label>
-          <div className="mt-1 flex gap-2">
-            <div className="flex-1">
-              <Input
-                type="number"
-                min="0"
-                value={endTimeParts.minutes}
-                onChange={(e) => {
-                  const minutes = Math.max(0, Number.parseInt(e.target.value, 10) || 0);
-                  const { seconds } = endTimeParts;
-                  const totalSeconds = convertToSeconds(minutes, seconds);
-                  if (totalSeconds > videoDetails.startTime) {
-                    setVideoDetails({
-                      ...videoDetails,
-                      endTime: totalSeconds,
-                    });
-                  }
-                }}
-                placeholder={t('secondsPlaceholder')}
-                className="w-full"
-              />
-              <span className="mt-1 block text-xs text-gray-500">{t('minutes')}</span>
+          {/* Subtitle Management */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
+              <div className="rounded-lg bg-purple-100 p-2">
+                <Languages
+                  size={16}
+                  className="text-purple-600"
+                />
+              </div>
+              <h4 className="text-sm font-semibold text-gray-900">{t('subtitlesAndCaptions')}</h4>
             </div>
-            <div className="flex-1">
-              <Input
-                type="number"
-                min="0"
-                max="59"
-                value={endTimeParts.seconds}
-                onChange={(e) => {
-                  const { minutes } = endTimeParts;
-                  const seconds = Math.max(0, Math.min(59, Number.parseInt(e.target.value, 10) || 0));
-                  const totalSeconds = convertToSeconds(minutes, seconds);
-                  if (totalSeconds > videoDetails.startTime) {
-                    setVideoDetails({
-                      ...videoDetails,
-                      endTime: totalSeconds,
-                    });
-                  }
-                }}
-                placeholder={t('secondsPlaceholder')}
-                className="w-full"
-              />
-              <span className="mt-1 block text-xs text-gray-500">{t('seconds')}</span>
-            </div>
+
+            <SubtitleManager
+              subtitles={subtitles}
+              setSubtitles={setSubtitles}
+              t={t}
+            />
           </div>
         </div>
-      </div>
-
-      <div className="mt-4 flex items-center space-x-6">
-        <Label className="flex items-center space-x-2">
-          <Checkbox
-            checked={videoDetails.autoplay}
-            onCheckedChange={(checked) => {
-              setVideoDetails({
-                ...videoDetails,
-                autoplay: Boolean(checked),
-              });
-            }}
-          />
-          <span className="text-sm text-gray-700">{t('autoplay')}</span>
-        </Label>
-
-        <Label className="flex items-center space-x-2">
-          <Checkbox
-            checked={videoDetails.muted}
-            onCheckedChange={(checked) => {
-              setVideoDetails({
-                ...videoDetails,
-                muted: Boolean(checked),
-              });
-            }}
-          />
-          <span className="text-sm text-gray-700">{t('startMuted')}</span>
-        </Label>
-      </div>
-    </div>
+      </Collapsible.Content>
+    </Collapsible.Root>
   );
 };
 
 const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course }: any) => {
   const t = useTranslations('Components.VideoModal');
-  const [video, setVideo] = React.useState<File | null>(null);
+  const [video, setVideo] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [name, setName] = React.useState('');
-  const [youtubeUrl, setYoutubeUrl] = React.useState('');
-  const [selectedView, setSelectedView] = React.useState<'file' | 'youtube'>('file');
-  const [videoDetails, setVideoDetails] = React.useState<VideoDetails>({
+  const [name, setName] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [selectedView, setSelectedView] = useState<'file' | 'youtube'>('file');
+  const [videoDetails, setVideoDetails] = useState<VideoDetails>({
     startTime: 0,
     endTime: null,
     autoplay: false,
     muted: false,
+    subtitles: [],
   });
-  const [accordionOpen, setAccordionOpen] = useState<string | undefined>('additional-settings');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files?.[0]) {
-      setVideo(event.target.files[0]);
+  const isYouTubeUrlValid = useMemo(() => {
+    if (!youtubeUrl) return false;
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+    return youtubeRegex.test(youtubeUrl);
+  }, [youtubeUrl]);
+
+  const validateForm = useCallback(() => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = t('errorActivityNameRequired');
     }
-  };
+
+    if (selectedView === 'file' && !video) {
+      newErrors.video = t('errorPleaseSelectVideoFile');
+    }
+
+    if (selectedView === 'youtube' && !youtubeUrl.trim()) {
+      newErrors.youtubeUrl = t('errorYouTubeUrlRequired');
+    }
+
+    if (selectedView === 'youtube' && youtubeUrl && !isYouTubeUrlValid) {
+      newErrors.youtubeUrl = t('errorValidYouTubeUrl');
+    }
+
+    if (videoDetails.endTime && videoDetails.endTime <= videoDetails.startTime) {
+      newErrors.timing = t('errorEndTimeGreaterThanStartTime');
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [name, selectedView, video, youtubeUrl, videoDetails, isYouTubeUrlValid]);
+
+  const handleVideoChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = event.target.files?.[0];
+      if (selectedFile) {
+        // Validate file size (max 500MB)
+        if (selectedFile.size > 500 * 1024 * 1024) {
+          toast.error(t('errorFileSizeLimit'));
+          return;
+        }
+
+        // Validate file type
+        const validTypes = ['video/mp4', 'video/webm', 'video/x-matroska'];
+        if (!validTypes.includes(selectedFile.type)) {
+          toast.error(t('errorInvalidVideoFileType'));
+          return;
+        }
+
+        setVideo(selectedFile);
+        setErrors((prev) => ({ ...prev, video: '' }));
+
+        // Auto-populate name if empty
+        if (!name) {
+          const fileName = selectedFile.name.replace(/\.[^/.]+$/, '');
+          setName(fileName);
+          setErrors((prev) => ({ ...prev, name: '' }));
+        }
+
+        toast.success(t('successVideoFileSelected'));
+      }
+    },
+    [name],
+  );
+
+  const canSubmit = useMemo(() => {
+    if (!name.trim()) return false;
+    if (selectedView === 'file') return !!video;
+    if (selectedView === 'youtube') return isYouTubeUrlValid;
+    return false;
+  }, [name, selectedView, video, isYouTubeUrlValid]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error(t('errorFixErrorsBeforeSubmitting'));
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -207,7 +941,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
           video,
           'video',
           {
-            name,
+            name: name.trim(),
             chapter_id: chapterId,
             activity_type: 'TYPE_VIDEO',
             activity_sub_type: 'SUBTYPE_VIDEO_HOSTED',
@@ -218,11 +952,12 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
           },
           chapterId,
         );
+        toast.success(t('successVideoActivityCreated'));
       }
 
       if (selectedView === 'youtube') {
         const external_video_object: ExternalVideoObject = {
-          name,
+          name: name.trim(),
           type: 'youtube',
           uri: youtubeUrl,
           chapter_id: chapterId,
@@ -230,140 +965,306 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
         };
 
         await submitExternalVideo(external_video_object, 'activity', chapterId);
+        toast.success(t('successYouTubeVideoActivityCreated'));
       }
+    } catch (error) {
+      console.error('Error creating video activity:', error);
+      toast.error(t('errorFailedToCreateVideoActivity'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const fileInputId = useMemo(() => `video-activity-file-${Date.now()}`, []);
+
   return (
-    <Form.Root onSubmit={handleSubmit}>
-      <div>
-        <Label htmlFor="video-activity-name">{t('activityName')}</Label>
-        <Input
-          id="video-activity-name"
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
-          type="text"
-          required
-          placeholder={t('activityNamePlaceholder')}
-        />
-      </div>
-
-      <div className="mt-4 rounded-lg border border-gray-200">
-        <div className="grid grid-cols-2 gap-0">
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedView('file');
-            }}
-            className={`flex items-center justify-center gap-2 p-4 ${
-              selectedView === 'file'
-                ? 'border-primary border-b-2 bg-gray-100'
-                : 'border-b border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            <Upload size={18} />
-            <span>{t('uploadVideo')}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedView('youtube');
-            }}
-            className={`flex items-center justify-center gap-2 p-4 ${
-              selectedView === 'youtube'
-                ? 'border-primary border-b-2 bg-gray-100'
-                : 'border-b border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            <Youtube size={18} />
-            <span>{t('youtubeVideo')}</span>
-          </button>
+    <div className="mx-auto max-w-4xl">
+      <Form.Root
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
+        {/* Header */}
+        <div className="border-b border-gray-200 pb-4 text-center">
+          <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('createVideoActivity')}</h2>
+          <p className="text-sm text-gray-600">
+            {t('createVideoActivityDescription')}
+          </p>
         </div>
 
-        <div className="p-6">
-          {selectedView === 'file' && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="video-activity-file">{t('videoFile')}</Label>
-                <div className="mt-2">
-                  <input
-                    id="video-activity-file"
-                    type="file"
-                    accept={SUPPORTED_VIDEO_FILES}
-                    onChange={handleVideoChange}
-                    className="hidden"
-                    aria-label={t('ariaLabel')}
-                    title={t('selectFile')}
-                  />
-                </div>
-                <div className="flex flex-row items-center">
-                  <Label
-                    htmlFor="video-activity-file"
-                    className="bg-primary hover:bg-primary/90 inline-block cursor-pointer rounded-full px-4 py-2 font-semibold text-white"
-                  >
-                    {t('chooseVideoFile')}
-                  </Label>
-                  {video ? (
-                    <div className="pl-2 text-sm text-green-700">
-                      <i>{video.name}</i> {t('fileUploadedSuffix')}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-              <VideoSettingsForm
-                videoDetails={videoDetails}
-                setVideoDetails={setVideoDetails}
-                t={t}
-              />
-            </div>
-          )}
-
-          {selectedView === 'youtube' && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="youtube-url">{t('youtubeUrl')}</Label>
-                <Input
-                  id="youtube-url"
-                  value={youtubeUrl}
-                  onChange={(e) => {
-                    setYoutubeUrl(e.target.value);
-                  }}
-                  type="text"
-                  required
-                  placeholder={t('youtubeUrlPlaceholder')}
-                />
-              </div>
-              <VideoSettingsForm
-                videoDetails={videoDetails}
-                setVideoDetails={setVideoDetails}
-                t={t}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <BarLoader
-              cssOverride={{ borderRadius: '60px' }}
-              width={60}
-              color="#ffffff"
+        {/* Activity Name */}
+        <div className="space-y-2">
+          <Label
+            htmlFor="video-activity-name"
+            className="flex items-center gap-2 text-sm font-medium text-gray-700"
+          >
+            <FileVideo
+              size={16}
+              className="text-blue-600"
             />
-          ) : (
-            t('createActivity')
+            {t('activityName')}
+            <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="video-activity-name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setErrors((prev) => ({ ...prev, name: '' }));
+            }}
+            type="text"
+            required
+            placeholder={t('activityNamePlaceholder')}
+            className={cn(
+              'w-full transition-all duration-200',
+              errors.name
+                ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                : 'focus:border-blue-500 focus:ring-blue-200',
+            )}
+          />
+          {errors.name && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-1 text-sm text-red-600"
+            >
+              <AlertCircle size={14} />
+              {errors.name}
+            </motion.p>
           )}
-        </Button>
-      </div>
-    </Form.Root>
+        </div>
+
+        {/* Video Source Selection */}
+        <div className="overflow-hidden rounded-xl border-2 border-gray-200 shadow-sm transition-shadow duration-200 hover:shadow-md">
+          <div className="grid grid-cols-2 gap-0 bg-gray-50">
+            <motion.button
+              type="button"
+              onClick={() => {
+                setSelectedView('file');
+                setErrors((prev) => ({ ...prev, youtubeUrl: '' }));
+              }}
+              className={cn(
+                'flex items-center justify-center gap-3 p-4 transition-all duration-200 relative overflow-hidden',
+                selectedView === 'file' ? 'bg-blue-600 text-white shadow-lg z-10' : 'hover:bg-gray-100 text-gray-700',
+              )}
+              whileHover={{ scale: selectedView !== 'file' ? 1.02 : 1 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Upload size={20} />
+              <span className="font-medium">{t('uploadVideo')}</span>
+              {selectedView === 'file' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 -z-10 bg-blue-600"
+                  initial={false}
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+            </motion.button>
+            <motion.button
+              type="button"
+              onClick={() => {
+                setSelectedView('youtube');
+                setErrors((prev) => ({ ...prev, video: '' }));
+              }}
+              className={cn(
+                'flex items-center justify-center gap-3 p-4 transition-all duration-200 relative overflow-hidden',
+                selectedView === 'youtube' ? 'bg-red-600 text-white shadow-lg z-10' : 'hover:bg-gray-100 text-gray-700',
+              )}
+              whileHover={{ scale: selectedView !== 'youtube' ? 1.02 : 1 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Youtube size={20} />
+              <span className="font-medium">{t('youtubeVideo')}</span>
+              {selectedView === 'youtube' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 -z-10 bg-red-600"
+                  initial={false}
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+            </motion.button>
+          </div>
+
+          <div className="bg-white p-6">
+            <AnimatePresence mode="wait">
+              {selectedView === 'file' && (
+                <motion.div
+                  key="file"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-4"
+                >
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor={fileInputId}
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      {t('videoFile')}
+                      <span className="text-red-500">*</span>
+                    </Label>
+                    <input
+                      id={fileInputId}
+                      type="file"
+                      accept={SUPPORTED_VIDEO_FILES}
+                      onChange={handleVideoChange}
+                      className="hidden"
+                      aria-label={t('ariaLabel')}
+                    />
+                    <div className="flex items-center gap-4">
+                      <Label
+                        htmlFor={fileInputId}
+                        className={cn(
+                          'bg-blue-600 hover:bg-blue-700 inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-3 font-medium text-white transition-all duration-200 shadow-sm hover:shadow-md',
+                          isSubmitting && 'opacity-50 cursor-not-allowed',
+                        )}
+                      >
+                        <FileVideo size={18} />
+                        {t('chooseVideoFile')}
+                      </Label>
+                      {video && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+                        >
+                          <CheckCircle2 size={16} />
+                          <div>
+                            <span className="font-medium">{video.name}</span>
+                            <span className="ml-2 text-green-600">({(video.size / (1024 * 1024)).toFixed(1)} MB)</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                    {errors.video && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-1 text-sm text-red-600"
+                      >
+                        <AlertCircle size={14} />
+                        {errors.video}
+                      </motion.p>
+                    )}
+                    <p className="flex items-center gap-2 text-xs text-gray-500">
+                      <Info size={12} />
+                      {t('supportedFormatsAndSize')}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {selectedView === 'youtube' && (
+                <motion.div
+                  key="youtube"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-4"
+                >
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="youtube-url"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      {t('youtubeUrl')}
+                      <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="youtube-url"
+                      value={youtubeUrl}
+                      onChange={(e) => {
+                        setYoutubeUrl(e.target.value);
+                        setErrors((prev) => ({ ...prev, youtubeUrl: '' }));
+                      }}
+                      type="url"
+                      required
+                      placeholder={t('youtubeUrlPlaceholder')}
+                      className={cn(
+                        'w-full transition-all duration-200',
+                        errors.youtubeUrl
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                          : youtubeUrl && isYouTubeUrlValid
+                            ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                            : 'focus:border-blue-500 focus:ring-blue-200',
+                      )}
+                    />
+                    {errors.youtubeUrl && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-1 text-sm text-red-600"
+                      >
+                        <AlertCircle size={14} />
+                        {errors.youtubeUrl}
+                      </motion.p>
+                    )}
+                    {youtubeUrl && isYouTubeUrlValid && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-1 text-sm text-green-600"
+                      >
+                        <CheckCircle2 size={14} />
+                        {t('validYouTubeUrl')}
+                      </motion.p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Video Settings */}
+        <VideoSettingsForm
+          videoDetails={videoDetails}
+          setVideoDetails={setVideoDetails}
+          t={t}
+        />
+
+        {errors.timing && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3"
+          >
+            <AlertTriangle
+              size={16}
+              className="text-red-600"
+            />
+            <p className="text-sm text-red-700">{errors.timing}</p>
+          </motion.div>
+        )}
+
+        {/* Submit Button */}
+        <div className="flex justify-end border-t border-gray-200 pt-6">
+          <Button
+            type="submit"
+            disabled={isSubmitting || !canSubmit}
+            className={cn(
+              'px-8 py-3 transition-all duration-200 shadow-sm hover:shadow-md',
+              canSubmit ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed',
+            )}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                <span>{t('creating')}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Plus size={18} />
+                {t('createActivity')}
+              </div>
+            )}
+          </Button>
+        </div>
+      </Form.Root>
+    </div>
   );
 };
 

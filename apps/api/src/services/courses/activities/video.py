@@ -23,7 +23,20 @@ from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_user_is_anon,
 )
-from src.services.courses.activities.uploads.videos import upload_video
+from src.services.courses.activities.uploads.videos import upload_video, upload_subtitle
+
+
+def _get_language_label(language_code: str) -> str:
+    """Get human-readable language label from language code"""
+    language_map = {
+        "en": "English",
+        "ru": "Russian",
+        "kz": "Kazakh",
+        "fr": "French",
+        "es": "Spanish",
+        "de": "German",
+    }
+    return language_map.get(language_code, language_code.upper())
 
 
 def validate_video_file(video_file: UploadFile | None) -> str:
@@ -67,6 +80,7 @@ async def create_video_activity(
     db_session: Session,
     video_file: UploadFile | None = None,
     details: str = "{}",
+    subtitle_files: list[UploadFile] = None,
 ):
     # RBAC check
     await rbac_check(request, "activity_x", current_user, "create", db_session)
@@ -140,6 +154,54 @@ async def create_video_activity(
             organization.org_uuid,
             course.course_uuid,
         )
+
+    # Process and upload subtitle files
+    if subtitle_files:
+        subtitle_info = []
+        for subtitle_file in subtitle_files:
+            if subtitle_file.filename and subtitle_file.size > 0:
+                # Validate subtitle file format
+                if not subtitle_file.filename.endswith((".srt", ".vtt")):
+                    continue  # Skip invalid subtitle files
+
+                # Extract language from filename or use default
+                # Expected format: video.en.srt or similar
+                filename_parts = subtitle_file.filename.split(".")
+                language = "en"  # default language
+                if len(filename_parts) >= 2:
+                    potential_lang = filename_parts[-2].lower()
+                    # Check if it's a valid language code (2-3 characters)
+                    if 2 <= len(potential_lang) <= 3 and potential_lang.isalpha():
+                        language = potential_lang
+
+                # Upload subtitle file with standardized naming
+                upload_result = await upload_subtitle(
+                    subtitle_file,
+                    activity.activity_uuid,
+                    organization.org_uuid,
+                    course.course_uuid,
+                    language,
+                    None,  # subtitle_id not needed anymore
+                )
+
+                if upload_result.get("success"):
+                    subtitle_info.append(
+                        {
+                            "language": language,
+                            "filename": upload_result.get("filename"),
+                            "label": _get_language_label(language),
+                            "url": f"/content/orgs/{organization.org_uuid}/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/{upload_result.get('filename')}",
+                        }
+                    )
+
+        # Update activity details with subtitle information
+        if subtitle_info:
+            updated_details = details.copy() if isinstance(details, dict) else {}
+            updated_details["subtitles"] = subtitle_info
+            activity.details = updated_details
+            db_session.add(activity)
+            db_session.commit()
+            db_session.refresh(activity)
 
     # update chapter
     chapter_activity_object = ChapterActivity(

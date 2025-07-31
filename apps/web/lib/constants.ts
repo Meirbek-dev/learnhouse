@@ -11,6 +11,8 @@ export const ACCEPTED_FILE_FORMATS = {
   pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   zip: 'application/zip,application/x-zip-compressed',
+  srt: '.srt',
+  vtt: 'text/vtt',
 } as const;
 
 /**

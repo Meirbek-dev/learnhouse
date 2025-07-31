@@ -254,7 +254,7 @@ const AdminEditOptions: FC<{
                 })}
                 dialogTrigger={
                   <button className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10 flex w-full items-center rounded-sm py-1.5 text-left text-sm transition-all">
-                    <BookMinus className="ml-2 mr-4 h-4 w-4" /> {t('delete')}
+                    <BookMinus className="mr-4 ml-2 h-4 w-4" /> {t('delete')}
                   </button>
                 }
                 functionToExecute={deleteCourse}

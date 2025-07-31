@@ -1,7 +1,7 @@
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityMediaDirectory } from '@services/media/media';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { useEffect, useState } from 'react';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
 import YouTube from 'react-youtube';
@@ -21,6 +21,12 @@ interface VideoDetails {
   endTime?: number | null;
   autoplay?: boolean;
   muted?: boolean;
+  subtitles?: Array<{
+    language: string;
+    filename: string;
+    label: string;
+    url: string;
+  }>;
 }
 
 interface SubtitleEntry {
@@ -49,11 +55,38 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0];
 
-  const subtitleEntries: SubtitleEntry[] = [
-    { html: 'Русский', url: '/subtitle.ru.srt' },
-    { html: 'English', url: '/subtitle.en.srt' },
-    { html: 'Қазақша', url: '/subtitle.kz.srt' },
-  ];
+  // Generate subtitle entries from activity details
+  const subtitleEntries: SubtitleEntry[] = useMemo(() => {
+    const subtitles = activity?.details?.subtitles || [];
+    return subtitles
+      .map((subtitle) => {
+        const url = getActivityMediaDirectory(
+          org?.org_uuid,
+          course?.course_uuid,
+          activity.activity_uuid,
+          subtitle.filename,
+          'video',
+        );
+        return url ? { html: subtitle.label, url } : null;
+      })
+      .filter((entry): entry is SubtitleEntry => entry !== null);
+  }, [activity, org, course]);
+
+  // Get default subtitle URL for current locale
+  const getDefaultSubtitleUrl = () => {
+    const subtitles = activity?.details?.subtitles || [];
+    const defaultSubtitle = subtitles.find((s) => s.language === locale);
+    if (defaultSubtitle) {
+      return getActivityMediaDirectory(
+        org?.org_uuid,
+        course?.course_uuid,
+        activity.activity_uuid,
+        defaultSubtitle.filename,
+        'video',
+      );
+    }
+    return '';
+  };
 
   useEffect(() => {
     if (activity?.content?.uri) {
@@ -87,17 +120,21 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
                   lang: locale,
                   pip: false,
                 }}
-                subtitle={{
-                  url: `/subtitle.${locale}.srt`,
-                  type: 'srt',
-                  style: {
-                    color: '#ffffff',
-                    fontSize: '2.5rem',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    textAlign: 'center',
-                  },
-                  encoding: 'utf8',
-                }}
+                subtitle={
+                  getDefaultSubtitleUrl()
+                    ? {
+                        url: getDefaultSubtitleUrl(),
+                        type: 'srt',
+                        style: {
+                          color: '#ffffff',
+                          fontSize: '2.5rem',
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                          textAlign: 'center',
+                        },
+                        encoding: 'utf8',
+                      }
+                    : undefined
+                }
                 locale={locale}
                 subtitleEntries={subtitleEntries}
                 className="size-full"
