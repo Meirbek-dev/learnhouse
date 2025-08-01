@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 interface GamificationProfile {
@@ -59,6 +60,7 @@ interface GamificationDashboardProps {
 
 export function GamificationDashboard({ orgId, className = '' }: GamificationDashboardProps) {
   const { data: session } = useSession();
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [dashboardData, setDashboardData] = useState<GamificationDashboard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,12 +105,12 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
 
   const getXpSourceDisplayName = (source: string) => {
     const sourceMap: Record<string, string> = {
-      login_daily: 'Daily Login',
-      activity_completion: 'Activity Completed',
-      course_completion: 'Course Completed',
-      login_streak_7_days: '7-Day Login Streak',
-      login_streak_30_days: '30-Day Login Streak',
-      login_streak_100_days: '100-Day Login Streak',
+      login_daily: t('xpSources.login_daily'),
+      activity_completion: t('xpSources.activity_completion'),
+      course_completion: t('xpSources.course_completion'),
+      login_streak_7_days: t('xpSources.login_streak_7_days'),
+      login_streak_30_days: t('xpSources.login_streak_30_days'),
+      login_streak_100_days: t('xpSources.login_streak_100_days'),
     };
     return sourceMap[source] || source;
   };
@@ -155,15 +157,15 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
 
   if (error || !dashboardData) {
     return (
-      <Card className={className}>
+      <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">{error || 'Failed to load gamification data'}</p>
+          <p className="text-muted-foreground">{error || t('dashboard.failedToLoad')}</p>
           <Button
             variant="outline"
             className="mt-4"
             onClick={() => window.location.reload()}
           >
-            Try Again
+            {t('dashboard.tryAgain')}
           </Button>
         </CardContent>
       </Card>
@@ -180,61 +182,42 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
-            Your Learning Progress
+            {t('dashboard.yourProgress')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Level and XP */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm">Level</p>
-                  <p className="text-2xl font-bold">{profile.current_level}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-muted-foreground text-sm">Total XP</p>
-                  <p className="text-2xl font-bold">{profile.total_xp.toLocaleString()}</p>
-                </div>
+          {/* Level and XP */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-muted-foreground text-sm">{t('levelIndicators.level')}</p>
+                <p className="text-2xl font-bold">{profile.current_level}</p>
               </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progress to Level {profile.current_level + 1}</span>
-                  <span>{profile.xp_to_next_level} XP needed</span>
-                </div>
-                <Progress
-                  value={levelProgress}
-                  className="h-3"
-                />
-              </div>
-
-              {rank_in_organization && (
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  <span className="text-sm">Rank #{rank_in_organization} in organization</span>
-                </div>
-              )}
-            </div>
-
-            {/* Streaks */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-lg border bg-gradient-to-br from-orange-50 to-red-50 p-3 text-center">
-                  <Flame className="mx-auto mb-2 h-6 w-6 text-orange-500" />
-                  <p className="text-muted-foreground text-sm">Login Streak</p>
-                  <p className="text-xl font-bold">{profile.current_login_streak}</p>
-                  <p className="text-muted-foreground text-xs">Best: {profile.longest_login_streak}</p>
-                </div>
-
-                <div className="rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50 p-3 text-center">
-                  <Star className="mx-auto mb-2 h-6 w-6 text-blue-500" />
-                  <p className="text-muted-foreground text-sm">Learning Streak</p>
-                  <p className="text-xl font-bold">{profile.current_learning_streak}</p>
-                  <p className="text-muted-foreground text-xs">Best: {profile.longest_learning_streak}</p>
-                </div>
+              <div className="text-right">
+                <p className="text-muted-foreground text-sm">{t('stats.totalXP')}</p>
+                <p className="text-2xl font-bold">{profile.total_xp.toLocaleString()}</p>
               </div>
             </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>{t('levelIndicators.xpToLevel', { level: profile.current_level + 1 })}</span>
+                <span>
+                  {profile.xp_to_next_level} {t('levelIndicators.xpToNext')}
+                </span>
+              </div>
+              <Progress
+                value={levelProgress}
+                className="h-3"
+              />
+            </div>
+
+            {rank_in_organization && (
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                <span className="text-sm">{t('dashboard.rankInOrg', { rank: rank_in_organization })}</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -245,7 +228,7 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Star className="h-5 w-5" />
-              Recent Activities
+              {t('dashboard.recentActivities')}
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -1,9 +1,10 @@
 'use client';
 
+import UserGamificationSettings from '@components/Dashboard/Pages/UserAccount/UserGamificationSettings/UserGamificationSettings';
 import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
 import UserEditGeneral from '@components/Dashboard/Pages/UserAccount/UserEditGeneral/UserEditGeneral';
 import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/UserProfile';
-import { Info, Lock, type LucideIcon, User as UserIcon } from 'lucide-react';
+import { Info, Lock, type LucideIcon, Trophy, User as UserIcon } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { getUriWithOrg } from '@services/config/config';
@@ -88,6 +89,12 @@ const SettingsPage = ({ params }: { params: Promise<SettingsParams> }) => {
       label: 'profile',
       icon: UserIcon,
       component: UserProfile,
+    },
+    {
+      id: 'gamification',
+      label: 'gamification',
+      icon: Trophy,
+      component: UserGamificationSettings,
     },
     {
       id: 'security',

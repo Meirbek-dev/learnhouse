@@ -2,7 +2,11 @@
 
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trophy, Video } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
+// Gamification imports
+import { LevelIndicatorBadge } from '@components/Dashboard/Gamification';
+import { useLevelIndicator } from '@/hooks/useLevelIndicator';
 import { Fragment, memo, useMemo, useState } from 'react';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -224,8 +228,12 @@ const ActivityIndicators = (props: Props) => {
   const courseid = props.course_uuid.replace('course_', '');
   const { enableNavigation } = props;
   const router = useRouter();
+  const org = useOrg() as any;
 
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Gamification
+  const { profile: gamificationProfile, showLevelIndicator } = useLevelIndicator(org?.id);
 
   const done_activity_style = 'bg-teal-600 hover:bg-teal-700';
   const black_activity_style = 'bg-zinc-300 hover:bg-zinc-400';
@@ -434,6 +442,16 @@ const ActivityIndicators = (props: Props) => {
           orgslug={orgslug}
           isCompleted={isCourseCompleted}
         />
+
+        {/* Level Indicator Badge */}
+        {showLevelIndicator && gamificationProfile && (
+          <div className="ml-2">
+            <LevelIndicatorBadge
+              level={gamificationProfile.current_level}
+              className="h-[20px] w-[20px] text-xs"
+            />
+          </div>
+        )}
       </div>
 
       {enableNavigation ? (

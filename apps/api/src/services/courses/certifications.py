@@ -1,3 +1,5 @@
+import random
+import string
 from datetime import datetime
 from typing import Literal
 
@@ -17,12 +19,12 @@ from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
-from src.services.gamification import award_xp
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
     authorization_verify_if_element_is_public,
     authorization_verify_if_user_is_anon,
 )
+from src.services.gamification import award_xp
 
 ####################################################
 # CRUD
@@ -276,9 +278,6 @@ async def create_certificate_user(
     user_uuid_short = user.user_uuid[-4:] if user.user_uuid else "USER"
 
     # Generate random 2-letter prefix
-    import random
-    import string
-
     random_prefix = "".join(random.choices(string.ascii_uppercase, k=2))
 
     # Get the count of existing certificate users for this user today
@@ -378,10 +377,6 @@ async def check_course_completion_and_create_certificate(
 ) -> bool:
     """Check if all activities in a course are completed and create certificate if so"""
 
-    print(
-        f"🐛 DEBUG: Checking course completion for user {user_id}, course {course_id}"
-    )
-
     # Get the user object for gamification
     from src.db.users import User
 
@@ -389,7 +384,6 @@ async def check_course_completion_and_create_certificate(
     user = db_session.exec(user_statement).first()
 
     if not user:
-        print(f"🐛 DEBUG: User {user_id} not found")
         return False
 
     # Get the course to find org_id
@@ -397,20 +391,14 @@ async def check_course_completion_and_create_certificate(
     course = db_session.exec(course_statement).first()
 
     if not course:
-        print(f"🐛 DEBUG: Course {course_id} not found")
         return False
-
-    print(f"🐛 DEBUG: Course found: {course.name} (UUID: {course.course_uuid})")
 
     # Get all activities in the course
     statement = select(ChapterActivity).where(ChapterActivity.course_id == course_id)
     course_activities = db_session.exec(statement).all()
 
     if not course_activities:
-        print(f"🐛 DEBUG: No activities found in course {course_id}")
         return False  # No activities in course
-
-    print(f"🐛 DEBUG: Found {len(course_activities)} activities in course")
 
     # Get all completed activities for this user in this course
     statement = select(TrailStep).where(
@@ -420,24 +408,18 @@ async def check_course_completion_and_create_certificate(
     )
     completed_activities = db_session.exec(statement).all()
 
-    print(f"🐛 DEBUG: Found {len(completed_activities)} completed activities for user")
-
     # Check if all activities are completed
     if len(completed_activities) >= len(course_activities):
-        print(f"🐛 DEBUG: All activities completed! Checking for certification...")
-
         # All activities completed, check if certification exists for this course
         statement = select(Certifications).where(Certifications.course_id == course_id)
         certification = db_session.exec(statement).first()
 
         if certification and certification.id:
-            print(f"🐛 DEBUG: Certification found: {certification.certification_uuid}")
             # Create certificate user link
             try:
                 await create_certificate_user(
                     request, user_id, certification.id, db_session
                 )
-                print(f"🐛 DEBUG: Certificate created successfully for user {user_id}")
 
                 # Award XP for course completion - certificate was just created
                 try:
@@ -455,7 +437,6 @@ async def check_course_completion_and_create_certificate(
                         },
                         related_course_id=course_id,
                     )
-                    print(f"🐛 DEBUG: XP awarded successfully for course completion")
                 except Exception as e:
                     # Log the error but don't fail the certification process
                     print(f"Failed to award XP for course completion: {e}")
@@ -463,17 +444,13 @@ async def check_course_completion_and_create_certificate(
                 return True
             except HTTPException as e:
                 if e.status_code == 400 and "already has a certificate" in e.detail:
-                    print(f"🐛 DEBUG: Certificate already exists for user {user_id}")
                     # Certificate already exists, which is fine
                     return True
-                print(f"🐛 DEBUG: Error creating certificate: {e}")
                 raise e
         else:
-            print(f"🐛 DEBUG: No certification configured for course {course_id}")
+            pass
     else:
-        print(
-            f"🐛 DEBUG: Course not fully completed. {len(completed_activities)}/{len(course_activities)} activities done"
-        )
+        pass
 
     return False
 

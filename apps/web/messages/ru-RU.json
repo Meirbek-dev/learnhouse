@@ -1620,6 +1620,9 @@
       "openuUniversity": "Торайгыров Университет",
       "touUniversity": "Торайгыров Университет"
     },
+    "Admin": {
+      "title": "Админ"
+    },
     "CourseOverview": {
       "courseLabel": "Курс"
     },

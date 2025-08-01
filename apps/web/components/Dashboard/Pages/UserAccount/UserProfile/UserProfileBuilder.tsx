@@ -12,6 +12,7 @@ import {
   Plus,
   TextIcon,
   Trash2,
+  Trophy,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
@@ -42,6 +43,7 @@ const SECTION_TYPE_KEYS = {
   'education': 'education',
   'affiliation': 'affiliation',
   'courses': 'courses',
+  'gamification': 'gamification',
 } as const;
 
 // Function to get translated section types configuration
@@ -85,6 +87,11 @@ const getSectionTypesConfig = (t: Function) => ({
     icon: BookOpen,
     label: t('SectionTypes.courses.label'),
     description: t('SectionTypes.courses.description'),
+  },
+  'gamification': {
+    icon: Trophy,
+    label: t('SectionTypes.gamification.label'),
+    description: t('SectionTypes.gamification.description'),
   },
 });
 
@@ -185,6 +192,17 @@ type CoursesSection = {
   // No need to store courses as they will be fetched from API
 } & BaseSection;
 
+type GamificationSection = {
+  type: 'gamification';
+  settings: {
+    showLevel: boolean;
+    showXP: boolean;
+    showStreaks: boolean;
+    showAchievements: boolean;
+    showLeaderboard: boolean;
+  };
+} & BaseSection;
+
 type ProfileSection =
   | ImageGallerySection
   | TextSection
@@ -193,7 +211,8 @@ type ProfileSection =
   | ExperienceSection
   | EducationSection
   | AffiliationSection
-  | CoursesSection;
+  | CoursesSection
+  | GamificationSection;
 
 interface ProfileData {
   sections: ProfileSection[];
@@ -323,6 +342,19 @@ const UserProfileBuilder = () => {
         return {
           ...baseSection,
           type: 'courses',
+        };
+      }
+      case 'gamification': {
+        return {
+          ...baseSection,
+          type: 'gamification',
+          settings: {
+            showLevel: true,
+            showXP: true,
+            showStreaks: true,
+            showAchievements: true,
+            showLeaderboard: false,
+          },
         };
       }
     }

@@ -1,15 +1,16 @@
 'use client';
 
+import { GamificationProfileSection } from '@/components/Dashboard/Gamification/GamificationProfileSection';
 import { GamificationDashboard, Leaderboard, StreakWidget } from '@/components/Dashboard/Gamification';
-import { Award, BookOpen, Flame, Star, Target, TrendingUp, Trophy, Users } from 'lucide-react';
+import { Award, BookOpen, Flame, Star, TrendingUp, Trophy, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
 import { useGamification } from '@/hooks/useGamification';
 import { getAPIUrl } from '@/services/config/config';
-import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 interface LearnerDashboardProps {
   orgId: number;
@@ -20,6 +21,7 @@ interface LearnerDashboardProps {
 
 export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' }: LearnerDashboardProps) {
   const { data: session } = useSession();
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [activeTab, setActiveTab] = useState('overview');
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
@@ -70,85 +72,94 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
       >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger
+            value="profile"
+            className="flex items-center gap-2"
+          >
+            <Users className="h-4 w-4" />
+            {t('dashboard.profile')}
+          </TabsTrigger>
+          <TabsTrigger
             value="overview"
             className="flex items-center gap-2"
           >
-            <Target className="h-4 w-4" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger
-            value="progress"
-            className="flex items-center gap-2"
-          >
             <Trophy className="h-4 w-4" />
-            Progress
+            {t('dashboard.progress')}
           </TabsTrigger>
           <TabsTrigger
             value="community"
             className="flex items-center gap-2"
           >
             <Users className="h-4 w-4" />
-            Community
+            {t('dashboard.community')}
           </TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
+        {/* Progress Tab */}
         <TabsContent
           value="overview"
           className="space-y-6"
         >
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {/* Quick Stats */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Quick Stats
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <BookOpen className="mx-auto mb-2 h-8 w-8 text-blue-500" />
-                    <p className="text-2xl font-bold">{courses.length}</p>
-                    <p className="text-muted-foreground text-sm">Available Courses</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <Star className="mx-auto mb-2 h-8 w-8 text-yellow-500" />
-                    <p className="text-2xl font-bold">
-                      {isLoadingDashboard ? '...' : dashboardData?.total_courses_completed || 0}
-                    </p>
-                    <p className="text-muted-foreground text-sm">Completed</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <Award className="mx-auto mb-2 h-8 w-8 text-green-500" />
-                    <p className="text-2xl font-bold">
-                      {isLoadingDashboard ? '...' : dashboardData?.total_certificates || 0}
-                    </p>
-                    <p className="text-muted-foreground text-sm">Certificates</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <Flame className="mx-auto mb-2 h-8 w-8 text-orange-500" />
-                    <p className="text-2xl font-bold">
-                      {isLoadingDashboard ? '...' : dashboardData?.profile?.current_login_streak || 0}
-                    </p>
-                    <p className="text-muted-foreground text-sm">Day Streak</p>
-                  </div>
+          {/* Quick Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                {t('dashboard.quickStats')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
+                  <BookOpen className="mx-auto mb-2 h-8 w-8 text-blue-500" />
+                  <p className="text-2xl font-bold">{courses.length}</p>
+                  <p className="text-muted-foreground text-sm">{t('dashboard.availableCourses')}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
+                  <Star className="mx-auto mb-2 h-8 w-8 text-yellow-500" />
+                  <p className="text-2xl font-bold">
+                    {isLoadingDashboard ? '...' : dashboardData?.total_courses_completed || 0}
+                  </p>
+                  <p className="text-muted-foreground text-sm">{t('dashboard.completed')}</p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
+                  <Award className="mx-auto mb-2 h-8 w-8 text-green-500" />
+                  <p className="text-2xl font-bold">
+                    {isLoadingDashboard ? '...' : dashboardData?.total_certificates || 0}
+                  </p>
+                  <p className="text-muted-foreground text-sm">{t('dashboard.certificates')}</p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
+                  <Flame className="mx-auto mb-2 h-8 w-8 text-orange-500" />
+                  <p className="text-2xl font-bold">
+                    {isLoadingDashboard ? '...' : dashboardData?.profile?.current_login_streak || 0}
+                  </p>
+                  <p className="text-muted-foreground text-sm">{t('dashboard.dayStreak')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Streaks Widget */}
-            <StreakWidget orgId={orgId} />
-          </div>
+          {/* Detailed Progress Section */}
+          <GamificationDashboard orgId={orgId} />
         </TabsContent>
 
-        {/* Progress Tab */}
+        {/* Profile Tab */}
         <TabsContent
-          value="progress"
+          value="profile"
           className="space-y-6"
         >
-          <GamificationDashboard orgId={orgId} />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <GamificationProfileSection
+              orgId={orgId}
+              variant="full"
+              showUnlocks
+              showAchievements
+            />
+            <StreakWidget
+              orgId={orgId}
+              compact={false}
+            />
+          </div>
         </TabsContent>
 
         {/* Community Tab */}

@@ -29,7 +29,6 @@ from src.db.gamification import (
 )
 from src.db.users import AnonymousUser, PublicUser
 
-
 # XP Constants - Easily configurable for balancing
 XP_REWARDS = {
     "login_daily": 10,
@@ -91,7 +90,7 @@ def is_consecutive_day(last_date_str: str | None, current_date: datetime) -> boo
         return False
 
     try:
-        last_date = datetime.fromisoformat(last_date_str.replace("Z", "+00:00"))
+        last_date = datetime.fromisoformat(last_date_str)
         # Convert to date only for comparison
         last_date_only = last_date.date()
         current_date_only = current_date.date()
@@ -117,7 +116,7 @@ def is_same_day(last_date_str: str | None, current_date: datetime) -> bool:
         return False
 
     try:
-        last_date = datetime.fromisoformat(last_date_str.replace("Z", "+00:00"))
+        last_date = datetime.fromisoformat(last_date_str)
         return last_date.date() == current_date.date()
     except (ValueError, AttributeError):
         return False
@@ -537,43 +536,34 @@ async def get_gamification_dashboard(
     total_courses_statement = select(XPTransaction).where(
         XPTransaction.user_id == user.id,
         XPTransaction.org_id == org_id,
-        XPTransaction.xp_source == "course_completion"
+        XPTransaction.xp_source == "course_completion",
     )
     course_completion_transactions = db_session.exec(total_courses_statement).all()
     total_courses_completed = len(course_completion_transactions)
 
     # Debug logging
-    print(f"🐛 DEBUG: User ID: {user.id}, Org ID: {org_id}")
-    print(f"🐛 DEBUG: Found {total_courses_completed} course completion transactions")
-    for transaction in course_completion_transactions:
-        print(f"🐛 DEBUG: Course completion XP transaction: {transaction.id}, XP: {transaction.xp_amount}, Date: {transaction.creation_date}")
 
     # Calculate total activities completed from all XP transactions (not just recent ones)
     total_activities_statement = select(XPTransaction).where(
         XPTransaction.user_id == user.id,
         XPTransaction.org_id == org_id,
-        XPTransaction.xp_source == "activity_completion"
+        XPTransaction.xp_source == "activity_completion",
     )
     activity_completion_transactions = db_session.exec(total_activities_statement).all()
     total_activities_completed = len(activity_completion_transactions)
-    print(f"🐛 DEBUG: Found {total_activities_completed} activity completion transactions")
 
     # Get total certificates for this user in this organization
     from src.db.courses.certifications import CertificateUser, Certifications
     from src.db.courses.courses import Course
-    certificates_statement = select(CertificateUser).join(
-        Certifications, CertificateUser.certification_id == Certifications.id
-    ).join(
-        Course, Certifications.course_id == Course.id
-    ).where(
-        CertificateUser.user_id == user.id,
-        Course.org_id == org_id
+
+    certificates_statement = (
+        select(CertificateUser)
+        .join(Certifications, CertificateUser.certification_id == Certifications.id)
+        .join(Course, Certifications.course_id == Course.id)
+        .where(CertificateUser.user_id == user.id, Course.org_id == org_id)
     )
     certificate_records = db_session.exec(certificates_statement).all()
     total_certificates = len(certificate_records)
-    print(f"🐛 DEBUG: Found {total_certificates} certificate records")
-    for cert in certificate_records:
-        print(f"🐛 DEBUG: Certificate: {cert.user_certification_uuid}, Created: {cert.created_at}")
 
     # Update profile data to include certificate count
     updated_profile_data = profile.profile_data.copy()

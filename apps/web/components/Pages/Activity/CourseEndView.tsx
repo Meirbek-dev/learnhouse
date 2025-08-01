@@ -3,6 +3,9 @@ import { ArrowLeft, BookOpen, Download, Shield, Target, Trophy } from 'lucide-re
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+// Gamification imports
+import { LevelDisplay } from '@components/Dashboard/Gamification';
+import { useLevelIndicator } from '@/hooks/useLevelIndicator';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -44,6 +47,9 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
     orgslug,
     `/certificates/${userCertificate?.certificate_user.user_certification_uuid}/verify`,
   );
+
+  // Gamification state
+  const { profile: gamificationProfile, showLevelIndicator } = useLevelIndicator(org?.id);
 
   // Check if course is actually completed
   const isCourseCompleted = useMemo(() => {
@@ -563,6 +569,36 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           </p>
 
           <p className="text-gray-500">{t('completionDescription')}</p>
+
+          {/* Gamification Celebration */}
+          {showLevelIndicator && gamificationProfile && (
+            <div className="space-y-4 rounded-lg border border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 p-6">
+              <div className="flex items-center justify-center space-x-2">
+                <Trophy className="h-6 w-6 text-yellow-600" />
+                <h3 className="text-xl font-semibold text-gray-900">{t('learningAchievementUnlocked')}</h3>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <div className="text-center">
+                    <LevelDisplay
+                      profile={gamificationProfile}
+                      variant="compact"
+                      className="justify-center"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center space-x-2 text-green-600">
+                    <Target className="h-5 w-5" />
+                    <span className="font-semibold">{t('xpBonusMessage')}</span>
+                  </div>
+                  <div className="text-center text-sm text-gray-600">{t('keepLearningMessage')}</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Certificate Display */}
           {isLoadingCertificate ? (

@@ -2,8 +2,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import ConfigDict, Field as PydanticField
-from sqlalchemy import JSON, Column, Integer, ForeignKey, DateTime
+from pydantic import ConfigDict
+from pydantic import Field as PydanticField
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer
 from sqlmodel import Field
 
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel

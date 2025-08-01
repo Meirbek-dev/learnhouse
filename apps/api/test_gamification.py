@@ -5,18 +5,18 @@ Run this to verify all components are working correctly
 """
 
 import asyncio
-import sys
 import os
+import sys
 
 # Add the src directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
+from src.db.gamification import StreakRecord, UserGamificationProfile, XPTransaction
 from src.services.gamification.gamification import (
     calculate_level_from_xp,
     is_consecutive_day,
     is_same_day,
 )
-from src.db.gamification import UserGamificationProfile, XPTransaction, StreakRecord
 
 
 async def test_gamification_system():
@@ -65,10 +65,10 @@ async def test_gamification_system():
     # Check if we can import the models (indicates tables exist)
     try:
         from src.db.gamification import (
-            UserGamificationProfile,
-            XPTransaction,
             StreakRecord,
             StreakTypeEnum,
+            UserGamificationProfile,
+            XPTransaction,
         )
 
         print("   ✓ UserGamificationProfile model imported")

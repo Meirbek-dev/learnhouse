@@ -3,8 +3,10 @@ import os
 from fastapi import APIRouter, Depends
 
 from src.routers import (
+    admin,
     auth,
     dev,
+    gamification,
     health,
     orgs,
     roles,
@@ -12,7 +14,6 @@ from src.routers import (
     trail,
     usergroups,
     users,
-    gamification,
 )
 from src.routers.ai import ai
 from src.routers.courses import (
@@ -58,6 +59,7 @@ v1_router.include_router(trail.router, prefix="/trail", tags=["trail"])
 v1_router.include_router(
     gamification.router, prefix="/gamification", tags=["gamification"]
 )
+v1_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 v1_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 v1_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 

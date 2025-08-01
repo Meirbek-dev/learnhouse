@@ -83,7 +83,7 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
   const courseUrl = customLink || getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`);
 
   return (
-    <Card className="group bg-card relative w-full max-w-sm min-w-[280px] overflow-hidden border-0 p-0 shadow-sm transition-all duration-300 hover:shadow-xl min-h-96">
+    <Card className="group bg-card relative min-h-96 w-full max-w-sm min-w-[280px] overflow-hidden border-0 p-0 shadow-sm transition-all duration-300 hover:shadow-xl">
       <AdminEditOptions
         course={course}
         orgSlug={orgslug}

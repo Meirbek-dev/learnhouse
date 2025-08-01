@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 
 interface GamificationProfile {
   current_login_streak: number;
@@ -28,6 +29,7 @@ interface StreakWidgetProps {
 }
 
 export function StreakWidget({ orgId, className = '', compact = false }: StreakWidgetProps) {
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification.streakWidget');
   const { data: session } = useSession();
   const [profile, setProfile] = useState<GamificationProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,9 +66,11 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         setError('Request timed out. Please try again.');
-      } else {
+      } else if (error instanceof Error) {
         console.error('Error fetching gamification profile:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error occurred');
+        setError(error.message);
+      } else {
+        setError('Unknown error occurred');
       }
     } finally {
       setIsLoading(false);
@@ -115,18 +119,26 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
     }
   }, []);
 
-  const getStreakMessage = useCallback((streak: number, status: string, type: 'login' | 'learning') => {
-    if (status === 'active' && streak > 0) {
-      return `${streak} day${streak > 1 ? 's' : ''} strong! 🔥`;
-    }
-    if (status === 'at-risk') {
-      return `Don't break your streak! ${type === 'login' ? 'Log in' : 'Complete an activity'} today.`;
-    }
-    if (status === 'broken' || streak === 0) {
-      return `Start your ${type} streak today!`;
-    }
-    return '';
-  }, []);
+  const getStreakMessage = useCallback(
+    (streak: number, status: string, type: 'login' | 'learning') => {
+      if (status === 'active' && streak > 0) {
+        return t('streakMessages.active', {
+          count: streak,
+          plural: streak > 1 ? 's' : '',
+        });
+      }
+      if (status === 'at-risk') {
+        const action = type === 'login' ? t('streakMessages.loginAction') : t('streakMessages.completeAction');
+        return t('streakMessages.atRisk', { action });
+      }
+      if (status === 'broken' || streak === 0) {
+        const typeText = type === 'login' ? t('streakMessages.login') : t('streakMessages.learning');
+        return t('streakMessages.broken', { type: typeText });
+      }
+      return '';
+    },
+    [t],
+  );
 
   // Memoized calculations
   const streakData = useMemo(() => {
@@ -191,7 +203,7 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
               <span className="text-sm">{error}</span>
-              {retryCount < 3 && (
+              {retryCount < 3 ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -199,8 +211,10 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
                   className="ml-2"
                 >
                   <RefreshCw className="mr-1 h-4 w-4" />
-                  Retry
+                  {t('retry')}
                 </Button>
+              ) : (
+                <span className="text-muted-foreground text-xs">{t('retryLimit')}</span>
               )}
             </AlertDescription>
           </Alert>
@@ -216,7 +230,7 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
         <CardHeader className={compact ? 'pb-3' : ''}>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Flame className="h-5 w-5" />
-            {compact ? 'Streaks' : 'Your Streaks'}
+            {compact ? t('titleCompact') : t('title')}
           </CardTitle>
         </CardHeader>
         <CardContent className={compact ? 'pt-0' : ''}>
@@ -224,8 +238,8 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
             <div className="mb-3 inline-block rounded-full bg-gray-100 p-4 dark:bg-gray-800">
               <Flame className="h-8 w-8 text-gray-400" />
             </div>
-            <p className="text-muted-foreground mb-2 text-sm">No streak data available</p>
-            <p className="text-muted-foreground text-xs">Complete activities to start building streaks!</p>
+            <p className="text-muted-foreground mb-2 text-sm">{t('noData')}</p>
+            <p className="text-muted-foreground text-xs">{t('noDataSubtext')}</p>
           </div>
         </CardContent>
       </Card>
@@ -273,7 +287,7 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Flame className="h-5 w-5" />
-            Streaks
+            {t('title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -284,7 +298,7 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-orange-500" />
-                    <h3 className="font-semibold">Daily Login</h3>
+                    <h3 className="font-semibold">{t('loginStreak')}</h3>
                   </div>
                   <Badge variant={getStreakBadgeVariant(loginStatus)}>
                     {profile.current_login_streak} day{profile.current_login_streak !== 1 ? 's' : ''}
@@ -294,7 +308,9 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
                 <p className="text-muted-foreground mb-2 text-sm">{loginMessage}</p>
 
                 {profile.longest_login_streak > profile.current_login_streak && (
-                  <p className="text-muted-foreground text-xs">Personal best: {profile.longest_login_streak} days</p>
+                  <p className="text-muted-foreground text-xs">
+                    {t('personalBest', { count: profile.longest_login_streak })}
+                  </p>
                 )}
               </div>
             </TooltipTrigger>
@@ -310,7 +326,7 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Star className="h-5 w-5 text-blue-500" />
-                    <h3 className="font-semibold">Learning</h3>
+                    <h3 className="font-semibold">{t('learningStreak')}</h3>
                   </div>
                   <Badge variant={getStreakBadgeVariant(learningStatus)}>
                     {profile.current_learning_streak} day{profile.current_learning_streak !== 1 ? 's' : ''}
@@ -320,7 +336,9 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
                 <p className="text-muted-foreground mb-2 text-sm">{learningMessage}</p>
 
                 {profile.longest_learning_streak > profile.current_learning_streak && (
-                  <p className="text-muted-foreground text-xs">Personal best: {profile.longest_learning_streak} days</p>
+                  <p className="text-muted-foreground text-xs">
+                    {t('personalBest', { count: profile.longest_learning_streak })}
+                  </p>
                 )}
               </div>
             </TooltipTrigger>

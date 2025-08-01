@@ -1,4 +1,5 @@
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type React from 'react';
 
@@ -10,6 +11,7 @@ interface LinkInputTooltipProps {
 
 const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, currentUrl }) => {
   const [url, setUrl] = useState(currentUrl || '');
+  const t = useTranslations('Components.Editor.LinkInputTooltip');
 
   useEffect(() => {
     setUrl(currentUrl || '');
@@ -17,10 +19,16 @@ const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, c
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (url) {
+    if (url.trim()) {
       // Ensure the URL has a protocol
       const formattedUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
       onSave(formattedUrl);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onCancel();
     }
   };
 
@@ -32,25 +40,26 @@ const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, c
       >
         <input
           type="text"
-          placeholder="Enter URL"
+          placeholder={t('enterUrl')}
           value={url}
-          onChange={(e) => {
-            setUrl(e.target.value);
-          }}
-          className="w-[200px] rounded border border-gray-300/50 px-2 py-1 text-xs focus:border-gray-300/80 focus:outline-none"
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-[200px] rounded border border-gray-300/50 px-2 py-1 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
         />
         <div className="flex gap-0.5">
           <button
             type="submit"
-            disabled={!url}
-            className="flex cursor-pointer items-center justify-center rounded bg-gray-300/24 p-1 text-green-500 transition-colors hover:bg-gray-300/48 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={!url.trim()}
+            className="flex cursor-pointer items-center justify-center rounded bg-green-50 p-1 text-green-600 transition-colors hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-green-50"
+            title={t('saveLink')}
           >
             <CheckIcon />
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="flex cursor-pointer items-center justify-center rounded bg-gray-300/24 p-1 text-red-500 transition-colors hover:bg-gray-300/48"
+            className="flex cursor-pointer items-center justify-center rounded bg-red-50 p-1 text-red-600 transition-colors hover:bg-red-100"
+            title={t('cancel')}
           >
             <Cross2Icon />
           </button>

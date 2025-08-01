@@ -4,8 +4,8 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.4"
 dependencies = [
-  "boto3>=1.39.15",
-  "botocore>=1.39.15",
+  "boto3>=1.40.0",
+  "botocore>=1.40.0",
   "fastapi[standard-no-fastapi-cloud-cli]==0.116.1",
   "fastapi-another-jwt-auth>=0.1.11",
   "langchain>=0.3.27",
@@ -14,7 +14,7 @@ dependencies = [
   "langchain-core>=0.3.72",
   "langchain-openai>=0.3.28",
   "langchain-text-splitters>=0.3.9",
-  "openai>=1.97.1",
+  "openai>=1.98.0",
   "psycopg[binary,pool]>=3.2.9",
   "pydantic[email]>=2.11.7",
   "python-dotenv>=1.1.1",
@@ -27,8 +27,8 @@ dependencies = [
   "chromadb>=1.0.15",
   "alembic>=1.16.4",
   "alembic-postgresql-enum>=1.8.0",
-  "stripe>=12.3.0",
-  "logfire[fastapi,sqlalchemy]>=4.0.0",
+  "stripe>=12.4.0",
+  "logfire[fastapi,sqlalchemy]>=4.0.1",
   "beautifulsoup4>=4.13.4",
   "python-ulid>=3.0.0",
   "argon2-cffi>=25.1.0",
@@ -42,11 +42,11 @@ dependencies = [
 [dependency-groups]
 
 dev = [
-  "faker>=37.4.2",
+  "faker>=37.5.3",
   "pytest>=8.4.1",
   "pytest-asyncio>=1.1.0",
   "pytest-cov<6.0.0",
-  "ruff>=0.12.5",
+  "ruff>=0.12.7",
 ]
 
 

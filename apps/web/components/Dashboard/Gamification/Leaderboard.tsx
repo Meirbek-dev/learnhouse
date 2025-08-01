@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 
 interface LeaderboardEntry {
   rank: number;
@@ -43,6 +44,7 @@ interface LeaderboardProps {
 
 export function Leaderboard({ orgId, className = '', limit = 10, compact = false }: LeaderboardProps) {
   const { data: session } = useSession();
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,37 +101,40 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
   }, [fetchLeaderboard]);
 
   // Memoized utility functions for performance
-  const getRankIcon = useCallback((rank: number) => {
-    switch (rank) {
-      case 1: {
-        return (
-          <Crown
-            className="h-5 w-5 text-yellow-500"
-            aria-label="1st place"
-          />
-        );
+  const getRankIcon = useCallback(
+    (rank: number) => {
+      switch (rank) {
+        case 1: {
+          return (
+            <Crown
+              className="h-5 w-5 text-yellow-500"
+              aria-label={t('leaderboard.ranks.first')}
+            />
+          );
+        }
+        case 2: {
+          return (
+            <Medal
+              className="h-5 w-5 text-gray-400"
+              aria-label={t('leaderboard.ranks.second')}
+            />
+          );
+        }
+        case 3: {
+          return (
+            <Award
+              className="h-5 w-5 text-amber-600"
+              aria-label={t('leaderboard.ranks.third')}
+            />
+          );
+        }
+        default: {
+          return <span className="text-muted-foreground text-sm font-bold">#{rank}</span>;
+        }
       }
-      case 2: {
-        return (
-          <Medal
-            className="h-5 w-5 text-gray-400"
-            aria-label="2nd place"
-          />
-        );
-      }
-      case 3: {
-        return (
-          <Award
-            className="h-5 w-5 text-amber-600"
-            aria-label="3rd place"
-          />
-        );
-      }
-      default: {
-        return <span className="text-muted-foreground text-sm font-bold">#{rank}</span>;
-      }
-    }
-  }, []);
+    },
+    [t],
+  );
 
   const getRankBadgeVariant = useCallback((rank: number): 'default' | 'secondary' | 'outline' => {
     switch (rank) {
@@ -179,7 +184,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
           <div
             className="space-y-3"
             role="status"
-            aria-label="Loading leaderboard"
+            aria-label={t('leaderboard.loading')}
           >
             {[...Array(5)].map((_, i) => (
               <div
@@ -208,7 +213,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
-              <span>{error || 'Failed to load leaderboard'}</span>
+              <span>{error || t('leaderboard.failedToLoad')}</span>
               {retryCount < 3 && (
                 <Button
                   variant="outline"
@@ -217,7 +222,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
                   className="ml-2"
                 >
                   <RefreshCw className="mr-1 h-4 w-4" />
-                  Retry
+                  {t('leaderboard.retry')}
                 </Button>
               )}
             </AlertDescription>
@@ -235,14 +240,14 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Trophy className="h-4 w-4" />
-              Top Learners
+              {t('leaderboard.topLearners')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div
               className="space-y-2"
               role="list"
-              aria-label="Top learners"
+              aria-label={t('leaderboard.topLearners')}
             >
               {topEntries.slice(0, 3).map((entry) => (
                 <Tooltip key={entry.user_id}>
@@ -312,17 +317,17 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Trophy className="h-5 w-5" />
-              Leaderboard
+              {t('leaderboard.title')}
             </div>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="text-muted-foreground flex cursor-help items-center gap-1 text-sm">
                   <Users className="h-4 w-4" />
-                  {leaderboard.total_participants} learners
+                  {t('leaderboard.totalParticipants', { total: leaderboard.total_participants })}
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Total active learners in your organization</p>
+                <p>{t('leaderboard.totalParticipants', { total: leaderboard.total_participants })}</p>
               </TooltipContent>
             </Tooltip>
           </CardTitle>
@@ -446,7 +451,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
           {leaderboard.total_participants > limit && (
             <div className="mt-4 text-center">
               <p className="text-muted-foreground text-sm">
-                Showing top {limit} of {leaderboard.total_participants} learners
+                {t('leaderboard.showingTop', { limit, total: leaderboard.total_participants })}
               </p>
             </div>
           )}

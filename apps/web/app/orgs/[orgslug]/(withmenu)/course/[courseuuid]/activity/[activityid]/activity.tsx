@@ -27,7 +27,7 @@ import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivityS
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
@@ -47,6 +47,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
+
+// Gamification imports
+import { LevelUpNotification, showXPGainToast } from '@components/Dashboard/Gamification';
+import { useLevelIndicator } from '@/hooks/useLevelIndicator';
+import { getUnlockedFeatures } from '@components/Objects/GamificationLevel';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));
@@ -894,6 +899,22 @@ export const MarkStatus = (props: {
   const [showMarkedTooltip, setShowMarkedTooltip] = React.useState(false);
   const [showUnmarkedTooltip, setShowUnmarkedTooltip] = React.useState(false);
 
+  // Gamification state
+  const [showLevelUpNotification, setShowLevelUpNotification] = useState(false);
+  const [levelUpData, setLevelUpData] = useState<{
+    newLevel: number;
+    xpGained: number;
+    unlockedFeatures: string[];
+  } | null>(null);
+
+  // Gamification profile management
+  const {
+    profile: gamificationProfile,
+    refetch: refetchGamification,
+    hasLeveledUp,
+    resetLevelUp
+  } = useLevelIndicator(org?.id);
+
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const markedTooltipCount = localStorage.getItem('activity_marked_tooltip_count');
@@ -966,6 +987,7 @@ export const MarkStatus = (props: {
   async function markActivityAsCompleteFront() {
     try {
       const willCompleteAll = areAllActivitiesCompleted();
+      const previousLevel = gamificationProfile?.current_level || 1;
       setIsLoading(true);
 
       await markActivityAsComplete(
@@ -976,6 +998,38 @@ export const MarkStatus = (props: {
       );
 
       await mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
+
+      // Refresh gamification profile and check for level up
+      await refetchGamification();
+
+      // Show XP gain notification
+      showXPGainToast({
+        xpAmount: 50, // Standard activity completion XP
+        source: 'activity_completion',
+        sourceDisplayName: 'Activity Completed',
+        context: {
+          activity_name: props.activity.title,
+        },
+      });
+
+      // Check for level up after a brief delay to allow for profile update
+      setTimeout(async () => {
+        await refetchGamification();
+        const updatedProfile = gamificationProfile;
+
+        if (updatedProfile && updatedProfile.current_level > previousLevel) {
+          const unlockedFeatures = getUnlockedFeatures(updatedProfile.current_level);
+          const previousUnlocked = getUnlockedFeatures(previousLevel);
+          const newUnlocks = unlockedFeatures.filter(f => !previousUnlocked.includes(f));
+
+          setLevelUpData({
+            newLevel: updatedProfile.current_level,
+            xpGained: 50,
+            unlockedFeatures: newUnlocks,
+          });
+          setShowLevelUpNotification(true);
+        }
+      }, 1000);
 
       if (willCompleteAll) {
         const cleanCourseUuid = props.course.course_uuid.replace('course_', '');
@@ -1138,6 +1192,21 @@ export const MarkStatus = (props: {
             ) : null}
           </div>
         </div>
+      )}
+
+      {/* Level Up Notification */}
+      {showLevelUpNotification && levelUpData && (
+        <LevelUpNotification
+          isVisible={showLevelUpNotification}
+          newLevel={levelUpData.newLevel}
+          xpGained={levelUpData.xpGained}
+          unlockedFeatures={levelUpData.unlockedFeatures}
+          onDismiss={() => {
+            setShowLevelUpNotification(false);
+            setLevelUpData(null);
+            resetLevelUp();
+          }}
+        />
       )}
     </>
   );

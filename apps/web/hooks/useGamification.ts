@@ -3,6 +3,7 @@
 import { updateLoginStreak } from '@/services/gamification/gamification';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 
 interface UseGamificationProps {
   orgId: number;
@@ -60,6 +61,7 @@ export function useGamification({
   onSuccess,
 }: UseGamificationProps): UseGamificationReturn {
   const { data: session } = useSession();
+  const t = useTranslations('Hooks.useGamification');
   const hasCheckedToday = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isUpdatingRef = useRef(false);
@@ -83,7 +85,7 @@ export function useGamification({
     }
 
     if (!isLocalStorageAvailable()) {
-      console.warn('localStorage not available, skipping streak update');
+      console.warn(t('localStorageNotAvailable'));
       return;
     }
 
@@ -109,7 +111,7 @@ export function useGamification({
         localStorage.setItem(storageKey, currentDate);
 
         if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ Login streak updated for date: ${currentDate}`);
+          console.log(t('loginStreakUpdated', { date: currentDate }));
         }
 
         onSuccess?.();
@@ -123,12 +125,12 @@ export function useGamification({
       }
 
       const errorInstance = error instanceof Error ? error : new Error('Unknown error occurred');
-      console.error('❌ Failed to update login streak:', errorInstance);
+      console.error(t('failedToUpdateStreak'), errorInstance);
       onError?.(errorInstance);
     } finally {
       isUpdatingRef.current = false;
     }
-  }, [enabled, session?.tokens?.access_token, userId, orgId, onError, onSuccess]);
+  }, [enabled, session?.tokens?.access_token, userId, orgId, onError, onSuccess, t]);
 
   // Manual retry function for error recovery
   const retryUpdate = useCallback(async () => {

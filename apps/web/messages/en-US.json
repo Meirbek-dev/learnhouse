@@ -397,7 +397,10 @@
       "verifyCertificate": "Verify Certificate",
       "viewCertificate": "View Certificate",
       "youAreAlmostThere": "You're almost there!",
-      "youAreMakingProgress": "You're making great progress in"
+      "youAreMakingProgress": "You're making great progress in",
+      "learningAchievementUnlocked": "Learning Achievement Unlocked!",
+      "xpBonusMessage": "+100 XP Course Completion Bonus!",
+      "keepLearningMessage": "Keep learning to unlock more avatar customizations and features!"
     },
     "EditCourseCertification": {
       "basicInfo": "Basic Information",
@@ -1620,6 +1623,74 @@
       "openuUniversity": "Toraighyrov University",
       "touUniversity": "Toraighyrov University"
     },
+    "Admin": {
+      "title": "Admin",
+      "overview": "Overview",
+      "overviewInfo": "Key metrics and statistics",
+      "analytics": "Analytics",
+      "analyticsInfo": "Detailed analytics and insights",
+      "system": "System",
+      "systemInfo": "System health and performance",
+      "adminDashboard": "Administrative dashboard for system management",
+      "totalUsers": "Total Users",
+      "totalCourses": "Total Courses",
+      "activities": "Activities",
+      "activeUsers": "Active Users",
+      "coursesCompleted": "Courses Completed",
+      "thisMonth": "this month",
+      "last30Days": "last 30 days",
+      "growth": "growth",
+      "topCourses": "Top Courses",
+      "topCoursesDescription": "Most popular courses by enrollment",
+      "completion": "completion",
+      "recentActivity": "Recent Activity",
+      "recentActivityDescription": "Latest activity across the platform",
+      "noDataAvailable": "No data available",
+      "noRecentActivity": "No recent activity",
+      "platformHealth": "Platform Health",
+      "platformHealthDescription": "System status overview",
+      "systemStatus": "System Status",
+      "operational": "Operational",
+      "avgResponseTime": "Avg Response Time",
+      "databaseHealth": "Database Health",
+      "healthy": "Healthy",
+      "userEngagement": "User Engagement",
+      "userEngagementDescription": "Daily active users and engagement metrics",
+      "dailyActiveUsers": "Daily Active Users",
+      "avgSessionDuration": "Avg Session Duration",
+      "returnRate": "Return Rate",
+      "contentPerformance": "Content Performance",
+      "contentPerformanceDescription": "Course popularity and completion rates",
+      "mostPopularCourses": "Most Popular Courses",
+      "completionRates": "Completion Rates",
+      "overallCompletion": "Overall Completion",
+      "avgCourseRating": "Avg Course Rating",
+      "learningProgress": "Learning Progress",
+      "learningProgressDescription": "Learning outcomes and progress tracking",
+      "coursesStarted": "Courses Started",
+      "certificatesIssued": "Certificates Issued",
+      "avgProgress": "Avg Progress",
+      "serverUptime": "Server Uptime",
+      "cpuUsage": "CPU Usage",
+      "memoryUsage": "Memory Usage",
+      "diskUsage": "Disk Usage",
+      "high": "High",
+      "normal": "Normal",
+      "free": "free",
+      "databasePerformance": "Database Performance",
+      "databasePerformanceDescription": "Database metrics and performance",
+      "activeConnections": "Active Connections",
+      "avgQueryTime": "Avg Query Time",
+      "databaseSize": "Database Size",
+      "systemAlerts": "System Alerts",
+      "systemAlertsDescription": "Current system alerts and notifications",
+      "noSystemAlerts": "No system alerts",
+      "notAvailable": "Not Available",
+      "unknown": "Unknown",
+      "basedOnLoginStreaks": "Based on user login streaks",
+      "sessionTrackingNotAvailable": "Session duration tracking is not currently implemented. This would require proper session management to provide accurate data.",
+      "storageEstimateDisclaimer": "This is an estimated value based on database size."
+    },
     "CourseOverview": {
       "courseLabel": "Course"
     },
@@ -1937,6 +2008,11 @@
         "webPreview": "Web Preview",
         "youtube": "YouTube",
         "youtubeVideo": "YouTube video"
+      },
+      "LinkInputTooltip": {
+        "enterUrl": "Enter URL",
+        "saveLink": "Save link",
+        "cancel": "Cancel"
       },
       "UserBlock": {
         "errorNotFound": "User not found",
@@ -2884,7 +2960,246 @@
         },
         "untitledSection": "Untitled Section"
       },
-      "title": "Account Settings"
+      "title": "Account Settings",
+      "gamification": "Gamification Settings",
+      "Gamification": {
+        "description": "Customize your learning experience with gamification features and privacy settings",
+        "tabs": {
+          "overview": "Overview",
+          "avatar": "Avatar",
+          "preferences": "Preferences",
+          "streaks": "Streaks",
+          "progress": "Progress"
+        },
+        "notifications": {
+          "title": "Notifications",
+          "description": "Choose which gamification events you want to be notified about",
+          "levelUp": "Level Up Notifications",
+          "levelUpDescription": "Get notified when you reach a new level",
+          "xpGain": "XP Gain Notifications",
+          "xpGainDescription": "Show notifications when you earn experience points",
+          "streakReminder": "Streak Reminders",
+          "streakReminderDescription": "Remind me to maintain my learning streaks",
+          "weeklyReport": "Weekly Reports",
+          "weeklyReportDescription": "Receive weekly progress summaries"
+        },
+        "privacy": {
+          "title": "Privacy Settings",
+          "description": "Control how your gamification data is shared and displayed",
+          "showOnLeaderboard": "Show on Leaderboard",
+          "showOnLeaderboardDescription": "Display your progress on organization leaderboards",
+          "publicProfileStats": "Public Profile Stats",
+          "publicProfileStatsDescription": "Show your stats on your public profile",
+          "shareProgress": "Share Progress",
+          "shareProgressDescription": "Allow sharing of learning progress with others"
+        },
+        "display": {
+          "title": "Display Settings",
+          "description": "Customize how gamification elements are displayed",
+          "animatedEffects": "Animated Effects",
+          "animatedEffectsDescription": "Show animated effects for level ups and achievements",
+          "compactMode": "Compact Mode",
+          "compactModeDescription": "Use a more compact display for gamification elements",
+          "showLevelIndicator": "Show Level Indicator",
+          "showLevelIndicatorDescription": "Display your current level in the interface",
+          "autoHideToasts": "Auto-hide Notifications",
+          "autoHideToastsDescription": "Automatically hide notification toasts after a few seconds"
+        },
+        "dangerZone": {
+          "title": "Danger Zone",
+          "description": "These actions cannot be undone. Proceed with caution.",
+          "resetWarning": "Resetting preferences will restore all settings to their default values. This action cannot be undone.",
+          "resetPreferences": "Reset Preferences",
+          "resetAllData": "Reset All Data",
+          "resetConfirmTitle": "Reset All Gamification Data?",
+          "resetConfirmDescription": "This will permanently delete all your gamification progress, including XP, levels, streaks, and achievements. This action cannot be undone."
+        },
+        "saving": "Saving...",
+        "savePreferences": "Save Preferences",
+        "cancel": "Cancel",
+        "avatarUpdated": "Avatar updated successfully",
+        "toast": {
+          "userNotAuthenticated": "User not authenticated",
+          "preferencesSaved": "Preferences saved successfully",
+          "preferencesError": "Failed to save preferences",
+          "preferencesReset": "Preferences reset to defaults"
+        },
+        "errors": {
+          "orgNotAvailable": "Organization data not available. Please refresh the page."
+        },
+        "levels": {
+          "titles": {
+            "novice": "Novice",
+            "apprentice": "Apprentice",
+            "scholar": "Scholar",
+            "expert": "Expert",
+            "master": "Master",
+            "grandmaster": "Grandmaster"
+          },
+          "unlocks": {
+            "basicProfile": "Basic Profile",
+            "avatarFrames": "Avatar Frames",
+            "customAvatarHat": "Custom Avatar Hat",
+            "avatarAccessories": "Avatar Accessories",
+            "exclusiveThemes": "Exclusive Themes",
+            "legendaryStatus": "Legendary Status"
+          },
+          "progress": {
+            "level": "Level",
+            "toNextLevel": "to next level",
+            "allTime": "All time"
+          }
+        },
+        "avatar": {
+          "frames": {
+            "golden": "Golden Frame",
+            "silver": "Silver Frame",
+            "diamond": "Diamond Frame",
+            "legendary": "Legendary Frame"
+          },
+          "accessories": {
+            "wizardHat": "Wizard Hat",
+            "scholarCrown": "Scholar Crown",
+            "smartGlasses": "Smart Glasses",
+            "knowledgeCape": "Knowledge Cape"
+          },
+          "unlockedFeatures": "Unlocked Features",
+          "featuresMore": "more"
+        },
+        "title": "Your Progress",
+        "rank": "Rank",
+        "error": {
+          "loadFailed": "Failed to load gamification data"
+        },
+        "stats": {
+          "totalXP": "Total XP",
+          "allTime": "All time"
+        },
+        "streaks": {
+          "days": "days",
+          "best": "Best",
+          "login": {
+            "title": "Login Streak",
+            "none": "No streak",
+            "active": "Active streak",
+            "atRisk": "At risk"
+          },
+          "learning": {
+            "title": "Learning Streak",
+            "none": "No streak",
+            "active": "Active streak",
+            "atRisk": "At risk"
+          }
+        },
+        "levelIndicators": {
+          "level": "Level",
+          "levelAbbrev": "Lv.",
+          "xpToNext": "XP to next",
+          "xpToLevel": "XP to Level {level}",
+          "totalXp": "{total} XP",
+          "progress": "{percentage}%",
+          "xpToNextLevel": "{xp} to next level"
+        },
+        "levelUpNotification": {
+          "title": "Level Up!",
+          "xpEarned": "+{xp} XP earned!",
+          "newMastery": "You've reached a new level of mastery!",
+          "newUnlocks": "New Unlocks!",
+          "continue": "Continue"
+        },
+        "streakWidget": {
+          "title": "Streaks",
+          "titleCompact": "Streaks",
+          "loginStreak": "Login Streak",
+          "learningStreak": "Learning Streak",
+          "noData": "No streak data available",
+          "noDataSubtext": "Complete activities to start building streaks!",
+          "streakMessages": {
+            "active": "{count} day{plural} strong! 🔥",
+            "atRisk": "Don't break your streak! {action} today.",
+            "broken": "Start your {type} streak today!",
+            "loginAction": "Log in",
+            "completeAction": "Complete an activity",
+            "login": "login",
+            "learning": "learning"
+          },
+          "personalBest": "Personal Best: {count} days",
+          "error": "Unable to load streak data",
+          "retry": "Retry",
+          "retryLimit": "Maximum retry attempts reached. Please refresh the page."
+        },
+        "xpGainToast": {
+          "streakBonus": "Streak Bonus!",
+          "streakDays": "for {days} days!"
+        },
+        "dashboard": {
+          "title": "Learning Progress",
+          "yourProgress": "Your Learning Progress",
+          "quickStats": "Quick Stats",
+          "availableCourses": "Available Courses",
+          "completed": "Completed",
+          "certificates": "Certificates",
+          "dayStreak": "Day Streak",
+          "profile": "Profile",
+          "progress": "Progress",
+          "community": "Community",
+          "recentActivities": "Recent Activities",
+          "nextMilestone": "Next Milestone",
+          "unlockedCustomizations": "Unlocked Customizations",
+          "recentAchievements": "Recent Achievements",
+          "topLearners": "Top Learners",
+          "rank": "Rank #{rank} in organization",
+          "noData": "No gamification data available",
+          "failedToLoad": "Failed to load gamification data",
+          "tryAgain": "Try Again",
+          "rankInOrg": "Rank #{rank} in organization"
+        },
+        "leaderboard": {
+          "title": "Leaderboard",
+          "topLearners": "Top Learners",
+          "showingTop": "Showing top {limit} of {total} learners",
+          "totalParticipants": "{total} learners are competing",
+          "failedToLoad": "Failed to load leaderboard",
+          "noData": "No leaderboard data available",
+          "retry": "Retry",
+          "maxRetries": "Maximum retry attempts reached. Please refresh the page.",
+          "loading": "Loading leaderboard",
+          "userInitials": {
+            "fallback": "??"
+          },
+          "ranks": {
+            "first": "1st place",
+            "second": "2nd place",
+            "third": "3rd place"
+          }
+        },
+        "avatarCustomization": {
+          "title": "Avatar Customization",
+          "description": "Customize your avatar appearance with unlocked rewards",
+          "currentStatus": "Current Status",
+          "displayOptions": "Display Options",
+          "showLevelBadge": "Show Level Badge",
+          "showFrame": "Show Avatar Frame",
+          "showAccessories": "Show Avatar Accessories",
+          "avatarFrames": "Avatar Frames",
+          "avatarAccessories": "Avatar Accessories",
+          "comingSoon": "Coming Soon",
+          "saveCustomization": "Save Customization",
+          "saving": "Saving...",
+          "saved": "Avatar customization saved!",
+          "failedToSave": "Failed to save customization",
+          "noDataMessage": "Complete some activities to unlock avatar customization!",
+          "unlockedAt": "Unlocked at Level {level}"
+        },
+        "xpSources": {
+          "login_daily": "Daily Login",
+          "activity_completion": "Activity Completed",
+          "course_completion": "Course Completed",
+          "login_streak_7_days": "7-Day Login Streak",
+          "login_streak_30_days": "30-Day Login Streak",
+          "login_streak_100_days": "100-Day Login Streak"
+        }
+      }
     },
     "UserProfileBuilder": {
       "AffiliationEditor": {
@@ -3048,6 +3363,57 @@
       "saveButton": "Save Changes",
       "savingButton": "Saving...",
       "title": "Profile Builder"
+    },
+    "gamification": "Gamification",
+    "Gamification": {
+      "title": "Gamification Settings",
+      "description": "Customize your learning experience and gamification preferences",
+      "notifications": {
+        "title": "Notifications",
+        "description": "Choose which gamification events should notify you",
+        "levelUp": "Level Up Notifications",
+        "levelUpDescription": "Get notified when you reach a new level",
+        "xpGain": "XP Gain Notifications",
+        "xpGainDescription": "Show toast notifications when gaining experience points",
+        "streakReminder": "Streak Reminders",
+        "streakReminderDescription": "Daily reminders to maintain your learning streak",
+        "weeklyReport": "Weekly Reports",
+        "weeklyReportDescription": "Receive weekly summaries of your progress"
+      },
+      "privacy": {
+        "title": "Privacy & Visibility",
+        "description": "Control how your gamification data is shared and displayed",
+        "showOnLeaderboard": "Show on Leaderboard",
+        "showOnLeaderboardDescription": "Display your progress on the organization leaderboard",
+        "publicProfileStats": "Public Profile Stats",
+        "publicProfileStatsDescription": "Show your level and stats on your public profile",
+        "shareProgress": "Share Progress",
+        "shareProgressDescription": "Allow sharing your progress with other users"
+      },
+      "display": {
+        "title": "Display Settings",
+        "description": "Customize how gamification elements appear",
+        "animatedEffects": "Animated Effects",
+        "animatedEffectsDescription": "Enable animations for level indicators and progress bars",
+        "compactMode": "Compact Mode",
+        "compactModeDescription": "Use smaller gamification widgets throughout the interface",
+        "showLevelIndicator": "Show Level Indicator",
+        "showLevelIndicatorDescription": "Display level badge in navigation and profile areas",
+        "autoHideToasts": "Auto-hide Toasts",
+        "autoHideToastsDescription": "Automatically dismiss notification toasts after a few seconds"
+      },
+      "dangerZone": {
+        "title": "Danger Zone",
+        "description": "Irreversible actions that affect your gamification data",
+        "resetWarning": "Resetting your data will permanently delete all XP, levels, streaks, and unlocked items. This action cannot be undone.",
+        "resetPreferences": "Reset Preferences",
+        "resetAllData": "Reset All Data",
+        "resetConfirmTitle": "Reset All Gamification Data?",
+        "resetConfirmDescription": "This will permanently delete all your XP, levels, streaks, unlocked items, and achievements. This action cannot be undone and you will start from zero."
+      },
+      "savePreferences": "Save Preferences",
+      "saving": "Saving...",
+      "cancel": "Cancel"
     },
     "UserSettings": {
       "add": "Invite Members",
@@ -3348,6 +3714,16 @@
   "Hooks": {
     "useContributorStatus": {
       "checkStatusError": "Failed to check contributor status"
+    },
+    "useLevelIndicator": {
+      "levelUpMessage": "🎉 Level Up! You've reached Level {level}!",
+      "failedToLoadProfile": "Failed to load profile data",
+      "xpGained": "+{amount} XP"
+    },
+    "useGamification": {
+      "localStorageNotAvailable": "localStorage not available, skipping streak update",
+      "loginStreakUpdated": "✅ Login streak updated for date: {date}",
+      "failedToUpdateStreak": "❌ Failed to update login streak"
     }
   },
   "LandingCustom": {
@@ -3442,6 +3818,7 @@
       "toToggle": "to toggle"
     },
     "mobile": {
+      "admin": "Admin",
       "assignments": "Assignments",
       "courses": "Courses",
       "home": "Home",
@@ -3452,6 +3829,7 @@
     },
     "orgName": "OpenU",
     "tooltips": {
+      "admin": "Admin Dashboard",
       "assignments": "Assignments",
       "courses": "Courses",
       "home": "Dashboard Home",

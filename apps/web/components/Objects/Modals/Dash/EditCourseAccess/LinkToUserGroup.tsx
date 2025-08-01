@@ -14,9 +14,14 @@ import useSWR, { mutate } from 'swr';
 import { Info } from 'lucide-react';
 import Link from 'next/link';
 
+interface UserGroup {
+  id: number;
+  name: string;
+  description?: string;
+}
+
 interface LinkToUserGroupProps {
-  // React function, todo: fix types
-  setUserGroupModal: any;
+  setUserGroupModal: (open: boolean) => void;
 }
 
 const LinkToUserGroup = (props: LinkToUserGroupProps) => {
@@ -30,16 +35,25 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const { data: usergroups } = useSWR(courseStructure && org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) =>
     swrFetcher(url, access_token),
   );
-  const [selectedUserGroup, setSelectedUserGroup] = useState(null) as any;
+  const [selectedUserGroup, setSelectedUserGroup] = useState<number | null>(null);
 
   const handleLink = async () => {
-    const res = await linkResourcesToUserGroup(selectedUserGroup, courseStructure.course_uuid, access_token);
-    if (res.status === 200) {
-      props.setUserGroupModal(false);
-      toast.success(t('linkSuccess'));
-      mutate(`${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}`);
-    } else {
-      toast.error(t('linkError', { error: res.data?.detail || t('unknownError') }));
+    if (!selectedUserGroup) {
+      toast.error(t('selectUserGroupFirst'));
+      return;
+    }
+
+    try {
+      const res = await linkResourcesToUserGroup(selectedUserGroup, courseStructure.course_uuid, access_token);
+      if (res.status === 200) {
+        props.setUserGroupModal(false);
+        toast.success(t('linkSuccess'));
+        mutate(`${getAPIUrl()}usergroups/resource/${courseStructure.course_uuid}`);
+      } else {
+        toast.error(t('linkError', { error: res.data?.detail || t('unknownError') }));
+      }
+    } catch {
+      toast.error(t('linkError', { error: t('unknownError') }));
     }
   };
 
@@ -47,7 +61,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
     if (usergroups && usergroups.length > 0) {
       setSelectedUserGroup(usergroups[0].id);
     }
-  }, [usergroups, setSelectedUserGroup]);
+  }, [usergroups]);
 
   return (
     <div className="flex flex-col space-y-1">
@@ -63,17 +77,17 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
             </span>
 
             <Select
-              onValueChange={setSelectedUserGroup}
-              defaultValue={selectedUserGroup}
+              onValueChange={(value) => setSelectedUserGroup(Number(value))}
+              defaultValue={selectedUserGroup?.toString()}
             >
               <SelectTrigger className="mx-5 mt-2 w-fit min-w-32">
                 <SelectValue placeholder={t('selectUserGroup')} />
               </SelectTrigger>
               <SelectContent>
-                {usergroups?.map((group: any) => (
+                {usergroups?.map((group: UserGroup) => (
                   <SelectItem
                     key={group.id}
-                    value={group.id}
+                    value={group.id.toString()}
                   >
                     {group.name}
                   </SelectItem>
