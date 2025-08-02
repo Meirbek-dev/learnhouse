@@ -7,12 +7,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Backpack, Book, CreditCard, School, User, Users } from 'lucide-react';
+import { Backpack, BarChart3, Book, CreditCard, School, User, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 interface BreadCrumbsProps {
-  type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments';
+  type: 'courses' | 'user' | 'users' | 'org' | 'orgusers' | 'assignments' | 'payments' | 'admin';
   last_breadcrumb?: string;
 }
 
@@ -69,6 +69,14 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
           />
         );
       }
+      case 'admin': {
+        return (
+          <BarChart3
+            className="text-gray"
+            size={14}
+          />
+        );
+      }
       default: {
         return null;
       }
@@ -95,6 +103,9 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       case 'payments': {
         return '/dash/payments';
       }
+      case 'admin': {
+        return '/dash/admin/overview';
+      }
       default: {
         return '#';
       }
@@ -120,6 +131,9 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       }
       case 'payments': {
         return t('Payments.title');
+      }
+      case 'admin': {
+        return t('Admin.title');
       }
       default: {
         return '';
