@@ -2,9 +2,9 @@
 
 import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { useLocale, useTranslations } from 'next-intl';
 import type React from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -17,6 +17,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const locale = useLocale();
+  const format = useFormatter();
   const t = useTranslations('Certificates.UserCertificates');
 
   const {
@@ -93,7 +94,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
             orgslug,
             `/certificates/${certificate.certificate_user.user_certification_uuid}/verify`,
           );
-          const awardedDate = new Date(certificate.certificate_user.created_at).toLocaleDateString(locale, {
+          const awardedDate = format.dateTime(new Date(certificate.certificate_user.created_at), {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

@@ -463,7 +463,7 @@ export default function OrgEditImages() {
                     type="button"
                     disabled={isLogoUploading}
                     className={cn(
-                      'rounded-full px-6 py-2.5 text-sm font-medium',
+                      'rounded-full px-6 py-2.5 font-medium text-sm',
                       'bg-linear-to-r from-blue-500 to-blue-600 text-white',
                       'hover:from-blue-600 hover:to-blue-700',
                       'shadow-xs transition-all duration-300 hover:shadow-sm',
@@ -529,7 +529,7 @@ export default function OrgEditImages() {
                     type="button"
                     disabled={isThumbnailUploading}
                     className={cn(
-                      'rounded-full px-6 py-2.5 text-sm font-medium',
+                      'rounded-full px-6 py-2.5 font-medium text-sm',
                       'bg-linear-to-r from-purple-500 to-purple-600 text-white',
                       'hover:from-purple-600 hover:to-purple-700',
                       'shadow-xs transition-all duration-300 hover:shadow-sm',
@@ -600,8 +600,8 @@ export default function OrgEditImages() {
                                 <button
                                   onClick={() => removePreview(preview.id)}
                                   className={cn(
-                                    'absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
-                                    'shadow-xs z-10 opacity-0 group-hover:opacity-100',
+                                    '-right-2 -top-2 absolute rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600',
+                                    'z-10 opacity-0 shadow-xs group-hover:opacity-100',
                                     'transition-opacity duration-200',
                                   )}
                                 >
@@ -610,8 +610,8 @@ export default function OrgEditImages() {
                                 <div
                                   {...provided.dragHandleProps}
                                   className={cn(
-                                    'absolute -left-2 -top-2 rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
-                                    'shadow-xs z-10 cursor-grab opacity-0 active:cursor-grabbing group-hover:opacity-100',
+                                    '-left-2 -top-2 absolute rounded-full bg-gray-600 p-1.5 text-white hover:bg-gray-700',
+                                    'z-10 cursor-grab opacity-0 shadow-xs active:cursor-grabbing group-hover:opacity-100',
                                     'transition-opacity duration-200',
                                   )}
                                 >
@@ -669,7 +669,7 @@ export default function OrgEditImages() {
                                 <button
                                   className={cn(
                                     `w-full ${PREVIEW_HEIGHT}`,
-                                    'rounded-xl border-2 border-dashed border-gray-200',
+                                    'rounded-xl border-2 border-gray-200 border-dashed',
                                     'transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/50',
                                     'group flex flex-col items-center justify-center space-y-2',
                                   )}

@@ -10,9 +10,9 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
-import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
 import useSWR from 'swr';
 

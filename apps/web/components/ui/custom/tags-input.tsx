@@ -232,9 +232,9 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
           ref={ref}
           dir={dir}
           className={cn(
-            'border-input placeholder:text-muted-foreground dark:bg-input/30 shadow-xs flex min-h-9 w-full flex-wrap items-center gap-1 overflow-hidden rounded-md border bg-transparent px-3 py-2 text-base outline-none transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-            'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
-            'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+            'flex min-h-9 w-full flex-wrap items-center gap-1 overflow-hidden rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30',
+            'focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50',
+            'aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
             className,
           )}
         >
@@ -245,7 +245,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               aria-disabled={disableButton}
               data-active={activeIndex === index}
               className={cn(
-                "data-[active='true']:ring-muted-foreground relative flex items-center gap-1 truncate rounded-sm px-2 py-1 text-xs aria-disabled:cursor-not-allowed aria-disabled:opacity-50 data-[active='true']:ring-2",
+                "relative flex items-center gap-1 truncate rounded-sm px-2 py-1 text-xs aria-disabled:cursor-not-allowed aria-disabled:opacity-50 data-[active='true']:ring-2 data-[active='true']:ring-muted-foreground",
               )}
               variant="secondary"
             >

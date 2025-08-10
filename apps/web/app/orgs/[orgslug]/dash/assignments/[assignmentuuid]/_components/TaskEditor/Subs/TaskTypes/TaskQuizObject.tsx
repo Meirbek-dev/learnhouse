@@ -664,7 +664,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         {view === 'teacher' && questions.length <= 10 && (
           <div className="mx-auto flex justify-center px-2">
             <div
-              className="text-slate soft-shadow my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear hover:shadow-xs"
+              className="soft-shadow text-slate my-2 flex w-full cursor-pointer items-center space-x-3 rounded-md bg-white px-4 py-2 text-xs transition duration-150 ease-linear hover:shadow-xs"
               onClick={addQuestion}
             >
               <PlusCircle

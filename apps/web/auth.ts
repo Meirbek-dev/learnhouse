@@ -13,7 +13,6 @@ import { getResponseMetadata } from '@/services/utils/ts/requests';
 
 // Improved type declarations for session cache - Edge Runtime compatible
 declare global {
-  // eslint-disable-next-line no-var
   var sessionCache:
     | Map<
         string,

@@ -49,29 +49,6 @@ export interface AdminAnalyticsMetrics {
   };
 }
 
-export interface AdminSystemMetrics {
-  serverHealth: {
-    status: string;
-  };
-  databaseStats: {
-    connections: number;
-    queryTime: number | null;
-    size: number | null;
-  };
-  storageInfo: {
-    diskUsage: number | null;
-  };
-  performanceMetrics: {
-    responseTime: number | null;
-  };
-  systemAlerts: {
-    title: string;
-    description: string;
-    severity: 'low' | 'medium' | 'high';
-    timestamp: string;
-  }[];
-}
-
 export interface AdminGamificationMetrics {
   totalProfiles: number;
   activeGamifiedUsers: number;
@@ -215,25 +192,6 @@ export async function getAdminAnalyticsMetrics(orgId: number, accessToken: strin
   }
 }
 
-export async function getAdminSystemMetrics(orgId: number, accessToken: string): Promise<AdminSystemMetrics> {
-  try {
-    const result = await fetch(
-      `${getAPIUrl()}admin/metrics/system?org_id=${orgId}`,
-      RequestBodyWithAuthHeader('GET', null, null, accessToken),
-    );
-
-    if (!result.ok) {
-      throw new Error(`HTTP error! status: ${result.status}`);
-    }
-
-    const response = await getResponseMetadata(result);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching admin system metrics:', error);
-    throw error; // Re-throw the error instead of returning mock data
-  }
-}
-
 export async function getAdminGamificationMetrics(
   orgId: number,
   accessToken: string,
@@ -256,30 +214,7 @@ export async function getAdminGamificationMetrics(
   }
 }
 
-export async function getHealthCheck(accessToken: string) {
-  try {
-    const result = await fetch(`${getAPIUrl()}health`, RequestBodyWithAuthHeader('GET', null, null, accessToken));
-
-    if (!result.ok) {
-      throw new Error(`HTTP error! status: ${result.status}`);
-    }
-
-    const response = await getResponseMetadata(result);
-    return response;
-  } catch (error) {
-    console.error('Error checking health:', error);
-    return {
-      success: false,
-      status: 503,
-      data: null,
-    };
-  }
-}
-
-export async function getAdminRetentionMetrics(
-  orgId: number,
-  accessToken: string,
-): Promise<AdminRetentionMetrics> {
+export async function getAdminRetentionMetrics(orgId: number, accessToken: string): Promise<AdminRetentionMetrics> {
   try {
     const result = await fetch(
       `${getAPIUrl()}admin/metrics/retention?org_id=${orgId}`,
@@ -298,10 +233,7 @@ export async function getAdminRetentionMetrics(
   }
 }
 
-export async function getAdminRealtimeMetrics(
-  orgId: number,
-  accessToken: string,
-): Promise<AdminRealtimeMetrics> {
+export async function getAdminRealtimeMetrics(orgId: number, accessToken: string): Promise<AdminRealtimeMetrics> {
   try {
     const result = await fetch(
       `${getAPIUrl()}admin/metrics/realtime?org_id=${orgId}`,
@@ -434,8 +366,8 @@ export interface AdminCourse {
 export async function getAdminUsers(
   orgId: number,
   accessToken: string,
-  page: number = 1,
-  limit: number = 20,
+  page = 1,
+  limit = 20,
   search?: string,
   filter?: string,
 ): Promise<UserListResponse> {
@@ -469,8 +401,8 @@ export async function getAdminUsers(
 export async function getAdminCourses(
   orgId: number,
   accessToken: string,
-  page: number = 1,
-  limit: number = 20,
+  page = 1,
+  limit = 20,
   search?: string,
   filter?: string,
 ): Promise<CourseListResponse> {
@@ -558,16 +490,13 @@ export async function importSystemData(
     formData.append('file', file);
     formData.append('type', importType);
 
-    const result = await fetch(
-      `${getAPIUrl()}admin/import?org_id=${orgId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: formData,
+    const result = await fetch(`${getAPIUrl()}admin/import?org_id=${orgId}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+      body: formData,
+    });
 
     if (!result.ok) {
       throw new Error(`HTTP error! status: ${result.status}`);
@@ -605,10 +534,7 @@ export async function performBulkCourseOperation(
   }
 }
 
-export async function getSecuritySettings(
-  orgId: number,
-  accessToken: string,
-): Promise<any> {
+export async function getSecuritySettings(orgId: number, accessToken: string): Promise<any> {
   try {
     const result = await fetch(
       `${getAPIUrl()}admin/security/settings?org_id=${orgId}`,

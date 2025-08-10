@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getLevelInfo } from '@/components/Objects/GamificationLevel';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Award, Gift, Star, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface LevelUpNotificationProps {
@@ -31,11 +31,11 @@ export function LevelUpNotification({
   xpGained,
   unlockedFeatures = [],
   onDismiss,
-  autoDismissDelay = 8000,
+  autoDismissDelay = 5000,
 }: LevelUpNotificationProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification.levelUpNotification');
   const [showUnlocks, setShowUnlocks] = useState(false);
-  const levelInfo = getLevelInfo(newLevel);
+  const levelInfo = getLevelInfo(newLevel, t);
   const Icon = levelInfo.icon;
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function LevelUpNotification({
                       variant="secondary"
                       className="bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200"
                     >
-                      Level {newLevel}
+                      {t('levelLabel', { level: newLevel })}
                     </Badge>
                     <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">{levelInfo.title}</span>
                   </div>
@@ -105,6 +105,7 @@ export function LevelUpNotification({
                 size="sm"
                 onClick={onDismiss}
                 className="h-8 w-8 p-0 text-yellow-600 hover:bg-yellow-100 hover:text-yellow-800 dark:text-yellow-400 dark:hover:bg-yellow-900 dark:hover:text-yellow-200"
+                title={t('title')}
               >
                 <X className="h-4 w-4" />
               </Button>

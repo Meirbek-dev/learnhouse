@@ -3,13 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Award, Calendar, Flame, Star, TrendingUp, Trophy } from 'lucide-react';
 import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
+import { useFormatter, useTranslations } from 'next-intl';
 import { getAPIUrl } from '@/services/config/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 interface GamificationProfile {
@@ -61,6 +61,7 @@ interface GamificationDashboardProps {
 export function GamificationDashboard({ orgId, className = '' }: GamificationDashboardProps) {
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
+  const format = useFormatter();
   const [dashboardData, setDashboardData] = useState<GamificationDashboard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,14 +87,14 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
         setDashboardData(data);
       } catch (error) {
         console.error('Error fetching gamification dashboard:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error occurred');
+        setError(error instanceof Error ? error.message : t('dashboard.failedToLoad'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, [orgId, session?.tokens?.access_token]);
+  }, [orgId, session?.tokens?.access_token, t]);
 
   const calculateLevelProgress = (profile: GamificationProfile) => {
     const xpForCurrentLevel = 100 * 1.2 ** (profile.current_level - 1);
@@ -108,11 +109,16 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
       login_daily: t('xpSources.login_daily'),
       activity_completion: t('xpSources.activity_completion'),
       course_completion: t('xpSources.course_completion'),
+      perfect_score: t('xpSources.perfect_score'),
+      first_activity: t('xpSources.first_activity'),
       login_streak_7_days: t('xpSources.login_streak_7_days'),
       login_streak_30_days: t('xpSources.login_streak_30_days'),
       login_streak_100_days: t('xpSources.login_streak_100_days'),
+      streak_bonus_7_days: t('xpSources.login_streak_7_days'),
+      streak_bonus_30_days: t('xpSources.login_streak_30_days'),
+      streak_bonus_100_days: t('xpSources.login_streak_100_days'),
     };
-    return sourceMap[source] || source;
+    return sourceMap[source] || t('xpSources.unknown', { source });
   };
 
   const getXpSourceIcon = (source: string) => {
@@ -120,11 +126,39 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
       login_daily: <Calendar className="h-4 w-4" />,
       activity_completion: <Star className="h-4 w-4" />,
       course_completion: <Trophy className="h-4 w-4" />,
+      perfect_score: <Award className="h-4 w-4" />,
+      first_activity: <Star className="h-4 w-4" />,
       login_streak_7_days: <Flame className="h-4 w-4" />,
       login_streak_30_days: <Flame className="h-4 w-4" />,
       login_streak_100_days: <Award className="h-4 w-4" />,
+      streak_bonus_7_days: <Flame className="h-4 w-4" />,
+      streak_bonus_30_days: <Flame className="h-4 w-4" />,
+      streak_bonus_100_days: <Award className="h-4 w-4" />,
     };
     return iconMap[source] || <Star className="h-4 w-4" />;
+  };
+
+  // Helper function to format dates for display
+  const formatTransactionDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format.dateTime(date, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      console.warn('Invalid date format in formatTransactionDate:', dateString, error);
+      return dateString;
+    }
+  };
+
+  // Helper function to format XP amounts with locale
+  const formatXPAmount = (amount: number) => {
+    const sign = amount > 0 ? '+' : '';
+    const formattedNumber = format.number(Math.abs(amount));
+    return `${sign}${formattedNumber} XP`;
   };
 
   if (isLoading) {
@@ -195,7 +229,7 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
               </div>
               <div className="text-right">
                 <p className="text-muted-foreground text-sm">{t('stats.totalXP')}</p>
-                <p className="text-2xl font-bold">{profile.total_xp.toLocaleString()}</p>
+                <p className="text-2xl font-bold">{format.number(profile.total_xp)}</p>
               </div>
             </div>
 
@@ -233,7 +267,7 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recent_xp_transactions.slice(0, 5).map((transaction) => (
+              {recent_xp_transactions.slice(0, 10).map((transaction) => (
                 <div
                   key={transaction.id}
                   className="bg-muted/50 flex items-center justify-between rounded-lg p-3"
@@ -243,13 +277,12 @@ export function GamificationDashboard({ orgId, className = '' }: GamificationDas
                     <div>
                       <p className="text-sm font-medium">{getXpSourceDisplayName(transaction.xp_source)}</p>
                       <p className="text-muted-foreground text-xs">
-                        {new Date(transaction.creation_date).toLocaleDateString()}
+                        {formatTransactionDate(transaction.creation_date)}
                       </p>
                     </div>
                   </div>
                   <Badge variant={transaction.xp_amount > 0 ? 'default' : 'destructive'}>
-                    {transaction.xp_amount > 0 ? '+' : ''}
-                    {transaction.xp_amount} XP
+                    {formatXPAmount(transaction.xp_amount)}
                   </Badge>
                 </div>
               ))}

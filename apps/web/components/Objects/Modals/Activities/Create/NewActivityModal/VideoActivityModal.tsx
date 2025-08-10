@@ -377,7 +377,7 @@ const SubtitleManager = ({
       <motion.div
         className={cn(
           'relative rounded-xl border-2 border-dashed transition-all duration-200',
-          dragOver ? 'border-blue-400 bg-blue-50/50 scale-102' : 'border-gray-200 hover:border-gray-300',
+          dragOver ? 'scale-102 border-blue-400 bg-blue-50/50' : 'border-gray-200 hover:border-gray-300',
           subtitles.length === 0 ? 'p-8' : 'p-4',
         )}
         onDrop={handleDrop}
@@ -682,7 +682,7 @@ const VideoSettingsForm = ({
         </Button>
       </Collapsible.Trigger>
 
-      <Collapsible.Content className="data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp overflow-hidden">
+      <Collapsible.Content className="data-[state=closed]:animate-slideUp data-[state=open]:animate-slideDown overflow-hidden">
         <div className="mt-3 space-y-6 rounded-lg border-2 border-gray-100 bg-gradient-to-br from-gray-50 to-white p-6 shadow-sm">
           {/* Timing Controls */}
           <div className="space-y-4">
@@ -1040,8 +1040,8 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
                 setErrors((prev) => ({ ...prev, youtubeUrl: '' }));
               }}
               className={cn(
-                'flex items-center justify-center gap-3 p-4 transition-all duration-200 relative overflow-hidden',
-                selectedView === 'file' ? 'bg-blue-600 text-white shadow-lg z-10' : 'hover:bg-gray-100 text-gray-700',
+                'relative flex items-center justify-center gap-3 overflow-hidden p-4 transition-all duration-200',
+                selectedView === 'file' ? 'z-10 bg-blue-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100',
               )}
               whileHover={{ scale: selectedView !== 'file' ? 1.02 : 1 }}
               whileTap={{ scale: 0.98 }}
@@ -1064,8 +1064,8 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
                 setErrors((prev) => ({ ...prev, video: '' }));
               }}
               className={cn(
-                'flex items-center justify-center gap-3 p-4 transition-all duration-200 relative overflow-hidden',
-                selectedView === 'youtube' ? 'bg-red-600 text-white shadow-lg z-10' : 'hover:bg-gray-100 text-gray-700',
+                'relative flex items-center justify-center gap-3 overflow-hidden p-4 transition-all duration-200',
+                selectedView === 'youtube' ? 'z-10 bg-red-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100',
               )}
               whileHover={{ scale: selectedView !== 'youtube' ? 1.02 : 1 }}
               whileTap={{ scale: 0.98 }}
@@ -1114,8 +1114,8 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
                       <Label
                         htmlFor={fileInputId}
                         className={cn(
-                          'bg-blue-600 hover:bg-blue-700 inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-3 font-medium text-white transition-all duration-200 shadow-sm hover:shadow-md',
-                          isSubmitting && 'opacity-50 cursor-not-allowed',
+                          'inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-3 font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md',
+                          isSubmitting && 'cursor-not-allowed opacity-50',
                         )}
                       >
                         <FileVideo size={18} />
@@ -1243,8 +1243,8 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
             type="submit"
             disabled={isSubmitting || !canSubmit}
             className={cn(
-              'px-8 py-3 transition-all duration-200 shadow-sm hover:shadow-md',
-              canSubmit ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed',
+              'px-8 py-3 shadow-sm transition-all duration-200 hover:shadow-md',
+              canSubmit ? 'bg-blue-600 text-white hover:bg-blue-700' : 'cursor-not-allowed bg-gray-300 text-gray-500',
             )}
           >
             {isSubmitting ? (

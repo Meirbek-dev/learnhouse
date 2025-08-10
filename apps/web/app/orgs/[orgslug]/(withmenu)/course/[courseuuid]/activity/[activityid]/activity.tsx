@@ -21,15 +21,17 @@ import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActi
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
+import { LevelUpNotification, showXPGainToast } from '@components/Dashboard/Gamification';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import { getUnlockedFeatures } from '@components/Objects/GamificationLevel';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -38,6 +40,7 @@ import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
+import { useLevelIndicator } from '@/hooks/useLevelIndicator';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { usePathname, useRouter } from 'next/navigation';
@@ -47,11 +50,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
-
-// Gamification imports
-import { LevelUpNotification, showXPGainToast } from '@components/Dashboard/Gamification';
-import { useLevelIndicator } from '@/hooks/useLevelIndicator';
-import { getUnlockedFeatures } from '@components/Objects/GamificationLevel';
 
 // Lazy load heavy components
 const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'));
@@ -672,7 +670,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                                     .map((author: any, idx: number) => (
                                       <div
                                         key={author.user.user_uuid}
-                                        className="z-[${10-idx}] relative"
+                                        className="relative z-[${10-idx}]"
                                       >
                                         <UserAvatar
                                           size="sm"
@@ -912,7 +910,7 @@ export const MarkStatus = (props: {
     profile: gamificationProfile,
     refetch: refetchGamification,
     hasLeveledUp,
-    resetLevelUp
+    resetLevelUp,
   } = useLevelIndicator(org?.id);
 
   React.useEffect(() => {
@@ -1004,7 +1002,7 @@ export const MarkStatus = (props: {
 
       // Show XP gain notification
       showXPGainToast({
-        xpAmount: 50, // Standard activity completion XP
+        xpAmount: 25, // Standard activity completion XP
         source: 'activity_completion',
         sourceDisplayName: 'Activity Completed',
         context: {
@@ -1018,13 +1016,13 @@ export const MarkStatus = (props: {
         const updatedProfile = gamificationProfile;
 
         if (updatedProfile && updatedProfile.current_level > previousLevel) {
-          const unlockedFeatures = getUnlockedFeatures(updatedProfile.current_level);
-          const previousUnlocked = getUnlockedFeatures(previousLevel);
-          const newUnlocks = unlockedFeatures.filter(f => !previousUnlocked.includes(f));
+          const unlockedFeatures = getUnlockedFeatures(updatedProfile.current_level, t);
+          const previousUnlocked = getUnlockedFeatures(previousLevel, t);
+          const newUnlocks = unlockedFeatures.filter((f) => !previousUnlocked.includes(f));
 
           setLevelUpData({
             newLevel: updatedProfile.current_level,
-            xpGained: 50,
+            xpGained: 25,
             unlockedFeatures: newUnlocks,
           });
           setShowLevelUpNotification(true);

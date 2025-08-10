@@ -14,6 +14,7 @@ from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
+from src.services.gamification import update_learning_streak
 
 
 async def create_user_trail(
@@ -271,11 +272,6 @@ async def add_activity_to_trail(
         await check_course_completion_and_create_certificate(
             request, user.id, course.id, db_session
         )
-
-    # 🎮 GAMIFICATION: Award XP and update learning streak for activity completion
-    try:
-        from src.services.gamification import update_learning_streak
-
         await update_learning_streak(
             request=request,
             user=user,
@@ -284,9 +280,6 @@ async def add_activity_to_trail(
             activity_id=activity.id,
             course_id=course.id,
         )
-    except ImportError:
-        # Gamification service not available, continue without it
-        pass
 
     statement = select(TrailRun).where(
         TrailRun.trail_id == trail.id, TrailRun.user_id == user.id

@@ -166,7 +166,7 @@ const BadgesExtension: FC = (props: any) => {
       <div className="relative flex items-center space-x-2">
         <div
           className={twMerge(
-            'soft-shadow my-2 flex w-fit items-center space-x-1 rounded-full px-3.5 py-1.5 text-sm font-semibold outline-2 outline-white/20',
+            'soft-shadow my-2 flex w-fit items-center space-x-1 rounded-full px-3.5 py-1.5 font-semibold text-sm outline-2 outline-white/20',
             getBadgeColor(color),
           )}
         >

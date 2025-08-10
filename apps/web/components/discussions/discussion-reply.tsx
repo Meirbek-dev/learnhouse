@@ -181,7 +181,7 @@ export default function DiscussionReply({
                     size="sm"
                     onClick={() => onVoteReply(postId, reply.id, 'up')}
                     className={cn(
-                      'h-8 px-3 rounded-none border-r border-slate-200 transition-all',
+                      'h-8 rounded-none border-slate-200 border-r px-3 transition-all',
                       reply.userVote === 'up'
                         ? 'bg-green-50 text-green-700 hover:bg-green-100'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-green-600',
@@ -199,7 +199,7 @@ export default function DiscussionReply({
                     size="sm"
                     onClick={() => onVoteReply(postId, reply.id, 'down')}
                     className={cn(
-                      'h-8 px-3 rounded-none transition-all',
+                      'h-8 rounded-none px-3 transition-all',
                       reply.userVote === 'down'
                         ? 'bg-red-50 text-red-700 hover:bg-red-100'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-red-600',
@@ -218,7 +218,7 @@ export default function DiscussionReply({
                   <div className="flex items-center">
                     <div
                       className={cn(
-                        'text-xs font-medium px-2 py-1 rounded-full',
+                        'rounded-full px-2 py-1 font-medium text-xs',
                         netScore > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
                       )}
                     >

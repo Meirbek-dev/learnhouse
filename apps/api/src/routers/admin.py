@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Annotated, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy import and_, func, null, text, or_
+from sqlalchemy import and_, func, null, or_, text
 from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
@@ -458,15 +458,19 @@ async def get_admin_overview_metrics(
 
         try:
             avg_session_result = db_session.exec(
-                avg_session_query,
-                {"org_id": org_id, "thirty_days_ago": thirty_days_ago.strftime("%Y-%m-%d")}
+                avg_session_query.params(
+                    org_id=org_id,
+                    thirty_days_ago=thirty_days_ago.strftime("%Y-%m-%d"),
+                )
             ).first()
             avg_session_minutes = (
-                avg_session_result[0] if isinstance(avg_session_result, tuple)
+                avg_session_result[0]
+                if isinstance(avg_session_result, tuple)
                 else avg_session_result
             )
             avg_session_duration = (
-                int(avg_session_minutes) if avg_session_minutes and avg_session_minutes > 0
+                int(avg_session_minutes)
+                if avg_session_minutes and avg_session_minutes > 0
                 else None
             )
         except Exception:
@@ -730,15 +734,19 @@ async def get_admin_analytics_metrics(
         seven_days_ago = datetime.now() - timedelta(days=7)
         try:
             session_result = db_session.exec(
-                session_duration_query,
-                {"org_id": org_id, "seven_days_ago": seven_days_ago.strftime("%Y-%m-%d")}
+                session_duration_query.params(
+                    org_id=org_id,
+                    seven_days_ago=seven_days_ago.strftime("%Y-%m-%d"),
+                )
             ).first()
             session_minutes = (
-                session_result[0] if isinstance(session_result, tuple)
+                session_result[0]
+                if isinstance(session_result, tuple)
                 else session_result
             )
             avg_session_duration_estimate = (
-                int(session_minutes) if session_minutes and session_minutes > 0
+                int(session_minutes)
+                if session_minutes and session_minutes > 0
                 else 15  # Default reasonable estimate
             )
         except Exception:
@@ -761,12 +769,13 @@ async def get_admin_analytics_metrics(
         seven_days_ago = datetime.now() - timedelta(days=7)
         try:
             peak_hours_result = db_session.exec(
-                peak_hours_query,
-                {"org_id": org_id, "seven_days_ago": seven_days_ago.strftime("%Y-%m-%d")}
+                peak_hours_query.params(
+                    org_id=org_id,
+                    seven_days_ago=seven_days_ago.strftime("%Y-%m-%d"),
+                )
             ).all()
             peak_hours = [
-                {"hour": int(row[0]), "users": int(row[1])}
-                for row in peak_hours_result
+                {"hour": int(row[0]), "users": int(row[1])} for row in peak_hours_result
             ]
         except Exception:
             peak_hours = []
@@ -787,10 +796,15 @@ async def get_admin_analytics_metrics(
         """)
 
         try:
-            device_result = db_session.exec(device_types_query, {"org_id": org_id}).all()
+            device_result = db_session.exec(
+                device_types_query.params(org_id=org_id)
+            ).all()
             total_device_users = sum(int(row[1]) for row in device_result) or 1
             device_types = [
-                {"type": row[0], "percentage": round((int(row[1]) / total_device_users) * 100, 1)}
+                {
+                    "type": row[0],
+                    "percentage": round((int(row[1]) / total_device_users) * 100, 1),
+                }
                 for row in device_result
             ]
             # Add default desktop estimation if no data
@@ -841,224 +855,6 @@ async def get_admin_analytics_metrics(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error fetching analytics metrics: {e!s}"
-        )
-
-
-@router.get("/metrics/system")
-async def get_admin_system_metrics(
-    org_id: Annotated[int, Query()] = ...,
-    db_session: Session = Depends(get_db_session),
-    current_user: PublicUser | AnonymousUser = Depends(get_current_user),
-):
-    """Get system metrics for the admin dashboard"""
-
-    # Check if user is authenticated
-    if isinstance(current_user, AnonymousUser):
-        raise HTTPException(status_code=401, detail="Authentication required")
-
-    if not await is_user_admin_of_org(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=403, detail="Not authorized to access admin metrics"
-        )
-
-    try:
-        # Calculate actual database size if possible
-        db_size_query = text(
-            "SELECT pg_size_pretty(pg_database_size(current_database())) as size"
-        )
-        try:
-            db_size_result = db_session.exec(db_size_query).first()
-            db_size_mb = None  # No fallback value
-            if db_size_result:
-                # Handle both tuple and direct result formats
-                size_value = (
-                    db_size_result[0]
-                    if isinstance(db_size_result, tuple)
-                    else (
-                        db_size_result.size
-                        if hasattr(db_size_result, "size")
-                        else db_size_result
-                    )
-                )
-                if size_value:
-                    # Parse size string like "125 MB" or "2048 kB"
-                    size_str = str(size_value)
-                    if "MB" in size_str:
-                        db_size_mb = int(float(size_str.replace(" MB", "")))
-                    elif "GB" in size_str:
-                        db_size_mb = int(float(size_str.replace(" GB", "")) * 1024)
-                    elif "kB" in size_str:
-                        db_size_mb = int(float(size_str.replace(" kB", "")) / 1024)
-        except Exception:
-            db_size_mb = None  # Cannot determine database size
-
-        # Connection count
-        connection_count_query = text(
-            "SELECT count(*) FROM pg_stat_activity WHERE state = 'active'"
-        )
-        connection_result = db_session.exec(connection_count_query).first()
-        active_connections_raw = (
-            connection_result[0]
-            if isinstance(connection_result, tuple)
-            else (connection_result or 0)
-        )
-        # Ensure active_connections is always an integer
-        try:
-            active_connections = (
-                int(active_connections_raw) if active_connections_raw is not None else 0
-            )
-        except (ValueError, TypeError):
-            active_connections = 0
-
-        # Calculate query time from recent activity
-        query_time_query = text(
-            "SELECT AVG(mean_exec_time) FROM pg_stat_statements WHERE calls > 0 LIMIT 1"
-        )
-        try:
-            query_time_result = db_session.exec(query_time_query).first()
-            if query_time_result:
-                avg_query_time_value = (
-                    query_time_result[0]
-                    if isinstance(query_time_result, tuple)
-                    else query_time_result
-                )
-                # Ensure avg_query_time is always an integer or None
-                try:
-                    avg_query_time = (
-                        int(float(avg_query_time_value))
-                        if avg_query_time_value is not None
-                        else None
-                    )
-                except (ValueError, TypeError):
-                    avg_query_time = None
-            else:
-                avg_query_time = None
-        except Exception:
-            avg_query_time = (
-                None  # Cannot determine query time without pg_stat_statements
-            )
-
-        # Get more accurate table size information if available
-        total_records_query = text("""
-            SELECT
-                COALESCE(SUM(pg_total_relation_size(schemaname||'.'||tablename)), 0) as total_size_bytes
-            FROM pg_tables
-            WHERE schemaname NOT IN ('information_schema', 'pg_catalog')
-        """)
-        try:
-            total_size_result = db_session.exec(total_records_query).first()
-            if total_size_result:
-                total_size_value = (
-                    total_size_result[0]
-                    if isinstance(total_size_result, tuple)
-                    else total_size_result
-                )
-                if total_size_value and float(total_size_value) > 0:
-                    # Convert bytes to percentage based on a reasonable storage limit assumption
-                    # This is still an estimate but more accurate than operation-based calculation
-                    size_gb = float(total_size_value) / (1024 * 1024 * 1024)
-                    # Assume 10GB as reasonable storage limit for percentage calculation
-                    estimated_storage_usage = min(
-                        100, max(0, int((size_gb / 10) * 100))
-                    )
-                else:
-                    estimated_storage_usage = None
-            else:
-                estimated_storage_usage = None
-        except Exception:
-            estimated_storage_usage = None  # Cannot determine storage usage
-
-        # Create system alerts based on actual metrics
-        system_alerts = []
-
-        # Database connection alert
-        if (
-            active_connections is not None
-            and isinstance(active_connections, int)
-            and active_connections > 50
-        ):
-            system_alerts.append(
-                {
-                    "title": "High Database Connections",
-                    "description": f"Currently {active_connections} active database connections (threshold: 50)",
-                    "severity": "high" if active_connections > 80 else "medium",
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                }
-            )
-
-        # Query performance alert
-        if (
-            avg_query_time is not None
-            and isinstance(avg_query_time, int)
-            and avg_query_time > 100
-        ):
-            system_alerts.append(
-                {
-                    "title": "Slow Query Performance",
-                    "description": f"Average query time is {avg_query_time}ms (threshold: 100ms)",
-                    "severity": "high" if avg_query_time > 200 else "medium",
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                }
-            )
-
-        # Storage alert
-        if (
-            estimated_storage_usage is not None
-            and isinstance(estimated_storage_usage, int)
-            and estimated_storage_usage > 80
-        ):
-            system_alerts.append(
-                {
-                    "title": "High Storage Usage",
-                    "description": f"Estimated storage usage at {estimated_storage_usage}%",
-                    "severity": "high" if estimated_storage_usage > 90 else "medium",
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                }
-            )
-
-        # Add system status info only if we have actual data
-        if not system_alerts and active_connections is not None:
-            query_info = (
-                f", {avg_query_time}ms avg query time" if avg_query_time else ""
-            )
-            system_alerts.append(
-                {
-                    "title": "Database Operating Normally",
-                    "description": f"Database operational - {active_connections} connections{query_info}",
-                    "severity": "low",
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                }
-            )
-
-        metrics = AdminSystemMetrics(
-            server_health={
-                "status": "operational",  # Server is running if we can respond
-            },
-            database_stats={
-                "connections": active_connections,
-                "queryTime": avg_query_time,
-                "size": db_size_mb,
-            },
-            storage_info={
-                "diskUsage": estimated_storage_usage,
-            },
-            performance_metrics={
-                "responseTime": avg_query_time,
-            },
-            system_alerts=system_alerts,
-        )
-
-        return {
-            "serverHealth": metrics.server_health,
-            "databaseStats": metrics.database_stats,
-            "storageInfo": metrics.storage_info,
-            "performanceMetrics": metrics.performance_metrics,
-            "systemAlerts": metrics.system_alerts,
-        }
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error fetching system metrics: {e!s}"
         )
 
 
@@ -1161,14 +957,16 @@ async def get_admin_gamification_metrics(
             ORDER BY MIN(total_xp)
         """)
 
-        xp_distribution_result = db_session.exec(xp_distribution_query, {"org_id": org_id}).all()
+        xp_distribution_result = db_session.exec(
+            xp_distribution_query.params(org_id=org_id)
+        ).all()
         total_xp_users = sum(row[1] for row in xp_distribution_result) or 1
 
         xp_distribution = [
             {
                 "label": row[0],
                 "users": int(row[1]),
-                "percentage": round((int(row[1]) / total_xp_users) * 100, 1)
+                "percentage": round((int(row[1]) / total_xp_users) * 100, 1),
             }
             for row in xp_distribution_result
         ]
@@ -1218,15 +1016,19 @@ async def get_admin_retention_metrics(
         cohorts = []
 
         for month_offset in range(6):
-            cohort_start = (now - timedelta(days=30 * (month_offset + 1))).replace(day=1)
-            cohort_end = (cohort_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+            cohort_start = (now - timedelta(days=30 * (month_offset + 1))).replace(
+                day=1
+            )
+            cohort_end = (cohort_start + timedelta(days=32)).replace(day=1) - timedelta(
+                days=1
+            )
 
             # New users in this cohort
             new_users_query = select(func.count(UserOrganization.user_id)).where(
                 and_(
                     UserOrganization.org_id == org_id,
                     UserOrganization.creation_date >= cohort_start,
-                    UserOrganization.creation_date <= cohort_end
+                    UserOrganization.creation_date <= cohort_end,
                 )
             )
             new_users = db_session.exec(new_users_query).first() or 0
@@ -1237,7 +1039,9 @@ async def get_admin_retention_metrics(
                 check_start = cohort_start + timedelta(days=30 * retention_month)
                 check_end = check_start + timedelta(days=30)
 
-                active_users_query = select(func.count(func.distinct(UserGamificationProfile.user_id))).where(
+                active_users_query = select(
+                    func.count(func.distinct(UserGamificationProfile.user_id))
+                ).where(
                     and_(
                         UserGamificationProfile.org_id == org_id,
                         UserGamificationProfile.user_id.in_(
@@ -1245,43 +1049,58 @@ async def get_admin_retention_metrics(
                                 and_(
                                     UserOrganization.org_id == org_id,
                                     UserOrganization.creation_date >= cohort_start,
-                                    UserOrganization.creation_date <= cohort_end
+                                    UserOrganization.creation_date <= cohort_end,
                                 )
                             )
                         ),
-                        UserGamificationProfile.last_login_date >= check_start.strftime("%Y-%m-%d"),
-                        UserGamificationProfile.last_login_date < check_end.strftime("%Y-%m-%d")
+                        UserGamificationProfile.last_login_date
+                        >= check_start.strftime("%Y-%m-%d"),
+                        UserGamificationProfile.last_login_date
+                        < check_end.strftime("%Y-%m-%d"),
                     )
                 )
                 active_users = db_session.exec(active_users_query).first() or 0
-                retention_rate = (active_users / new_users * 100) if new_users > 0 else 0
+                retention_rate = (
+                    (active_users / new_users * 100) if new_users > 0 else 0
+                )
 
-                retention_data.append({
-                    "month": retention_month,
-                    "activeUsers": active_users,
-                    "retentionRate": round(retention_rate, 1)
-                })
+                retention_data.append(
+                    {
+                        "month": retention_month,
+                        "activeUsers": active_users,
+                        "retentionRate": round(retention_rate, 1),
+                    }
+                )
 
-            cohorts.append({
-                "cohortMonth": cohort_start.strftime("%Y-%m"),
-                "newUsers": new_users,
-                "retentionData": retention_data
-            })
+            cohorts.append(
+                {
+                    "cohortMonth": cohort_start.strftime("%Y-%m"),
+                    "newUsers": new_users,
+                    "retentionData": retention_data,
+                }
+            )
 
         # Calculate overall retention metrics
         total_new_users = sum(c["newUsers"] for c in cohorts)
-        avg_30_day_retention = sum(
-            c["retentionData"][1]["retentionRate"] if len(c["retentionData"]) > 1 else 0
-            for c in cohorts
-        ) / len(cohorts) if cohorts else 0
+        avg_30_day_retention = (
+            sum(
+                c["retentionData"][1]["retentionRate"]
+                if len(c["retentionData"]) > 1
+                else 0
+                for c in cohorts
+            )
+            / len(cohorts)
+            if cohorts
+            else 0
+        )
 
         return {
             "cohorts": cohorts,
             "overallMetrics": {
                 "totalNewUsers": total_new_users,
                 "avg30DayRetention": round(avg_30_day_retention, 1),
-                "churnRate": round(100 - avg_30_day_retention, 1)
-            }
+                "churnRate": round(100 - avg_30_day_retention, 1),
+            },
         }
 
     except Exception as e:
@@ -1317,21 +1136,29 @@ async def get_admin_realtime_metrics(
         ).where(
             and_(
                 UserGamificationProfile.org_id == org_id,
-                UserGamificationProfile.last_login_date >= (now - timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
+                UserGamificationProfile.last_login_date
+                >= (now - timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S"),
             )
         )
         live_users = db_session.exec(recent_activity_query).first() or 0
 
         # Active course sessions (users with recent activity)
         active_sessions_query = (
-            select(Course.name, func.count(UserGamificationProfile.user_id).label("sessions"))
+            select(
+                Course.name,
+                func.count(UserGamificationProfile.user_id).label("sessions"),
+            )
             .join(UserOrganization, UserOrganization.org_id == Course.org_id)
-            .join(UserGamificationProfile, UserGamificationProfile.user_id == UserOrganization.user_id)
+            .join(
+                UserGamificationProfile,
+                UserGamificationProfile.user_id == UserOrganization.user_id,
+            )
             .where(
                 and_(
                     Course.org_id == org_id,
-                    UserGamificationProfile.last_login_date >= today.strftime("%Y-%m-%d"),
-                    UserGamificationProfile.org_id == org_id
+                    UserGamificationProfile.last_login_date
+                    >= today.strftime("%Y-%m-%d"),
+                    UserGamificationProfile.org_id == org_id,
                 )
             )
             .group_by(Course.name)
@@ -1349,14 +1176,20 @@ async def get_admin_realtime_metrics(
             select(
                 AssignmentTaskSubmission.creation_date,
                 Assignment.title,
-                UserOrganization.user_id
+                UserOrganization.user_id,
             )
-            .join(Assignment, AssignmentTaskSubmission.assignment_task_id == Assignment.id)
-            .join(UserOrganization, AssignmentTaskSubmission.user_id == UserOrganization.user_id)
+            .join(
+                Assignment, AssignmentTaskSubmission.assignment_task_id == Assignment.id
+            )
+            .join(
+                UserOrganization,
+                AssignmentTaskSubmission.user_id == UserOrganization.user_id,
+            )
             .where(
                 and_(
                     UserOrganization.org_id == org_id,
-                    AssignmentTaskSubmission.creation_date >= (now - timedelta(hours=1))
+                    AssignmentTaskSubmission.creation_date
+                    >= (now - timedelta(hours=1)),
                 )
             )
             .order_by(AssignmentTaskSubmission.creation_date.desc())
@@ -1365,21 +1198,25 @@ async def get_admin_realtime_metrics(
 
         activity_feed = []
         for activity in db_session.exec(activity_feed_query).all():
-            activity_feed.append({
-                "type": "assignment_submission",
-                "description": f"Assignment '{activity.title}' submitted",
-                "timestamp": activity.creation_date.isoformat() if activity.creation_date else None,
-                "userId": activity.user_id
-            })
+            activity_feed.append(
+                {
+                    "type": "assignment_submission",
+                    "description": f"Assignment '{activity.title}' submitted",
+                    "timestamp": activity.creation_date.isoformat()
+                    if activity.creation_date
+                    else None,
+                    "userId": activity.user_id,
+                }
+            )
 
         return {
             "liveUsers": {
                 "count": live_users,
-                "trend": "stable"  # Could be enhanced with trend calculation
+                "trend": "stable",  # Could be enhanced with trend calculation
             },
             "activeSessions": active_sessions,
             "activityFeed": activity_feed,
-            "lastUpdated": now.isoformat()
+            "lastUpdated": now.isoformat(),
         }
 
     except Exception as e:
@@ -1418,24 +1255,27 @@ async def get_admin_alerts(
                     select(UserGamificationProfile.user_id).where(
                         and_(
                             UserGamificationProfile.org_id == org_id,
-                            UserGamificationProfile.last_login_date >= inactive_threshold.strftime("%Y-%m-%d")
+                            UserGamificationProfile.last_login_date
+                            >= inactive_threshold.strftime("%Y-%m-%d"),
                         )
                     )
-                )
+                ),
             )
         )
         inactive_users = db_session.exec(inactive_users_query).first() or 0
 
         if inactive_users > 10:
-            alerts.append({
-                "id": "inactive_users",
-                "type": "user_engagement",
-                "severity": "medium",
-                "title": "High Number of Inactive Users",
-                "description": f"{inactive_users} users haven't been active in the last 14 days",
-                "timestamp": now.isoformat(),
-                "actionRequired": True
-            })
+            alerts.append(
+                {
+                    "id": "inactive_users",
+                    "type": "user_engagement",
+                    "severity": "medium",
+                    "title": "High Number of Inactive Users",
+                    "description": f"{inactive_users} users haven't been active in the last 14 days",
+                    "timestamp": now.isoformat(),
+                    "actionRequired": True,
+                }
+            )
 
         # Check for courses with low completion rates
         low_completion_query = (
@@ -1453,27 +1293,36 @@ async def get_admin_alerts(
                         select(Assignment.id).where(
                             Assignment.course_id.in_(
                                 select(Course.id).where(
-                                    and_(Course.name == course.name, Course.org_id == org_id)
+                                    and_(
+                                        Course.name == course.name,
+                                        Course.org_id == org_id,
+                                    )
                                 )
                             )
                         )
                     ),
-                    AssignmentTaskSubmission.grade >= 70
+                    AssignmentTaskSubmission.grade >= 70,
                 )
             )
             completed = db_session.exec(completed_query).first() or 0
-            completion_rate = (completed / course.total_assignments * 100) if course.total_assignments > 0 else 0
+            completion_rate = (
+                (completed / course.total_assignments * 100)
+                if course.total_assignments > 0
+                else 0
+            )
 
             if completion_rate < 30:
-                alerts.append({
-                    "id": f"low_completion_{course.name}",
-                    "type": "course_performance",
-                    "severity": "high" if completion_rate < 15 else "medium",
-                    "title": f"Low Completion Rate: {course.name}",
-                    "description": f"Course has only {completion_rate:.1f}% completion rate",
-                    "timestamp": now.isoformat(),
-                    "actionRequired": True
-                })
+                alerts.append(
+                    {
+                        "id": f"low_completion_{course.name}",
+                        "type": "course_performance",
+                        "severity": "high" if completion_rate < 15 else "medium",
+                        "title": f"Low Completion Rate: {course.name}",
+                        "description": f"Course has only {completion_rate:.1f}% completion rate",
+                        "timestamp": now.isoformat(),
+                        "actionRequired": True,
+                    }
+                )
 
         return {
             "alerts": alerts,
@@ -1481,8 +1330,8 @@ async def get_admin_alerts(
                 "total": len(alerts),
                 "high": len([a for a in alerts if a["severity"] == "high"]),
                 "medium": len([a for a in alerts if a["severity"] == "medium"]),
-                "low": len([a for a in alerts if a["severity"] == "low"])
-            }
+                "low": len([a for a in alerts if a["severity"] == "low"]),
+            },
         }
 
     except Exception as e:
@@ -1529,16 +1378,15 @@ async def bulk_user_operation(
                 user_org_query = select(UserOrganization).where(
                     and_(
                         UserOrganization.user_id == user_id,
-                        UserOrganization.org_id == org_id
+                        UserOrganization.org_id == org_id,
                     )
                 )
                 user_org = db_session.exec(user_org_query).first()
 
                 if not user_org:
-                    results["failed"].append({
-                        "user_id": user_id,
-                        "error": "User not found in organization"
-                    })
+                    results["failed"].append(
+                        {"user_id": user_id, "error": "User not found in organization"}
+                    )
                     continue
 
                 if action == "reset_progress":
@@ -1546,7 +1394,7 @@ async def bulk_user_operation(
                     profile_query = select(UserGamificationProfile).where(
                         and_(
                             UserGamificationProfile.user_id == user_id,
-                            UserGamificationProfile.org_id == org_id
+                            UserGamificationProfile.org_id == org_id,
                         )
                     )
                     profile = db_session.exec(profile_query).first()
@@ -1579,8 +1427,8 @@ async def bulk_user_operation(
             "summary": {
                 "successful": len(results["success"]),
                 "failed": len(results["failed"]),
-                "total": len(user_ids)
-            }
+                "total": len(user_ids),
+            },
         }
 
     except HTTPException:
@@ -1595,7 +1443,7 @@ async def bulk_user_operation(
 @router.get("/metrics/course-analytics")
 async def get_course_analytics(
     org_id: Annotated[int, Query()] = ...,
-    course_id: Optional[int] = None,
+    course_id: int | None = None,
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser | AnonymousUser = Depends(get_current_user),
 ):
@@ -1638,7 +1486,9 @@ async def get_course_analytics(
             submissions_query = select(
                 func.count(AssignmentTaskSubmission.id).label("total_submissions"),
                 func.avg(AssignmentTaskSubmission.grade).label("avg_grade"),
-                func.count(func.distinct(AssignmentTaskSubmission.user_id)).label("unique_users")
+                func.count(func.distinct(AssignmentTaskSubmission.user_id)).label(
+                    "unique_users"
+                ),
             ).where(
                 AssignmentTaskSubmission.assignment_task_id.in_(
                     select(Assignment.id).where(Assignment.course_id == course.id)
@@ -1655,7 +1505,7 @@ async def get_course_analytics(
                     AssignmentTaskSubmission.assignment_task_id.in_(
                         select(Assignment.id).where(Assignment.course_id == course.id)
                     ),
-                    AssignmentTaskSubmission.grade >= 70
+                    AssignmentTaskSubmission.grade >= 70,
                 )
             )
             completed_users = db_session.exec(completed_users_query).first() or 0
@@ -1674,44 +1524,66 @@ async def get_course_analytics(
             """)
 
             try:
-                time_result = db_session.exec(time_metrics_query, {"course_id": course.id}).first()
+                time_result = db_session.exec(
+                    time_metrics_query.params(course_id=course.id)
+                ).first()
                 avg_time_between_submissions = (
-                    round(time_result[0], 2) if time_result and time_result[0]
-                    else None
+                    round(time_result[0], 2) if time_result and time_result[0] else None
                 )
             except Exception:
                 avg_time_between_submissions = None
 
-            course_analytics.append({
-                "courseId": course.id,
-                "courseName": course.name,
-                "totalAssignments": total_assignments,
-                "totalActivities": total_activities,
-                "submissions": {
-                    "total": submission_stats.total_submissions if submission_stats else 0,
-                    "averageGrade": round(submission_stats.avg_grade or 0, 1) if submission_stats else 0,
-                    "uniqueUsers": submission_stats.unique_users if submission_stats else 0
-                },
-                "completion": {
-                    "completedUsers": completed_users,
-                    "completionRate": round((completed_users / (submission_stats.unique_users or 1)) * 100, 1) if submission_stats and submission_stats.unique_users else 0
-                },
-                "engagement": {
-                    "avgTimeBetweenSubmissions": avg_time_between_submissions,
-                    "activeUsers": submission_stats.unique_users if submission_stats else 0
+            course_analytics.append(
+                {
+                    "courseId": course.id,
+                    "courseName": course.name,
+                    "totalAssignments": total_assignments,
+                    "totalActivities": total_activities,
+                    "submissions": {
+                        "total": submission_stats.total_submissions
+                        if submission_stats
+                        else 0,
+                        "averageGrade": round(submission_stats.avg_grade or 0, 1)
+                        if submission_stats
+                        else 0,
+                        "uniqueUsers": submission_stats.unique_users
+                        if submission_stats
+                        else 0,
+                    },
+                    "completion": {
+                        "completedUsers": completed_users,
+                        "completionRate": round(
+                            (completed_users / (submission_stats.unique_users or 1))
+                            * 100,
+                            1,
+                        )
+                        if submission_stats and submission_stats.unique_users
+                        else 0,
+                    },
+                    "engagement": {
+                        "avgTimeBetweenSubmissions": avg_time_between_submissions,
+                        "activeUsers": submission_stats.unique_users
+                        if submission_stats
+                        else 0,
+                    },
                 }
-            })
+            )
 
         return {
             "courseAnalytics": course_analytics,
             "summary": {
                 "totalCourses": len(course_analytics),
                 "avgCompletionRate": round(
-                    sum(c["completion"]["completionRate"] for c in course_analytics) / len(course_analytics)
-                    if course_analytics else 0, 1
+                    sum(c["completion"]["completionRate"] for c in course_analytics)
+                    / len(course_analytics)
+                    if course_analytics
+                    else 0,
+                    1,
                 ),
-                "totalActiveUsers": sum(c["engagement"]["activeUsers"] for c in course_analytics)
-            }
+                "totalActiveUsers": sum(
+                    c["engagement"]["activeUsers"] for c in course_analytics
+                ),
+            },
         }
 
     except Exception as e:
@@ -1723,10 +1595,12 @@ async def get_course_analytics(
 @router.get("/users/analytics")
 async def get_user_analytics(
     org_id: Annotated[int, Query()] = ...,
-    page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=100),
-    sort_by: str = Query("total_xp", regex="^(total_xp|current_level|last_login_date|creation_date)$"),
-    sort_order: str = Query("desc", regex="^(asc|desc)$"),
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    sort_by: Annotated[
+        str, Query(regex="^(total_xp|current_level|last_login_date|creation_date)$")
+    ] = "total_xp",
+    sort_order: Annotated[str, Query(regex="^(asc|desc)$")] = "desc",
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser | AnonymousUser = Depends(get_current_user),
 ):
@@ -1756,15 +1630,17 @@ async def get_user_analytics(
                 UserGamificationProfile.total_xp,
                 UserGamificationProfile.current_level,
                 UserGamificationProfile.current_login_streak,
-                UserGamificationProfile.last_login_date
+                UserGamificationProfile.last_login_date,
             )
             .join(UserOrganization, User.id == UserOrganization.user_id)
-            .join(UserGamificationProfile,
-                  and_(
-                      User.id == UserGamificationProfile.user_id,
-                      UserGamificationProfile.org_id == org_id
-                  ),
-                  isouter=True)
+            .join(
+                UserGamificationProfile,
+                and_(
+                    User.id == UserGamificationProfile.user_id,
+                    UserGamificationProfile.org_id == org_id,
+                ),
+                isouter=True,
+            )
             .where(UserOrganization.org_id == org_id)
         )
 
@@ -1802,29 +1678,39 @@ async def get_user_analytics(
             user_assignments_query = select(
                 func.count(AssignmentTaskSubmission.id).label("total_submissions"),
                 func.avg(AssignmentTaskSubmission.grade).label("avg_grade"),
-                func.count(func.distinct(AssignmentTaskSubmission.assignment_task_id)).label("unique_assignments")
+                func.count(
+                    func.distinct(AssignmentTaskSubmission.assignment_task_id)
+                ).label("unique_assignments"),
             ).where(AssignmentTaskSubmission.user_id == user.id)
 
             assignment_stats = db_session.exec(user_assignments_query).first()
 
-            user_analytics.append({
-                "userId": user.id,
-                "username": user.username,
-                "name": f"{user.first_name} {user.last_name}".strip(),
-                "email": user.email,
-                "joinDate": user.creation_date,
-                "gamification": {
-                    "totalXP": user.total_xp or 0,
-                    "currentLevel": user.current_level or 1,
-                    "loginStreak": user.current_login_streak or 0,
-                    "lastLoginDate": user.last_login_date
-                },
-                "performance": {
-                    "totalSubmissions": assignment_stats.total_submissions if assignment_stats else 0,
-                    "averageGrade": round(assignment_stats.avg_grade or 0, 1) if assignment_stats else 0,
-                    "completedAssignments": assignment_stats.unique_assignments if assignment_stats else 0
+            user_analytics.append(
+                {
+                    "userId": user.id,
+                    "username": user.username,
+                    "name": f"{user.first_name} {user.last_name}".strip(),
+                    "email": user.email,
+                    "joinDate": user.creation_date,
+                    "gamification": {
+                        "totalXP": user.total_xp or 0,
+                        "currentLevel": user.current_level or 1,
+                        "loginStreak": user.current_login_streak or 0,
+                        "lastLoginDate": user.last_login_date,
+                    },
+                    "performance": {
+                        "totalSubmissions": assignment_stats.total_submissions
+                        if assignment_stats
+                        else 0,
+                        "averageGrade": round(assignment_stats.avg_grade or 0, 1)
+                        if assignment_stats
+                        else 0,
+                        "completedAssignments": assignment_stats.unique_assignments
+                        if assignment_stats
+                        else 0,
+                    },
                 }
-            })
+            )
 
         return {
             "users": user_analytics,
@@ -1832,16 +1718,21 @@ async def get_user_analytics(
                 "page": page,
                 "limit": limit,
                 "total": total_users,
-                "totalPages": (total_users + limit - 1) // limit
+                "totalPages": (total_users + limit - 1) // limit,
             },
             "summary": {
                 "totalUsers": total_users,
-                "activeUsers": len([u for u in user_analytics if u["gamification"]["totalXP"] > 0]),
+                "activeUsers": len(
+                    [u for u in user_analytics if u["gamification"]["totalXP"] > 0]
+                ),
                 "avgLevel": round(
-                    sum(u["gamification"]["currentLevel"] for u in user_analytics) / len(user_analytics)
-                    if user_analytics else 0, 1
-                )
-            }
+                    sum(u["gamification"]["currentLevel"] for u in user_analytics)
+                    / len(user_analytics)
+                    if user_analytics
+                    else 0,
+                    1,
+                ),
+            },
         }
 
     except Exception as e:
@@ -1865,29 +1756,26 @@ async def update_user_status(
         raise HTTPException(status_code=401, detail="Authentication required")
 
     if not await is_user_admin_of_org(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=403, detail="Not authorized to manage users"
-        )
+        raise HTTPException(status_code=403, detail="Not authorized to manage users")
 
     try:
         # Verify user exists in organization
         user_org_query = select(UserOrganization).where(
-            and_(
-                UserOrganization.user_id == user_id,
-                UserOrganization.org_id == org_id
-            )
+            and_(UserOrganization.user_id == user_id, UserOrganization.org_id == org_id)
         )
         user_org = db_session.exec(user_org_query).first()
 
         if not user_org:
-            raise HTTPException(status_code=404, detail="User not found in organization")
+            raise HTTPException(
+                status_code=404, detail="User not found in organization"
+            )
 
         if action == "reset_progress":
             # Reset gamification progress
             profile_query = select(UserGamificationProfile).where(
                 and_(
                     UserGamificationProfile.user_id == user_id,
-                    UserGamificationProfile.org_id == org_id
+                    UserGamificationProfile.org_id == org_id,
                 )
             )
             profile = db_session.exec(profile_query).first()
@@ -1904,10 +1792,11 @@ async def update_user_status(
                 db_session.commit()
 
                 return {"message": f"Progress reset for user {user_id}"}
-            else:
-                raise HTTPException(status_code=404, detail="User gamification profile not found")
+            raise HTTPException(
+                status_code=404, detail="User gamification profile not found"
+            )
 
-        elif action in ["activate", "deactivate"]:
+        if action in ["activate", "deactivate"]:
             # For now, we'll update the user organization record
             # In a full implementation, you might add an 'active' status field
             user_org.update_date = str(datetime.now())
@@ -1916,8 +1805,7 @@ async def update_user_status(
 
             return {"message": f"User {user_id} {action}d successfully"}
 
-        else:
-            raise HTTPException(status_code=400, detail="Invalid action")
+        raise HTTPException(status_code=400, detail="Invalid action")
 
     except HTTPException:
         raise
@@ -1972,7 +1860,7 @@ async def get_admin_config(
                 "description": organization.description,
                 "totalUsers": total_users,
                 "totalCourses": total_courses,
-                "creationDate": organization.creation_date
+                "creationDate": organization.creation_date,
             },
             "settings": {
                 "gamificationEnabled": True,  # Could be configurable
@@ -1980,14 +1868,14 @@ async def get_admin_config(
                 "maxUsersPerOrg": 1000,  # Could be configurable
                 "coursesPublicByDefault": False,
                 "allowUserRegistration": True,
-                "requireEmailVerification": True
+                "requireEmailVerification": True,
             },
             "limits": {
                 "maxCourses": 100,
                 "maxActivitiesPerCourse": 500,
                 "maxAssignmentsPerCourse": 50,
-                "storageQuotaGB": 10
-            }
+                "storageQuotaGB": 10,
+            },
         }
 
     except HTTPException:
@@ -2039,7 +1927,7 @@ async def update_admin_config(
 
         return {
             "message": "Admin configuration updated successfully",
-            "updatedFields": list(body.keys())
+            "updatedFields": list(body.keys()),
         }
 
     except HTTPException:
@@ -2054,7 +1942,7 @@ async def update_admin_config(
 @router.get("/dashboard")
 async def get_admin_dashboard(
     org_id: Annotated[int, Query()] = ...,
-    time_range: Optional[str] = Query("30d"),
+    time_range: Annotated[str | None, Query()] = "30d",
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser | AnonymousUser = Depends(get_current_user),
 ):
@@ -2071,13 +1959,14 @@ async def get_admin_dashboard(
 
     try:
         # Get overview metrics
-        overview_result = await get_admin_overview_metrics(org_id, db_session, current_user)
+        overview_result = await get_admin_overview_metrics(
+            org_id, db_session, current_user
+        )
 
         # Get analytics metrics
-        analytics_result = await get_admin_analytics_metrics(org_id, db_session, current_user)
-
-        # Get system metrics
-        system_result = await get_admin_system_metrics(org_id, db_session, current_user)
+        analytics_result = await get_admin_analytics_metrics(
+            org_id, db_session, current_user
+        )
 
         # Get alerts
         alerts_result = await get_admin_alerts(org_id, db_session, current_user)
@@ -2085,10 +1974,9 @@ async def get_admin_dashboard(
         return {
             "overview": overview_result,
             "analytics": analytics_result,
-            "system": system_result,
             "alerts": alerts_result,
             "timeRange": time_range,
-            "lastUpdated": datetime.now().isoformat()
+            "lastUpdated": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -2100,7 +1988,7 @@ async def get_admin_dashboard(
 @router.get("/export")
 async def export_system_data(
     org_id: Annotated[int, Query()] = ...,
-    type: str = Query("users", regex="^(users|courses|analytics|all)$"),
+    type: Annotated[str, Query(regex="^(users|courses|analytics|all)$")] = "users",
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser | AnonymousUser = Depends(get_current_user),
 ):
@@ -2111,17 +1999,13 @@ async def export_system_data(
         raise HTTPException(status_code=401, detail="Authentication required")
 
     if not await is_user_admin_of_org(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=403, detail="Not authorized to export data"
-        )
+        raise HTTPException(status_code=403, detail="Not authorized to export data")
 
     try:
         # Call the existing export endpoint
-        export_result = await export_organization_data(
+        return await export_organization_data(
             org_id, type, "json", db_session, current_user
         )
-
-        return export_result
 
     except Exception as e:
         raise HTTPException(
@@ -2132,8 +2016,10 @@ async def export_system_data(
 @router.get("/export/data")
 async def export_organization_data(
     org_id: Annotated[int, Query()] = ...,
-    export_type: str = Query("users", regex="^(users|courses|analytics|all)$"),
-    format: str = Query("json", regex="^(json|csv)$"),
+    export_type: Annotated[
+        str, Query(regex="^(users|courses|analytics|all)$")
+    ] = "users",
+    format: Annotated[str, Query(regex="^(json|csv)$")] = "json",
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser | AnonymousUser = Depends(get_current_user),
 ):
@@ -2144,9 +2030,7 @@ async def export_organization_data(
         raise HTTPException(status_code=401, detail="Authentication required")
 
     if not await is_user_admin_of_org(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=403, detail="Not authorized to export data"
-        )
+        raise HTTPException(status_code=403, detail="Not authorized to export data")
 
     try:
         export_data = {}
@@ -2163,31 +2047,35 @@ async def export_organization_data(
                     User.creation_date,
                     UserOrganization.creation_date.label("join_date"),
                     UserGamificationProfile.total_xp,
-                    UserGamificationProfile.current_level
+                    UserGamificationProfile.current_level,
                 )
                 .join(UserOrganization, User.id == UserOrganization.user_id)
-                .join(UserGamificationProfile,
-                      and_(
-                          User.id == UserGamificationProfile.user_id,
-                          UserGamificationProfile.org_id == org_id
-                      ),
-                      isouter=True)
+                .join(
+                    UserGamificationProfile,
+                    and_(
+                        User.id == UserGamificationProfile.user_id,
+                        UserGamificationProfile.org_id == org_id,
+                    ),
+                    isouter=True,
+                )
                 .where(UserOrganization.org_id == org_id)
             )
 
             users_data = []
             for user in db_session.exec(users_query).all():
-                users_data.append({
-                    "id": user.id,
-                    "username": user.username,
-                    "firstName": user.first_name,
-                    "lastName": user.last_name,
-                    "email": user.email,
-                    "userCreationDate": user.creation_date,
-                    "organizationJoinDate": user.join_date,
-                    "totalXP": user.total_xp or 0,
-                    "currentLevel": user.current_level or 1
-                })
+                users_data.append(
+                    {
+                        "id": user.id,
+                        "username": user.username,
+                        "firstName": user.first_name,
+                        "lastName": user.last_name,
+                        "email": user.email,
+                        "userCreationDate": user.creation_date,
+                        "organizationJoinDate": user.join_date,
+                        "totalXP": user.total_xp or 0,
+                        "currentLevel": user.current_level or 1,
+                    }
+                )
 
             export_data["users"] = users_data
 
@@ -2198,22 +2086,34 @@ async def export_organization_data(
 
             for course in db_session.exec(courses_query).all():
                 # Get course statistics
-                assignments_count = db_session.exec(
-                    select(func.count(Assignment.id)).where(Assignment.course_id == course.id)
-                ).first() or 0
+                assignments_count = (
+                    db_session.exec(
+                        select(func.count(Assignment.id)).where(
+                            Assignment.course_id == course.id
+                        )
+                    ).first()
+                    or 0
+                )
 
-                activities_count = db_session.exec(
-                    select(func.count(Activity.id)).where(Activity.course_id == course.id)
-                ).first() or 0
+                activities_count = (
+                    db_session.exec(
+                        select(func.count(Activity.id)).where(
+                            Activity.course_id == course.id
+                        )
+                    ).first()
+                    or 0
+                )
 
-                courses_data.append({
-                    "id": course.id,
-                    "name": course.name,
-                    "description": course.description,
-                    "creationDate": course.creation_date,
-                    "assignmentsCount": assignments_count,
-                    "activitiesCount": activities_count
-                })
+                courses_data.append(
+                    {
+                        "id": course.id,
+                        "name": course.name,
+                        "description": course.description,
+                        "creationDate": course.creation_date,
+                        "assignmentsCount": assignments_count,
+                        "activitiesCount": activities_count,
+                    }
+                )
 
             export_data["courses"] = courses_data
 
@@ -2223,24 +2123,37 @@ async def export_organization_data(
             thirty_days_ago = now - timedelta(days=30)
 
             # Get summary analytics
-            total_users = db_session.exec(
-                select(func.count(UserOrganization.user_id)).where(UserOrganization.org_id == org_id)
-            ).first() or 0
-
-            active_users = db_session.exec(
-                select(func.count(func.distinct(UserGamificationProfile.user_id))).where(
-                    and_(
-                        UserGamificationProfile.org_id == org_id,
-                        UserGamificationProfile.last_login_date >= thirty_days_ago.strftime("%Y-%m-%d")
+            total_users = (
+                db_session.exec(
+                    select(func.count(UserOrganization.user_id)).where(
+                        UserOrganization.org_id == org_id
                     )
-                )
-            ).first() or 0
+                ).first()
+                or 0
+            )
+
+            active_users = (
+                db_session.exec(
+                    select(
+                        func.count(func.distinct(UserGamificationProfile.user_id))
+                    ).where(
+                        and_(
+                            UserGamificationProfile.org_id == org_id,
+                            UserGamificationProfile.last_login_date
+                            >= thirty_days_ago.strftime("%Y-%m-%d"),
+                        )
+                    )
+                ).first()
+                or 0
+            )
 
             export_data["analytics"] = {
                 "exportDate": now.isoformat(),
                 "totalUsers": total_users,
                 "activeUsers30Days": active_users,
-                "engagementRate": round((active_users / total_users * 100), 2) if total_users > 0 else 0
+                "engagementRate": round((active_users / total_users * 100), 2)
+                if total_users > 0
+                else 0,
             }
 
         return {
@@ -2248,22 +2161,20 @@ async def export_organization_data(
             "format": format,
             "organizationId": org_id,
             "exportDate": datetime.now().isoformat(),
-            "data": export_data
+            "data": export_data,
         }
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error exporting data: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error exporting data: {e!s}")
 
 
 @router.get("/users")
 async def get_admin_users(
     org_id: Annotated[int, Query()] = ...,
-    page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=100),
-    search: Optional[str] = Query(None),
-    filter: Optional[str] = Query(None),
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    search: Annotated[str | None, Query()] = None,
+    filter: Annotated[str | None, Query()] = None,
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser | AnonymousUser = Depends(get_current_user),
 ):
@@ -2294,16 +2205,18 @@ async def get_admin_users(
                 UserGamificationProfile.total_xp,
                 UserGamificationProfile.current_level,
                 UserGamificationProfile.last_login_date,
-                Role.name.label("role_name")
+                Role.name.label("role_name"),
             )
             .join(UserOrganization, User.id == UserOrganization.user_id)
             .join(Role, UserOrganization.role_id == Role.id, isouter=True)
-            .join(UserGamificationProfile,
-                  and_(
-                      User.id == UserGamificationProfile.user_id,
-                      UserGamificationProfile.org_id == org_id
-                  ),
-                  isouter=True)
+            .join(
+                UserGamificationProfile,
+                and_(
+                    User.id == UserGamificationProfile.user_id,
+                    UserGamificationProfile.org_id == org_id,
+                ),
+                isouter=True,
+            )
             .where(UserOrganization.org_id == org_id)
         )
 
@@ -2315,7 +2228,7 @@ async def get_admin_users(
                     User.username.ilike(search_filter),
                     User.first_name.ilike(search_filter),
                     User.last_name.ilike(search_filter),
-                    User.email.ilike(search_filter)
+                    User.email.ilike(search_filter),
                 )
             )
 
@@ -2323,14 +2236,16 @@ async def get_admin_users(
         if filter == "active":
             thirty_days_ago = datetime.now() - timedelta(days=30)
             base_query = base_query.where(
-                UserGamificationProfile.last_login_date >= thirty_days_ago.strftime("%Y-%m-%d")
+                UserGamificationProfile.last_login_date
+                >= thirty_days_ago.strftime("%Y-%m-%d")
             )
         elif filter == "inactive":
             thirty_days_ago = datetime.now() - timedelta(days=30)
             base_query = base_query.where(
                 or_(
-                    UserGamificationProfile.last_login_date < thirty_days_ago.strftime("%Y-%m-%d"),
-                    UserGamificationProfile.last_login_date.is_(None)
+                    UserGamificationProfile.last_login_date
+                    < thirty_days_ago.strftime("%Y-%m-%d"),
+                    UserGamificationProfile.last_login_date.is_(None),
                 )
             )
 
@@ -2339,14 +2254,18 @@ async def get_admin_users(
         total_users = db_session.exec(count_query).first() or 0
 
         # Get paginated results
-        users_query = base_query.order_by(User.creation_date.desc()).offset(offset).limit(limit)
+        users_query = (
+            base_query.order_by(User.creation_date.desc()).offset(offset).limit(limit)
+        )
         users_result = db_session.exec(users_query).all()
 
         # Process user data
         admin_users = []
         for user in users_result:
             # Get user's course enrollment count
-            enrolled_courses_query = select(func.count(func.distinct(Assignment.course_id))).where(
+            enrolled_courses_query = select(
+                func.count(func.distinct(Assignment.course_id))
+            ).where(
                 Assignment.course_id.in_(
                     select(Course.id).where(Course.org_id == org_id)
                 )
@@ -2356,13 +2275,17 @@ async def get_admin_users(
             # Get completion rate
             user_submissions_query = select(
                 func.count(AssignmentTaskSubmission.id).label("total"),
-                func.count(AssignmentTaskSubmission.id).filter(AssignmentTaskSubmission.grade >= 70).label("completed")
+                func.count(AssignmentTaskSubmission.id)
+                .filter(AssignmentTaskSubmission.grade >= 70)
+                .label("completed"),
             ).where(AssignmentTaskSubmission.user_id == user.id)
 
             submission_stats = db_session.exec(user_submissions_query).first()
             completion_rate = 0
             if submission_stats and submission_stats.total > 0:
-                completion_rate = round((submission_stats.completed / submission_stats.total) * 100, 1)
+                completion_rate = round(
+                    (submission_stats.completed / submission_stats.total) * 100, 1
+                )
 
             # Determine status
             status = "active"
@@ -2373,23 +2296,26 @@ async def get_admin_users(
             else:
                 status = "inactive"
 
-            admin_users.append({
-                "id": user.id,
-                "name": f"{user.first_name} {user.last_name}".strip() or user.username,
-                "email": user.email,
-                "role": user.role_name or "student",
-                "status": status,
-                "lastActive": user.last_login_date or "Never",
-                "joinDate": user.join_date or user.creation_date,
-                "coursesEnrolled": courses_enrolled,
-                "completionRate": completion_rate
-            })
+            admin_users.append(
+                {
+                    "id": user.id,
+                    "name": f"{user.first_name} {user.last_name}".strip()
+                    or user.username,
+                    "email": user.email,
+                    "role": user.role_name or "student",
+                    "status": status,
+                    "lastActive": user.last_login_date or "Never",
+                    "joinDate": user.join_date or user.creation_date,
+                    "coursesEnrolled": courses_enrolled,
+                    "completionRate": completion_rate,
+                }
+            )
 
         return {
             "users": admin_users,
             "total": total_users,
             "page": page,
-            "limit": limit
+            "limit": limit,
         }
 
     except Exception as e:
@@ -2401,10 +2327,10 @@ async def get_admin_users(
 @router.get("/courses")
 async def get_admin_courses(
     org_id: Annotated[int, Query()] = ...,
-    page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=100),
-    search: Optional[str] = Query(None),
-    filter: Optional[str] = Query(None),
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    search: Annotated[str | None, Query()] = None,
+    filter: Annotated[str | None, Query()] = None,
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser | AnonymousUser = Depends(get_current_user),
 ):
@@ -2433,7 +2359,7 @@ async def get_admin_courses(
                 Course.public,
                 User.username.label("author_username"),
                 User.first_name.label("author_first_name"),
-                User.last_name.label("author_last_name")
+                User.last_name.label("author_last_name"),
             )
             .join(User, Course.author_id == User.id, isouter=True)
             .where(Course.org_id == org_id)
@@ -2442,9 +2368,7 @@ async def get_admin_courses(
         # Apply search filter
         if search:
             search_filter = f"%{search}%"
-            base_query = base_query.where(
-                Course.name.ilike(search_filter)
-            )
+            base_query = base_query.where(Course.name.ilike(search_filter))
 
         # Apply status filter
         if filter == "published":
@@ -2457,14 +2381,18 @@ async def get_admin_courses(
         total_courses = db_session.exec(count_query).first() or 0
 
         # Get paginated results
-        courses_query = base_query.order_by(Course.creation_date.desc()).offset(offset).limit(limit)
+        courses_query = (
+            base_query.order_by(Course.creation_date.desc()).offset(offset).limit(limit)
+        )
         courses_result = db_session.exec(courses_query).all()
 
         # Process course data
         admin_courses = []
         for course in courses_result:
             # Get enrollment count (users who have submitted assignments in this course)
-            enrollments_query = select(func.count(func.distinct(AssignmentTaskSubmission.user_id))).where(
+            enrollments_query = select(
+                func.count(func.distinct(AssignmentTaskSubmission.user_id))
+            ).where(
                 AssignmentTaskSubmission.assignment_task_id.in_(
                     select(Assignment.id).where(Assignment.course_id == course.id)
                 )
@@ -2484,13 +2412,19 @@ async def get_admin_courses(
                 ).where(
                     and_(
                         AssignmentTaskSubmission.assignment_task_id.in_(
-                            select(Assignment.id).where(Assignment.course_id == course.id)
+                            select(Assignment.id).where(
+                                Assignment.course_id == course.id
+                            )
                         ),
-                        AssignmentTaskSubmission.grade >= 70
+                        AssignmentTaskSubmission.grade >= 70,
                     )
                 )
-                completed_users = db_session.exec(completed_assignments_query).first() or 0
-                completion_rate = round((completed_users / max(enrollments, 1)) * 100, 1)
+                completed_users = (
+                    db_session.exec(completed_assignments_query).first() or 0
+                )
+                completion_rate = round(
+                    (completed_users / max(enrollments, 1)) * 100, 1
+                )
 
             # Determine status
             status = "published" if course.public else "draft"
@@ -2502,21 +2436,23 @@ async def get_admin_courses(
             elif course.author_username:
                 author_name = course.author_username
 
-            admin_courses.append({
-                "id": course.id,
-                "name": course.name,
-                "status": status,
-                "enrollments": enrollments,
-                "completionRate": completion_rate,
-                "lastModified": course.update_date or course.creation_date,
-                "author": author_name
-            })
+            admin_courses.append(
+                {
+                    "id": course.id,
+                    "name": course.name,
+                    "status": status,
+                    "enrollments": enrollments,
+                    "completionRate": completion_rate,
+                    "lastModified": course.update_date or course.creation_date,
+                    "author": author_name,
+                }
+            )
 
         return {
             "courses": admin_courses,
             "total": total_courses,
             "page": page,
-            "limit": limit
+            "limit": limit,
         }
 
     except Exception as e:
@@ -2561,18 +2497,17 @@ async def bulk_course_operation(
             try:
                 # Verify course exists in organization
                 course_query = select(Course).where(
-                    and_(
-                        Course.id == course_id,
-                        Course.org_id == org_id
-                    )
+                    and_(Course.id == course_id, Course.org_id == org_id)
                 )
                 course = db_session.exec(course_query).first()
 
                 if not course:
-                    results["failed"].append({
-                        "course_id": course_id,
-                        "error": "Course not found in organization"
-                    })
+                    results["failed"].append(
+                        {
+                            "course_id": course_id,
+                            "error": "Course not found in organization",
+                        }
+                    )
                     continue
 
                 if action == "publish":
@@ -2604,8 +2539,8 @@ async def bulk_course_operation(
             "summary": {
                 "successful": len(results["success"]),
                 "failed": len(results["failed"]),
-                "total": len(course_ids)
-            }
+                "total": len(course_ids),
+            },
         }
 
     except HTTPException:
@@ -2646,27 +2581,37 @@ async def perform_system_action(
             return {
                 "success": True,
                 "message": "Cache cleared successfully",
-                "data": {"action": "clear_cache", "timestamp": datetime.now().isoformat()}
+                "data": {
+                    "action": "clear_cache",
+                    "timestamp": datetime.now().isoformat(),
+                },
             }
 
-        elif action == "backup_data":
+        if action == "backup_data":
             # In a real implementation, you would trigger a backup process
             return {
                 "success": True,
                 "message": "Backup initiated successfully",
-                "data": {"action": "backup_data", "timestamp": datetime.now().isoformat()}
+                "data": {
+                    "action": "backup_data",
+                    "timestamp": datetime.now().isoformat(),
+                },
             }
 
-        elif action == "maintenance_mode":
+        if action == "maintenance_mode":
             # In a real implementation, you would set maintenance mode
             enabled = data.get("enabled", False)
             return {
                 "success": True,
                 "message": f"Maintenance mode {'enabled' if enabled else 'disabled'}",
-                "data": {"action": "maintenance_mode", "enabled": enabled, "timestamp": datetime.now().isoformat()}
+                "data": {
+                    "action": "maintenance_mode",
+                    "enabled": enabled,
+                    "timestamp": datetime.now().isoformat(),
+                },
             }
 
-        elif action == "reset_analytics":
+        if action == "reset_analytics":
             # Reset gamification analytics for the organization
             reset_query = text("""
                 UPDATE usergamificationprofile
@@ -2675,17 +2620,19 @@ async def perform_system_action(
                     longest_learning_streak = 0
                 WHERE org_id = :org_id
             """)
-            db_session.exec(reset_query, {"org_id": org_id})
+            db_session.exec(reset_query.params(org_id=org_id))
             db_session.commit()
 
             return {
                 "success": True,
                 "message": "Analytics data reset successfully",
-                "data": {"action": "reset_analytics", "timestamp": datetime.now().isoformat()}
+                "data": {
+                    "action": "reset_analytics",
+                    "timestamp": datetime.now().isoformat(),
+                },
             }
 
-        else:
-            raise HTTPException(status_code=400, detail="Invalid system action")
+        raise HTTPException(status_code=400, detail="Invalid system action")
 
     except HTTPException:
         raise
@@ -2729,17 +2676,17 @@ async def get_security_settings(
                 "minLength": 8,
                 "requireUppercase": True,
                 "requireNumbers": True,
-                "requireSymbols": False
+                "requireSymbols": False,
             },
             "sessionTimeout": 24,  # hours
             "loginAttempts": {
                 "maxAttempts": 5,
-                "lockoutDuration": 30  # minutes
+                "lockoutDuration": 30,  # minutes
             },
             "accessLogging": True,
             "ipWhitelist": [],
             "ssoEnabled": False,
-            "lastUpdated": datetime.now().isoformat()
+            "lastUpdated": datetime.now().isoformat(),
         }
 
     except HTTPException:
@@ -2777,10 +2724,7 @@ async def update_security_settings(
         return {
             "success": True,
             "message": "Security settings updated successfully",
-            "data": {
-                **body,
-                "lastUpdated": datetime.now().isoformat()
-            }
+            "data": {**body, "lastUpdated": datetime.now().isoformat()},
         }
 
     except HTTPException:
@@ -2804,9 +2748,7 @@ async def import_system_data(
         raise HTTPException(status_code=401, detail="Authentication required")
 
     if not await is_user_admin_of_org(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=403, detail="Not authorized to import data"
-        )
+        raise HTTPException(status_code=403, detail="Not authorized to import data")
 
     try:
         # In a real implementation, you would:
@@ -2824,20 +2766,18 @@ async def import_system_data(
                 "imported": 0,
                 "skipped": 0,
                 "errors": 0,
-                "timestamp": datetime.now().isoformat()
-            }
+                "timestamp": datetime.now().isoformat(),
+            },
         }
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error importing data: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error importing data: {e!s}")
 
 
 @router.get("/metrics/course-funnels")
 async def get_course_completion_funnels(
     org_id: Annotated[int, Query()] = ...,
-    course_id: Optional[int] = None,
+    course_id: int | None = None,
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser | AnonymousUser = Depends(get_current_user),
 ):
@@ -2883,7 +2823,9 @@ async def get_course_completion_funnels(
 
             # Calculate funnel stages
             # Stage 1: Course started (at least one assignment viewed/attempted)
-            started_query = select(func.count(func.distinct(AssignmentTaskSubmission.user_id))).where(
+            started_query = select(
+                func.count(func.distinct(AssignmentTaskSubmission.user_id))
+            ).where(
                 AssignmentTaskSubmission.assignment_task_id.in_(
                     select(Assignment.id).where(Assignment.course_id == course.id)
                 )
@@ -2891,25 +2833,36 @@ async def get_course_completion_funnels(
             started_users = db_session.exec(started_query).first() or 0
 
             # Stage 2: 50% completion
-            half_complete_query = select(func.count(func.distinct(AssignmentTaskSubmission.user_id))).where(
+            half_complete_query = select(
+                func.count(func.distinct(AssignmentTaskSubmission.user_id))
+            ).where(
                 and_(
                     AssignmentTaskSubmission.assignment_task_id.in_(
                         select(Assignment.id).where(Assignment.course_id == course.id)
                     ),
                     AssignmentTaskSubmission.user_id.in_(
                         select(AssignmentTaskSubmission.user_id)
-                        .where(AssignmentTaskSubmission.assignment_task_id.in_(
-                            select(Assignment.id).where(Assignment.course_id == course.id)
-                        ))
+                        .where(
+                            AssignmentTaskSubmission.assignment_task_id.in_(
+                                select(Assignment.id).where(
+                                    Assignment.course_id == course.id
+                                )
+                            )
+                        )
                         .group_by(AssignmentTaskSubmission.user_id)
-                        .having(func.count(AssignmentTaskSubmission.id) >= total_activities / 2)
-                    )
+                        .having(
+                            func.count(AssignmentTaskSubmission.id)
+                            >= total_activities / 2
+                        )
+                    ),
                 )
             )
             half_complete_users = db_session.exec(half_complete_query).first() or 0
 
             # Stage 3: Full completion
-            completed_query = select(func.count(func.distinct(AssignmentTaskSubmission.user_id))).where(
+            completed_query = select(
+                func.count(func.distinct(AssignmentTaskSubmission.user_id))
+            ).where(
                 and_(
                     AssignmentTaskSubmission.assignment_task_id.in_(
                         select(Assignment.id).where(Assignment.course_id == course.id)
@@ -2917,12 +2870,18 @@ async def get_course_completion_funnels(
                     AssignmentTaskSubmission.grade >= 70,
                     AssignmentTaskSubmission.user_id.in_(
                         select(AssignmentTaskSubmission.user_id)
-                        .where(AssignmentTaskSubmission.assignment_task_id.in_(
-                            select(Assignment.id).where(Assignment.course_id == course.id)
-                        ))
+                        .where(
+                            AssignmentTaskSubmission.assignment_task_id.in_(
+                                select(Assignment.id).where(
+                                    Assignment.course_id == course.id
+                                )
+                            )
+                        )
                         .group_by(AssignmentTaskSubmission.user_id)
-                        .having(func.count(AssignmentTaskSubmission.id) >= total_activities)
-                    )
+                        .having(
+                            func.count(AssignmentTaskSubmission.id) >= total_activities
+                        )
+                    ),
                 )
             )
             completed_users = db_session.exec(completed_query).first() or 0
@@ -2935,27 +2894,57 @@ async def get_course_completion_funnels(
                         "name": "Enrolled",
                         "users": total_enrolled,
                         "percentage": 100,
-                        "dropoffRate": 0
+                        "dropoffRate": 0,
                     },
                     {
                         "name": "Started",
                         "users": started_users,
-                        "percentage": round((started_users / total_enrolled * 100), 1) if total_enrolled > 0 else 0,
-                        "dropoffRate": round(((total_enrolled - started_users) / total_enrolled * 100), 1) if total_enrolled > 0 else 0
+                        "percentage": round((started_users / total_enrolled * 100), 1)
+                        if total_enrolled > 0
+                        else 0,
+                        "dropoffRate": round(
+                            ((total_enrolled - started_users) / total_enrolled * 100), 1
+                        )
+                        if total_enrolled > 0
+                        else 0,
                     },
                     {
                         "name": "50% Complete",
                         "users": half_complete_users,
-                        "percentage": round((half_complete_users / total_enrolled * 100), 1) if total_enrolled > 0 else 0,
-                        "dropoffRate": round(((started_users - half_complete_users) / started_users * 100), 1) if started_users > 0 else 0
+                        "percentage": round(
+                            (half_complete_users / total_enrolled * 100), 1
+                        )
+                        if total_enrolled > 0
+                        else 0,
+                        "dropoffRate": round(
+                            (
+                                (started_users - half_complete_users)
+                                / started_users
+                                * 100
+                            ),
+                            1,
+                        )
+                        if started_users > 0
+                        else 0,
                     },
                     {
                         "name": "Completed",
                         "users": completed_users,
-                        "percentage": round((completed_users / total_enrolled * 100), 1) if total_enrolled > 0 else 0,
-                        "dropoffRate": round(((half_complete_users - completed_users) / half_complete_users * 100), 1) if half_complete_users > 0 else 0
-                    }
-                ]
+                        "percentage": round((completed_users / total_enrolled * 100), 1)
+                        if total_enrolled > 0
+                        else 0,
+                        "dropoffRate": round(
+                            (
+                                (half_complete_users - completed_users)
+                                / half_complete_users
+                                * 100
+                            ),
+                            1,
+                        )
+                        if half_complete_users > 0
+                        else 0,
+                    },
+                ],
             }
 
             funnels.append(funnel_data)
@@ -2964,10 +2953,13 @@ async def get_course_completion_funnels(
             "funnels": funnels,
             "summary": {
                 "totalCourses": len(funnels),
-                "avgCompletionRate": round(sum(
-                    f["stages"][-1]["percentage"] for f in funnels
-                ) / len(funnels), 1) if funnels else 0
-            }
+                "avgCompletionRate": round(
+                    sum(f["stages"][-1]["percentage"] for f in funnels) / len(funnels),
+                    1,
+                )
+                if funnels
+                else 0,
+            },
         }
 
     except Exception as e:

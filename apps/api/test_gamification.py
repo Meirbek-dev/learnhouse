@@ -104,7 +104,3 @@ async def test_gamification_system():
 
 if __name__ == "__main__":
     asyncio.run(test_gamification_system())
-
-
-if __name__ == "__main__":
-    asyncio.run(test_gamification_system())

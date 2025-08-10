@@ -3,7 +3,6 @@
 import { LevelIndicatorBadge } from '@components/Dashboard/Gamification';
 import { useLevelIndicator } from '@/hooks/useLevelIndicator';
 import { useOrg } from '@components/Contexts/OrgContext';
-import React from 'react';
 
 interface NavbarLevelIndicatorProps {
   /** Additional CSS classes */

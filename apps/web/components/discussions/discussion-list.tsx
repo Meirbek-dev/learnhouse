@@ -276,7 +276,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
     }
 
     const reply = post.replies?.find((r: any) => r.id === replyId);
-    if (!(reply && reply.discussion_uuid)) {
+    if (!reply?.discussion_uuid) {
       console.error('Reply not found or missing discussion_uuid:', replyId);
       return;
     }
@@ -357,7 +357,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
     }
 
     const reply = post.replies?.find((r: any) => r.id === replyId);
-    if (!(reply && reply.discussion_uuid)) {
+    if (!reply?.discussion_uuid) {
       console.error('Reply not found or missing discussion_uuid:', replyId);
       return;
     }
@@ -416,7 +416,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
     }
 
     const reply = post.replies?.find((r: any) => r.id === replyId);
-    if (!(reply && reply.discussion_uuid)) {
+    if (!reply?.discussion_uuid) {
       console.error('Reply not found or missing discussion_uuid:', replyId);
       return;
     }

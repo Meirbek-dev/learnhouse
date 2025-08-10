@@ -56,10 +56,6 @@ interface GamificationPreferences {
   };
 }
 
-interface OrgParams {
-  orgslug: string;
-}
-
 // Default preferences
 const DEFAULT_PREFERENCES: GamificationPreferences = {
   notifications: {
@@ -122,7 +118,6 @@ export default function UserGamificationSettings() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [preferences, setPreferences] = useState<GamificationPreferences>(DEFAULT_PREFERENCES);
 
-  // Get org ID with proper fallback
   const orgId = useMemo(() => org?.id || 1, [org?.id]);
 
   // Load preferences on mount
@@ -132,7 +127,7 @@ export default function UserGamificationSettings() {
       const loadedPreferences = loadPreferences(String(userId), orgId);
       setPreferences(loadedPreferences);
     }
-  }, [org?.id, orgId]);
+  }, [org?.id, orgId, org?.user?.id]);
 
   // Save preferences handler
   const handleSavePreferences = useCallback(async () => {
@@ -143,7 +138,7 @@ export default function UserGamificationSettings() {
 
     setIsLoading(true);
     try {
-      savePreferences(String(org.user.id), orgId, preferences);
+      savePreferences(String(org.user?.id), orgId, preferences);
       toast.success(t('toast.preferencesSaved'));
     } catch (error) {
       console.error('Failed to save preferences:', error);
@@ -188,11 +183,11 @@ export default function UserGamificationSettings() {
   // Error boundary for org data
   if (!orgId) {
     return (
-      <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
+      <div className="soft-shadow bg-background mx-0 rounded-xl sm:mx-10">
         <div className="flex flex-col">
           <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-            <h1 className="text-xl font-bold text-gray-800">Gamification Settings</h1>
-            <h2 className="text-md text-gray-500">Organization not available</h2>
+            <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
+            <h2 className="text-md text-gray-500">{t('errors.orgNotAvailable')}</h2>
           </div>
           <div className="px-8 py-6">
             <Alert>
@@ -206,12 +201,12 @@ export default function UserGamificationSettings() {
   }
 
   return (
-    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow bg-background mx-0 rounded-xl sm:mx-10">
       <div className="flex flex-col">
         {/* Header */}
-        <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-          <h1 className="text-xl font-bold text-gray-800">Gamification Settings</h1>
-          <h2 className="text-md text-gray-500">Customize your gamification experience and preferences</h2>
+        <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-white px-5 py-3">
+          <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
+          <h2 className="text-md text-gray-500">{t('description')}</h2>
         </div>
 
         {/* Content */}
@@ -264,12 +259,7 @@ export default function UserGamificationSettings() {
               value="customization"
               className="space-y-6"
             >
-              <AvatarCustomization
-                orgId={orgId}
-                onUpdate={() => {
-                  toast.success(t('avatarUpdated'));
-                }}
-              />
+              <AvatarCustomization orgId={orgId} />
             </TabsContent>
 
             {/* Preferences Tab */}

@@ -416,7 +416,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
               tooltip={isCollapsed ? t('tooltips.logout') : undefined}
               size="sm"
               onClick={handleLogout}
-              className={`text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent flex-1 transition-all duration-200 ${
+              className={`text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground flex-1 transition-all duration-200 ${
                 isCollapsed ? 'w-full justify-center px-0' : 'gap-2 px-3'
               }`}
             >

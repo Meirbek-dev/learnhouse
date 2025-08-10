@@ -68,7 +68,7 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             logger.warning("OpenAI API key not configured")
             return None
 
-        model_name == "text-embedding-3-small"
+        model_name = "text-embedding-3-small"
 
         logger.info(f"Creating embedding function for model: {model_name}")
         return OpenAIEmbeddings(
@@ -76,7 +76,6 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             api_key=api_key,
             # Add performance optimizations
             max_retries=3,
-            request_timeout=30,
             # Use smaller batch sizes for better performance
             chunk_size=1000,
         )
@@ -87,7 +86,7 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
 
 
 @lru_cache(maxsize=10)
-def get_llm(model_name: str, temperature: float = 0.0) -> ChatOpenAI | None:
+def get_llm(model_name: str) -> ChatOpenAI | None:
     """
     Get cached LLM instance with OpenAI configuration.
     """
@@ -99,16 +98,14 @@ def get_llm(model_name: str, temperature: float = 0.0) -> ChatOpenAI | None:
             logger.warning("OpenAI API key not configured")
             return None
 
-        model_name = "gpt-4.1-nano"
+        model_name = "gpt-5-nano"
 
         logger.info(f"Creating LLM for model: {model_name}")
         return ChatOpenAI(
             model=model_name,
             api_key=api_key,
-            temperature=temperature,
             # Performance optimizations
             max_retries=2,
-            request_timeout=20,
             # Streaming for better user experience
             streaming=True,
             # Move parameters from model_kwargs to explicit parameters

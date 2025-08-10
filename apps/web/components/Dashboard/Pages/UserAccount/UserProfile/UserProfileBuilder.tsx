@@ -88,6 +88,7 @@ const getSectionTypesConfig = (t: Function) => ({
     label: t('SectionTypes.courses.label'),
     description: t('SectionTypes.courses.description'),
   },
+  // TODO: gamification section is broken
   'gamification': {
     icon: Trophy,
     label: t('SectionTypes.gamification.label'),

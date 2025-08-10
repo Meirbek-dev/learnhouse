@@ -253,24 +253,39 @@ export function getXPSourceDisplayName(source: string): string {
 
 /**
  * Format XP amount with appropriate signs and formatting
+ * @param amount - The XP amount to format
+ * @param locale - Optional locale for number formatting
  */
-export function formatXPAmount(amount: number): string {
+export function formatXPAmount(amount: number, locale?: string): string {
   const sign = amount > 0 ? '+' : '';
-  return `${sign}${amount.toLocaleString()} XP`;
+  const formattedNumber = locale ? amount.toLocaleString(locale) : amount.toLocaleString();
+  return `${sign}${formattedNumber} XP`;
 }
 
 /**
  * Check if a streak is at risk (user hasn't completed action today)
+ * @param lastActivityDate - ISO date string of last activity
+ * @returns boolean indicating if streak is at risk
  */
 export function isStreakAtRisk(lastActivityDate: string | null): boolean {
   if (!lastActivityDate) return false;
 
-  const lastDate = new Date(lastActivityDate);
-  const today = new Date();
-  const diffTime = today.getTime() - lastDate.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  try {
+    const lastDate = new Date(lastActivityDate);
+    const today = new Date();
 
-  return diffDays >= 1;
+    // Reset time to compare dates only
+    lastDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = today.getTime() - lastDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return diffDays >= 1;
+  } catch (error) {
+    console.warn('Invalid date format in isStreakAtRisk:', lastActivityDate, error);
+    return false;
+  }
 }
 
 /**
@@ -285,6 +300,11 @@ export function getStreakStatus(lastActivityDate: string | null): StreakStatus {
     const lastDate = new Date(lastActivityDate);
     const today = new Date();
 
+    // Validate date is valid
+    if (Number.isNaN(lastDate.getTime())) {
+      throw new Error('Invalid date');
+    }
+
     // Reset time to compare dates only
     lastDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
@@ -295,8 +315,8 @@ export function getStreakStatus(lastActivityDate: string | null): StreakStatus {
     if (diffDays === 0) return 'active';
     if (diffDays === 1) return 'at-risk';
     return 'broken';
-  } catch {
-    console.warn('Invalid date format in getStreakStatus:', lastActivityDate);
+  } catch (error) {
+    console.warn('Invalid date format in getStreakStatus:', lastActivityDate, error);
     return 'none';
   }
 }

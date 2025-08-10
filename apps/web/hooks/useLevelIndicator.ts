@@ -75,7 +75,7 @@ export function useLevelIndicator({
     } finally {
       setIsLoading(false);
     }
-  }, [enabled, session?.tokens?.access_token, orgId, profile]);
+  }, [enabled, session?.tokens?.access_token, orgId, profile, t]);
 
   const resetLevelUp = useCallback(() => {
     setHasLeveledUp(false);
@@ -159,8 +159,8 @@ export function useXPTracking(orgId: number) {
 
   const awardXP = useCallback(
     async (amount: number, source: string) => {
-      // In a real implementation, this would call the API to award XP
-      // For now, we'll just refresh the profile
+      // TODO: call the API to award XP
+      // For now, just refresh the profile
       await refetch();
       triggerGamificationUpdate();
     },

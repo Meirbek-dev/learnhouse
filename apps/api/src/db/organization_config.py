@@ -32,7 +32,7 @@ class StorageOrgConfig(PydanticStrictBaseModel):
 class AIOrgConfig(PydanticStrictBaseModel):
     enabled: bool = True
     limit: int = 10
-    model: str = "gpt-4.1-nano"
+    model: str = "gpt-5-nano"
 
 
 class AssignmentOrgConfig(PydanticStrictBaseModel):

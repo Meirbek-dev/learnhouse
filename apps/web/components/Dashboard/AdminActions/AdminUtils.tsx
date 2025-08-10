@@ -3,8 +3,8 @@
 import { useCallback, useMemo } from 'react';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useTranslations } from 'next-intl';
 
-// Enhanced utility functions
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -17,14 +17,14 @@ export const formatNumber = (value: number): string => {
   if (value >= 1_000_000) {
     return `${(value / 1_000_000).toFixed(1)}M`;
   }
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(1)}K`;
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(1)}K`;
   }
   return value.toString();
 };
 
 // Format percentages with proper precision
-export const formatPercentage = (value: number, precision: number = 1): string => {
+export const formatPercentage = (value: number, precision = 1): string => {
   return `${value.toFixed(precision)}%`;
 };
 
@@ -43,10 +43,28 @@ export const formatDuration = (seconds: number): string => {
   return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
 };
 
-// Format dates relative to now
-export const formatRelativeTime = (date: Date | string): string => {
+// Format dates relative to now - now accepts formatter for localization
+export const formatRelativeTime = (date: Date | string, formatter?: any): string => {
   const now = new Date();
   const targetDate = typeof date === 'string' ? new Date(date) : date;
+
+  // If formatter is available, use it for relative time
+  if (formatter) {
+    try {
+      return formatter.relativeTime(targetDate, now);
+    } catch {
+      // Fallback to date formatting if relative time fails
+      try {
+        return formatter.dateTime(targetDate, {
+          dateStyle: 'short',
+        });
+      } catch (error) {
+        console.warn('Failed to format date with formatter:', error);
+      }
+    }
+  }
+
+  // Fallback to native implementation
   const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
@@ -56,16 +74,51 @@ export const formatRelativeTime = (date: Date | string): string => {
     const minutes = Math.floor(diffInSeconds / 60);
     return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
   }
-  if (diffInSeconds < 86400) {
+  if (diffInSeconds < 86_400) {
     const hours = Math.floor(diffInSeconds / 3600);
     return `${hours} hour${hours === 1 ? '' : 's'} ago`;
   }
-  if (diffInSeconds < 2592000) {
-    const days = Math.floor(diffInSeconds / 86400);
+  if (diffInSeconds < 2_592_000) {
+    const days = Math.floor(diffInSeconds / 86_400);
     return `${days} day${days === 1 ? '' : 's'} ago`;
   }
 
   return targetDate.toLocaleDateString();
+};
+
+// Localized relative time formatter hook
+export const useLocalizedRelativeTime = () => {
+  const t = useTranslations('DashPage.Admin.Utils.relativeTime');
+
+  return useCallback((date: Date | string) => {
+    const now = new Date();
+    const targetDate = typeof date === 'string' ? new Date(date) : date;
+    const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000);
+
+    if (diffInSeconds < 60) {
+      return t('justNow');
+    }
+    if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return minutes === 1
+        ? t('minuteAgo', { count: minutes })
+        : t('minutesAgo', { count: minutes });
+    }
+    if (diffInSeconds < 86_400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return hours === 1
+        ? t('hourAgo', { count: hours })
+        : t('hoursAgo', { count: hours });
+    }
+    if (diffInSeconds < 2_592_000) {
+      const days = Math.floor(diffInSeconds / 86_400);
+      return days === 1
+        ? t('dayAgo', { count: days })
+        : t('daysAgo', { count: days });
+    }
+
+    return targetDate.toLocaleDateString();
+  }, [t]);
 };
 
 // Admin color schemes for consistent theming
@@ -76,7 +129,7 @@ export const adminColors = {
     500: '#3b82f6',
     600: '#2563eb',
     700: '#1d4ed8',
-    900: '#1e3a8a'
+    900: '#1e3a8a',
   },
   success: {
     50: '#f0fdf4',
@@ -84,7 +137,7 @@ export const adminColors = {
     500: '#22c55e',
     600: '#16a34a',
     700: '#15803d',
-    900: '#14532d'
+    900: '#14532d',
   },
   warning: {
     50: '#fffbeb',
@@ -92,7 +145,7 @@ export const adminColors = {
     500: '#f59e0b',
     600: '#d97706',
     700: '#b45309',
-    900: '#78350f'
+    900: '#78350f',
   },
   error: {
     50: '#fef2f2',
@@ -100,7 +153,7 @@ export const adminColors = {
     500: '#ef4444',
     600: '#dc2626',
     700: '#b91c1c',
-    900: '#7f1d1d'
+    900: '#7f1d1d',
   },
   gray: {
     50: '#f9fafb',
@@ -108,8 +161,8 @@ export const adminColors = {
     500: '#6b7280',
     600: '#4b5563',
     700: '#374151',
-    900: '#111827'
-  }
+    900: '#111827',
+  },
 };
 
 // Status badge configurations
@@ -119,55 +172,115 @@ export const getStatusConfig = (status: string) => {
       color: adminColors.success[600],
       bg: adminColors.success[50],
       border: adminColors.success[200],
-      label: 'Active'
+      label: 'Active',
     },
     inactive: {
       color: adminColors.gray[600],
       bg: adminColors.gray[50],
       border: adminColors.gray[200],
-      label: 'Inactive'
+      label: 'Inactive',
     },
     pending: {
       color: adminColors.warning[600],
       bg: adminColors.warning[50],
       border: adminColors.warning[200],
-      label: 'Pending'
+      label: 'Pending',
     },
     suspended: {
       color: adminColors.error[600],
       bg: adminColors.error[50],
       border: adminColors.error[200],
-      label: 'Suspended'
+      label: 'Suspended',
     },
     completed: {
       color: adminColors.success[600],
       bg: adminColors.success[50],
       border: adminColors.success[200],
-      label: 'Completed'
+      label: 'Completed',
     },
     failed: {
       color: adminColors.error[600],
       bg: adminColors.error[50],
       border: adminColors.error[200],
-      label: 'Failed'
+      label: 'Failed',
     },
     processing: {
       color: adminColors.primary[600],
       bg: adminColors.primary[50],
       border: adminColors.primary[200],
-      label: 'Processing'
-    }
+      label: 'Processing',
+    },
   };
 
   return configs[status.toLowerCase()] || configs.inactive;
 };
 
+// Localized status config hook
+export const useLocalizedStatusConfig = () => {
+  const t = useTranslations('DashPage.Admin.Utils.status');
+
+  return useCallback((status: string) => {
+    const configs = {
+      active: {
+        color: adminColors.success[600],
+        bg: adminColors.success[50],
+        border: adminColors.success[200],
+        label: t('active'),
+      },
+      inactive: {
+        color: adminColors.gray[600],
+        bg: adminColors.gray[50],
+        border: adminColors.gray[200],
+        label: t('inactive'),
+      },
+      pending: {
+        color: adminColors.warning[600],
+        bg: adminColors.warning[50],
+        border: adminColors.warning[200],
+        label: t('pending'),
+      },
+      suspended: {
+        color: adminColors.error[600],
+        bg: adminColors.error[50],
+        border: adminColors.error[200],
+        label: t('suspended'),
+      },
+      completed: {
+        color: adminColors.success[600],
+        bg: adminColors.success[50],
+        border: adminColors.success[200],
+        label: t('completed'),
+      },
+      failed: {
+        color: adminColors.error[600],
+        bg: adminColors.error[50],
+        border: adminColors.error[200],
+        label: t('failed'),
+      },
+      processing: {
+        color: adminColors.primary[600],
+        bg: adminColors.primary[50],
+        border: adminColors.primary[200],
+        label: t('processing'),
+      },
+    };
+
+    return configs[status.toLowerCase()] || configs.inactive;
+  }, [t]);
+};
+
 // Priority level configurations
 export const getPriorityConfig = (priority: string | number) => {
-  const level = typeof priority === 'string' ? priority.toLowerCase() :
-                priority > 7 ? 'critical' :
-                priority > 5 ? 'high' :
-                priority > 3 ? 'medium' : 'low';
+  const level =
+    typeof priority === 'string'
+      ? priority.toLowerCase()
+      : priority > 7
+        ? 'critical'
+        : priority > 5
+          ? 'high'
+          : priority > 3
+            ? 'medium'
+            : 'low';
 
   const configs = {
     critical: {
@@ -175,32 +288,83 @@ export const getPriorityConfig = (priority: string | number) => {
       bg: adminColors.error[50],
       border: adminColors.error[200],
       label: 'Critical',
-      icon: '🔴'
+      icon: '🔴',
     },
     high: {
       color: adminColors.warning[600],
       bg: adminColors.warning[50],
       border: adminColors.warning[200],
       label: 'High',
-      icon: '🟡'
+      icon: '🟡',
     },
     medium: {
       color: adminColors.primary[600],
       bg: adminColors.primary[50],
       border: adminColors.primary[200],
       label: 'Medium',
-      icon: '🔵'
+      icon: '🔵',
     },
     low: {
       color: adminColors.gray[600],
       bg: adminColors.gray[50],
       border: adminColors.gray[200],
       label: 'Low',
-      icon: '⚪'
-    }
+      icon: '⚪',
+    },
   };
 
   return configs[level] || configs.low;
+};
+
+// Localized priority config hook
+export const useLocalizedPriorityConfig = () => {
+  const t = useTranslations('DashPage.Admin.Utils.priority');
+
+  return useCallback((priority: string | number) => {
+    const level =
+      typeof priority === 'string'
+        ? priority.toLowerCase()
+        : priority > 7
+          ? 'critical'
+          : priority > 5
+            ? 'high'
+            : priority > 3
+              ? 'medium'
+              : 'low';
+
+    const configs = {
+      critical: {
+        color: adminColors.error[600],
+        bg: adminColors.error[50],
+        border: adminColors.error[200],
+        label: t('critical'),
+        icon: '🔴',
+      },
+      high: {
+        color: adminColors.warning[600],
+        bg: adminColors.warning[50],
+        border: adminColors.warning[200],
+        label: t('high'),
+        icon: '🟡',
+      },
+      medium: {
+        color: adminColors.primary[600],
+        bg: adminColors.primary[50],
+        border: adminColors.primary[200],
+        label: t('medium'),
+        icon: '🔵',
+      },
+      low: {
+        color: adminColors.gray[600],
+        bg: adminColors.gray[50],
+        border: adminColors.gray[200],
+        label: t('low'),
+        icon: '⚪',
+      },
+    };
+
+    return configs[level] || configs.low;
+  }, [t]);
 };
 
 // Generate chart color palette
@@ -249,9 +413,9 @@ export const calculateMedian = (values: number[]): number => {
   const middle = Math.floor(sorted.length / 2);
 
   if (sorted.length % 2 === 0) {
-    return (sorted[middle - 1] + sorted[middle]) / 2;
+    return ((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2;
   }
-  return sorted[middle];
+  return sorted[middle] ?? 0;
 };
 
 export const calculatePercentile = (values: number[], percentile: number): number => {
@@ -260,11 +424,11 @@ export const calculatePercentile = (values: number[], percentile: number): numbe
   const index = (percentile / 100) * (sorted.length - 1);
 
   if (Number.isInteger(index)) {
-    return sorted[index];
+    return sorted[index] ?? 0;
   }
 
-  const lower = sorted[Math.floor(index)];
-  const upper = sorted[Math.ceil(index)];
+  const lower = sorted[Math.floor(index)] ?? 0;
+  const upper = sorted[Math.ceil(index)] ?? 0;
   return lower + (upper - lower) * (index - Math.floor(index));
 };
 
@@ -275,16 +439,18 @@ export const exportToCSV = (data: any[], filename: string) => {
   const headers = Object.keys(data[0]);
   const csvContent = [
     headers.join(','),
-    ...data.map(row =>
-      headers.map(header => {
-        const value = row[header];
-        // Escape values that contain commas or quotes
-        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value;
-      }).join(',')
-    )
+    ...data.map((row) =>
+      headers
+        .map((header) => {
+          const value = row[header];
+          // Escape values that contain commas or quotes
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
+        })
+        .join(','),
+    ),
   ].join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -312,7 +478,7 @@ export const adminStorage = {
     }
   },
 
-  get: <T = any>(key: string, defaultValue?: T): T | null => {
+  get: <T = any,>(key: string, defaultValue?: T): T | null => {
     try {
       const item = localStorage.getItem(`admin_${key}`);
       return item ? JSON.parse(item) : defaultValue || null;
@@ -333,7 +499,7 @@ export const adminStorage = {
   clear: () => {
     try {
       const keys = Object.keys(localStorage);
-      keys.forEach(key => {
+      keys.forEach((key) => {
         if (key.startsWith('admin_')) {
           localStorage.removeItem(key);
         }
@@ -341,20 +507,17 @@ export const adminStorage = {
     } catch (error) {
       console.warn('Failed to clear localStorage:', error);
     }
-  }
+  },
 };
 
 // Debounce utility hook
-export const useDebounce = <T extends (...args: any[]) => any>(
-  callback: T,
-  delay: number
-): T => {
+export const useDebounce = <T extends (...args: any[]) => any>(callback: T, delay: number): T => {
   return useCallback(
     ((...args: Parameters<T>) => {
       const timeoutId = setTimeout(() => callback(...args), delay);
       return () => clearTimeout(timeoutId);
     }) as T,
-    [callback, delay]
+    [callback, delay],
   );
 };
 
@@ -368,7 +531,7 @@ export const useMemoizedStats = (data: number[]) => {
         min: 0,
         max: 0,
         total: 0,
-        count: 0
+        count: 0,
       };
     }
 
@@ -379,7 +542,7 @@ export const useMemoizedStats = (data: number[]) => {
       min: sorted[0],
       max: sorted[sorted.length - 1],
       total: data.reduce((sum, value) => sum + value, 0),
-      count: data.length
+      count: data.length,
     };
   }, [data]);
 };
@@ -392,7 +555,7 @@ export const adminRoutes = {
   users: '/admin/dashboard/actions',
   courses: '/admin/dashboard/courses',
   reports: '/admin/dashboard/reports',
-  settings: '/admin/settings'
+  settings: '/admin/settings',
 };
 
 // Validation utilities
@@ -403,7 +566,7 @@ export const validators = {
   },
 
   phone: (phone: string): boolean => {
-    const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
+    const phoneRegex = /^\+?[\d\s\-()]+$/;
     return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
   },
 
@@ -420,18 +583,21 @@ export const validators = {
     // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special char
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return strongPasswordRegex.test(password);
-  }
+  },
 };
 
-export default {
+const AdminUtils = {
   cn,
   formatNumber,
   formatPercentage,
   formatDuration,
   formatRelativeTime,
+  useLocalizedRelativeTime,
   adminColors,
   getStatusConfig,
+  useLocalizedStatusConfig,
   getPriorityConfig,
+  useLocalizedPriorityConfig,
   generateChartColors,
   calculateGrowthRate,
   calculateAverage,
@@ -442,5 +608,7 @@ export default {
   useDebounce,
   useMemoizedStats,
   adminRoutes,
-  validators
+  validators,
 };
+
+export default AdminUtils;

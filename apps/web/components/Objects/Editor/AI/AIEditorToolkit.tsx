@@ -419,7 +419,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
         mass: 0.2,
         velocity: 2,
       }}
-      className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center "
+      className="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center"
       style={{ pointerEvents: 'none' }}
     >
       <div

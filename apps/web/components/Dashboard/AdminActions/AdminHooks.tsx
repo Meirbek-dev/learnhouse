@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminToast } from './AdminToast';
 import useSWR, { mutate } from 'swr';
 
@@ -12,7 +12,7 @@ export interface AdminState {
   retryCount: number;
 }
 
-export const useAdminState = <T = any>(
+export const useAdminState = <T = any,>(
   key: string | null,
   fetcher: () => Promise<T>,
   options?: {
@@ -21,7 +21,7 @@ export const useAdminState = <T = any>(
     onSuccess?: (data: T) => void;
     onError?: (error: Error) => void;
     enableToast?: boolean;
-  }
+  },
 ) => {
   const { adminError, adminSuccess } = useAdminToast();
   const [retryCount, setRetryCount] = useState(0);
@@ -30,7 +30,7 @@ export const useAdminState = <T = any>(
     data,
     error,
     isLoading,
-    mutate: refresh
+    mutate: refresh,
   } = useSWR(key, fetcher, {
     onSuccess: (data) => {
       if (options?.enableToast && retryCount > 0) {
@@ -45,7 +45,7 @@ export const useAdminState = <T = any>(
       }
       options?.onError?.(error);
     },
-    shouldRetryOnError: false
+    shouldRetryOnError: false,
   });
 
   const retry = useCallback(async () => {
@@ -57,10 +57,10 @@ export const useAdminState = <T = any>(
       return;
     }
 
-    setRetryCount(prev => prev + 1);
+    setRetryCount((prev) => prev + 1);
 
     if (delay > 0) {
-      await new Promise(resolve => setTimeout(resolve, delay * retryCount));
+      await new Promise((resolve) => setTimeout(resolve, delay * retryCount));
     }
 
     refresh();
@@ -78,142 +78,154 @@ export const useAdminState = <T = any>(
     retryCount,
     retry,
     reset,
-    refresh
+    refresh,
   };
 };
 
 // Optimistic Updates Hook
-export const useOptimisticAdmin = <T = any>(
+export const useOptimisticAdmin = <T = any,>(
   key: string,
   updateFn: (data: T) => Promise<T>,
   options?: {
     enableToast?: boolean;
     rollbackOnError?: boolean;
-  }
+  },
 ) => {
   const { adminSuccess, adminError } = useAdminToast();
   const [isUpdating, setIsUpdating] = useState(false);
   const previousDataRef = useRef<T | null>(null);
 
-  const update = useCallback(async (optimisticData: T) => {
-    setIsUpdating(true);
+  const update = useCallback(
+    async (optimisticData: T) => {
+      setIsUpdating(true);
 
-    try {
-      // Store previous data for potential rollback
-      previousDataRef.current = optimisticData;
+      try {
+        // Store previous data for potential rollback
+        previousDataRef.current = optimisticData;
 
-      // Apply optimistic update
-      mutate(key, optimisticData, false);
+        // Apply optimistic update
+        mutate(key, optimisticData, false);
 
-      // Perform actual update
-      const result = await updateFn(optimisticData);
+        // Perform actual update
+        const result = await updateFn(optimisticData);
 
-      // Confirm update with real data
-      mutate(key, result, false);
+        // Confirm update with real data
+        mutate(key, result, false);
 
-      if (options?.enableToast) {
-        adminSuccess('Changes saved successfully');
+        if (options?.enableToast) {
+          adminSuccess('Changes saved successfully');
+        }
+
+        return result;
+      } catch (error) {
+        // Rollback on error if enabled
+        if (options?.rollbackOnError && previousDataRef.current) {
+          mutate(key, previousDataRef.current, false);
+        }
+
+        if (options?.enableToast) {
+          adminError('Failed to save changes', error instanceof Error ? error.message : 'Unknown error');
+        }
+
+        throw error;
+      } finally {
+        setIsUpdating(false);
       }
-
-      return result;
-    } catch (error) {
-      // Rollback on error if enabled
-      if (options?.rollbackOnError && previousDataRef.current) {
-        mutate(key, previousDataRef.current, false);
-      }
-
-      if (options?.enableToast) {
-        adminError('Failed to save changes', error instanceof Error ? error.message : 'Unknown error');
-      }
-
-      throw error;
-    } finally {
-      setIsUpdating(false);
-    }
-  }, [key, updateFn, options, adminSuccess, adminError]);
+    },
+    [key, updateFn, options, adminSuccess, adminError],
+  );
 
   return {
     update,
-    isUpdating
+    isUpdating,
   };
 };
 
 // Bulk Operations Hook
-export const useBulkAdmin = <T = any>(
+export const useBulkAdmin = <T = any,>(
   processFn: (items: T[]) => Promise<{ successful: T[]; failed: { item: T; error: string }[] }>,
   options?: {
     batchSize?: number;
     enableToast?: boolean;
     onProgress?: (processed: number, total: number) => void;
-  }
+  },
 ) => {
   const { bulkOperation } = useAdminToast();
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState({ processed: 0, total: 0 });
 
-  const process = useCallback(async (items: T[], operation: string) => {
-    if (isProcessing) return;
+  const process = useCallback(
+    async (items: T[], operation: string) => {
+      if (isProcessing) return;
 
-    setIsProcessing(true);
-    setProgress({ processed: 0, total: items.length });
+      setIsProcessing(true);
+      setProgress({ processed: 0, total: items.length });
 
-    const batchSize = options?.batchSize || 10;
-    const toastHandler = options?.enableToast ? bulkOperation(items.length, operation, options?.onProgress) : null;
+      const batchSize = options?.batchSize || 10;
+      const toastHandler = options?.enableToast
+        ? bulkOperation(
+            items.length,
+            operation,
+            options?.onProgress ? (processed: number) => options.onProgress?.(processed, items.length) : undefined,
+          )
+        : null;
 
-    try {
-      const allSuccessful: T[] = [];
-      const allFailed: { item: T; error: string }[] = [];
+      try {
+        const allSuccessful: T[] = [];
+        const allFailed: { item: T; error: string }[] = [];
 
-      // Process in batches
-      for (let i = 0; i < items.length; i += batchSize) {
-        const batch = items.slice(i, i + batchSize);
+        // Process in batches
+        for (let i = 0; i < items.length; i += batchSize) {
+          const batch = items.slice(i, i + batchSize);
 
-        try {
-          const result = await processFn(batch);
-          allSuccessful.push(...result.successful);
-          allFailed.push(...result.failed);
-        } catch (error) {
-          // If batch fails entirely, mark all items as failed
-          batch.forEach(item => {
-            allFailed.push({
-              item,
-              error: error instanceof Error ? error.message : 'Batch processing failed'
+          try {
+            const result = await processFn(batch);
+            allSuccessful.push(...result.successful);
+            allFailed.push(...result.failed);
+          } catch (error) {
+            // If batch fails entirely, mark all items as failed
+            batch.forEach((item) => {
+              allFailed.push({
+                item,
+                error: error instanceof Error ? error.message : 'Batch processing failed',
+              });
             });
-          });
+          }
+
+          const processed = Math.min(i + batchSize, items.length);
+          setProgress({ processed, total: items.length });
+          toastHandler?.updateProgress(processed);
+          options?.onProgress?.(processed, items.length);
         }
 
-        const processed = Math.min(i + batchSize, items.length);
-        setProgress({ processed, total: items.length });
-        toastHandler?.updateProgress(processed);
-        options?.onProgress?.(processed, items.length);
+        toastHandler?.complete(allSuccessful.length, allFailed.length);
+
+        return {
+          successful: allSuccessful,
+          failed: allFailed,
+          summary: {
+            total: items.length,
+            successful: allSuccessful.length,
+            failed: allFailed.length,
+            successRate: (allSuccessful.length / items.length) * 100,
+          },
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Bulk operation failed';
+        toastHandler?.error(errorMessage);
+        throw error;
+      } finally {
+        setIsProcessing(false);
+        setProgress({ processed: 0, total: 0 });
       }
-
-      toastHandler?.complete(allSuccessful.length, allFailed.length);
-
-      return {
-        successful: allSuccessful,
-        failed: allFailed,
-        summary: {
-          total: items.length,
-          successful: allSuccessful.length,
-          failed: allFailed.length,
-          successRate: (allSuccessful.length / items.length) * 100
-        }
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Bulk operation failed';
-      toastHandler?.error(errorMessage);
-      throw error;
-    } finally {
-      setIsProcessing(false);
-      setProgress({ processed: 0, total: 0 });
-    }
-  }, [isProcessing, options, bulkOperation, processFn]);
+    },
+    [isProcessing, options, bulkOperation, processFn],
+  );
 
   return {
     process,
     isProcessing,
-    progress
+    progress,
   };
 };
 
@@ -233,7 +245,7 @@ export const useAdminForm = <T extends Record<string, any>>(
   options?: {
     enableToast?: boolean;
     onSubmit?: (values: T) => Promise<void>;
-  }
+  },
 ) => {
   const { adminSuccess, adminError } = useAdminToast();
   const [state, setState] = useState<AdminFormState<T>>({
@@ -242,62 +254,71 @@ export const useAdminForm = <T extends Record<string, any>>(
     touched: {},
     isValid: true,
     isDirty: false,
-    isSubmitting: false
+    isSubmitting: false,
   });
 
-  const validateForm = useCallback((values: T) => {
-    if (!validate) return {};
-    return validate(values);
-  }, [validate]);
+  const validateForm = useCallback(
+    (values: T) => {
+      if (!validate) return {};
+      return validate(values);
+    },
+    [validate],
+  );
 
-  const setValue = useCallback((field: keyof T, value: any) => {
-    setState(prev => {
-      const newValues = { ...prev.values, [field]: value };
-      const errors = validateForm(newValues);
+  const setValue = useCallback(
+    (field: keyof T, value: any) => {
+      setState((prev) => {
+        const newValues = { ...prev.values, [field]: value };
+        const errors = validateForm(newValues);
 
-      return {
-        ...prev,
-        values: newValues,
-        errors,
-        touched: { ...prev.touched, [field]: true },
-        isValid: Object.keys(errors).length === 0,
-        isDirty: true
-      };
-    });
-  }, [validateForm]);
+        return {
+          ...prev,
+          values: newValues,
+          errors,
+          touched: { ...prev.touched, [field]: true },
+          isValid: Object.keys(errors).length === 0,
+          isDirty: true,
+        };
+      });
+    },
+    [validateForm],
+  );
 
-  const setValues = useCallback((values: Partial<T>) => {
-    setState(prev => {
-      const newValues = { ...prev.values, ...values };
-      const errors = validateForm(newValues);
+  const setValues = useCallback(
+    (values: Partial<T>) => {
+      setState((prev) => {
+        const newValues = { ...prev.values, ...values };
+        const errors = validateForm(newValues);
 
-      return {
-        ...prev,
-        values: newValues,
-        errors,
-        isValid: Object.keys(errors).length === 0,
-        isDirty: true
-      };
-    });
-  }, [validateForm]);
+        return {
+          ...prev,
+          values: newValues,
+          errors,
+          isValid: Object.keys(errors).length === 0,
+          isDirty: true,
+        };
+      });
+    },
+    [validateForm],
+  );
 
   const setError = useCallback((field: keyof T, error: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       errors: { ...prev.errors, [field]: error },
-      isValid: false
+      isValid: false,
     }));
   }, []);
 
   const clearError = useCallback((field: keyof T) => {
-    setState(prev => {
+    setState((prev) => {
       const newErrors = { ...prev.errors };
       delete newErrors[field];
 
       return {
         ...prev,
         errors: newErrors,
-        isValid: Object.keys(newErrors).length === 0
+        isValid: Object.keys(newErrors).length === 0,
       };
     });
   }, []);
@@ -305,13 +326,13 @@ export const useAdminForm = <T extends Record<string, any>>(
   const submit = useCallback(async () => {
     if (!options?.onSubmit) return;
 
-    setState(prev => ({ ...prev, isSubmitting: true }));
+    setState((prev) => ({ ...prev, isSubmitting: true }));
 
     try {
       const errors = validateForm(state.values);
 
       if (Object.keys(errors).length > 0) {
-        setState(prev => ({ ...prev, errors, isValid: false, isSubmitting: false }));
+        setState((prev) => ({ ...prev, errors, isValid: false, isSubmitting: false }));
         return;
       }
 
@@ -321,13 +342,13 @@ export const useAdminForm = <T extends Record<string, any>>(
         adminSuccess('Form submitted successfully');
       }
 
-      setState(prev => ({ ...prev, isDirty: false, isSubmitting: false }));
+      setState((prev) => ({ ...prev, isDirty: false, isSubmitting: false }));
     } catch (error) {
       if (options.enableToast) {
         adminError('Form submission failed', error instanceof Error ? error.message : 'Unknown error');
       }
 
-      setState(prev => ({ ...prev, isSubmitting: false }));
+      setState((prev) => ({ ...prev, isSubmitting: false }));
       throw error;
     }
   }, [state.values, options, validateForm, adminSuccess, adminError]);
@@ -339,7 +360,7 @@ export const useAdminForm = <T extends Record<string, any>>(
       touched: {},
       isValid: true,
       isDirty: false,
-      isSubmitting: false
+      isSubmitting: false,
     });
   }, [initialValues]);
 
@@ -350,29 +371,35 @@ export const useAdminForm = <T extends Record<string, any>>(
     setError,
     clearError,
     submit,
-    reset
+    reset,
   };
 };
 
 // Permissions Hook
-export const useAdminPermissions = (
-  requiredPermissions: string[],
-  userPermissions?: string[]
-) => {
+export const useAdminPermissions = (requiredPermissions: string[], userPermissions?: string[]) => {
   // Default to admin permissions if none provided (for development/admin access)
   const [permissions] = useState(userPermissions || ['admin:all']);
 
-  const hasPermission = useCallback((permission: string) => {
-    return permissions.includes(permission) || permissions.includes('admin:all');
-  }, [permissions]);
+  const hasPermission = useCallback(
+    (permission: string) => {
+      return permissions.includes(permission) || permissions.includes('admin:all');
+    },
+    [permissions],
+  );
 
-  const hasAllPermissions = useCallback((perms: string[]) => {
-    return perms.every(hasPermission);
-  }, [hasPermission]);
+  const hasAllPermissions = useCallback(
+    (perms: string[]) => {
+      return perms.every(hasPermission);
+    },
+    [hasPermission],
+  );
 
-  const hasAnyPermission = useCallback((perms: string[]) => {
-    return perms.some(hasPermission);
-  }, [hasPermission]);
+  const hasAnyPermission = useCallback(
+    (perms: string[]) => {
+      return perms.some(hasPermission);
+    },
+    [hasPermission],
+  );
 
   const canAccess = hasAllPermissions(requiredPermissions);
   const canPartialAccess = hasAnyPermission(requiredPermissions);
@@ -384,18 +411,18 @@ export const useAdminPermissions = (
     hasAnyPermission,
     canAccess,
     canPartialAccess,
-    requiredPermissions
+    requiredPermissions,
   };
 };
 
 // Debounced Search Hook
-export const useAdminSearch = <T = any>(
+export const useAdminSearch = <T = any,>(
   searchFn: (query: string) => Promise<T[]>,
   options?: {
     debounceMs?: number;
     minQueryLength?: number;
     enableToast?: boolean;
-  }
+  },
 ) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<T[]>([]);
@@ -403,40 +430,46 @@ export const useAdminSearch = <T = any>(
   const { adminError } = useAdminToast();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const search = useCallback(async (searchQuery: string) => {
-    const minLength = options?.minQueryLength || 2;
+  const search = useCallback(
+    async (searchQuery: string) => {
+      const minLength = options?.minQueryLength || 2;
 
-    if (searchQuery.length < minLength) {
-      setResults([]);
-      return;
-    }
-
-    setIsSearching(true);
-
-    try {
-      const data = await searchFn(searchQuery);
-      setResults(data);
-    } catch (error) {
-      if (options?.enableToast) {
-        adminError('Search failed', error instanceof Error ? error.message : 'Unknown error');
+      if (searchQuery.length < minLength) {
+        setResults([]);
+        return;
       }
-      setResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [searchFn, options, adminError]);
 
-  const debouncedSearch = useCallback((searchQuery: string) => {
-    setQuery(searchQuery);
+      setIsSearching(true);
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+      try {
+        const data = await searchFn(searchQuery);
+        setResults(data);
+      } catch (error) {
+        if (options?.enableToast) {
+          adminError('Search failed', error instanceof Error ? error.message : 'Unknown error');
+        }
+        setResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [searchFn, options, adminError],
+  );
 
-    timeoutRef.current = setTimeout(() => {
-      search(searchQuery);
-    }, options?.debounceMs || 300);
-  }, [search, options]);
+  const debouncedSearch = useCallback(
+    (searchQuery: string) => {
+      setQuery(searchQuery);
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        search(searchQuery);
+      }, options?.debounceMs || 300);
+    },
+    [search, options],
+  );
 
   useEffect(() => {
     return () => {
@@ -459,15 +492,17 @@ export const useAdminSearch = <T = any>(
     results,
     isSearching,
     search: debouncedSearch,
-    clearSearch
+    clearSearch,
   };
 };
 
-export default {
+const AdminHooks = {
   useAdminState,
   useOptimisticAdmin,
   useBulkAdmin,
   useAdminForm,
   useAdminPermissions,
-  useAdminSearch
+  useAdminSearch,
 };
+
+export default AdminHooks;

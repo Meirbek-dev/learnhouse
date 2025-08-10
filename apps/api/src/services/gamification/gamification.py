@@ -34,7 +34,7 @@ XP_REWARDS = {
     "login_daily": 10,
     "activity_completion": 25,
     "course_completion": 100,
-    "perfect_score": 50,  # Bonus for 100% on assignments
+    "perfect_score": 25,  # Bonus for 100% on assignments
     "first_activity": 25,  # Bonus for first activity completion
     "streak_bonus_7_days": 50,
     "streak_bonus_30_days": 200,
@@ -322,7 +322,7 @@ async def update_login_streak(
             user=user,
             org_id=org_id,
             xp_amount=XP_REWARDS["login_daily"],
-            xp_source="daily_login",
+            xp_source="login_daily",
             xp_context={
                 "streak_count": new_streak,
                 "login_date": current_time.isoformat(),
@@ -473,6 +473,7 @@ async def get_gamification_dashboard(
     user: PublicUser,
     org_id: int,
     db_session: Session,
+    limit: int = 10,
 ) -> GamificationDashboard:
     """
     Get comprehensive gamification dashboard data for a user.
@@ -502,7 +503,7 @@ async def get_gamification_dashboard(
         select(XPTransaction)
         .where(XPTransaction.user_id == user.id, XPTransaction.org_id == org_id)
         .order_by(XPTransaction.creation_date.desc())
-        .limit(10)
+        .limit(limit)
     )
 
     xp_transactions = db_session.exec(xp_statement).all()
@@ -540,8 +541,6 @@ async def get_gamification_dashboard(
     )
     course_completion_transactions = db_session.exec(total_courses_statement).all()
     total_courses_completed = len(course_completion_transactions)
-
-    # Debug logging
 
     # Calculate total activities completed from all XP transactions (not just recent ones)
     total_activities_statement = select(XPTransaction).where(

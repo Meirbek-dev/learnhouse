@@ -61,7 +61,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
       setError(null);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10_000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10_000);
 
       const response = await fetch(`${getAPIUrl()}gamification/leaderboard/${orgId}?limit=${limit}`, {
         ...RequestBodyWithAuthHeader('GET', null, null, session.tokens.access_token),
@@ -79,15 +79,15 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
       setRetryCount(0); // Reset retry count on success
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        setError('Request timed out. Please try again.');
+        setError(t('leaderboard.loadingTimeout') || t('common.tryAgain'));
       } else {
         console.error('Error fetching leaderboard:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error occurred');
+        setError(error instanceof Error ? error.message : t('leaderboard.failedToLoad'));
       }
     } finally {
       setIsLoading(false);
     }
-  }, [orgId, limit, session?.tokens?.access_token]);
+  }, [orgId, limit, session?.tokens?.access_token, t]);
 
   const handleRetry = useCallback(() => {
     if (retryCount < 3) {
@@ -173,7 +173,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
     return leaderboard?.leaderboard_entries.slice(0, limit) || [];
   }, [leaderboard, limit]);
 
-  // Enhanced loading state with accessibility
+  // Loading state
   if (isLoading) {
     return (
       <Card className={className}>
@@ -205,7 +205,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
     );
   }
 
-  // Enhanced error state with retry functionality
+  // Error state with retry
   if (error || !leaderboard) {
     return (
       <Card className={className}>
@@ -232,7 +232,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
     );
   }
 
-  // Compact view with enhanced accessibility
+  // Compact view
   if (compact) {
     return (
       <TooltipProvider>
@@ -249,14 +249,14 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
               role="list"
               aria-label={t('leaderboard.topLearners')}
             >
-              {topEntries.slice(0, 3).map((entry) => (
+              {topEntries.slice(0, 10).map((entry) => (
                 <Tooltip key={entry.user_id}>
                   <TooltipTrigger asChild>
                     <div
                       role="listitem"
                       className={`flex cursor-help items-center gap-2 rounded-lg p-2 transition-colors ${
                         isCurrentUser(entry.user_id)
-                          ? 'bg-primary/10 border-primary/20 border'
+                          ? 'border-primary/20 bg-primary/10 border'
                           : 'bg-muted/50 hover:bg-muted/70'
                       }`}
                     >
@@ -275,29 +275,34 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
                           entry.first_name && entry.last_name
                             ? `${entry.first_name[0]}${entry.last_name[0]}`.toUpperCase()
                             : entry.username && entry.username.length > 0
-                              ? entry.username[0]!.toUpperCase()
+                              ? entry.username[0]?.toUpperCase()
                               : getUserInitials(entry.user_id)
                         }
                         showProfilePopup
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-medium">
-                          {entry.username || `User ${entry.user_id}`}
-                          {isCurrentUser(entry.user_id) && <span className="text-primary ml-1">(You)</span>}
+                          {entry.username || t('leaderboard.user', { id: entry.user_id })}
+                          {isCurrentUser(entry.user_id) && (
+                            <span className="text-primary ml-1">{t('leaderboard.you')}</span>
+                          )}
                         </p>
                       </div>
                       <Badge
                         variant="outline"
                         className="px-1 text-xs"
                       >
-                        L{entry.current_level}
+                        {t('leaderboard.levelShort', { level: entry.current_level })}
                       </Badge>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>
-                      {entry.username || `User ${entry.user_id}`}: Level {entry.current_level},{' '}
-                      {entry.total_xp.toLocaleString()} XP
+                      {t('leaderboard.tooltipUser', {
+                        user: entry.username || t('leaderboard.user', { id: entry.user_id }),
+                        level: entry.current_level,
+                        xp: entry.total_xp.toLocaleString(),
+                      })}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -309,7 +314,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
     );
   }
 
-  // Full leaderboard view with enhanced UX
+  // Full leaderboard view
   return (
     <TooltipProvider>
       <Card className={className}>
@@ -336,7 +341,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
           <div
             className="space-y-3"
             role="list"
-            aria-label="Leaderboard rankings"
+            aria-label={t('leaderboard.aria.rankings')}
           >
             {topEntries.map((entry, index) => (
               <Tooltip key={entry.user_id}>
@@ -345,7 +350,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
                     role="listitem"
                     className={`flex cursor-help items-center gap-4 rounded-lg border p-4 transition-all duration-200 ${
                       isCurrentUser(entry.user_id)
-                        ? 'bg-primary/10 border-primary/20 ring-primary/10 shadow-sm ring-1'
+                        ? 'border-primary/20 bg-primary/10 ring-primary/10 shadow-sm ring-1'
                         : 'hover:bg-muted/50 hover:shadow-sm'
                     }`}
                   >
@@ -376,13 +381,15 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
 
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
-                          <p className="truncate font-medium">{entry.username || `User ${entry.user_id}`}</p>
+                          <p className="truncate font-medium">
+                            {entry.username || t('leaderboard.user', { id: entry.user_id })}
+                          </p>
                           {isCurrentUser(entry.user_id) && (
                             <Badge
                               variant="secondary"
                               className="text-xs"
                             >
-                              You
+                              {t('leaderboard.you')}
                             </Badge>
                           )}
                         </div>
@@ -390,9 +397,9 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
                         <div className="text-muted-foreground flex items-center gap-3 text-xs">
                           <span className="flex items-center gap-1">
                             <TrendingUp className="h-3 w-3" />
-                            Level {entry.current_level}
+                            {t('leaderboard.levelLabel', { level: entry.current_level })}
                           </span>
-                          <span>{entry.total_xp.toLocaleString()} XP</span>
+                          <span>{t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}</span>
                         </div>
                       </div>
                     </div>
@@ -410,7 +417,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Login streak: {entry.current_login_streak} days</p>
+                            <p>{t('leaderboard.loginStreakTooltip', { count: entry.current_login_streak })}</p>
                           </TooltipContent>
                         </Tooltip>
                       )}
@@ -425,7 +432,7 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Learning streak: {entry.current_learning_streak} days</p>
+                            <p>{t('leaderboard.learningStreakTooltip', { count: entry.current_learning_streak })}</p>
                           </TooltipContent>
                         </Tooltip>
                       )}
@@ -437,11 +444,11 @@ export function Leaderboard({ orgId, className = '', limit = 10, compact = false
                 </TooltipTrigger>
                 <TooltipContent>
                   <div className="text-center">
-                    <p className="font-medium">{entry.username || `User ${entry.user_id}`}</p>
+                    <p className="font-medium">{entry.username || t('leaderboard.user', { id: entry.user_id })}</p>
                     <p className="text-sm">
-                      Rank #{entry.rank} • Level {entry.current_level}
+                      {t('leaderboard.rankLevel', { rank: entry.rank, level: entry.current_level })}
                     </p>
-                    <p className="text-sm">{entry.total_xp.toLocaleString()} XP earned</p>
+                    <p className="text-sm">{t('leaderboard.xpEarned', { xp: entry.total_xp.toLocaleString() })}</p>
                   </div>
                 </TooltipContent>
               </Tooltip>

@@ -240,7 +240,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
       {/* Floating bottom navigation - shown when bottom nav is not visible */}
       {!isBottomNavVisible && (
         <div className="fixed bottom-8 left-1/2 z-50 w-[85%] max-w-lg -translate-x-1/2 transition-all duration-300 ease-in-out sm:w-auto sm:min-w-[350px]">
-          <div className="animate-in fade-in slide-in-from-bottom rounded-full bg-white/90 px-2.5 py-1.5 shadow-xs backdrop-blur-xl duration-300">
+          <div className="fade-in slide-in-from-bottom animate-in rounded-full bg-white/90 px-2.5 py-1.5 shadow-xs backdrop-blur-xl duration-300">
             <NavigationButtons
               isFloating
               prevActivity={prevActivity}

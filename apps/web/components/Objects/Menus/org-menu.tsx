@@ -43,7 +43,7 @@ const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
       <Link
         href={getUriWithOrg(orgslug, href)}
         className={`hover:text-primary flex max-h-[36px] items-center gap-3 rounded-md px-4 py-2 font-medium transition-colors ${
-          isActive ? 'text-primary bg-primary/15' : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
+          isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
         }`}
       >
         <Icon
@@ -262,7 +262,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
 
           {/* Menu panel */}
           <div
-            className="bg-background/95 border-border/60 absolute right-0 left-0 border-b shadow-lg backdrop-blur-sm"
+            className="border-border/60 bg-background/95 absolute right-0 left-0 border-b shadow-lg backdrop-blur-sm"
             data-mobile-menu
             onClick={(e) => {
               e.stopPropagation();
@@ -299,7 +299,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     {t('navigation')}
                   </label>
                 </div>
-                <div className="bg-accent/20 border-border/30 rounded-xl border p-3">
+                <div className="border-border/30 bg-accent/20 rounded-xl border p-3">
                   <nav className="space-y-1">
                     <div className="space-y-1">
                       <div
@@ -350,7 +350,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     {t('language')}
                   </label>
                 </div>
-                <div className="bg-accent/20 border-border/30 rounded-xl border p-4">
+                <div className="border-border/30 bg-accent/20 rounded-xl border p-4">
                   <div
                     className="flex min-h-[44px] items-center"
                     onClick={(e) => {
@@ -373,7 +373,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                     {t('account')}
                   </label>
                 </div>
-                <div className="bg-accent/20 border-border/30 rounded-xl border p-4">
+                <div className="border-border/30 bg-accent/20 rounded-xl border p-4">
                   <div className="flex min-h-[44px] items-center justify-center">
                     <HeaderProfileBox />
                   </div>

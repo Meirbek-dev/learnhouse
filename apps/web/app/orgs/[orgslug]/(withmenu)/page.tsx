@@ -71,8 +71,6 @@ const OrgHomePage = async (params: any) => {
 
   // Check if custom landing is enabled
   const hasCustomLanding = org.config?.config?.landing?.enabled;
-
-  // Show enhanced dashboard for authenticated users
   const showEnhancedDashboard = session?.user && !hasCustomLanding;
 
   return (

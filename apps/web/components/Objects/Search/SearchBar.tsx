@@ -202,6 +202,19 @@ export const SearchBar: FC<SearchBarProps> = ({
     return null;
   }, [searchQuery, t]);
 
+  // Calculate if we should show the dropdown
+  const shouldShowDropdown = useMemo(() => {
+    if (!showResults) return false;
+
+    // Show if there's a search query with content
+    if (searchQuery.trim()) return true;
+
+    // Show empty state only if focused and no initial load
+    if (!isInitialLoad && showResults) return true;
+
+    return false;
+  }, [showResults, searchQuery, isInitialLoad]);
+
   const searchTerms = useMemo(
     () => [
       {
@@ -445,34 +458,35 @@ export const SearchBar: FC<SearchBarProps> = ({
       </div>
 
       <div
-        className={`soft-shadow absolute z-50 mt-2 w-full divide-y divide-black/5 overflow-hidden rounded-xl bg-white transition-all duration-200 ease-in-out${showResults ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
+        className={`soft-shadow absolute z-50 mt-2 w-full divide-y divide-black/5 overflow-hidden rounded-xl bg-white transition-all duration-200 ease-in-out ${shouldShowDropdown ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
       >
-        {!searchQuery.trim() || isInitialLoad ? (
-          MemoizedEmptyState
-        ) : (
-          <>
-            {showSearchSuggestions ? MemoizedSearchSuggestions : null}
-            {isLoading ? (
-              <CourseResultsSkeleton />
-            ) : (
-              <>
-                {MemoizedQuickResults}
-                {(searchResults.courses.length > 0 ||
-                  searchResults.collections.length > 0 ||
-                  searchResults.users.length > 0 ||
-                  searchQuery.trim()) && (
-                  <Link
-                    href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`)}
-                    className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 transition-colors hover:bg-black/[0.02] hover:text-black/70"
-                  >
-                    <span>{t('viewAllResults')}</span>
-                    <ArrowRight size={14} />
-                  </Link>
-                )}
-              </>
-            )}
-          </>
-        )}
+        {shouldShowDropdown &&
+          (!searchQuery.trim() || isInitialLoad ? (
+            MemoizedEmptyState
+          ) : (
+            <>
+              {showSearchSuggestions ? MemoizedSearchSuggestions : null}
+              {isLoading ? (
+                <CourseResultsSkeleton />
+              ) : (
+                <>
+                  {MemoizedQuickResults}
+                  {(searchResults.courses.length > 0 ||
+                    searchResults.collections.length > 0 ||
+                    searchResults.users.length > 0 ||
+                    searchQuery.trim()) && (
+                    <Link
+                      href={getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`)}
+                      className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 transition-colors hover:bg-black/[0.02] hover:text-black/70"
+                    >
+                      <span>{t('viewAllResults')}</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  )}
+                </>
+              )}
+            </>
+          ))}
       </div>
     </div>
   );

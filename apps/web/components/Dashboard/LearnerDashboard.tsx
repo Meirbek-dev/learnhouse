@@ -22,7 +22,7 @@ interface LearnerDashboardProps {
 export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' }: LearnerDashboardProps) {
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('profile');
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
 
@@ -155,10 +155,7 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
               showUnlocks
               showAchievements
             />
-            <StreakWidget
-              orgId={orgId}
-              compact={false}
-            />
+            <StreakWidget orgId={orgId} />
           </div>
         </TabsContent>
 

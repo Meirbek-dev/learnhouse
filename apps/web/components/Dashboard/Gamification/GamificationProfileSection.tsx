@@ -1,8 +1,8 @@
 'use client';
 
-import { AVATAR_UNLOCKS, ExperienceBar, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
-import { Activity, Award, Crown, Flame, MoreHorizontal, Star, Target, Trophy, Zap } from 'lucide-react';
 import { type GamificationProfile, getGamificationProfile } from '@/services/gamification/gamification';
+import { Activity, Award, Crown, Flame, MoreHorizontal, Star, Target, Trophy, Zap } from 'lucide-react';
+import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { Separator } from '@/components/ui/separator';
@@ -55,7 +55,7 @@ export function GamificationProfileSection({
     };
 
     fetchProfile();
-  }, [orgId, session?.tokens?.access_token]);
+  }, [orgId, session?.tokens?.access_token, t]);
 
   if (isLoading) {
     return (
@@ -93,42 +93,10 @@ export function GamificationProfileSection({
     );
   }
 
-  const levelInfo = getLevelInfo(profile.current_level);
+  const levelInfo = getLevelInfo(profile.current_level, t);
   const nextMilestone = getNextMilestone(profile.current_level);
   const unlockedFrames = AVATAR_UNLOCKS.frames.filter((f) => profile.current_level >= f.level);
   const unlockedAccessories = AVATAR_UNLOCKS.accessories.filter((a) => profile.current_level >= a.level);
-
-  if (variant === 'compact') {
-    return (
-      <Card className={className}>
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-4">
-            <GamifiedUserAvatar
-              size="lg"
-              gamificationProfile={profile}
-              showLevelBadge
-              showAvatarFrame
-              showAvatarAccessories
-              use_with_session
-            />
-            <div className="flex-1 space-y-2">
-              <LevelIndicator
-                profile={profile}
-                variant="compact"
-                showXP
-                showProgress={false}
-              />
-              <ExperienceBar
-                profile={profile}
-                showLabels={false}
-                className="max-w-40"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className={className}>
@@ -294,8 +262,8 @@ export function GamificationProfileSection({
                     <Flame className="h-4 w-4 text-orange-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Week Warrior</p>
-                    <p className="text-muted-foreground text-xs">7-day login streak achieved!</p>
+                    <p className="text-sm font-medium">{t('dashboard.achievements.weekWarrior')}</p>
+                    <p className="text-muted-foreground text-xs">{t('dashboard.achievements.weekWarriorDesc')}</p>
                   </div>
                 </div>
               )}
@@ -306,8 +274,10 @@ export function GamificationProfileSection({
                     <Crown className="h-4 w-4 text-purple-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Scholar</p>
-                    <p className="text-muted-foreground text-xs">Reached level 10!</p>
+                    <p className="text-sm font-medium">{t('dashboard.achievements.scholar')}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {t('dashboard.achievements.reachedLevel', { level: 10 })}
+                    </p>
                   </div>
                 </div>
               )}

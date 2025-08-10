@@ -23,7 +23,7 @@ interface GamifiedUserAvatarProps {
   variant?: AvatarVariant;
   avatar_url?: string;
   use_with_session?: boolean;
-  predefined_avatar?: 'ai' | 'empty';
+  predefined_avatar?: 'empty';
   showProfilePopup?: boolean;
   userId?: number;
   username?: string;
@@ -57,13 +57,13 @@ const variantStyles = {
 
 // Level indicator size variants
 const levelIndicatorSizes = {
-  'xs': 'h-3 w-3 text-[8px]',
-  'sm': 'h-4 w-4 text-[10px]',
-  'md': 'h-5 w-5 text-xs',
-  'lg': 'h-6 w-6 text-sm',
-  'xl': 'h-7 w-7 text-sm',
-  '2xl': 'h-8 w-8 text-base',
-  '3xl': 'h-10 w-10 text-lg',
+  'xs': 'h-2 w-2 text-[8px]',
+  'sm': 'h-3 w-3 text-[10px]',
+  'md': 'h-4 w-4 text-xs',
+  'lg': 'h-5 w-5 text-sm',
+  'xl': 'h-6 w-6 text-sm',
+  '2xl': 'h-6 w-6 text-base',
+  '3xl': 'h-9 w-9 text-lg',
 };
 
 const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
@@ -119,8 +119,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
 
   const getAvatarUrl = (): string => {
     if (predefined_avatar) {
-      const avatarType = predefined_avatar === 'ai' ? 'tou_emblem_light.webp' : 'empty_avatar.webp';
-      return getUriWithOrg(params.orgslug as string, `/${avatarType}`);
+      return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
     }
 
     if (avatar_url) {
@@ -190,7 +189,8 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
     const availableFrames = AVATAR_UNLOCKS.frames.filter((frame) => level >= frame.level);
 
     // Return the highest unlocked frame
-    return availableFrames.length > 0 ? availableFrames[availableFrames.length - 1]!.color : null;
+    const highestFrame = availableFrames[availableFrames.length - 1];
+    return availableFrames.length > 0 && highestFrame ? highestFrame.color : null;
   };
 
   const getAvatarAccessory = (): string | null => {
@@ -200,7 +200,8 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
     const availableAccessories = AVATAR_UNLOCKS.accessories.filter((accessory) => level >= accessory.level);
 
     // Return the highest unlocked accessory
-    return availableAccessories.length > 0 ? availableAccessories[availableAccessories.length - 1]!.icon : null;
+    const highestAccessory = availableAccessories[availableAccessories.length - 1];
+    return availableAccessories.length > 0 && highestAccessory ? highestAccessory.icon : null;
   };
 
   const frameClass = getAvatarFrame();
@@ -223,7 +224,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
           className="bg-background"
         />
         <AvatarFallback className="bg-muted text-muted-foreground">
-          {predefined_avatar === 'ai' ? <User className="h-[60%] w-[60%]" /> : getFallbackText()}
+          {predefined_avatar === 'empty' ? <User className="h-[60%] w-[60%]" /> : getFallbackText()}
         </AvatarFallback>
       </Avatar>
 
@@ -234,12 +235,12 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
       {showLevelBadge && gamificationProfile && (
         <div
           className={cn(
-            'absolute flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold shadow-md',
+            'absolute z-10 flex items-center justify-center rounded-full bg-primary font-bold text-primary-foreground shadow-md ring-2 ring-background',
             levelIndicatorSizes[size],
             {
-              'top-0 right-0 translate-x-1/2 -translate-y-1/2': levelIndicatorPosition === 'top-right',
-              'bottom-0 right-0 translate-x-1/2 translate-y-1/2': levelIndicatorPosition === 'bottom-right',
-              'bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2': levelIndicatorPosition === 'bottom-center',
+              '-top-1 -right-1': levelIndicatorPosition === 'top-right',
+              '-bottom-1 -right-1': levelIndicatorPosition === 'bottom-right',
+              '-bottom-1 -translate-x-1/2 left-1/2': levelIndicatorPosition === 'bottom-center',
             },
           )}
         >
@@ -250,11 +251,15 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
       {/* Level Indicator with Icon */}
       {showLevelIndicator && gamificationProfile && (
         <div
-          className={cn('absolute flex items-center justify-center rounded-full shadow-md', levelIndicatorSizes[size], {
-            'top-0 right-0 translate-x-1/2 -translate-y-1/2': levelIndicatorPosition === 'top-right',
-            'bottom-0 right-0 translate-x-1/2 translate-y-1/2': levelIndicatorPosition === 'bottom-right',
-            'bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2': levelIndicatorPosition === 'bottom-center',
-          })}
+          className={cn(
+            'absolute z-10 flex items-center justify-center rounded-full shadow-md ring-2 ring-background',
+            levelIndicatorSizes[size],
+            {
+              '-top-1 -right-1': levelIndicatorPosition === 'top-right',
+              '-bottom-2 -right-2': levelIndicatorPosition === 'bottom-right',
+              '-bottom-1 -translate-x-1/2 left-1/2': levelIndicatorPosition === 'bottom-center',
+            },
+          )}
         >
           <LevelIndicator
             profile={gamificationProfile}

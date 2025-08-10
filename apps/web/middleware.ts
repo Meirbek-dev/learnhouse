@@ -19,7 +19,7 @@ export const config = {
      * 5. /examples (inside /public)
      * 6. all root files inside /public (e.g. /favicon.ico)
      */
-    // eslint-disable-next-line
+
     '/((?!api|_next|fonts|umami|examples|[\\w-]+\\.\\w+).*)',
     '/sitemap.xml',
     '/payments/stripe/connect/oauth',

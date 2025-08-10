@@ -1,6 +1,7 @@
 'use client';
 
 import * as RechartsPrimitive from 'recharts';
+import { useFormatter } from 'next-intl';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -39,7 +40,9 @@ function ChartContainer({
   ...props
 }: React.ComponentProps<'div'> & {
   config: ChartConfig;
-  children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>['children'];
+  // Allow either a React element or a render function; we'll cast when
+  // passing into ResponsiveContainer to satisfy the strict Recharts typing.
+  children: React.ReactNode | ((width: number, height: number) => React.ReactNode);
 }) {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
@@ -50,7 +53,7 @@ function ChartContainer({
         data-slot="chart"
         data-chart={chartId}
         className={cn(
-          "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border flex aspect-video justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden",
           className,
         )}
         {...props}
@@ -59,7 +62,8 @@ function ChartContainer({
           id={chartId}
           config={config}
         />
-        <RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
+        {/* Cast children to ReactElement to satisfy ResponsiveContainer props */}
+        <RechartsPrimitive.ResponsiveContainer>{children as React.ReactElement}</RechartsPrimitive.ResponsiveContainer>
       </div>
     </ChartContext.Provider>
   );
@@ -110,7 +114,8 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+}: // loosen types for Recharts v3 payload/tooltip props
+React.ComponentProps<any> &
   React.ComponentProps<'div'> & {
     hideLabel?: boolean;
     hideIndicator?: boolean;
@@ -119,13 +124,14 @@ function ChartTooltipContent({
     labelKey?: string;
   }) {
   const { config } = useChart();
+  const format = useFormatter();
 
   const tooltipLabel = React.useMemo(() => {
-    if (hideLabel || !payload?.length) {
+    if (hideLabel || !(payload && (payload as any[]).length)) {
       return null;
     }
 
-    const [item] = payload;
+    const [item] = payload as any[];
     const key = `${labelKey || item?.dataKey || item?.name || 'value'}`;
     const itemConfig = getPayloadConfigFromPayload(config, item, key);
     const value =
@@ -142,31 +148,33 @@ function ChartTooltipContent({
     return <div className={cn('font-medium', labelClassName)}>{value}</div>;
   }, [label, labelFormatter, payload, hideLabel, labelClassName, config, labelKey]);
 
-  if (!(active && payload?.length)) {
+  if (!(active && payload && (payload as any[]).length)) {
     return null;
   }
 
-  const nestLabel = payload.length === 1 && indicator !== 'dot';
+  const nestLabel = (payload as any[]).length === 1 && indicator !== 'dot';
 
   return (
     <div
       className={cn(
-        'border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl',
+        'grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl',
         className,
       )}
     >
       {!nestLabel ? tooltipLabel : null}
       <div className="grid gap-1.5">
-        {payload.map((item, index) => {
+        {(payload as any[]).map((item: any, index: number) => {
           const key = `${nameKey || item.name || item.dataKey || 'value'}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
-          const indicatorColor = color || item.payload.fill || item.color;
+
+          // Recharts v3 payload shape: color may live on item.color or item.fill or item.payload.fill
+          const indicatorColor = color || item.payload?.fill || item.color || item.fill;
 
           return (
             <div
-              key={item.dataKey}
+              key={item.dataKey ?? index}
               className={cn(
-                '[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5',
+                'flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground',
                 indicator === 'dot' && 'items-center',
               )}
             >
@@ -187,6 +195,7 @@ function ChartTooltipContent({
                         })}
                         style={
                           {
+                            // inline CSS variables for indicator color
                             '--color-bg': indicatorColor,
                             '--color-border': indicatorColor,
                           } as React.CSSProperties
@@ -201,9 +210,9 @@ function ChartTooltipContent({
                       {nestLabel ? tooltipLabel : null}
                       <span className="text-muted-foreground">{itemConfig?.label || item.name}</span>
                     </div>
-                    {item.value && (
+                    {item.value !== undefined && (
                       <span className="text-foreground font-mono font-medium tabular-nums">
-                        {item.value.toLocaleString()}
+                        {typeof item.value === 'number' ? format.number(item.value) : String(item.value)}
                       </span>
                     )}
                   </div>
@@ -225,11 +234,13 @@ function ChartLegendContent({
   payload,
   verticalAlign = 'bottom',
   nameKey,
-}: React.ComponentProps<'div'> &
-  Pick<RechartsPrimitive.LegendProps, 'payload' | 'verticalAlign'> & {
-    hideIcon?: boolean;
-    nameKey?: string;
-  }) {
+}: React.ComponentProps<'div'> & {
+  // explicit lightweight typing instead of picking from LegendProps to avoid key mismatch
+  payload?: any[];
+  verticalAlign?: RechartsPrimitive.LegendProps['verticalAlign'];
+  hideIcon?: boolean;
+  nameKey?: string;
+}) {
   const { config } = useChart();
 
   if (!payload?.length) {
@@ -238,14 +249,14 @@ function ChartLegendContent({
 
   return (
     <div className={cn('flex items-center justify-center gap-4', verticalAlign === 'top' ? 'pb-3' : 'pt-3', className)}>
-      {payload.map((item) => {
+      {(payload as any[]).map((item) => {
         const key = `${nameKey || item.dataKey || 'value'}`;
         const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
         return (
           <div
-            key={item.value}
-            className={cn('[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3')}
+            key={item.value ?? item.dataKey}
+            className={cn('flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground')}
           >
             {itemConfig?.icon && !hideIcon ? (
               <itemConfig.icon />
@@ -253,7 +264,7 @@ function ChartLegendContent({
               <div
                 className="h-2 w-2 shrink-0 rounded-[2px]"
                 style={{
-                  backgroundColor: item.color,
+                  backgroundColor: item.color ?? item.fill,
                 }}
               />
             )}
@@ -266,20 +277,27 @@ function ChartLegendContent({
 }
 
 // Helper to extract item config from a payload.
+//
+// Recharts v3 payload items can appear in different shapes:
+// - the outer item (in tooltip/legend payload) may have .payload (original data point)
+// - color can be on item.color, item.fill, or item.payload.fill
+//
+// We attempt to locate a label key string inside both item and item.payload and then
+// return the matching config entry. If not found, fall back to config[key].
 function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key: string) {
   if (typeof payload !== 'object' || payload === null) {
     return undefined;
   }
 
+  const p = payload as Record<string, any>;
+
   const payloadPayload =
-    'payload' in payload && typeof payload.payload === 'object' && payload.payload !== null
-      ? payload.payload
-      : undefined;
+    typeof p.payload === 'object' && p.payload !== null ? (p.payload as Record<string, any>) : undefined;
 
   let configLabelKey: string = key;
 
-  if (key in payload && typeof payload[key as keyof typeof payload] === 'string') {
-    configLabelKey = payload[key as keyof typeof payload] as string;
+  if (key in p && typeof p[key as keyof typeof p] === 'string') {
+    configLabelKey = p[key as keyof typeof p] as string;
   } else if (
     payloadPayload &&
     key in payloadPayload &&
@@ -288,7 +306,8 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
     configLabelKey = payloadPayload[key as keyof typeof payloadPayload] as string;
   }
 
-  return configLabelKey in config ? config[configLabelKey] : config[key as keyof typeof config];
+  // Prefer the resolved config label, else fallback to the original key.
+  return configLabelKey in config ? (config[configLabelKey] as any) : (config[key as keyof typeof config] as any);
 }
 
 export { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle };

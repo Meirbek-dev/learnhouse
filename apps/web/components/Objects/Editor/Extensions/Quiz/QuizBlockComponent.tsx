@@ -329,8 +329,8 @@ const QuizBlockComponent = (props: any) => {
                   >
                     <div
                       className={twMerge(
-                        'flex w-[40px] items-center justify-center self-stretch rounded-l-md bg-white text-base font-bold text-slate-800',
-                        answer.correct && isEditable ? 'outline-hidden bg-lime-300 text-lime-800' : 'bg-white',
+                        'flex w-[40px] items-center justify-center self-stretch rounded-l-md bg-white font-bold text-base text-slate-800',
+                        answer.correct && isEditable ? 'bg-lime-300 text-lime-800 outline-hidden' : 'bg-white',
                         userAnswers.some(
                           (userAnswer: any) =>
                             userAnswer.question_id === question.question_id &&
@@ -338,9 +338,9 @@ const QuizBlockComponent = (props: any) => {
                             !isEditable &&
                             !submitted,
                         )
-                          ? 'outline-hidden bg-blue-400 text-white'
+                          ? 'bg-blue-400 text-white outline-hidden'
                           : '',
-                        submitted && answer.correct ? 'outline-hidden bg-lime-300 text-lime-800' : '',
+                        submitted && answer.correct ? 'bg-lime-300 text-lime-800 outline-hidden' : '',
                         submitted &&
                           !answer.correct &&
                           userAnswers.some(
@@ -348,7 +348,7 @@ const QuizBlockComponent = (props: any) => {
                               userAnswer.question_id === question.question_id &&
                               userAnswer.answer_id === answer.answer_id,
                           )
-                          ? 'outline-hidden bg-red-400 text-red-800'
+                          ? 'bg-red-400 text-red-800 outline-hidden'
                           : '',
                       )}
                     >

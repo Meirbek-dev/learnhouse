@@ -2,9 +2,9 @@
 
 import { type GamificationProfile, calculateLevelProgress } from '@services/gamification/gamification';
 import { Crown, Star, Target, Trophy, Zap } from 'lucide-react';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Progress } from '@components/ui/progress';
 import { Badge } from '@components/ui/badge';
-import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 export interface LevelInfo {
@@ -16,50 +16,50 @@ export interface LevelInfo {
   unlocks?: string[];
 }
 
-// Level configuration with RPG-style progression
+// Level configuration with RPG-style progression (translation keys)
 export const LEVEL_CONFIG: Record<number, LevelInfo> = {
-  1: { level: 1, title: 'Novice', color: 'text-gray-500', icon: Target, minXP: 0, unlocks: ['Basic Profile'] },
-  5: { level: 5, title: 'Apprentice', color: 'text-blue-500', icon: Star, minXP: 1000, unlocks: ['Avatar Frames'] },
-  10: { level: 10, title: 'Scholar', color: 'text-purple-500', icon: Zap, minXP: 3000, unlocks: ['Custom Avatar Hat'] },
+  1: { level: 1, title: 'novice', color: 'text-gray-500', icon: Target, minXP: 0, unlocks: ['basicProfile'] },
+  5: { level: 5, title: 'apprentice', color: 'text-blue-500', icon: Star, minXP: 1000, unlocks: ['avatarFrames'] },
+  10: { level: 10, title: 'scholar', color: 'text-purple-500', icon: Zap, minXP: 3000, unlocks: ['customAvatarHat'] },
   15: {
     level: 15,
-    title: 'Expert',
+    title: 'expert',
     color: 'text-green-500',
     icon: Trophy,
     minXP: 6000,
-    unlocks: ['Avatar Accessories'],
+    unlocks: ['avatarAccessories'],
   },
   25: {
     level: 25,
-    title: 'Master',
+    title: 'master',
     color: 'text-orange-500',
     icon: Crown,
     minXP: 12_000,
-    unlocks: ['Exclusive Themes'],
+    unlocks: ['exclusiveThemes'],
   },
   50: {
     level: 50,
-    title: 'Grandmaster',
+    title: 'grandmaster',
     color: 'text-red-500',
     icon: Crown,
     minXP: 30_000,
-    unlocks: ['Legendary Status'],
+    unlocks: ['legendaryStatus'],
   },
 };
 
-// Avatar customization unlocks
+// Avatar customization unlocks (translation keys)
 export const AVATAR_UNLOCKS = {
   frames: [
-    { id: 'golden', level: 5, name: 'Golden Frame', color: 'border-yellow-400' },
-    { id: 'silver', level: 8, name: 'Silver Frame', color: 'border-gray-400' },
-    { id: 'diamond', level: 15, name: 'Diamond Frame', color: 'border-blue-400' },
-    { id: 'legendary', level: 25, name: 'Legendary Frame', color: 'border-purple-500' },
+    { id: 'golden', level: 5, name: 'golden', color: 'border-yellow-400' },
+    { id: 'silver', level: 8, name: 'silver', color: 'border-gray-400' },
+    { id: 'diamond', level: 15, name: 'diamond', color: 'border-blue-400' },
+    { id: 'legendary', level: 25, name: 'legendary', color: 'border-purple-500' },
   ],
   accessories: [
-    { id: 'wizard_hat', level: 10, name: 'Wizard Hat', icon: '🎩' },
-    { id: 'crown', level: 20, name: 'Scholar Crown', icon: '👑' },
-    { id: 'glasses', level: 15, name: 'Smart Glasses', icon: '🤓' },
-    { id: 'cape', level: 30, name: 'Knowledge Cape', icon: '🦸' },
+    { id: 'wizard_hat', level: 10, name: 'wizardHat', icon: '🎩' },
+    { id: 'crown', level: 20, name: 'scholarCrown', icon: '👑' },
+    { id: 'glasses', level: 15, name: 'smartGlasses', icon: '🤓' },
+    { id: 'cape', level: 30, name: 'knowledgeCape', icon: '🦸' },
   ],
 };
 
@@ -71,7 +71,7 @@ interface LevelIndicatorProps {
   className?: string;
 }
 
-export function getLevelInfo(level: number, t?: any): LevelInfo {
+export function getLevelInfo(level: number, t: any): LevelInfo {
   // Find the highest level config that the user has reached
   const availableLevels = Object.keys(LEVEL_CONFIG)
     .map(Number)
@@ -79,49 +79,20 @@ export function getLevelInfo(level: number, t?: any): LevelInfo {
   const currentLevelConfig = availableLevels.find((configLevel) => level >= configLevel) || 1;
   const baseConfig = LEVEL_CONFIG[currentLevelConfig]!;
 
-  // Get translated title if t function is provided
-  const titleMap: Record<string, string> = {
-    Novice: t ? t('Gamification.levels.titles.novice') : 'Novice',
-    Apprentice: t ? t('Gamification.levels.titles.apprentice') : 'Apprentice',
-    Scholar: t ? t('Gamification.levels.titles.scholar') : 'Scholar',
-    Expert: t ? t('Gamification.levels.titles.expert') : 'Expert',
-    Master: t ? t('Gamification.levels.titles.master') : 'Master',
-    Grandmaster: t ? t('Gamification.levels.titles.grandmaster') : 'Grandmaster',
-  };
-
   return {
     ...baseConfig,
     level: level, // Override with actual level
-    title: titleMap[baseConfig.title] || baseConfig.title,
+    title: t(`levels.titles.${baseConfig.title}`),
   };
 }
 
-export function getUnlockedFeatures(level: number, t?: any): string[] {
+export function getUnlockedFeatures(level: number, t: any): string[] {
   const unlocked: string[] = [];
-
-  // Get translated unlock names
-  const unlockMap: Record<string, string> = {
-    'Basic Profile': t ? t('Gamification.levels.unlocks.basicProfile') : 'Basic Profile',
-    'Avatar Frames': t ? t('Gamification.levels.unlocks.avatarFrames') : 'Avatar Frames',
-    'Custom Avatar Hat': t ? t('Gamification.levels.unlocks.customAvatarHat') : 'Custom Avatar Hat',
-    'Avatar Accessories': t ? t('Gamification.levels.unlocks.avatarAccessories') : 'Avatar Accessories',
-    'Exclusive Themes': t ? t('Gamification.levels.unlocks.exclusiveThemes') : 'Exclusive Themes',
-    'Legendary Status': t ? t('Gamification.levels.unlocks.legendaryStatus') : 'Legendary Status',
-    'Golden Frame': t ? t('Gamification.avatar.frames.golden') : 'Golden Frame',
-    'Silver Frame': t ? t('Gamification.avatar.frames.silver') : 'Silver Frame',
-    'Diamond Frame': t ? t('Gamification.avatar.frames.diamond') : 'Diamond Frame',
-    'Legendary Frame': t ? t('Gamification.avatar.frames.legendary') : 'Legendary Frame',
-    'Wizard Hat': t ? t('Gamification.avatar.accessories.wizardHat') : 'Wizard Hat',
-    'Scholar Crown': t ? t('Gamification.avatar.accessories.scholarCrown') : 'Scholar Crown',
-    'Smart Glasses': t ? t('Gamification.avatar.accessories.smartGlasses') : 'Smart Glasses',
-    'Knowledge Cape': t ? t('Gamification.avatar.accessories.knowledgeCape') : 'Knowledge Cape',
-  };
 
   Object.values(LEVEL_CONFIG).forEach((config) => {
     if (level >= config.level && config.unlocks) {
       config.unlocks.forEach((unlock) => {
-        const translatedUnlock = unlockMap[unlock] || unlock;
-        unlocked.push(translatedUnlock);
+        unlocked.push(t(`Gamification.levels.unlocks.${unlock}`));
       });
     }
   });
@@ -129,15 +100,13 @@ export function getUnlockedFeatures(level: number, t?: any): string[] {
   // Add specific avatar unlocks
   AVATAR_UNLOCKS.frames.forEach((frame) => {
     if (level >= frame.level) {
-      const translatedFrame = unlockMap[frame.name] || frame.name;
-      unlocked.push(translatedFrame);
+      unlocked.push(t(`Gamification.avatar.frames.${frame.name}`));
     }
   });
 
   AVATAR_UNLOCKS.accessories.forEach((accessory) => {
     if (level >= accessory.level) {
-      const translatedAccessory = unlockMap[accessory.name] || accessory.name;
-      unlocked.push(translatedAccessory);
+      unlocked.push(t(`Gamification.avatar.accessories.${accessory.name}`));
     }
   });
 
@@ -152,6 +121,7 @@ export function LevelIndicator({
   className,
 }: LevelIndicatorProps) {
   const t = useTranslations('DashPage.UserAccountSettings');
+  const format = useFormatter();
   const levelInfo = getLevelInfo(profile.current_level, t);
   const progressPercentage = calculateLevelProgress(profile);
   const Icon = levelInfo.icon;
@@ -164,7 +134,7 @@ export function LevelIndicator({
       >
         <Icon className="h-3 w-3" />
         <span className="font-medium">
-          {t('Gamification.levels.progress.level')}.{profile.current_level}
+          {t('Gamification.levelIndicators.level')} {profile.current_level}
         </span>
       </Badge>
     );
@@ -176,10 +146,10 @@ export function LevelIndicator({
         <div className={cn('flex items-center gap-1', levelInfo.color)}>
           <Icon className="h-4 w-4" />
           <span className="font-semibold">
-            {t('Gamification.levels.progress.level')}.{profile.current_level}
+            {t('Gamification.levelIndicators.level')} {profile.current_level}
           </span>
         </div>
-        {showXP && <span className="text-muted-foreground text-sm">{profile.total_xp.toLocaleString()} XP</span>}
+        {showXP && <span className="text-muted-foreground text-sm">{format.number(profile.total_xp)} XP</span>}
       </div>
     );
   }
@@ -191,16 +161,16 @@ export function LevelIndicator({
           <Icon className="h-5 w-5" />
           <div>
             <span className="font-semibold">
-              {t('Gamification.levels.progress.level')} {profile.current_level}
+              {t('Gamification.levelIndicators.level')} {profile.current_level}
             </span>
             <span className="ml-2 text-sm font-medium">{levelInfo.title}</span>
           </div>
         </div>
         {showXP && (
           <div className="text-right">
-            <div className="text-sm font-medium">{profile.total_xp.toLocaleString()} XP</div>
+            <div className="text-sm font-medium">{format.number(profile.total_xp)} XP</div>
             <div className="text-muted-foreground text-xs">
-              {profile.xp_to_next_level} {t('Gamification.levels.progress.toNextLevel')}
+              {profile.xp_to_next_level} {t('Gamification.levelIndicators.xpToNext')}
             </div>
           </div>
         )}
@@ -214,11 +184,11 @@ export function LevelIndicator({
           />
           <div className="text-muted-foreground flex justify-between text-xs">
             <span>
-              {t('Gamification.levels.progress.level')} {profile.current_level}
+              {t('Gamification.levelIndicators.level')} {profile.current_level}
             </span>
             <span>{progressPercentage.toFixed(0)}%</span>
             <span>
-              {t('Gamification.levels.progress.level')} {profile.current_level + 1}
+              {t('Gamification.levelIndicators.level')} {profile.current_level + 1}
             </span>
           </div>
         </div>
@@ -236,6 +206,7 @@ interface ExperienceBarProps {
 
 export function ExperienceBar({ profile, animated = true, showLabels = true, className }: ExperienceBarProps) {
   const t = useTranslations('DashPage.UserAccountSettings');
+  const format = useFormatter();
   const progressPercentage = calculateLevelProgress(profile);
   const levelInfo = getLevelInfo(profile.current_level, t);
 
@@ -244,10 +215,10 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
       {showLabels && (
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
-            {t('Gamification.levels.progress.level')} {profile.current_level}
+            {t('Gamification.levelIndicators.level')} {profile.current_level}
           </span>
           <span className="text-muted-foreground">
-            {profile.xp_to_next_level} XP {t('Gamification.levels.progress.toNextLevel')}
+            {profile.xp_to_next_level} XP {t('Gamification.levelIndicators.xpToNext')}
           </span>
         </div>
       )}
@@ -259,15 +230,15 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
         />
 
         {/* Level indicator overlay */}
-        <div className={cn('absolute left-2 top-0 flex h-full items-center', levelInfo.color)}>
+        <div className={cn('absolute top-0 left-2 flex h-full items-center', levelInfo.color)}>
           <levelInfo.icon className="h-3 w-3" />
         </div>
       </div>
 
       {showLabels && (
         <div className="text-muted-foreground flex justify-between text-xs">
-          <span>{profile.total_xp.toLocaleString()} XP</span>
-          <span>{(profile.total_xp + profile.xp_to_next_level).toLocaleString()} XP</span>
+          <span>{format.number(profile.total_xp)} XP</span>
+          <span>{format.number(profile.total_xp + profile.xp_to_next_level)} XP</span>
         </div>
       )}
     </div>

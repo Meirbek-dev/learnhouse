@@ -36,7 +36,7 @@ function getStorageKey(userId: string, orgId: number): string {
 }
 
 /**
- * Check if localStorage is available (SSR safe)
+ * Check if localStorage is available
  */
 function isLocalStorageAvailable(): boolean {
   try {
@@ -49,7 +49,7 @@ function isLocalStorageAvailable(): boolean {
 /**
  * Hook to automatically track user gamification activities
  * - Updates login streaks once per day (not per session)
- * - Uses localStorage to persist across browser sessions
+ * - TODO: improve to persist across multiple devices sessions
  * - Can be extended to track other activities
  * - Includes proper error handling and cleanup
  * - SSR safe with proper hydration
@@ -67,9 +67,10 @@ export function useGamification({
   const isUpdatingRef = useRef(false);
 
   // Memoize userId to prevent unnecessary re-renders
-  const userId = useMemo(() => session?.user?.id || session?.user?.email, [session?.user?.id, session?.user?.email]);
+  const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
 
   // Get last update date from localStorage
+  // TODO: replace with proper storage to sync across multiple devices
   const lastUpdateDate = useMemo(() => {
     if (!(isLocalStorageAvailable() && userId)) return null;
     return localStorage.getItem(getStorageKey(String(userId), orgId));

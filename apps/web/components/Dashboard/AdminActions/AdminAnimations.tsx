@@ -1,7 +1,8 @@
 'use client';
 
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { ReactNode, useState, useEffect } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { type ReactNode, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 // Animation Variants
@@ -11,7 +12,7 @@ export const adminAnimations = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
-    transition: { duration: 0.3, ease: 'easeOut' }
+    transition: { duration: 0.3, ease: 'easeOut' },
   },
 
   // Slide transitions for tabs
@@ -19,29 +20,29 @@ export const adminAnimations = {
     initial: { opacity: 0, x: 30 },
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -30 },
-    transition: { duration: 0.25, ease: 'easeInOut' }
+    transition: { duration: 0.25, ease: 'easeInOut' },
   },
 
   // Stagger animations for lists
   staggerContainer: {
     animate: {
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   },
 
   staggerItem: {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.3 }
+    transition: { duration: 0.3 },
   },
 
   // Scale animations for cards
   scaleOnHover: {
     whileHover: { scale: 1.02 },
     whileTap: { scale: 0.98 },
-    transition: { type: 'spring', stiffness: 300, damping: 20 }
+    transition: { type: 'spring', stiffness: 300, damping: 20 },
   },
 
   // Pulse animation for loading states
@@ -50,10 +51,10 @@ export const adminAnimations = {
       scale: [1, 1.05, 1],
       transition: {
         duration: 2,
-        repeat: Infinity,
-        ease: 'easeInOut'
-      }
-    }
+        repeat: Number.POSITIVE_INFINITY,
+        ease: 'easeInOut',
+      },
+    },
   },
 
   // Fade in/out
@@ -61,7 +62,7 @@ export const adminAnimations = {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     exit: { opacity: 0 },
-    transition: { duration: 0.2 }
+    transition: { duration: 0.2 },
   },
 
   // Bounce animation for success states
@@ -70,9 +71,9 @@ export const adminAnimations = {
       y: [0, -10, 0],
       transition: {
         duration: 0.6,
-        ease: 'easeOut'
-      }
-    }
+        ease: 'easeOut',
+      },
+    },
   },
 
   // Shake animation for errors
@@ -81,13 +82,13 @@ export const adminAnimations = {
       x: [0, -10, 10, -10, 10, 0],
       transition: {
         duration: 0.5,
-        ease: 'easeInOut'
-      }
-    }
-  }
+        ease: 'easeInOut',
+      },
+    },
+  },
 };
 
-// Enhanced Motion Components
+// Motion Components
 
 interface AnimatedCardProps {
   children: ReactNode;
@@ -154,9 +155,9 @@ export const AnimatedTabContent = ({ children, isActive, className }: AnimatedTa
       {isActive && (
         <motion.div
           className={className}
-          initial={prefersReducedMotion ? false : { opacity: 0, x: 20 }}
+          initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={prefersReducedMotion ? false : { opacity: 0, x: -20 }}
+          exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
         >
           {children}
@@ -166,7 +167,7 @@ export const AnimatedTabContent = ({ children, isActive, className }: AnimatedTa
   );
 };
 
-// Enhanced Button with micro-interactions
+// Button with micro-interactions
 interface AnimatedButtonProps {
   children: ReactNode;
   className?: string;
@@ -182,10 +183,11 @@ export const AnimatedButton = ({
   onClick,
   disabled = false,
   variant = 'default',
-  size = 'md'
+  size = 'md',
 }: AnimatedButtonProps) => {
   const [isClicked, setIsClicked] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+  const t = useTranslations('DashPage.Admin.Animations');
 
   const handleClick = () => {
     if (!disabled) {
@@ -198,14 +200,14 @@ export const AnimatedButton = ({
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2',
-    lg: 'px-6 py-3 text-lg'
+    lg: 'px-6 py-3 text-lg',
   };
 
   const variantClasses = {
     default: 'bg-blue-600 text-white hover:bg-blue-700',
     success: 'bg-green-600 text-white hover:bg-green-700',
     error: 'bg-red-600 text-white hover:bg-red-700',
-    loading: 'bg-gray-400 text-white cursor-not-allowed'
+    loading: 'bg-gray-400 text-white cursor-not-allowed',
   };
 
   return (
@@ -214,24 +216,24 @@ export const AnimatedButton = ({
         'rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
         sizeClasses[size],
         variantClasses[variant],
-        disabled && 'opacity-50 cursor-not-allowed',
-        className
+        disabled && 'cursor-not-allowed opacity-50',
+        className,
       )}
       onClick={handleClick}
       disabled={disabled || variant === 'loading'}
-      whileHover={!disabled && !prefersReducedMotion ? { scale: 1.02 } : undefined}
-      whileTap={!disabled && !prefersReducedMotion ? { scale: 0.98 } : undefined}
+      whileHover={!(disabled || prefersReducedMotion) ? { scale: 1.02 } : undefined}
+      whileTap={!(disabled || prefersReducedMotion) ? { scale: 0.98 } : undefined}
       animate={isClicked && !prefersReducedMotion ? { scale: [1, 0.95, 1] } : undefined}
       transition={{ duration: 0.15 }}
     >
       {variant === 'loading' ? (
         <div className="flex items-center gap-2">
           <motion.div
-            className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+            className="h-4 w-4 rounded-full border-2 border-white border-t-transparent"
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
           />
-          Loading...
+          {t('loading')}
         </div>
       ) : (
         children
@@ -249,20 +251,14 @@ interface AnimatedToastProps {
   className?: string;
 }
 
-export const AnimatedToast = ({
-  children,
-  type,
-  isVisible,
-  onClose,
-  className
-}: AnimatedToastProps) => {
+export const AnimatedToast = ({ children, type, isVisible, onClose, className }: AnimatedToastProps) => {
   const prefersReducedMotion = useReducedMotion();
 
   const typeClasses = {
     success: 'bg-green-50 border-green-200 text-green-800',
     error: 'bg-red-50 border-red-200 text-red-800',
     info: 'bg-blue-50 border-blue-200 text-blue-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800'
+    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
   };
 
   useEffect(() => {
@@ -277,13 +273,13 @@ export const AnimatedToast = ({
       {isVisible && (
         <motion.div
           className={cn(
-            'fixed top-4 right-4 p-4 border rounded-lg shadow-lg z-50 max-w-sm',
+            'fixed top-4 right-4 z-50 max-w-sm rounded-lg border p-4 shadow-lg',
             typeClasses[type],
-            className
+            className,
           )}
-          initial={prefersReducedMotion ? false : { opacity: 0, y: -50, scale: 0.9 }}
+          initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={prefersReducedMotion ? false : { opacity: 0, y: -50, scale: 0.9 }}
+          exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -50, scale: 0.9 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           {children}
@@ -308,32 +304,24 @@ interface AnimatedLoadingProps {
   className?: string;
 }
 
-export const AnimatedLoading = ({
-  type = 'spinner',
-  size = 'md',
-  className
-}: AnimatedLoadingProps) => {
+export const AnimatedLoading = ({ type = 'spinner', size = 'md', className }: AnimatedLoadingProps) => {
   const prefersReducedMotion = useReducedMotion();
 
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-8 h-8',
-    lg: 'w-12 h-12'
+    lg: 'w-12 h-12',
   };
 
   if (type === 'spinner') {
     return (
       <motion.div
-        className={cn(
-          'border-2 border-gray-200 border-t-blue-600 rounded-full',
-          sizeClasses[size],
-          className
-        )}
+        className={cn('rounded-full border-2 border-gray-200 border-t-blue-600', sizeClasses[size], className)}
         animate={prefersReducedMotion ? {} : { rotate: 360 }}
         transition={{
           duration: 1,
-          repeat: Infinity,
-          ease: 'linear'
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'linear',
         }}
       />
     );
@@ -346,17 +334,21 @@ export const AnimatedLoading = ({
           <motion.div
             key={index}
             className={cn(
-              'bg-blue-600 rounded-full',
-              size === 'sm' ? 'w-2 h-2' : size === 'md' ? 'w-3 h-3' : 'w-4 h-4'
+              'rounded-full bg-blue-600',
+              size === 'sm' ? 'h-2 w-2' : size === 'md' ? 'h-3 w-3' : 'h-4 w-4',
             )}
-            animate={prefersReducedMotion ? {} : {
-              scale: [1, 1.2, 1],
-              opacity: [0.7, 1, 0.7]
-            }}
+            animate={
+              prefersReducedMotion
+                ? {}
+                : {
+                    scale: [1, 1.2, 1],
+                    opacity: [0.7, 1, 0.7],
+                  }
+            }
             transition={{
               duration: 0.6,
-              repeat: Infinity,
-              delay: index * 0.2
+              repeat: Number.POSITIVE_INFINITY,
+              delay: index * 0.2,
             }}
           />
         ))}
@@ -367,19 +359,19 @@ export const AnimatedLoading = ({
   if (type === 'pulse') {
     return (
       <motion.div
-        className={cn(
-          'bg-blue-600 rounded-full',
-          sizeClasses[size],
-          className
-        )}
-        animate={prefersReducedMotion ? {} : {
-          scale: [1, 1.2, 1],
-          opacity: [0.7, 1, 0.7]
-        }}
+        className={cn('rounded-full bg-blue-600', sizeClasses[size], className)}
+        animate={
+          prefersReducedMotion
+            ? {}
+            : {
+                scale: [1, 1.2, 1],
+                opacity: [0.7, 1, 0.7],
+              }
+        }
         transition={{
           duration: 1.5,
-          repeat: Infinity,
-          ease: 'easeInOut'
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'easeInOut',
         }}
       />
     );
@@ -400,7 +392,7 @@ export const AnimatedCounter = ({
   value,
   duration = 1,
   className,
-  formatter = (v) => v.toString()
+  formatter = (v) => v.toString(),
 }: AnimatedCounterProps) => {
   const [displayValue, setDisplayValue] = useState(0);
   const prefersReducedMotion = useReducedMotion();
@@ -420,7 +412,7 @@ export const AnimatedCounter = ({
       const progress = Math.min(elapsed / (duration * 1000), 1);
 
       // Easing function (ease-out)
-      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const easeOut = 1 - (1 - progress) ** 3;
 
       setDisplayValue(Math.round(startValue + difference * easeOut));
 
@@ -430,16 +422,12 @@ export const AnimatedCounter = ({
     };
 
     animate();
-  }, [value, duration, prefersReducedMotion]);
+  }, [value, duration, prefersReducedMotion, displayValue]);
 
-  return (
-    <span className={className}>
-      {formatter(displayValue)}
-    </span>
-  );
+  return <span className={className}>{formatter(displayValue)}</span>;
 };
 
-export default {
+const AdminAnimations = {
   adminAnimations,
   AnimatedCard,
   AnimatedList,
@@ -447,5 +435,7 @@ export default {
   AnimatedButton,
   AnimatedToast,
   AnimatedLoading,
-  AnimatedCounter
+  AnimatedCounter,
 };
+
+export default AdminAnimations;

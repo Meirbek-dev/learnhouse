@@ -1,7 +1,7 @@
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityMediaDirectory } from '@services/media/media';
-import React, { useEffect, useMemo, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { useEffect, useMemo, useState } from 'react';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
 import YouTube from 'react-youtube';

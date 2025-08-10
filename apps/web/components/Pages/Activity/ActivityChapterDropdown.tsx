@@ -98,7 +98,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
 
       {isOpen ? (
         <div
-          className={`absolute z-50 mt-2 ${isMobile ? 'right-0 w-[90vw] sm:w-72' : 'right-0 w-72'} animate-in fade-in max-h-[70vh] cursor-pointer overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-xl duration-200`}
+          className={`absolute z-50 mt-2 ${isMobile ? 'right-0 w-[90vw] sm:w-72' : 'right-0 w-72'} fade-in animate-in max-h-[70vh] cursor-pointer overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-xl duration-200`}
         >
           <div className="flex items-center justify-between border-b border-gray-100 px-3 py-1.5">
             <h3 className="text-sm font-semibold text-gray-800">{t('courseContent')}</h3>

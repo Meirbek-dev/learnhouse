@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Crown, Lock, Palette, Settings, User } from 'lucide-react';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { Separator } from '@/components/ui/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
@@ -34,6 +35,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
   const [profile, setProfile] = useState<GamificationProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const isMobile = useIsMobile();
 
   // Local customization state
   const [customization, setCustomization] = useState<AvatarCustomization>({
@@ -68,14 +70,14 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
     };
 
     fetchProfile();
-  }, [orgId, session?.tokens?.access_token]);
+  }, [orgId, session?.tokens?.access_token, t]);
 
   const handleSaveCustomization = async () => {
     if (!(profile && session?.tokens?.access_token)) return;
 
     setIsSaving(true);
     try {
-      // In a real implementation, you would call an API to save customization
+      // TODO: call an API to save customization
       // For now, we'll just show a success message and update local state
       toast.success(t('avatarCustomization.saved'));
       onUpdate?.();
@@ -89,7 +91,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
 
   const unlockedFrames = profile ? AVATAR_UNLOCKS.frames.filter((f) => profile.current_level >= f.level) : [];
   const unlockedAccessories = profile ? AVATAR_UNLOCKS.accessories.filter((a) => profile.current_level >= a.level) : [];
-  const levelInfo = profile ? getLevelInfo(profile.current_level) : null;
+  const levelInfo = profile ? getLevelInfo(profile.current_level, t) : null;
 
   if (isLoading) {
     return (
@@ -148,14 +150,15 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
               showAvatarAccessories={customization.showAccessories}
               use_with_session
             />
-            <div className="flex-1">
+            <div className="flex-1 pt-4 pl-4">
               <LevelIndicator
                 profile={profile}
-                variant="compact"
                 showXP
+                variant={isMobile ? 'compact' : 'full'}
               />
               <p className="text-muted-foreground mt-1 text-sm">
-                {levelInfo?.title} • {unlockedFrames.length + unlockedAccessories.length} items unlocked
+                {levelInfo?.title} •{' '}
+                {t('avatarCustomization.unlockedItems', { count: unlockedFrames.length + unlockedAccessories.length })}
               </p>
             </div>
           </div>
@@ -231,14 +234,14 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
               <button
                 onClick={() => setCustomization((prev) => ({ ...prev, selectedFrame: null }))}
                 className={cn(
-                  'p-3 rounded-lg border-2 transition-colors text-center',
+                  'rounded-lg border-2 p-3 text-center transition-colors',
                   customization.selectedFrame === null
                     ? 'border-primary bg-primary/10'
                     : 'border-muted hover:border-border',
                 )}
               >
                 <User className="text-muted-foreground mx-auto mb-2 h-8 w-8" />
-                <p className="text-xs font-medium">None</p>
+                <p className="text-xs font-medium">{t('common.none')}</p>
               </button>
 
               {unlockedFrames.map((frame) => (
@@ -246,7 +249,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
                   key={frame.id}
                   onClick={() => setCustomization((prev) => ({ ...prev, selectedFrame: frame.id }))}
                   className={cn(
-                    'p-3 rounded-lg border-2 transition-colors text-center',
+                    'rounded-lg border-2 p-3 text-center transition-colors',
                     customization.selectedFrame === frame.id
                       ? 'border-primary bg-primary/10'
                       : 'border-muted hover:border-border',
@@ -254,7 +257,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
                 >
                   <div
                     className={cn(
-                      'h-8 w-8 mx-auto mb-2 rounded-full border-2',
+                      'mx-auto mb-2 h-8 w-8 rounded-full border-2',
                       frame.color,
                       'flex items-center justify-center',
                     )}
@@ -266,7 +269,8 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
                     variant="outline"
                     className="mt-1 text-[10px]"
                   >
-                    Lv.{frame.level}
+                    {t('levelIndicators.levelAbbrev')}
+                    {frame.level}
                   </Badge>
                 </button>
               ))}
@@ -283,14 +287,14 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
               <button
                 onClick={() => setCustomization((prev) => ({ ...prev, selectedAccessory: null }))}
                 className={cn(
-                  'p-3 rounded-lg border-2 transition-colors text-center',
+                  'rounded-lg border-2 p-3 text-center transition-colors',
                   customization.selectedAccessory === null
                     ? 'border-primary bg-primary/10'
                     : 'border-muted hover:border-border',
                 )}
               >
                 <User className="text-muted-foreground mx-auto mb-2 h-8 w-8" />
-                <p className="text-xs font-medium">None</p>
+                <p className="text-xs font-medium">{t('common.none')}</p>
               </button>
 
               {unlockedAccessories.map((accessory) => (
@@ -298,7 +302,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
                   key={accessory.id}
                   onClick={() => setCustomization((prev) => ({ ...prev, selectedAccessory: accessory.id }))}
                   className={cn(
-                    'p-3 rounded-lg border-2 transition-colors text-center',
+                    'rounded-lg border-2 p-3 text-center transition-colors',
                     customization.selectedAccessory === accessory.id
                       ? 'border-primary bg-primary/10'
                       : 'border-muted hover:border-border',
@@ -310,7 +314,8 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
                     variant="outline"
                     className="mt-1 text-[10px]"
                   >
-                    Lv.{accessory.level}
+                    {t('levelIndicators.levelAbbrev')}
+                    {accessory.level}
                   </Badge>
                 </button>
               ))}
@@ -341,7 +346,8 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
                     variant="outline"
                     className="mt-1 text-[10px]"
                   >
-                    Lv.{frame.level}
+                    {t('levelIndicators.levelAbbrev')}
+                    {frame.level}
                   </Badge>
                 </div>
               ))}

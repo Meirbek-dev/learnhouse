@@ -1,16 +1,9 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { AlertCircle, AlertTriangle, CheckCircle, Info, Loader2, X, XCircle } from 'lucide-react';
+import { type ReactNode, createContext, useCallback, useContext, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Info,
-  X,
-  AlertCircle,
-  Loader2
-} from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 // Toast Types
@@ -47,35 +40,36 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newToast: Toast = {
-      id,
-      duration: 5000,
-      dismissible: true,
-      ...toast
-    };
-
-    setToasts(prev => [...prev, newToast]);
-
-    // Auto-remove toast if duration is set and it's not a loading toast
-    if (newToast.duration && newToast.type !== 'loading') {
-      setTimeout(() => {
-        removeToast(id);
-      }, newToast.duration);
-    }
-
-    return id;
-  }, []);
-
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
+
+  const addToast = useCallback(
+    (toast: Omit<Toast, 'id'>) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const newToast: Toast = {
+        id,
+        duration: 5000,
+        dismissible: true,
+        ...toast,
+      };
+
+      setToasts((prev) => [...prev, newToast]);
+
+      // Auto-remove toast if duration is set and it's not a loading toast
+      if (newToast.duration && newToast.type !== 'loading') {
+        setTimeout(() => {
+          removeToast(id);
+        }, newToast.duration);
+      }
+
+      return id;
+    },
+    [removeToast],
+  );
 
   const updateToast = useCallback((id: string, updates: Partial<Toast>) => {
-    setToasts(prev => prev.map(toast =>
-      toast.id === id ? { ...toast, ...updates } : toast
-    ));
+    setToasts((prev) => prev.map((toast) => (toast.id === id ? { ...toast, ...updates } : toast)));
   }, []);
 
   const clearAll = useCallback(() => {
@@ -83,39 +77,56 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   // Convenience methods
-  const success = useCallback((title: string, description?: string, options?: Partial<Toast>) => {
-    return addToast({ type: 'success', title, description, ...options });
-  }, [addToast]);
+  const success = useCallback(
+    (title: string, description?: string, options?: Partial<Toast>) => {
+      return addToast({ type: 'success', title, description, ...options });
+    },
+    [addToast],
+  );
 
-  const error = useCallback((title: string, description?: string, options?: Partial<Toast>) => {
-    return addToast({ type: 'error', title, description, duration: 7000, ...options });
-  }, [addToast]);
+  const error = useCallback(
+    (title: string, description?: string, options?: Partial<Toast>) => {
+      return addToast({ type: 'error', title, description, duration: 7000, ...options });
+    },
+    [addToast],
+  );
 
-  const warning = useCallback((title: string, description?: string, options?: Partial<Toast>) => {
-    return addToast({ type: 'warning', title, description, ...options });
-  }, [addToast]);
+  const warning = useCallback(
+    (title: string, description?: string, options?: Partial<Toast>) => {
+      return addToast({ type: 'warning', title, description, ...options });
+    },
+    [addToast],
+  );
 
-  const info = useCallback((title: string, description?: string, options?: Partial<Toast>) => {
-    return addToast({ type: 'info', title, description, ...options });
-  }, [addToast]);
+  const info = useCallback(
+    (title: string, description?: string, options?: Partial<Toast>) => {
+      return addToast({ type: 'info', title, description, ...options });
+    },
+    [addToast],
+  );
 
-  const loading = useCallback((title: string, description?: string, options?: Partial<Toast>) => {
-    return addToast({ type: 'loading', title, description, duration: 0, dismissible: false, ...options });
-  }, [addToast]);
+  const loading = useCallback(
+    (title: string, description?: string, options?: Partial<Toast>) => {
+      return addToast({ type: 'loading', title, description, duration: 0, dismissible: false, ...options });
+    },
+    [addToast],
+  );
 
   return (
-    <ToastContext.Provider value={{
-      toasts,
-      addToast,
-      removeToast,
-      updateToast,
-      clearAll,
-      success,
-      error,
-      warning,
-      info,
-      loading
-    }}>
+    <ToastContext.Provider
+      value={{
+        toasts,
+        addToast,
+        removeToast,
+        updateToast,
+        clearAll,
+        success,
+        error,
+        warning,
+        info,
+        loading,
+      }}
+    >
       {children}
       <ToastContainer />
     </ToastContext.Provider>
@@ -134,72 +145,97 @@ export const useToast = () => {
 // Individual Toast Component
 const ToastItem = ({ toast }: { toast: Toast }) => {
   const { removeToast } = useToast();
+  const t = useTranslations('DashPage.Admin.Toasts');
 
   const getIcon = () => {
     switch (toast.type) {
-      case 'success':
+      case 'success': {
         return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'error':
+      }
+      case 'error': {
         return <XCircle className="h-5 w-5 text-red-600" />;
-      case 'warning':
+      }
+      case 'warning': {
         return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
-      case 'info':
+      }
+      case 'info': {
         return <Info className="h-5 w-5 text-blue-600" />;
-      case 'loading':
-        return <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />;
-      default:
+      }
+      case 'loading': {
+        return <Loader2 className="h-5 w-5 animate-spin text-blue-600" />;
+      }
+      default: {
         return <AlertCircle className="h-5 w-5 text-gray-600" />;
+      }
     }
   };
 
   const getBackgroundClass = () => {
     switch (toast.type) {
-      case 'success':
+      case 'success': {
         return 'bg-green-50 border-green-200';
-      case 'error':
+      }
+      case 'error': {
         return 'bg-red-50 border-red-200';
-      case 'warning':
+      }
+      case 'warning': {
         return 'bg-yellow-50 border-yellow-200';
-      case 'info':
+      }
+      case 'info': {
         return 'bg-blue-50 border-blue-200';
-      case 'loading':
+      }
+      case 'loading': {
         return 'bg-blue-50 border-blue-200';
-      default:
+      }
+      default: {
         return 'bg-gray-50 border-gray-200';
+      }
     }
   };
 
   const getTitleClass = () => {
     switch (toast.type) {
-      case 'success':
+      case 'success': {
         return 'text-green-900';
-      case 'error':
+      }
+      case 'error': {
         return 'text-red-900';
-      case 'warning':
+      }
+      case 'warning': {
         return 'text-yellow-900';
-      case 'info':
+      }
+      case 'info': {
         return 'text-blue-900';
-      case 'loading':
+      }
+      case 'loading': {
         return 'text-blue-900';
-      default:
+      }
+      default: {
         return 'text-gray-900';
+      }
     }
   };
 
   const getDescriptionClass = () => {
     switch (toast.type) {
-      case 'success':
+      case 'success': {
         return 'text-green-700';
-      case 'error':
+      }
+      case 'error': {
         return 'text-red-700';
-      case 'warning':
+      }
+      case 'warning': {
         return 'text-yellow-700';
-      case 'info':
+      }
+      case 'info': {
         return 'text-blue-700';
-      case 'loading':
+      }
+      case 'loading': {
         return 'text-blue-700';
-      default:
+      }
+      default: {
         return 'text-gray-700';
+      }
     }
   };
 
@@ -210,37 +246,29 @@ const ToastItem = ({ toast }: { toast: Toast }) => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -50, scale: 0.95 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className={cn(
-        'relative max-w-sm w-full rounded-lg border p-4 shadow-lg',
-        getBackgroundClass()
-      )}
+      className={cn('relative w-full min-w-sm rounded-lg border p-4 shadow-lg', getBackgroundClass())}
     >
       <div className="flex items-start">
-        <div className="flex-shrink-0">
-          {getIcon()}
-        </div>
+        <div className="flex-shrink-0">{getIcon()}</div>
 
         <div className="ml-3 w-0 flex-1">
-          <p className={cn('text-sm font-medium', getTitleClass())}>
-            {toast.title}
-          </p>
+          <p className={cn('font-medium text-sm', getTitleClass())}>{toast.title}</p>
 
-          {toast.description && (
-            <p className={cn('mt-1 text-sm', getDescriptionClass())}>
-              {toast.description}
-            </p>
-          )}
+          {toast.description && <p className={cn('mt-1 text-sm', getDescriptionClass())}>{toast.description}</p>}
 
           {toast.action && (
             <div className="mt-3">
               <button
                 onClick={toast.action.onClick}
                 className={cn(
-                  'text-sm font-medium underline hover:no-underline focus:outline-none',
-                  toast.type === 'success' ? 'text-green-700 hover:text-green-800' :
-                  toast.type === 'error' ? 'text-red-700 hover:text-red-800' :
-                  toast.type === 'warning' ? 'text-yellow-700 hover:text-yellow-800' :
-                  'text-blue-700 hover:text-blue-800'
+                  'font-medium text-sm underline hover:no-underline focus:outline-none',
+                  toast.type === 'success'
+                    ? 'text-green-700 hover:text-green-800'
+                    : toast.type === 'error'
+                      ? 'text-red-700 hover:text-red-800'
+                      : toast.type === 'warning'
+                        ? 'text-yellow-700 hover:text-yellow-800'
+                        : 'text-blue-700 hover:text-blue-800',
                 )}
               >
                 {toast.action.label}
@@ -250,18 +278,21 @@ const ToastItem = ({ toast }: { toast: Toast }) => {
         </div>
 
         {toast.dismissible && (
-          <div className="ml-4 flex-shrink-0 flex">
+          <div className="ml-4 flex flex-shrink-0">
             <button
               onClick={() => removeToast(toast.id)}
               className={cn(
-                'rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2',
-                toast.type === 'success' ? 'focus:ring-green-500' :
-                toast.type === 'error' ? 'focus:ring-red-500' :
-                toast.type === 'warning' ? 'focus:ring-yellow-500' :
-                'focus:ring-blue-500'
+                'inline-flex rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2',
+                toast.type === 'success'
+                  ? 'focus:ring-green-500'
+                  : toast.type === 'error'
+                    ? 'focus:ring-red-500'
+                    : toast.type === 'warning'
+                      ? 'focus:ring-yellow-500'
+                      : 'focus:ring-blue-500',
               )}
             >
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t('actions.dismiss')}</span>
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -271,12 +302,12 @@ const ToastItem = ({ toast }: { toast: Toast }) => {
       {/* Progress bar for timed toasts */}
       {toast.duration && toast.duration > 0 && toast.type !== 'loading' && (
         <motion.div
-          className="absolute bottom-0 left-0 h-1 bg-current opacity-20 rounded-bl-lg"
+          className="absolute bottom-0 left-0 h-1 rounded-bl-lg bg-current opacity-20"
           initial={{ width: '100%' }}
           animate={{ width: '0%' }}
           transition={{
             duration: toast.duration / 1000,
-            ease: 'linear'
+            ease: 'linear',
           }}
         />
       )}
@@ -292,7 +323,10 @@ const ToastContainer = () => {
     <div className="fixed top-4 right-4 z-50 space-y-2">
       <AnimatePresence>
         {toasts.map((toast) => (
-          <ToastItem key={toast.id} toast={toast} />
+          <ToastItem
+            key={toast.id}
+            toast={toast}
+          />
         ))}
       </AnimatePresence>
     </div>
@@ -302,121 +336,119 @@ const ToastContainer = () => {
 // Admin-specific toast hooks
 export const useAdminToast = () => {
   const toast = useToast();
+  const t = useTranslations('DashPage.Admin.Toasts');
 
-  const adminSuccess = useCallback((message: string, description?: string) => {
-    return toast.success(
-      `Admin: ${message}`,
-      description,
-      { duration: 4000 }
-    );
-  }, [toast]);
+  const adminSuccess = useCallback(
+    (message: string, description?: string) => {
+      return toast.success(message, description, { duration: 4000 });
+    },
+    [toast],
+  );
 
-  const adminError = useCallback((message: string, description?: string) => {
-    return toast.error(
-      `Admin Error: ${message}`,
-      description,
-      {
+  const adminError = useCallback(
+    (message: string, description?: string) => {
+      return toast.error(message, description, {
         duration: 8000,
         action: {
-          label: 'Report Issue',
+          label: t('actions.retry'),
           onClick: () => {
-            // Handle error reporting
+            // TODO: Handle error reporting
             console.log('Report issue clicked');
-          }
-        }
-      }
-    );
-  }, [toast]);
+          },
+        },
+      });
+    },
+    [toast, t],
+  );
 
-  const adminOperation = useCallback((operation: string) => {
-    const loadingId = toast.loading(
-      `Processing: ${operation}`,
-      'Please wait while we complete this operation...'
-    );
+  const adminOperation = useCallback(
+    (operation: string) => {
+      const loadingId = toast.loading(t('admin.operationStarted'), operation);
 
-    return {
-      success: (message?: string) => {
-        toast.updateToast(loadingId, {
-          type: 'success',
-          title: `Completed: ${operation}`,
-          description: message || 'Operation completed successfully',
-          duration: 4000,
-          dismissible: true
-        });
-      },
-      error: (error?: string) => {
-        toast.updateToast(loadingId, {
-          type: 'error',
-          title: `Failed: ${operation}`,
-          description: error || 'Operation failed. Please try again.',
-          duration: 6000,
-          dismissible: true,
-          action: {
-            label: 'Retry',
-            onClick: () => {
-              // Handle retry logic
-              console.log('Retry clicked');
-            }
-          }
-        });
-      },
-      dismiss: () => {
-        toast.removeToast(loadingId);
-      }
-    };
-  }, [toast]);
+      return {
+        success: (message?: string) => {
+          toast.updateToast(loadingId, {
+            type: 'success',
+            title: t('admin.operationCompleted'),
+            description: message || t('admin.operationCompleted'),
+            duration: 4000,
+            dismissible: true,
+          });
+        },
+        error: (error?: string) => {
+          toast.updateToast(loadingId, {
+            type: 'error',
+            title: t('admin.operationFailed'),
+            description: error || t('admin.operationFailed'),
+            duration: 6000,
+            dismissible: true,
+            action: {
+              label: t('actions.retry'),
+              onClick: () => {
+                // TODO: Handle retry logic
+                console.log('Retry clicked');
+              },
+            },
+          });
+        },
+        dismiss: () => {
+          toast.removeToast(loadingId);
+        },
+      };
+    },
+    [toast, t],
+  );
 
-  const bulkOperation = useCallback((
-    totalItems: number,
-    operation: string,
-    onProgress?: (processed: number) => void
-  ) => {
-    const loadingId = toast.loading(
-      `Bulk ${operation}`,
-      `Processing 0 of ${totalItems} items...`
-    );
+  const bulkOperation = useCallback(
+    (totalItems: number, operation: string, onProgress?: (processed: number) => void) => {
+      const loadingId = toast.loading(operation, t('admin.bulkOperationProgress', { current: 0, total: totalItems }));
 
-    return {
-      updateProgress: (processed: number) => {
-        toast.updateToast(loadingId, {
-          description: `Processing ${processed} of ${totalItems} items...`
-        });
-        onProgress?.(processed);
-      },
-      complete: (successful: number, failed: number = 0) => {
-        toast.updateToast(loadingId, {
-          type: failed > 0 ? 'warning' : 'success',
-          title: `Bulk ${operation} Complete`,
-          description: failed > 0
-            ? `${successful} successful, ${failed} failed`
-            : `All ${successful} items processed successfully`,
-          duration: 5000,
-          dismissible: true
-        });
-      },
-      error: (error: string) => {
-        toast.updateToast(loadingId, {
-          type: 'error',
-          title: `Bulk ${operation} Failed`,
-          description: error,
-          duration: 6000,
-          dismissible: true
-        });
-      }
-    };
-  }, [toast]);
+      return {
+        updateProgress: (processed: number) => {
+          toast.updateToast(loadingId, {
+            description: t('admin.bulkOperationProgress', { current: processed, total: totalItems }),
+          });
+          onProgress?.(processed);
+        },
+        complete: (successful: number, failed = 0) => {
+          toast.updateToast(loadingId, {
+            type: failed > 0 ? 'warning' : 'success',
+            title: t('admin.operationCompleted'),
+            description:
+              failed > 0
+                ? `${successful} successful, ${failed} failed`
+                : `All ${successful} items processed successfully`,
+            duration: 5000,
+            dismissible: true,
+          });
+        },
+        error: (error: string) => {
+          toast.updateToast(loadingId, {
+            type: 'error',
+            title: t('admin.operationFailed'),
+            description: error,
+            duration: 6000,
+            dismissible: true,
+          });
+        },
+      };
+    },
+    [toast, t],
+  );
 
   return {
     ...toast,
     adminSuccess,
     adminError,
     adminOperation,
-    bulkOperation
+    bulkOperation,
   };
 };
 
-export default {
+const AdminToast = {
   ToastProvider,
   useToast,
-  useAdminToast
+  useAdminToast,
 };
+
+export default AdminToast;

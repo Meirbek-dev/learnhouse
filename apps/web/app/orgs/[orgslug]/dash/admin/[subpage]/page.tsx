@@ -1,10 +1,8 @@
 'use client';
 
-import { BarChart3, Database, Settings, Trophy, Users, Monitor, Bell, Target, PieChart, Activity } from 'lucide-react';
+import { Activity, BarChart3, Bell, Database, Monitor, Target, Trophy, Users } from 'lucide-react';
 import AdminDashboardPage from '@components/Dashboard/Pages/Admin/AdminDashboardPage';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -20,8 +18,6 @@ export interface AdminParams {
 const AdminPage = (props: { params: Promise<AdminParams> }) => {
   const params = use(props.params);
   const t = useTranslations('DashPage.Admin');
-  const _session = useLHSession() as any;
-  const _org = useOrg() as any;
   const subpage = params.subpage || 'overview';
 
   const getPageTitle = () => {
@@ -38,46 +34,40 @@ const AdminPage = (props: { params: Promise<AdminParams> }) => {
           h2: t('analyticsInfo'),
         };
       }
-      case 'system': {
-        return {
-          h1: t('system'),
-          h2: t('systemInfo'),
-        };
-      }
       case 'gamification': {
         return {
           h1: t('gamification'),
-          h2: 'Gamification metrics and user engagement',
+          h2: t('gamificationInfo'),
         };
       }
       case 'retention': {
         return {
           h1: t('retention'),
-          h2: 'User retention and cohort analysis',
+          h2: t('retentionInfo'),
         };
       }
       case 'realtime': {
         return {
           h1: t('realtime'),
-          h2: 'Live monitoring and real-time metrics',
+          h2: t('realtimeInfo'),
         };
       }
       case 'alerts': {
         return {
           h1: t('alerts'),
-          h2: 'System alerts and notifications',
+          h2: t('alertsInfo'),
         };
       }
       case 'coursefunnels': {
         return {
           h1: t('courseFunnels'),
-          h2: 'Course completion funnels and analysis',
+          h2: t('courseFunnelsInfo'),
         };
       }
       case 'actions': {
         return {
           h1: t('actions'),
-          h2: 'Bulk operations and administrative actions',
+          h2: t('actionsInfo'),
         };
       }
       default: {
@@ -93,16 +83,16 @@ const AdminPage = (props: { params: Promise<AdminParams> }) => {
 
   return (
     <div className="flex h-screen w-full flex-col bg-[#f8f8f8]">
-      <div className="soft-shadow z-10 shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+      <div className="soft-shadow bg-background z-10 shrink-0 px-10 tracking-tight">
         <BreadCrumbs type="admin" />
         <div className="my-2 py-2">
-          <div className="flex w-100 flex-col space-y-1">
+          <div className="flex w-full flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{h1}</div>
             <div className="text-md flex font-medium text-gray-400">{h2}</div>
           </div>
         </div>
-        <div className="flex space-x-0.5 text-sm font-bold overflow-x-auto">
-          <div className="flex space-x-0.5 min-w-max">
+        <div className="flex space-x-0.5 overflow-x-auto text-sm font-bold">
+          <div className="flex min-w-max space-x-0.5">
             <TabLink
               href={getUriWithOrg(params.orgslug, '/dash/admin/overview')}
               icon={<BarChart3 size={16} />}
@@ -116,45 +106,39 @@ const AdminPage = (props: { params: Promise<AdminParams> }) => {
               isActive={subpage === 'analytics'}
             />
             <TabLink
-              href={getUriWithOrg(params.orgslug, '/dash/admin/system')}
-              icon={<Settings size={16} />}
-              label={t('system')}
-              isActive={subpage === 'system'}
-            />
-            <TabLink
               href={getUriWithOrg(params.orgslug, '/dash/admin/gamification')}
               icon={<Trophy size={16} />}
-              label="Gamification"
+              label={t('gamification')}
               isActive={subpage === 'gamification'}
             />
             <TabLink
               href={getUriWithOrg(params.orgslug, '/dash/admin/retention')}
               icon={<Users size={16} />}
-              label="Retention"
+              label={t('retention')}
               isActive={subpage === 'retention'}
             />
             <TabLink
               href={getUriWithOrg(params.orgslug, '/dash/admin/realtime')}
               icon={<Monitor size={16} />}
-              label="Real-time"
+              label={t('realtime')}
               isActive={subpage === 'realtime'}
             />
             <TabLink
               href={getUriWithOrg(params.orgslug, '/dash/admin/alerts')}
               icon={<Bell size={16} />}
-              label="Alerts"
+              label={t('alerts')}
               isActive={subpage === 'alerts'}
             />
             <TabLink
               href={getUriWithOrg(params.orgslug, '/dash/admin/coursefunnels')}
               icon={<Target size={16} />}
-              label="Course Funnels"
+              label={t('courseFunnels')}
               isActive={subpage === 'coursefunnels'}
             />
             <TabLink
               href={getUriWithOrg(params.orgslug, '/dash/admin/actions')}
               icon={<Activity size={16} />}
-              label="Actions"
+              label={t('actions')}
               isActive={subpage === 'actions'}
             />
           </div>
@@ -187,7 +171,7 @@ const TabLink = ({
 }) => (
   <Link href={href}>
     <div
-      className={`border-primary w-fit py-2 px-1 text-center transition-all ease-linear whitespace-nowrap ${
+      className={`border-primary w-fit px-1 py-2 text-center whitespace-nowrap transition-all ease-linear ${
         isActive ? 'border-b-4' : 'opacity-50 hover:opacity-75'
       } cursor-pointer`}
     >

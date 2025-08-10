@@ -1,6 +1,7 @@
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Slot } from '@radix-ui/react-slot';
 import type * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 
@@ -19,7 +20,7 @@ const BreadcrumbList = ({ className, ...props }: React.ComponentProps<'ol'>) => 
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        'text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words font-medium tracking-tight sm:gap-2.5',
+        'flex flex-wrap items-center gap-1.5 break-words font-medium text-muted-foreground text-sm tracking-tight sm:gap-2.5',
         className,
       )}
       {...props}
@@ -49,7 +50,7 @@ const BreadcrumbLink = ({
   return (
     <Comp
       data-slot="breadcrumb-link"
-      className={cn('hover:text-foreground transition-colors', className)}
+      className={cn('transition-colors hover:text-foreground', className)}
       {...props}
     />
   );
@@ -62,7 +63,7 @@ const BreadcrumbPage = ({ className, ...props }: React.ComponentProps<'span'>) =
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn('text-foreground font-normal', className)}
+      className={cn('font-normal text-foreground', className)}
       {...props}
     />
   );
@@ -83,6 +84,8 @@ const BreadcrumbSeparator = ({ children, className, ...props }: React.ComponentP
 };
 
 const BreadcrumbEllipsis = ({ className, ...props }: React.ComponentProps<'span'>) => {
+  const t = useTranslations('Components.Breadcrumb');
+
   return (
     <span
       data-slot="breadcrumb-ellipsis"
@@ -92,7 +95,7 @@ const BreadcrumbEllipsis = ({ className, ...props }: React.ComponentProps<'span'
       {...props}
     >
       <MoreHorizontal className="size-4" />
-      <span className="sr-only">More</span>
+      <span className="sr-only">{t('more')}</span>
     </span>
   );
 };

@@ -12,21 +12,24 @@ interface AdminSkeletonProps {
 
 const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkeletonProps) => {
   switch (variant) {
-    case 'navigation':
+    case 'navigation': {
       return (
-        <div className={cn('space-y-6', className)}>
+        <div className={cn('space-y-6 p-6', className)}>
           {/* Header Skeleton */}
-          <div className="text-center space-y-2">
-            <Skeleton className="h-8 w-48 mx-auto" />
-            <Skeleton className="h-4 w-64 mx-auto" />
+          <div className="space-y-2 text-center">
+            <Skeleton className="mx-auto h-8 w-48" />
+            <Skeleton className="mx-auto h-4 w-64" />
           </div>
 
           {/* Quick Stats Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             {[...Array(4)].map((_, i) => (
-              <Card key={i} className="p-4">
+              <Card
+                key={i}
+                className="p-4"
+              >
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2 flex-1">
+                  <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-8 w-16" />
                   </div>
@@ -39,9 +42,12 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
           {/* Navigation Grid Skeleton */}
           <div className="space-y-4">
             <Skeleton className="h-6 w-32" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {[...Array(9)].map((_, i) => (
-                <Card key={i} className="p-4">
+                <Card
+                  key={i}
+                  className="p-4"
+                >
                   <div className="flex items-center gap-3">
                     <Skeleton className="h-10 w-10 rounded-lg" />
                     <div className="flex-1 space-y-2">
@@ -55,21 +61,18 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
           </div>
         </div>
       );
+    }
 
-    case 'analytics':
+    case 'analytics': {
       return (
-        <div className={cn('space-y-6', className)}>
-          {/* Tabs Skeleton */}
-          <div className="flex gap-2">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-10 w-24 rounded-md" />
-            ))}
-          </div>
-
+        <div className={cn('space-y-6 px-6', className)}>
           {/* Charts Grid Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i}>
+          <div className="gap-6">
+            {[...Array(2)].map((_, i) => (
+              <Card
+                key={i}
+                className="mb-4 w-full"
+              >
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-5 w-5" />
@@ -78,17 +81,18 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
                   <Skeleton className="h-4 w-48" />
                 </CardHeader>
                 <CardContent>
-                  <Skeleton className="h-64 w-full" />
+                  <Skeleton className="h-48 w-full" />
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
       );
+    }
 
-    case 'charts':
+    case 'charts': {
       return (
-        <div className={cn('space-y-6', className)}>
+        <div className={cn('space-y-6 p-6', className)}>
           {[...Array(count)].map((_, i) => (
             <Card key={i}>
               <CardHeader>
@@ -105,11 +109,14 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {[...Array(3)].map((_, j) => (
-                      <div key={j} className="text-center space-y-2">
-                        <Skeleton className="h-8 w-16 mx-auto" />
-                        <Skeleton className="h-4 w-20 mx-auto" />
+                      <div
+                        key={j}
+                        className="space-y-2 text-center"
+                      >
+                        <Skeleton className="mx-auto h-8 w-16" />
+                        <Skeleton className="mx-auto h-4 w-20" />
                       </div>
                     ))}
                   </div>
@@ -120,10 +127,11 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
           ))}
         </div>
       );
+    }
 
-    case 'table':
+    case 'table': {
       return (
-        <div className={cn('space-y-4', className)}>
+        <div className={cn('space-y-4 p-6', className)}>
           {/* Search and Filters */}
           <div className="flex gap-4">
             <Skeleton className="h-10 flex-1" />
@@ -134,7 +142,7 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
           {/* Table Headers */}
           <Card>
             <CardContent className="p-0">
-              <div className="p-4 border-b">
+              <div className="border-b p-4">
                 <div className="flex items-center gap-4">
                   <Skeleton className="h-4 w-4" />
                   <Skeleton className="h-4 w-32" />
@@ -146,7 +154,10 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
 
               {/* Table Rows */}
               {[...Array(count || 5)].map((_, i) => (
-                <div key={i} className="p-4 border-b last:border-b-0">
+                <div
+                  key={i}
+                  className="border-b p-4 last:border-b-0"
+                >
                   <div className="flex items-center gap-4">
                     <Skeleton className="h-4 w-4" />
                     <div className="flex items-center gap-3">
@@ -170,22 +181,26 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
             <Skeleton className="h-4 w-32" />
             <div className="flex gap-2">
               {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-8 w-8" />
+                <Skeleton
+                  key={i}
+                  className="h-8 w-8"
+                />
               ))}
             </div>
           </div>
         </div>
       );
+    }
 
-    case 'card-grid':
+    case 'card-grid': {
       return (
-        <div className={cn('grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6', className)}>
+        <div className={cn('grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3', className)}>
           {[...Array(count || 6)].map((_, i) => (
             <Card key={i}>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-12 w-12 rounded-lg" />
-                  <div className="space-y-2 flex-1">
+                  <div className="flex-1 space-y-2">
                     <Skeleton className="h-5 w-32" />
                     <Skeleton className="h-4 w-24" />
                   </div>
@@ -194,7 +209,7 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
               <CardContent>
                 <div className="space-y-3">
                   <Skeleton className="h-32 w-full" />
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-8 w-16" />
                   </div>
@@ -204,11 +219,10 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
           ))}
         </div>
       );
-
-    case 'overview':
-    default:
+    }
+    default: {
       return (
-        <div className={cn('space-y-6', className)}>
+        <div className={cn('space-y-6 p-6', className)}>
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="space-y-2">
@@ -217,13 +231,16 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
             </div>
             <div className="flex gap-2">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-8 w-12" />
+                <Skeleton
+                  key={i}
+                  className="h-8 w-12"
+                />
               ))}
             </div>
           </div>
 
           {/* Metrics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
               <Card key={i}>
                 <CardContent className="p-6">
@@ -241,7 +258,7 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
           </div>
 
           {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {[...Array(count || 2)].map((_, i) => (
               <Card key={i}>
                 <CardHeader>
@@ -254,7 +271,10 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
                 <CardContent>
                   <div className="space-y-4">
                     {[...Array(3)].map((_, j) => (
-                      <div key={j} className="flex items-center justify-between">
+                      <div
+                        key={j}
+                        className="flex items-center justify-between"
+                      >
                         <div className="flex items-center gap-3">
                           <Skeleton className="h-8 w-8 rounded-full" />
                           <div className="space-y-1">
@@ -262,7 +282,7 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
                             <Skeleton className="h-3 w-24" />
                           </div>
                         </div>
-                        <div className="text-right space-y-1">
+                        <div className="space-y-1 text-right">
                           <Skeleton className="h-4 w-12" />
                           <Skeleton className="h-3 w-16" />
                         </div>
@@ -275,6 +295,7 @@ const AdminSkeleton = ({ variant = 'overview', count = 1, className }: AdminSkel
           </div>
         </div>
       );
+    }
   }
 };
 

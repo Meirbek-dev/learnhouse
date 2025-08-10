@@ -1,31 +1,29 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
-import { Badge } from '@components/ui/badge';
-import { Button } from '@components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
-import { Checkbox } from '@components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Alert, AlertDescription } from '@components/ui/alert';
-import { ScrollArea } from '@components/ui/scroll-area';
 import {
   AlertTriangle,
   Bell,
-  Users,
-  Settings,
   CheckCircle,
-  XCircle,
   Clock,
+  Download,
+  RefreshCw,
+  Settings,
   Shield,
   Trash2,
-  RefreshCw,
-  Download,
-  Upload
+  Upload,
+  Users,
+  XCircle,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
+import type { AdminAlertsResponse, BulkOperationResult } from '@services/admin/admin';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { Alert, AlertDescription } from '@components/ui/alert';
+import { useFormatter, useTranslations } from 'next-intl';
+import { ScrollArea } from '@components/ui/scroll-area';
+import { Button } from '@components/ui/button';
+import { Badge } from '@components/ui/badge';
 import { useState } from 'react';
-import type { AdminAlert, AdminAlertsResponse, BulkOperationResult } from '@services/admin/admin';
 
 interface AdminAlertsAndActionsProps {
   alerts: AdminAlertsResponse;
@@ -38,9 +36,10 @@ export const AdminAlertsAndActions = ({
   alerts,
   isLoading = false,
   onRefreshAlerts,
-  onBulkAction
+  onBulkAction,
 }: AdminAlertsAndActionsProps) => {
   const t = useTranslations('DashPage.Admin.Alerts');
+  const format = useFormatter();
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [bulkAction, setBulkAction] = useState<string>('');
   const [isPerformingAction, setIsPerformingAction] = useState(false);
@@ -48,48 +47,69 @@ export const AdminAlertsAndActions = ({
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high':
+      case 'high': {
         return 'border-red-200 bg-red-50 text-red-800';
-      case 'medium':
+      }
+      case 'medium': {
         return 'border-yellow-200 bg-yellow-50 text-yellow-800';
-      case 'low':
+      }
+      case 'low': {
         return 'border-blue-200 bg-blue-50 text-blue-800';
-      default:
+      }
+      default: {
         return 'border-gray-200 bg-gray-50 text-gray-800';
+      }
     }
   };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'high':
+      case 'high': {
         return <XCircle className="h-5 w-5 text-red-600" />;
-      case 'medium':
+      }
+      case 'medium': {
         return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
-      case 'low':
+      }
+      case 'low': {
         return <CheckCircle className="h-5 w-5 text-blue-600" />;
-      default:
+      }
+      default: {
         return <Bell className="h-5 w-5 text-gray-600" />;
+      }
     }
   };
 
   const getAlertTypeIcon = (type: string) => {
     switch (type) {
-      case 'user_engagement':
+      case 'user_engagement': {
         return <Users className="h-4 w-4" />;
-      case 'course_performance':
+      }
+      case 'course_performance': {
         return <AlertTriangle className="h-4 w-4" />;
-      case 'system':
+      }
+      case 'system': {
         return <Settings className="h-4 w-4" />;
-      case 'security':
+      }
+      case 'security': {
         return <Shield className="h-4 w-4" />;
-      default:
+      }
+      default: {
         return <Bell className="h-4 w-4" />;
+      }
     }
   };
 
   const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
+    try {
+      const date = new Date(timestamp);
+      return format.dateTime(date, {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      });
+    } catch (error) {
+      console.warn('Invalid timestamp format in formatTimestamp:', timestamp, error);
+      return timestamp;
+    }
   };
 
   const handleBulkAction = async () => {
@@ -109,22 +129,18 @@ export const AdminAlertsAndActions = ({
   };
 
   const toggleUserSelection = (userId: number) => {
-    setSelectedUsers(prev =>
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
+    setSelectedUsers((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]));
   };
 
   const selectAllUsers = () => {
-    // Note: No user data available for selection until backend integration is complete
+    // TODO: complete backend integration
     setSelectedUsers([]);
   };
 
   return (
     <div className="space-y-6">
       {/* Alerts Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -175,8 +191,11 @@ export const AdminAlertsAndActions = ({
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="alerts" className="space-y-4">
-        <div className="flex justify-between items-center">
+      <Tabs
+        defaultValue="alerts"
+        className="space-y-4"
+      >
+        <div className="flex items-center justify-between">
           <TabsList className="grid w-fit grid-cols-2">
             <TabsTrigger value="alerts">{t('systemAlerts')}</TabsTrigger>
             <TabsTrigger value="actions">{t('bulkActions')}</TabsTrigger>
@@ -188,39 +207,41 @@ export const AdminAlertsAndActions = ({
             size="sm"
             variant="outline"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             {t('refresh')}
           </Button>
         </div>
 
-        <TabsContent value="alerts" className="space-y-4">
+        <TabsContent
+          value="alerts"
+          className="space-y-4"
+        >
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5" />
                 {t('activeAlerts')}
               </CardTitle>
-              <CardDescription>
-                {t('alertsDescription')}
-              </CardDescription>
+              <CardDescription>{t('alertsDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[500px]">
+              <ScrollArea className="h-auto">
                 {alerts.alerts.length > 0 ? (
                   <div className="space-y-4">
                     {alerts.alerts.map((alert) => (
                       <div
                         key={alert.id}
-                        className={`p-4 border rounded-lg ${getSeverityColor(alert.severity)}`}
+                        className={`rounded-lg border p-4 ${getSeverityColor(alert.severity)}`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="mt-1">
-                            {getSeverityIcon(alert.severity)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
+                          <div className="mt-1">{getSeverityIcon(alert.severity)}</div>
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2 flex items-center gap-2">
                               <h4 className="font-semibold">{alert.title}</h4>
-                              <Badge variant="outline" className="text-xs">
+                              <Badge
+                                variant="outline"
+                                className="text-xs"
+                              >
                                 {getAlertTypeIcon(alert.type)}
                                 <span className="ml-1">{alert.type}</span>
                               </Badge>
@@ -228,14 +249,17 @@ export const AdminAlertsAndActions = ({
                                 {alert.severity}
                               </Badge>
                             </div>
-                            <p className="text-sm mb-2">{alert.description}</p>
+                            <p className="mb-2 text-sm">{alert.description}</p>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2 text-xs text-gray-600">
                                 <Clock className="h-3 w-3" />
                                 {formatTimestamp(alert.timestamp)}
                               </div>
                               {alert.actionRequired && (
-                                <Badge variant="outline" className="text-xs">
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs"
+                                >
                                   {t('actionRequired')}
                                 </Badge>
                               )}
@@ -246,8 +270,8 @@ export const AdminAlertsAndActions = ({
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-600" />
+                  <div className="py-8 text-center">
+                    <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-600" />
                     <p className="text-gray-600">{t('noActiveAlerts')}</p>
                   </div>
                 )}
@@ -256,22 +280,23 @@ export const AdminAlertsAndActions = ({
           </Card>
         </TabsContent>
 
-        <TabsContent value="actions" className="space-y-4">
+        <TabsContent
+          value="actions"
+          className="space-y-4"
+        >
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
                 {t('bulkUserActions')}
               </CardTitle>
-              <CardDescription>
-                {t('bulkActionsDescription')}
-              </CardDescription>
+              <CardDescription>{t('bulkActionsDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* User Selection */}
               <div>
-                <h4 className="font-medium mb-3">{t('selectUsers')}</h4>
-                <div className="flex items-center gap-4 mb-4">
+                <h4 className="mb-3 font-medium">{t('selectUsers')}</h4>
+                <div className="mb-4 flex items-center gap-4">
                   <Button
                     onClick={selectAllUsers}
                     size="sm"
@@ -291,20 +316,23 @@ export const AdminAlertsAndActions = ({
                   </span>
                 </div>
 
-                {/* User list - needs to be connected to actual API */}
-                <div className="border rounded-lg max-h-48 overflow-y-auto">
-                  <div className="text-center py-8 text-gray-500">
-                    <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                {/* User list - TODO: needs to be connected to API */}
+                <div className="max-h-48 overflow-y-auto rounded-lg border">
+                  <div className="py-8 text-center text-gray-500">
+                    <Users className="mx-auto mb-2 h-8 w-8 opacity-50" />
                     <p>{t('userListNotAvailable')}</p>
-                    <p className="text-xs mt-1">{t('connectUserManagementAPI')}</p>
+                    <p className="mt-1 text-xs">{t('connectUserManagementAPI')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Action Selection */}
               <div>
-                <h4 className="font-medium mb-3">{t('selectAction')}</h4>
-                <Select value={bulkAction} onValueChange={setBulkAction}>
+                <h4 className="mb-3 font-medium">{t('selectAction')}</h4>
+                <Select
+                  value={bulkAction}
+                  onValueChange={setBulkAction}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={t('chooseAction')} />
                   </SelectTrigger>
@@ -346,9 +374,9 @@ export const AdminAlertsAndActions = ({
                   <AlertDescription>
                     <div>
                       <p className="font-medium">{actionResult.message}</p>
-                      <p className="text-sm mt-1">
-                        {t('successful')}: {actionResult.results.success.length},
-                        {t('failed')}: {actionResult.results.failed.length}
+                      <p className="mt-1 text-sm">
+                        {t('successful')}: {actionResult.results.success.length},{t('failed')}:{' '}
+                        {actionResult.results.failed.length}
                       </p>
                     </div>
                   </AlertDescription>
@@ -364,13 +392,14 @@ export const AdminAlertsAndActions = ({
                 <Shield className="h-5 w-5" />
                 {t('systemManagement')}
               </CardTitle>
-              <CardDescription>
-                {t('systemManagementDescription')}
-              </CardDescription>
+              <CardDescription>{t('systemManagementDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button variant="outline" className="flex items-center gap-2 h-auto p-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Button
+                  variant="outline"
+                  className="flex h-auto items-center gap-2 p-4"
+                >
                   <Download className="h-5 w-5" />
                   <div className="text-left">
                     <p className="font-medium">{t('exportData')}</p>
@@ -378,7 +407,10 @@ export const AdminAlertsAndActions = ({
                   </div>
                 </Button>
 
-                <Button variant="outline" className="flex items-center gap-2 h-auto p-4">
+                <Button
+                  variant="outline"
+                  className="flex h-auto items-center gap-2 p-4"
+                >
                   <Upload className="h-5 w-5" />
                   <div className="text-left">
                     <p className="font-medium">{t('importData')}</p>
@@ -386,7 +418,10 @@ export const AdminAlertsAndActions = ({
                   </div>
                 </Button>
 
-                <Button variant="outline" className="flex items-center gap-2 h-auto p-4">
+                <Button
+                  variant="outline"
+                  className="flex h-auto items-center gap-2 p-4"
+                >
                   <Trash2 className="h-5 w-5" />
                   <div className="text-left">
                     <p className="font-medium">{t('cleanupData')}</p>
@@ -394,7 +429,10 @@ export const AdminAlertsAndActions = ({
                   </div>
                 </Button>
 
-                <Button variant="outline" className="flex items-center gap-2 h-auto p-4">
+                <Button
+                  variant="outline"
+                  className="flex h-auto items-center gap-2 p-4"
+                >
                   <RefreshCw className="h-5 w-5" />
                   <div className="text-left">
                     <p className="font-medium">{t('refreshCache')}</p>

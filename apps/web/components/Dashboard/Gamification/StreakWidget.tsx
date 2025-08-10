@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AlertCircle, Calendar, Flame, RefreshCw, Star, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getAPIUrl } from '@/services/config/config';
@@ -11,7 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
 
 interface GamificationProfile {
   current_login_streak: number;
@@ -25,11 +25,12 @@ interface GamificationProfile {
 interface StreakWidgetProps {
   orgId: number;
   className?: string;
-  compact?: boolean;
 }
 
-export function StreakWidget({ orgId, className = '', compact = false }: StreakWidgetProps) {
+export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification.streakWidget');
+  const locale = useLocale();
+  const format = useFormatter();
   const { data: session } = useSession();
   const [profile, setProfile] = useState<GamificationProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,17 +66,17 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        setError('Request timed out. Please try again.');
+        setError(t('errors.timeout'));
       } else if (error instanceof Error) {
         console.error('Error fetching gamification profile:', error);
-        setError(error.message);
+        setError(error.message || t('errors.unknown'));
       } else {
-        setError('Unknown error occurred');
+        setError(t('errors.unknown'));
       }
     } finally {
       setIsLoading(false);
     }
-  }, [orgId, session?.tokens?.access_token]);
+  }, [orgId, session?.tokens?.access_token, t]);
 
   const handleRetry = useCallback(() => {
     if (retryCount < 3) {
@@ -88,19 +89,43 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
     fetchProfile();
   }, [fetchProfile]);
 
-  // Memoized utility functions for performance
-  const getStreakStatus = useCallback((lastActivityDate: string | null) => {
-    if (!lastActivityDate) return 'none';
+  const getStreakStatus = useCallback(
+    (lastActivityDate: string | null) => {
+      if (!lastActivityDate) return 'none';
 
-    const lastDate = new Date(lastActivityDate);
-    const today = new Date();
-    const diffTime = today.getTime() - lastDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      try {
+        const lastDate = new Date(lastActivityDate);
+        const today = new Date();
 
-    if (diffDays === 0 || diffDays === 1) return 'active';
-    if (diffDays === 2) return 'at-risk';
-    return 'broken';
-  }, []);
+        // Use locale-aware date comparison
+        const lastDateString = lastDate.toLocaleDateString(locale, {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+        const todayString = today.toLocaleDateString(locale, {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+
+        // Reset time to compare dates only
+        lastDate.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        const diffTime = today.getTime() - lastDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0 || diffDays === 1) return 'active';
+        if (diffDays === 2) return 'at-risk';
+        return 'broken';
+      } catch (error) {
+        console.warn('Invalid date format in getStreakStatus:', lastActivityDate, error);
+        return 'none';
+      }
+    },
+    [locale],
+  );
 
   const getStreakBadgeVariant = useCallback((status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
     switch (status) {
@@ -140,6 +165,54 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
     [t],
   );
 
+  // format dates for display
+  const formatLastActivityDate = useCallback(
+    (dateString: string | null) => {
+      if (!dateString) return t('tooltips.noActivity');
+
+      try {
+        const date = new Date(dateString);
+        return format.dateTime(date, {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      } catch (error) {
+        console.warn('Invalid date format in formatLastActivityDate:', dateString, error);
+        return t('tooltips.invalidDate');
+      }
+    },
+    [format, t],
+  );
+
+  // Helper function to get relative time for last activity
+  const getRelativeTime = useCallback(
+    (dateString: string | null) => {
+      if (!dateString) return t('tooltips.noActivity');
+
+      try {
+        const date = new Date(dateString);
+        const now = new Date();
+        return format.relativeTime(date, now);
+      } catch (error) {
+        console.warn('Invalid date format in getRelativeTime:', dateString, error);
+        return t('tooltips.invalidDate');
+      }
+    },
+    [format, t],
+  );
+
+  // Localized day(s) using next-intl's number formatting
+  const formatDays = useCallback(
+    (count: number) => {
+      const formattedNumber = format.number(count);
+      return t('days', { count: formattedNumber });
+    },
+    [format, t],
+  );
+
   // Memoized calculations
   const streakData = useMemo(() => {
     if (!profile) return null;
@@ -156,18 +229,18 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
     };
   }, [profile, getStreakStatus, getStreakMessage]);
 
-  // Enhanced loading state
+  // Loading state
   if (isLoading) {
     return (
       <Card className={className}>
-        <CardHeader className={compact ? 'pb-3' : ''}>
+        <CardHeader>
           <div className="flex items-center gap-2">
             <Skeleton className="h-6 w-6 rounded-lg" />
             <Skeleton className="h-5 w-32" />
           </div>
         </CardHeader>
-        <CardContent className={compact ? 'pt-0' : ''}>
-          <div className={`space-y-4 ${compact ? 'space-y-2' : ''}`}>
+        <CardContent>
+          <div className="space-y-4">
             <div className="flex items-center justify-between rounded-xl border bg-gradient-to-r from-orange-50 to-red-50 p-4">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-8 w-8 rounded-lg" />
@@ -223,17 +296,17 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
     );
   }
 
-  // No data state with better messaging
+  // No data state
   if (!(profile && streakData)) {
     return (
       <Card className={className}>
-        <CardHeader className={compact ? 'pb-3' : ''}>
+        <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Flame className="h-5 w-5" />
-            {compact ? t('titleCompact') : t('title')}
+            {t('title')}
           </CardTitle>
         </CardHeader>
-        <CardContent className={compact ? 'pt-0' : ''}>
+        <CardContent>
           <div className="py-4 text-center">
             <div className="mb-3 inline-block rounded-full bg-gray-100 p-4 dark:bg-gray-800">
               <Flame className="h-8 w-8 text-gray-400" />
@@ -247,39 +320,6 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
   }
 
   const { loginStatus, learningStatus, loginMessage, learningMessage } = streakData;
-
-  if (compact) {
-    return (
-      <Card className={className}>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex cursor-help items-center gap-2">
-                  <Flame className="h-4 w-4 text-orange-500" />
-                  <span className="text-sm font-medium">{profile.current_login_streak}</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Login streak: {profile.current_login_streak} days</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex cursor-help items-center gap-2">
-                  <Star className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm font-medium">{profile.current_learning_streak}</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Learning streak: {profile.current_learning_streak} days</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <TooltipProvider>
@@ -300,9 +340,7 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
                     <Calendar className="h-5 w-5 text-orange-500" />
                     <h3 className="font-semibold">{t('loginStreak')}</h3>
                   </div>
-                  <Badge variant={getStreakBadgeVariant(loginStatus)}>
-                    {profile.current_login_streak} day{profile.current_login_streak !== 1 ? 's' : ''}
-                  </Badge>
+                  <Badge variant={getStreakBadgeVariant(loginStatus)}>{formatDays(profile.current_login_streak)}</Badge>
                 </div>
 
                 <p className="text-muted-foreground mb-2 text-sm">{loginMessage}</p>
@@ -315,7 +353,17 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Keep logging in daily to maintain your streak and earn bonus XP!</p>
+              <div className="space-y-1">
+                <p>{t('tooltips.login')}</p>
+                {profile.last_login_date && (
+                  <div className="text-xs font-extralight">
+                    <p>
+                      {t('tooltips.lastActivity')}: {getRelativeTime(profile.last_login_date)}
+                    </p>
+                    <p>{formatLastActivityDate(profile.last_login_date)}</p>
+                  </div>
+                )}
+              </div>
             </TooltipContent>
           </Tooltip>
 
@@ -329,7 +377,7 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
                     <h3 className="font-semibold">{t('learningStreak')}</h3>
                   </div>
                   <Badge variant={getStreakBadgeVariant(learningStatus)}>
-                    {profile.current_learning_streak} day{profile.current_learning_streak !== 1 ? 's' : ''}
+                    {formatDays(profile.current_learning_streak)}
                   </Badge>
                 </div>
 
@@ -343,7 +391,17 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Complete learning activities daily to build your learning streak!</p>
+              <div className="space-y-1">
+                <p>{t('tooltips.learning')}</p>
+                {profile.last_learning_activity_date && (
+                  <div className="text-xs font-extralight">
+                    <p>
+                      {t('tooltips.lastActivity')}: {getRelativeTime(profile.last_learning_activity_date)}
+                    </p>
+                    <p>{formatLastActivityDate(profile.last_learning_activity_date)}</p>
+                  </div>
+                )}
+              </div>
             </TooltipContent>
           </Tooltip>
 
@@ -351,12 +409,12 @@ export function StreakWidget({ orgId, className = '', compact = false }: StreakW
           <div className="bg-muted/50 rounded-lg p-3">
             <h4 className="mb-2 flex items-center gap-1 text-sm font-semibold">
               <Trophy className="h-4 w-4" />
-              Streak Tips
+              {t('tips.title')}
             </h4>
             <ul className="text-muted-foreground space-y-1 text-xs">
-              <li>• Daily logins earn bonus XP</li>
-              <li>• Learning streaks unlock special rewards</li>
-              <li>• Consistency is key to maintaining streaks</li>
+              <li>• {t('tips.dailyLoginBonus')}</li>
+              <li>• {t('tips.unlockRewards')}</li>
+              <li>• {t('tips.consistency')}</li>
             </ul>
           </div>
         </CardContent>
