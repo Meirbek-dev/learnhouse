@@ -73,7 +73,7 @@ const OrgUsers = () => {
             </div>
             <div className="overflow-x-auto">
               <Table className="overflow-hidden rounded-md">
-                <TableHeader className="rounded-md bg-gray-100 uppercase">
+                <TableHeader className="uppercase">
                   <TableRow>
                     <TableHead>{t('userHeader')}</TableHead>
                     <TableHead>{t('roleHeader')}</TableHead>

@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Literal
 
-from fastapi import HTTPException, Request, UploadFile
+from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, and_, or_, select, text
 from ulid import ULID
 
@@ -23,9 +22,9 @@ from src.db.resource_authors import (
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
+from src.security.courses_security import courses_rbac_check
 from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_element_is_public,
+    authorization_verify_based_on_org_admin_status,
     authorization_verify_if_user_is_anon,
 )
 from src.services.courses.thumbnails import upload_thumbnail
@@ -47,14 +46,18 @@ async def get_course(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
-    # Get course authors
+    # Get course authors with their roles
     authors_statement = (
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
-        .where(ResourceAuthor.resource_uuid == course_uuid)
-        .order_by(ResourceAuthor.id.asc())
+        .where(ResourceAuthor.resource_uuid == course.course_uuid)
+        .order_by(
+            ResourceAuthor.id.asc()
+        )
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -89,14 +92,18 @@ async def get_course_by_id(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # Get course authors with their roles
     authors_statement = (
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(ResourceAuthor.id.asc())
+        .order_by(
+            ResourceAuthor.id.asc()
+        )
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -148,7 +155,9 @@ async def get_course_meta(
     ]
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # Get course chapters
     chapters = []
@@ -240,7 +249,9 @@ async def get_courses_orgslug(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid.in_(course_uuids))
-        .order_by(ResourceAuthor.id.asc())
+        .order_by(
+            ResourceAuthor.id.asc()
+        )
     )
 
     author_results = db_session.exec(authors_query).all()
@@ -362,7 +373,9 @@ async def search_courses(
             select(ResourceAuthor, User)
             .join(User, ResourceAuthor.user_id == User.id)
             .where(ResourceAuthor.resource_uuid == course.course_uuid)
-            .order_by(ResourceAuthor.id.asc())
+            .order_by(
+                ResourceAuthor.id.asc()
+            )
         )
         author_results = db_session.exec(authors_statement).all()
 
@@ -410,13 +423,24 @@ async def create_course(
     thumbnail_file: UploadFile | None = None,
     thumbnail_type: ThumbnailType = ThumbnailType.IMAGE,
 ):
+    """
+    Create a new course
+
+    SECURITY NOTES:
+    - Requires proper permissions to create courses in the organization
+    - User becomes the CREATOR of the course automatically
+    - Course creation is subject to organization limits and permissions
+    """
+
     # Create Course object from CourseCreate data and add org_id
     course_data = course_object.model_dump()
     course_data["org_id"] = org_id
     course = Course.model_validate(course_data)
 
-    # RBAC check
-    await rbac_check(request, "course_x", current_user, "create", db_session)
+    # SECURITY: Check if user has permission to create courses in this organization
+    # Since this is a new course, we need to check organization-level permissions
+    # For now, we'll use the existing RBAC check but with proper organization context
+    await courses_rbac_check(request, "course_x", current_user, "create", db_session)
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == org_id)
@@ -457,7 +481,7 @@ async def create_course(
     db_session.commit()
     db_session.refresh(course)
 
-    # Make the user the creator of the course
+    # SECURITY: Make the user the creator of the course
     resource_author = ResourceAuthor(
         resource_uuid=course.course_uuid,
         user_id=current_user.id,
@@ -477,7 +501,9 @@ async def create_course(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(ResourceAuthor.id.asc())
+        .order_by(
+            ResourceAuthor.id.asc()
+        )
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -514,7 +540,9 @@ async def update_course_thumbnail(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    await courses_rbac_check(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
     # Get org uuid
     org_statement = select(Organization).where(Organization.id == course.org_id)
@@ -536,7 +564,7 @@ async def update_course_thumbnail(
             thumbnail_file,
             name_in_disk,
             org.org_uuid,
-            course.course_uuid,  # type: ignore
+            course.course_uuid,
         )
 
     # Update course
@@ -573,7 +601,9 @@ async def update_course_thumbnail(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(ResourceAuthor.id.asc())
+        .order_by(
+            ResourceAuthor.id.asc()
+        )
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -599,6 +629,14 @@ async def update_course(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
+    """
+    Update a course
+
+    SECURITY NOTES:
+    - Requires course ownership (CREATOR, MAINTAINER) or admin role
+    - Sensitive fields (public, open_to_contributors) require additional validation
+    - Cannot change course access settings without proper permissions
+    """
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
 
@@ -608,13 +646,56 @@ async def update_course(
             detail="Course not found",
         )
 
-    # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    # SECURITY: Require course ownership or admin role for updating courses
+    await courses_rbac_check(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
-    # Update only the fields that were passed in using exclude_unset for better performance
-    update_data = course_object.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(course, field, value)
+    # SECURITY: Additional checks for sensitive access control fields
+    sensitive_fields_updated = []
+
+    # Check if sensitive fields are being updated
+    if course_object.public is not None:
+        sensitive_fields_updated.append("public")
+    if course_object.open_to_contributors is not None:
+        sensitive_fields_updated.append("open_to_contributors")
+
+    # If sensitive fields are being updated, require additional validation
+    if sensitive_fields_updated:
+        # SECURITY: For sensitive access control changes, require CREATOR or MAINTAINER role
+        # Check if user is course owner (CREATOR or MAINTAINER)
+        statement = select(ResourceAuthor).where(
+            ResourceAuthor.resource_uuid == course_uuid,
+            ResourceAuthor.user_id == current_user.id,
+        )
+        resource_author = db_session.exec(statement).first()
+
+        is_course_owner = False
+        if resource_author and (
+            (
+                resource_author.authorship in (ResourceAuthorshipEnum.CREATOR, ResourceAuthorshipEnum.MAINTAINER)
+            )
+            and resource_author.authorship_status
+            == ResourceAuthorshipStatusEnum.ACTIVE
+        ):
+            is_course_owner = True
+
+        # Check if user has admin or maintainer role
+        is_admin_or_maintainer = await authorization_verify_based_on_org_admin_status(
+            request, current_user.id, "update", course_uuid, db_session
+        )
+
+        # SECURITY: Only course owners (CREATOR, MAINTAINER) or admins can change access settings
+        if not (is_course_owner or is_admin_or_maintainer):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"You must be the course owner (CREATOR or MAINTAINER) or have admin role to change access settings: {', '.join(sensitive_fields_updated)}",
+            )
+
+    # Update only the fields that were passed in
+    for var, value in vars(course_object).items():  # TODO: check for pydantic v2 compat
+        if value is not None:
+            setattr(course, var, value)
 
     # Complete the course object
     course.update_date = str(datetime.now())
@@ -628,7 +709,9 @@ async def update_course(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(ResourceAuthor.id.asc())
+        .order_by(
+            ResourceAuthor.id.asc()
+        )
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -644,7 +727,8 @@ async def update_course(
         for resource_author, user in author_results
     ]
 
-    return CourseRead.model_validate({**course.model_dump(), "authors": authors})
+    return CourseRead(**course.model_dump(), authors=authors)
+
 
 
 async def delete_course(
@@ -663,7 +747,9 @@ async def delete_course(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
+    await courses_rbac_check(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
 
     db_session.delete(course)
     db_session.commit()
@@ -757,34 +843,190 @@ async def get_user_courses(
     return result
 
 
-## 🔒 RBAC Utils ##
-
-
-async def rbac_check(
+async def get_course_user_rights(
     request: Request,
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
-    action: Literal["create", "read", "update", "delete"],
     db_session: Session,
-):
-    if action == "read":
-        if current_user.id == 0:  # Anonymous user
-            return await authorization_verify_if_element_is_public(
-                request, course_uuid, action, db_session
-            )
-        return await authorization_verify_based_on_roles_and_authorship(
-            request, current_user.id, action, course_uuid, db_session
+) -> dict:
+    """
+    Get detailed user rights for a specific course.
+
+    This function returns comprehensive rights information that can be used
+    by the UI to enable/disable features based on user permissions.
+
+    SECURITY NOTES:
+    - Returns rights based on course ownership and user roles
+    - Includes both course-level and content-level permissions
+    - Safe to expose to UI as it only returns permission information
+    """
+    # Check if course exists
+    statement = select(Course).where(Course.course_uuid == course_uuid)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
         )
 
-    await authorization_verify_if_user_is_anon(current_user.id)
-    await authorization_verify_based_on_roles_and_authorship(
-        request,
-        current_user.id,
-        action,
-        course_uuid,
-        db_session,
+    # Initialize rights object
+    rights = {
+        "course_uuid": course_uuid,
+        "user_id": current_user.id,
+        "is_anonymous": current_user.id == 0,
+        "permissions": {
+            "read": False,
+            "create": False,
+            "update": False,
+            "delete": False,
+            "create_content": False,
+            "update_content": False,
+            "delete_content": False,
+            "manage_contributors": False,
+            "manage_access": False,
+            "grade_assignments": False,
+            "mark_activities_done": False,
+            "create_certifications": False,
+        },
+        "ownership": {
+            "is_owner": False,
+            "is_creator": False,
+            "is_maintainer": False,
+            "is_contributor": False,
+            "authorship_status": None,
+        },
+        "roles": {
+            "is_admin": False,
+            "is_maintainer_role": False,
+            "is_instructor": False,
+            "is_user": False,
+        },
+    }
+
+    # Handle anonymous users
+    if current_user.id == 0:
+        # Anonymous users can only read public courses
+        if course.public:
+            rights["permissions"]["read"] = True
+        return rights
+
+    # Check course ownership
+    statement = select(ResourceAuthor).where(
+        ResourceAuthor.resource_uuid == course_uuid,
+        ResourceAuthor.user_id == current_user.id,
     )
-    return None
+    resource_author = db_session.exec(statement).first()
 
+    if resource_author:
+        rights["ownership"]["authorship_status"] = resource_author.authorship_status
 
-## 🔒 RBAC Utils ##
+        if resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE:
+            if resource_author.authorship == ResourceAuthorshipEnum.CREATOR:
+                rights["ownership"]["is_creator"] = True
+                rights["ownership"]["is_owner"] = True
+            elif resource_author.authorship == ResourceAuthorshipEnum.MAINTAINER:
+                rights["ownership"]["is_maintainer"] = True
+                rights["ownership"]["is_owner"] = True
+            elif resource_author.authorship == ResourceAuthorshipEnum.CONTRIBUTOR:
+                rights["ownership"]["is_contributor"] = True
+                rights["ownership"]["is_owner"] = True
+
+    # Check user roles
+    from src.security.rbac.rbac import (
+        authorization_verify_based_on_org_admin_status,
+        authorization_verify_based_on_roles,
+    )
+
+    # Check admin/maintainer role
+    is_admin_or_maintainer = await authorization_verify_based_on_org_admin_status(
+        request, current_user.id, "update", course_uuid, db_session
+    )
+
+    if is_admin_or_maintainer:
+        rights["roles"]["is_admin"] = True
+        rights["roles"]["is_maintainer_role"] = True
+
+    # Check instructor role
+    has_instructor_permissions = await authorization_verify_based_on_roles(
+        request, current_user.id, "create", "course_x", db_session
+    )
+
+    if has_instructor_permissions:
+        rights["roles"]["is_instructor"] = True
+
+    # Check user role (basic permissions)
+    has_user_permissions = await authorization_verify_based_on_roles(
+        request, current_user.id, "read", course_uuid, db_session
+    )
+
+    if has_user_permissions:
+        rights["roles"]["is_user"] = True
+
+    # Determine permissions based on ownership and roles
+    is_course_owner = rights["ownership"]["is_owner"]
+    is_admin = rights["roles"]["is_admin"]
+    is_maintainer_role = rights["roles"]["is_maintainer_role"]
+    is_instructor = rights["roles"]["is_instructor"]
+
+    # READ permissions
+    if (
+        course.public
+        or is_course_owner
+        or is_admin
+        or is_maintainer_role
+        or is_instructor
+        or has_user_permissions
+    ):
+        rights["permissions"]["read"] = True
+
+    # CREATE permissions (course creation)
+    if is_instructor or is_admin or is_maintainer_role:
+        rights["permissions"]["create"] = True
+
+    # UPDATE permissions (course-level updates)
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["update"] = True
+
+    # DELETE permissions (course deletion)
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["delete"] = True
+
+    # CONTENT CREATION permissions (activities, assignments, chapters, etc.)
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["create_content"] = True
+
+    # CONTENT UPDATE permissions
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["update_content"] = True
+
+    # CONTENT DELETE permissions
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["delete_content"] = True
+
+    # CONTRIBUTOR MANAGEMENT permissions
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["manage_contributors"] = True
+
+    # ACCESS MANAGEMENT permissions (public, open_to_contributors)
+    if (
+        rights["ownership"]["is_creator"]
+        or rights["ownership"]["is_maintainer"]
+        or is_admin
+        or is_maintainer_role
+    ):
+        rights["permissions"]["manage_access"] = True
+
+    # GRADING permissions
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["grade_assignments"] = True
+
+    # ACTIVITY MARKING permissions
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["mark_activities_done"] = True
+
+    # CERTIFICATION permissions
+    if is_course_owner or is_admin or is_maintainer_role:
+        rights["permissions"]["create_certifications"] = True
+
+    return rights

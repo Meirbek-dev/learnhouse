@@ -342,9 +342,7 @@ export const AdvancedGamificationCharts = ({ metrics, isLoading = false }: Advan
                   <h4 className="mb-4 font-medium">{t('streakCategories')}</h4>
                   <div className="py-6 text-center text-gray-500">
                     <p className="text-sm">{t('streakDataNotAvailable')}</p>
-                    <p className="mt-1 text-xs text-gray-400">
-                      {t('backendImplementationRequired')}
-                    </p>
+                    <p className="mt-1 text-xs text-gray-400">{t('backendImplementationRequired')}</p>
                   </div>
                 </div>
               </div>

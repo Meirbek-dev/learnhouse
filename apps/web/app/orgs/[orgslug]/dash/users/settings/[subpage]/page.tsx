@@ -1,17 +1,21 @@
 'use client';
 import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
+import { Monitor, ScanEye, SquareUserRound, UserPlus, Users, Shield } from 'lucide-react';
 import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd';
-import { Monitor, ScanEye, SquareUserRound, UserPlus, Users } from 'lucide-react';
 import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess';
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
+import OrgRoles from '@components/Dashboard/Pages/Users/OrgRoles/OrgRoles';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getUriWithOrg } from '@services/config/config';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { use, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export interface SettingsParams {
@@ -46,6 +50,10 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
         setH1Label(t('usergroupsTitle'));
         setH2Label(t('usergroupsDescription'));
       }
+      if (params.subpage == 'roles') {
+        setH1Label(t('rolesTitle'));
+        setH2Label(t('rolesDescription'));
+      }
     };
 
     handleLabels();
@@ -54,16 +62,18 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
   if (isMobile) {
     // TODO: Work on a better mobile experience
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8] p-4">
-        <div className="rounded-lg bg-white p-6 text-center shadow-md">
-          <h2 className="mb-4 text-xl font-bold">{t('desktopOnlyTitle')}</h2>
-          <Monitor
-            className="mx-auto my-5"
-            size={60}
-          />
-          <p>{t('desktopOnlyMessage1')}</p>
-          <p>{t('desktopOnlyMessage2')}</p>
-        </div>
+      <div className="flex h-screen w-full items-center justify-center bg-muted/40 p-4">
+        <Card className="max-w-sm text-center">
+          <CardContent className="py-2 px-6 flex flex-col items-center space-y-4">
+            <h2 className="text-xl font-bold tracking-tight">{t('desktopOnlyTitle')}</h2>
+            <Monitor
+              className="text-muted-foreground"
+              size={56}
+            />
+            <p className="text-sm text-muted-foreground leading-snug">{t('desktopOnlyMessage1')}</p>
+            <p className="text-xs text-muted-foreground/80">{t('desktopOnlyMessage2')}</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -100,6 +110,18 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
               <div className="mx-2 flex items-center space-x-2.5">
                 <SquareUserRound size={16} />
                 <div>{t('usergroups')}</div>
+              </div>
+            </div>
+          </Link>
+          <Link href={getUriWithOrg(params.orgslug, '') + `/dash/users/settings/roles`}>
+            <div
+              className={`py-2 w-fit text-center border-primary transition-all ease-linear ${
+                params.subpage.toString() === 'roles' ? 'border-b-4' : 'opacity-50'
+              } cursor-pointer`}
+            >
+              <div className="flex items-center space-x-2.5 mx-2">
+                <Shield size={16} />
+                <div>{t('roles')}</div>
               </div>
             </div>
           </Link>
@@ -140,6 +162,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
         {params.subpage === 'signups' ? <OrgAccess /> : ''}
         {params.subpage === 'add' ? <OrgUsersAdd /> : ''}
         {params.subpage === 'usergroups' ? <OrgUserGroups /> : ''}
+        {params.subpage === 'roles' ? <OrgRoles /> : ''}
       </motion.div>
     </div>
   );

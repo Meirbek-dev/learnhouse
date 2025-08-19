@@ -7,22 +7,44 @@ from src.core.events.database import get_db_session
 from src.db.roles import RoleCreate, RoleRead, RoleUpdate
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.services.roles.roles import create_role, delete_role, read_role, update_role
+from src.services.roles.roles import (
+    create_role,
+    delete_role,
+    get_roles_by_organization,
+    read_role,
+    update_role,
+)
 
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/org/{org_id}")
 async def api_create_role(
     request: Request,
+    org_id: int,
     role_object: RoleCreate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> RoleRead:
     """
-    Create new role
+    Create new role for a specific organization
     """
+    # Set the org_id in the role object
+    role_object.org_id = org_id
     return await create_role(request, db_session, role_object, current_user)
+
+
+@router.get("/org/{org_id}")
+async def api_get_roles_by_organization(
+    request: Request,
+    org_id: int,
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> list[RoleRead]:
+    """
+    Get all roles for a specific organization, including global roles
+    """
+    return await get_roles_by_organization(request, db_session, org_id, current_user)
 
 
 @router.get("/{role_id}")
@@ -41,6 +63,7 @@ async def api_get_role(
 @router.put("/{role_id}")
 async def api_update_role(
     request: Request,
+    role_id: int,
     role_object: RoleUpdate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -48,6 +71,7 @@ async def api_update_role(
     """
     Update role by role_id
     """
+    role_object.role_id = role_id
     return await update_role(request, db_session, role_object, current_user)
 
 

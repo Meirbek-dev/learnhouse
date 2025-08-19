@@ -1,6 +1,6 @@
 # Stage 1: Builder
 # Use a uv image with Python pre-installed.
-FROM ghcr.io/astral-sh/uv:0.7.13-python3.13-bookworm AS builder
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -32,7 +32,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Stage 2: Production
 # Use a lean Python-only image for the final production image.
 # This reduces the final image size as uv is not needed at runtime.
-FROM python:3.13.5-slim
+FROM python:3.13.7-slim-trixie
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

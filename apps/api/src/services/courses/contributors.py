@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request
 from sqlmodel import Session, and_, select
 
 from src.db.courses.courses import Course
@@ -10,10 +10,8 @@ from src.db.resource_authors import (
     ResourceAuthorshipStatusEnum,
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_user_is_anon,
-)
+from src.security.courses_security import courses_rbac_check
+from src.security.rbac.rbac import authorization_verify_if_user_is_anon
 
 
 async def apply_course_contributor(
@@ -22,6 +20,14 @@ async def apply_course_contributor(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
+    """
+    Apply to become a course contributor
+
+    SECURITY NOTES:
+    - Any authenticated user can apply to become a contributor
+    - Applications are created with PENDING status
+    - Only course owners (CREATOR, MAINTAINER) or admins can approve applications
+    """
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
 
@@ -82,21 +88,17 @@ async def update_course_contributor(
 ):
     """
     Update a course contributor's role and status
-    Only administrators can perform this action
+
+    SECURITY NOTES:
+    - Only course owners (CREATOR, MAINTAINER) or admins can update contributors
+    - Cannot modify the role of the course creator
+    - Requires strict course ownership checks
     """
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
 
-    # RBAC check - verify if user has admin rights
-    authorized = await authorization_verify_based_on_roles_and_authorship(
-        request, current_user.id, "update", course_uuid, db_session
-    )
-
-    if not authorized:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to update course contributors",
-        )
+    # SECURITY: Require course ownership or admin role for updating contributors
+    await courses_rbac_check(request, course_uuid, current_user, "update", db_session)
 
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -124,7 +126,7 @@ async def update_course_contributor(
             detail="Contributor not found for this course",
         )
 
-    # Don't allow changing the role of the creator
+    # SECURITY: Don't allow changing the role of the creator
     if existing_authorship.authorship == ResourceAuthorshipEnum.CREATOR:
         raise HTTPException(
             status_code=400,
@@ -151,6 +153,10 @@ async def get_course_contributors(
 ) -> list[dict]:
     """
     Get all contributors for a course with their user information
+
+    SECURITY NOTES:
+    - Requires read access to the course
+    - Contributors are visible to anyone with course read access
     """
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -161,6 +167,9 @@ async def get_course_contributors(
             status_code=404,
             detail="Course not found",
         )
+
+    # SECURITY: Require read access to the course
+    await courses_rbac_check(request, course_uuid, current_user, "read", db_session)
 
     # Get all contributors for this course with user information
     statement = (
@@ -192,21 +201,17 @@ async def add_bulk_course_contributors(
 ):
     """
     Add multiple contributors to a course by their usernames
-    Only administrators can perform this action
+
+    SECURITY NOTES:
+    - Only course owners (CREATOR, MAINTAINER) or admins can add contributors
+    - Requires strict course ownership checks
+    - Cannot add contributors to courses the user doesn't own
     """
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
 
-    # RBAC check - verify if user has admin rights
-    authorized = await authorization_verify_based_on_roles_and_authorship(
-        request, current_user.id, "update", course_uuid, db_session
-    )
-
-    if not authorized:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to add contributors",
-        )
+    # SECURITY: Require course ownership or admin role for adding contributors
+    await courses_rbac_check(request, course_uuid, current_user, "update", db_session)
 
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -285,21 +290,18 @@ async def remove_bulk_course_contributors(
 ):
     """
     Remove multiple contributors from a course by their usernames
-    Only administrators can perform this action
+
+    SECURITY NOTES:
+    - Only course owners (CREATOR, MAINTAINER) or admins can remove contributors
+    - Requires strict course ownership checks
+    - Cannot remove contributors from courses the user doesn't own
+    - Cannot remove the course creator
     """
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
 
-    # RBAC check - verify if user has admin rights
-    authorized = await authorization_verify_based_on_roles_and_authorship(
-        request, current_user.id, "update", course_uuid, db_session
-    )
-
-    if not authorized:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to remove contributors",
-        )
+    # SECURITY: Require course ownership or admin role for removing contributors
+    await courses_rbac_check(request, course_uuid, current_user, "update", db_session)
 
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
@@ -345,7 +347,7 @@ async def remove_bulk_course_contributors(
                 )
                 continue
 
-            # Don't allow removing the creator
+            # SECURITY: Don't allow removing the creator
             if existing_authorship.authorship == ResourceAuthorshipEnum.CREATOR:
                 results["failed"].append(
                     {"username": username, "reason": "Cannot remove the course creator"}

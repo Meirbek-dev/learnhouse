@@ -3,7 +3,9 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
+import { BookOpen } from 'lucide-react';
 import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -55,7 +57,19 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
             </div>
           </div>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
+          <Button
+            asChild
+            size="sm"
+          >
+            <Link
+              href={getUriWithOrg(org?.slug, '/dash/documentation/rights')}
+              className="gap-2"
+            >
+              <BookOpen className="size-4" />
+              <span>{t('rightsGuide')}</span>
+            </Link>
+          </Button>
           <SaveState orgslug={params.orgslug} />
         </div>
       </div>

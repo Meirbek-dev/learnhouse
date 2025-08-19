@@ -384,7 +384,9 @@
       "exploreCourses": "Explore More Courses",
       "instructor": "Instructor",
       "keepGoing": "Keep Going!",
+      "keepLearningMessage": "Keep learning to unlock more avatar customizations and features!",
       "labelAwarded": "Awarded",
+      "learningAchievementUnlocked": "Learning Achievement Unlocked!",
       "loadingCertificate": "Loading your certificate...",
       "loadingError": "Failed to load certificate. Please try again later.",
       "noCertificateAvailable": "No certificate available",
@@ -396,11 +398,9 @@
       "shareAchievement": "Share Your Achievement",
       "verifyCertificate": "Verify Certificate",
       "viewCertificate": "View Certificate",
-      "youAreAlmostThere": "You're almost there!",
-      "youAreMakingProgress": "You're making great progress in",
-      "learningAchievementUnlocked": "Learning Achievement Unlocked!",
       "xpBonusMessage": "+100 XP Course Completion Bonus!",
-      "keepLearningMessage": "Keep learning to unlock more avatar customizations and features!"
+      "youAreAlmostThere": "You're almost there!",
+      "youAreMakingProgress": "You're making great progress in"
     },
     "EditCourseCertification": {
       "basicInfo": "Basic Information",
@@ -799,6 +799,7 @@
     "RolesUpdate": {
       "adminRole": "Admin",
       "loadingButton": "Loading...",
+      "loadingRoles": "Loading roles...",
       "maintainerRole": "Maintainer",
       "rolesLabel": "Roles",
       "selectRolePlaceholder": "Please select a role for the user",
@@ -1449,434 +1450,429 @@
   },
   "DashPage": {
     "Admin": {
-      "title": "Admin",
-      "adminDashboard": "Admin Dashboard",
-      "overview": "Overview",
-      "overviewInfo": "Key metrics and recent activity",
-      "analytics": "Analytics",
-      "analyticsInfo": "User engagement and content performance",
-      "gamification": "Gamification",
-      "gamificationInfo": "XP, levels, achievements and trends",
-      "retention": "Retention",
-      "retentionInfo": "Cohorts, churn and return rates",
-      "realtime": "Realtime",
-      "realtimeInfo": "Live sessions and activity feed",
-      "alerts": "Alerts",
-      "alertsInfo": "System alerts and bulk actions",
-      "courseFunnels": "Course Funnels",
-      "courseFunnelsInfo": "Conversion funnels and drop-off points",
-      "actions": "Actions",
-      "actionsInfo": "Administrative actions and tools",
-      "accessDenied": "Access Denied",
-      "accessDeniedDescription": "You do not have permissions to access this dashboard",
-      "failedToLoadAdminData": "Failed to load admin data",
-      "failedToLoadAdminDataDescription": "Please refresh the page or try again later.",
-      "totalUsers": "Total Users",
-      "thisMonth": "this month",
-      "totalCourses": "Total Courses",
-      "activities": "activities",
-      "activeUsers": "Active Users",
-      "last30Days": "last 30 days",
-      "coursesCompleted": "Courses Completed",
-      "growth": "growth",
-      "topCourses": "Top Courses",
-      "topCoursesDescription": "Most engaging courses by enrollments and completion",
-      "completion": "Completion",
-      "noDataAvailable": "No data available",
-      "recentActivity": "Recent Activity",
-      "recentActivityDescription": "Latest events across the organization",
-      "noRecentActivity": "No recent activity",
-      "enrollments": "{count, plural, one {# enrollment} other {# enrollments}}",
-      "bulkOperationCompletedTitle": "Bulk Operation Completed",
-      "bulkOperationCompletedDescription": "Successfully processed {count} users",
-      "bulkOperationFailedTitle": "Bulk Operation Failed",
-      "bulkOperationFailedDescription": "Please try again",
-      "recentAction": {
-        "bulkUserActivation": "Bulk user activation",
-        "systemBackup": "System backup",
-        "cacheClear": "Cache clear",
-        "userExport": "User export"
-      },
-      "time": {
-        "twoHoursAgo": "2 hours ago",
-        "sixHoursAgo": "6 hours ago",
-        "oneDayAgo": "1 day ago",
-        "twoDaysAgo": "2 days ago"
-      },
-      "status": {
-        "success": "success"
-      },
-      "errorLoadingAnalyticsData": "Error loading analytics data",
-      "failedToLoadAnalyticsData": "Failed to load analytics data:",
-      "retry": "Retry",
-      "userEngagement": "User Engagement",
-      "userEngagementDescription": "Active users and return rates",
-      "dailyActiveUsers": "Daily Active Users",
-      "returnRate": "Return Rate",
-      "basedOnLoginStreaks": "Based on login streaks",
-      "contentPerformance": "Content Performance",
-      "contentPerformanceDescription": "Popular content and completion rates",
-      "mostPopularCourses": "Most popular courses",
-      "completionRates": "Completion rates",
-      "overallCompletion": "Overall completion",
-      "avgCourseRating": "Average course rating",
-      "notAvailable": "N/A",
-      "learningProgress": "Learning Progress",
-      "learningProgressDescription": "Progress, completions and certificates",
-      "coursesStarted": "Courses Started",
-      "certificatesIssued": "Certificates Issued",
-      "avgProgress": "Avg. Progress",
-      "errorLoadingGamificationData": "Error loading gamification data",
-      "failedToLoadGamificationMetrics": "Failed to load gamification metrics:",
-      "noGamificationData": "No gamification data available",
-      "errorLoadingRetentionData": "Error loading retention data",
-      "failedToLoadRetentionMetrics": "Failed to load retention metrics:",
-      "noRetentionData": "No retention data available",
-      "errorLoadingRealtimeData": "Error loading realtime data",
-      "failedToLoadRealtimeMetrics": "Failed to load realtime metrics:",
-      "noRealtimeData": "No realtime data available",
-      "errorLoadingAlertsData": "Error loading alerts",
-      "failedToLoadSystemAlerts": "Failed to load system alerts:",
-      "noAlertsData": "No alerts available",
-      "administrativeActions": "Administrative Actions",
-      "administrativeActionsDescription": "Manage users and system operations",
-      "userManagement": "User Management",
-      "userManagementDescription": "Bulk actions and notifications",
-      "exportUsers": "Export Users",
-      "activateUsers": "Activate Users",
-      "suspendUsers": "Suspend Users",
-      "sendNotifications": "Send Notifications",
-      "systemOperations": "System Operations",
-      "systemOperationsDescription": "Maintenance and reporting tools",
-      "backupData": "Backup Data",
-      "clearCache": "Clear Cache",
-      "generateReports": "Generate Reports",
-      "systemCheck": "System Check",
-      "recentActions": "Recent Actions",
-      "recentActionsDescription": "Log of recent administrative operations",
-      "Realtime": {
-        "title": "Realtime Monitoring",
-        "live": "Live",
-        "lastUpdated": "Last updated",
-        "refresh": "Refresh",
-        "activeSessions": "Active Sessions",
-        "activityFeed": "Activity Feed",
-        "sessions": {
-          "title": "Courses with Active Sessions",
-          "description": "Live participation by course",
-          "course": "Course",
-          "empty": "No active sessions right now"
-        },
-        "activity": {
-          "title": "Recent Activity",
-          "description": "Live stream of user activity",
-          "empty": "No activity in the selected timeframe",
-          "userBadge": "User #{id}"
-        },
-        "metrics": {
-          "activeUsers": "Active Users",
-          "activeSessions": "Active Sessions",
-          "totalSessions": "Total sessions",
-          "recentActivity": "Recent Activity",
-          "lastHour": "in the last hour"
-        },
-        "monitoringNote": "Monitoring is updated periodically. Some metrics may be delayed by up to a minute."
-      },
       "Alerts": {
-        "totalAlerts": "Total Alerts",
-        "highPriority": "High Priority",
-        "mediumPriority": "Medium Priority",
-        "lowPriority": "Low Priority",
-        "systemAlerts": "System Alerts",
-        "bulkActions": "Bulk Actions",
-        "refresh": "Refresh",
+        "actionRequired": "Action Required",
         "activeAlerts": "Active Alerts",
         "alertsDescription": "Review alerts and take action when required",
-        "actionRequired": "Action Required",
-        "noActiveAlerts": "No active alerts",
-        "bulkUserActions": "Bulk User Actions",
+        "bulkActions": "Bulk Actions",
         "bulkActionsDescription": "Select users and perform actions in bulk",
-        "selectUsers": "Select Users",
-        "selectAll": "Select All",
-        "clearSelection": "Clear Selection",
-        "usersSelected": "users selected",
-        "userListNotAvailable": "User list not available",
-        "connectUserManagementAPI": "Connect user management API to enable selection",
-        "selectAction": "Select Action",
+        "bulkUserActions": "Bulk User Actions",
+        "cacheDescription": "Clear caches to force data refresh",
         "chooseAction": "Choose an action",
-        "deactivateUsers": "Deactivate Users",
-        "resetProgress": "Reset Progress",
-        "sendNotification": "Send Notification",
-        "executeAction": "Execute Action",
-        "willAffect": "Will affect",
-        "users": "users",
-        "successful": "Successful",
-        "failed": "Failed",
-        "systemManagement": "System Management",
-        "systemManagementDescription": "Export, import and maintenance tasks",
-        "exportData": "Export Data",
-        "exportDescription": "Download organization data as CSV",
-        "importData": "Import Data",
-        "importDescription": "Upload CSV to update users",
         "cleanupData": "Cleanup Data",
         "cleanupDescription": "Remove stale or temporary data",
+        "clearSelection": "Clear Selection",
+        "connectUserManagementAPI": "Connect user management API to enable selection",
+        "deactivateUsers": "Deactivate Users",
+        "executeAction": "Execute Action",
+        "exportData": "Export Data",
+        "exportDescription": "Download organization data as CSV",
+        "failed": "Failed",
+        "highPriority": "High Priority",
+        "importData": "Import Data",
+        "importDescription": "Upload CSV to update users",
+        "lowPriority": "Low Priority",
+        "mediumPriority": "Medium Priority",
+        "noActiveAlerts": "No active alerts",
+        "refresh": "Refresh",
         "refreshCache": "Refresh Cache",
-        "cacheDescription": "Clear caches to force data refresh"
+        "resetProgress": "Reset Progress",
+        "selectAction": "Select Action",
+        "selectAll": "Select All",
+        "selectUsers": "Select Users",
+        "sendNotification": "Send Notification",
+        "successful": "Successful",
+        "systemAlerts": "System Alerts",
+        "systemManagement": "System Management",
+        "systemManagementDescription": "Export, import and maintenance tasks",
+        "totalAlerts": "Total Alerts",
+        "userListNotAvailable": "User list not available",
+        "users": "users",
+        "usersSelected": "users selected",
+        "willAffect": "Will affect"
       },
-      "Gamification": {
-        "totalProfiles": "Total Profiles",
-        "gamificationUsers": "Gamification Users",
-        "activeUsers": "Active Users",
-        "withXP": "with XP",
-        "engagementRate": "Engagement Rate",
-        "excellent": "Excellent",
-        "good": "Good",
-        "moderate": "Moderate",
-        "low": "Low",
-        "averageXP": "Average XP",
-        "levelDistribution": "Level Distribution",
-        "userLevelDistribution": "User Level Distribution",
-        "levelDistributionDescription": "Distribution of users by level",
-        "level": "Level",
-        "users": "Users",
-        "xpAnalysis": "XP Analysis",
-        "streakAnalysis": "Streak Analysis",
-        "insights": "Insights",
-        "xpStatistics": "XP Statistics",
-        "perUser": "per user",
-        "maxXP": "Max XP",
-        "topUser": "Top user",
-        "totalXP": "Total XP",
-        "allUsers": "all users",
-        "xpDistribution": "XP Distribution",
-        "loginStreakAnalysis": "Login Streak Analysis",
-        "streakDescription": "Overview of user login streaks",
-        "averageStreak": "Average Streak",
-        "days": "days",
-        "longestStreak": "Longest Streak",
-        "streakCategories": "Streak Categories",
-        "gamificationInsights": "Gamification Insights",
-        "insightsDescription": "Key findings and recommendations",
-        "levelInsights": "Level Insights",
-        "mostPopularLevel": "Most Popular Level",
-        "highLevelUsers": "High-level Users",
-        "keyMetrics": "Key Metrics",
-        "engagementLevel": "Engagement Level",
-        "ofUsersActive": "of users active",
-        "progressionRate": "Progression Rate",
-        "reachedLevel5Plus": "reached level 5+",
-        "retentionIndicator": "Retention Indicator",
-        "goodRetention": "Good retention",
-        "needsImprovement": "Needs improvement",
-        "recommendations": "Recommendations",
-        "lowEngagementRecommendation": "Engagement is low. Consider adding XP rewards and challenges.",
-        "streakImprovementRecommendation": "Increase streak incentives to motivate frequent logins.",
-        "generalRecommendation": "Introduce weekly goals and showcase progress to keep learners motivated.",
-        "levelProgressionTip": "Provide tips or micro-goals to help users level up consistently",
-        "noXpData": "No XP distribution data available",
-        "noGamificationActivity": "No gamification activity recorded yet",
-        "streakDataNotAvailable": "Streak distribution data is not available",
-        "backendImplementationRequired": "TODO: Backend implementation required for user streak categorization"
-      },
-      "Retention": {
-        "totalNewUsers": "Total New Users",
-        "last6Months": "last 6 months",
-        "retention": "retention",
-        "churn": "churn",
-        "avg30DayRetention": "Avg. 30-day Retention",
-        "churnRate": "Churn Rate",
-        "cohortAnalysis": "Cohort Analysis",
-        "retentionTrends": "Retention Trends",
-        "cohortRetentionMatrix": "Cohort Retention Matrix",
-        "cohortDescription": "Retention rates by cohort over months",
-        "newUsers": "new users",
-        "cohort": "Cohort",
-        "month": "Month",
-        "users": "Users",
-        "retentionTrendAnalysis": "Retention Trend Analysis",
-        "trendsDescription": "Trends and patterns in user retention",
-        "monthlyRetention": "Monthly Retention",
-        "retentionPatterns": "Retention Patterns",
-        "highRetention": "High Retention",
-        "moderateRetention": "Moderate Retention",
-        "lowRetention": "Low Retention",
-        "criticalRetention": "Critical Retention",
-        "keyInsights": "Key Insights",
-        "bestPerformingCohort": "Best Performing Cohort",
-        "noCohortData": "No cohort data available",
-        "improvementOpportunity": "Improvement Opportunity",
-        "highChurnAlert": "High churn rate detected. Consider engagement campaigns.",
-        "retentionGood": "Retention is within healthy range",
-        "trend": {
-          "improving": "improving",
-          "declining": "declining",
-          "stable": "stable"
+      "Animations": {
+        "accessibility": {
+          "animationDisabled": "Animation disabled for accessibility",
+          "reducedMotion": "Reduced motion enabled"
+        },
+        "buttonStates": {
+          "default": "Default",
+          "error": "Error",
+          "loading": "Loading...",
+          "success": "Success"
+        },
+        "loading": "Loading...",
+        "loadingStates": {
+          "dots": "Loading dots",
+          "pulse": "Loading pulse",
+          "skeleton": "Loading skeleton",
+          "spinner": "Loading spinner"
         }
       },
       "Funnels": {
-        "title": "Course Funnels",
-        "description": "Analyze course progression and drop-offs",
-        "selectCourse": "Select course",
         "allCourses": "All Courses",
-        "totalCourses": "Total Courses",
-        "avgCompletionRate": "Avg. Completion Rate",
-        "coursesAnalyzed": "Courses Analyzed",
-        "funnelAnalysis": "Funnel Analysis",
-        "singleFunnelDescription": "Detailed funnel breakdown for the selected course",
-        "dropoff": "drop-off",
-        "insights": "Insights",
-        "biggestDropoff": "Biggest drop-off",
-        "atStage": "at stage",
-        "overallCompletion": "Overall Completion",
-        "completionRate": "completion rate",
-        "good": "Good",
-        "poor": "Poor",
-        "needsImprovement": "Needs improvement",
         "allCoursesFunnels": "All Courses Funnels",
-        "overviewDescription": "Overview of funnels across all courses",
-        "enrolled": "enrolled",
+        "atStage": "at stage",
+        "avgCompletionRate": "Avg. Completion Rate",
+        "bestPractices": "Best Practices",
+        "biggestDropoff": "Biggest drop-off",
         "completed": "completed",
         "completion": "Completion",
-        "recommendations": "Recommendations",
-        "lowCompletionAlert": "Low completion rate detected. Improve content structure and engagement.",
+        "completionRate": "completion rate",
+        "coursesAnalyzed": "Courses Analyzed",
+        "description": "Analyze course progression and drop-offs",
+        "dropoff": "drop-off",
+        "enrolled": "enrolled",
+        "funnelAnalysis": "Funnel Analysis",
+        "good": "Good",
         "improvementTips": "Improvement Tips",
+        "insights": "Insights",
+        "lowCompletionAlert": "Low completion rate detected. Improve content structure and engagement.",
+        "needsImprovement": "Needs improvement",
+        "overallCompletion": "Overall Completion",
+        "overviewDescription": "Overview of funnels across all courses",
+        "poor": "Poor",
+        "practice1": "Use concise lessons with practical examples",
+        "practice2": "Encourage feedback and Q&A participation",
+        "practice3": "Highlight success stories and achievements",
+        "recommendations": "Recommendations",
+        "selectCourse": "Select course",
+        "singleFunnelDescription": "Detailed funnel breakdown for the selected course",
         "tip1": "Add interactive activities to keep learners engaged",
         "tip2": "Provide clear milestones and progress indicators",
         "tip3": "Offer short summaries at the end of sections",
-        "bestPractices": "Best Practices",
-        "practice1": "Use concise lessons with practical examples",
-        "practice2": "Encourage feedback and Q&A participation",
-        "practice3": "Highlight success stories and achievements"
+        "title": "Course Funnels",
+        "totalCourses": "Total Courses"
+      },
+      "Gamification": {
+        "activeUsers": "Active Users",
+        "allUsers": "all users",
+        "averageStreak": "Average Streak",
+        "averageXP": "Average XP",
+        "backendImplementationRequired": "TODO: Backend implementation required for user streak categorization",
+        "days": "days",
+        "engagementLevel": "Engagement Level",
+        "engagementRate": "Engagement Rate",
+        "excellent": "Excellent",
+        "gamificationInsights": "Gamification Insights",
+        "gamificationUsers": "Gamification Users",
+        "generalRecommendation": "Introduce weekly goals and showcase progress to keep learners motivated.",
+        "good": "Good",
+        "goodRetention": "Good retention",
+        "highLevelUsers": "High-level Users",
+        "insights": "Insights",
+        "insightsDescription": "Key findings and recommendations",
+        "keyMetrics": "Key Metrics",
+        "level": "Level",
+        "levelDistribution": "Level Distribution",
+        "levelDistributionDescription": "Distribution of users by level",
+        "levelInsights": "Level Insights",
+        "levelProgressionTip": "Provide tips or micro-goals to help users level up consistently",
+        "loginStreakAnalysis": "Login Streak Analysis",
+        "longestStreak": "Longest Streak",
+        "low": "Low",
+        "lowEngagementRecommendation": "Engagement is low. Consider adding XP rewards and challenges.",
+        "maxXP": "Max XP",
+        "moderate": "Moderate",
+        "mostPopularLevel": "Most Popular Level",
+        "needsImprovement": "Needs improvement",
+        "noGamificationActivity": "No gamification activity recorded yet",
+        "noXpData": "No XP distribution data available",
+        "ofUsersActive": "of users active",
+        "perUser": "per user",
+        "progressionRate": "Progression Rate",
+        "reachedLevel5Plus": "reached level 5+",
+        "recommendations": "Recommendations",
+        "retentionIndicator": "Retention Indicator",
+        "streakAnalysis": "Streak Analysis",
+        "streakCategories": "Streak Categories",
+        "streakDataNotAvailable": "Streak distribution data is not available",
+        "streakDescription": "Overview of user login streaks",
+        "streakImprovementRecommendation": "Increase streak incentives to motivate frequent logins.",
+        "topUser": "Top user",
+        "totalProfiles": "Total Profiles",
+        "totalXP": "Total XP",
+        "userLevelDistribution": "User Level Distribution",
+        "users": "Users",
+        "withXP": "with XP",
+        "xpAnalysis": "XP Analysis",
+        "xpDistribution": "XP Distribution",
+        "xpStatistics": "XP Statistics"
       },
       "Navigation": {
-        "adminDashboard": "Admin Dashboard",
-        "adminDashboardDescription": "Administrative tools and insights for your organization",
-        "overview": "Overview",
-        "overviewDescription": "Key metrics and recent activity",
-        "analytics": "Analytics",
-        "analyticsDescription": "User engagement and content performance",
-        "userManagement": "User Management",
-        "userManagementDescription": "Manage users and roles",
-        "courseManagement": "Course Management",
-        "courseManagementDescription": "Manage courses and content",
-        "gamification": "Gamification",
-        "gamificationDescription": "XP, levels, achievements and trends",
-        "retention": "Retention",
-        "retentionDescription": "Cohorts, churn and return rates",
-        "realtime": "Realtime",
-        "realtimeDescription": "Live sessions and activity feed",
-        "live": "Live",
-        "funnels": "Funnels",
-        "funnelsDescription": "Course progression and drop-offs",
-        "alerts": "Alerts",
-        "alertsDescription": "System alerts and bulk actions",
-        "security": "Security",
-        "securityDescription": "System health and performance",
         "actions": "Actions",
         "actionsDescription": "Administrative actions and tools",
-        "totalUsers": "Total Users",
-        "activeCourses": "Active Courses",
-        "monthlyGrowth": "Monthly Growth",
         "activeAlerts": "Active Alerts",
-        "quickAccess": "Quick Access",
+        "activeCourses": "Active Courses",
+        "adminDashboard": "Admin Dashboard",
+        "adminDashboardDescription": "Administrative tools and insights for your organization",
+        "alerts": "Alerts",
+        "alertsDescription": "System alerts and bulk actions",
         "allSections": "All Sections",
-        "quickActions": "Quick Actions",
-        "manageUsers": "Manage Users",
+        "analytics": "Analytics",
+        "analyticsDescription": "User engagement and content performance",
+        "courseManagement": "Course Management",
+        "courseManagementDescription": "Manage courses and content",
+        "funnels": "Funnels",
+        "funnelsDescription": "Course progression and drop-offs",
+        "gamification": "Gamification",
+        "gamificationDescription": "XP, levels, achievements and trends",
+        "live": "Live",
         "manageCourses": "Manage Courses",
+        "manageUsers": "Manage Users",
+        "monthlyGrowth": "Monthly Growth",
+        "overview": "Overview",
+        "overviewDescription": "Key metrics and recent activity",
+        "quickAccess": "Quick Access",
+        "quickActions": "Quick Actions",
+        "realtime": "Realtime",
+        "realtimeDescription": "Live sessions and activity feed",
+        "retention": "Retention",
+        "retentionDescription": "Cohorts, churn and return rates",
+        "security": "Security",
+        "securityDescription": "System health and performance",
+        "totalUsers": "Total Users",
+        "userManagement": "User Management",
+        "userManagementDescription": "Manage users and roles",
         "viewAnalytics": "View Analytics"
       },
-      "Toasts": {
-        "types": {
-          "success": "Success",
-          "error": "Error",
-          "warning": "Warning",
-          "info": "Information",
-          "loading": "Loading"
+      "Realtime": {
+        "activeSessions": "Active Sessions",
+        "activity": {
+          "description": "Live stream of user activity",
+          "empty": "No activity in the selected timeframe",
+          "title": "Recent Activity",
+          "userBadge": "User #{id}"
         },
+        "activityFeed": "Activity Feed",
+        "lastUpdated": "Last updated",
+        "live": "Live",
+        "metrics": {
+          "activeSessions": "Active Sessions",
+          "activeUsers": "Active Users",
+          "lastHour": "in the last hour",
+          "recentActivity": "Recent Activity",
+          "totalSessions": "Total sessions"
+        },
+        "monitoringNote": "Monitoring is updated periodically. Some metrics may be delayed by up to a minute.",
+        "refresh": "Refresh",
+        "sessions": {
+          "course": "Course",
+          "description": "Live participation by course",
+          "empty": "No active sessions right now",
+          "title": "Courses with Active Sessions"
+        },
+        "title": "Realtime Monitoring"
+      },
+      "Retention": {
+        "avg30DayRetention": "Avg. 30-day Retention",
+        "bestPerformingCohort": "Best Performing Cohort",
+        "churn": "churn",
+        "churnRate": "Churn Rate",
+        "cohort": "Cohort",
+        "cohortAnalysis": "Cohort Analysis",
+        "cohortDescription": "Retention rates by cohort over months",
+        "cohortRetentionMatrix": "Cohort Retention Matrix",
+        "criticalRetention": "Critical Retention",
+        "highChurnAlert": "High churn rate detected. Consider engagement campaigns.",
+        "highRetention": "High Retention",
+        "improvementOpportunity": "Improvement Opportunity",
+        "keyInsights": "Key Insights",
+        "last6Months": "last 6 months",
+        "lowRetention": "Low Retention",
+        "moderateRetention": "Moderate Retention",
+        "month": "Month",
+        "monthlyRetention": "Monthly Retention",
+        "newUsers": "new users",
+        "noCohortData": "No cohort data available",
+        "retention": "retention",
+        "retentionGood": "Retention is within healthy range",
+        "retentionPatterns": "Retention Patterns",
+        "retentionTrendAnalysis": "Retention Trend Analysis",
+        "retentionTrends": "Retention Trends",
+        "totalNewUsers": "Total New Users",
+        "trend": {
+          "declining": "declining",
+          "improving": "improving",
+          "stable": "stable"
+        },
+        "trendsDescription": "Trends and patterns in user retention",
+        "users": "Users"
+      },
+      "Toasts": {
         "actions": {
           "dismiss": "Dismiss",
           "retry": "Retry",
           "undo": "Undo"
         },
         "admin": {
-          "operationStarted": "Operation started",
+          "bulkOperationProgress": "Processing {current} of {total} items...",
           "operationCompleted": "Operation completed successfully",
           "operationFailed": "Operation failed",
-          "bulkOperationProgress": "Processing {current} of {total} items..."
-        }
-      },
-      "Animations": {
-        "loading": "Loading...",
-        "loadingStates": {
-          "spinner": "Loading spinner",
-          "dots": "Loading dots",
-          "pulse": "Loading pulse",
-          "skeleton": "Loading skeleton"
+          "operationStarted": "Operation started"
         },
-        "buttonStates": {
-          "loading": "Loading...",
-          "default": "Default",
+        "types": {
+          "error": "Error",
+          "info": "Information",
+          "loading": "Loading",
           "success": "Success",
-          "error": "Error"
-        },
-        "accessibility": {
-          "reducedMotion": "Reduced motion enabled",
-          "animationDisabled": "Animation disabled for accessibility"
+          "warning": "Warning"
         }
       },
       "Utils": {
-        "relativeTime": {
-          "justNow": "just now",
-          "minuteAgo": "{count} minute ago",
-          "minutesAgo": "{count} minutes ago",
-          "hourAgo": "{count} hour ago",
-          "hoursAgo": "{count} hours ago",
-          "dayAgo": "{count} day ago",
-          "daysAgo": "{count} days ago"
-        },
-        "validation": {
-          "emailInvalid": "Invalid email address",
-          "phoneInvalid": "Invalid phone number",
-          "urlInvalid": "Invalid URL",
-          "passwordWeak": "Password is too weak"
+        "calculation": {
+          "calculationError": "Calculation error",
+          "infiniteGrowth": "Infinite growth",
+          "noData": "No data available"
         },
         "export": {
           "exportComplete": "Export completed successfully",
           "exportFailed": "Export failed",
           "noDataToExport": "No data available to export"
         },
-        "storage": {
-          "saveError": "Failed to save data",
-          "loadError": "Failed to load data",
-          "removeError": "Failed to remove data",
-          "clearError": "Failed to clear storage"
-        },
-        "status": {
-          "active": "Active",
-          "inactive": "Inactive",
-          "pending": "Pending",
-          "suspended": "Suspended",
-          "completed": "Completed",
-          "failed": "Failed",
-          "processing": "Processing"
-        },
         "priority": {
           "critical": "Critical",
           "high": "High",
-          "medium": "Medium",
-          "low": "Low"
+          "low": "Low",
+          "medium": "Medium"
         },
-        "calculation": {
-          "noData": "No data available",
-          "calculationError": "Calculation error",
-          "infiniteGrowth": "Infinite growth"
+        "relativeTime": {
+          "dayAgo": "{count} day ago",
+          "daysAgo": "{count} days ago",
+          "hourAgo": "{count} hour ago",
+          "hoursAgo": "{count} hours ago",
+          "justNow": "just now",
+          "minuteAgo": "{count} minute ago",
+          "minutesAgo": "{count} minutes ago"
+        },
+        "status": {
+          "active": "Active",
+          "completed": "Completed",
+          "failed": "Failed",
+          "inactive": "Inactive",
+          "pending": "Pending",
+          "processing": "Processing",
+          "suspended": "Suspended"
+        },
+        "storage": {
+          "clearError": "Failed to clear storage",
+          "loadError": "Failed to load data",
+          "removeError": "Failed to remove data",
+          "saveError": "Failed to save data"
+        },
+        "validation": {
+          "emailInvalid": "Invalid email address",
+          "passwordWeak": "Password is too weak",
+          "phoneInvalid": "Invalid phone number",
+          "urlInvalid": "Invalid URL"
         }
-      }
-    },
-    "Components": {
-      "Breadcrumb": {
-        "more": "More"
-      }
+      },
+      "accessDenied": "Access Denied",
+      "accessDeniedDescription": "You do not have permissions to access this dashboard",
+      "actions": "Actions",
+      "actionsInfo": "Administrative actions and tools",
+      "activateUsers": "Activate Users",
+      "activeUsers": "Active Users",
+      "activities": "activities",
+      "adminDashboard": "Admin Dashboard",
+      "administrativeActions": "Administrative Actions",
+      "administrativeActionsDescription": "Manage users and system operations",
+      "alerts": "Alerts",
+      "alertsInfo": "System alerts and bulk actions",
+      "analytics": "Analytics",
+      "analyticsInfo": "User engagement and content performance",
+      "avgCourseRating": "Average course rating",
+      "avgProgress": "Avg. Progress",
+      "backupData": "Backup Data",
+      "basedOnLoginStreaks": "Based on login streaks",
+      "bulkOperationCompletedDescription": "Successfully processed {count} users",
+      "bulkOperationCompletedTitle": "Bulk Operation Completed",
+      "bulkOperationFailedDescription": "Please try again",
+      "bulkOperationFailedTitle": "Bulk Operation Failed",
+      "certificatesIssued": "Certificates Issued",
+      "clearCache": "Clear Cache",
+      "completion": "Completion",
+      "completionRates": "Completion rates",
+      "contentPerformance": "Content Performance",
+      "contentPerformanceDescription": "Popular content and completion rates",
+      "courseFunnels": "Course Funnels",
+      "courseFunnelsInfo": "Conversion funnels and drop-off points",
+      "coursesCompleted": "Courses Completed",
+      "coursesStarted": "Courses Started",
+      "dailyActiveUsers": "Daily Active Users",
+      "enrollments": "{count, plural, one {# enrollment} other {# enrollments}}",
+      "errorLoadingAlertsData": "Error loading alerts",
+      "errorLoadingAnalyticsData": "Error loading analytics data",
+      "errorLoadingGamificationData": "Error loading gamification data",
+      "errorLoadingRealtimeData": "Error loading realtime data",
+      "errorLoadingRetentionData": "Error loading retention data",
+      "exportUsers": "Export Users",
+      "failedToLoadAdminData": "Failed to load admin data",
+      "failedToLoadAdminDataDescription": "Please refresh the page or try again later.",
+      "failedToLoadAnalyticsData": "Failed to load analytics data:",
+      "failedToLoadGamificationMetrics": "Failed to load gamification metrics:",
+      "failedToLoadRealtimeMetrics": "Failed to load realtime metrics:",
+      "failedToLoadRetentionMetrics": "Failed to load retention metrics:",
+      "failedToLoadSystemAlerts": "Failed to load system alerts:",
+      "gamification": "Gamification",
+      "gamificationInfo": "XP, levels, achievements and trends",
+      "generateReports": "Generate Reports",
+      "growth": "growth",
+      "last30Days": "last 30 days",
+      "learningProgress": "Learning Progress",
+      "learningProgressDescription": "Progress, completions and certificates",
+      "mostPopularCourses": "Most popular courses",
+      "noAlertsData": "No alerts available",
+      "noDataAvailable": "No data available",
+      "noGamificationData": "No gamification data available",
+      "noRealtimeData": "No realtime data available",
+      "noRecentActivity": "No recent activity",
+      "noRetentionData": "No retention data available",
+      "notAvailable": "N/A",
+      "overallCompletion": "Overall completion",
+      "overview": "Overview",
+      "overviewInfo": "Key metrics and recent activity",
+      "realtime": "Realtime",
+      "realtimeInfo": "Live sessions and activity feed",
+      "recentAction": {
+        "bulkUserActivation": "Bulk user activation",
+        "cacheClear": "Cache clear",
+        "systemBackup": "System backup",
+        "userExport": "User export"
+      },
+      "recentActions": "Recent Actions",
+      "recentActionsDescription": "Log of recent administrative operations",
+      "recentActivity": "Recent Activity",
+      "recentActivityDescription": "Latest events across the organization",
+      "retention": "Retention",
+      "retentionInfo": "Cohorts, churn and return rates",
+      "retry": "Retry",
+      "returnRate": "Return Rate",
+      "sendNotifications": "Send Notifications",
+      "status": {
+        "success": "success"
+      },
+      "suspendUsers": "Suspend Users",
+      "systemCheck": "System Check",
+      "systemOperations": "System Operations",
+      "systemOperationsDescription": "Maintenance and reporting tools",
+      "thisMonth": "this month",
+      "time": {
+        "oneDayAgo": "1 day ago",
+        "sixHoursAgo": "6 hours ago",
+        "twoDaysAgo": "2 days ago",
+        "twoHoursAgo": "2 hours ago"
+      },
+      "title": "Admin",
+      "topCourses": "Top Courses",
+      "topCoursesDescription": "Most engaging courses by enrollments and completion",
+      "totalCourses": "Total Courses",
+      "totalUsers": "Total Users",
+      "userEngagement": "User Engagement",
+      "userEngagementDescription": "Active users and return rates",
+      "userManagement": "User Management",
+      "userManagementDescription": "Bulk actions and notifications"
     },
     "Assignments": {
       "AssignmentPage": {
@@ -2053,8 +2049,14 @@
       "openuUniversity": "Toraighyrov University",
       "touUniversity": "Toraighyrov University"
     },
+    "Components": {
+      "Breadcrumb": {
+        "more": "More"
+      }
+    },
     "CourseOverview": {
-      "courseLabel": "Course"
+      "courseLabel": "Course",
+      "rightsGuide": "Rights Guide"
     },
     "Courses": {
       "Access": {
@@ -2098,7 +2100,8 @@
         "createCourse": "Create Course",
         "createCourseDescription": "Create a new course",
         "noCourses": "No courses yet",
-        "noCoursesAvailable": "No courses available yet"
+        "noCoursesAvailable": "No courses available yet",
+        "rightsGuide": "Rights Guide"
       },
       "error": "Error loading courses",
       "myCourses": "My Courses",
@@ -2255,6 +2258,11 @@
         "expand": "Expand",
         "imageViewer": "Image Viewer"
       },
+      "LinkInputTooltip": {
+        "cancel": "Cancel",
+        "enterUrl": "Enter URL",
+        "saveLink": "Save link"
+      },
       "MathEquationBlock": {
         "completeReference": "View complete reference",
         "exponents": "Exponents:",
@@ -2371,11 +2379,6 @@
         "youtube": "YouTube",
         "youtubeVideo": "YouTube video"
       },
-      "LinkInputTooltip": {
-        "enterUrl": "Enter URL",
-        "saveLink": "Save link",
-        "cancel": "Cancel"
-      },
       "UserBlock": {
         "errorNotFound": "User not found",
         "loadUser": "Load User",
@@ -2411,6 +2414,56 @@
       },
       "activity": "Activity",
       "metaTitleEdit": "Edit - {activityName} Activity"
+    },
+    "Gamification": {
+      "cancel": "Cancel",
+      "dangerZone": {
+        "description": "Irreversible actions that affect your gamification data",
+        "resetAllData": "Reset All Data",
+        "resetConfirmDescription": "This will permanently delete all your XP, levels, streaks, unlocked items, and achievements. This action cannot be undone and you will start from zero.",
+        "resetConfirmTitle": "Reset All Gamification Data?",
+        "resetPreferences": "Reset Preferences",
+        "resetWarning": "Resetting your data will permanently delete all XP, levels, streaks, and unlocked items. This action cannot be undone.",
+        "title": "Danger Zone"
+      },
+      "description": "Customize your learning experience and gamification preferences",
+      "display": {
+        "animatedEffects": "Animated Effects",
+        "animatedEffectsDescription": "Enable animations for level indicators and progress bars",
+        "autoHideToasts": "Auto-hide Toasts",
+        "autoHideToastsDescription": "Automatically dismiss notification toasts after a few seconds",
+        "compactMode": "Compact Mode",
+        "compactModeDescription": "Use smaller gamification widgets throughout the interface",
+        "description": "Customize how gamification elements appear",
+        "showLevelIndicator": "Show Level Indicator",
+        "showLevelIndicatorDescription": "Display level badge in navigation and profile areas",
+        "title": "Display Settings"
+      },
+      "notifications": {
+        "description": "Choose which gamification events should notify you",
+        "levelUp": "Level Up Notifications",
+        "levelUpDescription": "Get notified when you reach a new level",
+        "streakReminder": "Streak Reminders",
+        "streakReminderDescription": "Daily reminders to maintain your learning streak",
+        "title": "Notifications",
+        "weeklyReport": "Weekly Reports",
+        "weeklyReportDescription": "Receive weekly summaries of your progress",
+        "xpGain": "XP Gain Notifications",
+        "xpGainDescription": "Show toast notifications when gaining experience points"
+      },
+      "privacy": {
+        "description": "Control how your gamification data is shared and displayed",
+        "publicProfileStats": "Public Profile Stats",
+        "publicProfileStatsDescription": "Show your level and stats on your public profile",
+        "shareProgress": "Share Progress",
+        "shareProgressDescription": "Allow sharing your progress with other users",
+        "showOnLeaderboard": "Show on Leaderboard",
+        "showOnLeaderboardDescription": "Display your progress on the organization leaderboard",
+        "title": "Privacy & Visibility"
+      },
+      "savePreferences": "Save Preferences",
+      "saving": "Saving...",
+      "title": "Gamification Settings"
     },
     "Metrics": {
       "desktopOnlyMessage1": "This page is only available on a desktop device.",
@@ -3125,6 +3178,365 @@
       "tryAgainOrContact": "Please try again or contact support if the issue persists."
     },
     "UserAccountSettings": {
+      "Gamification": {
+        "avatar": {
+          "accessories": {
+            "knowledgeCape": "Knowledge Cape",
+            "scholarCrown": "Scholar Crown",
+            "smartGlasses": "Smart Glasses",
+            "wizardHat": "Wizard Hat"
+          },
+          "featuresMore": "more",
+          "frames": {
+            "diamond": "Diamond Frame",
+            "golden": "Golden Frame",
+            "legendary": "Legendary Frame",
+            "silver": "Silver Frame"
+          },
+          "noFeaturesUnlocked": "No features unlocked yet",
+          "unlockAtLevel": "Unlock at Level {level}",
+          "unlockedFeatures": "Unlocked Features"
+        },
+        "avatarCustomization": {
+          "avatarAccessories": "Avatar Accessories",
+          "avatarFrames": "Avatar Frames",
+          "comingSoon": "Coming Soon",
+          "currentStatus": "Current Status",
+          "description": "Customize your avatar appearance with unlocked rewards",
+          "displayOptions": "Display Options",
+          "failedToSave": "Failed to save customization",
+          "lockedFeature": "Unlock at Level {level}",
+          "noAccessorySelected": "No accessory selected",
+          "noDataMessage": "Complete some activities to unlock avatar customization!",
+          "noFrameSelected": "No frame selected",
+          "preview": "Preview",
+          "previewChanges": "Preview Changes",
+          "resetToDefaults": "Reset to Defaults",
+          "saveCustomization": "Save Customization",
+          "saved": "Avatar customization saved!",
+          "saving": "Saving...",
+          "selectedAccessory": "Selected Accessory",
+          "selectedFrame": "Selected Frame",
+          "showAccessories": "Show Avatar Accessories",
+          "showFrame": "Show Avatar Frame",
+          "showLevelBadge": "Show Level Badge",
+          "title": "Avatar Customization",
+          "unlockedAt": "Unlocked at Level {level}",
+          "unlockedItems": "{count, plural, one {# item unlocked} other {# items unlocked}}"
+        },
+        "avatarUpdated": "Avatar updated successfully",
+        "cancel": "Cancel",
+        "common": {
+          "cancel": "Cancel",
+          "close": "Close",
+          "comingSoon": "Coming Soon",
+          "confirm": "Confirm",
+          "error": "Error",
+          "loading": "Loading...",
+          "noData": "No data available",
+          "none": "None",
+          "refreshPage": "Refresh page",
+          "retry": "Retry",
+          "save": "Save",
+          "tryAgain": "Try again"
+        },
+        "dangerZone": {
+          "description": "These actions cannot be undone. Proceed with caution.",
+          "resetAllData": "Reset All Data",
+          "resetConfirmDescription": "This will permanently delete all your gamification progress, including XP, levels, streaks, and achievements. This action cannot be undone.",
+          "resetConfirmTitle": "Reset All Gamification Data?",
+          "resetPreferences": "Reset Preferences",
+          "resetWarning": "Resetting preferences will restore all settings to their default values. This action cannot be undone.",
+          "title": "Danger Zone"
+        },
+        "dashboard": {
+          "achievements": {
+            "reachedLevel": "Reached level {level}!",
+            "scholar": "Scholar",
+            "weekWarrior": "Week Warrior",
+            "weekWarriorDesc": "7-day login streak achieved!"
+          },
+          "availableCourses": "Available Courses",
+          "certificates": "Certificates",
+          "community": "Community",
+          "completed": "Completed",
+          "dayStreak": "Day Streak",
+          "failedToLoad": "Failed to load gamification data",
+          "nextMilestone": "Next Milestone",
+          "noData": "No gamification data available",
+          "profile": "Profile",
+          "progress": "Progress",
+          "quickStats": "Quick Stats",
+          "rank": "Rank #{rank} in organization",
+          "rankInOrg": "Rank #{rank} in organization",
+          "recentAchievements": "Recent Achievements",
+          "recentActivities": "Recent Activities",
+          "title": "Learning Progress",
+          "topLearners": "Top Learners",
+          "tryAgain": "Try Again",
+          "unlockedCustomizations": "Unlocked Customizations",
+          "yourProgress": "Your Learning Progress"
+        },
+        "description": "Customize your learning experience with gamification features and privacy settings",
+        "display": {
+          "animatedEffects": "Animated Effects",
+          "animatedEffectsDescription": "Show animated effects for level ups and achievements",
+          "autoHideToasts": "Auto-hide Notifications",
+          "autoHideToastsDescription": "Automatically hide notification toasts after a few seconds",
+          "compactMode": "Compact Mode",
+          "compactModeDescription": "Use a more compact display for gamification elements",
+          "description": "Customize how gamification elements are displayed",
+          "showLevelIndicator": "Show Level Indicator",
+          "showLevelIndicatorDescription": "Display your current level in the interface",
+          "title": "Display Settings"
+        },
+        "error": {
+          "loadFailed": "Failed to load gamification data"
+        },
+        "errors": {
+          "orgNotAvailable": "Organization data not available. Please refresh the page."
+        },
+        "leaderboard": {
+          "aria": {
+            "rankings": "User rankings leaderboard"
+          },
+          "currentUser": "You",
+          "failedToLoad": "Failed to load leaderboard",
+          "learningStreakTooltip": "{count, plural, =1 {1 day learning streak} other {# days learning streak}}",
+          "levelLabel": "Level {level}",
+          "levelShort": "L{level}",
+          "loading": "Loading leaderboard...",
+          "loadingTimeout": "Request timed out. Please try again.",
+          "loginStreakTooltip": "{count, plural, =1 {1 day login streak} other {# days login streak}}",
+          "noParticipants": "No participants yet",
+          "notRanked": "Not ranked yet",
+          "rankLevel": "Rank #{rank}, Level {level}",
+          "ranks": {
+            "first": "First place",
+            "second": "Second place",
+            "third": "Third place"
+          },
+          "retry": "Retry",
+          "showingTop": "Showing top {limit} of {total} participants",
+          "stats": {
+            "learningStreak": "{count} day learning streak",
+            "level": "Level {level}",
+            "loginStreak": "{count} day login streak",
+            "xp": "XP"
+          },
+          "title": "Leaderboard",
+          "tooltipUser": "{user} - Level {level}, {xp} XP",
+          "topLearners": "Top Learners",
+          "totalParticipants": "Total participants: {total}",
+          "user": "User {id}",
+          "xp": "{xp} XP",
+          "xpEarned": "{xp} XP earned",
+          "you": "You",
+          "yourRank": "Your Rank"
+        },
+        "levelIndicators": {
+          "congratsMaxLevel": "Congratulations! You've reached the maximum level!",
+          "currentLevel": "Current Level",
+          "experienceBar": "Experience Bar",
+          "level": "Level",
+          "levelAbbrev": "Lv.",
+          "levelBadge": "Level Badge",
+          "levelProgress": "Level {current} Progress",
+          "maxLevel": "Max Level Reached",
+          "nextLevel": "Next Level",
+          "progress": "{percentage}%",
+          "progressTowards": "Progress towards Level {level}",
+          "totalXp": "{total} XP",
+          "xpProgress": "{current} / {required} XP",
+          "xpToLevel": "XP to Level {level}",
+          "xpToNext": "XP to next",
+          "xpToNextLevel": "{xp} to next level"
+        },
+        "levelUpNotification": {
+          "continue": "Continue",
+          "levelLabel": "Level {level}",
+          "newMastery": "You've reached a new level of mastery!",
+          "newUnlocks": "New Unlocks!",
+          "title": "Level Up!",
+          "xpEarned": "+{xp} XP earned!"
+        },
+        "levels": {
+          "descriptions": {
+            "apprentice": "Making steady progress and building skills",
+            "expert": "Advanced learner with deep expertise",
+            "grandmaster": "Elite status with unparalleled knowledge",
+            "master": "Exceptional mastery of the subject matter",
+            "novice": "Just getting started on your learning journey",
+            "scholar": "Demonstrating solid knowledge and understanding"
+          },
+          "progress": {
+            "allTime": "All time",
+            "currentProgress": "Current Progress",
+            "experiencePoints": "Experience Points",
+            "level": "Level",
+            "toNextLevel": "to next level",
+            "totalProgress": "Total Progress",
+            "xpAbbreviation": "XP"
+          },
+          "requirements": {
+            "activitiesCompleted": "{count} activities completed",
+            "level": "Level {level}",
+            "streakDays": "{count} day streak required",
+            "xpRequired": "{xp} XP required"
+          },
+          "titles": {
+            "apprentice": "Apprentice",
+            "expert": "Expert",
+            "grandmaster": "Grandmaster",
+            "master": "Master",
+            "novice": "Novice",
+            "scholar": "Scholar"
+          },
+          "unlocks": {
+            "avatarAccessories": "Avatar Accessories",
+            "avatarFrames": "Avatar Frames",
+            "basicProfile": "Basic Profile",
+            "customAvatarHat": "Custom Avatar Hat",
+            "exclusiveThemes": "Exclusive Themes",
+            "legendaryStatus": "Legendary Status",
+            "premiumFeatures": "Premium Features",
+            "specialBadges": "Special Badges"
+          }
+        },
+        "notifications": {
+          "description": "Choose which gamification events you want to be notified about",
+          "levelUp": "Level Up Notifications",
+          "levelUpDescription": "Get notified when you reach a new level",
+          "streakReminder": "Streak Reminders",
+          "streakReminderDescription": "Remind me to maintain my learning streaks",
+          "title": "Notifications",
+          "weeklyReport": "Weekly Reports",
+          "weeklyReportDescription": "Receive weekly progress summaries",
+          "xpGain": "XP Gain Notifications",
+          "xpGainDescription": "Show notifications when you earn experience points"
+        },
+        "pageTitle": "Gamification Settings",
+        "privacy": {
+          "description": "Control how your gamification data is shared and displayed",
+          "publicProfileStats": "Public Profile Stats",
+          "publicProfileStatsDescription": "Show your stats on your public profile",
+          "shareProgress": "Share Progress",
+          "shareProgressDescription": "Allow sharing of learning progress with others",
+          "showOnLeaderboard": "Show on Leaderboard",
+          "showOnLeaderboardDescription": "Display your progress on organization leaderboards",
+          "title": "Privacy Settings"
+        },
+        "rank": "Rank",
+        "savePreferences": "Save Preferences",
+        "saving": "Saving...",
+        "stats": {
+          "allTime": "All time",
+          "totalXP": "Total XP"
+        },
+        "streakWidget": {
+          "days": "{count, plural, one {# day} other {# days}}",
+          "error": "Unable to load streak data",
+          "errors": {
+            "timeout": "Request timed out. Please try again.",
+            "unknown": "Unknown error occurred"
+          },
+          "learningStreak": "Learning Streak",
+          "loginStreak": "Login Streak",
+          "noData": "No streak data available",
+          "noDataSubtext": "Complete activities to start building streaks!",
+          "personalBest": "Personal Best: {count} days",
+          "retry": "Retry",
+          "retryLimit": "Maximum retry attempts reached. Please refresh the page.",
+          "streakMessages": {
+            "active": "{count} day{plural} strong! 🔥",
+            "atRisk": "Don't break your streak! {action} today.",
+            "broken": "Start your {type} streak today!",
+            "completeAction": "Complete an activity",
+            "learning": "learning",
+            "login": "login",
+            "loginAction": "Log in"
+          },
+          "tips": {
+            "consistency": "Consistency is key to maintaining streaks",
+            "dailyLoginBonus": "Daily logins earn bonus XP",
+            "title": "Streak Tips",
+            "unlockRewards": "Learning streaks unlock special rewards"
+          },
+          "title": "Streaks",
+          "titleCompact": "Streaks",
+          "tooltips": {
+            "invalidDate": "Invalid date",
+            "lastActivity": "Last activity",
+            "learning": "Complete learning activities daily to build your learning streak!",
+            "login": "Keep logging in daily to maintain your streak and earn bonus XP!",
+            "noActivity": "No activity yet"
+          }
+        },
+        "streaks": {
+          "best": "Best",
+          "days": "days",
+          "learning": {
+            "active": "Active streak",
+            "atRisk": "At risk",
+            "none": "No streak",
+            "title": "Learning Streak"
+          },
+          "login": {
+            "active": "Active streak",
+            "atRisk": "At risk",
+            "none": "No streak",
+            "title": "Login Streak"
+          }
+        },
+        "tabs": {
+          "avatar": "Avatar",
+          "overview": "Overview",
+          "preferences": "Preferences",
+          "progress": "Progress",
+          "streaks": "Streaks"
+        },
+        "title": "Your Progress",
+        "toast": {
+          "preferencesError": "Failed to save preferences",
+          "preferencesReset": "Preferences reset to defaults",
+          "preferencesSaved": "Preferences saved successfully",
+          "userNotAuthenticated": "User not authenticated"
+        },
+        "xpGainToast": {
+          "congratulations": "Congratulations!",
+          "earned": "Earned",
+          "keepItUp": "Keep it up!",
+          "source": "Source: {source}",
+          "streakBonus": "Streak Bonus!",
+          "streakDays": "for {days} days!",
+          "streakText": "{count} day streak! 🔥",
+          "xpGained": "+{xp} XP Gained!",
+          "xpText": "XP"
+        },
+        "xpSources": {
+          "activity_completion": "Activity Completed",
+          "assignment_submission": "Assignment Submitted",
+          "course_completion": "Course Completed",
+          "discussion_post": "Discussion Post",
+          "first_activity": "First Activity",
+          "forum_participation": "Forum Participation",
+          "learning_streak_bonus": "Learning Streak Bonus",
+          "login_daily": "Daily Login",
+          "login_streak_100_days": "100-Day Login Streak",
+          "login_streak_30_days": "30-Day Login Streak",
+          "login_streak_7_days": "7-Day Login Streak",
+          "milestone_achievement": "Milestone Achievement",
+          "peer_review": "Peer Review",
+          "perfect_score": "Perfect Score",
+          "quiz_completion": "Quiz Completed",
+          "reading_completion": "Reading Completed",
+          "streak_bonus_100_days": "100-Day Streak Bonus",
+          "streak_bonus_30_days": "30-Day Streak Bonus",
+          "streak_bonus_7_days": "7-Day Streak Bonus",
+          "unknown": "Unknown Source: {source}",
+          "video_completion": "Video Watched"
+        }
+      },
       "UserAccount": {
         "EditGeneral": {
           "addAcademicInfo": "Add Academic Info",
@@ -3186,6 +3598,7 @@
           "updatingButton": "Updating..."
         }
       },
+      "gamification": "Gamification Settings",
       "general": "General",
       "generalSection": {
         "addAcademicInfo": "Add Academic Info",
@@ -3322,367 +3735,7 @@
         },
         "untitledSection": "Untitled Section"
       },
-      "title": "Account Settings",
-      "gamification": "Gamification Settings",
-      "Gamification": {
-        "pageTitle": "Gamification Settings",
-        "description": "Customize your learning experience with gamification features and privacy settings",
-        "tabs": {
-          "overview": "Overview",
-          "avatar": "Avatar",
-          "preferences": "Preferences",
-          "streaks": "Streaks",
-          "progress": "Progress"
-        },
-        "notifications": {
-          "title": "Notifications",
-          "description": "Choose which gamification events you want to be notified about",
-          "levelUp": "Level Up Notifications",
-          "levelUpDescription": "Get notified when you reach a new level",
-          "xpGain": "XP Gain Notifications",
-          "xpGainDescription": "Show notifications when you earn experience points",
-          "streakReminder": "Streak Reminders",
-          "streakReminderDescription": "Remind me to maintain my learning streaks",
-          "weeklyReport": "Weekly Reports",
-          "weeklyReportDescription": "Receive weekly progress summaries"
-        },
-        "privacy": {
-          "title": "Privacy Settings",
-          "description": "Control how your gamification data is shared and displayed",
-          "showOnLeaderboard": "Show on Leaderboard",
-          "showOnLeaderboardDescription": "Display your progress on organization leaderboards",
-          "publicProfileStats": "Public Profile Stats",
-          "publicProfileStatsDescription": "Show your stats on your public profile",
-          "shareProgress": "Share Progress",
-          "shareProgressDescription": "Allow sharing of learning progress with others"
-        },
-        "display": {
-          "title": "Display Settings",
-          "description": "Customize how gamification elements are displayed",
-          "animatedEffects": "Animated Effects",
-          "animatedEffectsDescription": "Show animated effects for level ups and achievements",
-          "compactMode": "Compact Mode",
-          "compactModeDescription": "Use a more compact display for gamification elements",
-          "showLevelIndicator": "Show Level Indicator",
-          "showLevelIndicatorDescription": "Display your current level in the interface",
-          "autoHideToasts": "Auto-hide Notifications",
-          "autoHideToastsDescription": "Automatically hide notification toasts after a few seconds"
-        },
-        "dangerZone": {
-          "title": "Danger Zone",
-          "description": "These actions cannot be undone. Proceed with caution.",
-          "resetWarning": "Resetting preferences will restore all settings to their default values. This action cannot be undone.",
-          "resetPreferences": "Reset Preferences",
-          "resetAllData": "Reset All Data",
-          "resetConfirmTitle": "Reset All Gamification Data?",
-          "resetConfirmDescription": "This will permanently delete all your gamification progress, including XP, levels, streaks, and achievements. This action cannot be undone."
-        },
-        "saving": "Saving...",
-        "savePreferences": "Save Preferences",
-        "cancel": "Cancel",
-        "avatarUpdated": "Avatar updated successfully",
-        "toast": {
-          "userNotAuthenticated": "User not authenticated",
-          "preferencesSaved": "Preferences saved successfully",
-          "preferencesError": "Failed to save preferences",
-          "preferencesReset": "Preferences reset to defaults"
-        },
-        "errors": {
-          "orgNotAvailable": "Organization data not available. Please refresh the page."
-        },
-        "levels": {
-          "titles": {
-            "novice": "Novice",
-            "apprentice": "Apprentice",
-            "scholar": "Scholar",
-            "expert": "Expert",
-            "master": "Master",
-            "grandmaster": "Grandmaster"
-          },
-          "descriptions": {
-            "novice": "Just getting started on your learning journey",
-            "apprentice": "Making steady progress and building skills",
-            "scholar": "Demonstrating solid knowledge and understanding",
-            "expert": "Advanced learner with deep expertise",
-            "master": "Exceptional mastery of the subject matter",
-            "grandmaster": "Elite status with unparalleled knowledge"
-          },
-          "unlocks": {
-            "basicProfile": "Basic Profile",
-            "avatarFrames": "Avatar Frames",
-            "customAvatarHat": "Custom Avatar Hat",
-            "avatarAccessories": "Avatar Accessories",
-            "exclusiveThemes": "Exclusive Themes",
-            "legendaryStatus": "Legendary Status",
-            "specialBadges": "Special Badges",
-            "premiumFeatures": "Premium Features"
-          },
-          "requirements": {
-            "level": "Level {level}",
-            "xpRequired": "{xp} XP required",
-            "activitiesCompleted": "{count} activities completed",
-            "streakDays": "{count} day streak required"
-          },
-          "progress": {
-            "level": "Level",
-            "toNextLevel": "to next level",
-            "allTime": "All time",
-            "currentProgress": "Current Progress",
-            "totalProgress": "Total Progress",
-            "experiencePoints": "Experience Points",
-            "xpAbbreviation": "XP"
-          }
-        },
-        "avatar": {
-          "frames": {
-            "golden": "Golden Frame",
-            "silver": "Silver Frame",
-            "diamond": "Diamond Frame",
-            "legendary": "Legendary Frame"
-          },
-          "accessories": {
-            "wizardHat": "Wizard Hat",
-            "scholarCrown": "Scholar Crown",
-            "smartGlasses": "Smart Glasses",
-            "knowledgeCape": "Knowledge Cape"
-          },
-          "unlockedFeatures": "Unlocked Features",
-          "featuresMore": "more",
-          "noFeaturesUnlocked": "No features unlocked yet",
-          "unlockAtLevel": "Unlock at Level {level}"
-        },
-        "title": "Your Progress",
-        "rank": "Rank",
-        "error": {
-          "loadFailed": "Failed to load gamification data"
-        },
-        "stats": {
-          "totalXP": "Total XP",
-          "allTime": "All time"
-        },
-        "streaks": {
-          "days": "days",
-          "best": "Best",
-          "login": {
-            "title": "Login Streak",
-            "none": "No streak",
-            "active": "Active streak",
-            "atRisk": "At risk"
-          },
-          "learning": {
-            "title": "Learning Streak",
-            "none": "No streak",
-            "active": "Active streak",
-            "atRisk": "At risk"
-          }
-        },
-        "levelIndicators": {
-          "level": "Level",
-          "levelAbbrev": "Lv.",
-          "currentLevel": "Current Level",
-          "nextLevel": "Next Level",
-          "xpToNext": "XP to next",
-          "xpToLevel": "XP to Level {level}",
-          "totalXp": "{total} XP",
-          "progress": "{percentage}%",
-          "xpToNextLevel": "{xp} to next level",
-          "xpProgress": "{current} / {required} XP",
-          "levelProgress": "Level {current} Progress",
-          "maxLevel": "Max Level Reached",
-          "congratsMaxLevel": "Congratulations! You've reached the maximum level!",
-          "progressTowards": "Progress towards Level {level}",
-          "experienceBar": "Experience Bar",
-          "levelBadge": "Level Badge"
-        },
-        "levelUpNotification": {
-          "title": "Level Up!",
-          "xpEarned": "+{xp} XP earned!",
-          "newMastery": "You've reached a new level of mastery!",
-          "newUnlocks": "New Unlocks!",
-          "continue": "Continue",
-          "levelLabel": "Level {level}"
-        },
-        "streakWidget": {
-          "title": "Streaks",
-          "titleCompact": "Streaks",
-          "loginStreak": "Login Streak",
-          "learningStreak": "Learning Streak",
-          "noData": "No streak data available",
-          "noDataSubtext": "Complete activities to start building streaks!",
-          "streakMessages": {
-            "active": "{count} day{plural} strong! 🔥",
-            "atRisk": "Don't break your streak! {action} today.",
-            "broken": "Start your {type} streak today!",
-            "loginAction": "Log in",
-            "completeAction": "Complete an activity",
-            "login": "login",
-            "learning": "learning"
-          },
-          "personalBest": "Personal Best: {count} days",
-          "error": "Unable to load streak data",
-          "retry": "Retry",
-          "retryLimit": "Maximum retry attempts reached. Please refresh the page.",
-          "errors": {
-            "timeout": "Request timed out. Please try again.",
-            "unknown": "Unknown error occurred"
-          },
-          "tooltips": {
-            "login": "Keep logging in daily to maintain your streak and earn bonus XP!",
-            "learning": "Complete learning activities daily to build your learning streak!",
-            "lastActivity": "Last activity",
-            "noActivity": "No activity yet",
-            "invalidDate": "Invalid date"
-          },
-          "tips": {
-            "title": "Streak Tips",
-            "dailyLoginBonus": "Daily logins earn bonus XP",
-            "unlockRewards": "Learning streaks unlock special rewards",
-            "consistency": "Consistency is key to maintaining streaks"
-          },
-          "days": "{count, plural, one {# day} other {# days}}"
-        },
-        "xpGainToast": {
-          "xpGained": "+{xp} XP Gained!",
-          "source": "Source: {source}",
-          "streakBonus": "Streak Bonus!",
-          "streakDays": "for {days} days!",
-          "xpText": "XP",
-          "streakText": "{count} day streak! 🔥",
-          "congratulations": "Congratulations!",
-          "keepItUp": "Keep it up!",
-          "earned": "Earned"
-        },
-        "leaderboard": {
-          "title": "Leaderboard",
-          "topLearners": "Top Learners",
-          "loading": "Loading leaderboard...",
-          "failedToLoad": "Failed to load leaderboard",
-          "retry": "Retry",
-          "totalParticipants": "Total participants: {total}",
-          "noParticipants": "No participants yet",
-          "yourRank": "Your Rank",
-          "notRanked": "Not ranked yet",
-          "currentUser": "You",
-          "you": "You",
-          "user": "User {id}",
-          "ranks": {
-            "first": "First place",
-            "second": "Second place",
-            "third": "Third place"
-          },
-          "stats": {
-            "xp": "XP",
-            "level": "Level {level}",
-            "loginStreak": "{count} day login streak",
-            "learningStreak": "{count} day learning streak"
-          },
-          "levelShort": "L{level}",
-          "levelLabel": "Level {level}",
-          "xp": "{xp} XP",
-          "loginStreakTooltip": "{count, plural, =1 {1 day login streak} other {# days login streak}}",
-          "learningStreakTooltip": "{count, plural, =1 {1 day learning streak} other {# days learning streak}}",
-          "rankLevel": "Rank #{rank}, Level {level}",
-          "xpEarned": "{xp} XP earned",
-          "showingTop": "Showing top {limit} of {total} participants",
-          "tooltipUser": "{user} - Level {level}, {xp} XP",
-          "aria": {
-            "rankings": "User rankings leaderboard"
-          },
-          "loadingTimeout": "Request timed out. Please try again."
-        },
-        "dashboard": {
-          "title": "Learning Progress",
-          "yourProgress": "Your Learning Progress",
-          "quickStats": "Quick Stats",
-          "availableCourses": "Available Courses",
-          "completed": "Completed",
-          "certificates": "Certificates",
-          "dayStreak": "Day Streak",
-          "profile": "Profile",
-          "progress": "Progress",
-          "community": "Community",
-          "recentActivities": "Recent Activities",
-          "nextMilestone": "Next Milestone",
-          "unlockedCustomizations": "Unlocked Customizations",
-          "recentAchievements": "Recent Achievements",
-          "topLearners": "Top Learners",
-          "rank": "Rank #{rank} in organization",
-          "noData": "No gamification data available",
-          "failedToLoad": "Failed to load gamification data",
-          "tryAgain": "Try Again",
-          "rankInOrg": "Rank #{rank} in organization",
-          "achievements": {
-            "weekWarrior": "Week Warrior",
-            "weekWarriorDesc": "7-day login streak achieved!",
-            "scholar": "Scholar",
-            "reachedLevel": "Reached level {level}!"
-          }
-        },
-        "avatarCustomization": {
-          "title": "Avatar Customization",
-          "description": "Customize your avatar appearance with unlocked rewards",
-          "currentStatus": "Current Status",
-          "displayOptions": "Display Options",
-          "showLevelBadge": "Show Level Badge",
-          "showFrame": "Show Avatar Frame",
-          "showAccessories": "Show Avatar Accessories",
-          "avatarFrames": "Avatar Frames",
-          "avatarAccessories": "Avatar Accessories",
-          "preview": "Preview",
-          "selectedFrame": "Selected Frame",
-          "selectedAccessory": "Selected Accessory",
-          "noFrameSelected": "No frame selected",
-          "noAccessorySelected": "No accessory selected",
-          "comingSoon": "Coming Soon",
-          "saveCustomization": "Save Customization",
-          "saving": "Saving...",
-          "saved": "Avatar customization saved!",
-          "failedToSave": "Failed to save customization",
-          "noDataMessage": "Complete some activities to unlock avatar customization!",
-          "unlockedAt": "Unlocked at Level {level}",
-          "lockedFeature": "Unlock at Level {level}",
-          "resetToDefaults": "Reset to Defaults",
-          "previewChanges": "Preview Changes",
-          "unlockedItems": "{count, plural, one {# item unlocked} other {# items unlocked}}"
-        },
-        "xpSources": {
-          "login_daily": "Daily Login",
-          "activity_completion": "Activity Completed",
-          "course_completion": "Course Completed",
-          "perfect_score": "Perfect Score",
-          "first_activity": "First Activity",
-          "assignment_submission": "Assignment Submitted",
-          "quiz_completion": "Quiz Completed",
-          "forum_participation": "Forum Participation",
-          "login_streak_7_days": "7-Day Login Streak",
-          "login_streak_30_days": "30-Day Login Streak",
-          "login_streak_100_days": "100-Day Login Streak",
-          "streak_bonus_7_days": "7-Day Streak Bonus",
-          "streak_bonus_30_days": "30-Day Streak Bonus",
-          "streak_bonus_100_days": "100-Day Streak Bonus",
-          "learning_streak_bonus": "Learning Streak Bonus",
-          "milestone_achievement": "Milestone Achievement",
-          "peer_review": "Peer Review",
-          "discussion_post": "Discussion Post",
-          "video_completion": "Video Watched",
-          "reading_completion": "Reading Completed",
-          "unknown": "Unknown Source: {source}"
-        },
-        "common": {
-          "loading": "Loading...",
-          "error": "Error",
-          "retry": "Retry",
-          "cancel": "Cancel",
-          "save": "Save",
-          "close": "Close",
-          "confirm": "Confirm",
-          "noData": "No data available",
-          "tryAgain": "Try again",
-          "refreshPage": "Refresh page",
-          "comingSoon": "Coming Soon",
-          "none": "None"
-        }
-      }
+      "title": "Account Settings"
     },
     "UserProfileBuilder": {
       "AffiliationEditor": {
@@ -3847,57 +3900,6 @@
       "savingButton": "Saving...",
       "title": "Profile Builder"
     },
-    "gamification": "Gamification",
-    "Gamification": {
-      "title": "Gamification Settings",
-      "description": "Customize your learning experience and gamification preferences",
-      "notifications": {
-        "title": "Notifications",
-        "description": "Choose which gamification events should notify you",
-        "levelUp": "Level Up Notifications",
-        "levelUpDescription": "Get notified when you reach a new level",
-        "xpGain": "XP Gain Notifications",
-        "xpGainDescription": "Show toast notifications when gaining experience points",
-        "streakReminder": "Streak Reminders",
-        "streakReminderDescription": "Daily reminders to maintain your learning streak",
-        "weeklyReport": "Weekly Reports",
-        "weeklyReportDescription": "Receive weekly summaries of your progress"
-      },
-      "privacy": {
-        "title": "Privacy & Visibility",
-        "description": "Control how your gamification data is shared and displayed",
-        "showOnLeaderboard": "Show on Leaderboard",
-        "showOnLeaderboardDescription": "Display your progress on the organization leaderboard",
-        "publicProfileStats": "Public Profile Stats",
-        "publicProfileStatsDescription": "Show your level and stats on your public profile",
-        "shareProgress": "Share Progress",
-        "shareProgressDescription": "Allow sharing your progress with other users"
-      },
-      "display": {
-        "title": "Display Settings",
-        "description": "Customize how gamification elements appear",
-        "animatedEffects": "Animated Effects",
-        "animatedEffectsDescription": "Enable animations for level indicators and progress bars",
-        "compactMode": "Compact Mode",
-        "compactModeDescription": "Use smaller gamification widgets throughout the interface",
-        "showLevelIndicator": "Show Level Indicator",
-        "showLevelIndicatorDescription": "Display level badge in navigation and profile areas",
-        "autoHideToasts": "Auto-hide Toasts",
-        "autoHideToastsDescription": "Automatically dismiss notification toasts after a few seconds"
-      },
-      "dangerZone": {
-        "title": "Danger Zone",
-        "description": "Irreversible actions that affect your gamification data",
-        "resetWarning": "Resetting your data will permanently delete all XP, levels, streaks, and unlocked items. This action cannot be undone.",
-        "resetPreferences": "Reset Preferences",
-        "resetAllData": "Reset All Data",
-        "resetConfirmTitle": "Reset All Gamification Data?",
-        "resetConfirmDescription": "This will permanently delete all your XP, levels, streaks, unlocked items, and achievements. This action cannot be undone and you will start from zero."
-      },
-      "savePreferences": "Save Preferences",
-      "saving": "Saving...",
-      "cancel": "Cancel"
-    },
     "UserSettings": {
       "add": "Invite Members",
       "addDescription": "Invite members to join your organization",
@@ -3931,6 +3933,9 @@
       "desktopOnlyMessage1": "This page is only accessible from a desktop device.",
       "desktopOnlyMessage2": "Please switch to a desktop to view and manage user settings.",
       "desktopOnlyTitle": "Desktop Only",
+      "roles": "Roles",
+      "rolesDescription": "Create and manage roles with specific permissions",
+      "rolesTitle": "Roles",
       "signups": "Signups & Invite Codes",
       "signupsDescription": "Choose from where users can join your organization",
       "signupsSection": {
@@ -4024,7 +4029,8 @@
         "userRemovedSuccess": "Removed user from org"
       },
       "usersTitle": "Users"
-    }
+    },
+    "gamification": "Gamification"
   },
   "Errors": {
     "somethingWentWrong": "Something went wrong!",
@@ -4198,15 +4204,15 @@
     "useContributorStatus": {
       "checkStatusError": "Failed to check contributor status"
     },
-    "useLevelIndicator": {
-      "levelUpMessage": "🎉 Level Up! You've reached Level {level}!",
-      "failedToLoadProfile": "Failed to load profile data",
-      "xpGained": "+{amount} XP"
-    },
     "useGamification": {
+      "failedToUpdateStreak": "❌ Failed to update login streak",
       "localStorageNotAvailable": "localStorage not available, skipping streak update",
-      "loginStreakUpdated": "✅ Login streak updated for date: {date}",
-      "failedToUpdateStreak": "❌ Failed to update login streak"
+      "loginStreakUpdated": "✅ Login streak updated for date: {date}"
+    },
+    "useLevelIndicator": {
+      "failedToLoadProfile": "Failed to load profile data",
+      "levelUpMessage": "🎉 Level Up! You've reached Level {level}!",
+      "xpGained": "+{amount} XP"
     }
   },
   "LandingCustom": {

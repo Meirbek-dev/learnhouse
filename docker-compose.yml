@@ -13,7 +13,7 @@ services:
       redis:
         condition: service_healthy
   db:
-    image: postgres:18beta2-alpine
+    image: postgres:18beta3-trixie
     restart: unless-stopped
     ports:
       - '5432:5432'

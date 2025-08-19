@@ -22,7 +22,7 @@ from src.db.courses.discussions import (
 )
 from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser, User
-from src.services.courses.courses import rbac_check
+from src.services.courses.courses import courses_rbac_check
 
 
 async def create_discussion(
@@ -60,7 +60,9 @@ async def create_discussion(
         )
 
     # RBAC check - users need read access to participate in discussions
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # If it's a reply, check if parent discussion exists
     if discussion_object.parent_discussion_id:
@@ -127,7 +129,9 @@ async def get_discussions_by_course_uuid(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # Get main discussions (posts, not replies)
     query = (
@@ -604,7 +608,9 @@ async def get_discussion_replies(
     course = db_session.exec(course_statement).first()
 
     if course:
-        await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+        await courses_rbac_check(
+            request, course.course_uuid, current_user, "read", db_session
+        )
 
     # Get replies
     replies_query = (

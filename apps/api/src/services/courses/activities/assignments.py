@@ -1,11 +1,14 @@
 from datetime import datetime
-from typing import Literal
 
 from fastapi import HTTPException, Request, UploadFile
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.db.courses.activities import Activity, ActivityRead
+from src.db.courses.activities import (
+    Activity,
+    ActivitySubTypeEnum,
+    ActivityTypeEnum,
+)
 from src.db.courses.assignments import (
     Assignment,
     AssignmentCreate,
@@ -26,17 +29,14 @@ from src.db.courses.assignments import (
     AssignmentUserSubmissionStatus,
 )
 from src.db.courses.chapter_activities import ChapterActivity
-from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
+from src.security.courses_security import courses_rbac_check_for_assignments
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles,
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_element_is_public,
-    authorization_verify_if_user_is_anon,
 )
 from src.services.courses.activities.uploads.sub_file import upload_submission_file
 from src.services.courses.activities.uploads.tasks_ref_files import (
@@ -67,7 +67,9 @@ async def create_assignment(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "create", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "create", db_session
+    )
 
     # Create Assignment using model_dump() for Pydantic v2 compatibility
     assignment_data = assignment_object.model_dump(exclude_unset=True)
@@ -114,7 +116,9 @@ async def read_assignment(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # return assignment read
     return AssignmentRead.model_validate(assignment)
@@ -157,7 +161,9 @@ async def read_assignment_from_activity_uuid(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # return assignment read
     return AssignmentRead.model_validate(assignment)
@@ -191,7 +197,9 @@ async def update_assignment(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_object.model_dump(exclude_unset=True)
@@ -236,7 +244,9 @@ async def delete_assignment(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
 
     # Delete Assignment
     db_session.delete(assignment)
@@ -283,7 +293,9 @@ async def delete_assignment_from_activity_uuid(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
 
     # Delete Assignment
     db_session.delete(assignment)
@@ -324,7 +336,9 @@ async def create_assignment_task(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "create", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "create", db_session
+    )
 
     # Create Assignment Task using model_dump() for Pydantic v2 compatibility
     task_data = assignment_task_object.model_dump(exclude_unset=True)
@@ -336,7 +350,7 @@ async def create_assignment_task(
     assignment_task.org_id = course.org_id
     assignment_task.chapter_id = assignment.chapter_id
     assignment_task.activity_id = assignment.activity_id
-    assignment_task.assignment_id = assignment.id  # type: ignore
+    assignment_task.assignment_id = assignment.id
     assignment_task.course_id = assignment.course_id
 
     # Insert Assignment Task in DB
@@ -380,7 +394,9 @@ async def read_assignment_tasks(
     )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # return assignment tasks read
     return [
@@ -428,7 +444,9 @@ async def read_assignment_task(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # return assignment task read
     return AssignmentTaskRead.model_validate(assignmenttask)
@@ -482,7 +500,9 @@ async def put_assignment_task_reference_file(
     org = db_session.exec(org_statement).first()
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
     # Upload reference file
     if reference_file and reference_file.filename and activity and org:
@@ -560,7 +580,9 @@ async def put_assignment_task_submission_file(
     org = db_session.exec(org_statement).first()
 
     # RBAC check - only need read permission to submit files
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # Check if user is enrolled in the course
     if not await authorization_verify_based_on_roles(
@@ -629,7 +651,9 @@ async def update_assignment_task(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_task_object.model_dump(exclude_unset=True)
@@ -686,7 +710,9 @@ async def delete_assignment_task(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
 
     # Delete Assignment Task
     db_session.delete(assignment_task)
@@ -740,7 +766,7 @@ async def handle_assignment_task_submission(
             detail="Course not found",
         )
 
-    # Check if user has instructor/admin permissions
+    # SECURITY: Check if user has instructor/admin permissions for grading
     is_instructor = await authorization_verify_based_on_roles(
         request, current_user.id, "update", course.course_uuid, db_session
     )
@@ -756,7 +782,7 @@ async def handle_assignment_task_submission(
                 detail="You must be enrolled in this course to submit assignments",
             )
 
-        # Regular users cannot update grades - only check if actual values are being set
+        # SECURITY: Regular users cannot update grades - only check if actual values are being set
         if (
             assignment_task_submission_object.grade is not None
             and assignment_task_submission_object.grade != 0
@@ -769,10 +795,12 @@ async def handle_assignment_task_submission(
             )
 
         # Only need read permission for submissions
-        await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+        await courses_rbac_check_for_assignments(
+            request, course.course_uuid, current_user, "read", db_session
+        )
     else:
-        # Instructors/admins need update permission to grade
-        await rbac_check(
+        # SECURITY: Instructors/admins need update permission to grade
+        await courses_rbac_check_for_assignments(
             request, course.course_uuid, current_user, "update", db_session
         )
 
@@ -787,7 +815,7 @@ async def handle_assignment_task_submission(
 
     # If submission exists, update it
     if assignment_task_submission:
-        # For regular users, ensure they can only update their own submissions
+        # SECURITY: For regular users, ensure they can only update their own submissions
         if not is_instructor and assignment_task_submission.user_id != current_user.id:
             raise HTTPException(
                 status_code=403, detail="You can only update your own submissions"
@@ -818,7 +846,7 @@ async def handle_assignment_task_submission(
             task_submission=model_data.get("task_submission", ""),
             grade=0,  # Always start with 0 for new submissions
             task_submission_grade_feedback="",  # Start with empty feedback
-            assignment_task_id=int(assignment_task.id),  # type: ignore
+            assignment_task_id=int(assignment_task.id),
             assignment_type=assignment_task.assignment_type,
             activity_id=assignment.activity_id,
             course_id=assignment.course_id,
@@ -856,6 +884,19 @@ async def read_user_assignment_task_submissions(
             detail="Assignment Task not found",
         )
 
+    # Check if assignment task submission exists
+    statement = select(AssignmentTaskSubmission).where(
+        AssignmentTaskSubmission.assignment_task_id == assignment_task.id,
+        AssignmentTaskSubmission.user_id == user_id,
+    )
+    assignment_task_submission = db_session.exec(statement).first()
+
+    if not assignment_task_submission:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task Submission not found",
+        )
+
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.id == assignment_task.assignment_id)
     assignment = db_session.exec(statement).first()
@@ -877,18 +918,9 @@ async def read_user_assignment_task_submissions(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
-
-    # Check if assignment task submission exists
-    statement = select(AssignmentTaskSubmission).where(
-        AssignmentTaskSubmission.assignment_task_id == assignment_task.id,
-        AssignmentTaskSubmission.user_id == user_id,
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
     )
-    assignment_task_submission = db_session.exec(statement).first()
-
-    if not assignment_task_submission:
-        # Return None instead of raising 404 for non-existent submissions
-        return None
 
     # return assignment task submission read
     return AssignmentTaskSubmissionRead.model_validate(assignment_task_submission)
@@ -961,7 +993,9 @@ async def read_assignment_task_submissions(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # return assignment task submission read
     return AssignmentTaskSubmissionRead.model_validate(assignment_task_submission)
@@ -1020,7 +1054,9 @@ async def update_assignment_task_submission(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_task_submission_object.model_dump(exclude_unset=True)
@@ -1090,7 +1126,9 @@ async def delete_assignment_task_submission(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
 
     # Delete Assignment Task Submission
     db_session.delete(assignment_task_submission)
@@ -1156,12 +1194,14 @@ async def create_assignment_submission(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # Create Assignment User Submission
     assignment_user_submission = AssignmentUserSubmission(
         user_id=current_user.id,
-        assignment_id=assignment.id,  # type: ignore
+        assignment_id=assignment.id,
         grade=0,
         assignmentusersubmission_uuid=f"assignmentusersubmission_{ULID()}",
         submission_status=AssignmentUserSubmissionStatus.SUBMITTED,
@@ -1196,9 +1236,9 @@ async def create_assignment_submission(
     # Add TrailStep
     trail = await check_trail_presence(
         org_id=course.org_id,
-        user_id=user.id,  # type: ignore
+        user_id=user.id,
         request=request,
-        user=user,  # type: ignore
+        user=user,
         db_session=db_session,
     )
 
@@ -1214,7 +1254,7 @@ async def create_assignment_submission(
             trail_id=trail.id if trail.id is not None else 0,
             course_id=course.id if course.id is not None else 0,
             org_id=course.org_id,
-            user_id=user.id,  # type: ignore
+            user_id=user.id,
             creation_date=datetime.now().isoformat(),
             update_date=datetime.now().isoformat(),
         )
@@ -1239,7 +1279,7 @@ async def create_assignment_submission(
             complete=True,
             teacher_verified=False,
             grade="",
-            user_id=user.id,  # type: ignore
+            user_id=user.id,
             creation_date=datetime.now().isoformat(),
             update_date=datetime.now().isoformat(),
         )
@@ -1289,7 +1329,9 @@ async def read_assignment_submissions(
     )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # return assignment tasks read
     return [
@@ -1332,7 +1374,9 @@ async def read_user_assignment_submissions(
     )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # return assignment tasks read
     return [
@@ -1398,7 +1442,9 @@ async def update_assignment_submission(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # Update only the fields that were passed in using model_dump with exclude_unset
     update_data = assignment_user_submission_object.model_dump(exclude_unset=True)
@@ -1457,7 +1503,9 @@ async def delete_assignment_submission(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
 
     # Delete Assignment User Submission
     db_session.delete(assignment_user_submission)
@@ -1474,6 +1522,7 @@ async def grade_assignment_submission(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> dict[str, str]:
+    # SECURITY: This function should only be accessible by course owners or instructors
     # Check if assignment exists
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
     assignment = db_session.exec(statement).first()
@@ -1493,7 +1542,10 @@ async def grade_assignment_submission(
             detail="Course not found",
         )
 
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    # SECURITY: Require course ownership or instructor role for grading
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
     # Check if assignment user submission exists
     statement = select(AssignmentUserSubmission).where(
@@ -1608,6 +1660,7 @@ async def mark_activity_as_done_for_user(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> dict[str, str]:
+    # SECURITY: This function should only be accessible by course owners or instructors
     # Get Assignment
     statement = select(Assignment).where(Assignment.assignment_uuid == assignment_uuid)
     assignment = db_session.exec(statement).first()
@@ -1631,7 +1684,10 @@ async def mark_activity_as_done_for_user(
             detail="Course not found",
         )
 
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    # SECURITY: Require course ownership or instructor role for marking activities as done
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
     if not activity:
         raise HTTPException(
@@ -1681,6 +1737,82 @@ async def mark_activity_as_done_for_user(
     return {"message": "Активность отмечена как выполненная"}
 
 
+async def create_assignment_with_activity(
+    request: Request,
+    assignment_object: AssignmentCreateWithActivity,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+    chapter_id: int,
+    activity_name: str,
+) -> AssignmentRead:
+    """
+    Create assignment with activity in a single transaction for better performance.
+    """
+    # Check if course exists
+    statement = select(Course).where(Course.id == assignment_object.course_id)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "create", db_session
+    )
+
+    # Create Activity first
+    activity = Activity(
+        name=activity_name,
+        activity_type=ActivityTypeEnum.TYPE_ASSIGNMENT,
+        activity_sub_type=ActivitySubTypeEnum.SUBTYPE_ASSIGNMENT,
+        published=assignment_object.published,
+        org_id=assignment_object.org_id,
+        course_id=assignment_object.course_id,
+        activity_uuid=f"activity_{ULID()}",
+        creation_date=datetime.now().isoformat(),
+        update_date=datetime.now().isoformat(),
+    )
+
+    # Insert Activity in DB
+    db_session.add(activity)
+    db_session.flush()  # Flush to get the ID without committing
+
+    # Create ChapterActivity relationship
+    chapter_activity = ChapterActivity(
+        chapter_id=chapter_id,
+        activity_id=activity.id,
+        course_id=assignment_object.course_id,
+        org_id=assignment_object.org_id,
+        order=1,  # Default order, can be adjusted later
+        creation_date=datetime.now().isoformat(),
+        update_date=datetime.now().isoformat(),
+    )
+
+    # Insert ChapterActivity in DB
+    db_session.add(chapter_activity)
+    db_session.flush()  # Flush to ensure proper ordering
+
+    assignment_data = assignment_object.model_dump(exclude_unset=True)
+    assignment = Assignment(**assignment_data)
+
+    assignment.assignment_uuid = f"assignment_{ULID()}"
+    assignment.creation_date = datetime.now().isoformat()
+    assignment.update_date = datetime.now().isoformat()
+    assignment.activity_id = activity.id
+    assignment.chapter_id = chapter_id
+
+    # Insert Assignment in DB
+    db_session.add(assignment)
+    db_session.commit()
+    db_session.refresh(assignment)
+
+    # return assignment read
+    return AssignmentRead.model_validate(assignment)
+
+
 async def get_assignments_from_course(
     request: Request,
     course_uuid: str,
@@ -1710,148 +1842,9 @@ async def get_assignments_from_course(
             assignments.append(assignment)
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_assignments(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # return assignments read
     return [AssignmentRead.model_validate(assignment) for assignment in assignments]
-
-
-## 🔒 RBAC Utils ##
-
-
-async def rbac_check(
-    request: Request,
-    course_uuid: str,
-    current_user: PublicUser | AnonymousUser,
-    action: Literal["create", "read", "update", "delete"],
-    db_session: Session,
-):
-    if action == "read":
-        if current_user.id == 0:  # Anonymous user
-            return await authorization_verify_if_element_is_public(
-                request, course_uuid, action, db_session
-            )
-        return await authorization_verify_based_on_roles_and_authorship(
-            request, current_user.id, action, course_uuid, db_session
-        )
-    await authorization_verify_if_user_is_anon(current_user.id)
-
-    await authorization_verify_based_on_roles_and_authorship(
-        request,
-        current_user.id,
-        action,
-        course_uuid,
-        db_session,
-    )
-    return None
-
-
-## 🔒 RBAC Utils ##
-
-
-async def create_assignment_with_activity(
-    request: Request,
-    assignment_object: AssignmentCreateWithActivity,
-    current_user: PublicUser | AnonymousUser,
-    db_session: Session,
-    chapter_id: int,
-    activity_name: str,
-) -> dict:
-    """
-    Create both an activity and assignment in a single transaction for better performance
-    """
-    # Optimize: Get chapter and course in a single join query
-    statement = (
-        select(Chapter, Course)
-        .join(Course, Chapter.course_id == Course.id)
-        .where(Chapter.id == chapter_id)
-    )
-    result = db_session.exec(statement).first()
-
-    if not result:
-        raise HTTPException(
-            status_code=404,
-            detail="Chapter or Course not found",
-        )
-
-    chapter, course = result
-
-    # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "create", db_session)
-
-    try:
-        # Optimize: Get last order in the same transaction with a more efficient query
-        statement = (
-            select(ChapterActivity.order)
-            .where(ChapterActivity.chapter_id == chapter_id)
-            .order_by(ChapterActivity.order.desc())
-            .limit(1)
-        )
-        last_order_result = db_session.exec(statement).first()
-        last_order = last_order_result if last_order_result else 0
-        to_be_used_order = last_order + 1
-
-        # Create Activity first
-        activity = Activity(
-            name=activity_name,
-            chapter_id=chapter_id,
-            activity_type="TYPE_ASSIGNMENT",
-            activity_sub_type="SUBTYPE_ASSIGNMENT_ANY",
-            published=False,
-            course_id=course.id,
-            content={},
-            activity_uuid=f"activity_{ULID()}",
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
-            org_id=chapter.org_id,
-        )
-
-        # Insert Activity in DB
-        db_session.add(activity)
-        db_session.flush()  # Flush to get the ID without committing
-
-        # Add activity to chapter
-        activity_chapter = ChapterActivity(
-            chapter_id=chapter_id,
-            activity_id=activity.id,
-            course_id=chapter.course_id,
-            org_id=chapter.org_id,
-            creation_date=str(datetime.now()),
-            update_date=str(datetime.now()),
-            order=to_be_used_order,
-        )
-
-        # Insert ChapterActivity link in DB
-        db_session.add(activity_chapter)
-        db_session.flush()  # Flush to get the ID without committing
-
-        # Create Assignment using model_dump() for Pydantic v2 compatibility
-        assignment_data = assignment_object.model_dump(exclude_unset=True)
-        assignment = Assignment(**assignment_data)
-
-        assignment.assignment_uuid = f"assignment_{ULID()}"
-        assignment.creation_date = datetime.now().isoformat()
-        assignment.update_date = datetime.now().isoformat()
-        assignment.org_id = course.org_id
-        assignment.activity_id = activity.id
-
-        # Insert Assignment in DB
-        db_session.add(assignment)
-
-        # Commit everything at once
-        db_session.commit()
-        db_session.refresh(activity)
-        db_session.refresh(assignment)
-
-        return {
-            "activity": ActivityRead.model_validate(activity),
-            "assignment": AssignmentRead.model_validate(assignment),
-            "success": True,
-        }
-
-    except Exception as e:
-        db_session.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to create assignment with activity: {e!s}",
-        )

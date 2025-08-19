@@ -430,7 +430,7 @@ async def _link_user_to_organization(
     user_organization = UserOrganization(
         user_id=user_id if user_id else 0,
         org_id=org_id,
-        role_id=3,  # Default role ID
+        role_id=4,  # Default role ID
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )

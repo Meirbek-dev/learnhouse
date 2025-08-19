@@ -1,17 +1,20 @@
 'use client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { updateUserRole } from '@services/organizations/orgs';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
-import { Button } from '@/components/ui/button';
+import { Button } from '@components/ui/button';
+import { Alert, AlertDescription } from '@components/ui/alert';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import { mutate } from 'swr';
+import useSWR, { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import React from 'react';
 import { z } from 'zod';
 
 interface Props {
@@ -19,13 +22,12 @@ interface Props {
   setRolesModal: any;
   alreadyAssignedRole: string;
 }
-
 const createValidationSchema = (t: (key: string) => string) =>
   z.object({
     role: z.string().min(1, t('roleRequired')),
   });
 
-interface FormValues {
+interface FormData {
   role: string;
 }
 
@@ -36,39 +38,53 @@ const RolesUpdate = (props: Props) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(validationT);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState(null) as any;
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormData>({
     resolver: zodResolver(validationSchema),
     defaultValues: {
       role: props.alreadyAssignedRole,
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
-    const toastId = toast.loading(t('toastLoading'));
-    try {
-      const res = await updateUserRole(org.id, props.user.user.id, values.role, access_token);
-      if (res.status === 200) {
-        await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
-        props.setRolesModal(false);
-        toast.success(t('toastSuccess'), { id: toastId });
-      } else {
-        const errorDetail = res.data?.detail || 'Unknown error';
-        form.setError('root', { message: t('updateErrorDetail', { error: errorDetail }) });
-        toast.error(t('toastError'), { id: toastId });
-      }
-    } catch (error: any) {
-      const errorMessage = error?.message || 'An unexpected error occurred';
-      form.setError('root', { message: t('updateErrorDetail', { error: errorMessage }) });
+  // Fetch available roles for the organization
+  const { data: roles, error: rolesError } = useSWR(org ? `${getAPIUrl()}roles/org/${org.id}` : null, (url) =>
+    swrFetcher(url, access_token),
+  );
+
+  const handleSubmit = async (values: FormData) => {
+    setIsSubmitting(true);
+    setError(null);
+
+    const res = await updateUserRole(org.id, props.user.user.id, values.role, access_token);
+    const toastId = toast.loading('Updating role...');
+
+    if (res.status === 200) {
+      await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
+      props.setRolesModal(false);
+      toast.success(t('toastSuccess'), { id: toastId });
+    } else {
+      setIsSubmitting(false);
+      setError('Error ' + res.status + ': ' + res.data.detail);
       toast.error(t('toastError'), { id: toastId });
     }
   };
 
   return (
-    <div>
+    <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            <strong>Error {error.split(':')[0]}: </strong>
+            {error.split(':').slice(1).join(':')}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-4"
         >
           <FormField
@@ -80,6 +96,7 @@ const RolesUpdate = (props: Props) => {
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  disabled={!roles || rolesError}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -87,9 +104,23 @@ const RolesUpdate = (props: Props) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="role_global_admin">{t('adminRole')}</SelectItem>
-                    <SelectItem value="role_global_maintainer">{t('maintainerRole')}</SelectItem>
-                    <SelectItem value="role_global_user">{t('userRole')}</SelectItem>
+                    {!roles || rolesError ? (
+                      <SelectItem
+                        value="loading"
+                        disabled
+                      >
+                        {t('loadingRoles')}
+                      </SelectItem>
+                    ) : (
+                      roles.map((role: any) => (
+                        <SelectItem
+                          key={role.id}
+                          value={role.role_uuid || role.id.toString()}
+                        >
+                          {role.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -97,19 +128,13 @@ const RolesUpdate = (props: Props) => {
             )}
           />
 
-          {form.formState.errors.root ? (
-            <div className="mb-2 rounded-md bg-red-100 px-3 py-2 text-xs font-bold text-red-500">
-              {form.formState.errors.root.message}
-            </div>
-          ) : null}
-
-          <div className="mt-6 flex justify-end">
+          <div className="flex justify-end pt-4">
             <Button
               type="submit"
-              className="mt-2.5"
-              disabled={form.formState.isSubmitting}
+              disabled={isSubmitting || !roles || rolesError}
+              className="min-w-[100px]"
             >
-              {form.formState.isSubmitting ? (
+              {isSubmitting ? (
                 <BarLoader
                   cssOverride={{ borderRadius: 60 }}
                   width={60}

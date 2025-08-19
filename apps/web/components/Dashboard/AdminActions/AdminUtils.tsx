@@ -2,8 +2,8 @@
 
 import { useCallback, useMemo } from 'react';
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { useTranslations } from 'next-intl';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -90,35 +90,32 @@ export const formatRelativeTime = (date: Date | string, formatter?: any): string
 export const useLocalizedRelativeTime = () => {
   const t = useTranslations('DashPage.Admin.Utils.relativeTime');
 
-  return useCallback((date: Date | string) => {
-    const now = new Date();
-    const targetDate = typeof date === 'string' ? new Date(date) : date;
-    const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000);
+  return useCallback(
+    (date: Date | string) => {
+      const now = new Date();
+      const targetDate = typeof date === 'string' ? new Date(date) : date;
+      const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000);
 
-    if (diffInSeconds < 60) {
-      return t('justNow');
-    }
-    if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return minutes === 1
-        ? t('minuteAgo', { count: minutes })
-        : t('minutesAgo', { count: minutes });
-    }
-    if (diffInSeconds < 86_400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return hours === 1
-        ? t('hourAgo', { count: hours })
-        : t('hoursAgo', { count: hours });
-    }
-    if (diffInSeconds < 2_592_000) {
-      const days = Math.floor(diffInSeconds / 86_400);
-      return days === 1
-        ? t('dayAgo', { count: days })
-        : t('daysAgo', { count: days });
-    }
+      if (diffInSeconds < 60) {
+        return t('justNow');
+      }
+      if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return minutes === 1 ? t('minuteAgo', { count: minutes }) : t('minutesAgo', { count: minutes });
+      }
+      if (diffInSeconds < 86_400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return hours === 1 ? t('hourAgo', { count: hours }) : t('hoursAgo', { count: hours });
+      }
+      if (diffInSeconds < 2_592_000) {
+        const days = Math.floor(diffInSeconds / 86_400);
+        return days === 1 ? t('dayAgo', { count: days }) : t('daysAgo', { count: days });
+      }
 
-    return targetDate.toLocaleDateString();
-  }, [t]);
+      return targetDate.toLocaleDateString();
+    },
+    [t],
+  );
 };
 
 // Admin color schemes for consistent theming
@@ -219,54 +216,57 @@ export const getStatusConfig = (status: string) => {
 export const useLocalizedStatusConfig = () => {
   const t = useTranslations('DashPage.Admin.Utils.status');
 
-  return useCallback((status: string) => {
-    const configs = {
-      active: {
-        color: adminColors.success[600],
-        bg: adminColors.success[50],
-        border: adminColors.success[200],
-        label: t('active'),
-      },
-      inactive: {
-        color: adminColors.gray[600],
-        bg: adminColors.gray[50],
-        border: adminColors.gray[200],
-        label: t('inactive'),
-      },
-      pending: {
-        color: adminColors.warning[600],
-        bg: adminColors.warning[50],
-        border: adminColors.warning[200],
-        label: t('pending'),
-      },
-      suspended: {
-        color: adminColors.error[600],
-        bg: adminColors.error[50],
-        border: adminColors.error[200],
-        label: t('suspended'),
-      },
-      completed: {
-        color: adminColors.success[600],
-        bg: adminColors.success[50],
-        border: adminColors.success[200],
-        label: t('completed'),
-      },
-      failed: {
-        color: adminColors.error[600],
-        bg: adminColors.error[50],
-        border: adminColors.error[200],
-        label: t('failed'),
-      },
-      processing: {
-        color: adminColors.primary[600],
-        bg: adminColors.primary[50],
-        border: adminColors.primary[200],
-        label: t('processing'),
-      },
-    };
+  return useCallback(
+    (status: string) => {
+      const configs = {
+        active: {
+          color: adminColors.success[600],
+          bg: adminColors.success[50],
+          border: adminColors.success[200],
+          label: t('active'),
+        },
+        inactive: {
+          color: adminColors.gray[600],
+          bg: adminColors.gray[50],
+          border: adminColors.gray[200],
+          label: t('inactive'),
+        },
+        pending: {
+          color: adminColors.warning[600],
+          bg: adminColors.warning[50],
+          border: adminColors.warning[200],
+          label: t('pending'),
+        },
+        suspended: {
+          color: adminColors.error[600],
+          bg: adminColors.error[50],
+          border: adminColors.error[200],
+          label: t('suspended'),
+        },
+        completed: {
+          color: adminColors.success[600],
+          bg: adminColors.success[50],
+          border: adminColors.success[200],
+          label: t('completed'),
+        },
+        failed: {
+          color: adminColors.error[600],
+          bg: adminColors.error[50],
+          border: adminColors.error[200],
+          label: t('failed'),
+        },
+        processing: {
+          color: adminColors.primary[600],
+          bg: adminColors.primary[50],
+          border: adminColors.primary[200],
+          label: t('processing'),
+        },
+      };
 
-    return configs[status.toLowerCase()] || configs.inactive;
-  }, [t]);
+      return configs[status.toLowerCase()] || configs.inactive;
+    },
+    [t],
+  );
 };
 
 // Priority level configurations
@@ -320,51 +320,54 @@ export const getPriorityConfig = (priority: string | number) => {
 export const useLocalizedPriorityConfig = () => {
   const t = useTranslations('DashPage.Admin.Utils.priority');
 
-  return useCallback((priority: string | number) => {
-    const level =
-      typeof priority === 'string'
-        ? priority.toLowerCase()
-        : priority > 7
-          ? 'critical'
-          : priority > 5
-            ? 'high'
-            : priority > 3
-              ? 'medium'
-              : 'low';
+  return useCallback(
+    (priority: string | number) => {
+      const level =
+        typeof priority === 'string'
+          ? priority.toLowerCase()
+          : priority > 7
+            ? 'critical'
+            : priority > 5
+              ? 'high'
+              : priority > 3
+                ? 'medium'
+                : 'low';
 
-    const configs = {
-      critical: {
-        color: adminColors.error[600],
-        bg: adminColors.error[50],
-        border: adminColors.error[200],
-        label: t('critical'),
-        icon: '🔴',
-      },
-      high: {
-        color: adminColors.warning[600],
-        bg: adminColors.warning[50],
-        border: adminColors.warning[200],
-        label: t('high'),
-        icon: '🟡',
-      },
-      medium: {
-        color: adminColors.primary[600],
-        bg: adminColors.primary[50],
-        border: adminColors.primary[200],
-        label: t('medium'),
-        icon: '🔵',
-      },
-      low: {
-        color: adminColors.gray[600],
-        bg: adminColors.gray[50],
-        border: adminColors.gray[200],
-        label: t('low'),
-        icon: '⚪',
-      },
-    };
+      const configs = {
+        critical: {
+          color: adminColors.error[600],
+          bg: adminColors.error[50],
+          border: adminColors.error[200],
+          label: t('critical'),
+          icon: '🔴',
+        },
+        high: {
+          color: adminColors.warning[600],
+          bg: adminColors.warning[50],
+          border: adminColors.warning[200],
+          label: t('high'),
+          icon: '🟡',
+        },
+        medium: {
+          color: adminColors.primary[600],
+          bg: adminColors.primary[50],
+          border: adminColors.primary[200],
+          label: t('medium'),
+          icon: '🔵',
+        },
+        low: {
+          color: adminColors.gray[600],
+          bg: adminColors.gray[50],
+          border: adminColors.gray[200],
+          label: t('low'),
+          icon: '⚪',
+        },
+      };
 
-    return configs[level] || configs.low;
-  }, [t]);
+      return configs[level] || configs.low;
+    },
+    [t],
+  );
 };
 
 // Generate chart color palette

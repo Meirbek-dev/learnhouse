@@ -146,5 +146,13 @@ export async function bulkRemoveContributors(course_uuid: string, data: any, acc
     `${getAPIUrl()}courses/${course_uuid}/bulk-remove-contributors`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token || undefined),
   );
-  return await getResponseMetadata(result);
+  return await errorHandling(result);
+}
+
+export async function getCourseRights(course_uuid: string, access_token: string | null | undefined) {
+  const result: any = await fetch(
+    `${getAPIUrl()}courses/${course_uuid}/rights`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token || undefined),
+  );
+  return await errorHandling(result);
 }

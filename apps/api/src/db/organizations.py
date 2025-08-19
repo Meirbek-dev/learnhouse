@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING
 
 from pydantic import ConfigDict
-from sqlmodel import JSON, Column, Field
+from sqlalchemy import JSON, Column
+from sqlmodel import Field
 
 from src.db.organization_config import OrganizationConfig
 from src.db.roles import RoleRead

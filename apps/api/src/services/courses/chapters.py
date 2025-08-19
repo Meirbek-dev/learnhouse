@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Literal
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
@@ -15,14 +14,9 @@ from src.db.courses.chapters import (
     ChapterUpdateOrder,
 )
 from src.db.courses.course_chapters import CourseChapter
-from src.db.users import AnonymousUser
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_element_is_public,
-    authorization_verify_if_user_is_anon,
-)
-from src.services.courses.courses import Course
-from src.services.users.users import PublicUser
+from src.db.courses.courses import Course
+from src.db.users import AnonymousUser, PublicUser
+from src.security.courses_security import courses_rbac_check_for_chapters
 
 ####################################################
 # CRUD
@@ -42,7 +36,9 @@ async def create_chapter(
     course = db_session.exec(statement).one()
 
     # RBAC check
-    await rbac_check(request, "chapter_x", current_user, "create", db_session)
+    await courses_rbac_check_for_chapters(
+        request, course.course_uuid, current_user, "create", db_session
+    )
 
     # Complete chapter object
     chapter.course_id = chapter_object.course_id
@@ -121,7 +117,9 @@ async def get_chapter(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_chapters(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     # Get activities for this chapter
     statement = (
@@ -159,7 +157,9 @@ async def update_chapter(
         )
 
     # RBAC check
-    await rbac_check(request, chapter.chapter_uuid, current_user, "update", db_session)
+    await courses_rbac_check_for_chapters(
+        request, chapter.chapter_uuid, current_user, "update", db_session
+    )
 
     # Update only the fields that were passed in
     update_data = chapter_object.model_dump(exclude_unset=True)
@@ -189,7 +189,9 @@ async def delete_chapter(
         )
 
     # RBAC check
-    await rbac_check(request, chapter.chapter_uuid, current_user, "delete", db_session)
+    await courses_rbac_check_for_chapters(
+        request, chapter.chapter_uuid, current_user, "delete", db_session
+    )
 
     # Remove all linked chapter activities
     statement = select(ChapterActivity).where(ChapterActivity.chapter_id == chapter.id)
@@ -223,7 +225,9 @@ async def get_course_chapters(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_chapters(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     statement = (
         select(Chapter)
@@ -279,7 +283,9 @@ async def DEPRECATED_get_course_chapters(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_chapters(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     chapters_in_db = await get_course_chapters(
         request, course.id, db_session, current_user, True
@@ -356,7 +362,9 @@ async def reorder_chapters_and_activities(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    await courses_rbac_check_for_chapters(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
     ###########
     # Chapters
@@ -459,33 +467,3 @@ async def reorder_chapters_and_activities(
     db_session.commit()
 
     return {"detail": "Chapters and activities reordered successfully"}
-
-
-## 🔒 RBAC Utils ##
-
-
-async def rbac_check(
-    request: Request,
-    course_uuid: str,
-    current_user: PublicUser | AnonymousUser,
-    action: Literal["create", "read", "update", "delete"],
-    db_session: Session,
-) -> None:
-    """Perform RBAC authorization check based on user type and action."""
-    if action == "read":
-        if current_user.id == 0:  # Anonymous user
-            return await authorization_verify_if_element_is_public(
-                request, course_uuid, action, db_session
-            )
-        return await authorization_verify_based_on_roles_and_authorship(
-            request, current_user.id, action, course_uuid, db_session
-        )
-    # For non-read operations, check if user is anonymous first
-    await authorization_verify_if_user_is_anon(current_user.id)
-    await authorization_verify_based_on_roles_and_authorship(
-        request, current_user.id, action, course_uuid, db_session
-    )
-    return None
-
-
-## 🔒 RBAC Utils ##

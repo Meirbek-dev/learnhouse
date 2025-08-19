@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Annotated, Dict, List, Optional
+from typing import Annotated, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import and_, func, null, or_, text

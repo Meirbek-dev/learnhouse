@@ -1,46 +1,133 @@
-# All node_modules directories
+# Dependencies
+node_modules
 **/node_modules
-**/dist
-**/.next
+jspm_packages/
 
-# All secrets
+# Package manager files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.yarn-integrity
+package-lock.json
+yarn.lock
+
+# Build outputs
+.next
+**/.next
+out
+.out
+dist
+**/dist
+build
+.nuxt
+.storybook-out
+
+# Environment files
+.env*
 **/.env.local
 **/.env.*.local
 
-# By default all git files
-.git
-**/.gitignore
-.gitattributes
-.github
+# Logs
+logs
+*.log
+**/*.log
 
-# Tools caches
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Cache directories
 .cache
+.parcel-cache
+.npm
+.eslintcache
+.nyc_output
+.pytest_cache/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 **/*.tsbuildinfo
 **/.eslintcache
 **/__pycache__
 **/.ruff_cache
 
-# Docker related
-dockers
-*docker-compose*
+# Coverage reports
+coverage
+*.lcov
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+coverage.xml
 
-# Log files
-logs
-**/*.log
+# Test files
+.tox/
+nosetests.xml
 
-# Temp files
+# Temporary files
+tmp/
 tmp
+temp/
 *.tmp
+.node_repl_history
+*.tgz
 
-# IDE related
-.idea
+# IDE files
 .vscode
+.idea
+*.swp
+*.swo
 
-# other
+# OS files
+.DS_Store
+**.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+**/.gitignore
+.gitattributes
+.github
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+*docker-compose*
+dockers
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+**/.venv
+ENV/
+env.bak/
+venv.bak/
+
+# Database
+*.db
+*.sqlite3
+
+# Media files
+uploads/
+media/
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Project specific
 **/.assets
 **/.temporary
-**.DS_Store
-out
-.env*
-**/.venv
 .logfire

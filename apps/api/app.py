@@ -282,8 +282,8 @@ def _add_middleware(app: FastAPI, config: OpenUConfig) -> None:
         compresslevel=6,  # Balanced compression ratio vs speed
     )
 
-    # Instrument with Logfire in production
-    if not config.general_config.development_mode:
+    # Only enable logfire if explicitly configured
+    if config.general_config.logfire_enabled:
         try:
             logfire.configure(
                 console=False,
@@ -291,6 +291,10 @@ def _add_middleware(app: FastAPI, config: OpenUConfig) -> None:
                 service_version="0.1.0",
             )
             logfire.instrument_fastapi(app)
+            # Instrument database after logfire is configured
+            from src.core.events.database import engine
+
+            logfire.instrument_sqlalchemy(engine=engine)
             logger.info("Logfire instrumentation enabled")
         except Exception as e:
             logger.warning(f"Failed to configure Logfire: {e}")

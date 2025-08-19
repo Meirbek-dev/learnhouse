@@ -46,14 +46,36 @@ class Permission(PydanticStrictBaseModel):
         return handler(core_schema)
 
 
+class PermissionsWithOwn(PydanticStrictBaseModel):
+    action_create: bool
+    action_read: bool
+    action_read_own: bool
+    action_update: bool
+    action_update_own: bool
+    action_delete: bool
+    action_delete_own: bool
+
+    def __getitem__(self, item) -> object:
+        return getattr(self, item)
+
+
+class DashboardPermission(PydanticStrictBaseModel):
+    action_access: bool
+
+    def __getitem__(self, item) -> object:
+        return getattr(self, item)
+
+
 class Rights(PydanticStrictBaseModel):
-    courses: Permission
+    courses: PermissionsWithOwn
     users: Permission
     usergroups: Permission
     collections: Permission
     organizations: Permission
     coursechapters: Permission
     activities: Permission
+    roles: Permission
+    dashboard: DashboardPermission
 
     def __getitem__(self, item) -> object:
         return getattr(self, item)

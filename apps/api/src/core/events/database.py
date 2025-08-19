@@ -3,7 +3,6 @@ import logging
 import os
 from collections.abc import Iterator
 
-import logfire
 from fastapi import FastAPI
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
@@ -160,15 +159,6 @@ def get_database_engine() -> Engine:
 
             # Create engine with optimized configuration
             _engine = create_engine(connection_string, **engine_kwargs)
-
-        # Instrument with Logfire if not in development or testing
-        if not is_testing:
-            openu_config = get_openu_config()
-            if not openu_config.general_config.development_mode:
-                try:
-                    logfire.instrument_sqlalchemy(engine=_engine)
-                except Exception as e:
-                    logger.warning(f"Failed to instrument SQLAlchemy: {e}")
 
     return _engine
 

@@ -145,13 +145,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       }
 
-      // Refresh token only if it's close to expiring (5 minutes before expiry)
+      // Refresh token only if it's close to expiring (1 minutes before expiry)
       const userWithTokens = token.user as UserWithTokens;
       if (userWithTokens?.tokens) {
         const tokenExpiry = userWithTokens.tokens.expiry || 0;
-        const fiveMinutes = 5 * 60 * 1000;
+        const oneMinute = 1 * 60 * 1000;
 
-        if (Date.now() + fiveMinutes >= tokenExpiry) {
+        if (Date.now() + oneMinute >= tokenExpiry) {
           try {
             const refreshToken = userWithTokens.tokens.refresh_token;
             if (refreshToken) {
@@ -182,14 +182,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return session;
       }
 
-      // Cache the session for 5 minutes to avoid frequent API calls
+      // Cache the session for 1 minute to refresh every minute
       const cacheKey = `user_session_${userWithTokens.tokens?.access_token}`;
 
       // Use Edge Runtime compatible cache
       const cache = getSessionCache();
       const cachedSession = cache.get(cacheKey);
 
-      if (cachedSession && Date.now() - cachedSession.timestamp < 5 * 60 * 1000) {
+      if (cachedSession && Date.now() - cachedSession.timestamp < 1 * 60 * 1000) {
         return {
           ...session,
           user: cachedSession.data.user,

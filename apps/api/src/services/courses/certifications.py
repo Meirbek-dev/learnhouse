@@ -19,11 +19,7 @@ from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac.rbac import (
-    authorization_verify_based_on_roles_and_authorship,
-    authorization_verify_if_element_is_public,
-    authorization_verify_if_user_is_anon,
-)
+from src.security.courses_security import courses_rbac_check_for_certifications
 from src.services.gamification import award_xp
 
 ####################################################
@@ -50,7 +46,9 @@ async def create_certification(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "create", db_session)
+    await courses_rbac_check_for_certifications(
+        request, course.course_uuid, current_user, "create", db_session
+    )
 
     # Create certification
     certification = Certifications(
@@ -99,7 +97,9 @@ async def get_certification(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_certifications(
+        request, course.course_uuid, current_user, "read", db_session
+    )
 
     return CertificationRead(**certification.model_dump())
 
@@ -123,7 +123,9 @@ async def get_certifications_by_course(
         )
 
     # RBAC check
-    await rbac_check(request, course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_certifications(
+        request, course_uuid, current_user, "read", db_session
+    )
 
     # Get certifications for this course
     statement = select(Certifications).where(Certifications.course_id == course.id)
@@ -166,7 +168,9 @@ async def update_certification(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "update", db_session)
+    await courses_rbac_check_for_certifications(
+        request, course.course_uuid, current_user, "update", db_session
+    )
 
     # Update only the fields that were passed in
     for var, value in vars(certification_object).items():
@@ -213,7 +217,9 @@ async def delete_certification(
         )
 
     # RBAC check
-    await rbac_check(request, course.course_uuid, current_user, "delete", db_session)
+    await courses_rbac_check_for_certifications(
+        request, course.course_uuid, current_user, "delete", db_session
+    )
 
     db_session.delete(certification)
     db_session.commit()
@@ -231,8 +237,16 @@ async def create_certificate_user(
     user_id: int,
     certification_id: int,
     db_session: Session,
+    current_user: PublicUser | AnonymousUser | None = None,
 ) -> CertificateUserRead:
-    """Create a certificate user link"""
+    """
+    Create a certificate user link
+
+    SECURITY NOTES:
+    - This function should only be called by authorized users (course owners, instructors, or system)
+    - When called from check_course_completion_and_create_certificate, it's a system operation
+    - When called directly, requires proper RBAC checks
+    """
 
     # Check if certification exists
     statement = select(Certifications).where(Certifications.id == certification_id)
@@ -242,6 +256,23 @@ async def create_certificate_user(
         raise HTTPException(
             status_code=404,
             detail="Certification not found",
+        )
+
+    # SECURITY: If current_user is provided, perform RBAC check
+    if current_user:
+        # Get course for RBAC check
+        statement = select(Course).where(Course.id == certification.course_id)
+        course = db_session.exec(statement).first()
+
+        if not course:
+            raise HTTPException(
+                status_code=404,
+                detail="Course not found",
+            )
+
+        # Require course ownership or instructor role for creating certificates
+        await courses_rbac_check_for_certifications(
+            request, course.course_uuid, current_user, "create", db_session
         )
 
     # Check if certificate user already exists
@@ -330,7 +361,9 @@ async def get_user_certificates_for_course(
         )
 
     # RBAC check
-    await rbac_check(request, course_uuid, current_user, "read", db_session)
+    await courses_rbac_check_for_certifications(
+        request, course_uuid, current_user, "read", db_session
+    )
 
     # Get all certifications for this course
     statement = select(Certifications).where(Certifications.course_id == course.id)
@@ -375,7 +408,14 @@ async def check_course_completion_and_create_certificate(
     course_id: int,
     db_session: Session,
 ) -> bool:
-    """Check if all activities in a course are completed and create certificate if so"""
+    """
+    Check if all activities in a course are completed and create certificate if so
+
+    SECURITY NOTES:
+    - This function is called by the system when activities are completed
+    - It should only create certificates for users who have actually completed the course
+    - The function is called from mark_activity_as_done_for_user which already has RBAC checks
+    """
 
     # Get the user object for gamification
     from src.db.users import User
@@ -415,7 +455,8 @@ async def check_course_completion_and_create_certificate(
         certification = db_session.exec(statement).first()
 
         if certification and certification.id:
-            # Create certificate user link
+            # SECURITY: Create certificate user link (system operation, no RBAC needed here)
+            # This is called from mark_activity_as_done_for_user which already has proper RBAC checks
             try:
                 await create_certificate_user(
                     request, user_id, certification.id, db_session
@@ -577,36 +618,3 @@ async def get_all_user_certificates(
         )
 
     return result
-
-
-####################################################
-# RBAC Utils
-####################################################
-
-
-async def rbac_check(
-    request: Request,
-    course_uuid: str,
-    current_user: PublicUser | AnonymousUser,
-    action: Literal["create", "read", "update", "delete"],
-    db_session: Session,
-):
-    if action == "read":
-        if current_user.id == 0:  # Anonymous user
-            await authorization_verify_if_element_is_public(
-                request, course_uuid, action, db_session
-            )
-        else:
-            await authorization_verify_based_on_roles_and_authorship(
-                request, current_user.id, action, course_uuid, db_session
-            )
-    else:
-        await authorization_verify_if_user_is_anon(current_user.id)
-
-        await authorization_verify_based_on_roles_and_authorship(
-            request,
-            current_user.id,
-            action,
-            course_uuid,
-            db_session,
-        )

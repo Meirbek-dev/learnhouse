@@ -11,6 +11,11 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getUriWithOrg } from '@services/config/config';
+import { BookOpen } from 'lucide-react';
+import Link from 'next/link';
+
 interface CourseProps {
   orgslug: string;
   courses: any;
@@ -25,6 +30,7 @@ const CoursesHome = (params: CourseProps) => {
   const { courses } = params;
   const isUserAdmin = useAdminStatus() as any;
   const t = useTranslations('DashPage.Courses.HomePageClient');
+  const org = useOrg() as any;
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);
@@ -52,7 +58,16 @@ const CoursesHome = (params: CourseProps) => {
       <div className="mb-6">
         <BreadCrumbs type="courses" />
         <div className="mt-4 flex flex-col items-start justify-between sm:flex-row sm:items-center">
-          <h1 className="mb-4 text-3xl font-bold sm:mb-0">{t('courses')}</h1>
+          <div className="flex items-center space-x-4">
+            <h1 className="mb-4 text-3xl font-bold sm:mb-0">{t('courses')}</h1>
+            <Link
+              href={getUriWithOrg(org?.slug, '/dash/documentation/rights')}
+              className="rounded-md bg-primary hover:scale-105 transition-all duration-100 ease-linear antialiased p-2 px-4 text-xs font-bold text-primary-foreground drop-shadow-lg flex space-x-2 items-center"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>{t('rightsGuide')}</span>
+            </Link>
+          </div>
           <AuthenticatedClientElement
             checkMethod="roles"
             action="create"
