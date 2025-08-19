@@ -1,6 +1,7 @@
 'use client';
 
-import { type GamificationProfile, getGamificationProfile } from '@/services/gamification/gamification';
+import type { GamificationProfile } from '@/services/gamification/gamification';
+import { getGamificationProfile } from '@/services/gamification/gamification';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';

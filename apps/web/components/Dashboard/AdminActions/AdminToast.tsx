@@ -1,9 +1,10 @@
 'use client';
 
 import { AlertCircle, AlertTriangle, CheckCircle, Info, Loader2, X, XCircle } from 'lucide-react';
-import { type ReactNode, createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 // Toast Types

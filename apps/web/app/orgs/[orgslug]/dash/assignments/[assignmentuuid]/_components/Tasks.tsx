@@ -3,7 +3,7 @@ import {
   useAssignmentsTaskDispatch,
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { FileUp, ListTodo, PanelLeftOpen, Plus } from 'lucide-react';
+import { FileUp, ListTodo, PanelLeftOpen, Plus, Type } from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -63,6 +63,7 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
                   <div className="text-gray-500">
                     {task.assignment_type === 'QUIZ' && <ListTodo size={15} />}
                     {task.assignment_type === 'FILE_SUBMISSION' && <FileUp size={15} />}
+                    {task.assignment_type === 'FORM' && <Type size={15} />}
                   </div>
                   <div className="text-sm font-semibold">{task.title}</div>
                 </div>

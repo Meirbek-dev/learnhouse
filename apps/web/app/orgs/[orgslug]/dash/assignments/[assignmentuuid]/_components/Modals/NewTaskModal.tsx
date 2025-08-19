@@ -72,8 +72,8 @@ const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
         <p className="w-40 text-sm text-gray-500">{t('fileSubmissionDescription')}</p>
       </div>
       <div
-        onClick={() => toast.error(t('formNotSupported'))}
-        className="flex flex-col justify-center space-y-2 pt-10 text-center opacity-25"
+        onClick={() => createTask('FORM')}
+        className="flex flex-col justify-center space-y-2 pt-10 text-center"
       >
         <div className="soft-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <AArrowUp size={30} />

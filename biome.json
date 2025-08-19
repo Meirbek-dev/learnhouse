@@ -49,7 +49,6 @@
         "useImportExtensions": "off"
       },
       "nursery": {
-        "useUniqueElementIds": "off",
         "useSortedClasses": "warn"
       },
       "performance": {

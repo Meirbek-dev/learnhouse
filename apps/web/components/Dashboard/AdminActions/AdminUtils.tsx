@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
-import { type ClassValue, clsx } from 'clsx';
 import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
+import type { ClassValue } from 'clsx';
+import { clsx } from 'clsx';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -88,7 +89,7 @@ export const formatRelativeTime = (date: Date | string, formatter?: any): string
 
 // Localized relative time formatter hook
 export const useLocalizedRelativeTime = () => {
-  const t = useTranslations('DashPage.Admin.Utils.relativeTime');
+  const t = useTranslations('AdminUtils.relativeTime');
 
   return useCallback(
     (date: Date | string) => {
@@ -214,7 +215,7 @@ export const getStatusConfig = (status: string) => {
 
 // Localized status config hook
 export const useLocalizedStatusConfig = () => {
-  const t = useTranslations('DashPage.Admin.Utils.status');
+  const t = useTranslations('AdminUtils.status');
 
   return useCallback(
     (status: string) => {
@@ -318,7 +319,7 @@ export const getPriorityConfig = (priority: string | number) => {
 
 // Localized priority config hook
 export const useLocalizedPriorityConfig = () => {
-  const t = useTranslations('DashPage.Admin.Utils.priority');
+  const t = useTranslations('AdminUtils.priority');
 
   return useCallback(
     (priority: string | number) => {

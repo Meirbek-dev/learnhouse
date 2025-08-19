@@ -61,6 +61,7 @@
       "currentPoints": "Current points: {points}",
       "enterGradePlaceholder": "Enter grade (max {max})",
       "fileSubmissionTitle": "File Submission",
+      "formTitle": "Form",
       "grade": "Grade",
       "points": "{count, plural, =0 {# points} one {# point} other {# points}}",
       "quizTitle": "Quiz",
@@ -165,6 +166,32 @@
     "unmarkDialogTitle": "Unmark Activity?",
     "unpublishedActivity": "This activity is not published yet",
     "viewAllActivities": "View all activities"
+  },
+  "AdminUtils": {
+    "priority": {
+      "critical": "Critical",
+      "high": "High",
+      "low": "Low",
+      "medium": "Medium"
+    },
+    "relativeTime": {
+      "dayAgo": "{count} day ago",
+      "daysAgo": "{count} days ago",
+      "hourAgo": "{count} hour ago",
+      "hoursAgo": "{count} hours ago",
+      "justNow": "just now",
+      "minuteAgo": "{count} minute ago",
+      "minutesAgo": "{count} minutes ago"
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "failed": "Failed",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "processing": "Processing",
+      "suspended": "Suspended"
+    }
   },
   "Auth": {
     "Forgot": {
@@ -793,6 +820,31 @@
       "courses": "Courses",
       "trail": "Progress"
     },
+    "OrgRoles": {
+      "actions": "Actions",
+      "cardDescription": "Roles define what users can do within your organization. Create custom roles with specific permissions for different user types.",
+      "cardTitle": "Manage Roles & Permissions",
+      "createRole": "Create a Role",
+      "createRoleDescription": "Create a new role with specific permissions",
+      "createRoleTitle": "Create a Role",
+      "deleteRole": "Delete Role",
+      "deleteRoleConfirmation": "This action cannot be undone. All users with this role will lose their permissions. Are you sure you want to delete this role?",
+      "deleteRoleError": "Error deleting role",
+      "deleteRoleTitle": "Delete Role ?",
+      "deletedRoleSuccess": "Deleted role",
+      "deleting": "Deleting...",
+      "description": "Description",
+      "edit": "Edit",
+      "editRole": "Edit Role",
+      "editRoleDescription": "Edit the role permissions and details",
+      "editRoleTitle": "Edit Role",
+      "noDescription": "No description",
+      "noPermissions": "No permissions",
+      "permissions": "Permissions",
+      "permissionsCount": "{count, plural, =0 {No permissions} one {# permission} other {# permissions}}",
+      "roleName": "Role Name",
+      "systemWide": "System-wide"
+    },
     "PageLoading": {
       "loading": "Loading..."
     },
@@ -830,6 +882,42 @@
     "TagsInput": {
       "removeOption": "Remove option",
       "removeTag": "Remove tag"
+    },
+    "TaskFormObject": {
+      "addBlank": "Add Blank",
+      "addQuestion": "Add Question",
+      "answerPlaceholder": "Your answer...",
+      "autoGradedBySystem": "Auto graded by system",
+      "blankPlaceholder": "Enter the correct answer",
+      "correct": "Correct",
+      "correctAnswer": "Correct Answer",
+      "correctAnswerLabel": "Correct Answer",
+      "correctAnswerPlaceholder": "Correct answer",
+      "expected": "Expected:",
+      "fillBlanksError": "Please fill in at least one blank before submitting.",
+      "fillInTheBlanks": "Fill in the blanks",
+      "gradeAssignment": "Grade Assignment",
+      "gradeError": "Error grading task, please retry later.",
+      "gradedSuccessfully": "Task graded successfully with {finalGrade} points ({correctAnswers}/{totalBlanks} correct)",
+      "hint": "Hint (optional)",
+      "hintLabel": "Hint",
+      "hintOptional": "Hint (optional)",
+      "incorrect": "Incorrect",
+      "noQuestionsFound": "No questions found",
+      "placeholder": "Placeholder",
+      "placeholderLabel": "Placeholder",
+      "placeholderText": "Placeholder text for the blank",
+      "questionPlaceholder": "Enter your question with blanks (use ___ for blanks)",
+      "questionText": "Question Text",
+      "removeBlank": "Remove Blank",
+      "removeBlankError": "Cannot delete the last blank. At least one blank is required.",
+      "removeQuestion": "Remove Question",
+      "saveError": "Error saving task, please retry later.",
+      "savedSuccessfully": "Task saved successfully",
+      "submitError": "Error submitting form, please retry later.",
+      "submitForGrading": "Submit for grading",
+      "submittedSuccessfully": "Form submitted successfully!",
+      "userIdRequired": "User ID is required for grading."
     },
     "TypeOfContentTitle": {
       "logoAlt": "{type} logo"
@@ -1923,7 +2011,7 @@
         "createSuccess": "Task created successfully",
         "fileSubmissionDescription": "Students can submit files for this task",
         "fileSubmissionTitle": "File Submission",
-        "formDescription": "Forms for students to fill out",
+        "formDescription": "Fill-in-the-blank forms for students",
         "formNotSupported": "Forms are not supported yet",
         "formTitle": "Form",
         "quizDescription": "Multiple choice questions",
@@ -2089,10 +2177,96 @@
       },
       "CoursePage": {
         "access": "Access",
+        "accessDenied": "Access Denied",
+        "accessDeniedMessage": "You don't have permission to access this course.",
+        "accessRestricted": "Access Restricted",
         "certification": "Certification",
         "content": "Content",
         "contributors": "Contributors",
-        "general": "General"
+        "general": "General",
+        "loading": "Loading...",
+        "noPermissionToAccess": "You don't have permission to access this course.",
+        "noPermissionToAccessTab": "You don't have permission to access {tabName}"
+      },
+      "RightsDocumentation": {
+        "backToDashboard": "Back to Dashboard",
+        "courseOwnership": {
+          "contributor": {
+            "description": "Course contributor with limited permissions",
+            "name": "Contributor",
+            "permissions": {
+              "editCourseContent": "Edit course content",
+              "createActivities": "Create activities",
+              "cannotManageContributors": "Cannot manage contributors",
+              "cannotChangeAccess": "Cannot change access"
+            }
+          },
+          "creator": {
+            "description": "Original course creator with full control",
+            "name": "Creator",
+            "permissions": {
+              "fullCourseControl": "Full course control",
+              "manageContributors": "Manage contributors",
+              "changeAccessSettings": "Change access settings",
+              "deleteCourse": "Delete course"
+            }
+          },
+          "maintainer": {
+            "description": "Course maintainer with extensive permissions",
+            "name": "Maintainer",
+            "permissions": {
+              "manageCourseContent": "Manage course content",
+              "manageContributors": "Manage contributors",
+              "changeAccessSettings": "Change access settings",
+              "cannotDeleteCourse": "Cannot delete course"
+            }
+          }
+        },
+        "courseOwnershipTypes": "Course Ownership Types",
+        "description": "Understanding LearnHouse permissions, roles, and access controls based on RBAC system",
+        "roleHierarchy": "Role Hierarchy",
+        "roles": {
+          "admin": {
+            "description": "Full platform control with all permissions",
+            "name": "Admin",
+            "permissions": {
+              "allPermissions": "All permissions",
+              "manageOrganization": "Manage organization",
+              "manageUsers": "Manage users",
+              "manageCourses": "Manage courses",
+              "manageRoles": "Manage roles"
+            }
+          },
+          "instructor": {
+            "description": "Can create courses but need ownership for content creation",
+            "name": "Instructor",
+            "permissions": {
+              "createCourses": "Create courses",
+              "manageOwnCourses": "Manage own courses",
+              "createAssignments": "Create assignments",
+              "gradeAssignments": "Grade assignments"
+            }
+          },
+          "maintainer": {
+            "description": "Mid-level manager with wide permissions",
+            "name": "Maintainer",
+            "permissions": {
+              "manageCourses": "Manage courses",
+              "manageUsers": "Manage users",
+              "manageAssignments": "Manage assignments"
+            }
+          },
+          "user": {
+            "description": "Read-Only Learner",
+            "name": "User",
+            "permissions": {
+              "viewCourses": "View courses",
+              "submitAssignments": "Submit assignments",
+              "takeAssessments": "Take assessments"
+            }
+          }
+        },
+        "title": "Authorizations & Rights Guide"
       },
       "HomePageClient": {
         "courses": "Courses",
@@ -4174,6 +4348,30 @@
   "Header": {
     "adminBadge": "ADMIN",
     "login": "Login",
+    "profile": {
+      "customRole": "Custom Role",
+      "dashboard": "Dashboard",
+      "roles": {
+        "admin": {
+          "description": "Full platform control with all permissions",
+          "name": "ADMIN"
+        },
+        "instructor": {
+          "description": "Can manage their own content",
+          "name": "INSTRUCTOR"
+        },
+        "maintainer": {
+          "description": "Mid-level manager with wide permissions",
+          "name": "MAINTAINER"
+        },
+        "user": {
+          "description": "Read-Only Learner",
+          "name": "USER"
+        }
+      },
+      "signOut": "Sign Out",
+      "userSettings": "User Settings"
+    },
     "signUp": "Sign Up",
     "tooltips": {
       "ownedCourses": "My purchased courses",
@@ -4399,6 +4597,7 @@
     "chapterDescriptionRequired": "Chapter description is required",
     "chapterNameRequired": "Chapter name is required",
     "contentRequired": "Content is required",
+    "descriptionMinLength": "Description must be at least {length} characters",
     "descriptionRequired": "Description is required",
     "documentNameRequired": "Document name is required",
     "fieldRequired": "{fieldName} is required",
@@ -4407,10 +4606,12 @@
     "loading": "Loading...",
     "maxLength": "Must be no more than {length} characters",
     "minLength": "Must be at least {length} characters",
+    "nameMinLength": "Name must be at least {length} characters",
     "nameRequired": "Name is required",
     "passwordMinLength": "Password must be at least {length} characters",
     "pdfFileRequired": "Please select a PDF file",
     "required": "Required",
+    "roleNameRequired": "Role name is required",
     "roleRequired": "Role is required",
     "titleRequired": "Title is required",
     "usernameMinLength": "Username must be at least {length} characters",

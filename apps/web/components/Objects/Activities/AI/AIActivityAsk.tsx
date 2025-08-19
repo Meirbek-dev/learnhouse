@@ -1,8 +1,9 @@
 'use client';
 
-import { type AIChatBotStateTypes, useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
+import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
+import type { AIChatBotStateTypes } from '@components/Contexts/AI/AIChatBotContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import touEmblemLight from 'public/tou_emblem_light.webp';
 import UserAvatar from '@components/Objects/UserAvatar';

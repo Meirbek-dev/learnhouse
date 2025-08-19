@@ -287,6 +287,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
 
     // Save the quiz to the server
     const values = {
+      assignment_task_submission_uuid: userSubmissions.assignment_task_submission_uuid || null,
       task_submission: updatedUserSubmissions,
       grade: 0,
       task_submission_grade_feedback: '',
@@ -305,6 +306,14 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         });
         toast.success(t('saveSuccess'));
         setShowSavingDisclaimer(false);
+        // Update userSubmissions with the returned UUID for future updates
+        const updatedUserSubmissionsWithUUID = {
+          ...updatedUserSubmissions,
+          assignment_task_submission_uuid:
+            res.data?.assignment_task_submission_uuid || userSubmissions.assignment_task_submission_uuid,
+        };
+        setUserSubmissions(updatedUserSubmissionsWithUUID);
+        setInitialUserSubmissions(updatedUserSubmissionsWithUUID);
         setUserSubmissions(updatedUserSubmissions);
       } else {
         toast.error(t('saveError'));

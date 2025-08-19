@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
 
 from src.core.events.database import get_db_session
 from src.db.courses.assignments import (
@@ -300,9 +300,14 @@ async def api_read_user_assignment_task_submissions_me(
     """
     Read task submissions for an assignment from a user
     """
-    return await read_user_assignment_task_submissions_me(
-        request, assignment_task_uuid, current_user, db_session
-    )
+    result = await read_user_assignment_task_submissions_me
+
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Assignment Task Submission not found",
+        )
+    return result
 
 
 @router.get("/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions")

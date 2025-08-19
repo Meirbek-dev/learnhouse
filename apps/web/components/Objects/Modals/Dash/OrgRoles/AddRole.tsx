@@ -1,17 +1,16 @@
 'use client';
 import {
-  Shield,
-  BookOpen,
-  Users,
-  UserCheck,
-  FolderOpen,
-  Building,
-  FileText,
   Activity,
-  Settings,
-  Monitor,
+  BookOpen,
+  Building,
   CheckSquare,
+  FileText,
+  FolderOpen,
+  Monitor,
+  Shield,
   Square,
+  UserCheck,
+  Users,
 } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -22,15 +21,16 @@ import { Textarea } from '@components/ui/textarea';
 import { createRole } from '@services/roles/roles';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { mutate } from 'swr';
 import React from 'react';
 import { z } from 'zod';
 
-type AddRoleProps = {
+interface AddRoleProps {
   setCreateRoleModal: any;
-};
+}
 
 interface Rights {
   courses: {
@@ -89,9 +89,9 @@ interface Rights {
   };
 }
 
-const roleFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').nonempty('Role name is required'),
-  description: z.string().min(10, 'Description must be at least 10 characters').nonempty('Description is required'),
+const createRoleFormSchema = (t: (key: string, values?: any) => string) => z.object({
+  name: z.string().min(2, t('nameMinLength', { length: 2 })).nonempty(t('roleNameRequired')),
+  description: z.string().min(10, t('descriptionMinLength', { length: 10 })).nonempty(t('descriptionRequired')),
   org_id: z.number(),
   rights: z.object({
     courses: z.object({
@@ -151,7 +151,12 @@ const roleFormSchema = z.object({
   }),
 });
 
-type RoleFormValues = z.infer<typeof roleFormSchema>;
+type RoleFormValues = {
+  name: string;
+  description: string;
+  org_id: number;
+  rights: Rights;
+};
 
 const defaultRights: Rights = {
   courses: {
@@ -421,11 +426,13 @@ const predefinedRoles = {
 };
 
 function AddRole(props: AddRoleProps) {
+  const t = useTranslations('Validation');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [rights, setRights] = React.useState<Rights>(defaultRights);
+  const roleFormSchema = createRoleFormSchema(t);
 
   const form = useForm<RoleFormValues>({
     resolver: zodResolver(roleFormSchema),
@@ -444,58 +451,58 @@ function AddRole(props: AddRoleProps) {
     // Update form values with current rights state
     const formattedRights = {
       courses: {
-        action_create: rights.courses?.action_create || false,
-        action_read: rights.courses?.action_read || false,
-        action_read_own: rights.courses?.action_read_own || false,
-        action_update: rights.courses?.action_update || false,
-        action_update_own: rights.courses?.action_update_own || false,
-        action_delete: rights.courses?.action_delete || false,
-        action_delete_own: rights.courses?.action_delete_own || false,
+        action_create: rights.courses?.action_create,
+        action_read: rights.courses?.action_read,
+        action_read_own: rights.courses?.action_read_own,
+        action_update: rights.courses?.action_update,
+        action_update_own: rights.courses?.action_update_own,
+        action_delete: rights.courses?.action_delete,
+        action_delete_own: rights.courses?.action_delete_own,
       },
       users: {
-        action_create: rights.users?.action_create || false,
-        action_read: rights.users?.action_read || false,
-        action_update: rights.users?.action_update || false,
-        action_delete: rights.users?.action_delete || false,
+        action_create: rights.users?.action_create,
+        action_read: rights.users?.action_read,
+        action_update: rights.users?.action_update,
+        action_delete: rights.users?.action_delete,
       },
       usergroups: {
-        action_create: rights.usergroups?.action_create || false,
-        action_read: rights.usergroups?.action_read || false,
-        action_update: rights.usergroups?.action_update || false,
-        action_delete: rights.usergroups?.action_delete || false,
+        action_create: rights.usergroups?.action_create,
+        action_read: rights.usergroups?.action_read,
+        action_update: rights.usergroups?.action_update,
+        action_delete: rights.usergroups?.action_delete,
       },
       collections: {
-        action_create: rights.collections?.action_create || false,
-        action_read: rights.collections?.action_read || false,
-        action_update: rights.collections?.action_update || false,
-        action_delete: rights.collections?.action_delete || false,
+        action_create: rights.collections?.action_create,
+        action_read: rights.collections?.action_read,
+        action_update: rights.collections?.action_update,
+        action_delete: rights.collections?.action_delete,
       },
       organizations: {
-        action_create: rights.organizations?.action_create || false,
-        action_read: rights.organizations?.action_read || false,
-        action_update: rights.organizations?.action_update || false,
-        action_delete: rights.organizations?.action_delete || false,
+        action_create: rights.organizations?.action_create,
+        action_read: rights.organizations?.action_read,
+        action_update: rights.organizations?.action_update,
+        action_delete: rights.organizations?.action_delete,
       },
       coursechapters: {
-        action_create: rights.coursechapters?.action_create || false,
-        action_read: rights.coursechapters?.action_read || false,
-        action_update: rights.coursechapters?.action_update || false,
-        action_delete: rights.coursechapters?.action_delete || false,
+        action_create: rights.coursechapters?.action_create,
+        action_read: rights.coursechapters?.action_read,
+        action_update: rights.coursechapters?.action_update,
+        action_delete: rights.coursechapters?.action_delete,
       },
       activities: {
-        action_create: rights.activities?.action_create || false,
-        action_read: rights.activities?.action_read || false,
-        action_update: rights.activities?.action_update || false,
-        action_delete: rights.activities?.action_delete || false,
+        action_create: rights.activities?.action_create,
+        action_read: rights.activities?.action_read,
+        action_update: rights.activities?.action_update,
+        action_delete: rights.activities?.action_delete,
       },
       roles: {
-        action_create: rights.roles?.action_create || false,
-        action_read: rights.roles?.action_read || false,
-        action_update: rights.roles?.action_update || false,
-        action_delete: rights.roles?.action_delete || false,
+        action_create: rights.roles?.action_create,
+        action_read: rights.roles?.action_read,
+        action_update: rights.roles?.action_update,
+        action_delete: rights.roles?.action_delete,
       },
       dashboard: {
-        action_access: rights.dashboard?.action_access || false,
+        action_access: rights.dashboard?.action_access,
       },
     };
 
@@ -567,39 +574,39 @@ function AddRole(props: AddRoleProps) {
     const someSelected = permissions.some((perm) => sectionRights[perm]) && !allSelected;
 
     return (
-      <div className="border border-gray-200 rounded-lg p-4 mb-4 bg-background shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+      <div className="bg-background mb-4 rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center space-x-2">
-            <Icon className="w-4 h-4 text-gray-500" />
-            <h3 className="font-semibold text-gray-800 text-sm sm:text-base">{title}</h3>
+            <Icon className="h-4 w-4 text-gray-500" />
+            <h3 className="text-sm font-semibold text-gray-800 sm:text-base">{title}</h3>
           </div>
           <button
             type="button"
             onClick={() => handleSelectAll(section, !allSelected)}
-            className="flex items-center space-x-2 text-sm text-primary hover:text-primary/80 font-medium self-start sm:self-auto transition-colors"
+            className="text-primary hover:text-primary/80 flex items-center space-x-2 self-start text-sm font-medium transition-colors sm:self-auto"
           >
             {allSelected ? (
-              <CheckSquare className="w-4 h-4" />
+              <CheckSquare className="h-4 w-4" />
             ) : someSelected ? (
-              <Square className="w-4 h-4" />
+              <Square className="h-4 w-4" />
             ) : (
-              <Square className="w-4 h-4" />
+              <Square className="h-4 w-4" />
             )}
             <span className="hidden sm:inline">{allSelected ? 'Deselect All' : 'Select All'}</span>
             <span className="sm:hidden">{allSelected ? 'Deselect' : 'Select'}</span>
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {permissions.map((permission) => (
             <label
               key={permission}
-              className="flex items-center space-x-2 cursor-pointer p-2 rounded-md hover:bg-gray-50 transition-colors"
+              className="flex cursor-pointer items-center space-x-2 rounded-md p-2 transition-colors hover:bg-gray-50"
             >
               <input
                 type="checkbox"
-                checked={rights[section]?.[permission as keyof (typeof rights)[typeof section]] || false}
+                checked={rights[section]?.[permission as keyof (typeof rights)[typeof section]]}
                 onChange={(e) => handleRightChange(section, permission, e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700 capitalize">
                 {permission.replace('action_', '').replace('_', ' ')}
@@ -612,13 +619,13 @@ function AddRole(props: AddRoleProps) {
   };
 
   return (
-    <div className="py-3 max-w-6xl mx-auto px-2 sm:px-0">
+    <div className="mx-auto max-w-6xl px-2 py-3 sm:px-0">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-6"
         >
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
             <div className="space-y-4 sm:space-y-6">
               <FormField
                 control={form.control}
@@ -655,19 +662,19 @@ function AddRole(props: AddRoleProps) {
               />
 
               <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Predefined Rights</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <h3 className="mb-4 text-lg font-semibold text-gray-800">Predefined Rights</h3>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {Object.keys(predefinedRoles).map((roleKey) => (
                     <button
                       key={roleKey}
                       type="button"
                       onClick={() => handlePredefinedRole(roleKey)}
-                      className="p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-left bg-white shadow-sm hover:shadow-md"
+                      className="rounded-lg border border-gray-200 bg-white p-3 text-left shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
                     >
-                      <div className="font-medium text-gray-900 text-sm sm:text-base">
+                      <div className="text-sm font-medium text-gray-900 sm:text-base">
                         {predefinedRoles[roleKey as keyof typeof predefinedRoles].name}
                       </div>
-                      <div className="text-xs sm:text-sm text-gray-500 mt-1">
+                      <div className="mt-1 text-xs text-gray-500 sm:text-sm">
                         {predefinedRoles[roleKey as keyof typeof predefinedRoles].description}
                       </div>
                     </button>
@@ -677,7 +684,7 @@ function AddRole(props: AddRoleProps) {
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Permissions</h3>
+              <h3 className="mb-4 text-lg font-semibold text-gray-800">Permissions</h3>
 
               <PermissionSection
                 title="Courses"
@@ -752,7 +759,7 @@ function AddRole(props: AddRoleProps) {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-6 flex flex-col justify-end space-y-2 border-t border-gray-200 pt-6 sm:flex-row sm:space-y-0 sm:space-x-3">
             <Button
               type="button"
               variant="outline"

@@ -24,13 +24,14 @@ import OnBoardMore from '@public/onboarding/OnBoardMore.png';
 import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
 import OnBoardAI from '@public/onboarding/OnBoardAI.png';
 import { useOrg } from '@components/Contexts/OrgContext';
-import Image, { type StaticImageData } from 'next/image';
 import { getUriWithOrg } from '@services/config/config';
+import type { StaticImageData } from 'next/image';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
+import Image from 'next/image';
 
 interface OnboardingStep {
   imageSrc: StaticImageData;

@@ -84,6 +84,22 @@ def set_postgres_optimization(dbapi_connection, connection_record) -> None:
         cursor.close()
 
 
+# Add connection pool monitoring for debugging
+@event.listens_for(Engine, "connect")
+def receive_connect(dbapi_connection, connection_record):
+    logging.debug("Database connection established")
+
+
+@event.listens_for(Engine, "checkout")
+def receive_checkout(dbapi_connection, connection_record, connection_proxy):
+    logging.debug("Connection checked out from pool")
+
+
+@event.listens_for(Engine, "checkin")
+def receive_checkin(dbapi_connection, connection_record):
+    logging.debug("Connection returned to pool")
+
+
 # --- Optimized Database Initialization ---
 
 # 1. Import all models to ensure SQLModel's metadata is populated

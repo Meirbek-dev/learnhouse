@@ -27,10 +27,11 @@ import { Checkbox } from '@components/ui/checkbox';
 import { Calendar } from '@components/ui/calendar';
 import { getUser } from '@services/users/users';
 import { Button } from '@components/ui/button';
-import { type Locale, format } from 'date-fns';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { toast } from 'react-hot-toast';
+import type { Locale } from 'date-fns';
+import { format } from 'date-fns';
 import type { FC } from 'react';
 
 // Define section type keys

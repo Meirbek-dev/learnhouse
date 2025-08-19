@@ -411,10 +411,4 @@
     scrollbar-width: thin;
     scrollbar-color: var(--color-muted-foreground) var(--color-background);
   }
-
-  em,
-  i,
-  .italic {
-    font-style: italic !important;
-  }
 }

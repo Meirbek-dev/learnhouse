@@ -13,8 +13,9 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { type FC, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
+import { useMemo } from 'react';
+import type { FC } from 'react';
 import { mutate } from 'swr';
 import { z } from 'zod';
 

@@ -12,12 +12,12 @@ import { getAPIUrl } from '@services/config/config';
   Note: GET requests are usually fetched with SWR directly from components.
 */
 
-export type CreateOrUpdateRoleBody = {
+export interface CreateOrUpdateRoleBody {
   name: string;
   description?: string;
   rights: any;
   org_id?: number;
-};
+}
 
 export async function createRole(body: CreateOrUpdateRoleBody, access_token: string) {
   const { org_id, ...payload } = body;

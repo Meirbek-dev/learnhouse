@@ -1,6 +1,7 @@
 'use client';
 
-import { type GamificationProfile, calculateLevelProgress } from '@/services/gamification/gamification';
+import type { GamificationProfile } from '@/services/gamification/gamification';
+import { calculateLevelProgress } from '@/services/gamification/gamification';
 import { getLevelInfo } from '@/components/Objects/GamificationLevel';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Progress } from '@/components/ui/progress';

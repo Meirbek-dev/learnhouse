@@ -4,6 +4,7 @@ import {
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import TaskQuizObject from './TaskTypes/TaskQuizObject';
+import TaskFormObject from './TaskTypes/TaskFormObject';
 import TaskFileObject from './TaskTypes/TaskFileObject';
 import { useEffect } from 'react';
 
@@ -18,6 +19,12 @@ const AssignmentTaskContentEdit = () => {
     <div>
       {assignment_task?.assignmentTask.assignment_type === 'QUIZ' && <TaskQuizObject view="teacher" />}
       {assignment_task?.assignmentTask.assignment_type === 'FILE_SUBMISSION' && <TaskFileObject view="teacher" />}
+      {assignment_task?.assignmentTask.assignment_type === 'FORM' && (
+        <TaskFormObject
+          view="teacher"
+          assignmentTaskUUID={assignment_task?.assignmentTask.assignment_task_uuid}
+        />
+      )}
     </div>
   );
 };

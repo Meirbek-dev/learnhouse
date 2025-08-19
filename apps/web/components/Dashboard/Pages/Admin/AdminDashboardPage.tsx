@@ -987,7 +987,7 @@ const MetricCard = ({ title, value, icon, trend, trendUp }: MetricCardProps) => 
         <div className="flex-1">
           <p className="mb-1 text-sm font-medium text-gray-600">{title}</p>
           <AnimatedCounter
-            value={Number.parseInt(value.replace(/,/g, '')) || 0}
+            value={Number.parseInt(value.replace(/,/g, ''), 10) || 0}
             formatter={(v) => v.toLocaleString()}
             className="text-2xl font-bold text-gray-900"
             duration={1.5}

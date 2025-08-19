@@ -9,8 +9,9 @@ import {
   MoreVertical,
   X,
 } from 'lucide-react';
-import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
+import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
+import type { AIEditorStateTypes } from '@components/Contexts/AI/AIEditorContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import touEmblemLight from 'public/tou_emblem_light.webp';

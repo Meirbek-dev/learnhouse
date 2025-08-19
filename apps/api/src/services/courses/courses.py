@@ -55,9 +55,7 @@ async def get_course(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(
-            ResourceAuthor.id.asc()
-        )
+        .order_by(ResourceAuthor.id.asc())
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -101,9 +99,7 @@ async def get_course_by_id(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(
-            ResourceAuthor.id.asc()
-        )
+        .order_by(ResourceAuthor.id.asc())
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -249,9 +245,7 @@ async def get_courses_orgslug(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid.in_(course_uuids))
-        .order_by(
-            ResourceAuthor.id.asc()
-        )
+        .order_by(ResourceAuthor.id.asc())
     )
 
     author_results = db_session.exec(authors_query).all()
@@ -373,9 +367,7 @@ async def search_courses(
             select(ResourceAuthor, User)
             .join(User, ResourceAuthor.user_id == User.id)
             .where(ResourceAuthor.resource_uuid == course.course_uuid)
-            .order_by(
-                ResourceAuthor.id.asc()
-            )
+            .order_by(ResourceAuthor.id.asc())
         )
         author_results = db_session.exec(authors_statement).all()
 
@@ -501,9 +493,7 @@ async def create_course(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(
-            ResourceAuthor.id.asc()
-        )
+        .order_by(ResourceAuthor.id.asc())
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -601,9 +591,7 @@ async def update_course_thumbnail(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(
-            ResourceAuthor.id.asc()
-        )
+        .order_by(ResourceAuthor.id.asc())
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -673,10 +661,10 @@ async def update_course(
         is_course_owner = False
         if resource_author and (
             (
-                resource_author.authorship in (ResourceAuthorshipEnum.CREATOR, ResourceAuthorshipEnum.MAINTAINER)
+                resource_author.authorship
+                in (ResourceAuthorshipEnum.CREATOR, ResourceAuthorshipEnum.MAINTAINER)
             )
-            and resource_author.authorship_status
-            == ResourceAuthorshipStatusEnum.ACTIVE
+            and resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
         ):
             is_course_owner = True
 
@@ -709,9 +697,7 @@ async def update_course(
         select(ResourceAuthor, User)
         .join(User, ResourceAuthor.user_id == User.id)
         .where(ResourceAuthor.resource_uuid == course.course_uuid)
-        .order_by(
-            ResourceAuthor.id.asc()
-        )
+        .order_by(ResourceAuthor.id.asc())
     )
     author_results = db_session.exec(authors_statement).all()
 
@@ -728,7 +714,6 @@ async def update_course(
     ]
 
     return CourseRead(**course.model_dump(), authors=authors)
-
 
 
 async def delete_course(

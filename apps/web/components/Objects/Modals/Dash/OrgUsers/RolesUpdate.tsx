@@ -3,13 +3,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import { Alert, AlertDescription } from '@components/ui/alert';
 import { updateUserRole } from '@services/organizations/orgs';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
-import { Alert, AlertDescription } from '@components/ui/alert';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
@@ -58,7 +58,7 @@ const RolesUpdate = (props: Props) => {
     setError(null);
 
     const res = await updateUserRole(org.id, props.user.user.id, values.role, access_token);
-    const toastId = toast.loading('Updating role...');
+    const toastId = toast.loading(t('toastLoading'));
 
     if (res.status === 200) {
       await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
@@ -66,7 +66,7 @@ const RolesUpdate = (props: Props) => {
       toast.success(t('toastSuccess'), { id: toastId });
     } else {
       setIsSubmitting(false);
-      setError('Error ' + res.status + ': ' + res.data.detail);
+      setError(`Error ${res.status}: ${res.data.detail}`);
       toast.error(t('toastError'), { id: toastId });
     }
   };

@@ -1,6 +1,6 @@
 'use client';
 
-import { CodeIcon, ImageIcon, LayoutDashboardIcon, type LucideIcon, Share2Icon, TextIcon } from 'lucide-react';
+import { CodeIcon, ImageIcon, LayoutDashboardIcon, Share2Icon, TextIcon } from 'lucide-react';
 import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
 import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral';
@@ -9,6 +9,7 @@ import OrgEditOther from '@components/Dashboard/Pages/Org/OrgEditOther/OrgEditOt
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { getUriWithOrg } from '@services/config/config';
 import { use, useEffect, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import Link from 'next/link';

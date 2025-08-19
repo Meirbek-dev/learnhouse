@@ -1,5 +1,6 @@
 import { deleteUserSubmission, markActivityAsDoneForUser, putFinalGrade } from '@services/courses/assignments';
 import TaskQuizObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
+import TaskFormObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFormObject';
 import TaskFileObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -132,6 +133,14 @@ const EvaluateAssignment = ({ user_id }: any) => {
                   <TaskFileObject
                     key={task.assignment_task_uuid}
                     view="custom-grading"
+                    user_id={user_id}
+                    assignmentTaskUUID={task.assignment_task_uuid}
+                  />
+                )}
+                {task.assignment_type === 'FORM' && (
+                  <TaskFormObject
+                    key={task.assignment_task_uuid}
+                    view="grading"
                     user_id={user_id}
                     assignmentTaskUUID={task.assignment_task_uuid}
                   />

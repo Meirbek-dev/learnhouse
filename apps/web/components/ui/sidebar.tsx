@@ -2,11 +2,12 @@
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { type VariantProps, cva } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
+import { cva } from 'class-variance-authority';
 import { Input } from '@/components/ui/input';
 import { PanelLeftIcon } from 'lucide-react';
 import { Slot } from '@radix-ui/react-slot';

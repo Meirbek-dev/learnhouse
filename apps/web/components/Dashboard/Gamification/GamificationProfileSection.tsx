@@ -1,9 +1,10 @@
 'use client';
 
-import { type GamificationProfile, getGamificationProfile } from '@/services/gamification/gamification';
 import { Activity, Award, Crown, Flame, MoreHorizontal, Star, Target, Trophy, Zap } from 'lucide-react';
 import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
+import type { GamificationProfile } from '@/services/gamification/gamification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getGamificationProfile } from '@/services/gamification/gamification';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';

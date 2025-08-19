@@ -1,6 +1,6 @@
 'use client';
 
-import { BookPlus, BookUser, EllipsisVertical, FileUp, Forward, InfoIcon, ListTodo, Save } from 'lucide-react';
+import { BookPlus, BookUser, EllipsisVertical, FileUp, Forward, InfoIcon, ListTodo, Save, Type } from 'lucide-react';
 import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useTranslations } from 'next-intl';
@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface AssignmentBoxProps {
-  type: 'quiz' | 'file';
+  type: 'quiz' | 'file' | 'form';
   view?: 'teacher' | 'student' | 'grading' | 'custom-grading';
   maxPoints?: number;
   currentPoints?: number;
@@ -60,6 +60,12 @@ const AssignmentBoxUI = ({
               <div className="flex items-center space-x-1.5">
                 <FileUp size={17} />
                 <p>{t('fileSubmissionTitle')}</p>
+              </div>
+            )}
+            {type === 'form' && (
+              <div className="flex items-center space-x-1.5">
+                <Type size={17} />
+                <p>{t('formTitle')}</p>
               </div>
             )}
           </div>

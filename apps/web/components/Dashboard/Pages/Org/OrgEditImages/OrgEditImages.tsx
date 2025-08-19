@@ -12,13 +12,14 @@ import {
 } from '@services/media/media';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
-import { DragDropContext, Draggable, type DropResult, Droppable } from '@hello-pangea/dnd';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import type { ChangeEvent, MouseEvent } from 'react';
+import type { DropResult } from '@hello-pangea/dnd';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';

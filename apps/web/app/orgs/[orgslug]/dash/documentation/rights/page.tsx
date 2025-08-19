@@ -1,38 +1,12 @@
 'use client';
-import {
-  Shield,
-  Users,
-  BookOpen,
-  UserCheck,
-  Lock,
-  Globe,
-  Award,
-  FileText,
-  Crown,
-  User,
-  UserCog,
-  GraduationCap,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Info,
-  ArrowLeft,
-  AlertTriangle,
-  Key,
-  UserCheck as UserCheckIcon,
-} from 'lucide-react';
+import { ArrowLeft, CheckCircle, Crown, GraduationCap, Shield, User, UserCog, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Button } from '@components/ui/button';
-import { Badge } from '@components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import React from 'react';
 
 interface RightsDocumentationProps {
   params: Promise<{ orgslug: string }>;
@@ -40,77 +14,112 @@ interface RightsDocumentationProps {
 
 const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
   const org = useOrg() as any;
+  const t = useTranslations('DashPage.Courses.RightsDocumentation');
 
   const roleHierarchy = [
     {
-      name: 'Admin',
-      icon: <Crown className="w-6 h-6 text-purple-600" />,
+      name: t('roles.admin.name'),
+      icon: <Crown className="h-6 w-6 text-purple-600" />,
       color: 'bg-purple-50 border-purple-200',
-      description: 'Full platform control with all permissions',
-      permissions: ['All permissions', 'Manage organization', 'Manage users', 'Manage courses', 'Manage roles'],
+      description: t('roles.admin.description'),
+      permissions: [
+        t('roles.admin.permissions.allPermissions'),
+        t('roles.admin.permissions.manageOrganization'),
+        t('roles.admin.permissions.manageUsers'),
+        t('roles.admin.permissions.manageCourses'),
+        t('roles.admin.permissions.manageRoles'),
+      ],
       level: 4,
     },
     {
-      name: 'Maintainer',
-      icon: <Shield className="w-6 h-6 text-blue-600" />,
+      name: t('roles.maintainer.name'),
+      icon: <Shield className="h-6 w-6 text-blue-600" />,
       color: 'bg-blue-50 border-blue-200',
-      description: 'Mid-level manager with wide permissions',
-      permissions: ['Manage courses', 'Manage users', 'Manage assignments'],
+      description: t('roles.maintainer.description'),
+      permissions: [
+        t('roles.maintainer.permissions.manageCourses'),
+        t('roles.maintainer.permissions.manageUsers'),
+        t('roles.maintainer.permissions.manageAssignments'),
+      ],
       level: 3,
     },
     {
-      name: 'Instructor',
-      icon: <GraduationCap className="w-6 h-6 text-green-600" />,
+      name: t('roles.instructor.name'),
+      icon: <GraduationCap className="h-6 w-6 text-green-600" />,
       color: 'bg-green-50 border-green-200',
-      description: 'Can create courses but need ownership for content creation',
-      permissions: ['Create courses', 'Manage own courses', 'Create assignments', 'Grade assignments'],
+      description: t('roles.instructor.description'),
+      permissions: [
+        t('roles.instructor.permissions.createCourses'),
+        t('roles.instructor.permissions.manageOwnCourses'),
+        t('roles.instructor.permissions.createAssignments'),
+        t('roles.instructor.permissions.gradeAssignments'),
+      ],
       level: 2,
     },
     {
-      name: 'User',
-      icon: <User className="w-6 h-6 text-gray-600" />,
+      name: t('roles.user.name'),
+      icon: <User className="h-6 w-6 text-gray-600" />,
       color: 'bg-gray-50 border-gray-200',
-      description: 'Read-Only Learner',
-      permissions: ['View courses', 'Submit assignments', 'Take assessments'],
+      description: t('roles.user.description'),
+      permissions: [
+        t('roles.user.permissions.viewCourses'),
+        t('roles.user.permissions.submitAssignments'),
+        t('roles.user.permissions.takeAssessments'),
+      ],
       level: 1,
     },
   ];
 
   const courseOwnershipTypes = [
     {
-      name: 'Creator',
-      icon: <Crown className="w-5 h-5 text-yellow-600" />,
+      name: t('courseOwnership.creator.name'),
+      icon: <Crown className="h-5 w-5 text-yellow-600" />,
       color: 'bg-yellow-50 border-yellow-200',
-      description: 'Original course creator with full control',
-      permissions: ['Full course control', 'Manage contributors', 'Change access settings', 'Delete course'],
+      description: t('courseOwnership.creator.description'),
+      permissions: [
+        t('courseOwnership.creator.permissions.fullCourseControl'),
+        t('courseOwnership.creator.permissions.manageContributors'),
+        t('courseOwnership.creator.permissions.changeAccessSettings'),
+        t('courseOwnership.creator.permissions.deleteCourse'),
+      ],
     },
     {
-      name: 'Maintainer',
-      icon: <Shield className="w-5 h-5 text-blue-600" />,
+      name: t('courseOwnership.maintainer.name'),
+      icon: <Shield className="h-5 w-5 text-blue-600" />,
       color: 'bg-blue-50 border-blue-200',
-      description: 'Course maintainer with extensive permissions',
-      permissions: ['Manage course content', 'Manage contributors', 'Change access settings', 'Cannot delete course'],
+      description: t('courseOwnership.maintainer.description'),
+      permissions: [
+        t('courseOwnership.maintainer.permissions.manageCourseContent'),
+        t('courseOwnership.maintainer.permissions.manageContributors'),
+        t('courseOwnership.maintainer.permissions.changeAccessSettings'),
+        t('courseOwnership.maintainer.permissions.cannotDeleteCourse'),
+      ],
     },
     {
-      name: 'Contributor',
-      icon: <UserCog className="w-5 h-5 text-green-600" />,
+      name: t('courseOwnership.contributor.name'),
+      icon: <UserCog className="h-5 w-5 text-green-600" />,
       color: 'bg-green-50 border-green-200',
-      description: 'Course contributor with limited permissions',
-      permissions: ['Edit course content', 'Create activities', 'Cannot manage contributors', 'Cannot change access'],
+      description: t('courseOwnership.contributor.description'),
+      permissions: [
+        t('courseOwnership.contributor.permissions.editCourseContent'),
+        t('courseOwnership.contributor.permissions.createActivities'),
+        t('courseOwnership.contributor.permissions.cannotManageContributors'),
+        t('courseOwnership.contributor.permissions.cannotChangeAccess'),
+      ],
     },
   ];
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6 pt-16 w-full">
-      <div className="w-full max-w-none mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-background flex min-h-screen w-full items-center justify-center p-6 pt-16">
+      <div className="mx-auto w-full max-w-none px-4 sm:px-6 lg:px-8">
         {/* Top Icon */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="mb-8 text-center"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-background rounded-full shadow-sm border border-border mb-6">
-            <Shield className="w-8 h-8 text-primary" />
+          <div className="border-border bg-background mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full border shadow-sm">
+            <Shield className="text-primary h-8 w-8" />
           </div>
         </motion.div>
 
@@ -119,7 +128,7 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-center mb-12"
+          className="mb-12 text-center"
         >
           <Button
             variant="ghost"
@@ -130,16 +139,14 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
               href={getUriWithOrg(org?.slug, '/dash')}
               className="inline-flex items-center"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="font-medium text-muted-foreground">Back to Dashboard</span>
+              <ArrowLeft className="h-4 w-4" />
+              <span className="text-muted-foreground font-medium">{t('backToDashboard')}</span>
             </Link>
           </Button>
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <h1 className="text-4xl font-bold text-gray-900">Authorizations & Rights Guide</h1>
+          <div className="mb-4 flex items-center justify-center space-x-3">
+            <h1 className="text-4xl font-bold text-gray-900">{t('title')}</h1>
           </div>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Understanding LearnHouse permissions, roles, and access controls based on RBAC system
-          </p>
+          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">{t('description')}</p>
         </motion.div>
 
         {/* Role Hierarchy Section */}
@@ -149,11 +156,11 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
           transition={{ delay: 0.2 }}
           className="mb-16"
         >
-          <h2 className="text-2xl font-bold mb-8 text-center flex items-center justify-center space-x-2">
-            <Crown className="w-6 h-6 text-purple-600" />
-            <span>Role Hierarchy</span>
+          <h2 className="mb-8 flex items-center justify-center space-x-2 text-center text-2xl font-bold">
+            <Crown className="h-6 w-6 text-purple-600" />
+            <span>{t('roleHierarchy')}</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {roleHierarchy.map((role, index) => (
               <motion.div
                 key={role.name}
@@ -162,10 +169,10 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
                 transition={{ delay: 0.3 + index * 0.1 }}
               >
                 <Card
-                  className={`hover:shadow-lg transition-all duration-200 hover:scale-[1.02] text-center h-full ${role.color}`}
+                  className={`h-full text-center transition-all duration-200 hover:scale-[1.02] hover:shadow-lg ${role.color}`}
                 >
                   <CardHeader>
-                    <div className="flex items-center justify-center space-x-3 mb-2">
+                    <div className="mb-2 flex items-center justify-center space-x-3">
                       {role.icon}
                       <CardTitle className="text-lg">{role.name}</CardTitle>
                     </div>
@@ -178,7 +185,7 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
                           key={permIndex}
                           className="flex items-center space-x-2 text-sm"
                         >
-                          <CheckCircle className="w-3 h-3 text-green-600 flex-shrink-0" />
+                          <CheckCircle className="h-3 w-3 flex-shrink-0 text-green-600" />
                           <span>{permission}</span>
                         </li>
                       ))}
@@ -197,11 +204,11 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
           transition={{ delay: 0.4 }}
           className="mb-16"
         >
-          <h2 className="text-2xl font-bold mb-8 text-center flex items-center justify-center space-x-2">
-            <Users className="w-6 h-6 text-primary" />
-            <span>Course Ownership Types</span>
+          <h2 className="mb-8 flex items-center justify-center space-x-2 text-center text-2xl font-bold">
+            <Users className="text-primary h-6 w-6" />
+            <span>{t('courseOwnershipTypes')}</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
             {courseOwnershipTypes.map((type, index) => (
               <motion.div
                 key={type.name}
@@ -210,10 +217,10 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
                 transition={{ delay: 0.5 + index * 0.1 }}
               >
                 <Card
-                  className={`${type.color} hover:shadow-lg transition-all duration-200 hover:scale-[1.02] text-center h-full`}
+                  className={`${type.color} h-full text-center transition-all duration-200 hover:scale-[1.02] hover:shadow-lg`}
                 >
                   <CardHeader>
-                    <div className="flex items-center justify-center space-x-3 mb-2">
+                    <div className="mb-2 flex items-center justify-center space-x-3">
                       {type.icon}
                       <CardTitle className="text-lg">{type.name}</CardTitle>
                     </div>
@@ -226,7 +233,7 @@ const RightsDocumentation = ({ params }: RightsDocumentationProps) => {
                           key={permIndex}
                           className="flex items-center space-x-2 text-sm"
                         >
-                          <CheckCircle className="w-3 h-3 text-green-600 flex-shrink-0" />
+                          <CheckCircle className="h-3 w-3 flex-shrink-0 text-green-600" />
                           <span>{permission}</span>
                         </li>
                       ))}

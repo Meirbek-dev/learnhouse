@@ -25,7 +25,7 @@ const pageTransition = {
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
     <SessionProvider
-      refetchInterval={60000}
+      refetchInterval={60_000}
       refetchOnWindowFocus
       refetchWhenOffline={false}
     >

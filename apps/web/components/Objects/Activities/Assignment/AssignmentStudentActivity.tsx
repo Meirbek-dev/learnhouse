@@ -1,5 +1,6 @@
 'use client';
 
+import TaskFormObject from '@/app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFormObject';
 import TaskQuizObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
 import TaskFileObject from 'app/orgs/[orgslug]/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
@@ -128,6 +129,13 @@ const AssignmentStudentActivity = () => {
                 )}
                 {task.assignment_type === 'FILE_SUBMISSION' && (
                   <TaskFileObject
+                    key={task.assignment_task_uuid}
+                    view="student"
+                    assignmentTaskUUID={task.assignment_task_uuid}
+                  />
+                )}
+                {task.assignment_type === 'FORM' && (
+                  <TaskFormObject
                     key={task.assignment_task_uuid}
                     view="student"
                     assignmentTaskUUID={task.assignment_task_uuid}

@@ -62,9 +62,9 @@ const CoursesHome = (params: CourseProps) => {
             <h1 className="mb-4 text-3xl font-bold sm:mb-0">{t('courses')}</h1>
             <Link
               href={getUriWithOrg(org?.slug, '/dash/documentation/rights')}
-              className="rounded-md bg-primary hover:scale-105 transition-all duration-100 ease-linear antialiased p-2 px-4 text-xs font-bold text-primary-foreground drop-shadow-lg flex space-x-2 items-center"
+              className="bg-primary text-primary-foreground flex items-center space-x-2 rounded-md p-2 px-4 text-xs font-bold antialiased drop-shadow-lg transition-all duration-100 ease-linear hover:scale-105"
             >
-              <BookOpen className="w-4 h-4" />
+              <BookOpen className="h-4 w-4" />
               <span>{t('rightsGuide')}</span>
             </Link>
           </div>

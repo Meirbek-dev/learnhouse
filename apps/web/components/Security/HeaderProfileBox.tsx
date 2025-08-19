@@ -7,31 +7,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu';
-import {
-  Package2,
-  Settings,
-  Crown,
-  Shield,
-  User,
-  Users,
-  Building,
-  LogOut,
-  User as UserIcon,
-  Home,
-  ChevronDown,
-  GraduationCap,
-} from 'lucide-react';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@components/ui/tooltip';
+import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import React, { useEffect, useMemo } from 'react';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
+import { useEffect, useMemo } from 'react';
 import { signOut } from 'next-auth/react';
+import type React from 'react';
 import Link from 'next/link';
 
 interface RoleInfo {
@@ -81,32 +69,32 @@ export const HeaderProfileBox = () => {
     // Define role configurations based on actual database roles
     const roleConfigs: { [key: string]: RoleInfo } = {
       role_global_admin: {
-        name: 'ADMIN',
+        name: t('profile.roles.admin.name'),
         icon: <Crown size={12} />,
         bgColor: 'bg-purple-600',
         textColor: 'text-white',
-        description: 'Full platform control with all permissions',
+        description: t('profile.roles.admin.description'),
       },
       role_global_maintainer: {
-        name: 'MAINTAINER',
+        name: t('profile.roles.maintainer.name'),
         icon: <Shield size={12} />,
         bgColor: 'bg-blue-600',
         textColor: 'text-white',
-        description: 'Mid-level manager with wide permissions',
+        description: t('profile.roles.maintainer.description'),
       },
       role_global_instructor: {
-        name: 'INSTRUCTOR',
+        name: t('profile.roles.instructor.name'),
         icon: <Users size={12} />,
         bgColor: 'bg-green-600',
         textColor: 'text-white',
-        description: 'Can manage their own content',
+        description: t('profile.roles.instructor.description'),
       },
       role_global_user: {
-        name: 'USER',
+        name: t('profile.roles.user.name'),
         icon: <User size={12} />,
         bgColor: 'bg-gray-500',
         textColor: 'text-white',
-        description: 'Read-Only Learner',
+        description: t('profile.roles.user.description'),
       },
     };
 
@@ -122,7 +110,7 @@ export const HeaderProfileBox = () => {
       roleKey = 'role_global_instructor';
     }
 
-    return roleConfigs[roleKey] || roleConfigs['role_global_user'] || null;
+    return roleConfigs[roleKey] || roleConfigs.role_global_user || null;
   }, [userRoles, org?.id]);
 
   const customRoles = useMemo((): CustomRoleInfo[] => {
@@ -145,7 +133,7 @@ export const HeaderProfileBox = () => {
     });
 
     return customRoles.map((role: any) => ({
-      name: role.role.name || 'Custom Role',
+      name: role.role.name || t('profile.customRole'),
       description: role.role.description,
     }));
   }, [userRoles, org?.id]);
@@ -153,8 +141,8 @@ export const HeaderProfileBox = () => {
   return (
     <div className="flex items-center">
       {session.status == 'unauthenticated' && (
-        <div className="flex text-sm text-gray-700 font-bold p-1.5 px-2 rounded-lg flex-grow">
-          <ul className="flex space-x-3 items-center">
+        <div className="flex flex-grow rounded-lg p-1.5 px-2 text-sm font-bold text-gray-700">
+          <ul className="flex items-center space-x-3">
             <li>
               <Button
                 variant="ghost"
@@ -186,7 +174,7 @@ export const HeaderProfileBox = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="flex items-center space-x-1 h-auto p-2"
+                  className="flex h-auto items-center space-x-1 p-2"
                 >
                   <UserAvatar size="sm" />
                   <div className="flex flex-col space-y-0">
@@ -197,7 +185,7 @@ export const HeaderProfileBox = () => {
                           <TooltipTrigger asChild>
                             <Badge
                               variant="secondary"
-                              className={`text-[8px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} px-1 py-0.5 font-medium flex items-center gap-0.5 w-fit`}
+                              className={`text-[8px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-0.5 px-1 py-0.5 font-medium`}
                             >
                               {userRoleInfo.icon}
                               {userRoleInfo.name}
@@ -218,7 +206,7 @@ export const HeaderProfileBox = () => {
                           <TooltipTrigger asChild>
                             <Badge
                               variant="secondary"
-                              className="text-[8px] bg-gray-500 text-white px-1 py-0.5 font-medium flex items-center gap-0.5 w-fit"
+                              className="flex w-fit items-center gap-0.5 bg-gray-500 px-1 py-0.5 text-[8px] font-medium text-white"
                             >
                               <Shield size={12} />
                               {customRole.name}
@@ -234,7 +222,7 @@ export const HeaderProfileBox = () => {
                         </Tooltip>
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground">{session.data.user.email}</p>
+                    <p className="text-muted-foreground text-xs">{session.data.user.email}</p>
                   </div>
                   <ChevronDown
                     size={16}
@@ -251,7 +239,7 @@ export const HeaderProfileBox = () => {
                     <UserAvatar size="sm" />
                     <div>
                       <p className="text-sm font-medium capitalize">{session.data.user.username}</p>
-                      <p className="text-xs text-muted-foreground">{session.data.user.email}</p>
+                      <p className="text-muted-foreground text-xs">{session.data.user.email}</p>
                     </div>
                   </div>
                 </DropdownMenuLabel>
@@ -263,7 +251,7 @@ export const HeaderProfileBox = () => {
                       className="flex items-center space-x-2"
                     >
                       <Shield size={16} />
-                      <span>Dashboard</span>
+                      <span>{t('profile.dashboard')}</span>
                     </Link>
                   </DropdownMenuItem>
                 )}
@@ -273,16 +261,16 @@ export const HeaderProfileBox = () => {
                     className="flex items-center space-x-2"
                   >
                     <UserIcon size={16} />
-                    <span>User Settings</span>
+                    <span>{t('profile.userSettings')}</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="flex items-center space-x-2 text-destructive focus:text-destructive"
+                  className="text-destructive focus:text-destructive flex items-center space-x-2"
                 >
                   <LogOut size={16} />
-                  <span>Sign Out</span>
+                  <span>{t('profile.signOut')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

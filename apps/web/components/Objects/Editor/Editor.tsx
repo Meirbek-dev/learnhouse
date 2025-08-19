@@ -1,5 +1,6 @@
 'use client';
-import { type AIEditorStateTypes, useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
+import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
+import type { AIEditorStateTypes } from '@components/Contexts/AI/AIEditorContext';
 
 import { DividerVerticalIcon, SlashIcon } from '@radix-ui/react-icons';
 import { ToolbarButtons } from './Toolbar/ToolbarButtons';

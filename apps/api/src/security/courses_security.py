@@ -185,18 +185,20 @@ async def courses_rbac_check(
         is_course_owner = False
         if resource_author and (
             (
-                resource_author.authorship in (ResourceAuthorshipEnum.CREATOR, ResourceAuthorshipEnum.MAINTAINER, ResourceAuthorshipEnum.CONTRIBUTOR)
+                resource_author.authorship
+                in (
+                    ResourceAuthorshipEnum.CREATOR,
+                    ResourceAuthorshipEnum.MAINTAINER,
+                    ResourceAuthorshipEnum.CONTRIBUTOR,
+                )
             )
-            and resource_author.authorship_status
-            == ResourceAuthorshipStatusEnum.ACTIVE
+            and resource_author.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
         ):
             is_course_owner = True
 
         # Check if user has admin or maintainer role
-        is_admin_or_maintainer = (
-            await authorization_verify_based_on_org_admin_status(
-                request, current_user.id, action, course_uuid, db_session
-            )
+        is_admin_or_maintainer = await authorization_verify_based_on_org_admin_status(
+            request, current_user.id, action, course_uuid, db_session
         )
 
         # SECURITY: For creating, updating, and deleting course content, user MUST be either:

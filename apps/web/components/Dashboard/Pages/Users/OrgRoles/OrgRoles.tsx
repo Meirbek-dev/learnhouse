@@ -6,18 +6,20 @@ import EditRole from '@components/Objects/Modals/Dash/OrgRoles/EditRole';
 import AddRole from '@components/Objects/Modals/Dash/OrgRoles/AddRole';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import { Pencil, Shield, Users, X, Globe } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { Globe, Pencil, Shield, X } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
 import { deleteRole } from '@services/roles/roles';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
+import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
 import React from 'react';
 
 function OrgRoles() {
+  const t = useTranslations('Components.OrgRoles');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -30,13 +32,13 @@ function OrgRoles() {
   );
 
   const deleteRoleUI = async (role_id: any) => {
-    const toastId = toast.loading('Deleting...');
+    const toastId = toast.loading(t('deleting'));
     const res = await deleteRole(role_id, org.id, access_token);
     if (res.status === 200) {
       mutate(`${getAPIUrl()}roles/org/${org.id}`);
-      toast.success('Deleted role', { id: toastId });
+      toast.success(t('deletedRoleSuccess'), { id: toastId });
     } else {
-      toast.error('Error deleting role', { id: toastId });
+      toast.error(t('deleteRoleError'), { id: toastId });
     }
   };
 
@@ -46,7 +48,7 @@ function OrgRoles() {
   };
 
   const getRightsSummary = (rights: any) => {
-    if (!rights) return 'No permissions';
+    if (!rights) return t('noPermissions');
 
     const totalPermissions = Object.keys(rights).reduce((acc, key) => {
       if (typeof rights[key] === 'object') {
@@ -55,7 +57,7 @@ function OrgRoles() {
       return acc;
     }, 0);
 
-    return `${totalPermissions} permissions`;
+    return t('permissionsCount', { count: totalPermissions });
   };
 
   // Check if a role is system-wide (TYPE_GLOBAL or role_uuid starts with role_global_)
@@ -66,7 +68,7 @@ function OrgRoles() {
     }
 
     // Check for role_uuid starting with role_global_
-    if (role.role_uuid && role.role_uuid.startsWith('role_global_')) {
+    if (role.role_uuid?.startsWith('role_global_')) {
       return true;
     }
 
@@ -84,213 +86,210 @@ function OrgRoles() {
   };
 
   return (
-    <>
-      <Card className="mt-6 mx-4 sm:mx-6 lg:mx-10">
-        <CardHeader className="bg-muted/50">
-          <CardTitle className="text-lg sm:text-xl">Manage Roles & Permissions</CardTitle>
-          <CardDescription className="text-xs sm:text-sm">
-            Roles define what users can do within your organization. Create custom roles with specific permissions for
-            different user types.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-3 sm:p-6">
-          {/* Mobile view - Cards */}
-          <div className="block sm:hidden space-y-3">
-            {roles?.map((role: any) => {
-              const isSystem = isSystemRole(role);
-              return (
-                <Card key={role.id}>
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
+    <Card className="mx-4 mt-6 sm:mx-6 lg:mx-10">
+      <CardHeader className="bg-muted/50">
+        <CardTitle className="text-lg sm:text-xl">{t('cardTitle')}</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
+          {t('cardDescription')}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-3 sm:p-6">
+        {/* Mobile view - Cards */}
+        <div className="block space-y-3 sm:hidden">
+          {roles?.map((role: any) => {
+            const isSystem = isSystemRole(role);
+            return (
+              <Card key={role.id}>
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Shield className="text-muted-foreground h-4 w-4" />
+                      <span className="text-sm font-medium">{role.name}</span>
+                      {isSystem && (
+                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+                          <Globe className="mr-1 h-3 w-3" />
+                          {t('systemWide')}
+                        </span>
+                      )}
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="text-xs"
+                    >
+                      {getRightsSummary(role.rights)}
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground text-sm">{role.description || t('noDescription')}</p>
+                  <div className="flex space-x-2">
+                    {!isSystem ? (
+                      <>
+                        <Modal
+                          isDialogOpen={editRoleModal && selectedRole?.id === role.id}
+                          onOpenChange={() => handleEditRoleModal(role)}
+                          minHeight="lg"
+                          minWidth="xl"
+                          customWidth="max-w-7xl"
+                          dialogContent={
+                            <EditRole
+                              role={role}
+                              setEditRoleModal={setEditRoleModal}
+                            />
+                          }
+                          dialogTitle={t('editRoleTitle')}
+                          dialogDescription={t('editRoleDescription')}
+                          dialogTrigger={
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              {t('edit')}
+                            </Button>
+                          }
+                        />
+                        <ConfirmationModal
+                          confirmationButtonText={t('deleteRole')}
+                          confirmationMessage={t('deleteRoleConfirmation')}
+                          dialogTitle={t('deleteRoleTitle')}
+                          dialogTrigger={
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <X className="h-4 w-4" />
+                              {t('deleteRole')}
+                            </Button>
+                          }
+                          functionToExecute={() => {
+                            deleteRoleUI(role.id);
+                          }}
+                          status="warning"
+                        />
+                      </>
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Desktop view - Table */}
+        <div className="hidden sm:block">
+          <Table>
+            <TableHeader>
+              <TableRow className="uppercase">
+                <TableHead>{t('roleName')}</TableHead>
+                <TableHead>{t('description')}</TableHead>
+                <TableHead>{t('permissions')}</TableHead>
+                <TableHead>{t('actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {roles?.map((role: any) => {
+                const isSystem = isSystemRole(role);
+                return (
+                  <TableRow key={role.id}>
+                    <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Shield className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">{role.name}</span>
+                        <Shield className="text-muted-foreground h-4 w-4" />
+                        <span className="font-medium">{role.name}</span>
                         {isSystem && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            <Globe className="w-3 h-3 mr-1" />
-                            System-wide
+                          <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+                            <Globe className="mr-1 h-3 w-3" />
+                            {t('systemWide')}
                           </span>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{role.description || t('noDescription')}</TableCell>
+                    <TableCell>
                       <Badge
                         variant="outline"
                         className="text-xs"
                       >
                         {getRightsSummary(role.rights)}
                       </Badge>
-                    </div>
-                    <p className="text-muted-foreground text-sm">{role.description || 'No description'}</p>
-                    <div className="flex space-x-2">
-                      {!isSystem ? (
-                        <>
-                          <Modal
-                            isDialogOpen={editRoleModal && selectedRole?.id === role.id}
-                            onOpenChange={() => handleEditRoleModal(role)}
-                            minHeight="lg"
-                            minWidth="xl"
-                            customWidth="max-w-7xl"
-                            dialogContent={
-                              <EditRole
-                                role={role}
-                                setEditRoleModal={setEditRoleModal}
-                              />
-                            }
-                            dialogTitle="Edit Role"
-                            dialogDescription={'Edit the role permissions and details'}
-                            dialogTrigger={
-                              <Button
-                                variant="default"
-                                size="sm"
-                                className="flex-1"
-                              >
-                                <Pencil className="w-4 h-4" />
-                                Edit
-                              </Button>
-                            }
-                          />
-                          <ConfirmationModal
-                            confirmationButtonText="Delete Role"
-                            confirmationMessage="This action cannot be undone. All users with this role will lose their permissions. Are you sure you want to delete this role?"
-                            dialogTitle={'Delete Role ?'}
-                            dialogTrigger={
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="flex-1"
-                              >
-                                <X className="w-4 h-4" />
-                                Delete
-                              </Button>
-                            }
-                            functionToExecute={() => {
-                              deleteRoleUI(role.id);
-                            }}
-                            status="warning"
-                          />
-                        </>
-                      ) : null}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        {!isSystem ? (
+                          <>
+                            <Modal
+                              isDialogOpen={editRoleModal && selectedRole?.id === role.id}
+                              onOpenChange={() => handleEditRoleModal(role)}
+                              minHeight="lg"
+                              minWidth="xl"
+                              customWidth="max-w-7xl"
+                              dialogContent={
+                                <EditRole
+                                  role={role}
+                                  setEditRoleModal={setEditRoleModal}
+                                />
+                              }
+                              dialogTitle={t('editRoleTitle')}
+                              dialogDescription={t('editRoleDescription')}
+                              dialogTrigger={
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                  {t('edit')}
+                                </Button>
+                              }
+                            />
+                            <ConfirmationModal
+                              confirmationButtonText={t('deleteRole')}
+                              confirmationMessage={t('deleteRoleConfirmation')}
+                              dialogTitle={t('deleteRoleTitle')}
+                              dialogTrigger={
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                >
+                                  <X className="h-4 w-4" />
+                                  {t('deleteRole')}
+                                </Button>
+                              }
+                              functionToExecute={() => {
+                                deleteRoleUI(role.id);
+                              }}
+                              status="warning"
+                            />
+                          </>
+                        ) : null}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
 
-          {/* Desktop view - Table */}
-          <div className="hidden sm:block">
-            <Table>
-              <TableHeader>
-                <TableRow className="uppercase">
-                  <TableHead>Role Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Permissions</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {roles?.map((role: any) => {
-                  const isSystem = isSystemRole(role);
-                  return (
-                    <TableRow key={role.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Shield className="w-4 h-4 text-muted-foreground" />
-                          <span className="font-medium">{role.name}</span>
-                          {isSystem && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              <Globe className="w-3 h-3 mr-1" />
-                              System-wide
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{role.description || 'No description'}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {getRightsSummary(role.rights)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          {!isSystem ? (
-                            <>
-                              <Modal
-                                isDialogOpen={editRoleModal && selectedRole?.id === role.id}
-                                onOpenChange={() => handleEditRoleModal(role)}
-                                minHeight="lg"
-                                minWidth="xl"
-                                customWidth="max-w-7xl"
-                                dialogContent={
-                                  <EditRole
-                                    role={role}
-                                    setEditRoleModal={setEditRoleModal}
-                                  />
-                                }
-                                dialogTitle="Edit Role"
-                                dialogDescription={'Edit the role permissions and details'}
-                                dialogTrigger={
-                                  <Button
-                                    variant="default"
-                                    size="sm"
-                                  >
-                                    <Pencil className="w-4 h-4" />
-                                    Edit
-                                  </Button>
-                                }
-                              />
-                              <ConfirmationModal
-                                confirmationButtonText="Delete Role"
-                                confirmationMessage="This action cannot be undone. All users with this role will lose their permissions. Are you sure you want to delete this role?"
-                                dialogTitle={'Delete Role ?'}
-                                dialogTrigger={
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                  >
-                                    <X className="w-4 h-4" />
-                                    Delete
-                                  </Button>
-                                }
-                                functionToExecute={() => {
-                                  deleteRoleUI(role.id);
-                                }}
-                                status="warning"
-                              />
-                            </>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="flex justify-end mt-6">
-            <Modal
-              isDialogOpen={createRoleModal}
-              onOpenChange={() => setCreateRoleModal(!createRoleModal)}
-              minHeight="no-min"
-              minWidth="xl"
-              customWidth="max-w-7xl"
-              dialogContent={<AddRole setCreateRoleModal={setCreateRoleModal} />}
-              dialogTitle="Create a Role"
-              dialogDescription={'Create a new role with specific permissions'}
-              dialogTrigger={
-                <Button>
-                  <Shield className="w-4 h-4" />
-                  Create a Role
-                </Button>
-              }
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </>
+        <div className="mt-6 flex justify-end">
+          <Modal
+            isDialogOpen={createRoleModal}
+            onOpenChange={() => setCreateRoleModal(!createRoleModal)}
+            minHeight="no-min"
+            minWidth="xl"
+            customWidth="max-w-7xl"
+            dialogContent={<AddRole setCreateRoleModal={setCreateRoleModal} />}
+            dialogTitle={t('createRoleTitle')}
+            dialogDescription={t('createRoleDescription')}
+            dialogTrigger={
+              <Button>
+                <Shield className="h-4 w-4" />
+                {t('createRole')}
+              </Button>
+            }
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

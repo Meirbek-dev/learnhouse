@@ -6,9 +6,9 @@ import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseSt
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
 import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
-import { Award, GalleryVerticalEnd, Globe, Info, UserPen, Lock } from 'lucide-react';
+import { Award, GalleryVerticalEnd, Globe, Info, Lock, UserPen } from 'lucide-react';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useCourseRights } from '@hooks/useCourseRights';
 import { getUriWithOrg } from '@services/config/config';
 import { useRouter } from 'next/navigation';
@@ -78,7 +78,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
 
   // Redirect to first available tab if current page is not accessible
   useEffect(() => {
-    if (!rightsLoading && !hasAccessToCurrentPage && visibleTabs.length > 0) {
+    if (!(rightsLoading || hasAccessToCurrentPage) && visibleTabs.length > 0) {
       const firstAvailableTab = visibleTabs[0];
       if (firstAvailableTab) {
         router.replace(getUriWithOrg(params.orgslug, '') + firstAvailableTab.href);
@@ -89,8 +89,8 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
   // Show loading state while rights are being fetched
   if (rightsLoading) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8]">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
       </div>
     );
   }
@@ -98,25 +98,25 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
   // Show access denied if no tabs are available
   if (!rightsLoading && visibleTabs.length === 0) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
+      <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8]">
         <div className="text-center">
-          <Lock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-          <p className="text-gray-500">You don't have permission to access this course.</p>
+          <Lock className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+          <h3 className="mb-2 text-lg font-medium text-gray-900">{t('accessDenied')}</h3>
+          <p className="text-gray-500">{t('noPermissionToAccess')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr]">
+    <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-[#f8f8f8]">
       <CourseProvider
         courseuuid={courseuuid}
-        withUnpublishedActivities={true}
+        withUnpublishedActivities
       >
-        <div className="pl-10 pr-10 text-sm tracking-tight bg-background z-10 soft-shadow">
+        <div className="soft-shadow bg-background z-10 pr-10 pl-10 text-sm tracking-tight">
           <CourseOverviewTop params={params} />
-          <div className="flex space-x-3 font-bold text-sm">
+          <div className="flex space-x-3 text-sm font-bold">
             {tabs.map((tab) => {
               const IconComponent = tab.icon;
               const isActive = params.subpage.toString() === tab.key;
@@ -126,17 +126,21 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
                 return (
                   <Tooltip key={tab.key}>
                     <TooltipTrigger asChild>
-                      <div className="flex space-x-4 py-2 w-fit text-center border-primary transition-all ease-linear opacity-30 cursor-not-allowed">
-                        <div className="flex items-center space-x-2.5 mx-2">
+                      <div className="border-primary flex w-fit cursor-not-allowed space-x-4 py-2 text-center opacity-30 transition-all ease-linear">
+                        <div className="mx-2 flex items-center space-x-2.5">
                           <IconComponent size={16} />
                           <div>{tab.label}</div>
                         </div>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" sideOffset={8} className="max-w-60 text-wrap">
+                    <TooltipContent
+                      side="bottom"
+                      sideOffset={8}
+                      className="max-w-60 text-wrap"
+                    >
                       <div className="text-center">
-                        <div className="font-medium text-gray-900">Access Restricted</div>
-                        <div className="text-xs text-gray-100/90">You don't have permission to access {tab.label}</div>
+                        <div className="font-medium text-gray-900">{t('accessRestricted')}</div>
+                        <div className="text-xs text-gray-100/90">{t('noPermissionToAccessTab', { tabName: tab.label })}</div>
                       </div>
                     </TooltipContent>
                   </Tooltip>
@@ -149,11 +153,11 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
                   href={getUriWithOrg(params.orgslug, '') + tab.href}
                 >
                   <div
-                    className={`flex space-x-4 py-2 w-fit text-center border-primary transition-all ease-linear ${
+                    className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                       isActive ? 'border-b-4' : 'opacity-50 hover:opacity-75'
                     } cursor-pointer`}
                   >
-                    <div className="flex items-center space-x-2.5 mx-2">
+                    <div className="mx-2 flex items-center space-x-2.5">
                       <IconComponent size={16} />
                       <div>{tab.label}</div>
                     </div>
@@ -168,7 +172,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
-          className="h-full overflow-y-auto relative"
+          className="relative h-full overflow-y-auto"
         >
           <div className="absolute inset-0">
             {params.subpage == 'content' && hasPermission('update_content') ? (

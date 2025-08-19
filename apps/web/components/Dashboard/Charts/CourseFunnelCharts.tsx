@@ -50,7 +50,7 @@ export const CourseFunnelCharts = ({ metrics, isLoading = false, onCourseSelect 
   };
 
   const handleCourseChange = (courseId: string) => {
-    const newCourseId = courseId === 'all' ? null : Number.parseInt(courseId);
+    const newCourseId = courseId === 'all' ? null : Number.parseInt(courseId, 10);
     setSelectedCourseId(newCourseId);
     onCourseSelect?.(newCourseId);
   };
