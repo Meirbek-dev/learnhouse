@@ -2188,6 +2188,15 @@
         "noPermissionToAccess": "You don't have permission to access this course.",
         "noPermissionToAccessTab": "You don't have permission to access {tabName}"
       },
+      "HomePageClient": {
+        "courses": "Courses",
+        "createACourse": "Create a course to add content",
+        "createCourse": "Create Course",
+        "createCourseDescription": "Create a new course",
+        "noCourses": "No courses yet",
+        "noCoursesAvailable": "No courses available yet",
+        "rightsGuide": "Rights Guide"
+      },
       "RightsDocumentation": {
         "backToDashboard": "Back to Dashboard",
         "courseOwnership": {
@@ -2195,30 +2204,30 @@
             "description": "Course contributor with limited permissions",
             "name": "Contributor",
             "permissions": {
-              "editCourseContent": "Edit course content",
-              "createActivities": "Create activities",
+              "cannotChangeAccess": "Cannot change access",
               "cannotManageContributors": "Cannot manage contributors",
-              "cannotChangeAccess": "Cannot change access"
+              "createActivities": "Create activities",
+              "editCourseContent": "Edit course content"
             }
           },
           "creator": {
             "description": "Original course creator with full control",
             "name": "Creator",
             "permissions": {
-              "fullCourseControl": "Full course control",
-              "manageContributors": "Manage contributors",
               "changeAccessSettings": "Change access settings",
-              "deleteCourse": "Delete course"
+              "deleteCourse": "Delete course",
+              "fullCourseControl": "Full course control",
+              "manageContributors": "Manage contributors"
             }
           },
           "maintainer": {
             "description": "Course maintainer with extensive permissions",
             "name": "Maintainer",
             "permissions": {
-              "manageCourseContent": "Manage course content",
-              "manageContributors": "Manage contributors",
+              "cannotDeleteCourse": "Cannot delete course",
               "changeAccessSettings": "Change access settings",
-              "cannotDeleteCourse": "Cannot delete course"
+              "manageContributors": "Manage contributors",
+              "manageCourseContent": "Manage course content"
             }
           }
         },
@@ -2231,51 +2240,42 @@
             "name": "Admin",
             "permissions": {
               "allPermissions": "All permissions",
-              "manageOrganization": "Manage organization",
-              "manageUsers": "Manage users",
               "manageCourses": "Manage courses",
-              "manageRoles": "Manage roles"
+              "manageOrganization": "Manage organization",
+              "manageRoles": "Manage roles",
+              "manageUsers": "Manage users"
             }
           },
           "instructor": {
             "description": "Can create courses but need ownership for content creation",
             "name": "Instructor",
             "permissions": {
-              "createCourses": "Create courses",
-              "manageOwnCourses": "Manage own courses",
               "createAssignments": "Create assignments",
-              "gradeAssignments": "Grade assignments"
+              "createCourses": "Create courses",
+              "gradeAssignments": "Grade assignments",
+              "manageOwnCourses": "Manage own courses"
             }
           },
           "maintainer": {
             "description": "Mid-level manager with wide permissions",
             "name": "Maintainer",
             "permissions": {
+              "manageAssignments": "Manage assignments",
               "manageCourses": "Manage courses",
-              "manageUsers": "Manage users",
-              "manageAssignments": "Manage assignments"
+              "manageUsers": "Manage users"
             }
           },
           "user": {
             "description": "Read-Only Learner",
             "name": "User",
             "permissions": {
-              "viewCourses": "View courses",
               "submitAssignments": "Submit assignments",
-              "takeAssessments": "Take assessments"
+              "takeAssessments": "Take assessments",
+              "viewCourses": "View courses"
             }
           }
         },
         "title": "Authorizations & Rights Guide"
-      },
-      "HomePageClient": {
-        "courses": "Courses",
-        "createACourse": "Create a course to add content",
-        "createCourse": "Create Course",
-        "createCourseDescription": "Create a new course",
-        "noCourses": "No courses yet",
-        "noCoursesAvailable": "No courses available yet",
-        "rightsGuide": "Rights Guide"
       },
       "error": "Error loading courses",
       "myCourses": "My Courses",
