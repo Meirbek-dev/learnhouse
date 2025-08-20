@@ -821,27 +821,182 @@
       "trail": "Progress"
     },
     "OrgRoles": {
+      "AddRole": {
+        "cancel": "Cancel",
+        "couldntCreateNewRole": "Couldn't create new role",
+        "createRole": "Create Role",
+        "createdNewRole": "Role created successfully",
+        "creating": "Creating role...",
+        "description": "Description",
+        "descriptionMinLength": "Description must be at least {length} characters",
+        "descriptionPlaceholder": "Describe what this role can do...",
+        "descriptionRequired": "Description is required",
+        "deselect": "Deselect",
+        "deselectAll": "Deselect All",
+        "nameMinLength": "Name must be at least {length} characters",
+        "permissions": {
+          "access": "Access",
+          "create": "Create",
+          "delete": "Delete",
+          "deleteOwn": "Delete Own",
+          "read": "Read",
+          "readOwn": "Read Own",
+          "update": "Update",
+          "updateOwn": "Update Own"
+        },
+        "permissionsTitle": "Permissions",
+        "predefinedRights": "Predefined Role Templates",
+        "predefinedRoles": {
+          "admin": {
+            "description": "Full platform control with all permissions",
+            "name": "Admin"
+          },
+          "analyst": {
+            "description": "Read-only access with analytics capabilities",
+            "name": "Analyst"
+          },
+          "contentCreator": {
+            "description": "Can create and edit content but not manage users",
+            "name": "Content Creator"
+          },
+          "courseManager": {
+            "description": "Can manage courses, chapters, and activities",
+            "name": "Course Manager"
+          },
+          "guest": {
+            "description": "Limited access for external users",
+            "name": "Guest"
+          },
+          "instructor": {
+            "description": "Can create and manage their own courses",
+            "name": "Instructor"
+          },
+          "moderator": {
+            "description": "Can moderate content and manage activities",
+            "name": "Moderator"
+          },
+          "userManager": {
+            "description": "Can manage users and user groups",
+            "name": "User Manager"
+          },
+          "viewer": {
+            "description": "Read-only access to courses and content",
+            "name": "Viewer"
+          }
+        },
+        "roleName": "Role Name",
+        "roleNamePlaceholder": "e.g., Course Manager",
+        "roleNameRequired": "Role name is required",
+        "sections": {
+          "activities": "Activities",
+          "collections": "Collections",
+          "courseChapters": "Course Chapters",
+          "courses": "Courses",
+          "dashboard": "Dashboard",
+          "organizations": "Organizations",
+          "roles": "Roles",
+          "userGroups": "User Groups",
+          "users": "Users"
+        },
+        "select": "Select",
+        "selectAll": "Select All"
+      },
+      "EditRole": {
+        "cancel": "Cancel",
+        "couldntUpdateRole": "Couldn't update role",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe what this role can do...",
+        "deselect": "Deselect",
+        "deselectAll": "Deselect All",
+        "permissions": {
+          "access": "Access",
+          "create": "Create",
+          "delete": "Delete",
+          "deleteOwn": "Delete Own",
+          "read": "Read",
+          "readOwn": "Read Own",
+          "update": "Update",
+          "updateOwn": "Update Own"
+        },
+        "permissionsTitle": "Permissions",
+        "predefinedRights": "Predefined Role Templates",
+        "predefinedRoles": {
+          "admin": {
+            "description": "Full platform control with all permissions",
+            "name": "Admin"
+          },
+          "analyst": {
+            "description": "Read-only access with analytics capabilities",
+            "name": "Analyst"
+          },
+          "contentCreator": {
+            "description": "Can create and edit content but not manage users",
+            "name": "Content Creator"
+          },
+          "courseManager": {
+            "description": "Can manage courses, chapters, and activities",
+            "name": "Course Manager"
+          },
+          "guest": {
+            "description": "Limited access for external users",
+            "name": "Guest"
+          },
+          "instructor": {
+            "description": "Can create and manage their own courses",
+            "name": "Instructor"
+          },
+          "moderator": {
+            "description": "Can moderate content and manage activities",
+            "name": "Moderator"
+          },
+          "userManager": {
+            "description": "Can manage users and user groups",
+            "name": "User Manager"
+          },
+          "viewer": {
+            "description": "Read-only access to courses and content",
+            "name": "Viewer"
+          }
+        },
+        "roleName": "Role Name",
+        "roleNamePlaceholder": "e.g., Course Manager",
+        "sections": {
+          "activities": "Activities",
+          "collections": "Collections",
+          "courseChapters": "Course Chapters",
+          "courses": "Courses",
+          "dashboard": "Dashboard",
+          "organizations": "Organizations",
+          "roles": "Roles",
+          "userGroups": "User Groups",
+          "users": "Users"
+        },
+        "select": "Select",
+        "selectAll": "Select All",
+        "updateRole": "Update Role",
+        "updatedRole": "Role updated successfully",
+        "updating": "Updating role..."
+      },
       "actions": "Actions",
-      "cardDescription": "Roles define what users can do within your organization. Create custom roles with specific permissions for different user types.",
-      "cardTitle": "Manage Roles & Permissions",
-      "createRole": "Create a Role",
-      "createRoleDescription": "Create a new role with specific permissions",
-      "createRoleTitle": "Create a Role",
+      "cardDescription": "Manage roles and permissions for your organization",
+      "cardTitle": "Organization Roles",
+      "createRole": "Create Role",
+      "createRoleDescription": "Define a new role with specific permissions",
+      "createRoleTitle": "Create New Role",
       "deleteRole": "Delete Role",
-      "deleteRoleConfirmation": "This action cannot be undone. All users with this role will lose their permissions. Are you sure you want to delete this role?",
-      "deleteRoleError": "Error deleting role",
-      "deleteRoleTitle": "Delete Role ?",
-      "deletedRoleSuccess": "Deleted role",
-      "deleting": "Deleting...",
+      "deleteRoleConfirmation": "Are you sure you want to delete this role? This action cannot be undone.",
+      "deleteRoleError": "Failed to delete role",
+      "deleteRoleTitle": "Delete Role",
+      "deletedRoleSuccess": "Role deleted successfully",
+      "deleting": "Deleting role...",
       "description": "Description",
       "edit": "Edit",
-      "editRole": "Edit Role",
-      "editRoleDescription": "Edit the role permissions and details",
+      "editRoleDescription": "Modify the role permissions and details",
       "editRoleTitle": "Edit Role",
       "noDescription": "No description",
       "noPermissions": "No permissions",
       "permissions": "Permissions",
-      "permissionsCount": "{count, plural, =0 {No permissions} one {# permission} other {# permissions}}",
+      "permissionsCount": "{count} permissions",
       "roleName": "Role Name",
       "systemWide": "System-wide"
     },
@@ -1540,6 +1695,7 @@
     "Admin": {
       "Alerts": {
         "actionRequired": "Action Required",
+        "activateUsers": "Activate Users",
         "activeAlerts": "Active Alerts",
         "alertsDescription": "Review alerts and take action when required",
         "bulkActions": "Bulk Actions",
@@ -1631,7 +1787,8 @@
         "tip2": "Provide clear milestones and progress indicators",
         "tip3": "Offer short summaries at the end of sections",
         "title": "Course Funnels",
-        "totalCourses": "Total Courses"
+        "totalCourses": "Total Courses",
+        "users": "users"
       },
       "Gamification": {
         "activeUsers": "Active Users",
@@ -4014,6 +4171,10 @@
         "featuredCourses": {
           "description": "Add a section to showcase selected courses",
           "label": "Courses"
+        },
+        "gamification": {
+          "description": "Display gamification stats and achievements",
+          "label": "Gamification"
         },
         "hero": {
           "description": "Add a hero section with heading and call-to-action",

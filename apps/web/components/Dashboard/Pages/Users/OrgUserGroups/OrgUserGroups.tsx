@@ -93,7 +93,7 @@ const OrgUserGroups = () => {
           <h2 className="text-sm text-gray-500">{t('description')}</h2>
         </div>
         <div className="overflow-x-auto">
-          <Table className="overflow-hidden rounded-md">
+          <Table className="overflow-hidden">
             <TableHeader className="uppercase">
               <TableRow>
                 <TableHead>{t('userGroupHeader')}</TableHead>

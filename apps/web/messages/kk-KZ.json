@@ -821,29 +821,184 @@
       "trail": "Прогресс"
     },
     "OrgRoles": {
+      "AddRole": {
+        "cancel": "Бас тарту",
+        "couldntCreateNewRole": "Жаңа рөлді құру мүмкін болмады",
+        "createRole": "Рөл құру",
+        "createdNewRole": "Рөл сәтті құрылды",
+        "creating": "Рөл құрылуда...",
+        "description": "Сипаттама",
+        "descriptionMinLength": "Сипаттама кемінде {length} таңбадан тұруы керек",
+        "descriptionPlaceholder": "Бұл рөл не істей алатынын сипаттаңыз...",
+        "descriptionRequired": "Сипаттама міндетті",
+        "deselect": "Таңдауды алып тастау",
+        "deselectAll": "Барлығын алып тастау",
+        "nameMinLength": "Атауы кемінде {length} таңбадан тұруы керек",
+        "permissions": {
+          "access": "Қол жеткізу",
+          "create": "Құру",
+          "delete": "Жою",
+          "deleteOwn": "Өзін жою",
+          "read": "Оқу",
+          "readOwn": "Өзін оқу",
+          "update": "Жаңарту",
+          "updateOwn": "Өзін жаңарту"
+        },
+        "permissionsTitle": "Рұқсаттар",
+        "predefinedRights": "Алдын ала дайын рөл үлгілері",
+        "predefinedRoles": {
+          "admin": {
+            "description": "Барлық рұқсаттармен толық бақылау",
+            "name": "Әкімші"
+          },
+          "analyst": {
+            "description": "Тек оқу құқығы бар, аналитика мүмкіндігімен",
+            "name": "Аналитик"
+          },
+          "contentCreator": {
+            "description": "Контент құра алады және өңдей алады, бірақ пайдаланушыларды басқара алмайды",
+            "name": "Контент жасаушы"
+          },
+          "courseManager": {
+            "description": "Курстарды, бөлімдерді және тапсырмаларды басқара алады",
+            "name": "Курс менеджері"
+          },
+          "guest": {
+            "description": "Сыртқы пайдаланушыларға шектеулі қол жеткізу",
+            "name": "Қонақ"
+          },
+          "instructor": {
+            "description": "Өз курстарын құрып, басқара алады",
+            "name": "Оқытушы"
+          },
+          "moderator": {
+            "description": "Контентті модерациялап, тапсырмаларды басқара алады",
+            "name": "Модератор"
+          },
+          "userManager": {
+            "description": "Пайдаланушылар мен топтарды басқара алады",
+            "name": "Пайдаланушы менеджері"
+          },
+          "viewer": {
+            "description": "Курстар мен контентті тек оқуға қол жеткізу",
+            "name": "Көрермен"
+          }
+        },
+        "roleName": "Рөл атауы",
+        "roleNamePlaceholder": "мысалы, Курс менеджері",
+        "roleNameRequired": "Рөл атауы міндетті",
+        "sections": {
+          "activities": "Белсенділіктер",
+          "collections": "Жинақтар",
+          "courseChapters": "Курс бөлімдері",
+          "courses": "Курстар",
+          "dashboard": "Бақылау тақтасы",
+          "organizations": "Ұйымдар",
+          "roles": "Рөлдер",
+          "userGroups": "Пайдаланушы топтары",
+          "users": "Пайдаланушылар"
+        },
+        "select": "Таңдау",
+        "selectAll": "Барлығын таңдау"
+      },
+      "EditRole": {
+        "cancel": "Бас тарту",
+        "couldntUpdateRole": "Рөлді жаңарту мүмкін болмады",
+        "description": "Сипаттама",
+        "descriptionPlaceholder": "Бұл рөл не істей алатынын сипаттаңыз...",
+        "deselect": "Таңдауды алып тастау",
+        "deselectAll": "Барлығын алып тастау",
+        "permissions": {
+          "access": "Қол жеткізу",
+          "create": "Құру",
+          "delete": "Жою",
+          "deleteOwn": "Өзін жою",
+          "read": "Оқу",
+          "readOwn": "Өзін оқу",
+          "update": "Жаңарту",
+          "updateOwn": "Өзін жаңарту"
+        },
+        "permissionsTitle": "Рұқсаттар",
+        "predefinedRights": "Алдын ала дайын рөл үлгілері",
+        "predefinedRoles": {
+          "admin": {
+            "description": "Барлық рұқсаттармен толық бақылау",
+            "name": "Әкімші"
+          },
+          "analyst": {
+            "description": "Тек оқу құқығы бар, аналитика мүмкіндігімен",
+            "name": "Аналитик"
+          },
+          "contentCreator": {
+            "description": "Контент құра алады және өңдей алады, бірақ пайдаланушыларды басқара алмайды",
+            "name": "Контент жасаушы"
+          },
+          "courseManager": {
+            "description": "Курстарды, бөлімдерді және тапсырмаларды басқара алады",
+            "name": "Курс менеджері"
+          },
+          "guest": {
+            "description": "Сыртқы пайдаланушыларға шектеулі қол жеткізу",
+            "name": "Қонақ"
+          },
+          "instructor": {
+            "description": "Өз курстарын құрып, басқара алады",
+            "name": "Оқытушы"
+          },
+          "moderator": {
+            "description": "Контентті модерациялап, тапсырмаларды басқара алады",
+            "name": "Модератор"
+          },
+          "userManager": {
+            "description": "Пайдаланушылар мен топтарды басқара алады",
+            "name": "Пайдаланушы менеджері"
+          },
+          "viewer": {
+            "description": "Курстар мен контентті тек оқуға қол жеткізу",
+            "name": "Көрермен"
+          }
+        },
+        "roleName": "Рөл атауы",
+        "roleNamePlaceholder": "мысалы, Курс менеджері",
+        "sections": {
+          "activities": "Белсенділіктер",
+          "collections": "Жинақтар",
+          "courseChapters": "Курс бөлімдері",
+          "courses": "Курстар",
+          "dashboard": "Бақылау тақтасы",
+          "organizations": "Ұйымдар",
+          "roles": "Рөлдер",
+          "userGroups": "Пайдаланушы топтары",
+          "users": "Пайдаланушылар"
+        },
+        "select": "Таңдау",
+        "selectAll": "Барлығын таңдау",
+        "updateRole": "Рөлді жаңарту",
+        "updatedRole": "Рөл сәтті жаңартылды",
+        "updating": "Рөл жаңартылуда..."
+      },
       "actions": "Әрекеттер",
-      "cardDescription": "Рөлдер пайдаланушылардың ұйымыңызда не істей алатынын анықтайды. Әртүрлі пайдаланушы түрлері үшін арнайы рұқсаттары бар пайдаланушы рөлдерін жасаңыз.",
-      "cardTitle": "Рөлдер мен рұқсаттарды басқару",
-      "createRole": "Рөл жасау",
-      "createRoleDescription": "Арнайы рұқсаттары бар жаңа рөл жасау",
-      "createRoleTitle": "Рөл жасау",
+      "cardDescription": "Ұйымыңыздың рөлдері мен рұқсаттарын басқарыңыз",
+      "cardTitle": "Ұйым рөлдері",
+      "createRole": "Жаңа рөл құру",
+      "createRoleDescription": "Белгілі бір рұқсаттары бар жаңа рөлді анықтаңыз",
+      "createRoleTitle": "Жаңа рөл жасау",
       "deleteRole": "Рөлді жою",
-      "deleteRoleConfirmation": "Бұл әрекетті болдырмауға болмайды. Осы рөлі бар барлық пайдаланушылар өз рұқсаттарын жоғалтады. Бұл рөлді жойғыңыз келе ме?",
-      "deleteRoleError": "Рөлді жою қатесі",
-      "deleteRoleTitle": "Рөлді жою керек пе?",
-      "deletedRoleSuccess": "Рөл жойылды",
-      "deleting": "Жойылуда...",
+      "deleteRoleConfirmation": "Бұл рөлді жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті қайтару мүмкін емес.",
+      "deleteRoleError": "Рөлді жою мүмкін болмады",
+      "deleteRoleTitle": "Рөлді жою",
+      "deletedRoleSuccess": "Рөл сәтті жойылды",
+      "deleting": "Рөл жойылуда...",
       "description": "Сипаттама",
       "edit": "Өңдеу",
-      "editRole": "Рөлді өңдеу",
-      "editRoleDescription": "Рөл рұқсаттары мен мәліметтерін өңдеу",
+      "editRoleDescription": "Рөлдің рұқсаттарын және мәліметтерін өзгертіңіз",
       "editRoleTitle": "Рөлді өңдеу",
       "noDescription": "Сипаттама жоқ",
-      "noPermissions": "Рұқсат жоқ",
+      "noPermissions": "Рұқсаттар жоқ",
       "permissions": "Рұқсаттар",
-      "permissionsCount": "{count, plural, =0 {Рұқсат жоқ} one {# рұқсат} other {# рұқсат}}",
+      "permissionsCount": "{count} рұқсат",
       "roleName": "Рөл атауы",
-      "systemWide": "Жүйелік"
+      "systemWide": "Жүйе деңгейінде"
     },
     "PageLoading": {
       "loading": "Жүктелуде..."
@@ -1540,6 +1695,7 @@
     "Admin": {
       "Alerts": {
         "actionRequired": "Іс-әрекет қажет",
+        "activateUsers": "Пайдаланушыларды іске қосыңыз",
         "activeAlerts": "Белсенді ескертулер",
         "alertsDescription": "Ескертулерді қараңыз және қажет болған жағдайда шара қабылдаңыз",
         "bulkActions": "Топтық әрекеттер",
@@ -1631,7 +1787,8 @@
         "tip2": "Анық кезеңдер мен прогресс көрсеткіштерін беріңіз",
         "tip3": "Бөлімдердің соңында қысқа түйіндемелер ұсыныңыз",
         "title": "Курс воронкалары",
-        "totalCourses": "Барлық курстар"
+        "totalCourses": "Барлық курстар",
+        "users": "пайдаланушылар"
       },
       "Gamification": {
         "activeUsers": "Белсенді пайдаланушылар",

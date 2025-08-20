@@ -25,7 +25,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   devIndicators: false,
   output: 'standalone',
-  typedRoutes: true,
 };
 
 const withNextIntl = createNextIntlPlugin();

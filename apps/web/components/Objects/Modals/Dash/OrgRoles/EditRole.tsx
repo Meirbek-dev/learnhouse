@@ -172,10 +172,10 @@ type RoleFormValues = {
   rights: Rights;
 };
 
-const predefinedRoles = {
+const predefinedRoles = (t: (key: string) => string) => ({
   'Admin': {
-    name: 'Admin',
-    description: 'Full platform control with all permissions',
+    name: t('predefinedRoles.admin.name'),
+    description: t('predefinedRoles.admin.description'),
     rights: {
       courses: {
         action_create: true,
@@ -197,8 +197,8 @@ const predefinedRoles = {
     },
   },
   'Course Manager': {
-    name: 'Course Manager',
-    description: 'Can manage courses, chapters, and activities',
+    name: t('predefinedRoles.courseManager.name'),
+    description: t('predefinedRoles.courseManager.description'),
     rights: {
       courses: {
         action_create: true,
@@ -220,8 +220,8 @@ const predefinedRoles = {
     },
   },
   'Instructor': {
-    name: 'Instructor',
-    description: 'Can create and manage their own courses',
+    name: t('predefinedRoles.instructor.name'),
+    description: t('predefinedRoles.instructor.description'),
     rights: {
       courses: {
         action_create: true,
@@ -243,8 +243,8 @@ const predefinedRoles = {
     },
   },
   'Viewer': {
-    name: 'Viewer',
-    description: 'Read-only access to courses and content',
+    name: t('predefinedRoles.viewer.name'),
+    description: t('predefinedRoles.viewer.description'),
     rights: {
       courses: {
         action_create: false,
@@ -266,8 +266,8 @@ const predefinedRoles = {
     },
   },
   'Content Creator': {
-    name: 'Content Creator',
-    description: 'Can create and edit content but not manage users',
+    name: t('predefinedRoles.contentCreator.name'),
+    description: t('predefinedRoles.contentCreator.description'),
     rights: {
       courses: {
         action_create: true,
@@ -289,8 +289,8 @@ const predefinedRoles = {
     },
   },
   'User Manager': {
-    name: 'User Manager',
-    description: 'Can manage users and user groups',
+    name: t('predefinedRoles.userManager.name'),
+    description: t('predefinedRoles.userManager.description'),
     rights: {
       courses: {
         action_create: false,
@@ -312,8 +312,8 @@ const predefinedRoles = {
     },
   },
   'Moderator': {
-    name: 'Moderator',
-    description: 'Can moderate content and manage activities',
+    name: t('predefinedRoles.moderator.name'),
+    description: t('predefinedRoles.moderator.description'),
     rights: {
       courses: {
         action_create: false,
@@ -335,8 +335,8 @@ const predefinedRoles = {
     },
   },
   'Analyst': {
-    name: 'Analyst',
-    description: 'Read-only access with analytics capabilities',
+    name: t('predefinedRoles.analyst.name'),
+    description: t('predefinedRoles.analyst.description'),
     rights: {
       courses: {
         action_create: false,
@@ -358,8 +358,8 @@ const predefinedRoles = {
     },
   },
   'Guest': {
-    name: 'Guest',
-    description: 'Limited access for external users',
+    name: t('predefinedRoles.guest.name'),
+    description: t('predefinedRoles.guest.description'),
     rights: {
       courses: {
         action_create: false,
@@ -380,16 +380,18 @@ const predefinedRoles = {
       dashboard: { action_access: false },
     },
   },
-};
+});
 
 function EditRole(props: EditRoleProps) {
-  const t = useTranslations('Validation');
+  const validationT = useTranslations('Validation');
+  const t = useTranslations('Components.OrgRoles.EditRole');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [rights, setRights] = React.useState<Rights>(props.role.rights || {});
-  const roleFormSchema = createRoleFormSchema(t);
+  const roleFormSchema = createRoleFormSchema(validationT);
+  const predefinedRolesData = predefinedRoles(t);
 
   const form = useForm<RoleFormValues>({
     resolver: zodResolver(roleFormSchema),
@@ -402,7 +404,7 @@ function EditRole(props: EditRoleProps) {
   });
 
   const handleSubmit = async (values: RoleFormValues) => {
-    const toastID = toast.loading('Updating...');
+    const toastID = toast.loading(t('updating'));
     setIsSubmitting(true);
 
     // Ensure rights object is properly structured
@@ -477,10 +479,10 @@ function EditRole(props: EditRoleProps) {
       setIsSubmitting(false);
       mutate(`${getAPIUrl()}roles/org/${org.id}`);
       props.setEditRoleModal(false);
-      toast.success('Updated role', { id: toastID });
+      toast.success(t('updatedRole'), { id: toastID });
     } else {
       setIsSubmitting(false);
-      toast.error("Couldn't update role", { id: toastID });
+      toast.error(t('couldntUpdateRole'), { id: toastID });
     }
   };
 
@@ -508,12 +510,38 @@ function EditRole(props: EditRoleProps) {
   };
 
   const handlePredefinedRole = (roleKey: string) => {
-    const role = predefinedRoles[roleKey as keyof typeof predefinedRoles];
+    const roleKeyMapping: { [key: string]: string } = {
+      'Admin': 'admin',
+      'Course Manager': 'courseManager',
+      'Instructor': 'instructor',
+      'Viewer': 'viewer',
+      'Content Creator': 'contentCreator',
+      'User Manager': 'userManager',
+      'Moderator': 'moderator',
+      'Analyst': 'analyst',
+      'Guest': 'guest',
+    };
+
+    const role = predefinedRolesData[roleKey as keyof typeof predefinedRolesData];
     if (role) {
       form.setValue('name', role.name);
       form.setValue('description', role.description);
       setRights(role.rights as Rights);
     }
+  };
+
+  const getPermissionLabel = (permission: string): string => {
+    const permissionMap: { [key: string]: string } = {
+      action_create: t('permissions.create'),
+      action_read: t('permissions.read'),
+      action_read_own: t('permissions.readOwn'),
+      action_update: t('permissions.update'),
+      action_update_own: t('permissions.updateOwn'),
+      action_delete: t('permissions.delete'),
+      action_delete_own: t('permissions.deleteOwn'),
+      action_access: t('permissions.access'),
+    };
+    return permissionMap[permission] || permission.replace('action_', '').replace('_', ' ');
   };
 
   const PermissionSection = ({
@@ -550,8 +578,8 @@ function EditRole(props: EditRoleProps) {
             ) : (
               <Square className="h-4 w-4" />
             )}
-            <span className="hidden sm:inline">{allSelected ? 'Deselect All' : 'Select All'}</span>
-            <span className="sm:hidden">{allSelected ? 'Deselect' : 'Select'}</span>
+            <span className="hidden sm:inline">{allSelected ? t('deselectAll') : t('selectAll')}</span>
+            <span className="sm:hidden">{allSelected ? t('deselect') : t('select')}</span>
           </button>
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -566,9 +594,7 @@ function EditRole(props: EditRoleProps) {
                 onChange={(e) => handleRightChange(section, permission, e.target.checked)}
                 className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700 capitalize">
-                {permission.replace('action_', '').replace('_', ' ')}
-              </span>
+              <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
             </label>
           ))}
         </div>
@@ -590,10 +616,10 @@ function EditRole(props: EditRoleProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Role Name</FormLabel>
+                    <FormLabel>{t('roleName')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g., Course Manager"
+                        placeholder={t('roleNamePlaceholder')}
                         {...field}
                       />
                     </FormControl>
@@ -607,10 +633,10 @@ function EditRole(props: EditRoleProps) {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>{t('description')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Describe what this role can do..."
+                        placeholder={t('descriptionPlaceholder')}
                         {...field}
                       />
                     </FormControl>
@@ -620,21 +646,17 @@ function EditRole(props: EditRoleProps) {
               />
 
               <div className="mt-6">
-                <h3 className="mb-4 text-lg font-semibold text-gray-800">Predefined Rights</h3>
+                <h3 className="mb-4 text-lg font-semibold text-gray-800">{t('predefinedRights')}</h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {Object.keys(predefinedRoles).map((roleKey) => (
+                  {Object.entries(predefinedRolesData).map(([roleKey, role]) => (
                     <button
                       key={roleKey}
                       type="button"
                       onClick={() => handlePredefinedRole(roleKey)}
                       className="rounded-lg border border-gray-200 bg-white p-3 text-left shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
                     >
-                      <div className="text-sm font-medium text-gray-900 sm:text-base">
-                        {predefinedRoles[roleKey as keyof typeof predefinedRoles].name}
-                      </div>
-                      <div className="mt-1 text-xs text-gray-500 sm:text-sm">
-                        {predefinedRoles[roleKey as keyof typeof predefinedRoles].description}
-                      </div>
+                      <div className="text-sm font-medium text-gray-900 sm:text-base">{role.name}</div>
+                      <div className="mt-1 text-xs text-gray-500 sm:text-sm">{role.description}</div>
                     </button>
                   ))}
                 </div>
@@ -642,10 +664,10 @@ function EditRole(props: EditRoleProps) {
             </div>
 
             <div className="space-y-4">
-              <h3 className="mb-4 text-lg font-semibold text-gray-800">Permissions</h3>
+              <h3 className="mb-4 text-lg font-semibold text-gray-800">{t('permissionsTitle')}</h3>
 
               <PermissionSection
-                title="Courses"
+                title={t('sections.courses')}
                 icon={BookOpen}
                 section="courses"
                 permissions={[
@@ -660,56 +682,56 @@ function EditRole(props: EditRoleProps) {
               />
 
               <PermissionSection
-                title="Users"
+                title={t('sections.users')}
                 icon={Users}
                 section="users"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
               />
 
               <PermissionSection
-                title="User Groups"
+                title={t('sections.userGroups')}
                 icon={UserCheck}
                 section="usergroups"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
               />
 
               <PermissionSection
-                title="Collections"
+                title={t('sections.collections')}
                 icon={FolderOpen}
                 section="collections"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
               />
 
               <PermissionSection
-                title="Organizations"
+                title={t('sections.organizations')}
                 icon={Building}
                 section="organizations"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
               />
 
               <PermissionSection
-                title="Course Chapters"
+                title={t('sections.courseChapters')}
                 icon={FileText}
                 section="coursechapters"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
               />
 
               <PermissionSection
-                title="Activities"
+                title={t('sections.activities')}
                 icon={Activity}
                 section="activities"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
               />
 
               <PermissionSection
-                title="Roles"
+                title={t('sections.roles')}
                 icon={Shield}
                 section="roles"
                 permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
               />
 
               <PermissionSection
-                title="Dashboard"
+                title={t('sections.dashboard')}
                 icon={Monitor}
                 section="dashboard"
                 permissions={['action_access']}
@@ -724,14 +746,14 @@ function EditRole(props: EditRoleProps) {
               onClick={() => props.setEditRoleModal(false)}
               className="w-full sm:w-auto"
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="w-full sm:w-auto"
             >
-              {isSubmitting ? 'Updating...' : 'Update Role'}
+              {isSubmitting ? t('updating') : t('updateRole')}
             </Button>
           </div>
         </form>

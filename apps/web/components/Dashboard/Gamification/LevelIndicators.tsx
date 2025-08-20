@@ -37,7 +37,7 @@ export function LevelIndicatorBadge({
   showIcon = true,
   className,
 }: LevelIndicatorBadgeProps) {
-  const t = useTranslations('DashPage.UserAccountSettings.Gamification.levelIndicators');
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const levelInfo = getLevelInfo(level, t);
   const Icon = levelInfo.icon;
 
@@ -69,7 +69,7 @@ export function LevelIndicatorBadge({
       >
         {showIcon && <Icon className="h-3 w-3" />}
         <span className="font-medium">
-          {t('levelAbbrev')}
+          {t('levelIndicators.levelAbbrev')}
           {level}
         </span>
       </Badge>
@@ -84,7 +84,7 @@ export function LevelIndicatorBadge({
       {showIcon && <Icon className="h-4 w-4" />}
       <div className="flex flex-col">
         <span className="text-xs font-medium">
-          {t('level')} {level}
+          {t('levelIndicators.level')} {level}
         </span>
         <span className="text-xs opacity-80">{levelInfo.title}</span>
       </div>
@@ -99,7 +99,7 @@ export function LevelProgressBar({
   animated = true,
   className,
 }: LevelProgressBarProps) {
-  const t = useTranslations('DashPage.UserAccountSettings.Gamification.levelIndicators');
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
   const levelInfo = getLevelInfo(profile.current_level, t);
   const progressPercentage = calculateLevelProgress(profile);
@@ -114,11 +114,11 @@ export function LevelProgressBar({
         {showLabels && (
           <div className="text-muted-foreground flex justify-between text-xs">
             <span>
-              {t('levelAbbrev')}
+              {t('levelIndicators.levelAbbrev')}
               {profile.current_level}
             </span>
             <span>
-              {profile.xp_to_next_level} {t('xpToNext')}
+              {profile.xp_to_next_level} {t('levelIndicators.xpToNext')}
             </span>
           </div>
         )}
@@ -131,9 +131,9 @@ export function LevelProgressBar({
       {showLabels && (
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
-            {t('level')} {profile.current_level}
+            {t('levelIndicators.level')} {profile.current_level}
           </span>
-          <span className="text-muted-foreground">{t('xpToLevel', { level: profile.current_level + 1 })}</span>
+          <span className="text-muted-foreground">{t('levelIndicators.xpToLevel', { level: profile.current_level + 1 })}</span>
         </div>
       )}
 
@@ -151,9 +151,9 @@ export function LevelProgressBar({
 
       {showLabels && (
         <div className="text-muted-foreground flex justify-between text-xs">
-          <span>{t('totalXp', { total: format.number(profile.total_xp) })}</span>
-          <span>{t('progress', { percentage: format.number(Math.round(progressPercentage)) })}</span>
-          <span>{t('totalXp', { total: format.number(profile.total_xp + profile.xp_to_next_level) })}</span>
+          <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}</span>
+          <span>{t('levelIndicators.progress', { percentage: format.number(Math.round(progressPercentage)) })}</span>
+          <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp + profile.xp_to_next_level) })}</span>
         </div>
       )}
     </div>

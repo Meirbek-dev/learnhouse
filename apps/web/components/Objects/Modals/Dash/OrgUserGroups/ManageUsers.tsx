@@ -56,7 +56,7 @@ const ManageUsers = (props: ManageUsersProps) => {
 
   return (
     <div className="py-3">
-      <Table className="overflow-hidden rounded-md">
+      <Table className="overflow-hidden">
         <TableHeader className="uppercase">
           <TableRow>
             <TableHead>{t('userHeader')}</TableHead>

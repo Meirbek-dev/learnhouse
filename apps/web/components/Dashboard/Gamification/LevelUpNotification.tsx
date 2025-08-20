@@ -33,9 +33,10 @@ export function LevelUpNotification({
   onDismiss,
   autoDismissDelay = 5000,
 }: LevelUpNotificationProps) {
+  const tLevel = useTranslations('DashPage.UserAccountSettings.Gamification');
   const t = useTranslations('DashPage.UserAccountSettings.Gamification.levelUpNotification');
   const [showUnlocks, setShowUnlocks] = useState(false);
-  const levelInfo = getLevelInfo(newLevel, t);
+  const levelInfo = getLevelInfo(newLevel, tLevel);
   const Icon = levelInfo.icon;
 
   useEffect(() => {

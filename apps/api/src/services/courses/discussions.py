@@ -77,14 +77,14 @@ async def create_discussion(
 
     # Generate UUID
     discussion_uuid = f"discussion_{ULID()}"
-
+    discussion_creation_date = str(datetime.now())
     discussion = CourseDiscussion(
         **discussion_object.model_dump(),
         course_id=course.id,
         user_id=current_user.id,
         discussion_uuid=discussion_uuid,
-        creation_date=str(datetime.now()),
-        update_date=str(datetime.now()),
+        creation_date=discussion_creation_date,
+        update_date=discussion_creation_date,
     )
 
     db_session.add(discussion)

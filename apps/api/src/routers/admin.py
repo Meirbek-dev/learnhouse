@@ -406,7 +406,7 @@ async def get_admin_overview_metrics(
         if not recent_activity:
             recent_activity.append(
                 {
-                    "description": "No recent activity",
+                    "description": "Активность отсутствует",
                     "timestamp": "N/A",
                     "type": "info",
                 }
@@ -1317,8 +1317,8 @@ async def get_admin_alerts(
                         "id": f"low_completion_{course.name}",
                         "type": "course_performance",
                         "severity": "high" if completion_rate < 15 else "medium",
-                        "title": f"Low Completion Rate: {course.name}",
-                        "description": f"Course has only {completion_rate:.1f}% completion rate",
+                        "title": f"Низкий процент завершения: {course.name}",
+                        "description": f"Курс имеет {completion_rate:.1f}% завершения",
                         "timestamp": now.isoformat(),
                         "actionRequired": True,
                     }

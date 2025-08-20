@@ -164,7 +164,7 @@ const UserGroupsSection = ({ usergroups }: { usergroups: any[] }) => {
         <h2 className="text-xs text-gray-500 sm:text-sm">{t('description')}</h2>
       </div>
       <div className="overflow-x-auto">
-        <Table className="overflow-hidden rounded-md">
+        <Table className="overflow-hidden">
           <TableHeader className="uppercase">
             <TableRow>
               <TableHead>{t('tableHeaderName')}</TableHead>

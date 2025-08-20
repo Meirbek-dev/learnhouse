@@ -93,7 +93,7 @@ export function getUnlockedFeatures(level: number, t: any): string[] {
   Object.values(LEVEL_CONFIG).forEach((config) => {
     if (level >= config.level && config.unlocks) {
       config.unlocks.forEach((unlock) => {
-        unlocked.push(t(`Gamification.levels.unlocks.${unlock}`));
+        unlocked.push(t(`levels.unlocks.${unlock}`));
       });
     }
   });
@@ -101,13 +101,13 @@ export function getUnlockedFeatures(level: number, t: any): string[] {
   // Add specific avatar unlocks
   AVATAR_UNLOCKS.frames.forEach((frame) => {
     if (level >= frame.level) {
-      unlocked.push(t(`Gamification.avatar.frames.${frame.name}`));
+      unlocked.push(t(`avatar.frames.${frame.name}`));
     }
   });
 
   AVATAR_UNLOCKS.accessories.forEach((accessory) => {
     if (level >= accessory.level) {
-      unlocked.push(t(`Gamification.avatar.accessories.${accessory.name}`));
+      unlocked.push(t(`avatar.accessories.${accessory.name}`));
     }
   });
 
@@ -121,7 +121,7 @@ export function LevelIndicator({
   showProgress = true,
   className,
 }: LevelIndicatorProps) {
-  const t = useTranslations('DashPage.UserAccountSettings');
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
   const levelInfo = getLevelInfo(profile.current_level, t);
   const progressPercentage = calculateLevelProgress(profile);
@@ -135,7 +135,7 @@ export function LevelIndicator({
       >
         <Icon className="h-3 w-3" />
         <span className="font-medium">
-          {t('Gamification.levelIndicators.level')} {profile.current_level}
+          {t('levelIndicators.level')} {profile.current_level}
         </span>
       </Badge>
     );
@@ -147,7 +147,7 @@ export function LevelIndicator({
         <div className={cn('flex items-center gap-1', levelInfo.color)}>
           <Icon className="h-4 w-4" />
           <span className="font-semibold">
-            {t('Gamification.levelIndicators.level')} {profile.current_level}
+            {t('levelIndicators.level')} {profile.current_level}
           </span>
         </div>
         {showXP && <span className="text-muted-foreground text-sm">{format.number(profile.total_xp)} XP</span>}
@@ -162,7 +162,7 @@ export function LevelIndicator({
           <Icon className="h-5 w-5" />
           <div>
             <span className="font-semibold">
-              {t('Gamification.levelIndicators.level')} {profile.current_level}
+              {t('levelIndicators.level')} {profile.current_level}
             </span>
             <span className="ml-2 text-sm font-medium">{levelInfo.title}</span>
           </div>
@@ -171,7 +171,7 @@ export function LevelIndicator({
           <div className="text-right">
             <div className="text-sm font-medium">{format.number(profile.total_xp)} XP</div>
             <div className="text-muted-foreground text-xs">
-              {profile.xp_to_next_level} {t('Gamification.levelIndicators.xpToNext')}
+              {profile.xp_to_next_level} {t('levelIndicators.xpToNext')}
             </div>
           </div>
         )}
@@ -185,11 +185,11 @@ export function LevelIndicator({
           />
           <div className="text-muted-foreground flex justify-between text-xs">
             <span>
-              {t('Gamification.levelIndicators.level')} {profile.current_level}
+              {t('levelIndicators.level')} {profile.current_level}
             </span>
             <span>{progressPercentage.toFixed(0)}%</span>
             <span>
-              {t('Gamification.levelIndicators.level')} {profile.current_level + 1}
+              {t('levelIndicators.level')} {profile.current_level + 1}
             </span>
           </div>
         </div>
@@ -206,7 +206,7 @@ interface ExperienceBarProps {
 }
 
 export function ExperienceBar({ profile, animated = true, showLabels = true, className }: ExperienceBarProps) {
-  const t = useTranslations('DashPage.UserAccountSettings');
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
   const progressPercentage = calculateLevelProgress(profile);
   const levelInfo = getLevelInfo(profile.current_level, t);
@@ -216,10 +216,10 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
       {showLabels && (
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
-            {t('Gamification.levelIndicators.level')} {profile.current_level}
+            {t('levelIndicators.level')} {profile.current_level}
           </span>
           <span className="text-muted-foreground">
-            {profile.xp_to_next_level} XP {t('Gamification.levelIndicators.xpToNext')}
+            {profile.xp_to_next_level} XP {t('levelIndicators.xpToNext')}
           </span>
         </div>
       )}
@@ -252,7 +252,7 @@ interface UnlockedFeaturesProps {
 }
 
 export function UnlockedFeatures({ level, className }: UnlockedFeaturesProps) {
-  const t = useTranslations('DashPage.UserAccountSettings');
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const unlockedFeatures = getUnlockedFeatures(level, t);
 
   if (unlockedFeatures.length === 0) {
@@ -261,7 +261,7 @@ export function UnlockedFeatures({ level, className }: UnlockedFeaturesProps) {
 
   return (
     <div className={cn('space-y-2', className)}>
-      <h4 className="text-muted-foreground text-sm font-medium">{t('Gamification.avatar.unlockedFeatures')}</h4>
+      <h4 className="text-muted-foreground text-sm font-medium">{t('avatar.unlockedFeatures')}</h4>
       <div className="flex flex-wrap gap-1">
         {unlockedFeatures.slice(0, 5).map((feature, index) => (
           <Badge
@@ -277,7 +277,7 @@ export function UnlockedFeatures({ level, className }: UnlockedFeaturesProps) {
             variant="outline"
             className="text-xs"
           >
-            +{unlockedFeatures.length - 5} {t('Gamification.avatar.featuresMore')}
+            +{unlockedFeatures.length - 5} {t('avatar.featuresMore')}
           </Badge>
         )}
       </div>

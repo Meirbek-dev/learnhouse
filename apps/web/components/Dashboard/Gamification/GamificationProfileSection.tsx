@@ -164,7 +164,7 @@ export function GamificationProfileSection({
               {t('dashboard.nextMilestone')}
             </h4>
             <Card className="bg-muted/30">
-              <CardContent className="pt-4">
+              <CardContent className="">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <nextMilestone.icon className={cn('h-5 w-5', nextMilestone.color)} />

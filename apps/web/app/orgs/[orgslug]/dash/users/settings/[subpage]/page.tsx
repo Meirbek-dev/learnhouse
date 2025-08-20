@@ -81,7 +81,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
       <div className="z-10 bg-[#fcfbfc] pr-10 pl-10 tracking-tight shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
         <BreadCrumbs type="orgusers" />
         <div className="my-2 py-3">
-          <div className="flex w-100 flex-col space-y-1">
+          <div className="flex max-w-7xl flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
             <div className="text-md flex font-medium text-gray-400">{H2Label} </div>
           </div>
