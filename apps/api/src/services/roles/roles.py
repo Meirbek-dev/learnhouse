@@ -462,10 +462,11 @@ async def read_role(
 async def update_role(
     request: Request,
     db_session: Session,
+    role_id: int,
     role_object: RoleUpdate,
     current_user: PublicUser,
 ):
-    statement = select(Role).where(Role.id == role_object.role_id)
+    statement = select(Role).where(Role.id == role_id)
     result = db_session.exec(statement)
 
     role = result.first()
@@ -490,9 +491,6 @@ async def update_role(
 
     # Complete the role object
     role.update_date = str(datetime.now())
-
-    # Remove the role_id from the role_object
-    del role_object.role_id
 
     # Update only the fields that were passed in
     update_data = role_object.model_dump(exclude_unset=True)

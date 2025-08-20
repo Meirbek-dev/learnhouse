@@ -71,8 +71,7 @@ async def api_update_role(
     """
     Update role by role_id
     """
-    role_object.role_id = role_id
-    return await update_role(request, db_session, role_object, current_user)
+    return await update_role(request, db_session, role_id, role_object, current_user)
 
 
 @router.delete("/{role_id}")

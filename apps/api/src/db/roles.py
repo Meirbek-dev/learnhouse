@@ -148,7 +148,6 @@ class RoleCreate(RoleBase):
 
 
 class RoleUpdate(SQLModelStrictBaseModel):
-    role_id: int = Field(default=None, foreign_key="role.id")
     name: str | None = None
     description: str | None = None
     rights: Rights | dict | None = Field(default=None, sa_column=Column(RightsJSON))
