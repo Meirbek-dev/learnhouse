@@ -6,7 +6,7 @@ import { SessionProvider } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 
-interface ClientLayoutProps {
+interface ClientProvidersProps {
   children: ReactNode;
 }
 
@@ -22,7 +22,7 @@ const pageTransition = {
   duration: 0.3,
 } as const;
 
-export default function ClientLayout({ children }: ClientLayoutProps) {
+export default function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <SessionProvider
       refetchInterval={60_000}

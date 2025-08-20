@@ -581,14 +581,14 @@ function AddRole(props: AddRoleProps) {
 
   const getPermissionLabel = (permission: string): string => {
     const permissionMap: { [key: string]: string } = {
-      'action_create': t('permissions.create'),
-      'action_read': t('permissions.read'),
-      'action_read_own': t('permissions.readOwn'),
-      'action_update': t('permissions.update'),
-      'action_update_own': t('permissions.updateOwn'),
-      'action_delete': t('permissions.delete'),
-      'action_delete_own': t('permissions.deleteOwn'),
-      'action_access': t('permissions.access'),
+      action_create: t('permissions.create'),
+      action_read: t('permissions.read'),
+      action_read_own: t('permissions.readOwn'),
+      action_update: t('permissions.update'),
+      action_update_own: t('permissions.updateOwn'),
+      action_delete: t('permissions.delete'),
+      action_delete_own: t('permissions.deleteOwn'),
+      action_access: t('permissions.access'),
     };
     return permissionMap[permission] || permission.replace('action_', '').replace('_', ' ');
   };
@@ -643,9 +643,7 @@ function AddRole(props: AddRoleProps) {
                 onChange={(e) => handleRightChange(section, permission, e.target.checked)}
                 className="rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700 capitalize">
-                {getPermissionLabel(permission)}
-              </span>
+              <span className="text-sm text-gray-700 capitalize">{getPermissionLabel(permission)}</span>
             </label>
           ))}
         </div>
@@ -706,12 +704,8 @@ function AddRole(props: AddRoleProps) {
                       onClick={() => handlePredefinedRole(roleKey)}
                       className="rounded-lg border border-gray-200 bg-white p-3 text-left shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
                     >
-                      <div className="text-sm font-medium text-gray-900 sm:text-base">
-                        {role.name}
-                      </div>
-                      <div className="mt-1 text-xs text-gray-500 sm:text-sm">
-                        {role.description}
-                      </div>
+                      <div className="text-sm font-medium text-gray-900 sm:text-base">{role.name}</div>
+                      <div className="mt-1 text-xs text-gray-500 sm:text-sm">{role.description}</div>
                     </button>
                   ))}
                 </div>

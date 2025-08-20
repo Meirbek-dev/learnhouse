@@ -1,26 +1,9 @@
-'use client';
-
-import OrgMenu from '@components/Objects/Menus/org-menu';
-import { Children, cloneElement, use } from 'react';
+import WithMenuClientLayout from './with-menu-client-layout';
 import '@styles/globals.css';
 
-export default function RootLayout(props: { children: React.ReactNode; params: Promise<any> }) {
-  const params = use(props.params);
+export default async function RootLayout(props: { children: React.ReactNode; params: Promise<any> }) {
+  const params = await props.params;
   const { children } = props;
 
-  return (
-    <>
-      <OrgMenu
-        key={`${params?.orgslug}-orgmenu`}
-        orgslug={params?.orgslug}
-      />
-      {/* Spacer for fixed header */}
-      <div className="h-[52px]" />
-      {Children.map(children, (child, index) =>
-        cloneElement(child as React.ReactElement, {
-          key: `${params.orgslug}-child-${index}`,
-        }),
-      )}
-    </>
-  );
+  return <WithMenuClientLayout orgslug={params?.orgslug}>{children}</WithMenuClientLayout>;
 }

@@ -2,13 +2,10 @@ export const dynamic = 'force-dynamic';
 
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
-import { getOrgCollections } from '@services/courses/collections';
-import LandingClassic from '@components/Landings/LandingClassic';
-import LandingCustom from '@components/Landings/LandingCustom';
-import { getOrgCourses } from '@services/courses/courses';
+import { PageSuspense } from '@components/Utils/PageSuspense';
 import { getTranslations } from 'next-intl/server';
+import { LandingContent } from './LandingContent';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string }>;
@@ -56,39 +53,12 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 const OrgHomePage = async (params: any) => {
   const { orgslug } = await params.params;
-  const session = await auth();
-  const access_token = session?.tokens?.access_token;
-  const courses = await getOrgCourses(orgslug, { revalidate: 0, tags: ['courses'] }, access_token || null);
-  const org = await getOrganizationContextInfo(orgslug, {
-    revalidate: 0,
-    tags: ['organizations'],
-  });
-  const org_id = org.id;
-  const collections = await getOrgCollections(org.id, access_token, {
-    revalidate: 0,
-    tags: ['courses'],
-  });
-
-  // Check if custom landing is enabled
-  const hasCustomLanding = org.config?.config?.landing?.enabled;
-  const showEnhancedDashboard = session?.user && !hasCustomLanding;
 
   return (
     <div className="w-full">
-      {hasCustomLanding ? (
-        <LandingCustom
-          landing={org.config.config.landing}
-          orgslug={orgslug}
-        />
-      ) : (
-        <LandingClassic
-          courses={courses}
-          collections={collections}
-          orgslug={orgslug}
-          org_id={org_id}
-          showLearnerDashboard={showEnhancedDashboard}
-        />
-      )}
+      <PageSuspense>
+        <LandingContent orgslug={orgslug} />
+      </PageSuspense>
     </div>
   );
 };

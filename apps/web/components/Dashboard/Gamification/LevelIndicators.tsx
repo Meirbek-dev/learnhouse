@@ -133,7 +133,9 @@ export function LevelProgressBar({
           <span className="font-medium">
             {t('levelIndicators.level')} {profile.current_level}
           </span>
-          <span className="text-muted-foreground">{t('levelIndicators.xpToLevel', { level: profile.current_level + 1 })}</span>
+          <span className="text-muted-foreground">
+            {t('levelIndicators.xpToLevel', { level: profile.current_level + 1 })}
+          </span>
         </div>
       )}
 
@@ -153,7 +155,9 @@ export function LevelProgressBar({
         <div className="text-muted-foreground flex justify-between text-xs">
           <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}</span>
           <span>{t('levelIndicators.progress', { percentage: format.number(Math.round(progressPercentage)) })}</span>
-          <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp + profile.xp_to_next_level) })}</span>
+          <span>
+            {t('levelIndicators.totalXp', { total: format.number(profile.total_xp + profile.xp_to_next_level) })}
+          </span>
         </div>
       )}
     </div>
