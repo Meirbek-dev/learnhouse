@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, col, select
@@ -12,10 +11,7 @@ from src.db.courses.discussions import (
     CourseDiscussionRead,
     CourseDiscussionUpdate,
     DiscussionDislike,
-    DiscussionDislikeCreate,
-    DiscussionDislikeRead,
     DiscussionLike,
-    DiscussionLikeCreate,
     DiscussionLikeRead,
     DiscussionStatusEnum,
     DiscussionType,

@@ -401,10 +401,10 @@ def install_default_elements(db_session: Session) -> bool:
     )
 
     # Serialize rights to JSON
-    role_global_admin.rights = role_global_admin.rights.dict()  # type: ignore
-    role_global_maintainer.rights = role_global_maintainer.rights.dict()  # type: ignore
-    role_global_instructor.rights = role_global_instructor.rights.dict()  # type: ignore
-    role_global_user.rights = role_global_user.rights.dict()  # type: ignore
+    role_global_admin.rights = role_global_admin.rights.dict()
+    role_global_maintainer.rights = role_global_maintainer.rights.dict()
+    role_global_instructor.rights = role_global_instructor.rights.dict()
+    role_global_user.rights = role_global_user.rights.dict()
 
     # Insert roles in DB
     db_session.add(role_global_admin)

@@ -142,7 +142,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_if_element_is_public_course_success(
         self, mock_request, mock_db_session, mock_course
-    ):
+    ) -> None:
         """Test public course authorization success"""
         with patch(
             "src.security.rbac.rbac.check_element_type", new_callable=AsyncMock
@@ -164,7 +164,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_if_element_is_public_course_not_public(
         self, mock_request, mock_db_session
-    ):
+    ) -> None:
         """Test public course authorization failure when course is not public"""
         with patch(
             "src.security.rbac.rbac.check_element_type", new_callable=AsyncMock
@@ -191,7 +191,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_if_element_is_public_collection_success(
         self, mock_request, mock_db_session, mock_collection
-    ):
+    ) -> None:
         """Test public collection authorization success"""
         with patch(
             "src.security.rbac.rbac.check_element_type", new_callable=AsyncMock
@@ -213,7 +213,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_if_element_is_public_unsupported_element_type(
         self, mock_request, mock_db_session
-    ):
+    ) -> None:
         """Test public element authorization with unsupported element type"""
         with patch(
             "src.security.rbac.rbac.check_element_type", new_callable=AsyncMock
@@ -237,7 +237,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_if_user_is_author_create_action(
         self, mock_request, mock_db_session
-    ):
+    ) -> None:
         """Test author verification for create action"""
         result = await authorization_verify_if_user_is_author(
             request=mock_request,
@@ -252,7 +252,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_if_user_is_author_success(
         self, mock_request, mock_db_session, mock_resource_author
-    ):
+    ) -> None:
         """Test author verification success"""
         with patch("src.security.rbac.rbac.check_element_type", new_callable=AsyncMock):
             # Mock database query
@@ -271,7 +271,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_if_user_is_author_wrong_user(
         self, mock_request, mock_db_session, mock_resource_author
-    ):
+    ) -> None:
         """Test author verification with wrong user"""
         with patch("src.security.rbac.rbac.check_element_type", new_callable=AsyncMock):
             # Mock database query
@@ -290,7 +290,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_if_user_is_author_no_resource_author(
         self, mock_request, mock_db_session
-    ):
+    ) -> None:
         """Test author verification when no resource author exists"""
         with patch("src.security.rbac.rbac.check_element_type", new_callable=AsyncMock):
             # Mock database query to return None
@@ -309,7 +309,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_based_on_roles_success(
         self, mock_request, mock_db_session, mock_role
-    ):
+    ) -> None:
         """Test role-based authorization success"""
         with patch(
             "src.security.rbac.rbac.check_element_type", new_callable=AsyncMock
@@ -332,7 +332,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_based_on_roles_no_permission(
         self, mock_request, mock_db_session, mock_role
-    ):
+    ) -> None:
         """Test role-based authorization failure"""
         with patch(
             "src.security.rbac.rbac.check_element_type", new_callable=AsyncMock
@@ -358,7 +358,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_based_on_org_admin_status_success(
         self, mock_request, mock_db_session
-    ):
+    ) -> None:
         """Test org admin status verification success"""
         with patch("src.security.rbac.rbac.check_element_type", new_callable=AsyncMock):
             # Mock admin role
@@ -391,7 +391,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_based_on_org_admin_status_no_admin(
         self, mock_request, mock_db_session
-    ):
+    ) -> None:
         """Test org admin status verification failure"""
         with patch("src.security.rbac.rbac.check_element_type", new_callable=AsyncMock):
             # Mock non-admin role
@@ -424,7 +424,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_based_on_roles_and_authorship_success(
         self, mock_request, mock_db_session, mock_resource_author
-    ):
+    ) -> None:
         """Test combined roles and authorship authorization success"""
         with (
             patch(
@@ -452,7 +452,7 @@ class TestRBAC:
     @pytest.mark.asyncio
     async def test_authorization_verify_based_on_roles_and_authorship_failure(
         self, mock_request, mock_db_session
-    ):
+    ) -> None:
         """Test combined roles and authorship authorization failure"""
         with (
             patch(
@@ -480,7 +480,7 @@ class TestRBAC:
             assert "User rights (roles & authorship)" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_authorization_verify_if_user_is_anon_anonymous_user(self):
+    async def test_authorization_verify_if_user_is_anon_anonymous_user(self) -> None:
         """Test anonymous user verification"""
         with pytest.raises(HTTPException) as exc_info:
             await authorization_verify_if_user_is_anon(user_id=0)
@@ -489,7 +489,9 @@ class TestRBAC:
         assert "You should be logged in to perform this action" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_authorization_verify_if_user_is_anon_authenticated_user(self):
+    async def test_authorization_verify_if_user_is_anon_authenticated_user(
+        self,
+    ) -> None:
         """Test authenticated user verification"""
         # Should not raise any exception
         await authorization_verify_if_user_is_anon(user_id=1)

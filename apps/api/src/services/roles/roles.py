@@ -135,7 +135,7 @@ async def create_role(
             rights_dict = role.rights
         else:
             try:
-                rights_dict = role.rights.model_dump()  # type: ignore
+                rights_dict = role.rights.model_dump()
             except AttributeError:
                 raise HTTPException(
                     status_code=400,
@@ -320,7 +320,7 @@ async def create_role(
                 pass
         else:
             # Re-raise the original exception if it's not the sequence issue
-            raise e
+            raise
 
     # Create RoleRead object with all required fields
     role_data = role.model_dump()
@@ -411,7 +411,7 @@ async def get_roles_by_organization(
     # Get global roles first
     global_roles_statement = (
         select(Role).where(Role.role_type == RoleTypeEnum.TYPE_GLOBAL).order_by(Role.id)
-    )  # type: ignore
+    )
 
     global_roles = list(db_session.exec(global_roles_statement).all())
 
@@ -420,7 +420,7 @@ async def get_roles_by_organization(
         select(Role)
         .where(Role.org_id == org_id, Role.role_type == RoleTypeEnum.TYPE_ORGANIZATION)
         .order_by(Role.id)
-    )  # type: ignore
+    )
 
     org_roles = list(db_session.exec(org_roles_statement).all())
 
@@ -513,7 +513,7 @@ async def update_role(
         else:
             try:
                 # Try model_dump() method (for Pydantic v2)
-                rights_dict = role.rights.model_dump()  # type: ignore
+                rights_dict = role.rights.model_dump()
             except AttributeError:
                 raise HTTPException(
                     status_code=400,
@@ -625,7 +625,7 @@ async def update_role(
 
 async def delete_role(
     request: Request, db_session: Session, role_id: int, current_user: PublicUser
-):
+) -> str:
     # First, get the role to check if it exists and get its UUID
     statement = select(Role).where(Role.id == role_id)
     result = db_session.exec(statement)

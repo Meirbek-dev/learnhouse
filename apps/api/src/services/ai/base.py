@@ -221,7 +221,7 @@ class FastAIService:
             )
 
         except Exception as e:
-            logger.error(f"Failed to create vector store: {e}")
+            logger.exception(f"Failed to create vector store: {e}")
             return None
 
     async def get_or_create_agent(
@@ -317,7 +317,7 @@ class FastAIService:
             )
 
         except Exception as e:
-            logger.error(f"Failed to create agent: {e}")
+            logger.exception(f"Failed to create agent: {e}")
             return None
 
 
@@ -385,10 +385,10 @@ async def ask_ai_fast(
         return result
 
     except TimeoutError:
-        logger.error("AI processing timed out")
+        logger.exception("AI processing timed out")
         return {"error": "Request timed out", "type": "timeout_error"}
     except Exception as e:
-        logger.error(f"Error processing AI request: {e}")
+        logger.exception(f"Error processing AI request: {e}")
         return {
             "error": f"AI processing failed: {e!s}",
             "type": "ai_processing_error",
@@ -427,7 +427,7 @@ def ask_ai(
             )
         )
     except Exception as e:
-        logger.error(f"Error in ask_ai wrapper: {e}")
+        logger.exception(f"Error in ask_ai wrapper: {e}")
         return {"error": f"AI processing failed: {e!s}", "type": "wrapper_error"}
 
 
@@ -471,7 +471,7 @@ def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
             }
 
     except Exception as e:
-        logger.error(f"Failed to create chat session: {e}")
+        logger.exception(f"Failed to create chat session: {e}")
         return {
             "message_history": [],
             "aichat_uuid": f"fallback_{ULID()}",
@@ -497,4 +497,4 @@ def cleanup_expired_cache() -> None:
 
         logger.info(f"Cleaned up {len(expired_keys)} expired cache entries")
     except Exception as e:
-        logger.error(f"Error cleaning up cache: {e}")
+        logger.exception(f"Error cleaning up cache: {e}")

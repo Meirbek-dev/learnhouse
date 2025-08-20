@@ -1,7 +1,6 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from fastapi import HTTPException
 from sqlmodel import Session
 
 from src.db.organization_config import OrganizationConfig
@@ -50,7 +49,7 @@ class TestFeaturesUtils:
         redis_mock.set.return_value = True
         return redis_mock
 
-    def test_feature_set_type_alias(self):
+    def test_feature_set_type_alias(self) -> None:
         """Test that FeatureSet type alias includes all expected features"""
         expected_features = [
             "ai",
@@ -87,7 +86,7 @@ class TestFeaturesUtils:
     @pytest.mark.asyncio
     async def test_check_limits_with_usage_unlimited_feature(
         self, mock_db_session, mock_org_config
-    ):
+    ) -> None:
         """Test feature limit check for unlimited feature (limit = 0)"""
         with (
             patch("src.security.features_utils.usage.get_openu_config") as mock_config,
@@ -120,7 +119,7 @@ class TestFeaturesUtils:
     @pytest.mark.asyncio
     async def test_check_limits_with_usage_no_previous_usage(
         self, mock_db_session, mock_org_config
-    ):
+    ) -> None:
         """Test feature limit check when no previous usage exists"""
         with (
             patch("src.security.features_utils.usage.get_openu_config") as mock_config,
@@ -148,7 +147,7 @@ class TestFeaturesUtils:
             assert result is True
 
     @pytest.mark.asyncio
-    async def test_increase_feature_usage_success(self, mock_db_session):
+    async def test_increase_feature_usage_success(self, mock_db_session) -> None:
         """Test successful feature usage increase"""
         with (
             patch("src.security.features_utils.usage.get_openu_config") as mock_config,
@@ -176,7 +175,9 @@ class TestFeaturesUtils:
             mock_redis.set.assert_called_once_with("ai_usage:1", 6)
 
     @pytest.mark.asyncio
-    async def test_increase_feature_usage_no_previous_usage(self, mock_db_session):
+    async def test_increase_feature_usage_no_previous_usage(
+        self, mock_db_session
+    ) -> None:
         """Test feature usage increase when no previous usage exists"""
         with (
             patch("src.security.features_utils.usage.get_openu_config") as mock_config,
@@ -203,7 +204,7 @@ class TestFeaturesUtils:
             mock_redis.set.assert_called_once_with("ai_usage:1", 1)
 
     @pytest.mark.asyncio
-    async def test_decrease_feature_usage_success(self, mock_db_session):
+    async def test_decrease_feature_usage_success(self, mock_db_session) -> None:
         """Test successful feature usage decrease"""
         with (
             patch("src.security.features_utils.usage.get_openu_config") as mock_config,
@@ -231,7 +232,9 @@ class TestFeaturesUtils:
             mock_redis.set.assert_called_once_with("ai_usage:1", 4)
 
     @pytest.mark.asyncio
-    async def test_decrease_feature_usage_no_previous_usage(self, mock_db_session):
+    async def test_decrease_feature_usage_no_previous_usage(
+        self, mock_db_session
+    ) -> None:
         """Test feature usage decrease when no previous usage exists"""
         with (
             patch("src.security.features_utils.usage.get_openu_config") as mock_config,
@@ -258,7 +261,7 @@ class TestFeaturesUtils:
             mock_redis.set.assert_called_once_with("ai_usage:1", -1)
 
     @pytest.mark.asyncio
-    async def test_all_features_covered(self, mock_db_session, mock_org_config):
+    async def test_all_features_covered(self, mock_db_session, mock_org_config) -> None:
         """Test that all features in FeatureSet are covered"""
         features = [
             "ai",
@@ -297,7 +300,7 @@ class TestFeaturesUtils:
             for feature in features:
                 # Test that each feature can be processed without errors
                 result = check_limits_with_usage(
-                    feature=feature,  # type: ignore
+                    feature=feature,
                     org_id=1,
                     db_session=mock_db_session,
                 )

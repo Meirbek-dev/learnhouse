@@ -1,7 +1,6 @@
 import random
 import string
 from datetime import datetime
-from typing import Literal
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
@@ -487,7 +486,7 @@ async def check_course_completion_and_create_certificate(
                 if e.status_code == 400 and "already has a certificate" in e.detail:
                     # Certificate already exists, which is fine
                     return True
-                raise e
+                raise
         else:
             pass
     else:

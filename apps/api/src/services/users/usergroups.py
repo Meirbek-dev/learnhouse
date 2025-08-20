@@ -273,7 +273,7 @@ async def add_users_to_usergroup(
         try:
             user_id = int(user_id_str.strip())
         except ValueError:
-            logging.error(f"Invalid user_id format: {user_id_str}")
+            logging.exception(f"Invalid user_id format: {user_id_str}")
             continue
 
         statement = select(User).where(User.id == user_id)
@@ -341,7 +341,7 @@ async def remove_users_from_usergroup(
         try:
             user_id = int(user_id_str.strip())
         except ValueError:
-            logging.error(f"Invalid user_id format: {user_id_str}")
+            logging.exception(f"Invalid user_id format: {user_id_str}")
             continue
 
         statement = select(UserGroupUser).where(

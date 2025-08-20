@@ -1,4 +1,3 @@
-from pydantic import EmailStr
 from sqlmodel import Session, select
 
 from src.db.organizations import OrganizationCreate
@@ -56,7 +55,7 @@ async def create_initial_data_for_tests(db_session: Session) -> bool:
     statement = select(UserOrganization).join(User).where(User.username == "testo")
     user_org = db_session.exec(statement).first()
 
-    user_org.role_id = 3  # type: ignore
+    user_org.role_id = 3
     db_session.add(user_org)
     db_session.commit()
 

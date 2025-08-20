@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
-from typing import Annotated, Dict, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy import and_, func, null, or_, text
+from sqlalchemy import and_, func, or_, text
 from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
@@ -2372,9 +2372,9 @@ async def get_admin_courses(
 
         # Apply status filter
         if filter == "published":
-            base_query = base_query.where(Course.public == True)
+            base_query = base_query.where(Course.public)
         elif filter == "draft":
-            base_query = base_query.where(Course.public == False)
+            base_query = base_query.where(not Course.public)
 
         # Get total count
         count_query = select(func.count()).select_from(base_query.subquery())

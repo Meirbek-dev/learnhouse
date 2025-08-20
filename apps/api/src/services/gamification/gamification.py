@@ -5,7 +5,7 @@ Handles XP calculations, streak tracking, level progression, and all gamificatio
 Designed to be highly extensible for future features like badges, achievements, and challenges.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 from fastapi import HTTPException, Request, status
@@ -15,14 +15,10 @@ from src.db.gamification import (
     GamificationDashboard,
     OrganizationLeaderboard,
     StreakRecord,
-    StreakRecordCreate,
     StreakRecordRead,
-    StreakRecordUpdate,
-    StreakTypeEnum,
     UserGamificationProfile,
     UserGamificationProfileCreate,
     UserGamificationProfileRead,
-    UserGamificationProfileUpdate,
     XPTransaction,
     XPTransactionCreate,
     XPTransactionRead,
@@ -513,7 +509,7 @@ async def get_gamification_dashboard(
     streak_statement = select(StreakRecord).where(
         StreakRecord.user_id == user.id,
         StreakRecord.org_id == org_id,
-        StreakRecord.is_active == True,
+        StreakRecord.is_active,
     )
 
     streaks = db_session.exec(streak_statement).all()

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -49,23 +49,23 @@ class TestAuth:
         }
         return user
 
-    def test_token_model(self):
+    def test_token_model(self) -> None:
         """Test Token model"""
         token = Token(access_token="test_token", token_type="bearer")
         assert token.access_token == "test_token"
         assert token.token_type == "bearer"
 
-    def test_token_data_model(self):
+    def test_token_data_model(self) -> None:
         """Test TokenData model"""
         token_data = TokenData(username="test@example.com")
         assert token_data.username == "test@example.com"
 
-    def test_token_data_model_default(self):
+    def test_token_data_model_default(self) -> None:
         """Test TokenData model with default values"""
         token_data = TokenData()
         assert token_data.username is None
 
-    def test_settings_model(self):
+    def test_settings_model(self) -> None:
         """Test Settings model"""
         settings = Settings()
         assert settings.authjwt_secret_key == "secret"  # Default in dev mode
@@ -80,7 +80,7 @@ class TestAuth:
     @pytest.mark.asyncio
     async def test_authenticate_user_success(
         self, mock_request, mock_db_session, mock_user
-    ):
+    ) -> None:
         """Test successful user authentication"""
         with (
             patch(
@@ -105,7 +105,7 @@ class TestAuth:
     @pytest.mark.asyncio
     async def test_authenticate_user_user_not_found(
         self, mock_request, mock_db_session
-    ):
+    ) -> None:
         """Test authentication when user is not found"""
         with patch(
             "src.security.auth.security_get_user", new_callable=AsyncMock
@@ -124,7 +124,7 @@ class TestAuth:
     @pytest.mark.asyncio
     async def test_authenticate_user_wrong_password(
         self, mock_request, mock_db_session, mock_user
-    ):
+    ) -> None:
         """Test authentication with wrong password"""
         with (
             patch(
@@ -143,7 +143,7 @@ class TestAuth:
 
             assert result is False
 
-    def test_create_access_token_default_expiry(self):
+    def test_create_access_token_default_expiry(self) -> None:
         """Test access token creation with default expiry"""
         data = {"sub": "test@example.com"}
         token = create_access_token(data)
@@ -157,7 +157,7 @@ class TestAuth:
         assert decoded["sub"] == "test@example.com"
         assert "exp" in decoded
 
-    def test_create_access_token_custom_expiry(self):
+    def test_create_access_token_custom_expiry(self) -> None:
         """Test access token creation with custom expiry"""
         data = {"sub": "test@example.com"}
         expires_delta = timedelta(hours=2)
@@ -178,7 +178,7 @@ class TestAuth:
     @pytest.mark.asyncio
     async def test_get_current_user_authenticated(
         self, mock_request, mock_db_session, mock_user
-    ):
+    ) -> None:
         """Test getting current user when authenticated"""
         with patch(
             "src.security.auth.security_get_user", new_callable=AsyncMock
@@ -202,7 +202,9 @@ class TestAuth:
             )
 
     @pytest.mark.asyncio
-    async def test_get_current_user_anonymous(self, mock_request, mock_db_session):
+    async def test_get_current_user_anonymous(
+        self, mock_request, mock_db_session
+    ) -> None:
         """Test getting current user when anonymous"""
         # Mock AuthJWT
         mock_authorize = Mock(spec=AuthJWT)
@@ -216,7 +218,9 @@ class TestAuth:
         assert isinstance(result, AnonymousUser)
 
     @pytest.mark.asyncio
-    async def test_get_current_user_jwt_error(self, mock_request, mock_db_session):
+    async def test_get_current_user_jwt_error(
+        self, mock_request, mock_db_session
+    ) -> None:
         """Test getting current user when JWT is invalid"""
         from jwt import PyJWTError
 
@@ -235,7 +239,9 @@ class TestAuth:
         assert "Could not validate credentials" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_get_current_user_user_not_found(self, mock_request, mock_db_session):
+    async def test_get_current_user_user_not_found(
+        self, mock_request, mock_db_session
+    ) -> None:
         """Test getting current user when user doesn't exist in database"""
         with patch(
             "src.security.auth.security_get_user", new_callable=AsyncMock
@@ -258,13 +264,13 @@ class TestAuth:
             assert "Could not validate credentials" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_non_public_endpoint_authenticated(self, mock_user):
+    async def test_non_public_endpoint_authenticated(self, mock_user) -> None:
         """Test non_public_endpoint with authenticated user"""
         # Should not raise any exception
         await non_public_endpoint(mock_user)
 
     @pytest.mark.asyncio
-    async def test_non_public_endpoint_anonymous(self):
+    async def test_non_public_endpoint_anonymous(self) -> None:
         """Test non_public_endpoint with anonymous user"""
         anonymous_user = AnonymousUser()
 

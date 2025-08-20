@@ -63,12 +63,12 @@ def import_all_models() -> None:
                             f"Failed to import module {full_module_path}: {e}"
                         )
                     except Exception as e:
-                        logger.error(
+                        logger.exception(
                             f"Unexpected error importing {full_module_path}: {e}"
                         )
 
     except Exception as e:
-        logger.error(f"Critical error during model import: {e}")
+        logger.exception(f"Critical error during model import: {e}")
         raise
 
 
@@ -86,17 +86,17 @@ def set_postgres_optimization(dbapi_connection, connection_record) -> None:
 
 # Add connection pool monitoring for debugging
 @event.listens_for(Engine, "connect")
-def receive_connect(dbapi_connection, connection_record):
+def receive_connect(dbapi_connection, connection_record) -> None:
     logging.debug("Database connection established")
 
 
 @event.listens_for(Engine, "checkout")
-def receive_checkout(dbapi_connection, connection_record, connection_proxy):
+def receive_checkout(dbapi_connection, connection_record, connection_proxy) -> None:
     logging.debug("Connection checked out from pool")
 
 
 @event.listens_for(Engine, "checkin")
-def receive_checkin(dbapi_connection, connection_record):
+def receive_checkin(dbapi_connection, connection_record) -> None:
     logging.debug("Connection returned to pool")
 
 
@@ -107,7 +107,7 @@ import_all_models()
 
 # 2. Rebuild models to resolve Pydantic V2 forward references
 try:
-    from src.db.trails import rebuild_trail_models  # type: ignore
+    from src.db.trails import rebuild_trail_models
 
     rebuild_trail_models()
 except ImportError:
@@ -116,7 +116,7 @@ except ImportError:
         "Ensure it exists if you have Pydantic V2 forward references."
     )
 except Exception as e:
-    logger.error(f"Error during rebuilding trail models: {e}")
+    logger.exception(f"Error during rebuilding trail models: {e}")
 
 
 # Global engine instance with caching
@@ -205,9 +205,9 @@ async def connect_to_db(app: FastAPI) -> None:
             SQLModel.metadata.create_all(db_engine)
 
     except Exception as e:
-        logger.error(f"Database initialization failed: {e}")
+        logger.exception(f"Database initialization failed: {e}")
         # Log additional context for debugging
-        logger.error(
+        logger.exception(
             f"Connection string type: {type(get_openu_config().database_config.sql_connection_string)}"
         )
         msg = f"Database connection failed: {e}"
@@ -231,7 +231,7 @@ async def close_database(app: FastAPI) -> None:
         logger.info("Database shutdown completed")
 
     except Exception as e:
-        logger.error(f"Error during database shutdown: {e}")
+        logger.exception(f"Error during database shutdown: {e}")
         # Don't raise here to allow graceful shutdown
 
 
@@ -256,7 +256,7 @@ def get_db_session() -> Iterator[Session]:
         try:
             yield session
         except Exception as e:
-            logger.error(f"Database session error: {e}")
+            logger.exception(f"Database session error: {e}")
             session.rollback()
             raise
         finally:
@@ -302,7 +302,7 @@ def get_db_health() -> dict:
             }
 
     except Exception as e:
-        logger.error(f"Database health check failed: {e}")
+        logger.exception(f"Database health check failed: {e}")
         return {"status": "unhealthy", "error": str(e)}
 
 

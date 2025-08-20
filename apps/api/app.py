@@ -175,7 +175,7 @@ async def lifespan(app: FastAPI):
         yield
 
     except Exception as e:
-        logger.error(f"Error during startup: {e}")
+        logger.exception(f"Error during startup: {e}")
         raise
     finally:
         # Shutdown
@@ -184,7 +184,7 @@ async def lifespan(app: FastAPI):
             await shutdown_app(app)()
             logger.info("OpenU API server shut down successfully")
         except Exception as e:
-            logger.error(f"Error during shutdown: {e}")
+            logger.exception(f"Error during shutdown: {e}")
 
 
 # Configuration caching
@@ -440,5 +440,5 @@ if __name__ == "__main__":
         uvicorn_config = get_optimized_uvicorn_config()
         uvicorn.run("app:app", **uvicorn_config)
     except Exception as e:
-        logger.error(f"Failed to start server: {e}")
+        logger.exception(f"Failed to start server: {e}")
         sys.exit(1)

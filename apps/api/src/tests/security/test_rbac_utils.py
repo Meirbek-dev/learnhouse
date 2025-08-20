@@ -12,67 +12,67 @@ class TestRBACUtils:
     """Test cases for RBAC utils module"""
 
     @pytest.mark.asyncio
-    async def test_check_element_type_course(self):
+    async def test_check_element_type_course(self) -> None:
         """Test element type checking for course"""
         result = await check_element_type("course_123")
         assert result == "courses"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_course_update(self):
+    async def test_check_element_type_course_update(self) -> None:
         """Test element type checking for course update"""
         result = await check_element_type("courseupdate_123")
         assert result == "courses"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_user(self):
+    async def test_check_element_type_user(self) -> None:
         """Test element type checking for user"""
         result = await check_element_type("user_123")
         assert result == "users"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_usergroup(self):
+    async def test_check_element_type_usergroup(self) -> None:
         """Test element type checking for usergroup"""
         result = await check_element_type("usergroup_123")
         assert result == "usergroups"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_house(self):
+    async def test_check_element_type_house(self) -> None:
         """Test element type checking for house"""
         result = await check_element_type("house_123")
         assert result == "houses"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_org(self):
+    async def test_check_element_type_org(self) -> None:
         """Test element type checking for organization"""
         result = await check_element_type("org_123")
         assert result == "organizations"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_chapter(self):
+    async def test_check_element_type_chapter(self) -> None:
         """Test element type checking for chapter"""
         result = await check_element_type("chapter_123")
         assert result == "coursechapters"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_collection(self):
+    async def test_check_element_type_collection(self) -> None:
         """Test element type checking for collection"""
         result = await check_element_type("collection_123")
         assert result == "collections"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_activity(self):
+    async def test_check_element_type_activity(self) -> None:
         """Test element type checking for activity"""
         result = await check_element_type("activity_123")
         assert result == "activities"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_role(self):
+    async def test_check_element_type_role(self) -> None:
         """Test element type checking for role"""
         result = await check_element_type("role_123")
         assert result == "roles"
 
     @pytest.mark.asyncio
-    async def test_check_element_type_unknown(self):
+    async def test_check_element_type_unknown(self) -> None:
         """Test element type checking for unknown element"""
         with pytest.raises(HTTPException) as exc_info:
             await check_element_type("unknown_123")
@@ -81,7 +81,7 @@ class TestRBACUtils:
         assert "Issue verifying element nature" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_check_element_type_empty_uuid(self):
+    async def test_check_element_type_empty_uuid(self) -> None:
         """Test element type checking for empty UUID"""
         with pytest.raises(HTTPException) as exc_info:
             await check_element_type("")
@@ -90,67 +90,67 @@ class TestRBACUtils:
         assert "Issue verifying element nature" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_get_singular_form_of_element_activity(self):
+    async def test_get_singular_form_of_element_activity(self) -> None:
         """Test getting singular form for activity"""
         result = await get_singular_form_of_element("activity_123")
         assert result == "activity"
 
     @pytest.mark.asyncio
-    async def test_get_singular_form_of_element_course(self):
+    async def test_get_singular_form_of_element_course(self) -> None:
         """Test getting singular form for course"""
         result = await get_singular_form_of_element("course_123")
         assert result == "course"
 
     @pytest.mark.asyncio
-    async def test_get_singular_form_of_element_user(self):
+    async def test_get_singular_form_of_element_user(self) -> None:
         """Test getting singular form for user"""
         result = await get_singular_form_of_element("user_123")
         assert result == "user"
 
     @pytest.mark.asyncio
-    async def test_get_singular_form_of_element_collection(self):
+    async def test_get_singular_form_of_element_collection(self) -> None:
         """Test getting singular form for collection"""
         result = await get_singular_form_of_element("collection_123")
         assert result == "collection"
 
     @pytest.mark.asyncio
-    async def test_get_singular_form_of_element_organization(self):
+    async def test_get_singular_form_of_element_organization(self) -> None:
         """Test getting singular form for organization"""
         result = await get_singular_form_of_element("org_123")
         assert result == "organization"
 
     @pytest.mark.asyncio
-    async def test_get_id_identifier_of_element_activity(self):
+    async def test_get_id_identifier_of_element_activity(self) -> None:
         """Test getting ID identifier for activity"""
         result = await get_id_identifier_of_element("activity_123")
         assert result == "activity_id"
 
     @pytest.mark.asyncio
-    async def test_get_id_identifier_of_element_course(self):
+    async def test_get_id_identifier_of_element_course(self) -> None:
         """Test getting ID identifier for course"""
         result = await get_id_identifier_of_element("course_123")
         assert result == "course_id"
 
     @pytest.mark.asyncio
-    async def test_get_id_identifier_of_element_user(self):
+    async def test_get_id_identifier_of_element_user(self) -> None:
         """Test getting ID identifier for user"""
         result = await get_id_identifier_of_element("user_123")
         assert result == "user_id"
 
     @pytest.mark.asyncio
-    async def test_get_id_identifier_of_element_organization(self):
+    async def test_get_id_identifier_of_element_organization(self) -> None:
         """Test getting ID identifier for organization"""
         result = await get_id_identifier_of_element("org_123")
         assert result == "org_id"
 
     @pytest.mark.asyncio
-    async def test_get_id_identifier_of_element_collection(self):
+    async def test_get_id_identifier_of_element_collection(self) -> None:
         """Test getting ID identifier for collection"""
         result = await get_id_identifier_of_element("collection_123")
         assert result == "collection_id"
 
     @pytest.mark.asyncio
-    async def test_element_type_consistency(self):
+    async def test_element_type_consistency(self) -> None:
         """Test consistency between element type checking and singular form"""
         test_cases = [
             ("course_123", "courses", "course"),
@@ -168,7 +168,7 @@ class TestRBACUtils:
             assert singular_form == expected_singular
 
     @pytest.mark.asyncio
-    async def test_id_identifier_consistency(self):
+    async def test_id_identifier_consistency(self) -> None:
         """Test consistency between singular form and ID identifier"""
         test_cases = [
             ("course_123", "course_id"),
@@ -183,7 +183,7 @@ class TestRBACUtils:
             assert id_identifier == expected_id_identifier
 
     @pytest.mark.asyncio
-    async def test_edge_cases_with_underscores(self):
+    async def test_edge_cases_with_underscores(self) -> None:
         """Test edge cases with multiple underscores"""
         # Test with multiple underscores
         result = await check_element_type("course_123_456")
@@ -196,7 +196,7 @@ class TestRBACUtils:
         assert result == "course_id"
 
     @pytest.mark.asyncio
-    async def test_edge_cases_with_numbers_only(self):
+    async def test_edge_cases_with_numbers_only(self) -> None:
         """Test edge cases with numbers only after prefix"""
         result = await check_element_type("course_123456")
         assert result == "courses"

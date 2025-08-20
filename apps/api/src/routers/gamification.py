@@ -19,7 +19,6 @@ from src.db.gamification import (
     GamificationDashboard,
     OrganizationLeaderboard,
     UserGamificationProfileRead,
-    XPTransactionRead,
 )
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user

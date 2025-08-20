@@ -19,7 +19,7 @@ from src.tests.security.test_security import TestSecurity
 class TestSecurityComprehensive:
     """Comprehensive test suite for all security functionality"""
 
-    def test_security_module_imports(self):
+    def test_security_module_imports(self) -> None:
         """Test that all security modules can be imported successfully"""
         # Test core security imports
 
@@ -34,7 +34,7 @@ class TestSecurityComprehensive:
         # Verify all imports succeeded
         assert True
 
-    def test_security_constants(self):
+    def test_security_constants(self) -> None:
         """Test that security constants are properly defined"""
         from src.security.security import (
             ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -48,7 +48,7 @@ class TestSecurityComprehensive:
         assert isinstance(SECRET_KEY, str)
         assert len(SECRET_KEY) > 0
 
-    def test_feature_set_definition(self):
+    def test_feature_set_definition(self) -> None:
         """Test that FeatureSet includes all expected features"""
 
         expected_features = [
@@ -81,7 +81,7 @@ class TestSecurityComprehensive:
                 "usergroups",
             ]
 
-    def test_security_module_structure(self):
+    def test_security_module_structure(self) -> None:
         """Test that the security module has the expected structure"""
         import src.security
         import src.security.auth
@@ -116,7 +116,7 @@ def get_security_test_classes():
     ]
 
 
-def run_security_tests():
+def run_security_tests() -> None:
     """Run all security tests"""
     test_classes = get_security_test_classes()
 

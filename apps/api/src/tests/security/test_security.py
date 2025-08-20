@@ -10,7 +10,7 @@ from src.security.security import (
 class TestSecurity:
     """Test cases for security.py module"""
 
-    def test_security_hash_password(self):
+    def test_security_hash_password(self) -> None:
         """Test password hashing functionality"""
         password = "test_password_123"
         hashed = security_hash_password(password)
@@ -22,7 +22,7 @@ class TestSecurity:
         # Verify the hash is not empty
         assert len(hashed) > 0
 
-    def test_security_verify_password_correct(self):
+    def test_security_verify_password_correct(self) -> None:
         """Test password verification with correct password"""
         password = "test_password_123"
         hashed = security_hash_password(password)
@@ -30,7 +30,7 @@ class TestSecurity:
         # Verify correct password returns True
         assert security_verify_password(password, hashed) is True
 
-    def test_security_verify_password_incorrect(self):
+    def test_security_verify_password_incorrect(self) -> None:
         """Test password verification with incorrect password"""
         password = "test_password_123"
         wrong_password = "wrong_password_456"
@@ -39,7 +39,7 @@ class TestSecurity:
         # Verify incorrect password returns False
         assert security_verify_password(wrong_password, hashed) is False
 
-    def test_security_verify_password_empty_password(self):
+    def test_security_verify_password_empty_password(self) -> None:
         """Test password verification with empty password"""
         password = "test_password_123"
         hashed = security_hash_password(password)
@@ -47,7 +47,7 @@ class TestSecurity:
         # Verify empty password returns False
         assert security_verify_password("", hashed) is False
 
-    def test_security_verify_password_empty_string(self):
+    def test_security_verify_password_empty_string(self) -> None:
         """Test password verification with empty string"""
         password = "test_password_123"
         hashed = security_hash_password(password)
@@ -55,7 +55,7 @@ class TestSecurity:
         # Verify empty string returns False
         assert security_verify_password("", hashed) is False
 
-    def test_jwt_constants(self):
+    def test_jwt_constants(self) -> None:
         """Test JWT constants are properly set"""
         # Verify constants are set
         assert ACCESS_TOKEN_EXPIRE_MINUTES == 30
@@ -64,7 +64,7 @@ class TestSecurity:
         assert isinstance(SECRET_KEY, str)
         assert len(SECRET_KEY) > 0
 
-    def test_password_hashing_consistency(self):
+    def test_password_hashing_consistency(self) -> None:
         """Test that password hashing produces consistent results"""
         password = "consistent_test_password"
         hashed1 = security_hash_password(password)
@@ -77,7 +77,7 @@ class TestSecurity:
         assert security_verify_password(password, hashed1) is True
         assert security_verify_password(password, hashed2) is True
 
-    def test_special_characters_in_password(self):
+    def test_special_characters_in_password(self) -> None:
         """Test password hashing with special characters"""
         password = "!@#$%^&*()_+-=[]{}|;':\",./<>?"
         hashed = security_hash_password(password)
@@ -85,7 +85,7 @@ class TestSecurity:
         assert security_verify_password(password, hashed) is True
         assert security_verify_password("wrong", hashed) is False
 
-    def test_unicode_characters_in_password(self):
+    def test_unicode_characters_in_password(self) -> None:
         """Test password hashing with unicode characters"""
         password = "测试密码123🚀🌟"
         hashed = security_hash_password(password)
@@ -93,7 +93,7 @@ class TestSecurity:
         assert security_verify_password(password, hashed) is True
         assert security_verify_password("wrong", hashed) is False
 
-    def test_very_long_password(self):
+    def test_very_long_password(self) -> None:
         """Test password hashing with very long password"""
         password = "a" * 1000
         hashed = security_hash_password(password)

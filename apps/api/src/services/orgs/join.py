@@ -23,7 +23,7 @@ async def join_org(
     args: JoinOrg,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-):
+) -> str:
     # Fetch organization
     statement = select(Organization).where(Organization.id == args.org_id)
     result = db_session.exec(statement)

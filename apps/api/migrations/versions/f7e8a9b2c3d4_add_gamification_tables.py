@@ -8,7 +8,6 @@ Create Date: 2025-01-31 10:00:00.000000
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "f7e8a9b2c3d4"
@@ -17,7 +16,7 @@ branch_labels = None
 depends_on = None
 
 
-def upgrade():
+def upgrade() -> None:
     # Create UserGamificationProfile table
     op.create_table(
         "usergamificationprofile",
@@ -117,7 +116,7 @@ def upgrade():
     )
 
 
-def downgrade():
+def downgrade() -> None:
     # Drop tables in reverse order
     op.drop_index(op.f("ix_streakrecord_is_active"), table_name="streakrecord")
     op.drop_index(op.f("ix_streakrecord_streak_type"), table_name="streakrecord")

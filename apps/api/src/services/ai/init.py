@@ -42,7 +42,7 @@ def get_chromadb_client() -> chromadb.Client:
         return chromadb.Client()
 
     except Exception as e:
-        logger.error(f"Failed to create ChromaDB client: {e}")
+        logger.exception(f"Failed to create ChromaDB client: {e}")
         # Fallback to local client
         return chromadb.Client()
 
@@ -81,7 +81,7 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
         )
 
     except Exception as e:
-        logger.error(f"Failed to create embedding function: {e}")
+        logger.exception(f"Failed to create embedding function: {e}")
         return None
 
 
@@ -115,7 +115,7 @@ def get_llm(model_name: str) -> ChatOpenAI | None:
         )
 
     except Exception as e:
-        logger.error(f"Failed to create LLM: {e}")
+        logger.exception(f"Failed to create LLM: {e}")
         return None
 
 

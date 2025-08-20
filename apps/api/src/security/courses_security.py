@@ -416,7 +416,7 @@ async def courses_rbac_check_for_collections(
             res = await authorization_verify_if_element_is_public(
                 request, collection_uuid, action, db_session
             )
-            if res == False:
+            if not res:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="User rights : You are not allowed to read this collection",

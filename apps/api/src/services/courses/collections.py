@@ -117,7 +117,7 @@ async def create_collection(
                     )
 
                 collection_course = CollectionCourse(
-                    collection_id=int(collection.id),  # type: ignore
+                    collection_id=int(collection.id),
                     course_id=course_id,
                     org_id=int(collection_object.org_id),
                     creation_date=str(datetime.now()),
@@ -257,7 +257,7 @@ async def get_collections(
         Collection.org_id == org_id, Collection.public
     )
     statement_all = (
-        select(Collection).where(Collection.org_id == org_id).distinct(Collection.id)  # type: ignore
+        select(Collection).where(Collection.org_id == org_id).distinct(Collection.id)
     )
 
     statement = statement_public if current_user.id == 0 else statement_all
