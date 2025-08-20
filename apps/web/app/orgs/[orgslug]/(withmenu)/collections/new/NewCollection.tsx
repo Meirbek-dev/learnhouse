@@ -36,7 +36,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     data: courses,
     error,
     isLoading,
-  } = useSWR(`${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/10`, (url) => swrFetcher(url, access_token));
+  } = useSWR(`${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/20`, (url) => swrFetcher(url, access_token));
   const [isPublic, setIsPublic] = useState(true);
 
   const handleVisibilityChange = (value: string) => {

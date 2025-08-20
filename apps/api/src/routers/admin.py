@@ -311,7 +311,7 @@ async def get_admin_overview_metrics(
                 )
             )
             .order_by(UserOrganization.creation_date.desc())
-            .limit(2)
+            .limit(5)
         )
 
         recent_users = db_session.exec(recent_users_query).all()
@@ -338,7 +338,7 @@ async def get_admin_overview_metrics(
                 and_(Course.org_id == org_id, Course.creation_date >= thirty_days_ago)
             )
             .order_by(Course.creation_date.desc())
-            .limit(2)
+            .limit(5)
         )
 
         recent_courses = db_session.exec(recent_courses_query).all()
@@ -379,7 +379,7 @@ async def get_admin_overview_metrics(
                 )
             )
             .order_by(AssignmentTaskSubmission.creation_date.desc())
-            .limit(2)
+            .limit(5)
         )
 
         recent_submissions = db_session.exec(recent_submissions_query).all()
@@ -551,7 +551,7 @@ async def get_admin_analytics_metrics(
             .where(Course.org_id == org_id)
             .group_by(Course.name)
             .order_by(func.count(UserOrganization.user_id).desc())
-            .limit(3)
+            .limit(5)
         )
 
         popular_courses_result = db_session.exec(popular_courses_query).all()

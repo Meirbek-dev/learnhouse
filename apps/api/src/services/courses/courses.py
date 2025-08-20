@@ -298,7 +298,7 @@ async def search_courses(
     search_query: str,
     db_session: Session,
     page: int = 1,
-    limit: int = 10,
+    limit: int = 20,
 ) -> list[CourseRead]:
     offset = (page - 1) * limit
 
@@ -748,7 +748,7 @@ async def get_user_courses(
     user_id: int,
     db_session: Session,
     page: int = 1,
-    limit: int = 10,
+    limit: int = 20,
 ) -> list[CourseRead]:
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)

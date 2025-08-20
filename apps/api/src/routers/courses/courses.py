@@ -175,7 +175,7 @@ async def api_search_courses(
     org_slug: str,
     query: str,
     page: int = 1,
-    limit: int = 10,
+    limit: int = 20,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseRead]:

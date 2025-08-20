@@ -42,7 +42,7 @@ interface LeaderboardProps {
   compact?: boolean;
 }
 
-export function Leaderboard({ orgId, className = '', limit = 10, compact = false }: LeaderboardProps) {
+export function Leaderboard({ orgId, className = '', limit = 20, compact = false }: LeaderboardProps) {
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(null);

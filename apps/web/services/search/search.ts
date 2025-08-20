@@ -5,7 +5,7 @@ export async function searchOrgContent(
   org_slug: string,
   query: string,
   page = 1,
-  limit = 10,
+  limit = 20,
   next: any,
   access_token?: any,
 ) {

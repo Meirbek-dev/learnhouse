@@ -20,7 +20,7 @@ const AssignmentsHome = () => {
   const org = useOrg() as any;
   const [courseAssignments, setCourseAssignments] = useState<any[]>([]);
 
-  const { data: courses } = useSWR(`${getAPIUrl()}courses/org_slug/${org?.slug}/page/1/limit/50`, (url) =>
+  const { data: courses } = useSWR(`${getAPIUrl()}courses/org_slug/${org?.slug}/page/1/limit/128`, (url) =>
     swrFetcher(url, access_token),
   );
 

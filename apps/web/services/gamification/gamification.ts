@@ -169,7 +169,7 @@ export async function getOrganizationLeaderboard(
   if (!accessToken) {
     throw new Error('Access token is required');
   }
-  if (limit <= 0 || limit > 100) {
+  if (limit <= 0 || limit > 200) {
     throw new Error('Limit must be between 1 and 100');
   }
 

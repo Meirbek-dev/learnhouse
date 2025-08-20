@@ -166,7 +166,7 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
         >
           <Leaderboard
             orgId={orgId}
-            limit={10}
+            limit={20}
           />
         </TabsContent>
       </Tabs>

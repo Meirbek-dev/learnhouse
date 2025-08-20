@@ -13,7 +13,7 @@ import { getAPIUrl } from '@services/config/config';
 
 export async function getOrgCourses(org_slug: string, next: any, access_token?: any) {
   const result: any = await fetch(
-    `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/10`,
+    `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/128`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
   return await errorHandling(result);
@@ -23,7 +23,7 @@ export async function searchOrgCourses(
   org_slug: string,
   query: string,
   page = 1,
-  limit = 10,
+  limit = 20,
   next: any,
   access_token?: any,
 ) {

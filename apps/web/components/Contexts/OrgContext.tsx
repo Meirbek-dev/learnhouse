@@ -24,7 +24,7 @@ export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslu
   const { data: org, error: orgError } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url) =>
     swrFetcher(url, accessToken),
   );
-  const { data: orgs, error: orgsError } = useSWR(`${getAPIUrl()}orgs/user/page/1/limit/10`, (url) =>
+  const { data: orgs, error: orgsError } = useSWR(`${getAPIUrl()}orgs/user/page/1/limit/20`, (url) =>
     swrFetcher(url, accessToken),
   );
 
