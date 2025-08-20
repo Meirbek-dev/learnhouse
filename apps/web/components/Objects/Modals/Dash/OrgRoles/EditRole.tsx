@@ -96,67 +96,74 @@ interface Rights {
 }
 
 // Zod schema for form validation
-const createRoleFormSchema = (t: (key: string, values?: any) => string) => z.object({
-  name: z.string().min(2, t('nameMinLength', { length: 2 })).nonempty(t('roleNameRequired')),
-  description: z.string().min(10, t('descriptionMinLength', { length: 10 })).nonempty(t('descriptionRequired')),
-  org_id: z.number(),
-  rights: z.object({
-    courses: z.object({
-      action_create: z.boolean(),
-      action_read: z.boolean(),
-      action_read_own: z.boolean(),
-      action_update: z.boolean(),
-      action_update_own: z.boolean(),
-      action_delete: z.boolean(),
-      action_delete_own: z.boolean(),
+const createRoleFormSchema = (t: (key: string, values?: any) => string) =>
+  z.object({
+    name: z
+      .string()
+      .min(2, t('nameMinLength', { length: 2 }))
+      .nonempty(t('roleNameRequired')),
+    description: z
+      .string()
+      .min(10, t('descriptionMinLength', { length: 10 }))
+      .nonempty(t('descriptionRequired')),
+    org_id: z.number(),
+    rights: z.object({
+      courses: z.object({
+        action_create: z.boolean(),
+        action_read: z.boolean(),
+        action_read_own: z.boolean(),
+        action_update: z.boolean(),
+        action_update_own: z.boolean(),
+        action_delete: z.boolean(),
+        action_delete_own: z.boolean(),
+      }),
+      users: z.object({
+        action_create: z.boolean(),
+        action_read: z.boolean(),
+        action_update: z.boolean(),
+        action_delete: z.boolean(),
+      }),
+      usergroups: z.object({
+        action_create: z.boolean(),
+        action_read: z.boolean(),
+        action_update: z.boolean(),
+        action_delete: z.boolean(),
+      }),
+      collections: z.object({
+        action_create: z.boolean(),
+        action_read: z.boolean(),
+        action_update: z.boolean(),
+        action_delete: z.boolean(),
+      }),
+      organizations: z.object({
+        action_create: z.boolean(),
+        action_read: z.boolean(),
+        action_update: z.boolean(),
+        action_delete: z.boolean(),
+      }),
+      coursechapters: z.object({
+        action_create: z.boolean(),
+        action_read: z.boolean(),
+        action_update: z.boolean(),
+        action_delete: z.boolean(),
+      }),
+      activities: z.object({
+        action_create: z.boolean(),
+        action_read: z.boolean(),
+        action_update: z.boolean(),
+        action_delete: z.boolean(),
+      }),
+      roles: z.object({
+        action_create: z.boolean(),
+        action_read: z.boolean(),
+        action_update: z.boolean(),
+        action_delete: z.boolean(),
+      }),
+      dashboard: z.object({
+        action_access: z.boolean(),
+      }),
     }),
-    users: z.object({
-      action_create: z.boolean(),
-      action_read: z.boolean(),
-      action_update: z.boolean(),
-      action_delete: z.boolean(),
-    }),
-    usergroups: z.object({
-      action_create: z.boolean(),
-      action_read: z.boolean(),
-      action_update: z.boolean(),
-      action_delete: z.boolean(),
-    }),
-    collections: z.object({
-      action_create: z.boolean(),
-      action_read: z.boolean(),
-      action_update: z.boolean(),
-      action_delete: z.boolean(),
-    }),
-    organizations: z.object({
-      action_create: z.boolean(),
-      action_read: z.boolean(),
-      action_update: z.boolean(),
-      action_delete: z.boolean(),
-    }),
-    coursechapters: z.object({
-      action_create: z.boolean(),
-      action_read: z.boolean(),
-      action_update: z.boolean(),
-      action_delete: z.boolean(),
-    }),
-    activities: z.object({
-      action_create: z.boolean(),
-      action_read: z.boolean(),
-      action_update: z.boolean(),
-      action_delete: z.boolean(),
-    }),
-    roles: z.object({
-      action_create: z.boolean(),
-      action_read: z.boolean(),
-      action_update: z.boolean(),
-      action_delete: z.boolean(),
-    }),
-    dashboard: z.object({
-      action_access: z.boolean(),
-    }),
-  }),
-});
+  });
 
 type RoleFormValues = {
   name: string;

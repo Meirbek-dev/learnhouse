@@ -300,7 +300,9 @@ async def api_read_user_assignment_task_submissions_me(
     """
     Read task submissions for an assignment from a user
     """
-    result = await read_user_assignment_task_submissions_me
+    result = await read_user_assignment_task_submissions_me(
+        request, assignment_task_uuid, current_user, db_session
+    )
 
     if result is None:
         raise HTTPException(

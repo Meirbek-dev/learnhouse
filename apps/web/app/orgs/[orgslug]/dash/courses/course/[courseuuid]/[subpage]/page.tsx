@@ -140,7 +140,9 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
                     >
                       <div className="text-center">
                         <div className="font-medium text-gray-900">{t('accessRestricted')}</div>
-                        <div className="text-xs text-gray-100/90">{t('noPermissionToAccessTab', { tabName: tab.label })}</div>
+                        <div className="text-xs text-gray-100/90">
+                          {t('noPermissionToAccessTab', { tabName: tab.label })}
+                        </div>
                       </div>
                     </TooltipContent>
                   </Tooltip>

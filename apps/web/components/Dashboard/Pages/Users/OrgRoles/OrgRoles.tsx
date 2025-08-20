@@ -89,9 +89,7 @@ function OrgRoles() {
     <Card className="mx-4 mt-6 sm:mx-6 lg:mx-10">
       <CardHeader className="bg-muted/50">
         <CardTitle className="text-lg sm:text-xl">{t('cardTitle')}</CardTitle>
-        <CardDescription className="text-xs sm:text-sm">
-          {t('cardDescription')}
-        </CardDescription>
+        <CardDescription className="text-xs sm:text-sm">{t('cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="p-3 sm:p-6">
         {/* Mobile view - Cards */}

@@ -1,10 +1,10 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
-import tailwind from 'eslint-plugin-tailwindcss';
 import unusedImports from 'eslint-plugin-unused-imports';
+import tailwind from 'eslint-plugin-tailwindcss';
+import { FlatCompat } from '@eslint/eslintrc';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import js from '@eslint/js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +22,7 @@ export default defineConfig([
 
     plugins: {
       'unused-imports': unusedImports,
-      tailwindcss: tailwind,
+      'tailwindcss': tailwind,
     },
 
     settings: {
