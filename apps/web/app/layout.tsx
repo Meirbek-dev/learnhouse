@@ -1,7 +1,6 @@
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
-import { filterClientMessages } from '@/lib/i18n-select';
 import { NextIntlClientProvider } from 'next-intl';
-import ClientProviders from './client-providers';
+import ClientLayout from './client-layout';
 import { Inter } from 'next/font/google';
 import { isDevEnv } from '@/auth';
 import Script from 'next/script';
@@ -17,13 +16,10 @@ const inter = Inter({
   fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
 });
 
-export { dynamic, revalidate } from './static-config';
-
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   setRequestLocale(locale);
-  const rawMessages = await getMessages();
-  const messages = filterClientMessages(rawMessages as any);
+  const messages = await getMessages();
 
   return (
     <html
@@ -45,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
         )}
         <NextIntlClientProvider messages={messages}>
-          <ClientProviders>{children}</ClientProviders>
+          <ClientLayout>{children}</ClientLayout>
         </NextIntlClientProvider>
       </body>
     </html>

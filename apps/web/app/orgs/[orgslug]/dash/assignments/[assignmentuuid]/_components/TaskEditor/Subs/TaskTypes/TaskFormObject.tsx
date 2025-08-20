@@ -14,7 +14,7 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { Check, Info, Minus, Plus, PlusCircle, Type, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 interface FormSchema {
@@ -303,7 +303,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     }
   };
 
-  async function getAssignmentTaskSubmissionFromIdentifiedUserUI() {
+  const getAssignmentTaskSubmissionFromIdentifiedUserUI = useCallback(async () => {
     if (!(access_token && user_id)) {
       return;
     }
@@ -327,7 +327,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         setUserSubmissionObject(res.data);
       }
     }
-  }
+  }, [access_token, user_id, assignmentTaskUUID, assignment]);
 
   useEffect(() => {
     const loadAssignmentTask = async () => {
@@ -390,7 +390,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       loadAssignmentTask();
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [assignmentTaskState, assignment, assignmentTaskStateHook, access_token, assignmentTaskUUID, view]);
+  }, [assignmentTaskState, assignment, assignmentTaskStateHook, access_token, assignmentTaskUUID, view, getAssignmentTaskSubmissionFromIdentifiedUserUI]);
 
   useEffect(() => {
     if (JSON.stringify(userSubmissions) !== JSON.stringify(initialUserSubmissions)) {

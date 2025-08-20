@@ -111,7 +111,7 @@ export const HeaderProfileBox = () => {
     }
 
     return roleConfigs[roleKey] || roleConfigs.role_global_user || null;
-  }, [userRoles, org?.id]);
+  }, [userRoles, org?.id, t]);
 
   const customRoles = useMemo((): CustomRoleInfo[] => {
     if (!userRoles || userRoles.length === 0) return [];
@@ -136,7 +136,7 @@ export const HeaderProfileBox = () => {
       name: role.role.name || t('profile.customRole'),
       description: role.role.description,
     }));
-  }, [userRoles, org?.id]);
+  }, [userRoles, org?.id, t]);
 
   return (
     <div className="flex items-center">
