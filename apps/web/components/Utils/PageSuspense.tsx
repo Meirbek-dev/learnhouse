@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 
@@ -133,6 +134,8 @@ export function PageTransitionLoader({ className = '', size = 'md', fullScreen =
     ? 'fixed inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50'
     : 'min-h-[200px]';
 
+  const t = useTranslations('Components.PageLoading');
+
   return (
     <div className={`flex items-center justify-center ${containerClasses} ${className}`}>
       <div className="flex flex-col items-center space-y-4">
@@ -151,7 +154,7 @@ export function PageTransitionLoader({ className = '', size = 'md', fullScreen =
         </div>
 
         {/* Optional loading text */}
-        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Loading...</div>
+        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('loading')}</div>
       </div>
     </div>
   );

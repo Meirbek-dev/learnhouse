@@ -899,7 +899,8 @@
           "users": "Users"
         },
         "select": "Select",
-        "selectAll": "Select All"
+        "selectAll": "Select All",
+        "unknownError": "An unknown error occurred"
       },
       "EditRole": {
         "cancel": "Cancel",
@@ -1015,7 +1016,8 @@
       "toastSuccess": "Role updated",
       "updateButton": "Update Role",
       "updateErrorDetail": "Role update error: {error}",
-      "userRole": "User"
+      "userRole": "User",
+      "errorPrefix": "Error"
     },
     "SearchBar": {
       "collectionType": "Collection",
@@ -1072,7 +1074,9 @@
       "submitError": "Error submitting form, please retry later.",
       "submitForGrading": "Submit for grading",
       "submittedSuccessfully": "Form submitted successfully!",
-      "userIdRequired": "User ID is required for grading."
+      "userIdRequired": "User ID is required for grading.",
+      "submissionSummary": "Submission Summary",
+      "totalBlanks": "Total Blanks"
     },
     "TypeOfContentTitle": {
       "logoAlt": "{type} logo"

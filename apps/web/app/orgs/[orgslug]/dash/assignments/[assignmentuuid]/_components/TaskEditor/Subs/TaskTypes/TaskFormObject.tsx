@@ -416,7 +416,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         questionUUID: `question_${crypto.randomUUID()}`,
         blanks: [
           {
-            placeholder: 'Enter the correct answer',
+            placeholder: t('blankPlaceholder'),
             correctAnswer: '',
             hint: '',
             blankUUID: `blank_${crypto.randomUUID()}`,
@@ -441,11 +441,11 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       >
         {view === 'grading' && (
           <div className="mb-6 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
-            <h3 className="mb-2 text-sm font-semibold text-gray-800">Submission Summary</h3>
+            <h3 className="mb-2 text-sm font-semibold text-gray-800">{t('submissionSummary')}</h3>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div className="text-center">
                 <div className="text-lg font-bold text-blue-600">{questions.flatMap((q) => q.blanks).length}</div>
-                <div className="text-gray-600">Total Blanks</div>
+                <div className="text-gray-600">{t('totalBlanks')}</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-green-600">
