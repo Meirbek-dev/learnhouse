@@ -11,6 +11,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { useTransition } from 'react';
 import { mutate } from 'swr';
 import { z } from 'zod';
 
@@ -45,15 +46,21 @@ const EditUserGroup = (props: EditUserGroupProps) => {
     },
   });
 
-  const handleSubmit = async (values: UserGroupFormValues) => {
-    const res = await updateUserGroup(props.usergroup.id, access_token, values);
+  const [isPending, startTransition] = useTransition();
 
-    if (res.status === 200) {
-      toast.success(t('toastSuccess'));
-      mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
-    } else {
-      toast.error(t('toastError'));
-    }
+  const handleSubmit = (values: UserGroupFormValues) => {
+    startTransition(() => {
+      void (async () => {
+        const res = await updateUserGroup(props.usergroup.id, access_token, values);
+
+        if (res.status === 200) {
+          toast.success(t('toastSuccess'));
+          mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
+        } else {
+          toast.error(t('toastError'));
+        }
+      })();
+    });
   };
 
   return (
@@ -100,9 +107,9 @@ const EditUserGroup = (props: EditUserGroupProps) => {
           <Button
             type="submit"
             className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
-            disabled={form.formState.isSubmitting}
+            disabled={isPending || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? t('loadingButton') : t('saveButton')}
+            {isPending || form.formState.isSubmitting ? t('loadingButton') : t('saveButton')}
           </Button>
         </div>
       </form>

@@ -24,13 +24,13 @@ import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUriWithoutOrg } from '@services/config/config';
+import { useEffect, useState, useTransition } from 'react';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
@@ -54,6 +54,7 @@ const PaymentsConfigurationPage: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isOnboardingLoading, setIsOnboardingLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const t = useTranslations('Payments.Configuration');
 
   const enableStripe = async () => {
@@ -93,7 +94,7 @@ const PaymentsConfigurationPage: FC = () => {
   const handleStripeOnboarding = async () => {
     const loadingToast = toast.loading(t('startingStripeOnboarding'));
     try {
-      setIsOnboardingLoading(true);
+      startTransition(() => setIsOnboardingLoading(true));
       const { connect_url } = await getStripeOnboardingLink(
         org.id,
         access_token,
@@ -107,7 +108,7 @@ const PaymentsConfigurationPage: FC = () => {
         id: loadingToast,
       });
     } finally {
-      setIsOnboardingLoading(false);
+      startTransition(() => setIsOnboardingLoading(false));
     }
   };
 

@@ -107,7 +107,6 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
     ),
   });
 
-// Memoized detail card component for better performance
 const DetailCard = React.memo(
   ({
     id,

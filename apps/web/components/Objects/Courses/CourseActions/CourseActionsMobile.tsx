@@ -9,9 +9,9 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getProductsByCourse } from '@services/payments/products';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 
 import UserAvatar from '../../UserAvatar';
 
@@ -144,6 +144,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
@@ -198,7 +199,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
       return;
     }
 
-    setIsActionLoading(true);
+    startTransition(() => setIsActionLoading(true));
     try {
       if (isStarted) {
         await removeCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
@@ -225,7 +226,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     } catch (error) {
       console.error('Failed to perform course action:', error);
     } finally {
-      setIsActionLoading(false);
+      startTransition(() => setIsActionLoading(false));
       await revalidateTags(['courses'], orgslug);
     }
   };
@@ -275,7 +276,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
             {hasAccess ? (
               <button
                 onClick={handleCourseAction}
-                disabled={isActionLoading}
+                disabled={isActionLoading || isPending}
                 className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                   isStarted
                     ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
@@ -310,7 +311,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                   onClick={() => {
                     setIsModalOpen(true);
                   }}
-                  disabled={isActionLoading}
+                  disabled={isActionLoading || isPending}
                   className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
                 >
                   {isActionLoading ? (
@@ -328,7 +329,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
         ) : (
           <button
             onClick={handleCourseAction}
-            disabled={isActionLoading}
+            disabled={isActionLoading || isPending}
             className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
               isStarted
                 ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'

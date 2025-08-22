@@ -10,7 +10,7 @@ import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import useSWR from 'swr';
 
 interface CoursePaidOptionsProps {
@@ -28,6 +28,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
     [key: string]: boolean;
   }>({});
   const [isProcessing, setIsProcessing] = useState<Record<string, boolean>>({});
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const { data: linkedProducts, error } = useSWR(
@@ -46,7 +47,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
     }
 
     try {
-      setIsProcessing((prev) => ({ ...prev, [productId]: true }));
+      startTransition(() => setIsProcessing((prev) => ({ ...prev, [productId]: true })));
       const redirect_uri = getUriWithOrg(org.slug, '/courses');
       const response = await getStripeProductCheckoutSession(
         course.org_id,
@@ -63,7 +64,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
     } catch {
       toast.error(t('requestError'));
     } finally {
-      setIsProcessing((prev) => ({ ...prev, [productId]: false }));
+      startTransition(() => setIsProcessing((prev) => ({ ...prev, [productId]: false })));
     }
   };
 
@@ -161,7 +162,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
             className="mt-4 w-full"
             variant="default"
             onClick={() => handleCheckout(product.id)}
-            disabled={isProcessing[product.id]}
+            disabled={isProcessing[product.id] || isPending}
           >
             {isProcessing[product.id]
               ? t('processing')

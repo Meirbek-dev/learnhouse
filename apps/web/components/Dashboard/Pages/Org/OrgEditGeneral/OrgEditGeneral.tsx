@@ -14,7 +14,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { useMemo } from 'react';
+import { useMemo, useTransition } from 'react';
 import type { FC } from 'react';
 import { mutate } from 'swr';
 import { z } from 'zod';
@@ -111,14 +111,20 @@ const OrgEditGeneral: FC = () => {
       explore: org?.explore ?? false,
     },
   });
+  const [isPending, startTransition] = useTransition();
 
   const updateOrg = async (values: OrganizationValues) => {
     const loadingToast = toast.loading(t('updatingOrg'));
     try {
-      await updateOrganization(org.id, values, access_token);
-      await revalidateTags(['organizations'], org.slug);
-      mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
-      toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
+      startTransition(() => {
+        void updateOrganization(org.id, values, access_token).then(async () => {
+          await revalidateTags(['organizations'], org.slug);
+          mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
+          toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
+        }).catch(() => {
+          toast.error(t('orgUpdateFailed'), { id: loadingToast });
+        });
+      });
     } catch {
       toast.error(t('orgUpdateFailed'), { id: loadingToast });
     }
@@ -243,9 +249,9 @@ const OrgEditGeneral: FC = () => {
             <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
               <Button
                 type="submit"
-                disabled={form.formState.isSubmitting}
+                disabled={form.formState.isSubmitting || isPending}
               >
-                {form.formState.isSubmitting ? t('Form.savingButton') : t('Form.saveButton')}
+                {form.formState.isSubmitting || isPending ? t('Form.savingButton') : t('Form.saveButton')}
               </Button>
             </div>
           </div>

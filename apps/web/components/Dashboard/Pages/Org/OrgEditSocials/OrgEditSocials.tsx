@@ -10,7 +10,7 @@ import { getAPIUrl } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -50,6 +50,7 @@ export default function OrgEditSocials() {
 
   const socials = form.watch('socials');
   const links = form.watch('links');
+  const [isPending, startTransition] = useTransition();
 
   const updateOrg = useCallback(
     async (values: OrganizationValues) => {
@@ -152,7 +153,7 @@ export default function OrgEditSocials() {
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(updateOrg)}>
+  <form onSubmit={form.handleSubmit((values) => startTransition(() => { void updateOrg(values); }))}>
           <div className="flex flex-col gap-0">
             <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
@@ -259,9 +260,9 @@ export default function OrgEditSocials() {
             <div className="mx-5 mt-3 mb-5 flex flex-row-reverse">
               <Button
                 type="submit"
-                disabled={form.formState.isSubmitting}
+                disabled={form.formState.isSubmitting || isPending}
               >
-                {form.formState.isSubmitting ? t('Form.savingButton') : t('Form.saveButton')}
+                {form.formState.isSubmitting || isPending ? t('Form.savingButton') : t('Form.saveButton')}
               </Button>
             </div>
           </div>

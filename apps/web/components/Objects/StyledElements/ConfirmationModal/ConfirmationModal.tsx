@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { isValidElement, useCallback, useState } from 'react';
+import { isValidElement, useCallback, useState, useTransition } from 'react';
 import { AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -45,17 +45,13 @@ interface ModalParams {
 
 const ConfirmationModal = (params: ModalParams) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isExecuting, setIsExecuting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const t = useTranslations('Components.ConfirmationModal');
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!isExecuting) {
-        setIsDialogOpen(open);
-      }
-    },
-    [isExecuting],
-  );
+  const onOpenChange = useCallback((open: boolean) => {
+    // allow opening/closing while a transition is pending so users can cancel/close the dialog
+    setIsDialogOpen(open);
+  }, []);
 
   // Helper: wrap button in span if needed for proper DialogTrigger usage
   const getSafeDialogTrigger = useCallback((trigger: ReactNode) => {
@@ -95,20 +91,24 @@ const ConfirmationModal = (params: ModalParams) => {
     }
   }, [params.size]);
 
-  const handleExecute = useCallback(async () => {
-    if (params.disabled || isExecuting) return;
+  const handleExecute = useCallback(() => {
+    if (params.disabled || isPending) return;
 
-    setIsExecuting(true);
-    try {
-      await params.functionToExecute();
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error('Error executing confirmation action:', error);
-      // Keep modal open on error so user can retry
-    } finally {
-      setIsExecuting(false);
-    }
-  }, [isExecuting, params]);
+    // Use startTransition to mark the UI work as non-urgent and show pending state
+    startTransition(() => {
+      // run the async operation. we still handle errors but don't block UI updates
+      void (async () => {
+        try {
+          await params.functionToExecute();
+          // close dialog as a state update inside the transition
+          setIsDialogOpen(false);
+        } catch (error) {
+          console.error('Error executing confirmation action:', error);
+          // Keep modal open on error so user can retry
+        }
+      })();
+    });
+  }, [params, isPending, startTransition]);
 
   const statusConfig = getStatusConfig();
   const sizeConfig = getSizeConfig();
@@ -158,7 +158,6 @@ const ConfirmationModal = (params: ModalParams) => {
                 setIsDialogOpen(false);
               }}
               className="w-full sm:w-auto"
-              disabled={isExecuting}
               type="button"
             >
               {params.cancelButtonText || t('cancel')}
@@ -169,11 +168,11 @@ const ConfirmationModal = (params: ModalParams) => {
             variant={statusConfig.buttonVariant as any}
             onClick={handleExecute}
             className="w-full sm:w-auto"
-            disabled={params.disabled || isExecuting}
+            disabled={params.disabled || isPending}
             type="button"
             aria-describedby="confirmation-description"
           >
-            {isExecuting ? (
+            {isPending ? (
               <div className="flex items-center gap-2">
                 <div
                   className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"

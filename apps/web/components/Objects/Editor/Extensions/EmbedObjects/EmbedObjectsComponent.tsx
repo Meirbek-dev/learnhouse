@@ -466,6 +466,7 @@ const EmbedObjectsComponent = (props: any) => {
   const [selectedProduct, setSelectedProduct] = useState<(typeof supportedProducts)[0] | null>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
   const codeInputRef = useRef<HTMLTextAreaElement>(null);
+  const [isPending, startTransition] = React.useTransition();
 
   // Handle direct input from product selection
   const handleProductSelection = (product: (typeof supportedProducts)[0]) => {
@@ -487,7 +488,9 @@ const EmbedObjectsComponent = (props: any) => {
   // Handle input submission
   const handleInputSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setActiveInput('none');
+    startTransition(() => {
+      setActiveInput('none');
+    });
   };
 
   // Handle escape key to cancel input
@@ -831,8 +834,9 @@ const EmbedObjectsComponent = (props: any) => {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
-                  disabled={(activeInput === 'url' && !embedUrl) || (activeInput === 'code' && !embedCode)}
+                  className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:opacity-60"
+                  disabled={isPending || (activeInput === 'url' && !embedUrl) || (activeInput === 'code' && !embedCode)}
+                  aria-busy={isPending}
                 >
                   {t('apply')}
                 </button>

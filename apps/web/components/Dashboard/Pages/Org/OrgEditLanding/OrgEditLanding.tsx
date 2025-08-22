@@ -19,9 +19,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
+import { createElement, useEffect, useState, useTransition } from 'react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getOrgLandingMediaDirectory } from '@services/media/media';
-import { createElement, useEffect, useState } from 'react';
 import { getOrgCourses } from '@services/courses/courses';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Textarea } from '@components/ui/textarea';
@@ -236,6 +236,7 @@ const OrgEditLanding = () => {
   });
   const [selectedSection, setSelectedSection] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   // Initialize landing data from org config
   useEffect(() => {
@@ -361,7 +362,7 @@ const OrgEditLanding = () => {
       return;
     }
 
-    setIsSaving(true);
+    startTransition(() => setIsSaving(true));
     const loadingToast = toast.loading(tNotify('savingLandingPage'));
     try {
       const res = await updateOrgLanding(
@@ -382,7 +383,7 @@ const OrgEditLanding = () => {
       toast.error(tNotify('landingPageSaveError'), { id: loadingToast });
       console.error('Error saving landing page:', error);
     } finally {
-      setIsSaving(false);
+      startTransition(() => setIsSaving(false));
     }
   };
 
@@ -406,10 +407,10 @@ const OrgEditLanding = () => {
             <Button
               variant="default"
               onClick={handleSave}
-              disabled={isSaving}
+              disabled={isSaving || isPending}
             >
               <Save className="mr-2 h-4 w-4" />
-              {isSaving ? t('savingButton') : t('saveButton')}
+              {isSaving || isPending ? t('savingButton') : t('saveButton')}
             </Button>
           </div>
         </div>

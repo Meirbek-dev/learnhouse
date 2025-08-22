@@ -7,12 +7,12 @@ import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useEffect, useState, useTransition } from 'react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -25,6 +25,7 @@ const Trail = (params: any) => {
   const t = useTranslations('TrailPage');
   const router = useRouter();
   const [isQuittingAll, setIsQuittingAll] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [quittingProgress, setQuittingProgress] = useState(0);
 
   const {
@@ -36,7 +37,7 @@ const Trail = (params: any) => {
   const handleQuitAllCourses = async () => {
     if (!trail?.runs?.length || isQuittingAll) return;
 
-    setIsQuittingAll(true);
+    startTransition(() => setIsQuittingAll(true));
     const totalCourses = trail.runs.length;
 
     try {
@@ -52,8 +53,8 @@ const Trail = (params: any) => {
     } catch (error) {
       console.error('Error quitting courses:', error);
     } finally {
-      setIsQuittingAll(false);
-      setQuittingProgress(0);
+      startTransition(() => setIsQuittingAll(false));
+      startTransition(() => setQuittingProgress(0));
     }
   };
 
@@ -76,14 +77,16 @@ const Trail = (params: any) => {
             dialogTrigger={
               <span>
                 <button
-                  disabled={isQuittingAll}
+                  disabled={isQuittingAll || isPending}
                   className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                    isQuittingAll
+                    isQuittingAll || isPending
                       ? 'cursor-not-allowed bg-gray-100 text-gray-500'
                       : 'bg-red-100 text-red-700 hover:bg-red-200'
                   }`}
                 >
-                  {isQuittingAll ? t('quittingProgress', { progress: quittingProgress }) : t('quitAllCourses')}
+                  {isQuittingAll || isPending
+                    ? t('quittingProgress', { progress: quittingProgress })
+                    : t('quitAllCourses')}
                 </button>
               </span>
             }

@@ -13,8 +13,8 @@ import AssignmentBoxUI from '@components/Objects/Activities/Assignment/Assignmen
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Check, Info, Minus, Plus, PlusCircle, Type, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useTranslations } from 'next-intl';
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
 
 interface FormSchema {
@@ -390,7 +390,15 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       loadAssignmentTask();
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
-  }, [assignmentTaskState, assignment, assignmentTaskStateHook, access_token, assignmentTaskUUID, view, getAssignmentTaskSubmissionFromIdentifiedUserUI]);
+  }, [
+    assignmentTaskState,
+    assignment,
+    assignmentTaskStateHook,
+    access_token,
+    assignmentTaskUUID,
+    view,
+    getAssignmentTaskSubmissionFromIdentifiedUserUI,
+  ]);
 
   useEffect(() => {
     if (JSON.stringify(userSubmissions) !== JSON.stringify(initialUserSubmissions)) {

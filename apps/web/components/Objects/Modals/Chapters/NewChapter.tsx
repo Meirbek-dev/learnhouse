@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
+import { useTransition } from 'react';
 import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string) => string) =>
@@ -33,7 +34,9 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = (values: FormValues) => {
     const chapter_object = {
       name: values.name,
       description: values.description,
@@ -41,7 +44,12 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
       course_id: course.id,
       org_id: course.org_id,
     };
-    await submitChapter(chapter_object);
+
+    startTransition(() => {
+      void (async () => {
+        await submitChapter(chapter_object);
+      })();
+    });
   };
 
   return (
@@ -85,9 +93,9 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
           <Button
             type="submit"
             className="mt-2.5"
-            disabled={form.formState.isSubmitting}
+            disabled={isPending || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? (
+            {isPending || form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}

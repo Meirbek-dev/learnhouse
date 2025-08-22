@@ -31,6 +31,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const [description, setDescription] = React.useState('');
   const [selectedCourses, setSelectedCourses] = React.useState([]) as any;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPending, startTransition] = React.useTransition();
   const router = useRouter();
   const {
     data: courses,
@@ -69,7 +70,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
       return;
     }
 
-    setIsSubmitting(true);
+    startTransition(() => setIsSubmitting(true));
     try {
       const collection = {
         name: name.trim(),
@@ -81,11 +82,11 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
       await createCollection(collection, session.data?.tokens?.access_token);
       await revalidateTags(['collections'], org.slug);
       toast.success(t('toast.success'));
-      router.push(getUriWithOrg(orgslug, '/collections'));
+      startTransition(() => router.push(getUriWithOrg(orgslug, '/collections')));
     } catch {
       toast.error(t('toast.failure'));
     } finally {
-      setIsSubmitting(false);
+      startTransition(() => setIsSubmitting(false));
     }
   };
 
@@ -226,11 +227,11 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isPending}
               className="flex items-center space-x-2 px-6 py-2"
             >
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              <span>{isSubmitting ? t('creatingButton') : t('createButton')}</span>
+              {isSubmitting || isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              <span>{isSubmitting || isPending ? t('creatingButton') : t('createButton')}</span>
             </Button>
           </div>
         </form>

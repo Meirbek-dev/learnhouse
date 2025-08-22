@@ -4,13 +4,13 @@ import { createCertification, deleteCertification } from '@services/courses/cert
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { AlertTriangle, Award, FileText, Settings } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useEffect, useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { getAPIUrl } from '@services/config/config';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
@@ -24,6 +24,7 @@ interface EditCourseCertificationProps {
 const EditCourseCertification = (props: EditCourseCertificationProps) => {
   const [error, setError] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [hasInitialized, setHasInitialized] = useState(false);
   const course = useCourse();
   const dispatchCourse = useCourseDispatch() as any;
@@ -130,7 +131,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
   const handleCertificationToggle = async (enabled: boolean) => {
     if (enabled && !hasExistingCertification) {
       // Create new certification
-      setIsCreating(true);
+      startTransition(() => setIsCreating(true));
       try {
         const formValues = form.getValues();
         const config = {
@@ -156,7 +157,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
         toast.error(t('certificationError'));
         form.setValue('enable_certification', false);
       } finally {
-        setIsCreating(false);
+        startTransition(() => setIsCreating(false));
       }
     } else if (!enabled && hasExistingCertification) {
       // Delete existing certification

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
+import { useTransition } from 'react';
 import { z } from 'zod';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
@@ -35,21 +36,27 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
-    await submitFileActivity(
-      values.file,
-      'documentpdf',
-      {
-        name: values.name,
-        chapter_id: chapterId,
-        activity_type: 'TYPE_DOCUMENT',
-        activity_sub_type: 'SUBTYPE_DOCUMENT_PDF',
-        published_version: 1,
-        version: 1,
-        course_id: course.id,
-      },
-      chapterId,
-    );
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = (values: FormValues) => {
+    startTransition(() => {
+      void (async () => {
+        await submitFileActivity(
+          values.file,
+          'documentpdf',
+          {
+            name: values.name,
+            chapter_id: chapterId,
+            activity_type: 'TYPE_DOCUMENT',
+            activity_sub_type: 'SUBTYPE_DOCUMENT_PDF',
+            published_version: 1,
+            version: 1,
+            course_id: course.id,
+          },
+          chapterId,
+        );
+      })();
+    });
   };
 
   return (
@@ -119,9 +126,9 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
           <Button
             type="submit"
             className="mt-2.5"
-            disabled={form.formState.isSubmitting}
+            disabled={isPending || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? (
+            {isPending || form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}

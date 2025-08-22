@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getGamificationProfile } from '@/services/gamification/gamification';
 import { Check, Crown, Lock, Palette, Settings, User } from 'lucide-react';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
+import { useEffect, useState, useTransition } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +36,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
   const [profile, setProfile] = useState<GamificationProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const isMobile = useIsMobile();
 
   // Local customization state
@@ -66,7 +67,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
         console.error('Error fetching gamification profile:', error);
         toast.error(t('dashboard.failedToLoad'));
       } finally {
-        setIsLoading(false);
+        startTransition(() => setIsLoading(false));
       }
     };
 
@@ -76,7 +77,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
   const handleSaveCustomization = async () => {
     if (!(profile && session?.tokens?.access_token)) return;
 
-    setIsSaving(true);
+    startTransition(() => setIsSaving(true));
     try {
       // TODO: call an API to save customization
       // For now, we'll just show a success message and update local state
@@ -86,7 +87,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
       console.error('Error saving customization:', error);
       toast.error(t('avatarCustomization.failedToSave'));
     } finally {
-      setIsSaving(false);
+      startTransition(() => setIsSaving(false));
     }
   };
 
@@ -360,10 +361,10 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
         {/* Save Button */}
         <Button
           onClick={handleSaveCustomization}
-          disabled={isSaving}
+          disabled={isSaving || isPending}
           className="w-full"
         >
-          {isSaving ? (
+          {isSaving || isPending ? (
             <>
               <Settings className="mr-2 h-4 w-4 animate-spin" />
               {t('avatarCustomization.saving')}

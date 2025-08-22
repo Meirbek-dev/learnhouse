@@ -8,11 +8,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPassword } from '@services/auth/auth';
 import { AlertTriangle, Info } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import Link from 'next/link';
 import { z } from 'zod';
 
@@ -43,6 +43,7 @@ const ResetPasswordClient = () => {
   const email = searchParams.get('email') || '';
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [isPending, startTransition] = useTransition();
   const validationSchema = createValidationSchema(validationT);
 
   const form = useForm<ResetPasswordFormData>({
@@ -55,15 +56,17 @@ const ResetPasswordClient = () => {
     },
   });
 
-  const handleSubmit = async (values: ResetPasswordFormData) => {
+  const handleSubmit = (values: ResetPasswordFormData) => {
     setError('');
     setMessage('');
-    const res = await resetPassword(values.email, values.new_password, org?.id, values.reset_code);
-    if (res.status === 200) {
-      setMessage(t('success'));
-    } else {
-      setError(res.data.detail);
-    }
+    startTransition(async () => {
+      const res = await resetPassword(values.email, values.new_password, org?.id, values.reset_code);
+      if (res.status === 200) {
+        setMessage(t('success'));
+      } else {
+        setError(res.data.detail);
+      }
+    });
   };
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
@@ -177,9 +180,9 @@ const ResetPasswordClient = () => {
                   <Button
                     type="submit"
                     className="w-full font-bold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={form.formState.isSubmitting}
+                    disabled={isPending}
                   >
-                    {form.formState.isSubmitting ? t('loading') : t('changePassword')}
+                    {isPending ? t('loading') : t('changePassword')}
                   </Button>
                 </div>
               </form>

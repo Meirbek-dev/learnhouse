@@ -7,11 +7,11 @@ import { getUriWithOrg } from '@services/config/config';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { sendResetLink } from '@services/auth/auth';
 import { AlertTriangle, Info } from 'lucide-react';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { z } from 'zod';
@@ -37,15 +37,20 @@ const ForgotPasswordClient = () => {
     },
   });
 
+  const [isPending, startTransition] = useTransition();
+
   const handleSubmit = async (values: ForgotPasswordFormData) => {
     setError('');
     setMessage('');
-    const res = await sendResetLink(values.email, org?.id);
-    if (res.status === 200) {
-      setMessage(t('checkEmail'));
-    } else {
-      setError(res.data.detail);
-    }
+
+    startTransition(async () => {
+      const res = await sendResetLink(values.email, org?.id);
+      if (res.status === 200) {
+        setMessage(t('checkEmail'));
+      } else {
+        setError(res.data.detail);
+      }
+    });
   };
   return (
     <div className="grid h-screen grid-flow-col justify-stretch">
@@ -111,9 +116,9 @@ const ForgotPasswordClient = () => {
                     <Button
                       type="submit"
                       className="w-full p-2 font-semibold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isPending}
                     >
-                      {form.formState.isSubmitting ? t('loading') : t('sendResetLink')}
+                      {isPending ? t('loading') : t('sendResetLink')}
                     </Button>
                   </div>
                 </form>

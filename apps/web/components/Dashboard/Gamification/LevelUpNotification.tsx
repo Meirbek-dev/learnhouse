@@ -51,7 +51,6 @@ export function LevelUpNotification({
 
   useEffect(() => {
     if (isVisible && unlockedFeatures.length > 0) {
-      // Show unlocks after a delay for better UX
       const timer = setTimeout(() => {
         setShowUnlocks(true);
       }, 1500);

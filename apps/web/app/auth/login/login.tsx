@@ -6,12 +6,12 @@ import PasswordInput from '@components/ui/custom/password-input';
 import { AlertTriangle, UserRoundPlus } from 'lucide-react';
 import openuLogoDark from 'public/openu_logo_dark.webp';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { z } from 'zod';
@@ -36,6 +36,7 @@ const LoginClient = (props: LoginClientProps) => {
   const t = useTranslations('Auth.Login');
   const [error, setError] = useState('');
   const validationSchema = createValidationSchema(validationT);
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(validationSchema),
@@ -45,27 +46,29 @@ const LoginClient = (props: LoginClientProps) => {
     },
   });
 
-  const handleSubmit = async (values: LoginFormData) => {
-    try {
-      const res = await signIn('credentials', {
-        redirect: false,
-        email: values.email,
-        password: values.password,
-      });
+  const handleSubmit = (values: LoginFormData) => {
+    startTransition(async () => {
+      try {
+        const res = await signIn('credentials', {
+          redirect: false,
+          email: values.email,
+          password: values.password,
+        });
 
-      if (res?.error) {
+        if (res?.error) {
+          setError(t('wrongCredentials'));
+          return;
+        }
+
+        if (res?.ok) {
+          // Successful login, redirect
+          window.location.href = '/redirect_from_auth';
+        }
+      } catch (error) {
+        console.error('Login error:', error);
         setError(t('wrongCredentials'));
-        return;
       }
-
-      if (res?.ok) {
-        // Successful login, redirect
-        window.location.href = '/redirect_from_auth';
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(t('wrongCredentials'));
-    }
+    });
   };
 
   return (
@@ -154,9 +157,9 @@ const LoginClient = (props: LoginClientProps) => {
                     <Button
                       type="submit"
                       className="w-full font-semibold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isPending}
                     >
-                      {form.formState.isSubmitting ? t('loading') : t('login')}
+                      {isPending ? t('loading') : t('login')}
                     </Button>
                   </div>
                 </form>
@@ -175,9 +178,9 @@ const LoginClient = (props: LoginClientProps) => {
                   <span>{t('signup')}</span>
                 </Link>
                 <button
-                  onClick={() => signIn('google', { callbackUrl: '/redirect_from_auth' })}
+                  onClick={() => startTransition(() => signIn('google', { callbackUrl: '/redirect_from_auth' }))}
                   className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50"
-                  disabled={form.formState.isSubmitting}
+                  disabled={isPending}
                 >
                   <Image
                     src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"

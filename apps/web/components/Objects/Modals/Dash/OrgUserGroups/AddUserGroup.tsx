@@ -11,6 +11,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { useTransition } from 'react';
 import { mutate } from 'swr';
 import { z } from 'zod';
 
@@ -43,16 +44,22 @@ const AddUserGroup = (props: AddUserGroupProps) => {
     },
   });
 
-  const handleSubmit = async (values: UserGroupFormValues) => {
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = (values: UserGroupFormValues) => {
     const toastID = toast.loading(t('toastLoading'));
-    const res = await createUserGroup(values, access_token);
-    if (res.status === 200) {
-      mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
-      props.setCreateUserGroupModal(false);
-      toast.success(t('toastSuccess'), { id: toastID });
-    } else {
-      toast.error(t('toastError'), { id: toastID });
-    }
+    startTransition(() => {
+      void (async () => {
+        const res = await createUserGroup(values, access_token);
+        if (res.status === 200) {
+          mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
+          props.setCreateUserGroupModal(false);
+          toast.success(t('toastSuccess'), { id: toastID });
+        } else {
+          toast.error(t('toastError'), { id: toastID });
+        }
+      })();
+    });
   };
 
   return (
@@ -99,9 +106,9 @@ const AddUserGroup = (props: AddUserGroupProps) => {
           <Button
             type="submit"
             className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
-            disabled={form.formState.isSubmitting}
+            disabled={isPending || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? t('loadingButton') : t('createButton')}
+            {isPending || form.formState.isSubmitting ? t('loadingButton') : t('createButton')}
           </Button>
         </div>
       </form>

@@ -20,6 +20,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import type { ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
+import { useTransition } from 'react';
 import { z } from 'zod';
 
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {
@@ -67,43 +68,49 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
     }
   }, [orgslug, getOrgMetadata]);
 
-  const onSubmit = async (values: FormValues) => {
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = (values: FormValues) => {
     if (orgId === null) {
       toast.error(t('toastErrorOrgMissing'));
       return;
     }
     const toast_loading = toast.loading(t('toastLoading'));
 
-    try {
-      const res = await createNewCourse(
-        orgId,
-        {
-          name: values.name,
-          description: values.description,
-          learnings: values.learnings?.join(', ') || '',
-          tags: values.tags?.join(', ') || '',
-          visibility: values.visibility,
-        },
-        values.thumbnail,
-        session.data?.tokens?.access_token,
-      );
+    startTransition(() => {
+      void (async () => {
+        try {
+          const res = await createNewCourse(
+            orgId,
+            {
+              name: values.name,
+              description: values.description,
+              learnings: values.learnings?.join(', ') || '',
+              tags: values.tags?.join(', ') || '',
+              visibility: values.visibility,
+            },
+            values.thumbnail,
+            session.data?.tokens?.access_token,
+          );
 
-      if (res.success) {
-        await revalidateTags(['courses'], orgslug);
-        toast.dismiss(toast_loading);
-        toast.success(t('toastSuccess'));
+          if (res.success) {
+            await revalidateTags(['courses'], orgslug);
+            toast.dismiss(toast_loading);
+            toast.success(t('toastSuccess'));
 
-        if (res.data.org_id === orgId) {
-          closeModal();
-          router.refresh();
-          await revalidateTags(['courses'], orgslug);
+            if (res.data.org_id === orgId) {
+              closeModal();
+              router.refresh();
+              await revalidateTags(['courses'], orgslug);
+            }
+          } else {
+            toast.error(res.data.detail || t('toastError'));
+          }
+        } catch {
+          toast.error(t('toastError'));
         }
-      } else {
-        toast.error(res.data.detail || t('toastError'));
-      }
-    } catch {
-      toast.error(t('toastError'));
-    }
+      })();
+    });
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -301,9 +308,9 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={form.formState.isSubmitting}
+            disabled={isPending || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? (
+            {isPending || form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}

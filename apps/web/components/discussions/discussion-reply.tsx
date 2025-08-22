@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import type React from 'react';
 
 interface DiscussionReplyProps {
@@ -33,6 +33,7 @@ export default function DiscussionReply({
   const t = useTranslations('CoursePage');
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.replyMessage);
+  const [isPending, startTransition] = useTransition();
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
@@ -55,8 +56,10 @@ export default function DiscussionReply({
     const textContent = tempDiv.textContent || tempDiv.textContent || '';
 
     if (!textContent.trim()) return;
-    onEditReply(postId, reply.id, editContent);
-    setEditing(false);
+    startTransition(() => {
+      onEditReply(postId, reply.id, editContent);
+      setEditing(false);
+    });
   };
 
   // Helper to check if a given user is admin for the org

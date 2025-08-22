@@ -20,13 +20,13 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import type { ChangeEvent, MouseEvent } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg']);
 
@@ -90,6 +90,7 @@ export default function OrgEditImages() {
   const [localThumbnail, setLocalThumbnail] = useState<string | null>(null);
   const [isLogoUploading, setIsLogoUploading] = useState(false);
   const [isThumbnailUploading, setIsThumbnailUploading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [previews, setPreviews] = useState<Preview[]>(() => {
     // Initialize with image previews
     const imagePreviews = (org?.previews?.images || [])
@@ -127,7 +128,7 @@ export default function OrgEditImages() {
       const file = event.target.files[0];
       if (file) {
         setLocalLogo(URL.createObjectURL(file));
-        setIsLogoUploading(true);
+        startTransition(() => setIsLogoUploading(true));
         const loadingToast = toast.loading(tNotify('uploadingLogo'));
         try {
           await uploadOrganizationLogo(org.id, file, access_token);
@@ -137,7 +138,7 @@ export default function OrgEditImages() {
         } catch {
           toast.error(tNotify('logoUploadFailed'), { id: loadingToast });
         } finally {
-          setIsLogoUploading(false);
+          startTransition(() => setIsLogoUploading(false));
         }
       }
     }
@@ -148,7 +149,7 @@ export default function OrgEditImages() {
       const file = event.target.files[0];
       if (file) {
         setLocalThumbnail(URL.createObjectURL(file));
-        setIsThumbnailUploading(true);
+        startTransition(() => setIsThumbnailUploading(true));
         const loadingToast = toast.loading(tNotify('uploadingThumbnail'));
         try {
           await uploadOrganizationThumbnail(org.id, file, access_token);
@@ -158,7 +159,7 @@ export default function OrgEditImages() {
         } catch {
           toast.error(tNotify('thumbnailUploadFailed'), { id: loadingToast });
         } finally {
-          setIsThumbnailUploading(false);
+          startTransition(() => setIsThumbnailUploading(false));
         }
       }
     }
@@ -179,7 +180,7 @@ export default function OrgEditImages() {
         return;
       }
 
-      setIsPreviewUploading(true);
+      startTransition(() => setIsPreviewUploading(true));
       const loadingToast = toast.loading(tNotify('uploadingPreviews', { count: files.length }));
 
       try {
@@ -228,7 +229,7 @@ export default function OrgEditImages() {
       } catch {
         toast.error(tNotify('previewsUploadFailed'), { id: loadingToast });
       } finally {
-        setIsPreviewUploading(false);
+        startTransition(() => setIsPreviewUploading(false));
       }
     }
   };
@@ -249,7 +250,7 @@ export default function OrgEditImages() {
         access_token,
       );
 
-      setPreviews(updatedPreviews);
+      startTransition(() => setPreviews(updatedPreviews));
       toast.success(tNotify('previewRemovedSuccess'), { id: loadingToast });
       router.refresh();
     } catch {

@@ -23,8 +23,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { useCallback, useEffect, useState } from 'react';
 import Youtube from '@tiptap/extension-youtube';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -143,6 +143,7 @@ export default function RichTextEditor({
       },
     },
   });
+  const [isPending, startTransition] = useTransition();
 
   // Sync content prop changes with editor
   useEffect(() => {
@@ -171,6 +172,7 @@ export default function RichTextEditor({
     if (!(editor && imageUrl)) return;
 
     editor.chain().focus().setImage({ src: imageUrl, alt: 'Uploaded image' }).run();
+
     setImageUrl('');
     setIsImageDialogOpen(false);
   }, [editor, imageUrl]);
@@ -198,7 +200,7 @@ export default function RichTextEditor({
       const file = e.target.files?.[0];
       if (!(file && editor)) return;
 
-      setIsUploading(true);
+      startTransition(() => setIsUploading(true));
 
       try {
         // Create a temporary URL for the file
@@ -213,7 +215,7 @@ export default function RichTextEditor({
       } catch (error) {
         console.error('Error uploading file:', error);
       } finally {
-        setIsUploading(false);
+        startTransition(() => setIsUploading(false));
         // Clear the input
         e.target.value = '';
       }
@@ -472,14 +474,14 @@ export default function RichTextEditor({
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             onChange={handleFileUpload}
             accept="image/*,video/*"
-            disabled={isUploading}
+            disabled={isUploading || isPending}
           />
           <Button
             type="button"
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
-            disabled={isUploading}
+            disabled={isUploading || isPending}
             title={t('uploadFile')}
           >
             <Upload size={16} />

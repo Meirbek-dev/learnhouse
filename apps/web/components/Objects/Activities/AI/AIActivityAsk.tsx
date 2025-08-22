@@ -5,12 +5,12 @@ import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import type { AIChatBotStateTypes } from '@components/Contexts/AI/AIChatBotContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import touEmblemLight from 'public/tou_emblem_light.webp';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import clsx from 'clsx';
@@ -101,13 +101,15 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
     });
   };
 
+  const [isPending, startTransition] = useTransition();
+
   const sendMessage = async (message: string) => {
     if (aiChatBotState.aichat_uuid) {
       await dispatchAIChatBot({
         type: 'addMessage',
         payload: { sender: 'user', message, type: 'user' },
       });
-      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
+      startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
       const response = await sendActivityAIChatMessage(
         message,
         aiChatBotState.aichat_uuid,
@@ -127,7 +129,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
         });
         return;
       }
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+      startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
       await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
       await dispatchAIChatBot({
         type: 'addMessage',
@@ -138,7 +140,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
         type: 'addMessage',
         payload: { sender: 'user', message, type: 'user' },
       });
-      await dispatchAIChatBot({ type: 'setIsWaitingForResponse' });
+      startTransition(() => dispatchAIChatBot({ type: 'setIsWaitingForResponse' }));
       const response = await startActivityAIChatSession(message, access_token, props.activity.activity_uuid);
       if (!response.success) {
         await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
@@ -153,11 +155,13 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
         });
         return;
       }
-      await dispatchAIChatBot({
-        type: 'setAichat_uuid',
-        payload: response.data.aichat_uuid,
-      });
-      await dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+      startTransition(() =>
+        dispatchAIChatBot({
+          type: 'setAichat_uuid',
+          payload: response.data.aichat_uuid,
+        }),
+      );
+      startTransition(() => dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' }));
       await dispatchAIChatBot({ type: 'setChatInputValue', payload: '' });
       await dispatchAIChatBot({
         type: 'addMessage',
@@ -274,7 +278,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                 <input
                   onKeyDown={handleKeyDown}
                   onChange={handleChange}
-                  disabled={aiChatBotState.isWaitingForResponse}
+                  disabled={aiChatBotState.isWaitingForResponse || isPending}
                   value={aiChatBotState.chatInputValue}
                   placeholder={t('placeholder')}
                   type="text"

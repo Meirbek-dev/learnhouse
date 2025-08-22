@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@components/ui/alert';
 import { useFormatter, useTranslations } from 'next-intl';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Badge } from '@components/ui/badge';
+import { useTransition } from 'react';
 
 interface RealtimeMonitoringChartsProps {
   metrics: AdminRealtimeMetrics;
@@ -18,6 +19,7 @@ interface RealtimeMonitoringChartsProps {
 export const RealtimeMonitoringCharts = ({ metrics, isLoading = false, onRefresh }: RealtimeMonitoringChartsProps) => {
   const t = useTranslations('DashPage.Admin.Realtime');
   const format = useFormatter();
+  const [isPending, startTransition] = useTransition();
 
   const formatTimestamp = (timestamp: string) => {
     try {
@@ -89,11 +91,11 @@ export const RealtimeMonitoringCharts = ({ metrics, isLoading = false, onRefresh
             {t('lastUpdated')}: {formatTimestamp(metrics.lastUpdated)}
           </span>
           <button
-            onClick={onRefresh}
-            disabled={isLoading}
+            onClick={() => startTransition(() => onRefresh && onRefresh())}
+            disabled={isLoading || isPending}
             className="flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading || isPending ? 'animate-spin' : ''}`} />
             {t('refresh')}
           </button>
         </div>

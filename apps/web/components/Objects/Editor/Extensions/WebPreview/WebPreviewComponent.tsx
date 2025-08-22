@@ -29,7 +29,6 @@ const ALIGNMENTS = [
   { value: 'right', label: <AlignRight size={16} /> },
 ];
 
-// Memoized sub-components for better performance
 const PreviewImage = memo(({ src, alt }: { src: string; alt: string }) => (
   <div className="-mx-6 -mt-6 mb-0 overflow-hidden rounded-t-xl">
     <img

@@ -38,7 +38,7 @@ const RolesUpdate = (props: Props) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(validationT);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
   const [error, setError] = React.useState(null) as any;
 
   const form = useForm<FormData>({
@@ -54,21 +54,21 @@ const RolesUpdate = (props: Props) => {
   );
 
   const handleSubmit = async (values: FormData) => {
-    setIsSubmitting(true);
     setError(null);
 
-    const res = await updateUserRole(org.id, props.user.user.id, values.role, access_token);
-    const toastId = toast.loading(t('toastLoading'));
+    startTransition(async () => {
+      const toastId = toast.loading(t('toastLoading'));
+      const res = await updateUserRole(org.id, props.user.user.id, values.role, access_token);
 
-    if (res.status === 200) {
-      await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
-      props.setRolesModal(false);
-      toast.success(t('toastSuccess'), { id: toastId });
-    } else {
-      setIsSubmitting(false);
-      setError(`Error ${res.status}: ${res.data.detail}`);
-      toast.error(t('toastError'), { id: toastId });
-    }
+      if (res.status === 200) {
+        await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
+        props.setRolesModal(false);
+        toast.success(t('toastSuccess'), { id: toastId });
+      } else {
+        setError(`Error ${res.status}: ${res.data.detail}`);
+        toast.error(t('toastError'), { id: toastId });
+      }
+    });
   };
 
   return (
@@ -131,10 +131,10 @@ const RolesUpdate = (props: Props) => {
           <div className="flex justify-end pt-4">
             <Button
               type="submit"
-              disabled={isSubmitting || !roles || rolesError}
+              disabled={isPending || !roles || rolesError}
               className="min-w-[100px]"
             >
-              {isSubmitting ? (
+              {isPending ? (
                 <BarLoader
                   cssOverride={{ borderRadius: 60 }}
                   width={60}

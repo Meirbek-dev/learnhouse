@@ -20,6 +20,7 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { useTransition } from 'react';
 import Link from 'next/link';
 import { z } from 'zod';
 
@@ -62,29 +63,35 @@ export const AssignmentTaskGeneralEdit = () => {
     mode: 'onChange',
   });
 
-  const handleSubmit = async (values: TaskFormData) => {
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = (values: TaskFormData) => {
     if (!isTaskLoaded) {
       toast.error(t('taskNotLoaded'));
       return;
     }
 
-    try {
-      const res = await updateAssignmentTask(
-        values,
-        assignmentTaskState.assignmentTask.assignment_task_uuid,
-        assignment.assignment_object.assignment_uuid,
-        access_token,
-      );
-      if (res.success) {
-        assignmentTaskStateHook({ type: 'reload' });
-        toast.success(t('saveSuccess'));
-      } else {
-        toast.error(t('saveError'));
-      }
-    } catch (error) {
-      console.error('Error updating assignment task:', error);
-      toast.error(t('saveError'));
-    }
+    startTransition(() => {
+      void (async () => {
+        try {
+          const res = await updateAssignmentTask(
+            values,
+            assignmentTaskState.assignmentTask.assignment_task_uuid,
+            assignment.assignment_object.assignment_uuid,
+            access_token,
+          );
+          if (res.success) {
+            assignmentTaskStateHook({ type: 'reload' });
+            toast.success(t('saveSuccess'));
+          } else {
+            toast.error(t('saveError'));
+          }
+        } catch (error) {
+          console.error('Error updating assignment task:', error);
+          toast.error(t('saveError'));
+        }
+      })();
+    });
   };
 
   // Update form values when assignment task changes
@@ -224,9 +231,9 @@ export const AssignmentTaskGeneralEdit = () => {
         <Button
           type="submit"
           className="mt-4 w-full bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
-          disabled={form.formState.isSubmitting}
+          disabled={isPending || form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? t('saving') : t('save')}
+          {isPending || form.formState.isSubmitting ? t('saving') : t('save')}
         </Button>
       </form>
     </Form>

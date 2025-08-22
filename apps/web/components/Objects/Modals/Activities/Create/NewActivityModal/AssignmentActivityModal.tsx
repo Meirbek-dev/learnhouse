@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { useTransition } from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { mutate } from 'swr';
@@ -72,55 +73,60 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = (values: FormValues) => {
     const toastLoading = toast.loading(t('creatingAssignment'));
-
-    try {
-      // Use the new combined endpoint for better performance
-      const res = await createAssignmentWithActivity(
-        {
-          title: values.name,
-          description: values.description,
-          due_date: values.dueDate,
-          grading_type: values.gradingType,
-          course_id: course?.courseStructure.id,
-          org_id: org?.id,
-          chapter_id: chapterId,
-        },
-        chapterId,
-        values.name,
-        session.data?.tokens?.access_token,
-      );
-
-      if (res.success) {
-        toast.success(t('createSuccess'));
-
-        // Only revalidate if we have valid course data
-        if (course?.courseStructure?.course_uuid) {
-          // Revalidate cache with proper parameters
-          mutate(
-            `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+    startTransition(() => {
+      void (async () => {
+        try {
+          // Use combined endpoint for better performance
+          const res = await createAssignmentWithActivity(
+            {
+              title: values.name,
+              description: values.description,
+              due_date: values.dueDate,
+              grading_type: values.gradingType,
+              course_id: course?.courseStructure.id,
+              org_id: org?.id,
+              chapter_id: chapterId,
+            },
+            chapterId,
+            values.name,
+            session.data?.tokens?.access_token,
           );
-        }
 
-        if (orgslug) {
-          await revalidateTags(['courses'], orgslug);
-        }
+          if (res.success) {
+            toast.success(t('createSuccess'));
 
-        closeModal();
-      } else {
-        toast.error(t('createError', { error: res.data?.detail || t('unknownError') }));
-      }
-    } catch (error: any) {
-      console.error('Assignment creation failed:', error);
-      toast.error(
-        t('createError', {
-          error: error?.message || t('unexpectedError'),
-        }),
-      );
-    } finally {
-      toast.dismiss(toastLoading);
-    }
+            // Only revalidate if we have valid course data
+            if (course?.courseStructure?.course_uuid) {
+              // Revalidate cache with proper parameters
+              mutate(
+                `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+              );
+            }
+
+            if (orgslug) {
+              await revalidateTags(['courses'], orgslug);
+            }
+
+            closeModal();
+          } else {
+            toast.error(t('createError', { error: res.data?.detail || t('unknownError') }));
+          }
+        } catch (error: any) {
+          console.error('Assignment creation failed:', error);
+          toast.error(
+            t('createError', {
+              error: error?.message || t('unexpectedError'),
+            }),
+          );
+        } finally {
+          toast.dismiss(toastLoading);
+        }
+      })();
+    });
   };
 
   return (
@@ -244,9 +250,9 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
           <Button
             type="submit"
             className="mt-2.5"
-            disabled={form.formState.isSubmitting}
+            disabled={isPending || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? (
+            {isPending || form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}

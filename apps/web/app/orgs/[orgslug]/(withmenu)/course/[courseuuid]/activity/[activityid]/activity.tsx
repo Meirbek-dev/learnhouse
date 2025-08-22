@@ -1004,7 +1004,7 @@ export const MarkStatus = (props: {
       showXPGainToast({
         xpAmount: 25, // Standard activity completion XP
         source: 'activity_completion',
-        sourceDisplayName: 'Activity Completed',
+        sourceDisplayName: t('activityCompleted'),
         context: {
           activity_name: props.activity.title,
         },

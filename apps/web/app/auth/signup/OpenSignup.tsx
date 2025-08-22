@@ -2,6 +2,7 @@
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import PasswordInput from '@components/ui/custom/password-input';
+import { useEffect, useState, useTransition } from 'react';
 import { AlertTriangle, Check, User } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +11,6 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { signup } from '@services/auth/auth';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
@@ -43,6 +43,7 @@ const OpenSignUpComponent = () => {
   const org = useOrg() as any;
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [isPending, startTransition] = useTransition();
   const validationSchema = createValidationSchema(validationT);
 
   const form = useForm<SignUpFormData>({
@@ -59,7 +60,7 @@ const OpenSignUpComponent = () => {
     },
   });
 
-  const handleSubmit = async (values: SignUpFormData) => {
+  const handleSubmit = (values: SignUpFormData) => {
     setError('');
     setMessage('');
 
@@ -70,15 +71,17 @@ const OpenSignUpComponent = () => {
       org_id: values.org_id || org?.id || '',
     };
 
-    const res = await signup(submitValues);
-    const responseMessage = await res.json();
-    if (res.status === 200) {
-      setMessage(t('accountCreated'));
-    } else if ([401, 400, 404, 409].includes(res.status)) {
-      setError(responseMessage.detail);
-    } else {
-      setError(t('errorSomethingWentWrong'));
-    }
+    startTransition(async () => {
+      const res = await signup(submitValues);
+      const responseMessage = await res.json();
+      if (res.status === 200) {
+        setMessage(t('accountCreated'));
+      } else if ([401, 400, 404, 409].includes(res.status)) {
+        setError(responseMessage.detail);
+      } else {
+        setError(t('errorSomethingWentWrong'));
+      }
+    });
   };
 
   useEffect(() => {
@@ -205,9 +208,9 @@ const OpenSignUpComponent = () => {
       <div>
         <div className="mx-10 mt-5 mb-5 flex h-0.5 rounded-2xl bg-slate-100" />
         <button
-          onClick={() => signIn('google', { callbackUrl: '/redirect_from_auth' })}
+          onClick={() => startTransition(() => signIn('google', { callbackUrl: '/redirect_from_auth' }))}
           className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={form.formState.isSubmitting}
+          disabled={isPending}
         >
           <Image
             src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"

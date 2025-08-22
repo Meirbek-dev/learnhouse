@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { useTransition } from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { FC } from 'react';
@@ -89,22 +90,28 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = (values: FormValues) => {
     const toastLoading = toast.loading(t('updateLoading'));
-    try {
-      const res = await updateAssignment(values, assignment.assignment_uuid, accessToken);
-      if (res.success) {
-        mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
-        toast.success(t('updateSuccess'));
-        onClose();
-      } else {
-        toast.error(t('updateError'));
-      }
-    } catch {
-      toast.error(t('updateErrorGeneric'));
-    } finally {
-      toast.dismiss(toastLoading);
-    }
+    startTransition(() => {
+      void (async () => {
+        try {
+          const res = await updateAssignment(values, assignment.assignment_uuid, accessToken);
+          if (res.success) {
+            mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
+            toast.success(t('updateSuccess'));
+            onClose();
+          } else {
+            toast.error(t('updateError'));
+          }
+        } catch {
+          toast.error(t('updateErrorGeneric'));
+        } finally {
+          toast.dismiss(toastLoading);
+        }
+      })();
+    });
   };
 
   return (
@@ -234,9 +241,9 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
           </Button>
           <Button
             type="submit"
-            disabled={form.formState.isSubmitting}
+            disabled={isPending || form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? (
+            {isPending || form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={30}

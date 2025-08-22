@@ -438,8 +438,9 @@ function AddRole(props: AddRoleProps) {
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
   const [rights, setRights] = React.useState<Rights>(defaultRights);
+  const [error, setError] = React.useState('');
   const roleFormSchema = createRoleFormSchema(validationT);
   const predefinedRolesData = predefinedRoles(t);
 
@@ -455,7 +456,7 @@ function AddRole(props: AddRoleProps) {
 
   const handleSubmit = async (values: RoleFormValues) => {
     const toastID = toast.loading(t('creating'));
-    setIsSubmitting(true);
+    setError('');
 
     // Update form values with current rights state
     const formattedRights = {
@@ -515,24 +516,30 @@ function AddRole(props: AddRoleProps) {
       },
     };
 
-    const res = await createRole(
-      {
-        name: values.name,
-        description: values.description,
-        org_id: values.org_id,
-        rights: formattedRights,
-      },
-      access_token,
-    );
-    if (res.status === 200 || res.status === 201) {
-      setIsSubmitting(false);
-      mutate(`${getAPIUrl()}roles/org/${org.id}`);
-      props.setCreateRoleModal(false);
-      toast.success(t('createdNewRole'), { id: toastID });
-    } else {
-      setIsSubmitting(false);
-      toast.error(t('couldntCreateNewRole'), { id: toastID });
-    }
+    startTransition(async () => {
+      try {
+        const res = await createRole(
+          {
+            name: values.name,
+            description: values.description,
+            org_id: values.org_id,
+            rights: formattedRights,
+          },
+          access_token,
+        );
+
+        if (res.status === 200 || res.status === 201) {
+          mutate(`${getAPIUrl()}roles/org/${org.id}`);
+          props.setCreateRoleModal(false);
+          toast.success(t('createdNewRole'), { id: toastID });
+        } else {
+          toast.error(t('couldntCreateNewRole'), { id: toastID });
+        }
+      } catch (err: any) {
+        toast.error(t('couldntCreateNewRole'), { id: toastID });
+        setError(err?.message || t('unknownError'));
+      }
+    });
   };
 
   const handleRightChange = (section: keyof Rights, action: string, value: boolean) => {
@@ -799,10 +806,10 @@ function AddRole(props: AddRoleProps) {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="w-full sm:w-auto"
             >
-              {isSubmitting ? t('creating') : t('createRole')}
+              {isPending ? t('creating') : t('createRole')}
             </Button>
           </div>
         </form>

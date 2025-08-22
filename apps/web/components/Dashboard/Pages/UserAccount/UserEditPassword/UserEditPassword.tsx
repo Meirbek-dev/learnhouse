@@ -1,6 +1,7 @@
 'use client';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import PasswordInput from '@components/ui/custom/password-input';
 import { updatePassword } from '@services/settings/password';
 import { getUriWithoutOrg } from '@services/config/config';
@@ -9,7 +10,6 @@ import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
@@ -54,9 +54,12 @@ const UserEditPassword = () => {
       new_password: '',
     },
   });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const onSubmit = async (values: PasswordFormData) => {
     const loadingToast = toast.loading(t('updating'));
+    startTransition(() => setIsProcessing(true));
     try {
       const user_id = session?.data?.user?.id;
       if (!(user_id && access_token)) {
@@ -96,6 +99,8 @@ const UserEditPassword = () => {
     } catch (error: any) {
       toast.error(t('passwordUpdateError'), { id: loadingToast });
       console.error('Password update error:', error);
+    } finally {
+      startTransition(() => setIsProcessing(false));
     }
   };
 
@@ -142,7 +147,7 @@ const UserEditPassword = () => {
             <div className="flex justify-end pt-2">
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isProcessing || isPending}
               >
                 {isSubmitting ? tPassword('updatingButton') : tPassword('updateButton')}
               </Button>
