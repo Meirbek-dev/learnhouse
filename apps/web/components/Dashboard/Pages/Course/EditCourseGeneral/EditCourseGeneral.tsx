@@ -1,289 +1,163 @@
 'use client';
 
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { AlertTriangle, Loader2, BookOpen, Tag, Image, Video, FileText } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo, useId } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { TagsInput } from '@components/ui/custom/tags-input';
-import { revalidateTags } from '@services/utils/ts/requests';
-import { updateCourse } from '@services/courses/courses';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, Loader2 } from 'lucide-react';
-import { getAPIUrl } from '@services/config/config';
+import { Separator } from '@components/ui/separator';
+import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';
+import ThumbnailUpdate from './ThumbnailUpdate';
+import { Switch } from '@components/ui/switch';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { mutate } from 'swr';
-import { z } from 'zod';
-
-import LearningItemsList from './LearningItemsList';
-import ThumbnailUpdate from './ThumbnailUpdate';
 
 const generateId = () => crypto.randomUUID();
 
-interface EditCourseGeneralProps {
-  orgslug: string;
-  course_uuid?: string;
+type EditCourseStructureProps = { orgslug: string; course_uuid?: string };
+
+interface FormValues {
+  name: string;
+  description: string;
+  about: string;
+  learnings: string;
+  tags: string[];
+  public: boolean;
+  thumbnail_type: 'image' | 'video' | 'both';
 }
 
-const createCourseFormSchema = (t: any) =>
-  z.object({
-    name: z
-      .string()
-      .min(2, t('errors.required', { fieldName: t('name.label') }))
-      .max(100, t('errors.maxLength', { count: 100 })),
-    description: z
-      .string()
-      .min(2, t('errors.required', { fieldName: t('description.label') }))
-      .max(1000, t('errors.maxLength', { count: 1000 })),
-    about: z.string(),
-    learnings: z
-      .string()
-      .min(1, t('errors.required', { fieldName: t('learnings.label') }))
-      .refine((value) => {
-        try {
-          const learningItems = JSON.parse(value);
-          return Array.isArray(learningItems) && learningItems.length > 0;
-        } catch {
-          return false;
-        }
-      }, t('errors.atLeastOneLearningItem'))
-      .refine((value) => {
-        try {
-          const learningItems = JSON.parse(value);
-          return !learningItems.some((item: any) => !item.text || item.text.trim() === '');
-        } catch {
-          return false;
-        }
-      }, t('errors.allLearningItemsMustHaveText')),
-    tags: z.array(z.string()),
-    public: z.boolean(),
-    thumbnail_type: z.enum(['image', 'video', 'both']),
-  });
+const validateValues = (values: FormValues, t: any) => {
+  const errors: Partial<Record<keyof FormValues, string>> = {};
+  const errT = (key: string, params?: any) => t(`errors.${key}`, params);
 
-const EditCourseGeneral = (props: EditCourseGeneralProps) => {
+  if (!values.name?.trim()) {
+    errors.name = errT('required', { fieldName: t('name.label') });
+  } else if (values.name.length > 100) {
+    errors.name = errT('maxLength', { count: 100 });
+  }
+
+  if (!values.description?.trim()) {
+    errors.description = errT('required', { fieldName: t('description.label') });
+  } else if (values.description.length > 1000) {
+    errors.description = errT('maxLength', { count: 1000 });
+  }
+
+  if (!values.learnings) {
+    errors.learnings = errT('required', { fieldName: t('learnings.label') });
+  } else {
+    try {
+      const arr = JSON.parse(values.learnings);
+      if (!Array.isArray(arr)) {
+        errors.learnings = errT('invalidFormat');
+      } else if (arr.length === 0) {
+        errors.learnings = errT('atLeastOneLearningItem');
+      } else if (arr.some((i: any) => !i.text?.trim())) {
+        errors.learnings = errT('allLearningItemsMustHaveText');
+      }
+    } catch {
+      errors.learnings = errT('invalidJsonFormat');
+    }
+  }
+
+  return errors;
+};
+
+function EditCourseGeneral(_props: EditCourseStructureProps) {
+  const t = useTranslations('CourseEdit.General');
   const [error, setError] = useState('');
-  const [isFormInitialized, setIsFormInitialized] = useState(false);
-  const [isAutoSaving, setIsAutoSaving] = useState(false);
-  const initialValuesRef = useRef<any>(null);
-  const courseStructureRef = useRef<any>(null);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const course = useCourse();
   const dispatchCourse = useCourseDispatch() as any;
   const { isLoading, courseStructure } = course as any;
-  const session = useLHSession() as any;
-  const t = useTranslations('CourseEdit.General');
+  const formId = useId();
 
-  const courseFormSchema = createCourseFormSchema(t);
-  type CourseFormData = z.infer<typeof courseFormSchema>;
-
-  const initializeLearnings = useCallback((learnings: any): string => {
-    if (!learnings) {
-      return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-    }
-
+  const initializeLearnings = (learnings: any) => {
+    if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
     try {
       const parsed = JSON.parse(learnings);
-      if (Array.isArray(parsed)) {
-        return parsed.length > 0
-          ? JSON.stringify(parsed.map((item: any) => Object.assign(item, { id: item.id || generateId() })))
-          : JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-      }
-
-      if (typeof learnings === 'string') {
-        return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
-      }
-
-      return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+      if (Array.isArray(parsed)) return learnings;
     } catch {
       if (typeof learnings === 'string') {
         return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
       }
-
-      return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
     }
-  }, []);
+    return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+  };
 
-  const initializeTags = useCallback((tags: any): string[] => {
-    if (!tags) return [];
-
-    if (typeof tags === 'string') {
-      return tags
+  const parseTags = (raw: any): string[] => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw as string[];
+    if (typeof raw === 'string') {
+      return raw
         .split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
+        .map((t: string) => t.trim())
+        .filter(Boolean);
     }
-
-    if (Array.isArray(tags)) {
-      return tags.filter((tag) => typeof tag === 'string' && tag.trim().length > 0);
-    }
-
     return [];
-  }, []);
+  };
 
-  const form = useForm<CourseFormData>({
-    resolver: zodResolver(courseFormSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      about: '',
-      learnings: JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]),
-      tags: [],
-      public: false,
-      thumbnail_type: 'image',
-    },
+  const getInitialValues = (): FormValues => ({
+    name: courseStructure?.name || '',
+    description: courseStructure?.description || '',
+    about: courseStructure?.about || '',
+    learnings: initializeLearnings(courseStructure?.learnings || ''),
+    tags: parseTags(courseStructure?.tags),
+    public: courseStructure?.public || false,
+    thumbnail_type: courseStructure?.thumbnail_type || 'image',
+  });
+
+  const form = useForm<FormValues>({
+    defaultValues: getInitialValues(),
     mode: 'onChange',
   });
 
-  const {
-    watch,
-    reset,
-    formState: { errors, isDirty },
-  } = form;
+  const initialRef = useRef<FormValues>(form.getValues());
 
-  // Watch all form values at once to prevent multiple rerenders
-  const formValues = watch();
-  const thumbnailType = formValues.thumbnail_type;
-
+  // Reset when backend data changes
   useEffect(() => {
-    courseStructureRef.current = courseStructure;
-  }, [courseStructure]);
-
-  useEffect(() => {
-    if (courseStructure && !isLoading && !isFormInitialized) {
-      // Ensure thumbnail_type always has a valid enum value
-      const thumbnailType = courseStructure?.thumbnail_type || 'image';
-      const validThumbnailType = (['image', 'video', 'both'] as const).includes(thumbnailType)
-        ? (thumbnailType as 'image' | 'video' | 'both')
-        : 'image';
-
-      const newValues: CourseFormData = {
-        name: courseStructure?.name || '',
-        description: courseStructure?.description || '',
-        about: courseStructure?.about || '',
-        learnings: initializeLearnings(courseStructure?.learnings || ''),
-        tags: initializeTags(courseStructure?.tags || ''),
-        public: Boolean(courseStructure?.public),
-        thumbnail_type: validThumbnailType,
-      };
-
-      initialValuesRef.current = newValues;
-      reset(newValues);
-      setIsFormInitialized(true);
+    if (!isLoading && courseStructure) {
+      const vals = getInitialValues();
+      form.reset(vals);
+      initialRef.current = vals;
+      setError('');
     }
-  }, [
-    courseStructure?.course_uuid,
-    isLoading,
-    isFormInitialized,
-    initializeLearnings,
-    initializeTags,
-    reset,
-    courseStructure.description,
-    courseStructure.name,
-    courseStructure.thumbnail_type,
-    courseStructure.tags,
-    courseStructure.about,
-    courseStructure.learnings,
-    courseStructure,
-    courseStructure.public,
-  ]);
+  }, [isLoading, courseStructure, form]);
 
+  // Watch for unsaved changes & sync context
   useEffect(() => {
-    if (!isLoading && isDirty) {
-      dispatchCourse({ type: 'setIsNotSaved' });
+    const sub = form.watch((values) => {
+      if (isLoading) return;
+      const errors = validateValues(values as FormValues, t);
+      // set field errors imperatively
+      (Object.keys(values) as (keyof FormValues)[]).forEach((k) => {
+        if (errors[k]) form.setError(k, { message: errors[k] });
+        else form.clearErrors(k);
+      });
+      const changed = JSON.stringify(values) !== JSON.stringify(initialRef.current);
+      if (changed) {
+        dispatchCourse({ type: 'setIsNotSaved' });
+        const valuesForContext = { ...values, tags: (values.tags || []).join(', ') } as any;
+        dispatchCourse({ type: 'setCourseStructure', payload: { ...courseStructure, ...valuesForContext } });
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [form, isLoading, dispatchCourse, courseStructure, t]);
+
+  const handleSubmit = (values: FormValues) => {
+    const errors = validateValues(values, t);
+    if (Object.keys(errors).length > 0) {
+      setError(t('errors.saveFailed'));
+      // Focus on the first field with an error for better accessibility
+      const firstErrorField = Object.keys(errors)[0] as keyof FormValues;
+      form.setFocus(firstErrorField);
+      return;
     }
-  }, [isDirty, isLoading, dispatchCourse]);
-
-  const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
-
-  const autoSaveCourse = useCallback(
-    async (courseData: any) => {
-      if (!(session?.data?.tokens?.access_token && courseData.course_uuid)) return;
-
-      try {
-        setIsAutoSaving(true);
-        mutate(
-          `${getAPIUrl()}courses/${courseData.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-        );
-        await updateCourse(courseData.course_uuid, courseData, session.data.tokens.access_token);
-        await revalidateTags(['courses'], props.orgslug);
-        dispatchCourse({ type: 'setIsSaved' });
-      } catch (error) {
-        console.error('Auto-save failed:', error);
-      } finally {
-        setIsAutoSaving(false);
-      }
-    },
-    [session, withUnpublishedActivities, props.orgslug, dispatchCourse],
-  );
-
-  // Single useEffect for auto-save logic
-  useEffect(() => {
-    if (!isLoading && isFormInitialized && initialValuesRef.current) {
-      const hasChanges = JSON.stringify(formValues) !== JSON.stringify(initialValuesRef.current);
-
-      if (hasChanges && !isAutoSaving) {
-        // Clear existing timeout
-        if (autoSaveTimeoutRef.current) {
-          clearTimeout(autoSaveTimeoutRef.current);
-        }
-
-        // Set new timeout for auto-save
-        autoSaveTimeoutRef.current = setTimeout(() => {
-          const updatedCourseStructure = {
-            ...courseStructureRef.current,
-            ...formValues,
-            tags: formValues.tags.join(', '), // Convert array back to string for API
-          };
-
-          dispatchCourse({ type: 'setCourseStructure', payload: updatedCourseStructure });
-          autoSaveCourse(updatedCourseStructure);
-        }, 2000); // 2 second delay
-      }
-    }
-  }, [formValues, isLoading, isFormInitialized, dispatchCourse, autoSaveCourse, isAutoSaving]);
-
-  // Cleanup auto-save timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Form submission handler
-  const onSubmit = useCallback(
-    async (data: CourseFormData) => {
-      if (!(session?.data?.tokens?.access_token && courseStructure?.course_uuid)) return;
-
-      try {
-        setError('');
-        const updatedCourseStructure = {
-          ...courseStructure,
-          ...data,
-          tags: data.tags.join(', '), // Convert array back to string for API
-        };
-
-        mutate(
-          `${getAPIUrl()}courses/${courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-        );
-        await updateCourse(courseStructure.course_uuid, updatedCourseStructure, session.data.tokens.access_token);
-        await revalidateTags(['courses'], props.orgslug);
-
-        dispatchCourse({ type: 'setCourseStructure', payload: updatedCourseStructure });
-        dispatchCourse({ type: 'setIsSaved' });
-
-        // Update initial values after successful save
-        initialValuesRef.current = data;
-      } catch (error: any) {
-        setError(error?.message || t('errors.saveFailed'));
-      }
-    },
-    [session, courseStructure, withUnpublishedActivities, props.orgslug, dispatchCourse, t],
-  );
+    dispatchCourse({ type: 'setIsSaved' });
+    setError('');
+  };
 
   if (isLoading || !courseStructure) {
     return (
@@ -291,7 +165,7 @@ const EditCourseGeneral = (props: EditCourseGeneralProps) => {
         <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
           <Loader2
             size={16}
-            className="mr-2 animate-spin"
+            className="mr-2 animate-spin text-primary"
           />
           <span>{t('loading')}</span>
         </div>
@@ -300,152 +174,242 @@ const EditCourseGeneral = (props: EditCourseGeneralProps) => {
   }
 
   return (
-    <div className="h-full">
-      <div className="h-6" />
-      <div className="px-10 pb-10">
-        <div className="rounded-xl bg-white shadow-xs">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="p-6">
-                {error ? (
-                  <div className="mb-6 flex items-center rounded-md bg-red-50 p-4 text-red-700">
-                    <AlertTriangle className="mr-2 h-4 w-4" />
-                    {error}
-                  </div>
-                ) : null}
-
-                <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('name.label')}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t('name.placeholder')}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+    <div
+      className="mx-auto space-y-8 p-6"
+      role="main"
+      aria-labelledby="course-edit-title"
+    >
+      <Form {...form}>
+        <form
+          id={formId}
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-6"
+          noValidate
+        >
+          {error && (
+            <Card
+              className="border-destructive/50 bg-destructive/5"
+              role="alert"
+            >
+              <CardContent className="p-4">
+                <div
+                  id={`${formId}-error`}
+                  className="flex items-center space-x-2 text-destructive"
+                >
+                  <AlertTriangle
+                    className="h-5 w-5"
+                    aria-hidden="true"
                   />
+                  <span className="font-medium">{error}</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('description.label')}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t('description.placeholder')}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          <Card>
+            <CardHeader>
+              {/* Header Section */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h1
+                    id="course-edit-title"
+                    className="flex items-center gap-2 text-2xl font-bold tracking-tight"
+                  >
+                    <BookOpen
+                      className="h-8 w-8 text-primary"
+                      aria-hidden="true"
+                    />
+                    {t('title', { courseName: courseStructure.name })}
+                  </h1>
+                  <p className="text-md text-muted-foreground">{t('subtitle')}</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Basic Information Section */}
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">{t('name.label')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder={t('name.placeholder')}
+                          className="text-lg"
+                          maxLength={100}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="about"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('about.label')}</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">{t('description.label')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder={t('description.placeholder')}
+                          maxLength={1000}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="learnings"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('learnings.label')}</FormLabel>
-                        <FormControl>
+                <FormField
+                  control={form.control}
+                  name="about"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">{t('about.label')}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          className="min-h-[120px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Separator />
+
+                <FormField
+                  control={form.control}
+                  name="learnings"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">{t('learnings.label')}</FormLabel>
+                      <FormControl>
+                        <div
+                          role="group"
+                          aria-labelledby="learnings-label"
+                        >
                           <LearningItemsList
                             value={field.value}
                             onChange={field.onChange}
-                            error={errors.learnings?.message}
+                            error={form.formState.errors.learnings?.message as string | undefined}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="tags"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('tags.label')}</FormLabel>
-                        <FormControl>
-                          <TagsInput
-                            placeholder={t('tags.placeholder')}
-                            value={field.value || []}
-                            onValueChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                        <Tag
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
+                        {t('tags.label')}
+                      </FormLabel>
+                      <FormControl>
+                        <TagsInput
+                          placeholder={t('tags.placeholder')}
+                          value={field.value || []}
+                          onValueChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                  <FormField
-                    control={form.control}
-                    name="thumbnail_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('thumbnailType')}</FormLabel>
+              <Separator />
+
+              {/* Thumbnail Section */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="thumbnail_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">{t('thumbnailType')}</FormLabel>
+                      <FormControl>
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
                         >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue>
-                                {field.value === 'image'
-                                  ? t('image')
-                                  : field.value === 'video'
-                                    ? t('video')
-                                    : field.value === 'both'
-                                      ? t('both')
-                                      : t('image')}
-                              </SelectValue>
-                            </SelectTrigger>
-                          </FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="image">{t('image')}</SelectItem>
-                            <SelectItem value="video">{t('video')}</SelectItem>
-                            <SelectItem value="both">{t('both')}</SelectItem>
+                            <SelectItem value="image">
+                              <div className="flex items-center gap-2">
+                                <Image
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                                {t('image')}
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="video">
+                              <div className="flex items-center gap-2">
+                                <Video
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                                {t('video')}
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="both">
+                              <div className="flex items-center gap-2">
+                                <Image
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                                <Video
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                                {t('both')}
+                              </div>
+                            </SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  {/* Thumbnail Upload Section */}
-                  <div className="space-y-4">
-                    <FormLabel>{t('thumbnail.label')}</FormLabel>
-                    <ThumbnailUpdate thumbnailType={thumbnailType} />
-                  </div>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="thumbnail_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">{t('thumbnail.label')}</FormLabel>
+                      <FormControl>
+                        <ThumbnailUpdate thumbnailType={field.value as any} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            </form>
-          </Form>
-        </div>
-      </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
-};
+}
 
 export default EditCourseGeneral;
