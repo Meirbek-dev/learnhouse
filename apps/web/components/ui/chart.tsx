@@ -1,8 +1,9 @@
 'use client';
 
+import type { CSSProperties, ComponentProps, ComponentType, ReactElement, ReactNode } from 'react';
+import { createContext, useContext, useId, useMemo } from 'react';
 import * as RechartsPrimitive from 'recharts';
 import { useFormatter } from 'next-intl';
-import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -11,8 +12,8 @@ const THEMES = { light: '', dark: '.dark' } as const;
 
 export type ChartConfig = {
   [k in string]: {
-    label?: React.ReactNode;
-    icon?: React.ComponentType;
+    label?: ReactNode;
+    icon?: ComponentType;
   } & ({ color?: string; theme?: never } | { color?: never; theme: Record<keyof typeof THEMES, string> });
 };
 
@@ -20,10 +21,10 @@ interface ChartContextProps {
   config: ChartConfig;
 }
 
-const ChartContext = React.createContext<ChartContextProps | null>(null);
+const ChartContext = createContext<ChartContextProps | null>(null);
 
 function useChart() {
-  const context = React.useContext(ChartContext);
+  const context = useContext(ChartContext);
 
   if (!context) {
     throw new Error('useChart must be used within a <ChartContainer />');
@@ -38,13 +39,13 @@ function ChartContainer({
   children,
   config,
   ...props
-}: React.ComponentProps<'div'> & {
+}: ComponentProps<'div'> & {
   config: ChartConfig;
   // Allow either a React element or a render function; we'll cast when
   // passing into ResponsiveContainer to satisfy the strict Recharts typing.
-  children: React.ReactNode | ((width: number, height: number) => React.ReactNode);
+  children: ReactNode | ((width: number, height: number) => ReactNode);
 }) {
-  const uniqueId = React.useId();
+  const uniqueId = useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
 
   return (
@@ -63,7 +64,7 @@ function ChartContainer({
           config={config}
         />
         {/* Cast children to ReactElement to satisfy ResponsiveContainer props */}
-        <RechartsPrimitive.ResponsiveContainer>{children as React.ReactElement}</RechartsPrimitive.ResponsiveContainer>
+        <RechartsPrimitive.ResponsiveContainer>{children as ReactElement}</RechartsPrimitive.ResponsiveContainer>
       </div>
     </ChartContext.Provider>
   );
@@ -115,8 +116,8 @@ function ChartTooltipContent({
   nameKey,
   labelKey,
 }: // loosen types for Recharts v3 payload/tooltip props
-React.ComponentProps<any> &
-  React.ComponentProps<'div'> & {
+ComponentProps<any> &
+  ComponentProps<'div'> & {
     hideLabel?: boolean;
     hideIndicator?: boolean;
     indicator?: 'line' | 'dot' | 'dashed';
@@ -126,7 +127,7 @@ React.ComponentProps<any> &
   const { config } = useChart();
   const format = useFormatter();
 
-  const tooltipLabel = React.useMemo(() => {
+  const tooltipLabel = useMemo(() => {
     if (hideLabel || !(payload && (payload as any[]).length)) {
       return null;
     }
@@ -198,7 +199,7 @@ React.ComponentProps<any> &
                             // inline CSS variables for indicator color
                             '--color-bg': indicatorColor,
                             '--color-border': indicatorColor,
-                          } as React.CSSProperties
+                          } as CSSProperties
                         }
                       />
                     )

@@ -5,12 +5,12 @@ import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/r
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
+import { useCallback, useMemo, useTransition } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import { useCallback, useMemo, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -153,7 +153,13 @@ export default function OrgEditSocials() {
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <Form {...form}>
-  <form onSubmit={form.handleSubmit((values) => startTransition(() => { void updateOrg(values); }))}>
+        <form
+          onSubmit={form.handleSubmit((values) =>
+            startTransition(() => {
+              void updateOrg(values);
+            }),
+          )}
+        >
           <div className="flex flex-col gap-0">
             <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>

@@ -19,12 +19,12 @@ import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo } from 'react';
 import { signOut } from 'next-auth/react';
-import type React from 'react';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 
 interface RoleInfo {
   name: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   bgColor: string;
   textColor: string;
   description: string;

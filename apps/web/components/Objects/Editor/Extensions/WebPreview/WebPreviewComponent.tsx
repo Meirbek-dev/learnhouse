@@ -1,6 +1,6 @@
 import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { getUrlPreview } from '@services/courses/activities';
 import { Checkbox } from '@components/ui/checkbox';
@@ -29,7 +29,7 @@ const ALIGNMENTS = [
   { value: 'right', label: <AlignRight size={16} /> },
 ];
 
-const PreviewImage = memo(({ src, alt }: { src: string; alt: string }) => (
+const PreviewImage = ({ src, alt }: { src: string; alt: string }) => (
   <div className="-mx-6 -mt-6 mb-0 overflow-hidden rounded-t-xl">
     <img
       src={src}
@@ -37,10 +37,9 @@ const PreviewImage = memo(({ src, alt }: { src: string; alt: string }) => (
       className="block h-40 w-full object-cover"
     />
   </div>
-));
-PreviewImage.displayName = 'PreviewImage';
+);
 
-const FaviconDisplay = memo(({ favicon, url, faviconAlt }: { favicon?: string; url: string; faviconAlt: string }) => (
+const FaviconDisplay = ({ favicon, url, faviconAlt }: { favicon?: string; url: string; faviconAlt: string }) => (
   <div className="mt-0 flex items-center border-t border-gray-100 pt-2">
     {favicon ? (
       <img
@@ -51,49 +50,45 @@ const FaviconDisplay = memo(({ favicon, url, faviconAlt }: { favicon?: string; u
     ) : null}
     <span className="truncate text-xs text-gray-500">{url}</span>
   </div>
-));
-FaviconDisplay.displayName = 'FaviconDisplay';
-
-const AlignmentControls = memo(
-  ({
-    alignment,
-    onAlignmentChange,
-    alignments,
-    t,
-  }: {
-    alignment: string;
-    onAlignmentChange: (value: string) => void;
-    alignments: typeof ALIGNMENTS;
-    t: any;
-  }) => (
-    <div className="mt-4 flex flex-col items-center">
-      <div className="flex items-center gap-1">
-        <span className="mr-1 text-xs text-gray-500">{t('align')}:</span>
-        {alignments.map((opt) => (
-          <button
-            key={opt.value}
-            aria-pressed={alignment === opt.value}
-            onClick={() => {
-              onAlignmentChange(opt.value);
-            }}
-            title={t('alignOption', { value: t(opt.value) })}
-            type="button"
-            className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:ring-2 focus:ring-blue-300 focus:outline-none ${
-              alignment === opt.value
-                ? 'border-gray-600 bg-gray-600 text-white hover:bg-gray-700'
-                : 'border-gray-200 bg-white hover:bg-gray-100'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  ),
 );
-AlignmentControls.displayName = 'AlignmentControls';
 
-const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttributes, deleteNode }) => {
+const AlignmentControls = ({
+  alignment,
+  onAlignmentChange,
+  alignments,
+  t,
+}: {
+  alignment: string;
+  onAlignmentChange: (value: string) => void;
+  alignments: typeof ALIGNMENTS;
+  t: any;
+}) => (
+  <div className="mt-4 flex flex-col items-center">
+    <div className="flex items-center gap-1">
+      <span className="mr-1 text-xs text-gray-500">{t('align')}:</span>
+      {alignments.map((opt) => (
+        <button
+          key={opt.value}
+          aria-pressed={alignment === opt.value}
+          onClick={() => {
+            onAlignmentChange(opt.value);
+          }}
+          title={t('alignOption', { value: t(opt.value) })}
+          type="button"
+          className={`flex items-center justify-center rounded-full border p-1.5 text-gray-600 transition-colors duration-150 focus:ring-2 focus:ring-blue-300 focus:outline-none ${
+            alignment === opt.value
+              ? 'border-gray-600 bg-gray-600 text-white hover:bg-gray-700'
+              : 'border-gray-200 bg-white hover:bg-gray-100'
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewProps) => {
   const t = useTranslations('Components.WebPreview');
   const [inputUrl, setInputUrl] = useState(node.attrs.url || '');
   const [loading, setLoading] = useState(false);
@@ -492,8 +487,6 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = memo(({ node, updateAttri
       </div>
     </NodeViewWrapper>
   );
-});
-
-WebPreviewComponent.displayName = 'WebPreviewComponent';
+};
 
 export default WebPreviewComponent;

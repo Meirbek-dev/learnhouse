@@ -14,12 +14,12 @@ import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
+import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@components/ui/input';
-import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
 import UserAvatar from '../UserAvatar';
 import Link from 'next/link';
@@ -424,7 +424,7 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   // handler for Enter key press
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
+    (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' && searchQuery.trim().length > 0) {
         window.location.href = getUriWithOrg(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`);
       }

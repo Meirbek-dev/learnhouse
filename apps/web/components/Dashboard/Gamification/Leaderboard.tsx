@@ -100,7 +100,6 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
     fetchLeaderboard();
   }, [fetchLeaderboard]);
 
-  // Memoized utility functions for performance
   const getRankIcon = useCallback(
     (rank: number) => {
       switch (rank) {
@@ -168,7 +167,6 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
     [session?.user?.id],
   );
 
-  // Memoized calculations
   const topEntries = useMemo(() => {
     return leaderboard?.leaderboard_entries.slice(0, limit) || [];
   }, [leaderboard, limit]);

@@ -7,10 +7,9 @@ import { getOwnedCourses } from '@services/payments/payments';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { Package2, ShoppingCart } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { memo } from 'react';
 import useSWR from 'swr';
 
-const EmptyState = memo(({ t }: { t: any }) => (
+const EmptyState = ({ t }: { t: any }) => (
   <div className="col-span-full flex items-center justify-center py-16">
     <div className="max-w-md text-center">
       <div className="mb-6">
@@ -22,11 +21,9 @@ const EmptyState = memo(({ t }: { t: any }) => (
       <p className="text-lg leading-relaxed text-gray-500">{t('noPurchasedCoursesDesc')}</p>
     </div>
   </div>
-));
+);
 
-EmptyState.displayName = 'EmptyState';
-
-const CourseGrid = memo(({ ownedCourses, orgSlug }: { ownedCourses: any[]; orgSlug: string }) => (
+const CourseGrid = ({ ownedCourses, orgSlug }: { ownedCourses: any[]; orgSlug: string }) => (
   <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
     {ownedCourses.map((course: any) => (
       <div
@@ -40,9 +37,7 @@ const CourseGrid = memo(({ ownedCourses, orgSlug }: { ownedCourses: any[]; orgSl
       </div>
     ))}
   </div>
-));
-
-CourseGrid.displayName = 'CourseGrid';
+);
 
 const OwnedCoursesPage = () => {
   const t = useTranslations('DashPage.Courses');
@@ -117,4 +112,4 @@ const OwnedCoursesPage = () => {
   );
 };
 
-export default memo(OwnedCoursesPage);
+export default OwnedCoursesPage;

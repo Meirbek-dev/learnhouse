@@ -525,7 +525,6 @@ export const useDebounce = <T extends (...args: any[]) => any>(callback: T, dela
   );
 };
 
-// Memoized calculations
 export const useMemoizedStats = (data: number[]) => {
   return useMemo(() => {
     if (data.length === 0) {

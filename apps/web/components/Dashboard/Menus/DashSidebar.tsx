@@ -13,29 +13,17 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import {
-  AlertCircle,
-  Backpack,
-  BadgeDollarSign,
-  BarChart3,
-  BookCopy,
-  Home,
-  LogOut,
-  School,
-  Settings,
-  Users,
-} from 'lucide-react';
+import { Backpack, BadgeDollarSign, BarChart3, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
 import openuLogoLight from '@public/openu_logo_light.webp';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -58,7 +46,7 @@ interface SidebarProps {
 }
 
 // Loading skeleton component
-const SidebarSkeleton = memo(() => (
+const SidebarSkeleton = () => (
   <Sidebar
     side="left"
     variant="sidebar"
@@ -94,29 +82,7 @@ const SidebarSkeleton = memo(() => (
       </div>
     </SidebarFooter>
   </Sidebar>
-));
-
-SidebarSkeleton.displayName = 'SidebarSkeleton';
-
-// Error fallback component
-const SidebarError = memo(({ onRetry }: { onRetry: () => void }) => {
-  const t = useTranslations('SidebarMenu');
-  return (
-    <div className="flex flex-col items-center justify-center p-6 text-center">
-      <AlertCircle className="text-destructive mb-2 h-8 w-8" />
-      <p className="text-muted-foreground mb-3 text-sm">{t('errors.failedToLoad')}</p>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onRetry}
-      >
-        {t('errors.retry')}
-      </Button>
-    </div>
-  );
-});
-
-SidebarError.displayName = 'SidebarError';
+);
 
 // Custom hook for navigation items
 const useNavigationItems = () => {
@@ -188,7 +154,7 @@ const useNavigationItems = () => {
 };
 
 // Navigation item component
-const NavigationItem = memo(({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boolean }) => (
+const NavigationItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boolean }) => (
   <SidebarMenuItem className={isCollapsed ? 'flex w-full justify-center' : ''}>
     <SidebarMenuButton
       asChild
@@ -229,15 +195,12 @@ const NavigationItem = memo(({ item, isCollapsed }: { item: NavigationItem; isCo
       </Link>
     </SidebarMenuButton>
   </SidebarMenuItem>
-));
-
-NavigationItem.displayName = 'NavigationItem';
+);
 
 const DashSidebar = ({ className }: SidebarProps) => {
   const org = useOrg() as any;
   const session = useLHSession();
   const { state, toggleSidebar } = useSidebar();
-  const [error, setError] = useState(false);
   const t = useTranslations('SidebarMenu');
   const navigationItems = useNavigationItems();
 
@@ -282,13 +245,10 @@ const DashSidebar = ({ className }: SidebarProps) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        setError(false);
-
         // Simulate async loading with timeout
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
         console.error('Failed to load sidebar data:', error);
-        setError(true);
       }
     };
 
@@ -453,4 +413,4 @@ const DashSidebar = ({ className }: SidebarProps) => {
   );
 };
 
-export default memo(DashSidebar);
+export default DashSidebar;

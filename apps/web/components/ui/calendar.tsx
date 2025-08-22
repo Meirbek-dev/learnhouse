@@ -7,8 +7,9 @@ import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
 import type { DayButton } from 'react-day-picker';
 import type { Locale } from 'date-fns/locale';
+import type { ComponentProps } from 'react';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import * as React from 'react';
 
 const Calendar = ({
   className,
@@ -19,8 +20,8 @@ const Calendar = ({
   formatters,
   components,
   ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>['variant'];
+}: ComponentProps<typeof DayPicker> & {
+  buttonVariant?: ComponentProps<typeof Button>['variant'];
 }) => {
   const getDayPickerLocale = (locale: string): Locale => {
     const localeMap: Record<string, Locale> = {
@@ -200,11 +201,11 @@ const Calendar = ({
   );
 };
 
-const CalendarDayButton = ({ className, day, modifiers, ...props }: React.ComponentProps<typeof DayButton>) => {
+const CalendarDayButton = ({ className, day, modifiers, ...props }: ComponentProps<typeof DayButton>) => {
   const defaultClassNames = getDefaultClassNames();
 
-  const ref = React.useRef<HTMLButtonElement>(null);
-  React.useEffect(() => {
+  const ref = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
     if (modifiers.focused) ref.current?.focus();
   }, [modifiers.focused]);
 

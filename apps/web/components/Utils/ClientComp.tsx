@@ -1,6 +1,8 @@
 'use client';
 
-const ClientComponentSkeleton = ({ children }: { children: React.ReactNode }) => {
+import type { ReactNode } from 'react';
+
+const ClientComponentSkeleton = ({ children }: { children: ReactNode }) => {
   return <div>{children}</div>;
 };
 

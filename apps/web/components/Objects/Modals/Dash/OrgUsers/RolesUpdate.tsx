@@ -9,12 +9,13 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getAPIUrl } from '@services/config/config';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
-import React from 'react';
+import type { FC } from 'react';
 import { z } from 'zod';
 
 interface Props {
@@ -31,15 +32,15 @@ interface FormData {
   role: string;
 }
 
-const RolesUpdate = (props: Props) => {
+const RolesUpdate: FC<Props> = (props) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(validationT);
-  const [isPending, startTransition] = React.useTransition();
-  const [error, setError] = React.useState(null) as any;
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<any>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(validationSchema),

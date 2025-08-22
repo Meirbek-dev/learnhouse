@@ -70,6 +70,7 @@ target-version = "py314"
 # lint.select = ["ALL"]
 lint.fixable = ["ALL"]
 lint.ignore = [
+  "F401",
   "COM812",  # missing trailing comma (stylistic, optional)
   "DTZ005",  # datetime.now() used without tzinfo (not always relevant)
   "T20",     # flake8-print (allow print statements for debugging/logging)

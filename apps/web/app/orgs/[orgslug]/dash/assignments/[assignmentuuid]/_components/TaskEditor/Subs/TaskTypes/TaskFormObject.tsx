@@ -13,7 +13,7 @@ import AssignmentBoxUI from '@components/Objects/Activities/Assignment/Assignmen
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Check, Info, Minus, Plus, PlusCircle, Type, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
 
@@ -268,12 +268,12 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
 
     questions.forEach((question) => {
       question.blanks.forEach((blank) => {
-        totalBlanks++;
+        totalBlanks += 1;
         const userAnswer = userSubmissions.submissions.find(
           (submission) => submission.questionUUID === question.questionUUID && submission.blankUUID === blank.blankUUID,
         );
         if (userAnswer && userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim()) {
-          correctAnswers++;
+          correctAnswers += 1;
         }
       });
     });

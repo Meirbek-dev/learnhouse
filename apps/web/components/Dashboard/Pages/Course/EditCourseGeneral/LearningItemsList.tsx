@@ -153,14 +153,12 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     onChange(JSON.stringify(newItems));
   };
 
-  // Update item text
   const updateItemText = (id: string, text: string) => {
     const newItems = items.map((item) => (item.id === id ? { ...item, text } : item));
     setItems(newItems);
     onChange(JSON.stringify(newItems));
   };
 
-  // Update item emoji
   const updateItemEmoji = (id: string, emoji: string) => {
     const newItems = items.map((item) => (item.id === id ? { ...item, emoji } : item));
     setItems(newItems);

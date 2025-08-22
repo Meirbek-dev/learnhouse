@@ -1,8 +1,8 @@
 'use client';
 
 import OrgMenu from '@components/Objects/Menus/org-menu';
+import type { ReactElement, ReactNode } from 'react';
 import { Children, cloneElement } from 'react';
-import type { ReactNode } from 'react';
 
 interface WithMenuClientLayoutProps {
   children: ReactNode;
@@ -19,7 +19,7 @@ export default function WithMenuClientLayout({ children, orgslug }: WithMenuClie
       {/* Spacer for fixed header */}
       <div className="h-[52px]" />
       {Children.map(children, (child, index) =>
-        cloneElement(child as React.ReactElement, {
+        cloneElement(child as ReactElement, {
           key: `${orgslug}-child-${index}`,
         }),
       )}

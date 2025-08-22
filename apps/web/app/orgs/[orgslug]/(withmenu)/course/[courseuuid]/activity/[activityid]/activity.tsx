@@ -21,11 +21,11 @@ import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActi
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
 import { LevelUpNotification, showXPGainToast } from '@components/Dashboard/Gamification';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
@@ -189,10 +189,10 @@ const ActivityClient = (props: ActivityClientProps) => {
   const session = useLHSession() as any;
   const pathname = usePathname();
   const access_token = session?.data?.tokens?.access_token;
-  const [bgColor, setBgColor] = React.useState('bg-white');
-  const [assignment, setAssignment] = React.useState(null) as any;
-  const [markStatusButtonActive, setMarkStatusButtonActive] = React.useState(false);
-  const [isFocusMode, setIsFocusMode] = React.useState(false);
+  const [bgColor, setBgColor] = useState('bg-white');
+  const [assignment, setAssignment] = useState(null) as any;
+  const [markStatusButtonActive, setMarkStatusButtonActive] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(false);
   const isInitialRender = useRef(true);
   const { contributorStatus } = useContributorStatus(courseuuid);
   const router = useRouter();
@@ -211,14 +211,12 @@ const ActivityClient = (props: ActivityClientProps) => {
     swrFetcher(url, access_token),
   );
 
-  // Memoize activity position calculation
   const { allActivities, currentIndex } = useActivityPosition(course, activityid);
 
   // Get previous and next activities
   const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null;
   const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null;
 
-  // Memoize activity content
   const activityContent = useMemo(() => {
     if (!activity?.published || activity?.content?.paid_access === false) {
       return null;
@@ -283,7 +281,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   };
 
   // Initialize focus mode from localStorage
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('globalFocusMode');
       setIsFocusMode(saved === 'true');
@@ -291,7 +289,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   }, []);
 
   // Save focus mode to localStorage
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('globalFocusMode', isFocusMode.toString());
       // Dispatch custom event for focus mode change
@@ -893,9 +891,9 @@ export const MarkStatus = (props: {
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const isMobile = useIsMobile();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [showMarkedTooltip, setShowMarkedTooltip] = React.useState(false);
-  const [showUnmarkedTooltip, setShowUnmarkedTooltip] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showMarkedTooltip, setShowMarkedTooltip] = useState(false);
+  const [showUnmarkedTooltip, setShowUnmarkedTooltip] = useState(false);
 
   // Gamification state
   const [showLevelUpNotification, setShowLevelUpNotification] = useState(false);
@@ -913,7 +911,7 @@ export const MarkStatus = (props: {
     resetLevelUp,
   } = useLevelIndicator(org?.id);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const markedTooltipCount = localStorage.getItem('activity_marked_tooltip_count');
       const unmarkedTooltipCount = localStorage.getItem('activity_unmarked_tooltip_count');
@@ -1342,7 +1340,7 @@ const AssignmentTools = (props: {
 }) => {
   const submission = useAssignmentSubmission() as any;
   const session = useLHSession() as any;
-  const [finalGrade, setFinalGrade] = React.useState(null) as any;
+  const [finalGrade, setFinalGrade] = useState(null) as any;
   const { t } = props;
 
   const submitForGradingUI = async () => {
@@ -1370,7 +1368,7 @@ const AssignmentTools = (props: {
     return 'F';
   }
 
-  const getGradingBasedOnMethod = React.useCallback(async () => {
+  const getGradingBasedOnMethod = useCallback(async () => {
     const res = await getFinalGrade(
       session.data?.user?.id,
       props.assignment?.assignment_uuid,

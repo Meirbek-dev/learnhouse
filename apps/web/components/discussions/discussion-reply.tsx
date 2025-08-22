@@ -8,9 +8,9 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from './rich-text-editor';
+import { useState, useTransition } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useState, useTransition } from 'react';
 import type React from 'react';
 
 interface DiscussionReplyProps {

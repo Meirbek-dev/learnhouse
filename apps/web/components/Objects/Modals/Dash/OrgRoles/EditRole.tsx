@@ -165,12 +165,12 @@ const createRoleFormSchema = (t: (key: string, values?: any) => string) =>
     }),
   });
 
-type RoleFormValues = {
+interface RoleFormValues {
   name: string;
   description: string;
   org_id: number;
   rights: Rights;
-};
+}
 
 const predefinedRoles = (t: (key: string) => string) => ({
   'Admin': {

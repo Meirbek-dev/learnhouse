@@ -50,7 +50,6 @@ const Canva = (props: Editor) => {
   const isEditable = true;
   const isMobile = useIsMobile();
 
-  // Memoize lowlight configuration
   const lowlightConfig = useMemo(() => {
     const lowlight = createLowlight(common);
     lowlight.register('html', html);
@@ -62,7 +61,6 @@ const Canva = (props: Editor) => {
     return lowlight;
   }, []);
 
-  // Memoize editor extensions
   const extensions = useMemo(
     () => [
       StarterKit.configure({

@@ -14,7 +14,6 @@ import { Draggable } from '@hello-pangea/dnd';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import * as React from 'react';
 import Link from 'next/link';
 import { mutate } from 'swr';
 
@@ -34,9 +33,9 @@ const ActivityElement = (props: ActivitiyElementProps) => {
   const router = useRouter();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [modifiedActivity, setModifiedActivity] = React.useState<ModifiedActivityInterface | undefined>();
-  const [selectedActivity, setSelectedActivity] = React.useState<string | undefined>();
-  const [isUpdatingName, setIsUpdatingName] = React.useState<boolean>(false);
+  const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>();
+  const [selectedActivity, setSelectedActivity] = useState<string | undefined>();
+  const [isUpdatingName, setIsUpdatingName] = useState<boolean>(false);
   const activityUUID = props.activity.activity_uuid;
   const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');

@@ -17,6 +17,7 @@ import {
   Youtube,
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
+import type { ChangeEvent, DragEvent, ComponentType, FormEvent } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { AnimatePresence, motion } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';
@@ -31,7 +32,6 @@ import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
-import type React from 'react';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 const SUPPORTED_SUBTITLE_FILES = constructAcceptValue(['srt', 'vtt']);
@@ -95,7 +95,7 @@ const TimeInput = ({
   t,
 }: {
   label: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: ComponentType<{ size?: number; className?: string }>;
   minutes: number;
   seconds: number;
   onMinutesChange: (minutes: number) => void;
@@ -244,7 +244,7 @@ const SubtitleManager = ({
   );
 
   const handleSubtitleUpload = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: ChangeEvent<HTMLInputElement>) => {
       const files = [...(event.target.files || [])];
 
       if (files.length === 0) return;
@@ -270,7 +270,7 @@ const SubtitleManager = ({
   );
 
   const handleDrop = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
+    (event: DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       setDragOver(false);
 
@@ -306,12 +306,12 @@ const SubtitleManager = ({
     [addSubtitle, t],
   );
 
-  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragOver(true);
   }, []);
 
-  const handleDragLeave = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragOver(false);
   }, []);
@@ -885,7 +885,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
   }, [name, selectedView, video, youtubeUrl, videoDetails, isYouTubeUrlValid, t]);
 
   const handleVideoChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: ChangeEvent<HTMLInputElement>) => {
       const selectedFile = event.target.files?.[0];
       if (selectedFile) {
         // Validate file size (max 500MB)
@@ -924,7 +924,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     return false;
   }, [name, selectedView, video, isYouTubeUrlValid]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {

@@ -29,6 +29,7 @@ import { getUriWithoutOrg } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { ChangeEvent, ElementType } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -41,7 +42,6 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
-import * as React from 'react';
 import { z } from 'zod';
 
 const SUPPORTED_FILES = constructAcceptValue(['image']);
@@ -107,146 +107,141 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
     ),
   });
 
-const DetailCard = React.memo(
-  ({
-    id,
-    detail,
-    onUpdate,
-    onRemove,
-    onLabelChange,
-    availableIcons,
-  }: {
-    id: string;
-    detail: DetailItem;
-    onUpdate: (id: string, field: keyof DetailItem, value: string) => void;
-    onRemove: (id: string) => void;
-    onLabelChange: (id: string, newLabel: string) => void;
-    availableIcons: readonly {
-      name: string;
-      label: string;
-      component: React.ElementType;
-    }[];
-  }) => {
-    // Add local state for label input
-    const [localLabel, setLocalLabel] = useState(detail.label);
-    const [isUserInput, setIsUserInput] = useState(false);
-    const t = useTranslations('DashPage.UserAccountSettings.generalSection');
+const DetailCard = ({
+  id,
+  detail,
+  onUpdate,
+  onRemove,
+  onLabelChange,
+  availableIcons,
+}: {
+  id: string;
+  detail: DetailItem;
+  onUpdate: (id: string, field: keyof DetailItem, value: string) => void;
+  onRemove: (id: string) => void;
+  onLabelChange: (id: string, newLabel: string) => void;
+  availableIcons: readonly {
+    name: string;
+    label: string;
+    component: ElementType;
+  }[];
+}) => {
+  // Add local state for label input
+  const [localLabel, setLocalLabel] = useState(detail.label);
+  const [isUserInput, setIsUserInput] = useState(false);
+  const t = useTranslations('DashPage.UserAccountSettings.generalSection');
 
-    // Create a stable callback for label changes - only for user input
-    const stableLabelChangeCallback = useCallback(
-      (newLabel: string) => {
-        if (isUserInput && newLabel !== detail.label) {
-          onLabelChange(id, newLabel);
-        }
-      },
-      [id, onLabelChange, detail.label, isUserInput],
-    );
+  // Create a stable callback for label changes - only for user input
+  const stableLabelChangeCallback = useCallback(
+    (newLabel: string) => {
+      if (isUserInput && newLabel !== detail.label) {
+        onLabelChange(id, newLabel);
+      }
+    },
+    [id, onLabelChange, detail.label, isUserInput],
+  );
 
-    // Debounce the label change handler
-    const debouncedLabelChange = useDebounce(stableLabelChangeCallback, 500);
+  // Debounce the label change handler
+  const debouncedLabelChange = useDebounce(stableLabelChangeCallback, 500);
 
-    // Memoize handlers to prevent unnecessary re-renders
-    const handleLabelChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newLabel = e.target.value;
-        setLocalLabel(newLabel);
-        setIsUserInput(true);
-        debouncedLabelChange(newLabel);
-      },
-      [debouncedLabelChange],
-    );
+  const handleLabelChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const newLabel = e.target.value;
+      setLocalLabel(newLabel);
+      setIsUserInput(true);
+      debouncedLabelChange(newLabel);
+    },
+    [debouncedLabelChange],
+  );
 
-    const handleIconChange = useCallback(
-      (value: string) => {
-        onUpdate(id, 'icon', value);
-      },
-      [id, onUpdate],
-    );
+  const handleIconChange = useCallback(
+    (value: string) => {
+      onUpdate(id, 'icon', value);
+    },
+    [id, onUpdate],
+  );
 
-    const handleTextChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        onUpdate(id, 'text', e.target.value);
-      },
-      [id, onUpdate],
-    );
+  const handleTextChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onUpdate(id, 'text', e.target.value);
+    },
+    [id, onUpdate],
+  );
 
-    const handleRemove = useCallback(() => {
-      onRemove(id);
-    }, [id, onRemove]);
+  const handleRemove = useCallback(() => {
+    onRemove(id);
+  }, [id, onRemove]);
 
-    // Update local label when prop changes (but don't trigger callbacks)
-    useEffect(() => {
-      setLocalLabel(detail.label);
-      setIsUserInput(false); // Reset user input flag when prop changes
-    }, [detail.label]);
+  // Update local label when prop changes (but don't trigger callbacks)
+  useEffect(() => {
+    setLocalLabel(detail.label);
+    setIsUserInput(false); // Reset user input flag when prop changes
+  }, [detail.label]);
 
-    return (
-      <div className="space-y-2 rounded-lg border bg-white p-4 shadow-sm">
-        <div className="mb-3 flex items-center justify-between">
-          <Input
-            value={localLabel}
-            onChange={handleLabelChange}
-            placeholder={t('detailLabelPlaceholder')}
-            className="max-w-[200px]"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-red-500 hover:text-red-700"
-            onClick={handleRemove}
+  return (
+    <div className="space-y-2 rounded-lg border bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <Input
+          value={localLabel}
+          onChange={handleLabelChange}
+          placeholder={t('detailLabelPlaceholder')}
+          className="max-w-[200px]"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-red-500 hover:text-red-700"
+          onClick={handleRemove}
+        >
+          {t('detailRemove')}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{t('detailIconLabel')}</Label>
+          <Select
+            value={detail.icon}
+            onValueChange={handleIconChange}
           >
-            {t('detailRemove')}
-          </Button>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t('detailSelectIconPlaceholder')}>
+                {detail.icon ? (
+                  <div className="flex items-center gap-2">
+                    <IconComponent iconName={detail.icon} />
+                    <span>{availableIcons.find((i) => i.name === detail.icon)?.label}</span>
+                  </div>
+                ) : null}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {availableIcons.map((icon) => (
+                <SelectItem
+                  key={icon.name}
+                  value={icon.name}
+                >
+                  <div className="flex items-center gap-2">
+                    <icon.component className="h-4 w-4" />
+                    <span>{icon.label}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label>{t('detailIconLabel')}</Label>
-            <Select
-              value={detail.icon}
-              onValueChange={handleIconChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={t('detailSelectIconPlaceholder')}>
-                  {detail.icon ? (
-                    <div className="flex items-center gap-2">
-                      <IconComponent iconName={detail.icon} />
-                      <span>{availableIcons.find((i) => i.name === detail.icon)?.label}</span>
-                    </div>
-                  ) : null}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {availableIcons.map((icon) => (
-                  <SelectItem
-                    key={icon.name}
-                    value={icon.name}
-                  >
-                    <div className="flex items-center gap-2">
-                      <icon.component className="h-4 w-4" />
-                      <span>{icon.label}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>{t('detailTextLabel')}</Label>
-            <Input
-              value={detail.text}
-              onChange={handleTextChange}
-              placeholder={t('detailTextPlaceholder')}
-            />
-          </div>
+        <div>
+          <Label>{t('detailTextLabel')}</Label>
+          <Input
+            value={detail.text}
+            onChange={handleTextChange}
+            placeholder={t('detailTextPlaceholder')}
+          />
         </div>
       </div>
-    );
-  },
-);
-
-DetailCard.displayName = 'DetailCard';
+    </div>
+  );
+};
 
 interface UserEditFormProps {
   form: UseFormReturn<FormValues>;
@@ -255,7 +250,7 @@ interface UserEditFormProps {
     success: string;
     isLoading: boolean;
     localAvatar: File | null;
-    handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+    handleFileChange: (event: ChangeEvent<HTMLInputElement>) => Promise<void>;
   };
 }
 
@@ -627,15 +622,15 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 const UserEditGeneral = () => {
   const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
-  const [localAvatar, setLocalAvatar] = React.useState<File | null>(null);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string | undefined>();
-  const [success, setSuccess] = React.useState<string>('');
+  const [localAvatar, setLocalAvatar] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string>('');
   const [userData, setUserData] = useState<any>(null);
   const [currentLocale, setCurrentLocale] = useState<Locale | null>(null);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const t = useTranslations('DashPage.Notifications');
-  const validationSchema = React.useMemo(() => createValidationSchema(t), [t]);
+  const validationSchema = useMemo(() => createValidationSchema(t), [t]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),
@@ -685,7 +680,7 @@ const UserEditGeneral = () => {
     fetchData();
   }, [session?.data?.user?.id, access_token, form]);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 

@@ -213,7 +213,6 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
     [format, t],
   );
 
-  // Memoized calculations
   const streakData = useMemo(() => {
     if (!profile) return null;
 

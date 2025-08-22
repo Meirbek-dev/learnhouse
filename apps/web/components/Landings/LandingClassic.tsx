@@ -10,7 +10,6 @@ import { LearnerDashboard } from '@components/Dashboard/LearnerDashboard';
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { memo } from 'react';
 
 interface LandingClassicProps {
   courses: any[];
@@ -20,7 +19,7 @@ interface LandingClassicProps {
   showLearnerDashboard?: boolean;
 }
 
-const EmptyCollectionsState = memo(({ t }: { t: any }) => (
+const EmptyCollectionsState = ({ t }: { t: any }) => (
   <div className="col-span-full flex items-center justify-center py-12">
     <div className="max-w-md text-center">
       <div className="mb-6">
@@ -46,11 +45,8 @@ const EmptyCollectionsState = memo(({ t }: { t: any }) => (
       </p>
     </div>
   </div>
-));
-
-EmptyCollectionsState.displayName = 'EmptyCollectionsState';
-
-const EmptyCoursesState = memo(({ t }: { t: any }) => (
+);
+const EmptyCoursesState = ({ t }: { t: any }) => (
   <div className="col-span-full flex items-center justify-center py-12">
     <div className="max-w-md text-center">
       <div className="mb-6">
@@ -76,32 +72,26 @@ const EmptyCoursesState = memo(({ t }: { t: any }) => (
       </p>
     </div>
   </div>
-));
-
-EmptyCoursesState.displayName = 'EmptyCoursesState';
-
-const CollectionGrid = memo(
-  ({ collections, orgslug, org_id }: { collections: any[]; orgslug: string; org_id: number }) => (
-    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
-      {collections.map((collection: any) => (
-        <div
-          key={collection.collection_uuid}
-          className="p-2 transition-transform duration-200 hover:scale-[1.02]"
-        >
-          <CollectionThumbnail
-            collection={collection}
-            orgslug={orgslug}
-            org_id={org_id}
-          />
-        </div>
-      ))}
-    </div>
-  ),
 );
 
-CollectionGrid.displayName = 'CollectionGrid';
+const CollectionGrid = ({ collections, orgslug, org_id }: { collections: any[]; orgslug: string; org_id: number }) => (
+  <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+    {collections.map((collection: any) => (
+      <div
+        key={collection.collection_uuid}
+        className="p-2 transition-transform duration-200 hover:scale-[1.02]"
+      >
+        <CollectionThumbnail
+          collection={collection}
+          orgslug={orgslug}
+          org_id={org_id}
+        />
+      </div>
+    ))}
+  </div>
+);
 
-const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
+const CourseGrid = ({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
   <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
     {courses.map((course: any) => (
       <div
@@ -115,9 +105,7 @@ const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string
       </div>
     ))}
   </div>
-));
-
-CourseGrid.displayName = 'CourseGrid';
+);
 
 const LandingClassic = ({
   courses,
@@ -211,4 +199,4 @@ const LandingClassic = ({
   );
 };
 
-export default memo(LandingClassic);
+export default LandingClassic;

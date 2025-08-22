@@ -1,4 +1,5 @@
 'use client';
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertTriangle, Code2, PencilLine, Plus, Trash2 } from 'lucide-react';
@@ -13,10 +14,11 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import type { FC } from 'react';
 import { mutate } from 'swr';
-import React from 'react';
 import { z } from 'zod';
 
 interface Script {
@@ -36,21 +38,20 @@ const getValidationSchema = (t: (key: string) => string) =>
 
 type ScriptFormData = z.infer<ReturnType<typeof getValidationSchema>>;
 
-const OrgEditOther: React.FC = () => {
+const OrgEditOther: FC = () => {
   const router = useRouter();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
-  const [selectedView, setSelectedView] = React.useState<'list' | 'edit'>('list');
-  const [scripts, setScripts] = React.useState<Script[]>([]);
-  const [currentScript, setCurrentScript] = React.useState<Script | null>(null);
+  const [selectedView, setSelectedView] = useState<'list' | 'edit'>('list');
+  const [scripts, setScripts] = useState<Script[]>([]);
+  const [currentScript, setCurrentScript] = useState<Script | null>(null);
   const t = useTranslations('DashPage.Other');
 
-  // Initialize validation schema
   const validationSchema = getValidationSchema(t);
 
   // Initialize scripts from org
-  React.useEffect(() => {
+  useEffect(() => {
     if (org?.scripts?.scripts) {
       setScripts(Array.isArray(org.scripts.scripts) ? org.scripts.scripts : []);
     } else {

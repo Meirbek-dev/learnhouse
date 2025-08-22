@@ -15,15 +15,15 @@ import {
   SiX,
   SiYoutube,
 } from '@icons-pack/react-simple-icons';
+import type { ChangeEvent, FormEvent, KeyboardEvent, CSSProperties, MouseEvent as ReactMouseEvent } from 'react';
 import { AlignCenter, Code, GripHorizontal, GripVertical, Link as LinkIcon } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';
-import * as React from 'react';
 
 // Add new type for script-based embeds
 const SCRIPT_BASED_EMBEDS = {
@@ -80,84 +80,81 @@ const getYouTubeEmbedUrl = (url: string): string => {
   }
 };
 
-// Add new memoized component for the embed content
-const MemoizedEmbed = React.memo(
-  ({
-    embedUrl,
-    sanitizedEmbedCode,
-    embedType,
-  }: {
-    embedUrl: string;
-    sanitizedEmbedCode: string;
-    embedType: 'url' | 'code';
-  }) => {
-    useEffect(() => {
-      if (embedType === 'code' && sanitizedEmbedCode) {
-        // Check for any matching script-based embeds
-        const matchingPlatform = Object.entries(SCRIPT_BASED_EMBEDS).find(([_, config]) =>
-          sanitizedEmbedCode.includes(config.identifier),
-        );
-
-        if (matchingPlatform) {
-          const [_, config] = matchingPlatform;
-          const script = document.createElement('script');
-          script.src = config.src;
-          script.async = true;
-          document.body.append(script);
-
-          return () => {
-            if (document.body.contains(script)) {
-              document.body.removeChild(script);
-            }
-          };
-        }
-      }
-
-      return () => {};
-    }, [embedType, sanitizedEmbedCode]);
-
-    if (embedType === 'url' && embedUrl) {
-      // Process the URL if it's a YouTube URL - using proper URL validation
-      let isYoutubeUrl = false;
-
-      try {
-        const url = new URL(embedUrl);
-        // Check if the hostname is exactly youtube.com or youtu.be (or www variants)
-        isYoutubeUrl =
-          url.hostname === 'youtube.com' ||
-          url.hostname === 'www.youtube.com' ||
-          url.hostname === 'youtu.be' ||
-          url.hostname === 'www.youtu.be';
-      } catch {
-        // Invalid URL format, not a YouTube URL
-        isYoutubeUrl = false;
-      }
-
-      const processedUrl = isYoutubeUrl ? getYouTubeEmbedUrl(embedUrl) : embedUrl;
-
-      return (
-        <iframe
-          src={processedUrl}
-          className="h-full w-full border-0"
-          allowFullScreen
-          title="Embedded Content"
-        />
-      );
-    }
-
+// Embed content component
+const EmbedContent = ({
+  embedUrl,
+  sanitizedEmbedCode,
+  embedType,
+}: {
+  embedUrl: string;
+  sanitizedEmbedCode: string;
+  embedType: 'url' | 'code';
+}) => {
+  useEffect(() => {
     if (embedType === 'code' && sanitizedEmbedCode) {
-      return (
-        <div
-          dangerouslySetInnerHTML={{ __html: sanitizedEmbedCode }}
-          className="h-full w-full"
-        />
+      // Check for any matching script-based embeds
+      const matchingPlatform = Object.entries(SCRIPT_BASED_EMBEDS).find(([_, config]) =>
+        sanitizedEmbedCode.includes(config.identifier),
       );
+
+      if (matchingPlatform) {
+        const [_, config] = matchingPlatform;
+        const script = document.createElement('script');
+        script.src = config.src;
+        script.async = true;
+        document.body.append(script);
+
+        return () => {
+          if (document.body.contains(script)) {
+            document.body.removeChild(script);
+          }
+        };
+      }
     }
 
-    return null;
-  },
-);
-MemoizedEmbed.displayName = 'MemoizedEmbed';
+    return () => {};
+  }, [embedType, sanitizedEmbedCode]);
+
+  if (embedType === 'url' && embedUrl) {
+    // Process the URL if it's a YouTube URL - using proper URL validation
+    let isYoutubeUrl = false;
+
+    try {
+      const url = new URL(embedUrl);
+      // Check if the hostname is exactly youtube.com or youtu.be (or www variants)
+      isYoutubeUrl =
+        url.hostname === 'youtube.com' ||
+        url.hostname === 'www.youtube.com' ||
+        url.hostname === 'youtu.be' ||
+        url.hostname === 'www.youtu.be';
+    } catch {
+      // Invalid URL format, not a YouTube URL
+      isYoutubeUrl = false;
+    }
+
+    const processedUrl = isYoutubeUrl ? getYouTubeEmbedUrl(embedUrl) : embedUrl;
+
+    return (
+      <iframe
+        src={processedUrl}
+        className="h-full w-full border-0"
+        allowFullScreen
+        title="Embedded Content"
+      />
+    );
+  }
+
+  if (embedType === 'code' && sanitizedEmbedCode) {
+    return (
+      <div
+        dangerouslySetInnerHTML={{ __html: sanitizedEmbedCode }}
+        className="h-full w-full"
+      />
+    );
+  }
+
+  return null;
+};
 
 const EmbedObjectsComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.EmbedObjects');
@@ -311,7 +308,7 @@ const EmbedObjectsComponent = (props: any) => {
     }
   }, [embedCode, embedType]);
 
-  const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newUrl = event.target.value;
     const trimmedUrl = newUrl.trim();
 
@@ -351,7 +348,7 @@ const EmbedObjectsComponent = (props: any) => {
     }
   };
 
-  const handleCodeChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleCodeChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = event.target.value;
     const trimmedCode = newCode.trim();
     // Only update if code is not just whitespace
@@ -370,7 +367,7 @@ const EmbedObjectsComponent = (props: any) => {
     height: props.node.attrs.embedHeight || 300,
   });
 
-  const handleResizeStart = (event: React.MouseEvent<HTMLDivElement>, direction: 'horizontal' | 'vertical') => {
+  const handleResizeStart = (event: ReactMouseEvent<HTMLDivElement>, direction: 'horizontal' | 'vertical') => {
     event.preventDefault();
     setIsResizing(true);
     const startX = event.clientX;
@@ -425,7 +422,7 @@ const EmbedObjectsComponent = (props: any) => {
   // Calculate responsive styles based on parent width
   const getResponsiveStyles = () => {
     // Default styles
-    const styles: React.CSSProperties = {
+    const styles: CSSProperties = {
       height: `${embedHeight}px`,
       width: embedWidth,
     };
@@ -446,11 +443,10 @@ const EmbedObjectsComponent = (props: any) => {
     return styles;
   };
 
-  // Memoize the embed content
   const embedContent = useMemo(
     () =>
       !isResizing && (embedUrl || sanitizedEmbedCode) ? (
-        <MemoizedEmbed
+        <EmbedContent
           embedUrl={embedUrl}
           sanitizedEmbedCode={sanitizedEmbedCode}
           embedType={embedType}
@@ -466,7 +462,7 @@ const EmbedObjectsComponent = (props: any) => {
   const [selectedProduct, setSelectedProduct] = useState<(typeof supportedProducts)[0] | null>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
   const codeInputRef = useRef<HTMLTextAreaElement>(null);
-  const [isPending, startTransition] = React.useTransition();
+  const [isPending, startTransition] = useTransition();
 
   // Handle direct input from product selection
   const handleProductSelection = (product: (typeof supportedProducts)[0]) => {
@@ -486,7 +482,7 @@ const EmbedObjectsComponent = (props: any) => {
   };
 
   // Handle input submission
-  const handleInputSubmit = (e: React.FormEvent) => {
+  const handleInputSubmit = (e: FormEvent) => {
     e.preventDefault();
     startTransition(() => {
       setActiveInput('none');
@@ -494,7 +490,7 @@ const EmbedObjectsComponent = (props: any) => {
   };
 
   // Handle escape key to cancel input
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       setActiveInput('none');
     }

@@ -158,12 +158,12 @@ const createRoleFormSchema = (t: (key: string, values?: any) => string) =>
     }),
   });
 
-type RoleFormValues = {
+interface RoleFormValues {
   name: string;
   description: string;
   org_id: number;
   rights: Rights;
-};
+}
 
 const defaultRights: Rights = {
   courses: {
@@ -535,9 +535,9 @@ function AddRole(props: AddRoleProps) {
         } else {
           toast.error(t('couldntCreateNewRole'), { id: toastID });
         }
-      } catch (err: any) {
+      } catch (error: any) {
         toast.error(t('couldntCreateNewRole'), { id: toastID });
-        setError(err?.message || t('unknownError'));
+        setError(error?.message || t('unknownError'));
       }
     });
   };

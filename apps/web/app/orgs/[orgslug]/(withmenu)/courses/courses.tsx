@@ -10,7 +10,7 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { memo, useState } from 'react';
+import { useState } from 'react';
 
 interface CourseProps {
   orgslug: string;
@@ -18,7 +18,7 @@ interface CourseProps {
   org_id: number;
 }
 
-const EmptyStateMessage = memo(({ isUserAdmin, t, newCourseButtonTrigger }: any) => (
+const EmptyStateMessage = ({ isUserAdmin, t, newCourseButtonTrigger }: any) => (
   <div className="col-span-full flex items-center justify-center py-12">
     <div className="max-w-md text-center">
       <div className="mb-6">
@@ -43,11 +43,9 @@ const EmptyStateMessage = memo(({ isUserAdmin, t, newCourseButtonTrigger }: any)
       {isUserAdmin ? <div className="flex justify-center">{newCourseButtonTrigger}</div> : null}
     </div>
   </div>
-));
+);
 
-EmptyStateMessage.displayName = 'EmptyStateMessage';
-
-const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
+const CourseGrid = ({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
   <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
     {courses.map((course: any) => (
       <div
@@ -61,9 +59,7 @@ const CourseGrid = memo(({ courses, orgslug }: { courses: any[]; orgslug: string
       </div>
     ))}
   </div>
-));
-
-CourseGrid.displayName = 'CourseGrid';
+);
 
 const Courses = (props: CourseProps) => {
   const t = useTranslations('CoursesPage');
@@ -138,4 +134,4 @@ const Courses = (props: CourseProps) => {
   );
 };
 
-export default memo(Courses);
+export default Courses;

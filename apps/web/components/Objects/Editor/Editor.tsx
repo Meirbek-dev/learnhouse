@@ -83,11 +83,9 @@ const Editor = (props: EditorProps) => {
     }
   }, [is_ai_feature_enabled]);
 
-  // Memoize course and activity IDs
   const courseUuid = useMemo(() => props.course.course_uuid.slice(7), [props.course.course_uuid]);
   const activityUuid = useMemo(() => props.activity.activity_uuid.slice(9), [props.activity.activity_uuid]);
 
-  // Memoize lowlight configuration
   const lowlightConfig = useMemo(() => {
     const lowlight = createLowlight(common);
     lowlight.register('html', html);
@@ -99,7 +97,6 @@ const Editor = (props: EditorProps) => {
     return lowlight;
   }, []);
 
-  // Memoize editor extensions
   const extensions = useMemo(
     () => [
       StarterKit.configure({
@@ -189,7 +186,6 @@ const Editor = (props: EditorProps) => {
   // Destructure setContent for stable reference
   const { setContent } = props;
 
-  // Memoize content update handler
   const handleContentSave = useCallback(() => {
     if (editor) {
       setContent(editor.getJSON());

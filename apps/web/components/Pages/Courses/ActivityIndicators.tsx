@@ -5,9 +5,9 @@ import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 // Gamification imports
 import { LevelIndicatorBadge } from '@components/Dashboard/Gamification';
 import { useLevelIndicator } from '@/hooks/useLevelIndicator';
-import { Fragment, memo, useMemo, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
+import { Fragment, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -62,8 +62,7 @@ function getActivityTypeBadgeColor(activityType: string): string {
   }
 }
 
-// Memoized activity type icon component
-const ActivityTypeIcon = memo(({ activityType }: { activityType: string }) => {
+const ActivityTypeIcon = ({ activityType }: { activityType: string }) => {
   switch (activityType) {
     case 'TYPE_VIDEO': {
       return (
@@ -106,120 +105,119 @@ const ActivityTypeIcon = memo(({ activityType }: { activityType: string }) => {
       );
     }
   }
-});
+};
 
-ActivityTypeIcon.displayName = 'ActivityTypeIcon';
+const ActivityTooltipContent = ({
+  activity,
+  isDone,
+  isCurrent,
+}: {
+  activity: any;
+  isDone: boolean;
+  isCurrent: boolean;
+}) => {
+  const t = useTranslations('ActivityIndicators');
+  return (
+    <div className="soft-shadow fade-in animate-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
+      <div className="flex items-center gap-2">
+        <ActivityTypeIcon activityType={activity.activity_type} />
+        <span className="text-sm text-gray-700">{activity.name}</span>
+        {isDone ? (
+          <span className="ml-auto text-gray-400">
+            <Check size={14} />
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <span className={`rounded-full px-2 py-0.5 text-xs ${getActivityTypeBadgeColor(activity.activity_type)}`}>
+          {getActivityTypeLabel(activity.activity_type, t)}
+        </span>
+        <span className="text-xs text-gray-400">
+          {isCurrent ? t('currentActivity') : isDone ? t('completed') : t('notStarted')}
+        </span>
+      </div>
+    </div>
+  );
+};
 
-// Memoized activity tooltip content
-const ActivityTooltipContent = memo(
-  ({ activity, isDone, isCurrent }: { activity: any; isDone: boolean; isCurrent: boolean }) => {
-    const t = useTranslations('ActivityIndicators');
-    return (
-      <div className="soft-shadow fade-in animate-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
-        <div className="flex items-center gap-2">
-          <ActivityTypeIcon activityType={activity.activity_type} />
-          <span className="text-sm text-gray-700">{activity.name}</span>
-          {isDone ? (
-            <span className="ml-auto text-gray-400">
-              <Check size={14} />
+const ChapterTooltipContent = ({
+  chapter,
+  chapterNumber,
+  totalActivities,
+  completedActivities,
+}: {
+  chapter: any;
+  chapterNumber: number;
+  totalActivities: number;
+  completedActivities: number;
+}) => {
+  const t = useTranslations('ActivityIndicators');
+  return (
+    <div className="soft-shadow fade-in animate-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-gray-900">
+          {t('chapter')} {chapterNumber}
+        </span>
+        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+          {completedActivities}/{totalActivities} {t('completed')}
+        </span>
+      </div>
+      <div className="mt-1">
+        <span className="text-sm text-gray-700">{chapter.name}</span>
+      </div>
+    </div>
+  );
+};
+
+const CertificationBadge = ({
+  courseid,
+  orgslug,
+  isCompleted,
+}: {
+  courseid: string;
+  orgslug: string;
+  isCompleted: boolean;
+}) => {
+  const t = useTranslations('Certificates.ActivityIndicators');
+  return (
+    <ToolTip
+      sideOffset={8}
+      unstyled
+      content={
+        <div className="soft-shadow fade-in animate-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
+          <div className="flex items-center gap-2">
+            <Trophy
+              size={16}
+              className="text-yellow-500"
+            />
+            <span className="text-sm font-medium text-gray-900">
+              {isCompleted ? t('certificationAvailable') : t('earnCertificate')}
             </span>
-          ) : null}
-        </div>
-        <div className="mt-2 flex items-center gap-2">
-          <span className={`rounded-full px-2 py-0.5 text-xs ${getActivityTypeBadgeColor(activity.activity_type)}`}>
-            {getActivityTypeLabel(activity.activity_type, t)}
-          </span>
-          <span className="text-xs text-gray-400">
-            {isCurrent ? t('currentActivity') : isDone ? t('completed') : t('notStarted')}
-          </span>
-        </div>
-      </div>
-    );
-  },
-);
-
-ActivityTooltipContent.displayName = 'ActivityTooltipContent';
-
-// Add new memoized component for chapter tooltip
-const ChapterTooltipContent = memo(
-  ({
-    chapter,
-    chapterNumber,
-    totalActivities,
-    completedActivities,
-  }: {
-    chapter: any;
-    chapterNumber: number;
-    totalActivities: number;
-    completedActivities: number;
-  }) => {
-    const t = useTranslations('ActivityIndicators');
-    return (
-      <div className="soft-shadow fade-in animate-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900">
-            {t('chapter')} {chapterNumber}
-          </span>
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
-            {completedActivities}/{totalActivities} {t('completed')}
-          </span>
-        </div>
-        <div className="mt-1">
-          <span className="text-sm text-gray-700">{chapter.name}</span>
-        </div>
-      </div>
-    );
-  },
-);
-
-ChapterTooltipContent.displayName = 'ChapterTooltipContent';
-
-// Add certification badge component
-const CertificationBadge = memo(
-  ({ courseid, orgslug, isCompleted }: { courseid: string; orgslug: string; isCompleted: boolean }) => {
-    const t = useTranslations('Certificates.ActivityIndicators');
-    return (
-      <ToolTip
-        sideOffset={8}
-        unstyled
-        content={
-          <div className="soft-shadow fade-in animate-in min-w-[200px] rounded-lg bg-white px-4 py-3 duration-200">
-            <div className="flex items-center gap-2">
-              <Trophy
-                size={16}
-                className="text-yellow-500"
-              />
-              <span className="text-sm font-medium text-gray-900">
-                {isCompleted ? t('certificationAvailable') : t('earnCertificate')}
-              </span>
-            </div>
-            <div className="mt-1">
-              <span className="text-sm text-gray-700">{isCompleted ? t('viewCertificate') : t('earnCertificate')}</span>
-            </div>
           </div>
-        }
+          <div className="mt-1">
+            <span className="text-sm text-gray-700">{isCompleted ? t('viewCertificate') : t('earnCertificate')}</span>
+          </div>
+        </div>
+      }
+    >
+      <Link
+        href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/end`}
+        prefetch={false}
+        className={`mx-2 flex h-[20px] cursor-pointer items-center transition-all focus:outline-none ${
+          isCompleted ? 'opacity-100' : 'cursor-not-allowed opacity-50'
+        }`}
       >
-        <Link
-          href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/end`}
-          prefetch={false}
-          className={`mx-2 flex h-[20px] cursor-pointer items-center transition-all focus:outline-none ${
-            isCompleted ? 'opacity-100' : 'cursor-not-allowed opacity-50'
+        <div
+          className={`flex h-[20px] w-[20px] items-center justify-center rounded-full text-xs font-medium transition-colors ${
+            isCompleted ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-gray-100 text-gray-400'
           }`}
         >
-          <div
-            className={`flex h-[20px] w-[20px] items-center justify-center rounded-full text-xs font-medium transition-colors ${
-              isCompleted ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-gray-100 text-gray-400'
-            }`}
-          >
-            <Trophy size={12} />
-          </div>
-        </Link>
-      </ToolTip>
-    );
-  },
-);
-
-CertificationBadge.displayName = 'CertificationBadge';
+          <Trophy size={12} />
+        </div>
+      </Link>
+    </ToolTip>
+  );
+};
 
 const ActivityIndicators = (props: Props) => {
   const t = useTranslations('ActivityIndicators');
@@ -257,7 +255,6 @@ const ActivityIndicators = (props: Props) => {
     );
   }, [allActivities, props.current_activity]);
 
-  // Memoize activity status checks
   const isActivityDone = useMemo(
     () => (activity: any) => {
       // Clean up course UUID by removing 'course_' prefix if it exists
@@ -471,4 +468,4 @@ const ActivityIndicators = (props: Props) => {
   );
 };
 
-export default memo(ActivityIndicators);
+export default ActivityIndicators;

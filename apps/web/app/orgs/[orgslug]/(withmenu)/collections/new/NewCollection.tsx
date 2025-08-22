@@ -11,14 +11,14 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Textarea } from '@components/ui/textarea';
 import { Checkbox } from '@components/ui/checkbox';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import type { ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import { useState } from 'react';
-import * as React from 'react';
 import useSWR from 'swr';
 
 const NewCollection = ({ params }: { params: { orgslug: string } }) => {
@@ -27,11 +27,11 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { orgslug } = params;
-  const [name, setName] = React.useState('');
-  const [description, setDescription] = React.useState('');
-  const [selectedCourses, setSelectedCourses] = React.useState([]) as any;
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedCourses, setSelectedCourses] = useState([]) as any;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPending, startTransition] = React.useTransition();
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const {
     data: courses,
@@ -44,11 +44,11 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
     setIsPublic(value === 'true');
   };
 
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
   };
 
-  const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(event.target.value);
   };
 

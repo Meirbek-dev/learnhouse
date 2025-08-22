@@ -13,7 +13,7 @@ import { useWindowSize } from '@/hooks/useWindowSize';
 import { useEffect, useMemo, useState } from 'react';
 import ReactConfetti from 'react-confetti';
 import html2canvas from 'html2canvas-pro';
-import type React from 'react';
+import type { FC } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
 import jsPDF from 'jspdf';
@@ -27,7 +27,7 @@ interface CourseEndViewProps {
   trailData: any;
 }
 
-const CourseEndView: React.FC<CourseEndViewProps> = ({
+const CourseEndView: FC<CourseEndViewProps> = ({
   courseName,
   orgslug,
   courseUuid,

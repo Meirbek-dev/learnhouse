@@ -16,16 +16,17 @@ import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
-import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
-function OrgRoles() {
+const OrgRoles: FC = () => {
   const t = useTranslations('Components.OrgRoles');
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [createRoleModal, setCreateRoleModal] = React.useState(false);
-  const [editRoleModal, setEditRoleModal] = React.useState(false);
-  const [selectedRole, setSelectedRole] = React.useState(null) as any;
+  const [createRoleModal, setCreateRoleModal] = useState(false);
+  const [editRoleModal, setEditRoleModal] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<any>(null);
 
   const { data: roles } = useSWR(org ? `${getAPIUrl()}roles/org/${org.id}` : null, (url) =>
     swrFetcher(url, access_token),
@@ -289,6 +290,6 @@ function OrgRoles() {
       </CardContent>
     </Card>
   );
-}
+};
 
 export default OrgRoles;

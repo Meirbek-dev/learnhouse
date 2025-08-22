@@ -15,7 +15,6 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
-import * as React from 'react';
 import Link from 'next/link';
 
 interface FileSchema {
@@ -34,10 +33,10 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [localUploadFile, setLocalUploadFile] = React.useState<File | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [assignmentTask, setAssignmentTask] = React.useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [localUploadFile, setLocalUploadFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [assignmentTask, setAssignmentTask] = useState<any>(null);
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
   const assignment = useAssignments() as any;
 

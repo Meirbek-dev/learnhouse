@@ -198,7 +198,6 @@ const EditCourseGeneral = (props: EditCourseGeneralProps) => {
 
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  // Memoized auto-save function
   const autoSaveCourse = useCallback(
     async (courseData: any) => {
       if (!(session?.data?.tokens?.access_token && courseData.course_uuid)) return;
