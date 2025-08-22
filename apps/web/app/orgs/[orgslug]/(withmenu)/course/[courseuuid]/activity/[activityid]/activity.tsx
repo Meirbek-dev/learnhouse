@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit2,
+  Loader2,
   Maximize2,
   Minimize2,
   UserRoundPen,
@@ -64,10 +65,7 @@ const AIChatBotProvider = lazy(() => import('@components/Contexts/AI/AIChatBotCo
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="flex h-64 items-center justify-center">
-    <div className="relative h-6 w-6">
-      <div className="absolute top-0 left-0 h-full w-full rounded-full border-2 border-gray-100" />
-      <div className="absolute top-0 left-0 h-full w-full animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
-    </div>
+    <Loader2 className="h-6 w-6 animate-spin" />
   </div>
 );
 

@@ -2,8 +2,8 @@
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { AlertTriangle, Loader2, UserRoundPlus } from 'lucide-react';
 import PasswordInput from '@components/ui/custom/password-input';
-import { AlertTriangle, UserRoundPlus } from 'lucide-react';
 import openuLogoDark from 'public/openu_logo_dark.webp';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useTransition } from 'react';
@@ -159,7 +159,17 @@ const LoginClient = (props: LoginClientProps) => {
                       className="w-full font-semibold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={isPending}
                     >
-                      {isPending ? t('loading') : t('login')}
+                      {isPending ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2
+                            className="h-4 w-4 animate-spin"
+                            aria-hidden="true"
+                          />
+                          {t('loading')}
+                        </div>
+                      ) : (
+                        t('login')
+                      )}
                     </Button>
                   </div>
                 </form>

@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, BookOpen, ClockIcon, ShoppingCart, UserPen } from 'lucide-react';
+import { AlertCircle, ArrowRight, BookOpen, ClockIcon, Loader2, ShoppingCart, UserPen } from 'lucide-react';
 import { getAPIUrl, getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { removeCourse, startCourse } from '@services/courses/activity';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -255,7 +255,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
         className="soft-shadow mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white py-3 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed"
       >
         {isContributeLoading ? (
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-700 border-t-transparent" />
+          <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
           <>
             <UserPen className="h-5 w-5" />
@@ -388,7 +388,11 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
   };
 
   if (isLoading) {
-    return <div className="soft-shadow h-20 animate-pulse rounded-lg bg-gray-100" />;
+    return (
+      <div className="soft-shadow flex h-20 items-center justify-center rounded-lg bg-gray-100">
+        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+      </div>
+    );
   }
 
   if (linkedProducts.length > 0) {
@@ -414,7 +418,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
                 }`}
               >
                 {isActionLoading ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   renderActionButton(isStarted ? 'leave' : 'start')
                 )}
@@ -472,7 +476,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
           }`}
         >
           {isActionLoading ? (
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             renderActionButton(isStarted ? 'leave' : 'start')
           )}

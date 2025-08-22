@@ -1,5 +1,5 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
-import { ArrowLeft, BookOpen, Download, Shield, Target, Trophy } from 'lucide-react';
+import { ArrowLeft, BookOpen, Download, Loader2, Shield, Target, Trophy } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -603,7 +603,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           {/* Certificate Display */}
           {isLoadingCertificate ? (
             <div className="flex items-center justify-center py-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin" />
               <span className="ml-3 text-gray-600">{t('loadingCertificate')}</span>
             </div>
           ) : certificateError ? (

@@ -3,7 +3,7 @@
 import type { ButtonHTMLAttributes, FC, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
 import { UploadIcon } from '@radix-ui/react-icons';
 import { useTranslations } from 'next-intl';
-import { Loader } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -60,7 +60,7 @@ const FileUploadBlock = ({ isLoading, isEditable, isEmpty, Icon, children }: Upl
 
   if (isLoading) {
     return (
-      <Loader
+      <Loader2
         className="animate-spin text-gray-200"
         size={50}
       />

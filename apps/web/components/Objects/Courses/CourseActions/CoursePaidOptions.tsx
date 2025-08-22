@@ -1,7 +1,7 @@
 'use client';
 
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
-import { ChevronDown, ChevronUp, RefreshCcw, SquareCheck } from 'lucide-react';
+import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
@@ -76,7 +76,18 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   };
 
   if (error) return <div>{t('failedToLoad')}</div>;
-  if (!linkedProducts) return <div>{t('loading')}</div>;
+  if (!linkedProducts)
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+          <Loader2
+            size={16}
+            className="mr-2 animate-spin"
+          />
+          <span>{t('loading')}</span>
+        </div>
+      </div>
+    );
 
   return (
     <div className="space-y-4 p-1">

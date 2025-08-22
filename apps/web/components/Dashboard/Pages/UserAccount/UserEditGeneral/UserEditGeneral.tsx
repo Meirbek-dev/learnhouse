@@ -15,6 +15,7 @@ import {
   Laptop2,
   Lightbulb,
   Link,
+  Loader2,
   MapPin,
   UploadCloud,
   Users,
@@ -768,7 +769,7 @@ const UserEditGeneral = () => {
     return (
       <div className="soft-shadow mx-0 rounded-xl bg-white p-8 sm:mx-10">
         <div className="flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       </div>
     );

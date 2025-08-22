@@ -1,7 +1,7 @@
 'use client';
 
 import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
-import { AlertCircle, LogIn, LogOut, ShoppingCart } from 'lucide-react';
+import { AlertCircle, Loader2, LogIn, LogOut, ShoppingCart } from 'lucide-react';
 import { removeCourse, startCourse } from '@services/courses/activity';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
@@ -232,7 +232,11 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   };
 
   if (isLoading) {
-    return <div className="mt-4 mb-8 h-16 animate-pulse rounded-lg bg-gray-100" />;
+    return (
+      <div className="mt-4 mb-8 flex h-16 items-center justify-center rounded-lg bg-gray-100">
+        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+      </div>
+    );
   }
 
   // Filter active authors and sort by role priority
@@ -284,7 +288,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                 }`}
               >
                 {isActionLoading ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : isStarted ? (
                   <>
                     <LogOut className="h-4 w-4" />
@@ -315,7 +319,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
                   className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
                 >
                   {isActionLoading ? (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
                       <ShoppingCart className="h-4 w-4" />
@@ -337,7 +341,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
             }`}
           >
             {isActionLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : !session.data?.user ? (
               <>
                 <LogIn className="h-4 w-4" />

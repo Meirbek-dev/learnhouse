@@ -1,9 +1,9 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { AlertTriangle, Check, Loader2, User } from 'lucide-react';
 import PasswordInput from '@components/ui/custom/password-input';
 import { useEffect, useState, useTransition } from 'react';
-import { AlertTriangle, Check, User } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
@@ -200,7 +200,17 @@ const OpenSignUpComponent = () => {
               className="w-full p-2 font-semibold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting ? t('loading') : t('createAccount')}
+              {form.formState.isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <Loader2
+                    className="h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                  {t('loading')}
+                </div>
+              ) : (
+                t('createAccount')
+              )}
             </Button>
           </div>
         </form>

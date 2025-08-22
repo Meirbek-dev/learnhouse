@@ -77,7 +77,9 @@ const RolesUpdate: FC<Props> = (props) => {
       {error && (
         <Alert variant="destructive">
           <AlertDescription>
-            <strong>{t('errorPrefix')} {error.split(':')[0]}: </strong>
+            <strong>
+              {t('errorPrefix')} {error.split(':')[0]}:{' '}
+            </strong>
             {error.split(':').slice(1).join(':')}
           </AlertDescription>
         </Alert>

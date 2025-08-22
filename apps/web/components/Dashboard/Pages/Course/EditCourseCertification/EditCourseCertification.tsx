@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { createCertification, deleteCertification } from '@services/courses/certifications';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { AlertTriangle, Award, FileText, Settings } from 'lucide-react';
+import { AlertTriangle, Award, FileText, Loader2, Settings } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -286,7 +286,17 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
   };
 
   if (isLoading || !courseStructure || (courseStructure.course_uuid && access_token && certifications === undefined)) {
-    return <div>{t('loading')}</div>;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+          <Loader2
+            size={16}
+            className="mr-2 animate-spin"
+          />
+          <span>{t('loading')}</span>
+        </div>
+      </div>
+    );
   }
 
   if (certificationsError) {

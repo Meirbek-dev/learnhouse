@@ -233,7 +233,9 @@ export const AnimatedButton = ({
             className="h-4 w-4 rounded-full border-2 border-white border-t-transparent"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+            aria-hidden="true"
           />
+          <span className="sr-only">{t('loading')}</span>
           {t('loading')}
         </div>
       ) : (

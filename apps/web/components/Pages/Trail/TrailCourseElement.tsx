@@ -7,7 +7,7 @@ import { revalidateTags } from '@services/utils/ts/requests';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useEffect, useMemo, useState } from 'react';
-import { Award, ExternalLink } from 'lucide-react';
+import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -122,7 +122,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
           <div className="mt-2 border-t border-gray-100 pt-2">
             {isLoadingCertificate ? (
               <div className="flex items-center space-x-1 text-xs text-gray-500">
-                <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-500" />
+                <Loader2 className="h-3 w-3 animate-spin" />
                 <span>{t('loadingCertificate')}</span>
               </div>
             ) : courseCertificate ? (

@@ -2,11 +2,11 @@
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import PasswordInput from '@components/ui/custom/password-input';
+import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { getUriWithoutOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPassword } from '@services/auth/auth';
-import { AlertTriangle, Info } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -182,7 +182,17 @@ const ResetPasswordClient = () => {
                     className="w-full font-bold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isPending}
                   >
-                    {isPending ? t('loading') : t('changePassword')}
+                    {isPending ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2
+                          className="h-4 w-4 animate-spin"
+                          aria-hidden="true"
+                        />
+                        {t('loading')}
+                      </div>
+                    ) : (
+                      t('changePassword')
+                    )}
                   </Button>
                 </div>
               </form>

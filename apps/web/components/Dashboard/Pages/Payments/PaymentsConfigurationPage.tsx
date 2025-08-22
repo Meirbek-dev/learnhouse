@@ -113,7 +113,17 @@ const PaymentsConfigurationPage: FC = () => {
   };
 
   if (isLoading) {
-    return <div>{t('loading')}</div>;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+          <Loader2
+            size={16}
+            className="mr-2 animate-spin"
+          />
+          <span>{t('loading')}</span>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

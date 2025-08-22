@@ -8,6 +8,7 @@ import {
   Crown,
   Eye,
   EyeOff,
+  Loader2,
   Palette,
   RotateCcw,
   Settings,
@@ -510,7 +511,7 @@ export default function UserGamificationSettings() {
                   >
                     {isLoading ? (
                       <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                         {t('saving')}
                       </>
                     ) : (

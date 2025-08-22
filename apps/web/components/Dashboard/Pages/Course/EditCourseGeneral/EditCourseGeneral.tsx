@@ -9,10 +9,10 @@ import { TagsInput } from '@components/ui/custom/tags-input';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateCourse } from '@services/courses/courses';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Input } from '@components/ui/input';
-import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { mutate } from 'swr';
@@ -286,7 +286,17 @@ const EditCourseGeneral = (props: EditCourseGeneralProps) => {
   );
 
   if (isLoading || !courseStructure) {
-    return <div className="flex h-64 items-center justify-center">{t('loading')}</div>;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+          <Loader2
+            size={16}
+            className="mr-2 animate-spin"
+          />
+          <span>{t('loading')}</span>
+        </div>
+      </div>
+    );
   }
 
   return (

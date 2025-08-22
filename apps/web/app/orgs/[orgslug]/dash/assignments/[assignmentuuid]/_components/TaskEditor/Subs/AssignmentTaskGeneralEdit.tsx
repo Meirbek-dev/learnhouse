@@ -6,7 +6,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { Cloud, File, Info, Loader, UploadCloud } from 'lucide-react';
+import { Cloud, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getActivityByID } from '@services/courses/activities';
 import { getTaskRefFileDir } from '@services/media/media';
@@ -130,7 +130,7 @@ export const AssignmentTaskGeneralEdit = () => {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
+          <Loader2 className="mx-auto h-8 w-8 animate-spin" />
           <p className="mt-2 text-gray-600">{t('loadingTask')}</p>
         </div>
       </div>
@@ -346,7 +346,7 @@ const UpdateTaskRef = () => {
                 title={t('chooseFile')}
               />
               <div className="text-gray mt-4 flex animate-pulse items-center rounded-md bg-slate-200 px-4 py-2 text-sm font-bold antialiased">
-                <Loader
+                <Loader2
                   size={16}
                   className="mr-2 animate-spin"
                 />

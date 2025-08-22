@@ -6,7 +6,7 @@ import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseSt
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
 import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
-import { Award, GalleryVerticalEnd, Globe, Info, Lock, UserPen } from 'lucide-react';
+import { Award, GalleryVerticalEnd, Globe, Info, Loader2, Lock, UserPen } from 'lucide-react';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useCourseRights } from '@hooks/useCourseRights';
@@ -90,7 +90,7 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
   if (rightsLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8]">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }

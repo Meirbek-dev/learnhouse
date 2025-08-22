@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
 import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
 import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
-import { Loader, Pencil, SquareUserRound, Users, X } from 'lucide-react';
+import { Loader2, Pencil, SquareUserRound, Users, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
@@ -76,7 +76,7 @@ const OrgUserGroups = () => {
 
   if (isLoading) {
     return (
-      <Loader
+      <Loader2
         size={16}
         className="mr-2 animate-spin"
       />

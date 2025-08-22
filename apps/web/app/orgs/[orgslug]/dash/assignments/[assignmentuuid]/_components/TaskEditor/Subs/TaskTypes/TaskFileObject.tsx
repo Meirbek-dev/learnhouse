@@ -8,7 +8,7 @@ import {
 import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { Cloud, Download, File, Info, Loader, UploadCloud } from 'lucide-react';
+import { Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -412,7 +412,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
                     title={t('selectFile')}
                   />
                   <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2.5 text-xs font-medium text-slate-600 antialiased sm:px-5 sm:text-sm">
-                    <Loader
+                    <Loader2
                       size={15}
                       className="mr-2"
                     />

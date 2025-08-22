@@ -1,7 +1,7 @@
 'use client';
 
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
-import { AlertTriangle, ArrowLeft, CheckCircle, Shield, XCircle } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CheckCircle, Loader2, Shield, XCircle } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCertificateByUuid } from '@services/courses/certifications';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -111,7 +111,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
         <div className="soft-shadow w-full max-w-4xl space-y-6 rounded-2xl bg-white p-8">
           <div className="flex items-center justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+            <Loader2 className="h-12 w-12 animate-spin" />
           </div>
           <div className="text-center">
             <h1 className="mb-2 text-2xl font-bold text-gray-900">{t('verifyingCertificate')}</h1>

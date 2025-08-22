@@ -12,6 +12,7 @@ import {
   Gamepad,
   GraduationCap,
   Heart,
+  Loader2,
   Microscope,
   Music,
   Palette,
@@ -194,7 +195,17 @@ const UnsplashImagePicker: FC<UnsplashImagePickerProps> = ({ onSelect, onClose, 
             </div>
           ))}
         </div>
-        {loading ? <p className="mt-4 text-center">{t('loading')}</p> : null}
+        {loading ? (
+          <div className="mt-4 flex justify-center">
+            <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+              <Loader2
+                size={16}
+                className="mr-2 animate-spin"
+              />
+              <span>{t('loading')}</span>
+            </div>
+          </div>
+        ) : null}
         {!loading && images.length > 0 && (
           <Button
             onClick={handleLoadMore}

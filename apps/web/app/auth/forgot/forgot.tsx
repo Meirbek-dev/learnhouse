@@ -1,12 +1,12 @@
 'use client';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import openuLogoDark from 'public/openu_logo_dark.webp';
 import { getUriWithOrg } from '@services/config/config';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { sendResetLink } from '@services/auth/auth';
-import { AlertTriangle, Info } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -118,7 +118,17 @@ const ForgotPasswordClient = () => {
                       className="w-full p-2 font-semibold shadow-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={isPending}
                     >
-                      {isPending ? t('loading') : t('sendResetLink')}
+                      {isPending ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2
+                            className="h-4 w-4 animate-spin"
+                            aria-hidden="true"
+                          />
+                          {t('loading')}
+                        </div>
+                      ) : (
+                        t('sendResetLink')
+                      )}
                     </Button>
                   </div>
                 </form>

@@ -7,6 +7,7 @@ import {
   FileVideo,
   Info,
   Languages,
+  Loader2,
   Play,
   Plus,
   Settings,
@@ -439,7 +440,7 @@ const SubtitleManager = ({
             className="rounded-lg border border-blue-200 bg-blue-50 p-3"
           >
             <div className="flex items-center gap-2 text-sm text-blue-700">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               <span>{t('processingFiles', { count: uploadingFiles.length })}</span>
             </div>
           </motion.div>
@@ -1249,7 +1250,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 <span>{t('creating')}</span>
               </div>
             ) : (

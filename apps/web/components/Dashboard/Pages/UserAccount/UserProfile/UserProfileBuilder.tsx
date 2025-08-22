@@ -8,6 +8,7 @@ import {
   GripVertical,
   ImageIcon,
   Link as LinkIcon,
+  Loader2,
   MapPin,
   Plus,
   TextIcon,
@@ -434,7 +435,7 @@ const UserProfileBuilder = () => {
     return (
       <div className="soft-shadow mx-0 rounded-xl bg-white p-6 sm:mx-10">
         <div className="flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       </div>
     );

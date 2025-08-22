@@ -1,6 +1,6 @@
 'use client';
 
-import { Archive, ChevronDown, ChevronUp, Info, Pencil, Plus, RefreshCcw, SquareCheck } from 'lucide-react';
+import { Archive, ChevronDown, ChevronUp, Info, Loader2, Pencil, Plus, RefreshCcw, SquareCheck } from 'lucide-react';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
@@ -111,7 +111,18 @@ const PaymentsProductPage = () => {
   }
 
   if (error) return <div>{t('loadError')}</div>;
-  if (!products) return <div>{t('loading')}</div>;
+  if (!products)
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+          <Loader2
+            size={16}
+            className="mr-2 animate-spin"
+          />
+          <span>{t('loading')}</span>
+        </div>
+      </div>
+    );
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">

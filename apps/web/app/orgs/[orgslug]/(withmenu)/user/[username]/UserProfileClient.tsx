@@ -11,6 +11,7 @@ import {
   Laptop2,
   Lightbulb,
   Link as LinkIcon,
+  Loader2,
   MapPin,
   Users,
   X,
@@ -340,7 +341,7 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
                         <div>
                           {isLoadingCourses ? (
                             <div className="flex items-center justify-center py-8">
-                              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
+                              <Loader2 className="h-8 w-8 animate-spin" />
                             </div>
                           ) : userCourses.length > 0 ? (
                             <div className="grid w-full grid-cols-1 gap-6 pb-8 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">

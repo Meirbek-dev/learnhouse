@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { isValidElement, useCallback, useState, useTransition } from 'react';
-import { AlertTriangle, Info } from 'lucide-react';
+import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
@@ -174,8 +174,8 @@ const ConfirmationModal = (params: ModalParams) => {
           >
             {isPending ? (
               <div className="flex items-center gap-2">
-                <div
-                  className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+                <Loader2
+                  className="h-4 w-4 animate-spin"
                   aria-hidden="true"
                 />
                 <span className="sr-only">{t('loading')}</span>

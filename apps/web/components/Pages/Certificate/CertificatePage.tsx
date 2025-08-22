@@ -3,9 +3,9 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowLeft, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import html2canvas from 'html2canvas-pro';
 import type React from 'react';
@@ -412,9 +412,12 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-          <p className="text-gray-600">{t('loading')}</p>
+        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-6 py-3 text-sm font-medium text-gray-600">
+          <Loader2
+            size={20}
+            className="mr-3 animate-spin"
+          />
+          <span>{t('loading')}</span>
         </div>
       </div>
     );
