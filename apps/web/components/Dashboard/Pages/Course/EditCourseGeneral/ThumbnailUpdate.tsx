@@ -356,7 +356,7 @@ const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
         </div>
       )}
 
-      <div className="p-6">
+      <div className="pt-2 pb-6">
         <div className="space-y-6">
           {renderThumbnailPreview()}
           {renderTabContent()}

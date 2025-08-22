@@ -18,7 +18,7 @@ import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string) => string) =>
   z.object({
-    email: z.string().min(1, t('required')).email(t('invalidEmail')),
+    email: z.email(t('invalidEmail')).min(1, t('required')),
   });
 
 type ForgotPasswordFormData = z.infer<ReturnType<typeof createValidationSchema>>;

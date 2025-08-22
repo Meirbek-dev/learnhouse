@@ -1398,6 +1398,7 @@
         "description": "Make course publicly available (even for unregistered users)",
         "label": "Public course"
       },
+      "subtitle": "Configure the basic information for your course",
       "tags": {
         "label": "Course Tags",
         "placeholder": "Press Enter to add..."
@@ -1409,6 +1410,7 @@
         "uploading": "Uploading..."
       },
       "thumbnailType": "Thumbnail Type",
+      "title": "Edit Course: {courseName}",
       "video": "Video"
     },
     "NewActivityModal": {

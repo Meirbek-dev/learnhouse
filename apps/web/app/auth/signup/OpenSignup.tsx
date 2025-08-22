@@ -19,7 +19,7 @@ import { z } from 'zod';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({
-    email: z.string().min(1, t('required')).email(t('invalidEmail')),
+    email: z.email(t('invalidEmail')).min(1, t('required')),
     password: z
       .string()
       .min(1, t('required'))

@@ -86,10 +86,7 @@ interface FormValues {
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   z.object({
-    email: z
-      .string()
-      .email(t('Form.invalidEmail'))
-      .min(1, t('Form.requiredField', { fieldName: 'Email' })),
+    email: z.email(t('Form.invalidEmail')).min(1, t('Form.requiredField', { fieldName: 'Email' })),
     username: z.string().min(1, t('Form.requiredField', { fieldName: 'Username' })),
     first_name: z.string().min(1, t('Form.requiredField', { fieldName: 'First name' })),
     last_name: z.string().min(1, t('Form.requiredField', { fieldName: 'Last name' })),
