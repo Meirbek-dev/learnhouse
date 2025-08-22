@@ -1,7 +1,7 @@
 'use client';
 
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { AlertCircle, Loader2, LogIn, LogOut, ShoppingCart } from 'lucide-react';
+import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
 import { removeCourse, startCourse } from '@services/courses/activity';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';

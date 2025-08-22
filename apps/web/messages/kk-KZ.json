@@ -899,7 +899,8 @@
           "users": "Пайдаланушылар"
         },
         "select": "Таңдау",
-        "selectAll": "Барлығын таңдау"
+        "selectAll": "Барлығын таңдау",
+        "unknownError": "Белгісіз қате пайда болды"
       },
       "EditRole": {
         "cancel": "Бас тарту",
@@ -1005,6 +1006,7 @@
     },
     "RolesUpdate": {
       "adminRole": "Әкімші",
+      "errorPrefix": "Қателік",
       "loadingButton": "Жүктелуде...",
       "loadingRoles": "Рөлдер жүктелуде...",
       "maintainerRole": "Қолдаушы",
@@ -1069,9 +1071,11 @@
       "removeQuestion": "Сұрақты жою",
       "saveError": "Тапсырманы сақтау қатесі, кейінірек қайталаңыз.",
       "savedSuccessfully": "Тапсырма сәтті сақталды",
+      "submissionSummary": "Қорытынды",
       "submitError": "Форманы жіберу қатесі, кейінірек қайталаңыз.",
       "submitForGrading": "Бағалауға жіберу",
       "submittedSuccessfully": "Форма сәтті жіберілді!",
+      "totalBlanks": "Жалпы өтулер",
       "userIdRequired": "Бағалау үшін пайдаланушы ID-сы қажет."
     },
     "TypeOfContentTitle": {
@@ -4171,6 +4175,10 @@
         "featuredCourses": {
           "description": "Таңдалған курстарды көрсетуге арналған бөлім қосу",
           "label": "Курстар"
+        },
+        "gamification": {
+          "description": "Ойынның статистикасы мен жетістіктерін көрсету",
+          "label": "Ақылнама"
         },
         "hero": {
           "description": "Тақырыбы және әрекетке шақыруы бар батыр бөлімін қосу",

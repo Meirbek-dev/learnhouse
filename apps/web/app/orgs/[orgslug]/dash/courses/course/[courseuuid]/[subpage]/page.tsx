@@ -5,8 +5,8 @@ import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCours
 import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral';
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess';
-import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 import { Award, GalleryVerticalEnd, Globe, Info, Loader2, Lock, UserPen } from 'lucide-react';
+import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext';
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useCourseRights } from '@hooks/useCourseRights';
