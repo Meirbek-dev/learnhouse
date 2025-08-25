@@ -104,13 +104,11 @@ export function getUnlockedFeatures(level: number, t: any): string[] {
       unlocked.push(t(`avatar.frames.${frame.name}`));
     }
   });
-
   AVATAR_UNLOCKS.accessories.forEach((accessory) => {
     if (level >= accessory.level) {
       unlocked.push(t(`avatar.accessories.${accessory.name}`));
     }
   });
-
   return unlocked;
 }
 
@@ -176,7 +174,6 @@ export function LevelIndicator({
           </div>
         )}
       </div>
-
       {showProgress && (
         <div className="space-y-1">
           <Progress
@@ -223,7 +220,6 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
           </span>
         </div>
       )}
-
       <div className="relative">
         <Progress
           value={progressPercentage}
@@ -235,7 +231,6 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
           <levelInfo.icon className="h-3 w-3" />
         </div>
       </div>
-
       {showLabels && (
         <div className="text-muted-foreground flex justify-between text-xs">
           <span>{format.number(profile.total_xp)} XP</span>

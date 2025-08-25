@@ -1,7 +1,6 @@
 'use client';
 
 import type { GamificationProfile } from '@/services/gamification/gamification';
-import { calculateLevelProgress } from '@/services/gamification/gamification';
 import { getLevelInfo } from '@/components/Objects/GamificationLevel';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Progress } from '@/components/ui/progress';
@@ -102,7 +101,8 @@ export function LevelProgressBar({
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
   const levelInfo = getLevelInfo(profile.current_level, t);
-  const progressPercentage = calculateLevelProgress(profile);
+  // Rely exclusively on server-calculated progress (authoritative)
+  const progressPercentage = Math.max(0, Math.min(100, profile.profile_data?.progress_percent ?? 0));
 
   if (variant === 'compact') {
     return (

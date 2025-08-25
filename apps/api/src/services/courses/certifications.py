@@ -1,8 +1,8 @@
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timezone
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
 from ulid import ULID
 
@@ -237,14 +237,29 @@ async def create_certificate_user(
     certification_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser | None = None,
+    idempotency_key: str | None = None,
 ) -> CertificateUserRead:
     """
-    Create a certificate user link
+    Create a certificate user link with enhanced idempotency and race condition protection.
 
     SECURITY NOTES:
     - This function should only be called by authorized users (course owners, instructors, or system)
     - When called from check_course_completion_and_create_certificate, it's a system operation
     - When called directly, requires proper RBAC checks
+
+    Args:
+        request: FastAPI request object
+        user_id: ID of user receiving certificate
+        certification_id: ID of certification
+        db_session: Database session
+        current_user: Current user (if called directly)
+        idempotency_key: Optional key for duplicate prevention
+
+    Returns:
+        CertificateUserRead: Created or existing certificate
+
+    Raises:
+        HTTPException: If validation fails or database error occurs
     """
 
     # Check if certification exists
@@ -274,71 +289,119 @@ async def create_certificate_user(
             request, course.course_uuid, current_user, "create", db_session
         )
 
-    # Check if certificate user already exists
-    statement = select(CertificateUser).where(
-        CertificateUser.user_id == user_id,
-        CertificateUser.certification_id == certification_id,
-    )
-    existing_certificate_user = db_session.exec(statement).first()
+    now = datetime.now(timezone.utc)
 
-    if existing_certificate_user:
+    try:
+        # Use atomic transaction with proper locking for idempotency
+        with db_session.begin():
+            # Check for existing certificate with database lock to prevent race conditions
+            lock_stmt = (
+                select(CertificateUser)
+                .where(
+                    CertificateUser.user_id == user_id,
+                    CertificateUser.certification_id == certification_id,
+                )
+                .with_for_update(skip_locked=True)
+            )
+
+            existing_certificate = db_session.exec(lock_stmt).first()
+            if existing_certificate:
+                # Certificate already exists, return it (idempotency)
+                return CertificateUserRead.model_validate(existing_certificate)
+
+            # Additional idempotency check using idempotency_key if provided
+            # For now, we rely on the unique constraint as the primary idempotency mechanism
+            # Future enhancement: store idempotency keys in certificate metadata
+
+            # Get user to extract user_uuid
+            from src.db.users import User
+
+            user_stmt = select(User).where(User.id == user_id)
+            user = db_session.exec(user_stmt).first()
+
+            if not user:
+                raise HTTPException(
+                    status_code=404,
+                    detail="User not found",
+                )
+
+            # Generate unique certificate UUID with better collision resistance and idempotency
+            current_year = now.year
+            current_month = now.month
+            current_day = now.day
+
+            # Extract last 4 characters from user_uuid for uniqueness
+            user_uuid_short = user.user_uuid[-4:] if user.user_uuid else "USER"
+
+            # Generate deterministic prefix if idempotency_key provided, otherwise random
+            if idempotency_key:
+                # Use hash of idempotency key for deterministic but unique prefix
+                import hashlib
+
+                prefix_hash = (
+                    hashlib.md5(idempotency_key.encode()).hexdigest()[:2].upper()
+                )
+            else:
+                # Generate random 2-letter prefix
+                prefix_hash = "".join(random.choices(string.ascii_uppercase, k=2))
+
+            # Use timestamp for better uniqueness
+            timestamp_suffix = f"{int(now.timestamp())}"[
+                -6:
+            ]  # Last 6 digits of timestamp
+
+            user_certification_uuid = f"{prefix_hash}-{current_year}{current_month:02d}{current_day:02d}-{user_uuid_short}-{timestamp_suffix}"
+
+            # Create certificate user with enhanced data
+            certificate_data = {
+                "user_id": user_id,
+                "certification_id": certification_id,
+                "user_certification_uuid": user_certification_uuid,
+                "created_at": now.isoformat(),
+                "updated_at": now.isoformat(),
+            }
+
+            # Add idempotency information to certificate metadata if supported
+            # Note: This would require extending the CertificateUser model with metadata field
+            # For now, we rely on unique constraints
+
+            certificate_user = CertificateUser(**certificate_data)
+
+            try:
+                db_session.add(certificate_user)
+                db_session.flush()  # Ensure it's written and constraints are checked
+
+                # Transaction commits automatically at context exit
+
+            except Exception as db_exc:
+                # Handle unique constraint violations gracefully
+                if (
+                    "unique" in str(db_exc).lower()
+                    or "duplicate" in str(db_exc).lower()
+                ):
+                    # Race condition occurred, try to get the existing certificate
+                    db_session.rollback()
+
+                    retry_stmt = select(CertificateUser).where(
+                        CertificateUser.user_id == user_id,
+                        CertificateUser.certification_id == certification_id,
+                    )
+                    existing_cert = db_session.exec(retry_stmt).first()
+
+                    if existing_cert:
+                        return CertificateUserRead.model_validate(existing_cert)
+
+                # Re-raise if it's not a uniqueness violation
+                raise db_exc
+
+        return CertificateUserRead.model_validate(certificate_user)
+
+    except Exception as exc:
+        db_session.rollback()
         raise HTTPException(
-            status_code=400,
-            detail="User already has a certificate for this course",
-        )
-
-    # Generate readable certificate user UUID
-    current_year = datetime.now().year
-    current_month = datetime.now().month
-    current_day = datetime.now().day
-
-    # Get user to extract user_uuid
-    from src.db.users import User
-
-    statement = select(User).where(User.id == user_id)
-    user = db_session.exec(statement).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found",
-        )
-
-    # Extract last 4 characters from user_uuid for uniqueness (since all start with "user_")
-    user_uuid_short = user.user_uuid[-4:] if user.user_uuid else "USER"
-
-    # Generate random 2-letter prefix
-    random_prefix = "".join(random.choices(string.ascii_uppercase, k=2))
-
-    # Get the count of existing certificate users for this user today
-    today_user_prefix = f"{random_prefix}-{current_year}{current_month:02d}{current_day:02d}-{user_uuid_short}-"
-    statement = select(CertificateUser).where(
-        CertificateUser.user_certification_uuid.startswith(today_user_prefix)
-    )
-    existing_certificates = db_session.exec(statement).all()
-
-    # Generate next sequential number for this user today
-    next_number = len(existing_certificates) + 1
-    certificate_number = (
-        f"{next_number:03d}"  # Format as 3-digit number with leading zeros
-    )
-
-    user_certification_uuid = f"{today_user_prefix}{certificate_number}"
-
-    # Create certificate user
-    certificate_user = CertificateUser(
-        user_id=user_id,
-        certification_id=certification_id,
-        user_certification_uuid=user_certification_uuid,
-        created_at=str(datetime.now()),
-        updated_at=str(datetime.now()),
-    )
-
-    db_session.add(certificate_user)
-    db_session.commit()
-    db_session.refresh(certificate_user)
-
-    return CertificateUserRead(**certificate_user.model_dump())
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create certificate: {str(exc)}",
+        ) from exc
 
 
 async def get_user_certificates_for_course(
@@ -406,14 +469,26 @@ async def check_course_completion_and_create_certificate(
     user_id: int,
     course_id: int,
     db_session: Session,
+    idempotency_key: str | None = None,
 ) -> bool:
     """
-    Check if all activities in a course are completed and create certificate if so
+    Check if all activities in a course are completed and create certificate if so.
+    Enhanced with server-authoritative XP awarding and better idempotency.
 
     SECURITY NOTES:
     - This function is called by the system when activities are completed
     - It should only create certificates for users who have actually completed the course
     - The function is called from mark_activity_as_done_for_user which already has RBAC checks
+
+    Args:
+        request: FastAPI request object
+        user_id: User ID completing the course
+        course_id: Course ID being completed
+        db_session: Database session
+        idempotency_key: Optional idempotency key to prevent duplicate certificates
+
+    Returns:
+        bool: True if certificate was created or already existed, False otherwise
     """
 
     # Get the user object for gamification
@@ -454,43 +529,85 @@ async def check_course_completion_and_create_certificate(
         certification = db_session.exec(statement).first()
 
         if certification and certification.id:
-            # SECURITY: Create certificate user link (system operation, no RBAC needed here)
-            # This is called from mark_activity_as_done_for_user which already has proper RBAC checks
             try:
+                # Generate idempotency key if not provided
+                if not idempotency_key:
+                    idempotency_key = (
+                        f"course_completion_{user_id}_{course_id}_{course.course_uuid}"
+                    )
+
+                # SECURITY: Create certificate user link (system operation, no RBAC needed here)
+                # This is called from mark_activity_as_done_for_user which already has proper RBAC checks
                 await create_certificate_user(
-                    request, user_id, certification.id, db_session
+                    request=request,
+                    user_id=user_id,
+                    certification_id=certification.id,
+                    db_session=db_session,
+                    idempotency_key=idempotency_key,
                 )
 
-                # Award XP for course completion - certificate was just created
+                # Award XP for course completion using server-authoritative system
+                # Import here to avoid circular imports
+                from src.services.gamification import award_xp
+                from src.shared.gamification_constants import XP_REWARDS
+
                 try:
                     await award_xp(
                         request=request,
                         user=user,
                         org_id=course.org_id,
-                        xp_amount=100,  # XP_REWARDS["course_completion"]
+                        xp_amount=XP_REWARDS["course_completion"],
                         xp_source="course_completion",
                         db_session=db_session,
                         xp_context={
                             "course_id": course_id,
                             "course_name": course.name,
                             "course_uuid": course.course_uuid,
+                            "total_activities": len(course_activities),
+                            "completion_date": datetime.now(timezone.utc).isoformat(),
                         },
                         related_course_id=course_id,
+                        idempotency_key=f"course_xp_{idempotency_key}",
                     )
-                except Exception as e:
+                except Exception as xp_error:
                     # Log the error but don't fail the certification process
-                    print(f"Failed to award XP for course completion: {e}")
+                    # In production, this should use structured logging
+                    print(
+                        f"Failed to award XP for course completion (user_id: {user_id}, course_id: {course_id}): {xp_error}"
+                    )
 
                 return True
-            except HTTPException as e:
-                if e.status_code == 400 and "already has a certificate" in e.detail:
-                    # Certificate already exists, which is fine
+
+            except HTTPException as cert_error:
+                # Handle certificate creation errors gracefully
+                if (
+                    cert_error.status_code == 400
+                    or "already" in str(cert_error.detail).lower()
+                ):
+                    # Certificate already exists, which is fine for idempotency
                     return True
-                raise
+                # Re-raise unexpected errors
+                raise cert_error
+
+            except Exception as general_error:
+                # Log unexpected errors but don't fail silently
+                print(
+                    f"Unexpected error during course completion (user_id: {user_id}, course_id: {course_id}): {general_error}"
+                )
+                raise general_error
         else:
-            pass
+            # No certification configured for this course
+            # This is not an error condition, just log for debugging
+            print(
+                f"No certification found for course {course_id} ({course.course_uuid})"
+            )
     else:
-        pass
+        # Course not yet completed
+        completed_count = len(completed_activities)
+        total_count = len(course_activities)
+        print(
+            f"Course {course_id} not completed: {completed_count}/{total_count} activities finished"
+        )
 
     return False
 

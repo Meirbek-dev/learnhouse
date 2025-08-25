@@ -98,6 +98,14 @@ export function GamificationProfileSection({
   const nextMilestone = getNextMilestone(profile.current_level);
   const unlockedFrames = AVATAR_UNLOCKS.frames.filter((f) => profile.current_level >= f.level);
   const unlockedAccessories = AVATAR_UNLOCKS.accessories.filter((a) => profile.current_level >= a.level);
+  const localizeLevelTitle = (raw: string) => {
+    const key = raw.toLowerCase();
+    try {
+      return t(`levels.titles.${key}`);
+    } catch {
+      return raw; // fallback if missing
+    }
+  };
 
   return (
     <Card className={className}>
@@ -172,7 +180,7 @@ export function GamificationProfileSection({
                       <p className="font-medium">
                         {t('levelIndicators.level')} {nextMilestone.level}
                       </p>
-                      <p className="text-muted-foreground text-sm">{nextMilestone.title}</p>
+                      <p className="text-muted-foreground text-sm">{localizeLevelTitle(nextMilestone.title)}</p>
                     </div>
                   </div>
                   <div className="text-right">

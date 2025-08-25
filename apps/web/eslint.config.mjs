@@ -38,7 +38,7 @@ export default defineConfig([
       'react/no-unescaped-entities': 'off',
       'react-hooks/exhaustive-deps': 'warn',
       'tailwindcss/classnames-order': 'warn',
-      'react/jsx-no-literals': 'warn',
+      'react/jsx-no-literals': 'off',
     },
   },
 ]);

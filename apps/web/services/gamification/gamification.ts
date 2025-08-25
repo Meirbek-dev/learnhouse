@@ -1,7 +1,7 @@
 import { RequestBodyWithAuthHeader, errorHandling } from '@/services/utils/ts/requests';
 import { getAPIUrl } from '@/services/config/config';
 
-// Enhanced interfaces with better typing
+// Enhanced interfaces with better typing and server-authoritative data
 export interface GamificationProfile {
   id: number;
   user_id: number;
@@ -15,7 +15,24 @@ export interface GamificationProfile {
   longest_learning_streak: number;
   last_login_date: string | null;
   last_learning_activity_date: string | null;
-  profile_data: Record<string, any>;
+  profile_data: {
+    // Server-calculated level progression data (server-authoritative)
+    current_level_base_xp?: number;
+    current_level_total_xp?: number;
+    current_level_current_xp?: number;
+    progress_percent?: number;
+    xp_for_current_level?: number;
+    server_calculated_at?: string;
+
+    // Level-up tracking
+    last_level_up?: string;
+    levels_gained?: number;
+    old_level?: number;
+    new_level?: number;
+
+    // Additional metadata
+    [key: string]: any;
+  };
   creation_date: string;
   update_date: string;
 }
@@ -190,47 +207,122 @@ export async function getXPRewards(): Promise<Record<string, number>> {
 }
 
 /**
- * Calculate level from total XP (client-side utility)
+ * Get level calculation metadata from server to prevent drift
  */
-export function calculateLevel(totalXP: number): { level: number; xpToNext: number } {
-  if (totalXP <= 0) {
-    return { level: 1, xpToNext: 100 };
-  }
-
-  let level = 1;
-  let xpRequired = 0;
-  const baseXP = 100;
-  const multiplier = 1.2;
-
-  while (true) {
-    const xpForThisLevel = Math.floor(baseXP * multiplier ** (level - 1));
-    if (xpRequired + xpForThisLevel > totalXP) {
-      const xpToNext = xpRequired + xpForThisLevel - totalXP;
-      return { level, xpToNext };
-    }
-
-    xpRequired += xpForThisLevel;
-    level += 1;
-
-    // Safety limit
-    if (level > 1000) {
-      return { level, xpToNext: 0 };
-    }
-  }
+export async function getLevelMetadata(): Promise<{
+  base_xp_per_level: number;
+  xp_multiplier_per_level: number;
+  sample_levels: Array<{ level: number; xp_required: number; cumulative_xp: number }>;
+  calculation_note: string;
+}> {
+  const result = await fetch(`${getAPIUrl()}gamification/level-metadata`);
+  return await errorHandling(result);
 }
 
 /**
- * Calculate progress percentage within current level
+ * Award XP (idempotent). Returns updated profile + transaction.
+ */
+export async function awardXP(
+  orgId: number,
+  accessToken: string,
+  payload: {
+    source: string;
+    source_id?: string;
+    xp_amount?: number;
+    idempotency_key?: string;
+    transaction_metadata?: Record<string, any>;
+  },
+): Promise<any> {
+  if (!orgId) throw new Error('orgId required');
+  if (!accessToken) throw new Error('access token required');
+  const body = { ...payload };
+  if (!body.idempotency_key) {
+    body.idempotency_key = `xp_${payload.source}_${payload.source_id || 'generic'}_${Date.now()}`;
+  }
+  const res = await fetch(
+    `${getAPIUrl()}gamification/award-xp/${orgId}`,
+    RequestBodyWithAuthHeader('POST', JSON.stringify(body), 'application/json', accessToken),
+  );
+  return errorHandling(res);
+}
+
+// Preferences
+export async function getGamificationPreferences(orgId: number, accessToken: string) {
+  const res = await fetch(
+    `${getAPIUrl()}gamification/preferences/${orgId}`,
+    RequestBodyWithAuthHeader('GET', null, null, accessToken),
+  );
+  return errorHandling(res);
+}
+
+export async function updateGamificationPreferences(orgId: number, accessToken: string, preferences: any) {
+  const res = await fetch(
+    `${getAPIUrl()}gamification/preferences/${orgId}`,
+    RequestBodyWithAuthHeader('PUT', JSON.stringify({ preferences }), 'application/json', accessToken),
+  );
+  return errorHandling(res);
+}
+
+/**
+ * Calculate progress percentage within current level (server-authoritative)
+ * Uses server-calculated data to prevent drift between frontend and backend.
  */
 export function calculateLevelProgress(profile: GamificationProfile): number {
+  // Prefer server-calculated progress if available
+  if (profile.profile_data?.progress_percent !== undefined) {
+    return Math.max(0, Math.min(100, profile.profile_data.progress_percent));
+  }
+
+  // Fallback calculation (should be avoided in favor of server data)
+  if (!profile.xp_to_next_level || profile.xp_to_next_level <= 0) {
+    return 100; // Max level or invalid data
+  }
+
+  // Use server-provided level data if available
+  if (profile.profile_data?.current_level_total_xp && profile.profile_data?.current_level_current_xp) {
+    const totalXPForLevel = profile.profile_data.current_level_total_xp;
+    const currentXPInLevel = profile.profile_data.current_level_current_xp;
+    return Math.max(0, Math.min(100, (currentXPInLevel / totalXPForLevel) * 100));
+  }
+
+  // Legacy fallback - warn that server data should be used
+  console.warn('Using client-side level progress calculation. Server should provide progress_percent in profile_data.');
+
+  // Rough approximation based on exponential progression (not authoritative)
   const baseXP = 100;
   const multiplier = 1.2;
-
   const xpForCurrentLevel = Math.floor(baseXP * multiplier ** (profile.current_level - 1));
-  const totalXpNeeded = xpForCurrentLevel;
-  const currentProgress = totalXpNeeded - profile.xp_to_next_level;
+  const currentProgress = Math.max(0, xpForCurrentLevel - profile.xp_to_next_level);
 
-  return Math.max(0, Math.min(100, (currentProgress / totalXpNeeded) * 100));
+  return Math.max(0, Math.min(100, (currentProgress / xpForCurrentLevel) * 100));
+}
+
+/**
+ * Get level progression data from server-authoritative profile
+ * This replaces client-side level calculations entirely.
+ */
+export function getLevelProgressionData(profile: GamificationProfile): {
+  currentLevel: number;
+  totalXP: number;
+  progressPercent: number;
+  currentLevelBaseXP: number;
+  currentLevelTotalXP: number;
+  currentLevelCurrentXP: number;
+  xpToNextLevel: number;
+  serverCalculated: boolean;
+} {
+  const serverData = profile.profile_data || {};
+
+  return {
+    currentLevel: profile.current_level,
+    totalXP: profile.total_xp,
+    progressPercent: serverData.progress_percent ?? calculateLevelProgress(profile),
+    currentLevelBaseXP: serverData.current_level_base_xp ?? 0,
+    currentLevelTotalXP: serverData.current_level_total_xp ?? 100,
+    currentLevelCurrentXP: serverData.current_level_current_xp ?? 0,
+    xpToNextLevel: profile.xp_to_next_level,
+    serverCalculated: serverData.server_calculated_at !== undefined,
+  };
 }
 
 /**

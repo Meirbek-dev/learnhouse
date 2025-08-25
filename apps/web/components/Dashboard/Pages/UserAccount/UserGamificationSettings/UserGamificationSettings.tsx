@@ -33,6 +33,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useOrg } from '@/components/Contexts/OrgContext';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 
@@ -78,42 +79,38 @@ const DEFAULT_PREFERENCES: GamificationPreferences = {
   },
 };
 
-// Storage key for preferences
-const getPreferencesKey = (userId: string, orgId: number) => `gamification_preferences_${userId}_${orgId}`;
+// Remote persistence helpers (server authoritative with optimistic local fallback)
+import { getAPIUrl } from '@/services/config/config';
 
-// SSR-safe localStorage utilities
-const isLocalStorageAvailable = (): boolean => {
-  try {
-    return typeof window !== 'undefined' && 'localStorage' in window && window.localStorage !== null;
-  } catch {
-    return false;
+async function fetchPreferences(orgId: number, token: string): Promise<GamificationPreferences> {
+  const res = await fetch(`${getAPIUrl()}gamification/preferences/${orgId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    console.error('Failed to fetch preferences:', res.status, res.statusText, await res.text());
+    throw new Error(`Failed to load preferences: ${res.status} ${res.statusText}`);
   }
-};
+  const data = await res.json();
+  return { ...DEFAULT_PREFERENCES, ...data.preferences };
+}
 
-const loadPreferences = (userId: string, orgId: number): GamificationPreferences => {
-  if (!isLocalStorageAvailable()) return DEFAULT_PREFERENCES;
-
-  try {
-    const stored = localStorage.getItem(getPreferencesKey(userId, orgId));
-    return stored ? { ...DEFAULT_PREFERENCES, ...JSON.parse(stored) } : DEFAULT_PREFERENCES;
-  } catch {
-    return DEFAULT_PREFERENCES;
+async function savePreferencesRemote(orgId: number, token: string, prefs: GamificationPreferences) {
+  const res = await fetch(`${getAPIUrl()}gamification/preferences/${orgId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ preferences: prefs }),
+  });
+  if (!res.ok) {
+    console.error('Failed to save preferences:', res.status, res.statusText, await res.text());
+    throw new Error(`Failed to save preferences: ${res.status} ${res.statusText}`);
   }
-};
-
-const savePreferences = (userId: string, orgId: number, preferences: GamificationPreferences): void => {
-  if (!isLocalStorageAvailable()) return;
-
-  try {
-    localStorage.setItem(getPreferencesKey(userId, orgId), JSON.stringify(preferences));
-  } catch (error) {
-    console.error('Failed to save gamification preferences:', error);
-  }
-};
+  return await res.json();
+}
 
 export default function UserGamificationSettings() {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const org = useOrg() as any;
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
@@ -121,25 +118,39 @@ export default function UserGamificationSettings() {
 
   const orgId = useMemo(() => org?.id || 1, [org?.id]);
 
-  // Load preferences on mount
+  // Load preferences (server authoritative)
   useEffect(() => {
-    if (org?.id) {
-      const userId = org.user?.id || 'anonymous';
-      const loadedPreferences = loadPreferences(String(userId), orgId);
-      setPreferences(loadedPreferences);
-    }
-  }, [org?.id, orgId, org?.user?.id]);
+    let cancelled = false;
+    const run = async () => {
+      if (!(session?.tokens?.access_token && session.user?.id && orgId)) return;
+      setIsLoading(true);
+      try {
+        const remote = await fetchPreferences(orgId, session.tokens.access_token);
+        if (!cancelled) setPreferences(remote);
+      } catch {
+        // Fall back to defaults silently
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.tokens?.access_token, session?.user?.id, orgId]);
 
   // Save preferences handler
   const handleSavePreferences = useCallback(async () => {
-    if (!org?.user?.id) {
+    if (!session?.user?.id) {
       toast.error(t('toast.userNotAuthenticated'));
       return;
     }
 
     setIsLoading(true);
     try {
-      savePreferences(String(org.user?.id), orgId, preferences);
+      if (!session.tokens?.access_token) throw new Error('No token');
+      // Optimistic: local state already updated; push to server
+      await savePreferencesRemote(orgId, session.tokens.access_token, preferences);
       toast.success(t('toast.preferencesSaved'));
     } catch (error) {
       console.error('Failed to save preferences:', error);
@@ -147,7 +158,7 @@ export default function UserGamificationSettings() {
     } finally {
       setIsLoading(false);
     }
-  }, [org?.user?.id, orgId, preferences, t]);
+  }, [session?.user?.id, orgId, preferences, t]);
 
   // Reset preferences handler
   const handleResetPreferences = useCallback(() => {
@@ -180,6 +191,26 @@ export default function UserGamificationSettings() {
       display: { ...prev.display, [key]: value },
     }));
   }, []);
+
+  // Authentication guard
+  if (!session?.user?.id) {
+    return (
+      <div className="soft-shadow bg-background mx-0 rounded-xl sm:mx-10">
+        <div className="flex flex-col">
+          <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
+            <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
+            <h2 className="text-md text-gray-500">{t('errors.userNotAuthenticated')}</h2>
+          </div>
+          <div className="px-8 py-6">
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{t('errors.userNotAuthenticated')}</AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Error boundary for org data
   if (!orgId) {

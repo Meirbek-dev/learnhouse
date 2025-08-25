@@ -1,7 +1,7 @@
 'use client';
 
 import { updateLoginStreak } from '@/services/gamification/gamification';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 
@@ -17,42 +17,26 @@ interface UseGamificationReturn {
   orgId: number;
   hasCheckedToday: boolean;
   isUpdating: boolean;
-  lastUpdateDate: string | null;
   retryUpdate: () => Promise<void>;
+  lastError: Error | null;
+  clearError: () => void;
 }
 
-/**
- * Get the current date in YYYY-MM-DD format
- */
-function getCurrentDateString(): string {
-  return new Date().toISOString().split('T')[0]!;
-}
+// Global state to prevent duplicate requests across hook instances
+const globalState = {
+  pendingRequests: new Map<string, Promise<any>>(),
+  completedToday: new Set<string>(),
+};
 
 /**
- * Get the storage key for the last login streak update
- */
-function getStorageKey(userId: string, orgId: number): string {
-  return `gamification_login_streak_${userId}_${orgId}`;
-}
-
-/**
- * Check if localStorage is available
- */
-function isLocalStorageAvailable(): boolean {
-  try {
-    return typeof window !== 'undefined' && 'localStorage' in window && window.localStorage !== null;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Hook to automatically track user gamification activities
- * - Updates login streaks once per day (not per session)
- * - TODO: improve to persist across multiple devices sessions
- * - Can be extended to track other activities
- * - Includes proper error handling and cleanup
- * - SSR safe with proper hydration
+ * Enhanced gamification hook with improved error handling and deduplication
+ *
+ * Features:
+ * - Automatic login streak tracking
+ * - Request deduplication across hook instances
+ * - Comprehensive error handling and retry logic
+ * - Cross-device sync via server-side idempotency
+ * - Proper cleanup and memory management
  */
 export function useGamification({
   orgId,
@@ -62,95 +46,186 @@ export function useGamification({
 }: UseGamificationProps): UseGamificationReturn {
   const { data: session } = useSession();
   const t = useTranslations('Hooks.useGamification');
-  const hasCheckedToday = useRef(false);
+
+  // Create unique key for this user/org combination
+  const getStateKey = useCallback(() => {
+    if (!session?.user?.id || !orgId) return null;
+    return `${session.user.id}_${orgId}`;
+  }, [session?.user?.id, orgId]);
+
+  // Session-based check tracking (resets on browser restart)
+  const getSessionKey = useCallback(() => {
+    const stateKey = getStateKey();
+    if (!stateKey) return null;
+    const today = new Date().toDateString();
+    return `gamification_${stateKey}_${today}`;
+  }, [getStateKey]);
+
+  const [hasCheckedToday, setHasCheckedToday] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const sessionKey = getSessionKey();
+    if (!sessionKey) return false;
+
+    // Check both sessionStorage and global state
+    const sessionChecked = sessionStorage.getItem(sessionKey) === 'true';
+    const globalChecked = globalState.completedToday.has(sessionKey);
+    return sessionChecked || globalChecked;
+  });
+
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [lastError, setLastError] = useState<Error | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const isUpdatingRef = useRef(false);
 
-  // Memoize userId to prevent unnecessary re-renders
-  const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
+  const clearError = useCallback(() => {
+    setLastError(null);
+  }, []);
 
-  // Get last update date from localStorage
-  // TODO: replace with proper storage to sync across multiple devices
-  const lastUpdateDate = useMemo(() => {
-    if (!(isLocalStorageAvailable() && userId)) return null;
-    return localStorage.getItem(getStorageKey(String(userId), orgId));
-  }, [userId, orgId]);
+  const updateStreak = useCallback(async (): Promise<void> => {
+    const stateKey = getStateKey();
+    const sessionKey = getSessionKey();
 
-  const updateStreak = useCallback(async () => {
+    // Validation checks
     if (
-      !(enabled && session?.tokens?.access_token && orgId && userId) ||
-      hasCheckedToday.current ||
-      isUpdatingRef.current
+      !enabled ||
+      !session?.tokens?.access_token ||
+      !orgId ||
+      !session?.user?.id ||
+      !stateKey ||
+      !sessionKey ||
+      hasCheckedToday ||
+      isUpdating
     ) {
       return;
     }
 
-    if (!isLocalStorageAvailable()) {
-      console.warn(t('localStorageNotAvailable'));
-      return;
+    // Check for existing request to prevent duplicates
+    if (globalState.pendingRequests.has(stateKey)) {
+      try {
+        await globalState.pendingRequests.get(stateKey);
+        return;
+      } catch (error) {
+        // Handle error from existing request
+        if (error instanceof Error) {
+          setLastError(error);
+          onError?.(error);
+        }
+        return;
+      }
     }
 
-    try {
-      isUpdatingRef.current = true;
-      const currentDate = getCurrentDateString();
-      const storageKey = getStorageKey(String(userId), orgId);
-      const lastUpdate = localStorage.getItem(storageKey);
+    setIsUpdating(true);
+    setLastError(null);
 
-      // Only update if we haven't already updated today
-      if (lastUpdate !== currentDate) {
-        // Cancel any previous request
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
+    // Cancel any previous request for this hook instance
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new abort controller
+    abortControllerRef.current = new AbortController();
+
+    // Create the request promise
+    const requestPromise = (async () => {
+      try {
+        // Server handles idempotency - safe to call multiple times
+        if (!session.tokens?.access_token) {
+          throw new Error('Access token is not available');
         }
-
-        // Create new abort controller for this request
-        abortControllerRef.current = new AbortController();
-
         await updateLoginStreak(orgId, session.tokens.access_token);
 
-        // Store the current date to prevent multiple updates today
-        localStorage.setItem(storageKey, currentDate);
+        // Mark as completed in both session storage and global state
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(sessionKey, 'true');
+        }
+        globalState.completedToday.add(sessionKey);
 
-        if (process.env.NODE_ENV === 'development') {
-          console.log(t('loginStreakUpdated', { date: currentDate }));
+        setHasCheckedToday(true);
+
+        logger.debug(`Login streak updated successfully for user ${session.user?.id} in org ${orgId}`);
+        onSuccess?.();
+      } catch (error) {
+        // Handle different types of errors appropriately
+        if (error instanceof Error && error.name === 'AbortError') {
+          return; // Ignore aborted requests
         }
 
-        onSuccess?.();
-      }
+        const errorInstance =
+          error instanceof Error ? error : new Error('Unknown error occurred during login streak update');
 
-      // Prevent multiple checks in the same session
-      hasCheckedToday.current = true;
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return; // Ignore aborted requests
-      }
+        // Don't set error state for network timeouts or temporary issues
+        if (shouldRetryError(errorInstance)) {
+          logger.warn('Temporary error updating login streak, will retry later:', errorInstance.message);
+        } else {
+          setLastError(errorInstance);
+          onError?.(errorInstance);
+        }
 
-      const errorInstance = error instanceof Error ? error : new Error('Unknown error occurred');
-      console.error(t('failedToUpdateStreak'), errorInstance);
-      onError?.(errorInstance);
+        throw errorInstance;
+      }
+    })();
+
+    // Store the request promise globally
+    globalState.pendingRequests.set(stateKey, requestPromise);
+
+    try {
+      await requestPromise;
     } finally {
-      isUpdatingRef.current = false;
+      // Clean up the request from global state
+      globalState.pendingRequests.delete(stateKey);
+      setIsUpdating(false);
     }
-  }, [enabled, session?.tokens?.access_token, userId, orgId, onError, onSuccess, t]);
+  }, [
+    enabled,
+    session?.tokens?.access_token,
+    session?.user?.id,
+    orgId,
+    hasCheckedToday,
+    isUpdating,
+    onError,
+    onSuccess,
+    getStateKey,
+    getSessionKey,
+  ]);
 
-  // Manual retry function for error recovery
-  const retryUpdate = useCallback(async () => {
-    hasCheckedToday.current = false;
+  const retryUpdate = useCallback(async (): Promise<void> => {
+    const sessionKey = getSessionKey();
+
+    // Reset state for retry
+    setHasCheckedToday(false);
+    setLastError(null);
+
+    if (sessionKey && typeof window !== 'undefined') {
+      sessionStorage.removeItem(sessionKey);
+      globalState.completedToday.delete(sessionKey);
+    }
+
     await updateStreak();
-  }, [updateStreak]);
+  }, [updateStreak, getSessionKey]);
 
+  // Auto-trigger streak update on authentication
   useEffect(() => {
-    updateStreak();
+    if (session?.tokens?.access_token && enabled && !hasCheckedToday && !isUpdating) {
+      // Add small delay to prevent race conditions on page load
+      const timer = setTimeout(() => {
+        updateStreak().catch((error) => {
+          logger.error('Failed to update login streak on session change:', error);
+        });
+      }, 100);
 
-    // Cleanup function to abort any pending requests
+      return () => clearTimeout(timer);
+    }
+  }, [session?.tokens?.access_token, enabled, hasCheckedToday, isUpdating, updateStreak]);
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     };
-  }, [updateStreak]);
+  }, []);
 
-  // Reset check when session changes or on new day
+  // Daily reset logic
   useEffect(() => {
     const now = new Date();
     const tomorrow = new Date(now);
@@ -160,22 +235,67 @@ export function useGamification({
     const msUntilTomorrow = tomorrow.getTime() - now.getTime();
 
     const timeout = setTimeout(() => {
-      hasCheckedToday.current = false;
-      // Trigger update on new day if user is still authenticated
+      // Reset local state
+      setHasCheckedToday(false);
+      clearError();
+
+      // Clean up session storage and global state
+      const sessionKey = getSessionKey();
+      if (sessionKey && typeof window !== 'undefined') {
+        sessionStorage.removeItem(sessionKey);
+        globalState.completedToday.delete(sessionKey);
+      }
+
+      // Trigger update if user is still authenticated
       if (session?.tokens?.access_token && enabled) {
-        updateStreak();
+        updateStreak().catch((error) => {
+          logger.error('Failed to update login streak on daily reset:', error);
+        });
       }
     }, msUntilTomorrow);
 
     return () => clearTimeout(timeout);
-  }, [session?.tokens?.access_token, enabled, updateStreak]);
+  }, [session?.tokens?.access_token, enabled, updateStreak, getSessionKey, clearError]);
 
   return {
     isAuthenticated: !!session?.tokens?.access_token,
     orgId,
-    hasCheckedToday: hasCheckedToday.current,
-    isUpdating: isUpdatingRef.current,
-    lastUpdateDate,
+    hasCheckedToday,
+    isUpdating,
     retryUpdate,
+    lastError,
+    clearError,
   };
 }
+
+/**
+ * Determine if an error should trigger automatic retry
+ */
+function shouldRetryError(error: Error): boolean {
+  const retryableErrors = [
+    'NetworkError',
+    'TypeError', // Often network-related
+    'timeout',
+    'ECONNRESET',
+    'ENOTFOUND',
+  ];
+
+  return retryableErrors.some(
+    (errorType) => error.name.includes(errorType) || error.message.toLowerCase().includes(errorType.toLowerCase()),
+  );
+}
+
+// Simple logger that respects environment
+const logger = {
+  debug: (message: string, ...args: any[]) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(`[useGamification] ${message}`, ...args);
+    }
+  },
+  warn: (message: string, ...args: any[]) => {
+    console.warn(`[useGamification] ${message}`, ...args);
+  },
+  error: (message: string, ...args: any[]) => {
+    console.error(`[useGamification] ${message}`, ...args);
+  },
+};
