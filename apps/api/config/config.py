@@ -15,6 +15,7 @@ class GeneralConfig(PydanticStrictBaseModel):
     development_mode: bool
     install_mode: bool
     logfire_enabled: bool
+    timezone: str = "UTC"
 
 
 class SecurityConfig(PydanticStrictBaseModel):
@@ -127,6 +128,9 @@ def get_openu_config() -> OpenUConfig:
         if env_logfire_enabled != "None"
         else yaml_config.get("general", {}).get("logfire_enabled", False)
     )
+    # Timezone
+    env_timezone = os.environ.get("OPENU_TIMEZONE")
+    timezone = env_timezone or yaml_config.get("general", {}).get("timezone", "UTC")
 
     # Security Config
     env_auth_jwt_secret_key = os.environ.get("OPENU_AUTH_JWT_SECRET_KEY")
@@ -315,6 +319,7 @@ def get_openu_config() -> OpenUConfig:
             development_mode=bool(development_mode),
             install_mode=bool(install_mode),
             logfire_enabled=bool(logfire_enabled),
+            timezone=timezone,
         ),
         hosting_config=hosting_config,
         database_config=database_config,

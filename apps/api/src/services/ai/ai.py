@@ -10,7 +10,7 @@ from src.db.organization_config import OrganizationConfig
 from src.db.organizations import Organization
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.services.ai.base import ask_ai_fast, get_chat_session_history
+from src.services.ai.base import ask_ai, get_chat_session_history
 from src.services.ai.schemas.ai import (
     ActivityAIChatSessionResponse,
     SendActivityAIChatMessage,
@@ -110,7 +110,7 @@ async def ai_start_activity_chat_session(
         )
 
         # Use fast AI processing
-        response = await ask_ai_fast(
+        response = await ask_ai(
             chat_session_object.message,
             chat_session["message_history"],
             ai_friendly_text,
@@ -191,7 +191,7 @@ async def ai_send_activity_chat_message(
         )
 
         # Use fast AI processing
-        response = await ask_ai_fast(
+        response = await ask_ai(
             chat_session_object.message,
             chat_session["message_history"],
             ai_friendly_text,

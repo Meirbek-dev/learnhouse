@@ -43,6 +43,7 @@ dependencies = [
 
 dev = [
   "faker>=37.5.3",
+  "pyflakes>=3.4.0",
   "pytest>=8.4.1",
   "pytest-asyncio>=1.1.0",
   "pytest-cov<6.0.0",
@@ -80,6 +81,8 @@ lint.ignore = [
   "PLR2004", # magic value used in comparison (often acceptable)
   "D",       # all docstring-related rules disabled
   "D100",    # missing docstring in public module
+  "S101",    # Use of `assert` detected
+  "TD002",   # Missing author in TODO;
 ]
 
 format.quote-style = "double"

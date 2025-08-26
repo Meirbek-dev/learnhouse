@@ -1,24 +1,26 @@
 'use client';
 
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { AlertTriangle, Loader2, BookOpen, Tag, Image, Video, FileText } from 'lucide-react';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { AlertTriangle, BookOpen, Image, Loader2, Tag, Video } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { useCallback, useEffect, useRef, useState, useMemo, useId } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
+import { Card, CardContent, CardHeader } from '@components/ui/card';
 import { TagsInput } from '@components/ui/custom/tags-input';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';
 import ThumbnailUpdate from './ThumbnailUpdate';
-import { Switch } from '@components/ui/switch';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 
 const generateId = () => crypto.randomUUID();
 
-type EditCourseStructureProps = { orgslug: string; course_uuid?: string };
+interface EditCourseStructureProps {
+  orgslug: string;
+  course_uuid?: string;
+}
 
 interface FormValues {
   name: string;
@@ -105,7 +107,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
     about: courseStructure?.about || '',
     learnings: initializeLearnings(courseStructure?.learnings || ''),
     tags: parseTags(courseStructure?.tags),
-    public: courseStructure?.public || false,
+    public: courseStructure?.public,
     thumbnail_type: courseStructure?.thumbnail_type || 'image',
   });
 
@@ -124,7 +126,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       initialRef.current = vals;
       setError('');
     }
-  }, [isLoading, courseStructure, form]);
+  }, [isLoading, courseStructure, form, getInitialValues]);
 
   // Watch for unsaved changes & sync context
   useEffect(() => {
@@ -165,7 +167,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
         <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
           <Loader2
             size={16}
-            className="mr-2 animate-spin text-primary"
+            className="text-primary mr-2 animate-spin"
           />
           <span>{t('loading')}</span>
         </div>
@@ -194,7 +196,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
               <CardContent className="p-4">
                 <div
                   id={`${formId}-error`}
-                  className="flex items-center space-x-2 text-destructive"
+                  className="text-destructive flex items-center space-x-2"
                 >
                   <AlertTriangle
                     className="h-5 w-5"
@@ -216,7 +218,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                     className="flex items-center gap-2 text-2xl font-bold tracking-tight"
                   >
                     <BookOpen
-                      className="h-8 w-8 text-primary"
+                      className="text-primary h-8 w-8"
                       aria-hidden="true"
                     />
                     {t('title', { courseName: courseStructure.name })}
@@ -395,7 +397,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                   name="thumbnail_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-semibold flex justify-center">
+                      <FormLabel className="flex justify-center text-base font-semibold">
                         {t('thumbnail.label')}
                       </FormLabel>
                       <FormControl>

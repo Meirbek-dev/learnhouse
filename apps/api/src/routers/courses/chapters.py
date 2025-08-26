@@ -11,7 +11,6 @@ from src.db.courses.chapters import (
 )
 from src.security.auth import get_current_user
 from src.services.courses.chapters import (
-    DEPRECATED_get_course_chapters,
     create_chapter,
     delete_chapter,
     get_chapter,
@@ -48,21 +47,6 @@ async def api_get_coursechapter(
     Get single CourseChapter by chapter_id
     """
     return await get_chapter(request, chapter_id, current_user, db_session)
-
-
-@router.get("/course/{course_uuid}/meta", deprecated=True)
-async def api_get_chapter_meta(
-    request: Request,
-    course_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Get Chapters metadata
-    """
-    return await DEPRECATED_get_course_chapters(
-        request, course_uuid, current_user, db_session
-    )
 
 
 @router.put("/course/{course_uuid}/order")

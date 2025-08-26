@@ -1,6 +1,6 @@
 import random
 import string
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
@@ -289,7 +289,7 @@ async def create_certificate_user(
             request, course.course_uuid, current_user, "create", db_session
         )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     try:
         # Use atomic transaction with proper locking for idempotency
@@ -392,7 +392,7 @@ async def create_certificate_user(
                         return CertificateUserRead.model_validate(existing_cert)
 
                 # Re-raise if it's not a uniqueness violation
-                raise db_exc
+                raise
 
         return CertificateUserRead.model_validate(certificate_user)
 
@@ -400,7 +400,7 @@ async def create_certificate_user(
         db_session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create certificate: {str(exc)}",
+            detail=f"Failed to create certificate: {exc!s}",
         ) from exc
 
 
@@ -548,26 +548,29 @@ async def check_course_completion_and_create_certificate(
 
                 # Award XP for course completion using server-authoritative system
                 # Import here to avoid circular imports
+                from src.db.gamification import XPAwardRequest, XPSource
                 from src.services.gamification import award_xp
-                from src.shared.gamification_constants import XP_REWARDS
 
                 try:
-                    await award_xp(
-                        request=request,
-                        user=user,
-                        org_id=course.org_id,
-                        xp_amount=XP_REWARDS["course_completion"],
-                        xp_source="course_completion",
-                        db_session=db_session,
-                        xp_context={
+                    award_request = XPAwardRequest(
+                        source=XPSource.COURSE_COMPLETION,
+                        source_id=str(course_id),
+                        idempotency_key=f"course_xp_{idempotency_key}",
+                        metadata={
                             "course_id": course_id,
                             "course_name": course.name,
                             "course_uuid": course.course_uuid,
                             "total_activities": len(course_activities),
-                            "completion_date": datetime.now(timezone.utc).isoformat(),
+                            "completion_date": datetime.now(UTC).isoformat(),
                         },
-                        related_course_id=course_id,
-                        idempotency_key=f"course_xp_{idempotency_key}",
+                    )
+
+                    await award_xp(
+                        user_id=user_id,
+                        org_id=course.org_id,
+                        award_request=award_request,
+                        db_session=db_session,
+                        request=request,
                     )
                 except Exception as xp_error:
                     # Log the error but don't fail the certification process
@@ -587,14 +590,14 @@ async def check_course_completion_and_create_certificate(
                     # Certificate already exists, which is fine for idempotency
                     return True
                 # Re-raise unexpected errors
-                raise cert_error
+                raise
 
             except Exception as general_error:
                 # Log unexpected errors but don't fail silently
                 print(
                     f"Unexpected error during course completion (user_id: {user_id}, course_id: {course_id}): {general_error}"
                 )
-                raise general_error
+                raise
         else:
             # No certification configured for this course
             # This is not an error condition, just log for debugging

@@ -1,7 +1,7 @@
 import { RequestBodyWithAuthHeader, errorHandling } from '@/services/utils/ts/requests';
 import { getAPIUrl } from '@/services/config/config';
 
-// Enhanced interfaces with better typing and server-authoritative data
+// Enhanced interfaces aligned with new server-authoritative architecture
 export interface GamificationProfile {
   id: number;
   user_id: number;
@@ -9,32 +9,27 @@ export interface GamificationProfile {
   total_xp: number;
   current_level: number;
   xp_to_next_level: number;
+  level_progress_percent: number; // Server-calculated progress
   current_login_streak: number;
   longest_login_streak: number;
   current_learning_streak: number;
   longest_learning_streak: number;
+  current_daily_goal_streak?: number;
+  longest_daily_goal_streak?: number;
   last_login_date: string | null;
   last_learning_activity_date: string | null;
-  profile_data: {
-    // Server-calculated level progression data (server-authoritative)
-    current_level_base_xp?: number;
-    current_level_total_xp?: number;
-    current_level_current_xp?: number;
-    progress_percent?: number;
-    xp_for_current_level?: number;
-    server_calculated_at?: string;
-
-    // Level-up tracking
-    last_level_up?: string;
-    levels_gained?: number;
-    old_level?: number;
-    new_level?: number;
-
-    // Additional metadata
-    [key: string]: any;
-  };
+  last_xp_award_date?: string | null;
+  daily_xp_earned: number;
+  daily_xp_limit: number;
+  daily_goal_xp: number;
+  total_activities_completed: number;
+  total_courses_completed: number;
+  total_sessions: number;
+  profile_data: Record<string, any>; // Preferences and metadata
   creation_date: string;
   update_date: string;
+  version?: number;
+  login_streak_updated_today?: boolean; // Optimization flag from server
 }
 
 export interface XPTransaction {
@@ -44,10 +39,33 @@ export interface XPTransaction {
   xp_amount: number;
   xp_source: string;
   xp_context: Record<string, any>;
-  related_activity_id: number | null;
-  related_course_id: number | null;
-  related_trail_step_id: number | null;
+  related_activity_id: string | null;
+  related_course_id: string | null;
+  related_trail_step_id: string | null;
   creation_date: string;
+  level_before?: number;
+  level_after?: number;
+  level_up_occurred?: boolean;
+  base_xp?: number;
+  bonus_xp?: number;
+  multiplier?: number;
+}
+
+export interface XPAwardRequest {
+  source: string;
+  source_id?: string;
+  custom_amount?: number;
+  multiplier?: number;
+  idempotency_key?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface XPAwardResponse {
+  transaction: XPTransaction;
+  profile: GamificationProfile;
+  level_up_occurred: boolean;
+  previous_level: number;
+  achievements_unlocked?: string[];
 }
 
 export interface StreakRecord {
@@ -55,48 +73,111 @@ export interface StreakRecord {
   user_id: number;
   org_id: number;
   streak_type: string;
-  current_count: number;
-  longest_count: number;
-  streak_start_date: string | null;
-  last_activity_date: string | null;
-  streak_end_date: string | null;
-  streak_data: Record<string, any>;
+  activity_date: string;
+  streak_count: number;
+  activities_count: number;
+  bonus_xp_awarded: number;
+  milestone_reached: number | null;
+  metadata: Record<string, any>;
+}
+
+export interface Achievement {
+  id: number;
+  org_id: number;
+  achievement_key: string;
+  achievement_type: string; // enum value
+  title: string;
+  description: string;
+  icon_url?: string | null;
+  requirements: Record<string, any>;
+  xp_reward: number;
+  unlock_level: number;
   is_active: boolean;
-  creation_date: string;
-  update_date: string;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface UserAchievement {
+  id: number;
+  user_id: number;
+  org_id: number;
+  achievement_id: number;
+  progress_percent: number;
+  is_unlocked: boolean;
+  unlocked_at: string | null;
+  progress_data: Record<string, any>;
+  achievement?: Achievement; // joined data
 }
 
 export interface GamificationDashboard {
   profile: GamificationProfile;
   recent_xp_transactions: XPTransaction[];
-  active_streaks: StreakRecord[];
-  total_activities_completed: number;
-  total_courses_completed: number;
-  total_certificates: number;
-  rank_in_organization: number | null;
+  daily_xp_history: {
+    date: string;
+    xp: number;
+    transactions: number;
+  }[];
+  streak_status: {
+    login: {
+      current: number;
+      longest: number;
+      last_activity: string | null;
+      status: string;
+    };
+    learning: {
+      current: number;
+      longest: number;
+      last_activity: string | null;
+      status: string;
+    };
+  };
+  achievements: {
+    total: number;
+    recent: {
+      key: string;
+      title: string;
+      type: string;
+      xp_reward: number;
+      unlocked_at: string | null;
+    }[];
+  };
+  leaderboard_position?: number;
+  next_level_preview: {
+    level: number;
+    xp_required: number;
+    unlocks: string[];
+  };
+  daily_progress: {
+    xp_earned: number;
+    xp_limit: number;
+    goal_xp: number;
+    goal_progress: number;
+    limit_progress: number;
+  };
 }
 
 export interface LeaderboardEntry {
   rank: number;
   user_id: number;
-  total_xp: number;
-  current_level: number;
-  current_login_streak: number;
-  current_learning_streak: number;
-  username?: string;
-  avatar_image?: string;
-  user_uuid?: string;
-  first_name?: string;
-  last_name?: string;
+  total_xp?: number;
+  current_level?: number;
+  current_login_streak?: number;
+  current_learning_streak?: number;
+  achievement_count?: number;
 }
 
 export interface OrganizationLeaderboard {
   org_id: number;
-  leaderboard_entries: LeaderboardEntry[];
+  leaderboard_type: string;
+  period: string;
+  leaderboard_entries: LeaderboardEntry[]; // backend field name
   total_participants: number;
+  current_user_rank?: number | null;
+  last_updated: string;
 }
 
-export type StreakStatus = 'active' | 'at-risk' | 'broken' | 'none';
+export type StreakStatus = 'active' | 'at_risk' | 'broken' | 'none';
 
 /**
  * Get user's gamification profile for an organization
@@ -145,6 +226,25 @@ export async function updateLoginStreak(orgId: number, accessToken: string): Pro
 }
 
 /**
+ * Update user's learning streak (activity engagement)
+ */
+export async function updateLearningStreak(orgId: number, accessToken: string): Promise<GamificationProfile> {
+  if (!orgId || orgId <= 0) {
+    throw new Error('Invalid organization ID');
+  }
+  if (!accessToken) {
+    throw new Error('Access token is required');
+  }
+
+  const result = await fetch(
+    `${getAPIUrl()}gamification/learning-streak/${orgId}`,
+    RequestBodyWithAuthHeader('POST', null, null, accessToken),
+  );
+
+  return await errorHandling(result);
+}
+
+/**
  * Get comprehensive gamification dashboard data
  * @param orgId - Organization ID
  * @param accessToken - User's access token
@@ -168,16 +268,19 @@ export async function getGamificationDashboard(orgId: number, accessToken: strin
 }
 
 /**
- * Get organization leaderboard
+ * Get organization leaderboard with enhanced filtering
  * @param orgId - Organization ID
  * @param accessToken - User's access token
+ * @param leaderboardType - Type of leaderboard ('xp', 'streaks', 'achievements')
+ * @param period - Time period ('all_time', 'monthly', 'weekly')
  * @param limit - Maximum number of entries to return (default: 50, max: 100)
  * @returns Promise<OrganizationLeaderboard>
- * @throws Error if request fails or user unauthorized
  */
 export async function getOrganizationLeaderboard(
   orgId: number,
   accessToken: string,
+  leaderboardType: 'xp' | 'streaks' | 'achievements' = 'xp',
+  period: 'all_time' | 'monthly' | 'weekly' = 'all_time',
   limit = 50,
 ): Promise<OrganizationLeaderboard> {
   if (!orgId || orgId <= 0) {
@@ -186,16 +289,22 @@ export async function getOrganizationLeaderboard(
   if (!accessToken) {
     throw new Error('Access token is required');
   }
-  if (limit <= 0 || limit > 200) {
+  if (limit <= 0 || limit > 100) {
     throw new Error('Limit must be between 1 and 100');
   }
 
+  const params = new URLSearchParams({
+    leaderboard_type: leaderboardType,
+    period,
+    limit: limit.toString(),
+  });
+
   const result = await fetch(
-    `${getAPIUrl()}gamification/leaderboard/${orgId}?limit=${limit}`,
+    `${getAPIUrl()}gamification/leaderboard/${orgId}?${params}`,
     RequestBodyWithAuthHeader('GET', null, null, accessToken),
   );
-
-  return await errorHandling(result);
+  const data = await errorHandling(result);
+  return data;
 }
 
 /**
@@ -212,7 +321,9 @@ export async function getXPRewards(): Promise<Record<string, number>> {
 export async function getLevelMetadata(): Promise<{
   base_xp_per_level: number;
   xp_multiplier_per_level: number;
-  sample_levels: Array<{ level: number; xp_required: number; cumulative_xp: number }>;
+  max_level: number;
+  max_daily_xp: number;
+  sample_levels: { level: number; xp_required: number; cumulative_xp: number }[];
   calculation_note: string;
 }> {
   const result = await fetch(`${getAPIUrl()}gamification/level-metadata`);
@@ -220,25 +331,17 @@ export async function getLevelMetadata(): Promise<{
 }
 
 /**
- * Award XP (idempotent). Returns updated profile + transaction.
+ * Award XP (idempotent). Returns updated profile + transaction with achievement data.
  */
-export async function awardXP(
-  orgId: number,
-  accessToken: string,
-  payload: {
-    source: string;
-    source_id?: string;
-    xp_amount?: number;
-    idempotency_key?: string;
-    transaction_metadata?: Record<string, any>;
-  },
-): Promise<any> {
+export async function awardXP(orgId: number, accessToken: string, payload: XPAwardRequest): Promise<XPAwardResponse> {
   if (!orgId) throw new Error('orgId required');
   if (!accessToken) throw new Error('access token required');
+
   const body = { ...payload };
   if (!body.idempotency_key) {
     body.idempotency_key = `xp_${payload.source}_${payload.source_id || 'generic'}_${Date.now()}`;
   }
+
   const res = await fetch(
     `${getAPIUrl()}gamification/award-xp/${orgId}`,
     RequestBodyWithAuthHeader('POST', JSON.stringify(body), 'application/json', accessToken),
@@ -268,9 +371,9 @@ export async function updateGamificationPreferences(orgId: number, accessToken: 
  * Uses server-calculated data to prevent drift between frontend and backend.
  */
 export function calculateLevelProgress(profile: GamificationProfile): number {
-  // Prefer server-calculated progress if available
-  if (profile.profile_data?.progress_percent !== undefined) {
-    return Math.max(0, Math.min(100, profile.profile_data.progress_percent));
+  // Use server-calculated progress directly
+  if (typeof profile.level_progress_percent === 'number') {
+    return Math.max(0, Math.min(100, profile.level_progress_percent));
   }
 
   // Fallback calculation (should be avoided in favor of server data)
@@ -278,15 +381,7 @@ export function calculateLevelProgress(profile: GamificationProfile): number {
     return 100; // Max level or invalid data
   }
 
-  // Use server-provided level data if available
-  if (profile.profile_data?.current_level_total_xp && profile.profile_data?.current_level_current_xp) {
-    const totalXPForLevel = profile.profile_data.current_level_total_xp;
-    const currentXPInLevel = profile.profile_data.current_level_current_xp;
-    return Math.max(0, Math.min(100, (currentXPInLevel / totalXPForLevel) * 100));
-  }
-
-  // Legacy fallback - warn that server data should be used
-  console.warn('Using client-side level progress calculation. Server should provide progress_percent in profile_data.');
+  console.warn('Using client-side level progress calculation. Server should provide level_progress_percent.');
 
   // Rough approximation based on exponential progression (not authoritative)
   const baseXP = 100;
@@ -305,23 +400,21 @@ export function getLevelProgressionData(profile: GamificationProfile): {
   currentLevel: number;
   totalXP: number;
   progressPercent: number;
-  currentLevelBaseXP: number;
-  currentLevelTotalXP: number;
-  currentLevelCurrentXP: number;
   xpToNextLevel: number;
+  dailyXPEarned: number;
+  dailyXPLimit: number;
+  dailyGoalXP: number;
   serverCalculated: boolean;
 } {
-  const serverData = profile.profile_data || {};
-
   return {
     currentLevel: profile.current_level,
     totalXP: profile.total_xp,
-    progressPercent: serverData.progress_percent ?? calculateLevelProgress(profile),
-    currentLevelBaseXP: serverData.current_level_base_xp ?? 0,
-    currentLevelTotalXP: serverData.current_level_total_xp ?? 100,
-    currentLevelCurrentXP: serverData.current_level_current_xp ?? 0,
+    progressPercent: profile.level_progress_percent ?? calculateLevelProgress(profile),
     xpToNextLevel: profile.xp_to_next_level,
-    serverCalculated: serverData.server_calculated_at !== undefined,
+    dailyXPEarned: profile.daily_xp_earned,
+    dailyXPLimit: profile.daily_xp_limit,
+    dailyGoalXP: profile.daily_goal_xp,
+    serverCalculated: typeof profile.level_progress_percent === 'number',
   };
 }
 
@@ -330,14 +423,17 @@ export function getLevelProgressionData(profile: GamificationProfile): {
  */
 export function getXPSourceDisplayName(source: string): string {
   const sourceMap: Record<string, string> = {
-    login_daily: 'Daily Login',
+    daily_login: 'Daily Login',
+    first_login: 'First Login',
     activity_completion: 'Activity Completed',
     course_completion: 'Course Completed',
     perfect_score: 'Perfect Score',
-    first_activity: 'First Activity',
-    login_streak_7_days: '7-Day Login Streak',
-    login_streak_30_days: '30-Day Login Streak',
-    login_streak_100_days: '100-Day Login Streak',
+    streak_bonus: 'Streak Bonus',
+    social_sharing: 'Social Sharing',
+    peer_review: 'Peer Review',
+    content_creation: 'Content Creation',
+    milestone_reached: 'Milestone Reached',
+    admin_award: 'Admin Award',
   };
 
   return sourceMap[source] || source.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
@@ -405,7 +501,7 @@ export function getStreakStatus(lastActivityDate: string | null): StreakStatus {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return 'active';
-    if (diffDays === 1) return 'at-risk';
+    if (diffDays === 1) return 'at_risk';
     return 'broken';
   } catch (error) {
     console.warn('Invalid date format in getStreakStatus:', lastActivityDate, error);

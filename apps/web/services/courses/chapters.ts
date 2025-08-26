@@ -7,15 +7,6 @@ import { getAPIUrl } from '@services/config/config';
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
-// TODO : deprecate this function
-export async function getCourseChaptersMetadata(course_uuid: string, next: any, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}chapters/meta/course_${course_uuid}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
-  return await errorHandling(result);
-}
-
 export async function updateChaptersMetadata(course_uuid: string, data: any, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/course/course_${course_uuid}/order`,

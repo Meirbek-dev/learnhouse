@@ -71,7 +71,7 @@ async def create_assignment(
         request, course.course_uuid, current_user, "create", db_session
     )
 
-    # Create Assignment using model_dump() for Pydantic v2 compatibility
+    # Create Assignment
     assignment_data = assignment_object.model_dump(exclude_unset=True)
     assignment = Assignment(**assignment_data)
 
@@ -340,7 +340,7 @@ async def create_assignment_task(
         request, course.course_uuid, current_user, "create", db_session
     )
 
-    # Create Assignment Task using model_dump() for Pydantic v2 compatibility
+    # Create Assignment Task
     task_data = assignment_task_object.model_dump(exclude_unset=True)
     assignment_task = AssignmentTask(**task_data)
 
@@ -843,7 +843,6 @@ async def handle_assignment_task_submission(
         # Create new Task submission
         current_time = datetime.now().isoformat()
 
-        # Use model_dump() for Pydantic v2 compatibility
         model_data = assignment_task_submission_object.model_dump(exclude_unset=True)
 
         assignment_task_submission = AssignmentTaskSubmission(

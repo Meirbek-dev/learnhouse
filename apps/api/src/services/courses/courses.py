@@ -681,9 +681,9 @@ async def update_course(
             )
 
     # Update only the fields that were passed in
-    for var, value in vars(course_object).items():  # TODO: check for pydantic v2 compat
-        if value is not None:
-            setattr(course, var, value)
+    update_data = course_object.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(course, field, value)
 
     # Complete the course object
     course.update_date = str(datetime.now())

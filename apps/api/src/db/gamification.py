@@ -1,238 +1,652 @@
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Any, Dict, Optional
+"""
+Enhanced Gamification Database Models
 
-from pydantic import ConfigDict, Field as PydanticField
-from sqlalchemy import JSON, Column, ForeignKey, Integer, UniqueConstraint, Index
+Comprehensive gamification system with proper constraints, indexes, and validation.
+Designed for scalability, performance, and extensibility.
+"""
+
+from datetime import UTC, datetime, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import ConfigDict, field_validator
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    Column,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlmodel import Field
 
+from src.db.organizations import Organization
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
+# Import referenced models to ensure they're available during schema creation
+from src.db.users import User
 
-class StreakTypeEnum(str, Enum):
+
+class StreakType(str, Enum):
+    """Types of streaks that can be tracked."""
+
     LOGIN = "login"
     LEARNING = "learning"
+    DAILY_GOAL = "daily_goal"
+    ACTIVITY = "activity"
+
+
+class XPSource(str, Enum):
+    """Sources of XP that can be awarded to users."""
+
+    ACTIVITY_COMPLETION = "activity_completion"
+    COURSE_COMPLETION = "course_completion"
+    LOGIN_BONUS = "login_bonus"
+    STREAK_BONUS = "streak_bonus"
+    ASSIGNMENT_SUBMISSION = "assignment_submission"
+    PEER_REVIEW = "peer_review"
+    FORUM_PARTICIPATION = "forum_participation"
+    QUIZ_COMPLETION = "quiz_completion"
+    MILESTONE_ACHIEVEMENT = "milestone_achievement"
+    DAILY_GOAL_COMPLETION = "daily_goal_completion"
+    ADMIN_AWARD = "admin_award"
+
+
+class AchievementType(str, Enum):
+    """Types of achievements that can be unlocked."""
+
+    LEVEL_MILESTONE = "level_milestone"
+    STREAK_MILESTONE = "streak_milestone"
+    COURSE_MASTERY = "course_mastery"
+    SOCIAL_ENGAGEMENT = "social_engagement"
+    CONTENT_CREATOR = "content_creator"
+    EARLY_ADOPTER = "early_adopter"
+    PERFECT_STUDENT = "perfect_student"
+
+
+# ============================================================================
+# Main Gamification Profile
+# ============================================================================
 
 
 class UserGamificationProfile(SQLModelStrictBaseModel, table=True):
-    __tablename__ = "usergamificationprofile"
+    """
+    Central gamification profile for users within organizations.
+    Contains all XP, level, streak, and preference data.
+    """
+
+    __tablename__ = "user_gamification_profiles"
     __table_args__ = (
-        UniqueConstraint("user_id", "org_id", name="uk_gamification_user_org"),
-        Index("idx_gamification_leaderboard", "org_id", "total_xp"),
+        UniqueConstraint("user_id", "org_id", name="uq_profile_user_org"),
+        Index("idx_profile_org_xp", "org_id", "total_xp"),
+        Index("idx_profile_org_level", "org_id", "current_level"),
+        Index("idx_profile_user_org", "user_id", "org_id"),
+        Index("idx_profile_last_login", "last_login_date"),
+        CheckConstraint("total_xp >= 0", name="ck_profile_total_xp_positive"),
+        CheckConstraint("current_level >= 1", name="ck_profile_current_level_positive"),
+        CheckConstraint(
+            "xp_to_next_level >= 0", name="ck_profile_xp_to_next_level_positive"
+        ),
+        CheckConstraint(
+            "level_progress_percent >= 0 AND level_progress_percent <= 100",
+            name="ck_profile_progress_percent",
+        ),
     )
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    # Primary fields
+    id: int = Field(primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
     org_id: int = Field(foreign_key="organization.id", index=True)
 
-    # XP and Level data
+    # XP and leveling (server authoritative; xp_in_level + xp_to_next_level allow cheap progress calc)
     total_xp: int = Field(default=0, ge=0)
     current_level: int = Field(default=1, ge=1)
+    xp_in_level: int = Field(default=0, ge=0)
+    xp_to_next_level: int = Field(default=100, ge=0)  # Remaining XP for next level
+    level_progress_percent: float = Field(default=0.0, ge=0.0, le=100.0)
 
-    # Streak data
+    # Streak tracking
     current_login_streak: int = Field(default=0, ge=0)
     longest_login_streak: int = Field(default=0, ge=0)
     current_learning_streak: int = Field(default=0, ge=0)
     longest_learning_streak: int = Field(default=0, ge=0)
+    current_daily_goal_streak: int = Field(default=0, ge=0)
+    longest_daily_goal_streak: int = Field(default=0, ge=0)
 
-    # Date tracking
-    last_login_date: Optional[datetime] = Field(default=None)
-    last_learning_activity_date: Optional[datetime] = Field(default=None)
+    # Activity tracking
+    last_login_date: datetime | None = Field(default=None)
+    last_learning_activity_date: datetime | None = Field(default=None)
+    last_xp_award_date: datetime | None = Field(default=None)
+
+    # Daily limits and tracking
+    daily_xp_earned: int = Field(default=0, ge=0)
+    daily_xp_limit: int = Field(default=500, ge=0)
+    daily_goal_xp: int = Field(default=50, ge=0)
+
+    # Engagement metrics
+    total_sessions: int = Field(default=0, ge=0)
+    total_activities_completed: int = Field(default=0, ge=0)
+    total_courses_completed: int = Field(default=0, ge=0)
+    avg_session_duration: float = Field(default=0.0, ge=0.0)  # In minutes
+
+    # Preferences (embedded for performance)
+    preferences: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
     # Metadata
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
-    # Version field for optimistic locking
-    version: int = Field(default=1)
+    # Optimistic locking
+    version: int = Field(default=1, ge=1)
 
 
-class UserGamificationProfileBase(SQLModelStrictBaseModel):
+# ============================================================================
+# XP Transactions
+# ============================================================================
+
+
+class XPTransaction(SQLModelStrictBaseModel, table=True):
+    """
+    Individual XP transactions with complete audit trail.
+    Immutable once created for compliance and debugging.
+    """
+
+    __tablename__ = "xp_transactions"
+    __table_args__ = (
+        Index("idx_xp_user_org", "user_id", "org_id"),
+        Index("idx_xp_source", "source"),
+        Index("idx_xp_created", "created_at"),
+        Index("idx_xp_user_source", "user_id", "source"),
+        UniqueConstraint("idempotency_key", name="uq_xp_idempotency_key"),
+        # Prevent awarding same (source, source_id) twice to same user/org (e.g. duplicate activity completion)
+        UniqueConstraint(
+            "user_id",
+            "org_id",
+            "source",
+            "source_id",
+            name="uq_xp_user_org_source_sourceid",
+        ),
+        CheckConstraint("xp_amount > 0", name="ck_xp_transaction_amount_positive"),
+    )
+
+    # Primary fields
+    id: int = Field(primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    org_id: int = Field(foreign_key="organization.id", index=True)
+
+    # Transaction details
+    xp_amount: int = Field(gt=0)  # Must be positive
+    source: XPSource = Field()
+    source_id: str | None = Field(
+        default=None, max_length=255
+    )  # Reference to source entity
+    idempotency_key: str | None = Field(default=None, max_length=100, index=True)
+
+    # Additional context
+    multiplier_applied: float = Field(default=1.0, ge=0.1, le=10.0)
+    bonus_xp: int = Field(default=0, ge=0)
+    reason: str | None = Field(default=None, max_length=500)
+
+    # Metadata for debugging and analysis
+    transaction_metadata: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
+
+    # Audit fields
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_by_admin: bool = Field(default=False)
+    admin_user_id: int | None = Field(default=None, foreign_key="user.id")
+
+    # Achievement tracking
+    triggered_level_up: bool = Field(default=False)
+    previous_level: int = Field(default=1, ge=1)
+    new_level: int = Field(default=1, ge=1)
+
+
+# ============================================================================
+# Streak Records
+# ============================================================================
+
+
+class StreakRecord(SQLModelStrictBaseModel, table=True):
+    """
+    Historical streak data for detailed analytics and recovery.
+    Tracks streak milestones and provides data for insights.
+    """
+
+    __tablename__ = "streak_records"
+    __table_args__ = (
+        Index("idx_streak_user_type", "user_id", "streak_type"),
+        Index("idx_streak_org_type", "org_id", "streak_type"),
+        Index("idx_streak_date", "date"),
+        UniqueConstraint(
+            "user_id", "org_id", "streak_type", "date", name="uq_streak_daily"
+        ),
+    )
+
+    # Primary fields
+    id: int = Field(primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    org_id: int = Field(foreign_key="organization.id", index=True)
+
+    # Streak details
+    streak_type: StreakType = Field()
+    date: datetime = Field(index=True)  # Date of this streak record
+    streak_count: int = Field(ge=0)  # Current streak count on this date
+    is_milestone: bool = Field(default=False)  # Was this a milestone day?
+
+    # Context
+    activities_completed: int = Field(default=0, ge=0)
+    xp_earned_today: int = Field(default=0, ge=0)
+
+    # Metadata
+    streak_metadata: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+# ============================================================================
+# Achievements
+# ============================================================================
+
+
+class Achievement(SQLModelStrictBaseModel, table=True):
+    """
+    Available achievements within an organization.
+    Templates for what users can unlock.
+    """
+
+    __tablename__ = "achievements"
+    __table_args__ = (
+        UniqueConstraint("org_id", "achievement_key", name="uq_achievement_org_key"),
+        Index("idx_achievement_org", "org_id"),
+        Index("idx_achievement_type", "achievement_type"),
+    )
+
+    # Primary fields
+    id: int = Field(primary_key=True)
+    org_id: int = Field(foreign_key="organization.id", index=True)
+
+    # Achievement definition
+    achievement_key: str = Field(max_length=100, index=True)  # Unique identifier
+    achievement_type: AchievementType = Field()
+
+    # Display information
+    title: str = Field(max_length=200)
+    description: str = Field(sa_column=Column(Text))
+    icon_url: str | None = Field(default=None, max_length=500)
+
+    # Requirements and rewards
+    requirements: dict[str, Any] = Field(
+        sa_column=Column(JSON)
+    )  # Flexible requirement system
+    xp_reward: int = Field(default=0, ge=0)
+    unlock_level: int = Field(default=1, ge=1)
+
+    # Metadata
+    is_active: bool = Field(default=True)
+    sort_order: int = Field(default=0)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class UserAchievement(SQLModelStrictBaseModel, table=True):
+    """
+    Achievements unlocked by users.
+    Tracks progress and completion.
+    """
+
+    __tablename__ = "user_achievements"
+    __table_args__ = (
+        UniqueConstraint("user_id", "achievement_id", name="uq_user_achievement"),
+        Index("idx_user_achievement_user", "user_id"),
+        Index("idx_user_achievement_org", "org_id"),
+        Index("idx_user_achievement_unlocked", "unlocked_at"),
+    )
+
+    # Primary fields
+    id: int = Field(primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    org_id: int = Field(foreign_key="organization.id", index=True)
+    achievement_id: int = Field(foreign_key="achievements.id")
+
+    # Progress tracking
+    progress_percent: float = Field(default=0.0, ge=0.0, le=100.0)
+    is_unlocked: bool = Field(default=False)
+    unlocked_at: datetime | None = Field(default=None)
+
+    # Context
+    progress_data: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+
+    # Metadata
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+# ============================================================================
+# Leaderboard Snapshots
+# ============================================================================
+
+
+class LeaderboardSnapshot(SQLModelStrictBaseModel, table=True):
+    """
+    Pre-computed leaderboard snapshots for performance.
+    Updated periodically and cached for fast retrieval.
+    """
+
+    __tablename__ = "leaderboard_snapshots"
+    __table_args__ = (
+        UniqueConstraint(
+            "org_id",
+            "leaderboard_type",
+            "period",
+            "snapshot_date",
+            name="uq_leaderboard_snapshot",
+        ),
+        Index("idx_leaderboard_org_type", "org_id", "leaderboard_type"),
+        Index("idx_leaderboard_date", "snapshot_date"),
+    )
+
+    # Primary fields
+    id: int = Field(primary_key=True)
+    org_id: int = Field(foreign_key="organization.id", index=True)
+
+    # Snapshot details
+    leaderboard_type: str = Field(max_length=50)  # 'xp', 'streaks', 'achievements'
+    period: str = Field(max_length=20)  # 'daily', 'weekly', 'monthly', 'all_time'
+    snapshot_date: datetime = Field(index=True)
+
+    # Leaderboard data
+    leaderboard_data: list[dict[str, Any]] = Field(sa_column=Column(JSON))
+    total_participants: int = Field(default=0, ge=0)
+
+    # Metadata
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+# ============================================================================
+# Pydantic Response Models
+# ============================================================================
+
+
+class UserGamificationProfileRead(PydanticStrictBaseModel):
+    """Response model for user gamification profiles."""
+
+    id: int
     user_id: int
     org_id: int
-    total_xp: int = Field(default=0, ge=0)
-    current_level: int = Field(default=1, ge=1)
-    current_login_streak: int = Field(default=0, ge=0)
-    longest_login_streak: int = Field(default=0, ge=0)
-    current_learning_streak: int = Field(default=0, ge=0)
-    longest_learning_streak: int = Field(default=0, ge=0)
-    last_login_date: Optional[datetime] = None
-    last_learning_activity_date: Optional[datetime] = None
-
-
-class UserGamificationProfileCreate(UserGamificationProfileBase):
-    pass
-
-
-class UserGamificationProfileUpdate(SQLModelStrictBaseModel):
-    total_xp: Optional[int] = Field(default=None, ge=0)
-    current_level: Optional[int] = Field(default=None, ge=1)
-    current_login_streak: Optional[int] = Field(default=None, ge=0)
-    longest_login_streak: Optional[int] = Field(default=None, ge=0)
-    current_learning_streak: Optional[int] = Field(default=None, ge=0)
-    longest_learning_streak: Optional[int] = Field(default=None, ge=0)
-    last_login_date: Optional[datetime] = None
-    last_learning_activity_date: Optional[datetime] = None
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    version: Optional[int] = None
-
-
-class UserGamificationProfileRead(UserGamificationProfileBase):
-    id: int
+    total_xp: int
+    current_level: int
+    xp_to_next_level: int
+    level_progress_percent: float
+    xp_in_level: int | None = None
+    current_login_streak: int
+    longest_login_streak: int
+    current_learning_streak: int
+    longest_learning_streak: int
+    last_login_date: datetime | None
+    last_learning_activity_date: datetime | None
+    last_xp_award_date: datetime | None
+    daily_xp_earned: int
+    daily_xp_limit: int
+    daily_goal_xp: int
+    total_sessions: int
+    total_activities_completed: int
+    total_courses_completed: int
+    avg_session_duration: float
+    preferences: dict[str, Any]
     created_at: datetime
     updated_at: datetime
     version: int
 
 
-class XPTransaction(SQLModelStrictBaseModel, table=True):
-    __tablename__ = "xptransaction"
-    __table_args__ = (
-        Index("idx_xp_user_org_date", "user_id", "org_id", "created_at"),
-        Index("idx_xp_idempotency", "idempotency_key", postgresql_where=Column("idempotency_key").isnot(None), unique=True),
-    )
+class UserGamificationProfileCreate(PydanticStrictBaseModel):
+    """Request model for creating user gamification profiles."""
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
-    org_id: int = Field(foreign_key="organization.id", index=True)
-
-    # Transaction data
-    xp_amount: int = Field(ge=0)
-    source: str = Field(max_length=100)  # e.g., "activity_completion", "login_daily"
-    source_id: Optional[str] = Field(default=None, max_length=255)  # e.g., activity UUID
-
-    # Idempotency and metadata
-    idempotency_key: Optional[str] = Field(default=None, max_length=255, unique=True)
-    transaction_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), index=True)
-
-
-class XPTransactionBase(SQLModelStrictBaseModel):
     user_id: int
     org_id: int
-    xp_amount: int = Field(ge=0)
-    source: str = Field(max_length=100)
-    source_id: Optional[str] = Field(default=None, max_length=255)
-    idempotency_key: Optional[str] = Field(default=None, max_length=255)
-    transaction_metadata: Optional[Dict[str, Any]] = None
+    daily_goal_xp: int = 50
 
 
-class XPTransactionCreate(XPTransactionBase):
-    pass
+class UserGamificationProfileUpdate(PydanticStrictBaseModel):
+    """Request model for updating user gamification profiles."""
+
+    daily_goal_xp: int | None = None
+    preferences: dict[str, Any] | None = None
 
 
-class XPTransactionRead(XPTransactionBase):
+class XPTransactionRead(PydanticStrictBaseModel):
+    """Response model for XP transactions."""
+
     id: int
-    created_at: datetime
-
-
-class StreakRecord(SQLModelStrictBaseModel, table=True):
-    __tablename__ = "streakrecord"
-    __table_args__ = (
-        UniqueConstraint("user_id", "org_id", "streak_type", "date", name="uk_streak_user_org_type_date"),
-        Index("idx_streak_user_org_type", "user_id", "org_id", "streak_type"),
-    )
-
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
-    org_id: int = Field(foreign_key="organization.id", index=True)
-
-    # Streak data
-    streak_type: StreakTypeEnum
-    date: datetime = Field(index=True)  # Date of the streak activity (date only, no time)
-    streak_count: int = Field(ge=0)
-
-    # Metadata
-    record_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-
-class StreakRecordBase(SQLModelStrictBaseModel):
     user_id: int
     org_id: int
-    streak_type: StreakTypeEnum
+    xp_amount: int
+    source: XPSource
+    source_id: str | None
+    multiplier_applied: float
+    bonus_xp: int
+    reason: str | None
+    transaction_metadata: dict[str, Any]
+    created_at: datetime
+    created_by_admin: bool
+    admin_user_id: int | None
+    triggered_level_up: bool
+    previous_level: int
+    new_level: int
+    idempotency_key: str | None
+
+    # Accept cached JSON where 'source' was serialized as plain string
+    @field_validator("source", mode="before")
+    @classmethod
+    def _coerce_source(cls, v):  # type: ignore[override]
+        if isinstance(v, XPSource):
+            return v
+        if isinstance(v, str):
+            try:
+                return XPSource(v)
+            except ValueError:
+                # Unknown source: keep raw string to avoid hard failure; caller can handle
+                return v  # type: ignore[return-value]
+        return v
+
+
+class XPAwardRequest(PydanticStrictBaseModel):
+    """Request model for awarding XP."""
+
+    user_id: int
+    source: XPSource
+    source_id: str | None = None
+    reason: str | None = None
+    multiplier: float = 1.0
+    # Amount override (if provided use this instead of default table)
+    custom_amount: int | None = None
+    # Idempotency key to prevent duplicate awards (daily login, bonuses, etc.)
+    idempotency_key: str | None = None
+    metadata: dict[str, Any] = {}
+
+
+class XPAwardResponse(PydanticStrictBaseModel):
+    """Response model for XP awards aligned with frontend expectations.
+
+    Contains full transaction + updated profile snapshot and achievement info.
+    """
+
+    transaction: XPTransactionRead
+    profile: UserGamificationProfileRead
+    level_up_occurred: bool
+    previous_level: int
+    achievements_unlocked: list[str] | None = None
+
+
+class StreakRecordRead(PydanticStrictBaseModel):
+    """Response model for streak records."""
+
+    id: int
+    user_id: int
+    org_id: int
+    streak_type: StreakType
     date: datetime
-    streak_count: int = Field(ge=0)
-    record_metadata: Optional[Dict[str, Any]] = None
-
-
-class StreakRecordCreate(StreakRecordBase):
-    pass
-
-
-class StreakRecordUpdate(SQLModelStrictBaseModel):
-    streak_count: Optional[int] = Field(default=None, ge=0)
-    record_metadata: Optional[Dict[str, Any]] = None
-
-
-class StreakRecordRead(StreakRecordBase):
-    id: int
+    streak_count: int
+    is_milestone: bool
+    activities_completed: int
+    xp_earned_today: int
+    streak_metadata: dict[str, Any]
     created_at: datetime
 
 
-class UserGamificationPreference(SQLModelStrictBaseModel, table=True):
-    __tablename__ = "usergamificationpreference"
-    __table_args__ = (
-        UniqueConstraint("user_id", "org_id", name="uk_gamification_pref_user_org"),
-    )
+class GamificationDashboard(PydanticStrictBaseModel):
+    """Comprehensive dashboard data (server-authoritative)."""
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
-    org_id: int = Field(foreign_key="organization.id", index=True)
+    profile: UserGamificationProfileRead
+    recent_xp_transactions: list[XPTransactionRead]
+    daily_xp_history: list[dict[str, Any]]
+    streak_status: dict[str, Any]
+    achievements: dict[str, Any]
+    leaderboard_position: int | None = None
+    next_level_preview: dict[str, Any]
+    daily_progress: dict[str, Any]
 
-    # Preference data stored as JSON
-    preferences: Dict[str, Any] = Field(sa_column=Column(JSON))
+    @field_validator("recent_xp_transactions", mode="before")
+    @classmethod
+    def _coerce_recent_tx(cls, v):  # type: ignore[override]
+        # Accept list of dicts with plain string sources and coerce inline
+        if isinstance(v, list):
+            coerced = []
+            for item in v:
+                if isinstance(item, dict) and "source" in item:
+                    src = item.get("source")
+                    if isinstance(src, str):
+                        try:
+                            item["source"] = XPSource(src)
+                        except ValueError:
+                            # Leave as original string
+                            pass
+                coerced.append(item)
+            return coerced
+        return v
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class OrganizationLeaderboard(PydanticStrictBaseModel):
+    """Organization leaderboard data."""
 
-class UserGamificationPreferenceRead(SQLModelStrictBaseModel):
-    id: int
-    user_id: int
     org_id: int
-    preferences: Dict[str, Any]
+    leaderboard_type: str
+    period: str
+    leaderboard_entries: list[dict[str, Any]]
+    total_participants: int
+    current_user_rank: int | None = None
+    last_updated: datetime
+
+    # Strict mode disallows automatic coercion of str -> datetime; cached JSON restores
+    # datetimes as ISO strings. We accept ISO 8601 strings and convert explicitly.
+    @field_validator("last_updated", mode="before")
+    @classmethod
+    def _coerce_last_updated(cls, v):  # type: ignore[override]
+        if isinstance(v, datetime):
+            return v
+        if isinstance(v, str):
+            try:
+                # fromisoformat supports the offset like +00:00 used in cache
+                return datetime.fromisoformat(v)
+            except ValueError:
+                # Fallback: try parsing without microseconds / Z replacement
+                v2 = v.replace("Z", "+00:00")
+                try:
+                    return datetime.fromisoformat(v2)
+                except Exception as e:  # pragma: no cover - defensive
+                    msg = f"Invalid datetime string for last_updated: {v}"
+                    raise ValueError(msg) from e
+        msg = "last_updated must be datetime or ISO 8601 string"
+        raise TypeError(msg)
+
+
+class AchievementRead(PydanticStrictBaseModel):
+    """Response model for achievements."""
+
+    id: int
+    org_id: int
+    achievement_key: str
+    achievement_type: AchievementType
+    title: str
+    description: str
+    icon_url: str | None
+    requirements: dict[str, Any]
+    xp_reward: int
+    unlock_level: int
+    is_active: bool
+    sort_order: int
     created_at: datetime
     updated_at: datetime
 
 
-class UserGamificationPreferenceUpsert(SQLModelStrictBaseModel):
-    preferences: Dict[str, Any]
+class UserAchievementRead(PydanticStrictBaseModel):
+    """Response model for user achievements."""
+
+    id: int
+    user_id: int
+    org_id: int
+    achievement_id: int
+    progress_percent: float
+    is_unlocked: bool
+    unlocked_at: datetime | None
+    progress_data: dict[str, Any]
+    created_at: datetime
+    updated_at: datetime
+
+    # Achievement details (joined)
+    achievement: AchievementRead | None = None
 
 
-# Response models for comprehensive data
-class GamificationDashboard(PydanticStrictBaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    profile: UserGamificationProfileRead
-    recent_transactions: list[XPTransactionRead]
-    daily_xp_history: list[Dict[str, Any]]  # Last 30 days
-    weekly_summary: Dict[str, Any]
-    achievements_unlocked: list[str]
-    next_level_info: Dict[str, Any]
-
-
-class OrganizationLeaderboard(PydanticStrictBaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class GamificationAnalytics(PydanticStrictBaseModel):
+    """Analytics data for gamification insights."""
 
     org_id: int
-    leaderboard_entries: list[Dict[str, Any]]  # Will include user details + XP
-    total_participants: int
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    period_start: datetime
+    period_end: datetime
+
+    # Engagement metrics
+    total_active_users: int
+    total_xp_awarded: int
+    average_xp_per_user: float
+
+    # Level distribution
+    level_distribution: dict[str, int]
+
+    # Streak analytics
+    average_login_streak: float
+    average_learning_streak: float
+
+    # Top performers
+    top_xp_earners: list[dict[str, Any]]
+    longest_streaks: list[dict[str, Any]]
+
+    # Activity breakdown
+    xp_by_source: dict[str, int]
+    completion_rates: dict[str, float]
 
 
-class XPAwardRequest(SQLModelStrictBaseModel):
-    source: str = Field(max_length=100)
-    source_id: Optional[str] = Field(default=None, max_length=255)
-    xp_amount: Optional[int] = Field(default=None, ge=0)  # If None, use default from source
-    idempotency_key: str = Field(max_length=255)
-    transaction_metadata: Optional[Dict[str, Any]] = None
+# ============================================================================
+# Preference API Models (for compatibility with existing endpoints)
+# ============================================================================
 
 
-class XPAwardResponse(PydanticStrictBaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class UserGamificationPreferenceRead(PydanticStrictBaseModel):
+    """Response model for preference endpoints."""
 
-    transaction: XPTransactionRead
-    profile_updated: UserGamificationProfileRead
-    level_up: bool = False
-    previous_level: Optional[int] = None
+    user_id: int
+    org_id: int
+    preferences: dict[str, Any]
+    created_at: datetime
+    updated_at: datetime
+
+
+class UserGamificationPreferenceUpsert(PydanticStrictBaseModel):
+    """Request model for updating preferences."""
+
+    preferences: dict[str, Any]

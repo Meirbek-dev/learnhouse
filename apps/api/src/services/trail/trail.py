@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from fastapi import HTTPException, Request, status
@@ -15,6 +16,8 @@ from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
 from src.services.gamification import update_learning_streak
+
+logger = logging.getLogger(__name__)
 
 
 async def create_user_trail(
@@ -267,19 +270,71 @@ async def add_activity_to_trail(
         db_session.commit()
         db_session.refresh(trailstep)
 
+        # Award XP for first-time activity completion (idempotent by checking creation)
+        try:
+            from src.db.gamification import (
+                XPAwardRequest,
+                XPSource,
+            )  # local import to avoid circular deps
+            from src.services.gamification import award_xp
+
+            award_request = XPAwardRequest(
+                user_id=user.id,
+                source=XPSource.ACTIVITY_COMPLETION,
+                source_id=str(activity.activity_uuid),
+                idempotency_key=f"activity_completion_{user.id}_{activity.activity_uuid}",
+                metadata={
+                    "activity_id": activity.id,
+                    "activity_uuid": activity.activity_uuid,
+                    "activity_name": getattr(activity, "name", None),
+                    "course_id": course.id,
+                    "course_uuid": course.course_uuid,
+                    "course_name": getattr(course, "name", None),
+                    "completed_at": datetime.now().isoformat(),
+                },
+            )
+            await award_xp(
+                user_id=user.id,
+                org_id=course.org_id,
+                award_request=award_request,
+                db_session=db_session,
+                request=request,
+            )
+        except Exception as xp_err:  # noqa: BLE001 - we want to log any failure without breaking core flow
+            logger.warning(
+                "Failed to award activity completion XP (user_id=%s, activity_uuid=%s): %s",
+                user.id,
+                activity.activity_uuid,
+                xp_err,
+            )
+
     # Check if all activities in the course are completed and create certificate if so
     if course and course.id:
         await check_course_completion_and_create_certificate(
             request, user.id, course.id, db_session
         )
-        await update_learning_streak(
-            request=request,
-            user=user,
-            org_id=course.org_id,
-            db_session=db_session,
-            activity_id=activity.id,
-            course_id=course.id,
-        )
+        # Update learning streak (correct signature)
+        try:
+            await update_learning_streak(
+                user_id=user.id,
+                org_id=course.org_id,
+                db_session=db_session,
+                activity_id=str(activity.id) if activity.id is not None else None,
+            )
+        except TypeError as sig_err:  # surface signature issues
+            logger.exception(
+                "update_learning_streak call failed (user_id=%s, org_id=%s): %s",
+                user.id,
+                course.org_id,
+                sig_err,
+            )
+        except Exception as streak_err:  # noqa: BLE001
+            logger.warning(
+                "Learning streak update failed (user_id=%s, org_id=%s): %s",
+                user.id,
+                course.org_id,
+                streak_err,
+            )
 
     statement = select(TrailRun).where(
         TrailRun.trail_id == trail.id, TrailRun.user_id == user.id

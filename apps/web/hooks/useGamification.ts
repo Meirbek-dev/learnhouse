@@ -1,6 +1,7 @@
 'use client';
 
-import { updateLoginStreak } from '@/services/gamification/gamification';
+import { updateLearningStreak, updateLoginStreak } from '@/services/gamification/gamification';
+import { getAPIUrl } from '@/services/config/config';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -18,6 +19,7 @@ interface UseGamificationReturn {
   hasCheckedToday: boolean;
   isUpdating: boolean;
   retryUpdate: () => Promise<void>;
+  triggerLearningStreak: () => Promise<void>;
   lastError: Error | null;
   clearError: () => void;
 }
@@ -49,7 +51,7 @@ export function useGamification({
 
   // Create unique key for this user/org combination
   const getStateKey = useCallback(() => {
-    if (!session?.user?.id || !orgId) return null;
+    if (!(session?.user?.id && orgId)) return null;
     return `${session.user.id}_${orgId}`;
   }, [session?.user?.id, orgId]);
 
@@ -86,12 +88,7 @@ export function useGamification({
 
     // Validation checks
     if (
-      !enabled ||
-      !session?.tokens?.access_token ||
-      !orgId ||
-      !session?.user?.id ||
-      !stateKey ||
-      !sessionKey ||
+      !(enabled && session?.tokens?.access_token && orgId && session?.user?.id && stateKey && sessionKey) ||
       hasCheckedToday ||
       isUpdating
     ) {
@@ -131,17 +128,55 @@ export function useGamification({
         if (!session.tokens?.access_token) {
           throw new Error('Access token is not available');
         }
-        await updateLoginStreak(orgId, session.tokens.access_token);
+        const token = session.tokens.access_token;
+
+        // 1. Fast path: HEAD streak endpoint (no body). If already updated today, skip POST.
+        try {
+          const controller = new AbortController();
+          abortControllerRef.current = controller;
+          const headResp = await fetch(`${getAPIUrl()}gamification/login-streak/${orgId}` , {
+            method: 'HEAD',
+            headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
+          });
+          if (headResp.status === 204) {
+            const updatedHeader = headResp.headers.get('X-Login-Streak-Updated');
+            const currentStreakHeader = headResp.headers.get('X-Current-Login-Streak');
+            if (updatedHeader === 'true') {
+              // Already updated today – mark and exit without POST
+              if (typeof window !== 'undefined' && sessionKey) {
+                sessionStorage.setItem(sessionKey, 'true');
+              }
+              globalState.completedToday.add(sessionKey!);
+              setHasCheckedToday(true);
+              logger.debug(`Login streak already updated today (streak=${currentStreakHeader}) for user ${session.user?.id}`);
+              onSuccess?.();
+              return; // Done
+            }
+          }
+        } catch (e) {
+          // HEAD may fail (older server / network); fall back silently
+          logger.debug('HEAD streak preflight skipped/fallback', e);
+        }
+
+        // 2. Perform POST update since not yet updated (or HEAD unsupported)
+        const updatedProfile = await updateLoginStreak(orgId, token);
+
+        // If server returns flag use it; otherwise assume success
+        const flag = (updatedProfile as any)?.login_streak_updated_today;
+        if (flag === false) {
+          // Edge: server reports not updated (possible race). Avoid marking; allow retry later.
+          logger.debug('Streak POST returned flag=false; not marking completedToday');
+        } else {
+          if (typeof window !== 'undefined' && sessionKey) {
+            sessionStorage.setItem(sessionKey, 'true');
+          }
+          globalState.completedToday.add(sessionKey!);
+          setHasCheckedToday(true);
+        }
 
         // Mark as completed in both session storage and global state
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem(sessionKey, 'true');
-        }
-        globalState.completedToday.add(sessionKey);
-
-        setHasCheckedToday(true);
-
-        logger.debug(`Login streak updated successfully for user ${session.user?.id} in org ${orgId}`);
+        logger.debug(`Login streak processed for user ${session.user?.id} in org ${orgId}`);
         onSuccess?.();
       } catch (error) {
         // Handle different types of errors appropriately
@@ -263,6 +298,14 @@ export function useGamification({
     hasCheckedToday,
     isUpdating,
     retryUpdate,
+    triggerLearningStreak: async () => {
+      if (!(session?.tokens?.access_token && orgId)) return;
+      try {
+        await updateLearningStreak(orgId, session.tokens.access_token);
+      } catch (error) {
+        logger.warn('Learning streak update failed', error);
+      }
+    },
     lastError,
     clearError,
   };

@@ -18,7 +18,7 @@ import {
   Youtube,
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
-import type { ChangeEvent, DragEvent, ComponentType, FormEvent } from 'react';
+import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { AnimatePresence, motion } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';

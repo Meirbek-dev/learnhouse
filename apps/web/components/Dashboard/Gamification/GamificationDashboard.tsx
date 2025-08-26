@@ -1,9 +1,9 @@
 'use client';
 
-import { Award, Calendar, Flame, Star, TrendingUp, Trophy, RefreshCw } from 'lucide-react';
+import { Award, Calendar, Flame, RefreshCw, Star, TrendingUp, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useFormatter, useTranslations } from 'next-intl';
 import { getAPIUrl } from '@/services/config/config';
@@ -149,7 +149,7 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
     (dateString: string): string => {
       try {
         const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
+        if (Number.isNaN(date.getTime())) {
           throw new Error('Invalid date');
         }
         return format.dateTime(date, {
@@ -199,17 +199,17 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error(t('dashboard.profileNotFound'));
-          } else if (response.status === 403) {
-            throw new Error(t('dashboard.accessDenied'));
-          } else {
-            throw new Error(`${t('dashboard.fetchError')}: ${response.statusText}`);
           }
+          if (response.status === 403) {
+            throw new Error(t('dashboard.accessDenied'));
+          }
+          throw new Error(`${t('dashboard.fetchError')}: ${response.statusText}`);
         }
 
         const data = await response.json();
 
         // Validate the response data
-        if (!data || !data.profile) {
+        if (!data?.profile) {
           throw new Error(t('dashboard.invalidResponse'));
         }
 
@@ -251,7 +251,7 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
   // Auto-retry logic with exponential backoff
   useEffect(() => {
     if (error && retryCount > 0 && retryCount <= 3) {
-      const retryDelay = Math.min(1000 * Math.pow(2, retryCount - 1), 10000); // Cap at 10s
+      const retryDelay = Math.min(1000 * 2 ** (retryCount - 1), 10_000); // Cap at 10s
       const timer = setTimeout(() => {
         console.log(`Retrying gamification dashboard fetch (attempt ${retryCount})`);
         fetchDashboardData();
@@ -437,7 +437,7 @@ const ErrorState = ({
           </Button>
 
           {retryCount > 0 && (
-            <p className="text-sm text-muted-foreground">{t('dashboard.retryAttempt', { count: retryCount })}</p>
+            <p className="text-muted-foreground text-sm">{t('dashboard.retryAttempt', { count: retryCount })}</p>
           )}
         </div>
       </CardContent>

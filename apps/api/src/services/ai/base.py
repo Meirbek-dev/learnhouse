@@ -321,7 +321,7 @@ class FastAIService:
             return None
 
 
-async def ask_ai_fast(
+async def ask_ai(
     question: str,
     message_history: RedisChatMessageHistory | list,
     text_reference: str,
@@ -393,42 +393,6 @@ async def ask_ai_fast(
             "error": f"AI processing failed: {e!s}",
             "type": "ai_processing_error",
         }
-
-
-# Backwards compatibility wrapper
-def ask_ai(
-    question: str,
-    message_history: RedisChatMessageHistory | list,
-    text_reference: str,
-    message_for_the_prompt: str,
-    embedding_model_name: str,
-    openai_model_name: str,
-    session_id: str = "default",
-) -> dict[str, Any]:
-    """Synchronous wrapper for the async fast AI function."""
-    try:
-        # Get or create event loop
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        # Run the async function
-        return loop.run_until_complete(
-            ask_ai_fast(
-                question,
-                message_history,
-                text_reference,
-                message_for_the_prompt,
-                embedding_model_name,
-                openai_model_name,
-                session_id,
-            )
-        )
-    except Exception as e:
-        logger.exception(f"Error in ask_ai wrapper: {e}")
-        return {"error": f"AI processing failed: {e!s}", "type": "wrapper_error"}
 
 
 def get_chat_session_history(aichat_uuid: str | None = None) -> dict[str, Any]:
