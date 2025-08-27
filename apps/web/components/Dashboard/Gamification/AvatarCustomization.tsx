@@ -3,18 +3,17 @@
 import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
 import type { GamificationProfile } from '@/services/gamification/gamification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getGamificationProfile } from '@/services/gamification/gamification';
 import { Check, Crown, Lock, Palette, Settings, User } from 'lucide-react';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
+import { useGamificationProfile } from '@/hooks/useGamificationProfile';
 
 interface AvatarCustomizationProps {
   orgId: number;
@@ -32,9 +31,7 @@ interface AvatarCustomization {
 
 export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustomizationProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const { data: session } = useSession();
-  const [profile, setProfile] = useState<GamificationProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { profile, isLoading, error } = useGamificationProfile({ orgId, enabled: true });
   const [isSaving, setIsSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
   const isMobile = useIsMobile();
@@ -49,33 +46,13 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
   });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!session?.tokens?.access_token) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const gamificationData = await getGamificationProfile(orgId, session.tokens.access_token);
-        setProfile(gamificationData);
-
-        // Load saved customization preferences from profile_data
-        if (gamificationData.profile_data?.avatar_customization) {
-          setCustomization(gamificationData.profile_data.avatar_customization);
-        }
-      } catch (error) {
-        console.error('Error fetching gamification profile:', error);
-        toast.error(t('dashboard.failedToLoad'));
-      } finally {
-        startTransition(() => setIsLoading(false));
-      }
-    };
-
-    fetchProfile();
-  }, [orgId, session?.tokens?.access_token, t]);
+    if (profile?.preferences?.avatar_customization) {
+      setCustomization(profile.preferences.avatar_customization as any);
+    }
+  }, [profile]);
 
   const handleSaveCustomization = async () => {
-    if (!(profile && session?.tokens?.access_token)) return;
+    if (!profile) return;
 
     startTransition(() => setIsSaving(true));
     try {
@@ -91,9 +68,16 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
     }
   };
 
-  const unlockedFrames = profile ? AVATAR_UNLOCKS.frames.filter((f) => profile.current_level >= f.level) : [];
-  const unlockedAccessories = profile ? AVATAR_UNLOCKS.accessories.filter((a) => profile.current_level >= a.level) : [];
-  const levelInfo = profile ? getLevelInfo(profile.current_level, t) : null;
+  const { unlockedFrames, unlockedAccessories, levelInfo } = useMemo(() => {
+    if (!profile) {
+      return { unlockedFrames: [], unlockedAccessories: [], levelInfo: null };
+    }
+    return {
+      unlockedFrames: AVATAR_UNLOCKS.frames.filter((f) => profile.current_level >= f.level),
+      unlockedAccessories: AVATAR_UNLOCKS.accessories.filter((a) => profile.current_level >= a.level),
+      levelInfo: getLevelInfo(profile.current_level, t),
+    };
+  }, [profile, t]);
 
   if (isLoading) {
     return (

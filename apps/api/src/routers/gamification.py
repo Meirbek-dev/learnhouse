@@ -1,581 +1,478 @@
-"""
-Gamification API Router
+"""Gamification API Router."""
 
-Provides endpoints for gamification features including:
-- User gamification profiles
-- XP transactions and history
-- Streak tracking
-- Leaderboards
-- Dashboard data
-"""
-
-import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from sqlmodel import Session, select
-
-from src.core.events.database import get_db_session
-from src.core.timezone import now_local, today_local
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from src.db.gamification import (
     OrganizationLeaderboard,
     UserGamificationPreferenceRead,
     UserGamificationPreferenceUpsert,
-    XPAwardRequest,
     XPSource,
 )
-from src.db.user_organizations import UserOrganization
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.services.gamification.gamification import (
-    GamificationConfig,
-    award_xp,
+from src.services.gamification import (
     calculate_level_details,
-    get_gamification_dashboard,
-    get_or_create_profile,
-    get_organization_leaderboard,
-    update_learning_streak,
-    update_login_streak,
+    get_gamification_config,
 )
+from src.services.gamification.gamification import (
+    get_gamification_dashboard_result,
+    get_gamification_preferences_result,
+    update_gamification_preferences_result,
+    get_gamification_profile_result,
+)
+from src.services.gamification.service_container import (
+    GamificationServices,
+    get_gamification_services,
+)
+from src.services.gamification.xp_sources import list_xp_sources
+from src.services.gamification.cache_service import create_cache_service
 
 router = APIRouter()
 
+# ----------------------------------------------------------------------------
+# Shared helpers: Result -> HTTPException mapping + decorator
+# ----------------------------------------------------------------------------
 
-def _serialize_profile(profile) -> dict[str, Any]:
-    """Serialize DB profile to API contract expected by web app.
-
-    Frontend currently expects: creation_date/update_date & xp_to_next_level.
-    We keep DB field names intact and only transform the outbound shape.
-    """
-    # Support both SQLModel instance and already-dumped dict
-    if isinstance(profile, dict):
-        total_xp = profile.get("total_xp", 0)
-        level, xp_in_level, xp_to_next, progress = calculate_level_details(total_xp)
-        last_login_date = profile.get("last_login_date")
-        if isinstance(last_login_date, str):
-            try:
-                from datetime import datetime as _dt
-
-                # Attempt ISO parse; fallback leave string
-                parsed_last = _dt.fromisoformat(last_login_date)
-            except Exception:
-                parsed_last = None
-        else:
-            parsed_last = last_login_date
-        today_flag = bool(parsed_last and parsed_last.date() == today_local())
-        return {
-            "id": profile.get("id"),
-            "user_id": profile.get("user_id"),
-            "org_id": profile.get("org_id"),
-            "total_xp": total_xp,
-            "current_level": level,
-            "xp_to_next_level": xp_to_next,
-            "xp_in_level": xp_in_level,
-            "level_progress_percent": progress,
-            "current_login_streak": profile.get("current_login_streak", 0),
-            "longest_login_streak": profile.get("longest_login_streak", 0),
-            "current_learning_streak": profile.get("current_learning_streak", 0),
-            "longest_learning_streak": profile.get("longest_learning_streak", 0),
-            "last_login_date": last_login_date,
-            "last_learning_activity_date": profile.get("last_learning_activity_date"),
-            "creation_date": profile.get("created_at") or profile.get("creation_date"),
-            "update_date": profile.get("updated_at") or profile.get("update_date"),
-            "profile_data": profile.get("profile_data", {}),
-            "daily_xp_earned": profile.get("daily_xp_earned", 0),
-            "daily_xp_limit": profile.get(
-                "daily_xp_limit", GamificationConfig.MAX_DAILY_XP
-            ),
-            "daily_goal_xp": profile.get(
-                "daily_goal_xp", GamificationConfig.DEFAULT_DAILY_GOAL_XP
-            ),
-            "login_streak_updated_today": today_flag,
-        }
-
-    level, xp_in_level, xp_to_next, progress = calculate_level_details(profile.total_xp)
-    today_flag = (
-        profile.last_login_date is not None
-        and profile.last_login_date.date() == today_local()
-    )
-    return {
-        "id": profile.id,
-        "user_id": profile.user_id,
-        "org_id": profile.org_id,
-        "total_xp": profile.total_xp,
-        "current_level": level,  # ensure recalculated consistency
-        "xp_to_next_level": xp_to_next,
-        "xp_in_level": xp_in_level,
-        "level_progress_percent": progress,
-        "current_login_streak": profile.current_login_streak,
-        "longest_login_streak": profile.longest_login_streak,
-        "current_learning_streak": profile.current_learning_streak,
-        "longest_learning_streak": profile.longest_learning_streak,
-        "last_login_date": profile.last_login_date,
-        "last_learning_activity_date": profile.last_learning_activity_date,
-        # Aliases for FE naming
-        "creation_date": profile.created_at,
-        "update_date": profile.updated_at,
-        # Enhanced profile data
-        "profile_data": profile.preferences or {},
-        "daily_xp_earned": profile.daily_xp_earned,
-        "daily_xp_limit": profile.daily_xp_limit,
-        "daily_goal_xp": profile.daily_goal_xp,
-        "total_activities_completed": profile.total_activities_completed,
-        "total_courses_completed": profile.total_courses_completed,
-        "total_sessions": profile.total_sessions,
-        "login_streak_updated_today": today_flag,
-    }
+ERROR_STATUS_MAP = {
+    "invalid_amount": (400, "XP amount must be positive"),
+    "daily_cap": (429, "Daily XP cap reached"),
+    "integrity_error": (409, "Duplicate XP transaction"),
+    "achievement_create_failed": (500, "Failed to create achievement"),
+    "achievement_check_failed": (500, "Failed to check achievements"),
+    "achievement_progress_failed": (500, "Failed to get achievement progress"),
+    "badge_create_failed": (500, "Failed to create badge"),
+    "badge_not_found": (404, "Badge not found"),
+    "badge_award_failed": (500, "Failed to award badge"),
+    "leaderboard_error": (500, "Failed to build leaderboard"),
+    "streak_error": (500, "Failed to update streak"),
+    "preferences_error": (500, "Failed to load preferences"),
+    "preferences_update_error": (500, "Failed to update preferences"),
+    "dashboard_error": (500, "Failed to load dashboard"),
+    "profile_error": (500, "Failed to load profile"),
+}
 
 
-def _serialize_transaction(tx) -> dict[str, Any]:
-    """Map XPTransaction model to FE contract.
-
-    Frontend expects: xp_source, xp_context, creation_date; we provide graceful fallbacks.
-    """
-    if isinstance(tx, dict):
-        src = tx.get("source") or tx.get("xp_source")
-        return {
-            "id": tx.get("id"),
-            "user_id": tx.get("user_id"),
-            "org_id": tx.get("org_id"),
-            "xp_amount": tx.get("xp_amount", 0),
-            "xp_source": src,
-            "xp_context": tx.get("metadata")
-            or tx.get("transaction_metadata")
-            or tx.get("xp_context")
-            or {},
-            "related_activity_id": tx.get("source_id"),
-            "related_course_id": None,
-            "related_trail_step_id": None,
-            "creation_date": tx.get("created_at") or tx.get("creation_date"),
-            "level_before": tx.get("previous_level") or tx.get("level_before"),
-            "level_after": tx.get("new_level") or tx.get("level_after"),
-            "level_up_occurred": tx.get("triggered_level_up")
-            or tx.get("level_up_occurred", False),
-            "base_xp": (
-                (tx.get("xp_amount", 0) - tx.get("bonus_xp", 0))
-                if tx.get("xp_amount") is not None
-                else tx.get("base_xp")
-            ),
-            "bonus_xp": tx.get("bonus_xp", 0),
-            "multiplier": tx.get("multiplier_applied") or tx.get("multiplier", 1.0),
-            "idempotency_key": tx.get("idempotency_key"),
-        }
-    # XPTransaction model fields mapping
-    return {
-        "id": tx.id,
-        "user_id": tx.user_id,
-        "org_id": tx.org_id,
-        "xp_amount": tx.xp_amount,
-        "xp_source": tx.source,
-        "xp_context": getattr(tx, "transaction_metadata", {}) or {},
-        "related_activity_id": tx.source_id,
-        "related_course_id": None,
-        "related_trail_step_id": None,
-        "creation_date": tx.created_at,
-        "level_before": tx.previous_level,
-        "level_after": tx.new_level,
-        "level_up_occurred": tx.triggered_level_up,
-        "base_xp": tx.xp_amount - getattr(tx, "bonus_xp", 0),
-        "bonus_xp": tx.bonus_xp,
-        "multiplier": tx.multiplier_applied,
-        "idempotency_key": getattr(tx, "idempotency_key", None),
-    }
+def raise_for_result(result) -> None:  # small helper
+    if result.ok:
+        return
+    code = result.code or "error"
+    status_code, message = ERROR_STATUS_MAP.get(code, (500, "Internal error"))
+    raise HTTPException(status_code=status_code, detail=message)
 
 
-async def verify_user_org_membership(
-    user_id: int, org_id: int, db_session: Session
-) -> bool:
-    """Verify that user belongs to the organization."""
-    membership = db_session.exec(
-        select(UserOrganization).where(
-            UserOrganization.user_id == user_id, UserOrganization.org_id == org_id
-        )
-    ).first()
-    return membership is not None
+def result_endpoint(fn):  # decorator to DRY error unwrapping for simple endpoints
+    async def wrapper(*args, **kwargs):  # pragma: no cover - thin wrapper
+        result = await fn(*args, **kwargs)
+        raise_for_result(result)
+        return result.value
+
+    return wrapper
 
 
-@router.get("/profile/{org_id}")
-async def get_gamification_profile(
+@router.get(
+    "/profile/{org_id}",
+    summary="Get gamification profile",
+    response_description="Current gamification profile with level & streak info",
+)
+async def get_profile(
     org_id: int,
-    request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> dict[str, Any]:
-    """Get user's gamification profile.
-
-    Also performs an automatic login streak update (idempotent) so that
-    frontends that only call /profile still advance streaks.
-    """
-
-    # Verify membership
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-
-    profile = await get_or_create_profile(current_user.id, org_id, db_session)
-
-    # Auto update login streak if not recorded today (safe & idempotent)
-    try:
-        if (
-            not profile.last_login_date
-            or profile.last_login_date.date() != today_local()
-        ):
-            profile = await update_login_streak(
-                current_user.id, org_id, db_session, request
-            )
-    except Exception:
-        # Non-fatal; return profile even if streak update failed
-        pass
-
-    return _serialize_profile(profile)
-
-
-@router.post("/login-streak/{org_id}")
-async def update_user_login_streak(
-    org_id: int,
-    request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> dict[str, Any]:
-    """Update user's login streak. Idempotent per day."""
-
-    # Verify user belongs to org
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-
-    profile = await update_login_streak(current_user.id, org_id, db_session, request)
-
-    return _serialize_profile(profile)
-
-
-@router.head("/login-streak/{org_id}")
-async def head_user_login_streak(
-    org_id: int,
-    response: Response,
-    request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
 ):
-    """Lightweight idempotent login streak update.
-
-    Performs the same logic as POST but returns no body. Headers expose result.
-    - X-Login-Streak-Updated: true|false (whether last_login_date is today after call)
-    - X-Current-Login-Streak: <int>
-    """
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-    # Capture state before
-    profile = await get_or_create_profile(current_user.id, org_id, db_session)
-    pre_same_day = (
-        profile.last_login_date and profile.last_login_date.date() == today_local()
+    """Get user's gamification profile (Result-based)."""
+    result = await get_gamification_profile_result(
+        user_id=user.id, org_id=org_id, db_session=services.xp.db_session
     )
-    if not pre_same_day:
-        profile = await update_login_streak(
-            current_user.id, org_id, db_session, request
-        )
-    updated_flag = (
-        profile.last_login_date and profile.last_login_date.date() == today_local()
-    )
-    response.headers["X-Login-Streak-Updated"] = "true" if updated_flag else "false"
-    response.headers["X-Current-Login-Streak"] = str(profile.current_login_streak)
-    return Response(status_code=204)
+    raise_for_result(result)
+    return {"data": {"profile": result.value}, "meta": {"version": 1}}
 
 
-@router.post("/learning-streak/{org_id}")
-async def update_user_learning_streak(
+@router.post(
+    "/award-xp/{org_id}",
+    summary="Award XP",
+    response_description="XP award transaction + updated profile snapshot",
+)
+async def award_xp_endpoint(
     org_id: int,
+    source: XPSource,
+    source_id: str,
     request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> dict[str, Any]:
-    """Update user's learning streak (activity based). Idempotent per day per activity context."""
-
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-
-    profile = await update_learning_streak(current_user.id, org_id, db_session)
-    return _serialize_profile(profile)
-
-
-@router.post("/award-xp/{org_id}")
-async def award_user_xp(
-    org_id: int,
-    award_request: XPAwardRequest,
-    request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> dict[str, Any]:
-    """
-    Award XP to user with idempotency guarantees.
-    Requires idempotency_key to prevent duplicate awards.
-    """
-
-    # Verify user belongs to org
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-
-    # Generate idempotency key if not provided
-    if not award_request.idempotency_key:
-        award_request.idempotency_key = str(uuid.uuid4())
-
-    # Server-enforced source validation & RBAC
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+    metadata: dict[str, Any] | None = None,
+    custom_amount: int | None = None,
+):
+    """Award XP to user (idempotent via X-Idempotency-Key header)."""
     try:
-        source_enum = (
-            award_request.source
-            if isinstance(award_request.source, XPSource)
-            else XPSource(award_request.source)
+        idem_key = request.headers.get("X-Idempotency-Key")
+        result = await services.xp.award_xp(
+            user_id=user.id,
+            org_id=org_id,
+            source=source,
+            source_id=source_id,
+            metadata=metadata or {},
+            custom_amount=custom_amount,
+            idempotency_key=idem_key,
         )
-    except ValueError:
+        raise_for_result(result)
+
+        return {"data": result.value.model_dump(), "meta": {"version": 1}}
+    except HTTPException:
+        raise
+    except Exception as e:  # pragma: no cover - defensive
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid XP source",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to award XP: {e!s}",
         )
 
-    # Restrict ADMIN_AWARD to org admins (reuse RBAC helper)
-    if source_enum == XPSource.ADMIN_AWARD:
-        from src.security.rbac.rbac import (
-            authorization_verify_based_on_org_admin_status,
-        )
 
-        is_admin = await authorization_verify_based_on_org_admin_status(
-            request, current_user.id, "create", f"org_{org_id}", db_session
-        )
-        if not is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only organization admins can issue admin XP awards",
-            )
+@router.post(
+    "/login-streak/{org_id}",
+    summary="Update login streak",
+    response_description="Updated login streak status (idempotent per day)",
+)
+async def update_login_streak_endpoint(
+    org_id: int,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    """Update user's login streak."""
+    result = await services.streaks.update_login_streak(user.id, org_id)
 
-    # Disallow client specifying custom_amount for non-admin unless source supports it
-    SOURCES_ALLOWING_CUSTOM = {XPSource.ADMIN_AWARD}
-    if (
-        award_request.custom_amount is not None
-        and source_enum not in SOURCES_ALLOWING_CUSTOM
-    ):
-        # Nullify custom amount to enforce server table
-        award_request.custom_amount = None
-
-    award_request.source = source_enum
-
-    response = await award_xp(
-        current_user.id, org_id, award_request, db_session, request
+    raise_for_result(result)
+    profile_result = await get_gamification_profile_result(
+        user_id=user.id, org_id=org_id, db_session=services.xp.db_session
     )
+    raise_for_result(profile_result)
+    # Update cache proactively with fresh profile (already loaded by helper)
+    try:  # pragma: no cover
+        cache = create_cache_service()
+        cache.set_profile(user.id, org_id, profile_result.value)
+    except Exception:
+        pass
+    return {
+        "data": {
+            "profile": profile_result.value,
+            "streak_updated": result.value.get("streak_updated", False),
+        },
+        "meta": {"version": 1},
+    }
 
-    # Return same schema but normalize embedded profile
-    data = response.model_dump()
-    data["profile"] = _serialize_profile(data["profile"])
-    data["transaction"] = _serialize_transaction(data["transaction"])
 
+@router.post(
+    "/learning-streak/{org_id}",
+    summary="Update learning streak",
+    response_description="Updated learning streak status (idempotent per day)",
+)
+async def update_learning_streak_endpoint(
+    org_id: int,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    """Update user's learning streak."""
+    result = await services.streaks.update_learning_streak(user.id, org_id)
+    raise_for_result(result)
+    profile_result = await get_gamification_profile_result(
+        user_id=user.id, org_id=org_id, db_session=services.xp.db_session
+    )
+    raise_for_result(profile_result)
+    try:  # pragma: no cover
+        cache = create_cache_service()
+        cache.set_profile(user.id, org_id, profile_result.value)
+    except Exception:
+        pass
+    return {
+        "data": {
+            "profile": profile_result.value,
+            "streak_updated": result.value.get("streak_updated", False),
+        },
+        "meta": {"version": 1},
+    }
+
+
+@router.post(
+    "/events/activity-completed/{org_id}",
+    summary="Activity completion event",
+    response_description="Acknowledgement of processed activity completion",
+)
+async def handle_activity_completion(
+    org_id: int,
+    activity_id: str,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    """Handle activity completion event."""
+    try:
+        result = await services.xp.award_xp(
+            user_id=user.id,
+            org_id=org_id,
+            source=XPSource.ACTIVITY_COMPLETION,
+            source_id=activity_id,
+            metadata={},
+        )
+        raise_for_result(result)
+        award = result.value
+        streak_result = await services.streaks.update_learning_streak(user.id, org_id)
+        if not streak_result.ok:
+            # Non-fatal; include warning
+            award_dict = award.model_dump()
+            award_dict["streak_warning"] = streak_result.error
+            return {"data": {"xp_award": award_dict}, "meta": {"version": 1}}
+        return {"data": {"xp_award": award.model_dump()}, "meta": {"version": 1}}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to handle activity completion: {e!s}",
+        )
+
+
+@router.post("/events/course-completed/{org_id}")
+async def handle_course_completion(
+    org_id: int,
+    course_id: str,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+    activity_count: int = 1,
+):
+    """Handle course completion event."""
+    try:
+        result = await services.xp.award_xp(
+            user_id=user.id,
+            org_id=org_id,
+            source=XPSource.COURSE_COMPLETION,
+            source_id=course_id,
+            metadata={"activity_count": activity_count},
+        )
+        raise_for_result(result)
+        award = result.value
+        await services.streaks.update_learning_streak(user.id, org_id)  # ignore errors
+        return {"data": {"xp_award": award.model_dump()}, "meta": {"version": 1}}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to handle course completion: {e!s}",
+        )
+
+
+@router.get(
+    "/config",
+    summary="Public gamification config",
+    response_description="Safe subset of gamification configuration",
+)
+async def get_config():
+    """Get gamification configuration (public safe subset)."""
+    try:
+        config = get_gamification_config()
+        xp_rewards = {
+            k: getattr(config.xp_rewards, k)
+            for k in dir(config.xp_rewards)
+            if not k.startswith("_")
+            and isinstance(getattr(config.xp_rewards, k), (int, float))
+        }
+        return {
+            "levels": {
+                "base_xp": config.levels.base_xp,
+                "multiplier": config.levels.multiplier,
+                "max_level": config.levels.max_level,
+            },
+            "xp_rewards": xp_rewards,
+            "streaks": {
+                "login_milestones": list(config.streaks.login_milestones),
+                "learning_milestones": list(config.streaks.learning_milestones),
+                "weekly_bonus_interval": getattr(
+                    config.streaks, "weekly_bonus_interval", None
+                ),
+            },
+            "daily_caps": {
+                "max_daily_xp": config.daily_caps.max_daily_xp,
+                "default_daily_goal": config.daily_caps.default_daily_goal,
+            },
+            "features": {
+                "streaks": config.enable_streaks,
+                "achievements": config.enable_achievements,
+                "leaderboards": config.enable_leaderboards,
+                "daily_goals": config.enable_daily_goals,
+            },
+        }
+    except Exception as e:  # pragma: no cover - defensive
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get config: {e!s}",
+        )
+
+
+@router.get(
+    "/xp-sources",
+    summary="List XP sources",
+    response_description="Metadata for all XP sources (label, description, default XP)",
+)
+async def get_xp_sources(
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    """Get XP source metadata using shared CacheService."""
+    cache_key = "xp_sources"
+    cached = services.cache.get(cache_key)
+    if cached is not None:
+        return cached
+    data = {"sources": list_xp_sources()}
+    services.cache.set(cache_key, data, ttl=60)
     return data
 
 
-@router.get("/dashboard/{org_id}")
-async def get_user_gamification_dashboard(
-    org_id: int,
-    request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> dict[str, Any]:
-    """Get comprehensive gamification dashboard for user."""
-
-    # Verify user belongs to org
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-
-    dashboard = await get_gamification_dashboard(current_user.id, org_id, db_session)
-
-    # Enrich profile in dashboard for FE parity
-    dash_dict = dashboard.model_dump()
-    dash_dict["profile"] = _serialize_profile(dashboard.profile)
-
-    # Normalize transactions list name differences
-    if "recent_transactions" in dash_dict:
-        dash_dict["recent_xp_transactions"] = [
-            _serialize_transaction(tx) for tx in dash_dict.pop("recent_transactions")
-        ]
-
-    return dash_dict
-
-
-@router.get("/leaderboard/{org_id}", response_model=OrganizationLeaderboard)
-async def get_org_leaderboard(
-    org_id: int,
-    request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-    leaderboard_type: Annotated[str, Query(regex="^(xp|streaks|achievements)$")] = "xp",
-    period: Annotated[str, Query(regex="^(all_time|monthly|weekly)$")] = "all_time",
-    limit: Annotated[int, Query(le=100, ge=1)] = 50,
-) -> OrganizationLeaderboard:
-    """Get organization leaderboard."""
-
-    # Verify user belongs to org
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-
-    return await get_organization_leaderboard(
-        org_id, db_session, leaderboard_type, period, limit, current_user.id
-    )
-
-
-@router.get("/xp-rewards")
-async def get_xp_rewards() -> dict[str, int]:
-    """Get XP reward values for different actions."""
-    return GamificationConfig.XP_REWARDS
-
-
-@router.get("/level-metadata")
-async def get_level_metadata() -> dict[str, Any]:
-    """Get level calculation metadata and sample progression."""
-
-    # Generate sample level progression
-    sample_levels = []
-    for level in range(1, 21):  # First 20 levels
-        if level == 1:
-            cumulative_xp = 0
-        else:
-            # Calculate XP needed for this level
-            xp_needed = int(
-                GamificationConfig.BASE_XP_PER_LEVEL
-                * (GamificationConfig.XP_MULTIPLIER_PER_LEVEL ** (level - 1))
-            )
-            if level == 2:
-                cumulative_xp = xp_needed
-            else:
-                prev_cumulative = sample_levels[-1]["cumulative_xp"]
-                cumulative_xp = prev_cumulative + xp_needed
-
-        sample_levels.append(
-            {
-                "level": level,
-                "xp_required": int(
-                    GamificationConfig.BASE_XP_PER_LEVEL
-                    * (GamificationConfig.XP_MULTIPLIER_PER_LEVEL ** (level - 1))
-                )
-                if level > 1
-                else 0,
-                "cumulative_xp": cumulative_xp,
-            }
-        )
-
-    return {
-        "base_xp_per_level": GamificationConfig.BASE_XP_PER_LEVEL,
-        "xp_multiplier_per_level": GamificationConfig.XP_MULTIPLIER_PER_LEVEL,
-        "max_level": GamificationConfig.MAX_LEVEL,
-        "max_daily_xp": GamificationConfig.MAX_DAILY_XP,
-        "sample_levels": sample_levels,
-        "calculation_note": "XP required for level N = BASE_XP * (MULTIPLIER ^ (N-1))",
-    }
-
-
 @router.get("/preferences/{org_id}", response_model=UserGamificationPreferenceRead)
-async def get_gamification_preferences(
+async def get_preferences(
     org_id: int,
-    request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> UserGamificationPreferenceRead:
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
     """Get user's gamification preferences."""
-
-    # Verify user belongs to org
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-
-    # Get or create profile
-    from src.services.gamification.gamification import get_or_create_profile
-
-    profile = await get_or_create_profile(current_user.id, org_id, db_session)
-
-    return UserGamificationPreferenceRead(
-        user_id=current_user.id,
+    result = await get_gamification_preferences_result(
+        user_id=user.id,
         org_id=org_id,
-        preferences=profile.preferences
-        or {
-            "notifications": {
-                "levelUp": True,
-                "xpGain": True,
-                "streakReminder": False,
-                "weeklyReport": True,
-            },
-            "privacy": {
-                "showOnLeaderboard": True,
-                "publicProfileStats": True,
-                "shareProgress": False,
-            },
-            "display": {
-                "animatedEffects": True,
-                "compactMode": False,
-                "showLevelIndicator": True,
-                "autoHideToasts": False,
-            },
-        },
-        created_at=profile.created_at,
-        updated_at=profile.updated_at,
+        db_session=services.xp.db_session,
     )
+    raise_for_result(result)
+    return result.value
 
 
 @router.put("/preferences/{org_id}", response_model=UserGamificationPreferenceRead)
-async def update_gamification_preferences(
+async def update_preferences(
     org_id: int,
-    preferences_update: UserGamificationPreferenceUpsert,
-    request: Request,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> UserGamificationPreferenceRead:
+    preferences: UserGamificationPreferenceUpsert,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
     """Update user's gamification preferences."""
-
-    # Verify user belongs to org
-    if not await verify_user_org_membership(current_user.id, org_id, db_session):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not belong to this organization",
-        )
-
-    # Get or create profile
-    from src.services.gamification.gamification import get_or_create_profile
-
-    profile = await get_or_create_profile(current_user.id, org_id, db_session)
-
-    # Update preferences in the profile
-    profile.preferences = preferences_update.preferences
-    profile.updated_at = now_local()
-    # Invalidate caches so UI sees updated preferences
-    from src.services.gamification.gamification import CacheManager
-
-    CacheManager.delete(
-        f"gamification:profile:{org_id}:{current_user.id}",
-        f"gamification:dashboard:{org_id}:{current_user.id}",
-    )
-    db_session.commit()
-    db_session.refresh(profile)
-
-    return UserGamificationPreferenceRead(
-        user_id=current_user.id,
+    result = await update_gamification_preferences_result(
+        user_id=user.id,
         org_id=org_id,
-        preferences=profile.preferences,
-        created_at=profile.created_at,
-        updated_at=profile.updated_at,
+        preferences=preferences,
+        db_session=services.xp.db_session,
     )
+    raise_for_result(result)
+    return result.value
+
+
+@router.get(
+    "/dashboard/{org_id}",
+    summary="Gamification dashboard",
+    response_description="Aggregated gamification dashboard data",
+)
+async def get_dashboard(
+    org_id: int,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    """Get gamification dashboard data."""
+    result = await get_gamification_dashboard_result(
+        user_id=user.id,
+        org_id=org_id,
+        db_session=services.xp.db_session,
+    )
+    raise_for_result(result)
+    return result.value
+
+
+@router.get("/streaks/summary/{org_id}", summary="Get streak summary")
+async def streak_summary(
+    org_id: int,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    result = await services.streaks.get_streak_summary(user.id, org_id)
+    raise_for_result(result)
+    return {"data": result.value}
+
+
+@router.get(
+    "/leaderboard/{org_id}",
+    response_model=OrganizationLeaderboard,
+    summary="Organization leaderboard",
+    response_description="Leaderboard entries for organization",
+)
+async def get_leaderboard(
+    org_id: int,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+):
+    """Get organization leaderboard."""
+    # Prefer new leaderboard service (Result) if available
+    try:
+        result = await services.leaderboard.get_top_xp(
+            org_id=org_id, limit=limit, current_user_id=user.id
+        )
+        raise_for_result(result)
+        lb = result.value
+        return {
+            "org_id": lb.org_id,
+            "leaderboard_type": "xp_leaderboard",
+            "period": "all_time",
+            "leaderboard_entries": [
+                {
+                    "rank": e.rank,
+                    "user_id": e.user_id,
+                    "username": e.username,
+                    "total_xp": e.total_xp,
+                    "current_level": e.current_level,
+                    "is_current_user": e.is_current_user,
+                }
+                for e in lb.entries
+            ],
+            "total_participants": lb.total_participants,
+            "current_user_rank": lb.current_user_rank,
+            "last_updated": lb.last_updated,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:  # pragma: no cover - defensive fallback
+        raise HTTPException(status_code=500, detail=f"Failed to get leaderboard: {e!s}")
+
+
+# ---------------------------------------------------------------------------
+# Achievement & Badge Endpoints (Result-based services)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/achievements/{org_id}", summary="List achievements & progress")
+async def list_achievements(
+    org_id: int,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    progress_result = await services.achievements.get_user_achievement_progress(
+        user.id, org_id
+    )
+    raise_for_result(progress_result)
+    return {"data": progress_result.value}
+
+
+@router.post("/achievements/check/{org_id}", summary="Check & unlock achievements")
+async def check_achievements(
+    org_id: int,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    result = await services.achievements.check_user_achievements(user.id, org_id)
+    raise_for_result(result)
+    return {"data": [a.achievement_key for a in result.value]}
+
+
+@router.post("/badges/{org_id}/{badge_key}", summary="Award badge manually (admin)")
+async def award_badge(
+    org_id: int,
+    badge_key: str,
+    user: Annotated[PublicUser, Depends(get_current_user)],
+    services: Annotated[GamificationServices, Depends(get_gamification_services)],
+):
+    result = await services.achievements.award_badge(user.id, org_id, badge_key)
+    raise_for_result(result)
+    badge = result.value
+    return {
+        "data": {
+            "badge_key": badge_key,
+            "earned_at": getattr(badge, "earned_at", None),
+            "user_id": badge.user_id if badge else user.id,
+        }
+    }

@@ -184,7 +184,7 @@ export function LevelIndicator({
             <span>
               {t('levelIndicators.level')} {profile.current_level}
             </span>
-            <span>{progressPercentage.toFixed(0)}%</span>
+            <span>{(progressPercentage || 0).toFixed(0)}%</span>
             <span>
               {t('levelIndicators.level')} {profile.current_level + 1}
             </span>

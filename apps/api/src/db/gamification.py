@@ -15,6 +15,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Column,
+    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -86,6 +87,29 @@ class UserGamificationProfile(SQLModelStrictBaseModel, table=True):
         Index("idx_profile_org_level", "org_id", "current_level"),
         Index("idx_profile_user_org", "user_id", "org_id"),
         Index("idx_profile_last_login", "last_login_date"),
+        Index("idx_profile_last_activity", "last_learning_activity_date"),
+        Index("idx_profile_created", "created_at"),
+        Index("idx_profile_updated", "updated_at"),
+        # Composite indexes for leaderboards
+        Index(
+            "idx_profile_org_xp_desc",
+            "org_id",
+            "total_xp",
+            postgresql_ops={"total_xp": "DESC"},
+        ),
+        Index("idx_profile_org_level_xp", "org_id", "current_level", "total_xp"),
+        Index(
+            "idx_profile_streak_login",
+            "org_id",
+            "current_login_streak",
+            postgresql_ops={"current_login_streak": "DESC"},
+        ),
+        Index(
+            "idx_profile_streak_learning",
+            "org_id",
+            "current_learning_streak",
+            postgresql_ops={"current_learning_streak": "DESC"},
+        ),
         CheckConstraint("total_xp >= 0", name="ck_profile_total_xp_positive"),
         CheckConstraint("current_level >= 1", name="ck_profile_current_level_positive"),
         CheckConstraint(
@@ -94,6 +118,17 @@ class UserGamificationProfile(SQLModelStrictBaseModel, table=True):
         CheckConstraint(
             "level_progress_percent >= 0 AND level_progress_percent <= 100",
             name="ck_profile_progress_percent",
+        ),
+        CheckConstraint(
+            "daily_xp_limit >= daily_goal_xp", name="ck_profile_daily_limit_goal"
+        ),
+        CheckConstraint(
+            "current_login_streak <= longest_login_streak",
+            name="ck_profile_login_streak_logic",
+        ),
+        CheckConstraint(
+            "current_learning_streak <= longest_learning_streak",
+            name="ck_profile_learning_streak_logic",
         ),
     )
 
@@ -136,6 +171,10 @@ class UserGamificationProfile(SQLModelStrictBaseModel, table=True):
     # Preferences (embedded for performance)
     preferences: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
+    # Soft delete support
+    is_active: bool = Field(default=True, index=True)
+    deleted_at: datetime | None = Field(default=None)
+
     # Metadata
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -161,6 +200,10 @@ class XPTransaction(SQLModelStrictBaseModel, table=True):
         Index("idx_xp_source", "source"),
         Index("idx_xp_created", "created_at"),
         Index("idx_xp_user_source", "user_id", "source"),
+        Index("idx_xp_org_created", "org_id", "created_at"),
+        Index(
+            "idx_xp_date_partition", "created_at", postgresql_using="btree"
+        ),  # For partitioning
         UniqueConstraint("idempotency_key", name="uq_xp_idempotency_key"),
         # Prevent awarding same (source, source_id) twice to same user/org (e.g. duplicate activity completion)
         UniqueConstraint(
@@ -171,6 +214,8 @@ class XPTransaction(SQLModelStrictBaseModel, table=True):
             name="uq_xp_user_org_source_sourceid",
         ),
         CheckConstraint("xp_amount > 0", name="ck_xp_transaction_amount_positive"),
+        CheckConstraint("multiplier_applied > 0", name="ck_xp_multiplier_positive"),
+        CheckConstraint("bonus_xp >= 0", name="ck_xp_bonus_non_negative"),
     )
 
     # Primary fields
@@ -370,6 +415,33 @@ class LeaderboardSnapshot(SQLModelStrictBaseModel, table=True):
 
 
 # ============================================================================
+# Preference Models
+# ============================================================================
+
+
+class UserGamificationPreferenceRead(PydanticStrictBaseModel):
+    """Response model for user gamification preferences."""
+
+    user_id: int
+    org_id: int
+    notifications_enabled: bool = True
+    daily_goal_xp: int = 50
+    show_leaderboard: bool = True
+    show_streaks: bool = True
+    show_achievements: bool = True
+
+
+class UserGamificationPreferenceUpsert(PydanticStrictBaseModel):
+    """Request model for updating user gamification preferences."""
+
+    notifications_enabled: bool | None = None
+    daily_goal_xp: int | None = None
+    show_leaderboard: bool | None = None
+    show_streaks: bool | None = None
+    show_achievements: bool | None = None
+
+
+# ============================================================================
 # Pydantic Response Models
 # ============================================================================
 
@@ -456,21 +528,6 @@ class XPTransactionRead(PydanticStrictBaseModel):
         return v
 
 
-class XPAwardRequest(PydanticStrictBaseModel):
-    """Request model for awarding XP."""
-
-    user_id: int
-    source: XPSource
-    source_id: str | None = None
-    reason: str | None = None
-    multiplier: float = 1.0
-    # Amount override (if provided use this instead of default table)
-    custom_amount: int | None = None
-    # Idempotency key to prevent duplicate awards (daily login, bonuses, etc.)
-    idempotency_key: str | None = None
-    metadata: dict[str, Any] = {}
-
-
 class XPAwardResponse(PydanticStrictBaseModel):
     """Response model for XP awards aligned with frontend expectations.
 
@@ -482,6 +539,8 @@ class XPAwardResponse(PydanticStrictBaseModel):
     level_up_occurred: bool
     previous_level: int
     achievements_unlocked: list[str] | None = None
+    # Indicates whether this award created a NEW transaction (True) or returned a cached/idempotent existing one (False)
+    is_new_transaction: bool = True
 
 
 class StreakRecordRead(PydanticStrictBaseModel):
@@ -498,38 +557,6 @@ class StreakRecordRead(PydanticStrictBaseModel):
     xp_earned_today: int
     streak_metadata: dict[str, Any]
     created_at: datetime
-
-
-class GamificationDashboard(PydanticStrictBaseModel):
-    """Comprehensive dashboard data (server-authoritative)."""
-
-    profile: UserGamificationProfileRead
-    recent_xp_transactions: list[XPTransactionRead]
-    daily_xp_history: list[dict[str, Any]]
-    streak_status: dict[str, Any]
-    achievements: dict[str, Any]
-    leaderboard_position: int | None = None
-    next_level_preview: dict[str, Any]
-    daily_progress: dict[str, Any]
-
-    @field_validator("recent_xp_transactions", mode="before")
-    @classmethod
-    def _coerce_recent_tx(cls, v):  # type: ignore[override]
-        # Accept list of dicts with plain string sources and coerce inline
-        if isinstance(v, list):
-            coerced = []
-            for item in v:
-                if isinstance(item, dict) and "source" in item:
-                    src = item.get("source")
-                    if isinstance(src, str):
-                        try:
-                            item["source"] = XPSource(src)
-                        except ValueError:
-                            # Leave as original string
-                            pass
-                coerced.append(item)
-            return coerced
-        return v
 
 
 class OrganizationLeaderboard(PydanticStrictBaseModel):
@@ -601,52 +628,8 @@ class UserAchievementRead(PydanticStrictBaseModel):
 
     # Achievement details (joined)
     achievement: AchievementRead | None = None
-
-
-class GamificationAnalytics(PydanticStrictBaseModel):
-    """Analytics data for gamification insights."""
-
-    org_id: int
-    period_start: datetime
-    period_end: datetime
-
-    # Engagement metrics
-    total_active_users: int
-    total_xp_awarded: int
-    average_xp_per_user: float
-
-    # Level distribution
-    level_distribution: dict[str, int]
-
-    # Streak analytics
-    average_login_streak: float
-    average_learning_streak: float
-
-    # Top performers
-    top_xp_earners: list[dict[str, Any]]
     longest_streaks: list[dict[str, Any]]
 
     # Activity breakdown
     xp_by_source: dict[str, int]
     completion_rates: dict[str, float]
-
-
-# ============================================================================
-# Preference API Models (for compatibility with existing endpoints)
-# ============================================================================
-
-
-class UserGamificationPreferenceRead(PydanticStrictBaseModel):
-    """Response model for preference endpoints."""
-
-    user_id: int
-    org_id: int
-    preferences: dict[str, Any]
-    created_at: datetime
-    updated_at: datetime
-
-
-class UserGamificationPreferenceUpsert(PydanticStrictBaseModel):
-    """Request model for updating preferences."""
-
-    preferences: dict[str, Any]

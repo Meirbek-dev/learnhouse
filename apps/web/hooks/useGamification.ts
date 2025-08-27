@@ -1,8 +1,8 @@
 'use client';
 
 import { updateLearningStreak, updateLoginStreak } from '@/services/gamification/gamification';
-import { getAPIUrl } from '@/services/config/config';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getAPIUrl } from '@/services/config/config';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 
@@ -134,7 +134,7 @@ export function useGamification({
         try {
           const controller = new AbortController();
           abortControllerRef.current = controller;
-          const headResp = await fetch(`${getAPIUrl()}gamification/login-streak/${orgId}` , {
+          const headResp = await fetch(`${getAPIUrl()}gamification/login-streak/${orgId}`, {
             method: 'HEAD',
             headers: { Authorization: `Bearer ${token}` },
             signal: controller.signal,
@@ -149,7 +149,9 @@ export function useGamification({
               }
               globalState.completedToday.add(sessionKey!);
               setHasCheckedToday(true);
-              logger.debug(`Login streak already updated today (streak=${currentStreakHeader}) for user ${session.user?.id}`);
+              logger.debug(
+                `Login streak already updated today (streak=${currentStreakHeader}) for user ${session.user?.id}`,
+              );
               onSuccess?.();
               return; // Done
             }

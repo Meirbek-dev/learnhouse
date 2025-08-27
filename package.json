@@ -6,7 +6,6 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{js,ts,tsx,md,css,json}\"",
-    "fresh-install": "rm -rf node_modules apps/web/node_modules && pnpm install",
     "lint": "turbo run lint",
     "oxlint": "oxlint --fix --fix-suggestions",
     "start": "turbo run start"

@@ -19,7 +19,7 @@ from src.db.courses.courses import Course
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
 from src.security.courses_security import courses_rbac_check_for_certifications
-from src.services.gamification import award_xp
+from src.services.gamification import XPSource, create_streak_service, create_xp_service
 
 ####################################################
 # CRUD
@@ -546,32 +546,23 @@ async def check_course_completion_and_create_certificate(
                     idempotency_key=idempotency_key,
                 )
 
-                # Award XP for course completion using server-authoritative system
+                # Award XP for course completion using event-driven system
                 # Import here to avoid circular imports
-                from src.db.gamification import XPAwardRequest, XPSource
-                from src.services.gamification import award_xp
+                from src.db.courses import get_course_activity_count
 
                 try:
-                    award_request = XPAwardRequest(
-                        source=XPSource.COURSE_COMPLETION,
-                        source_id=str(course_id),
-                        idempotency_key=f"course_xp_{idempotency_key}",
-                        metadata={
-                            "course_id": course_id,
-                            "course_name": course.name,
-                            "course_uuid": course.course_uuid,
-                            "total_activities": len(course_activities),
-                            "completion_date": datetime.now(UTC).isoformat(),
-                        },
-                    )
-
-                    await award_xp(
+                    xp_service = create_xp_service(db_session)
+                    # Award course completion XP (idempotent via source_id)
+                    await xp_service.award_xp(
                         user_id=user_id,
                         org_id=course.org_id,
-                        award_request=award_request,
-                        db_session=db_session,
-                        request=request,
+                        source=XPSource.COURSE_COMPLETION,
+                        source_id=str(course_id),
+                        metadata={"activity_count": len(course_activities)},
                     )
+                    # Update learning streak
+                    streak_service = create_streak_service(db_session)
+                    await streak_service.update_learning_streak(user_id, course.org_id)
                 except Exception as xp_error:
                     # Log the error but don't fail the certification process
                     # In production, this should use structured logging

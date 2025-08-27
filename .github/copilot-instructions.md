@@ -102,3 +102,5 @@ const searchParams = await props.searchParams;
 - Follow best practices of the frameworks and libraries used in the project
 - Project is using latest versions of libraries and frameworks
 - Use shadcn UI best practices
+- This project is not deployed and doesn't have users yer. So you can do breaking changes, leaving
+  no legacy/compatibility code.

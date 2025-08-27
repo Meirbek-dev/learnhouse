@@ -1,7 +1,7 @@
 'use client';
 
-import type { GamificationProfile } from '@/services/gamification/gamification';
-import { getGamificationProfile } from '@/services/gamification/gamification';
+import type { GamificationProfile, XPAwardRequest } from '@/services/gamification/gamification';
+import { getGamificationProfile, awardXP } from '@/services/gamification/gamification';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -158,19 +158,54 @@ export function useXPTracking(orgId: number) {
     }
   }, [profile, lastXP, t]);
 
-  const awardXP = useCallback(
-    async (amount: number, source: string) => {
-      // TODO: call the API to award XP
-      // For now, just refresh the profile
-      await refetch();
-      triggerGamificationUpdate();
+  const { data: session } = useSession();
+
+  const award = useCallback(
+    async (amount: number, source: string, extras: Partial<XPAwardRequest> = {}) => {
+      if (!(session?.tokens?.access_token && orgId)) return;
+      // Optimistic mutation: clone current profile
+      const before = profile ? { ...profile } : null;
+      try {
+        if (profile) {
+          const optimistic = { ...profile } as any;
+          optimistic.total_xp += amount;
+          if (optimistic.xp_in_level != null && optimistic.xp_to_next_level != null) {
+            if (amount >= optimistic.xp_to_next_level) {
+              const spill = amount - optimistic.xp_to_next_level;
+              optimistic.current_level += 1;
+              optimistic.xp_in_level = spill;
+              optimistic.xp_to_next_level = Math.round((optimistic.xp_to_next_level || 100) * 1.15);
+            } else {
+              optimistic.xp_in_level += amount;
+              optimistic.xp_to_next_level -= amount;
+            }
+            optimistic.level_progress_percent = Math.max(
+              0,
+              Math.min(100, (optimistic.xp_in_level / (optimistic.xp_in_level + optimistic.xp_to_next_level)) * 100),
+            );
+          }
+          (window as any).__lastGamificationProfile = optimistic;
+        }
+        const payload: XPAwardRequest = {
+          source,
+          custom_amount: amount,
+          ...extras,
+        } as any;
+        await awardXP(orgId, session.tokens.access_token, payload);
+      } catch (e) {
+        console.warn('[useXPTracking] awardXP failed', e);
+        if (before) (window as any).__lastGamificationProfile = before;
+      } finally {
+        await refetch();
+        triggerGamificationUpdate();
+      }
     },
-    [refetch],
+    [session?.tokens?.access_token, orgId, profile, refetch],
   );
 
   return {
     profile,
-    awardXP,
+    awardXP: award,
     refetch,
   };
 }

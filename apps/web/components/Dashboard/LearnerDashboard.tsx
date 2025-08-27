@@ -5,9 +5,8 @@ import { GamificationDashboard, Leaderboard, StreakWidget } from '@/components/D
 import { Award, BookOpen, Flame, Star, TrendingUp, Trophy, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
 import { useGamification } from '@/hooks/useGamification';
-import { getAPIUrl } from '@/services/config/config';
+import { getGamificationDashboard as fetchGamificationDashboardService, type GamificationDashboard as DashboardData } from '@/services/gamification/gamification';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -23,38 +22,34 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [activeTab, setActiveTab] = useState('profile');
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
 
   // Initialize gamification tracking
   useGamification({ orgId, enabled: !!session?.user });
 
-  // Fetch gamification dashboard for Quick Stats
+  // Fetch gamification dashboard (normalized) for Quick Stats
   useEffect(() => {
-    const fetchGamificationDashboard = async () => {
+    let cancelled = false;
+    async function run() {
       if (!session?.tokens?.access_token) {
         setIsLoadingDashboard(false);
         return;
       }
-
       try {
         setIsLoadingDashboard(true);
-        const response = await fetch(`${getAPIUrl()}gamification/dashboard/${orgId}`, {
-          ...RequestBodyWithAuthHeader('GET', null, null, session.tokens.access_token),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setDashboardData(data);
-        }
-      } catch (error) {
-        console.error('Error fetching gamification dashboard:', error);
+        const data = await fetchGamificationDashboardService(orgId, session.tokens.access_token);
+        if (!cancelled) setDashboardData(data);
+      } catch (err) {
+        if (!cancelled) console.error('Error fetching gamification dashboard:', err);
       } finally {
-        setIsLoadingDashboard(false);
+        if (!cancelled) setIsLoadingDashboard(false);
       }
+    }
+    run();
+    return () => {
+      cancelled = true;
     };
-
-    fetchGamificationDashboard();
   }, [orgId, session?.tokens?.access_token]);
 
   // Don't show for anonymous users
@@ -117,21 +112,23 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Star className="mx-auto mb-2 h-8 w-8 text-yellow-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard ? '...' : dashboardData?.total_courses_completed || 0}
+                    {isLoadingDashboard
+                      ? '...'
+                      : (dashboardData?.profile?.totals?.courses_completed ?? (dashboardData as any)?.total_courses_completed ?? 0)}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.completed')}</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Award className="mx-auto mb-2 h-8 w-8 text-green-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard ? '...' : dashboardData?.total_certificates || 0}
+                    {isLoadingDashboard ? '...' : (dashboardData as any)?.total_certificates || 0}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.certificates')}</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Flame className="mx-auto mb-2 h-8 w-8 text-orange-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard ? '...' : dashboardData?.profile?.current_login_streak || 0}
+                    {isLoadingDashboard ? '...' : dashboardData?.profile?.streaks?.login?.current || 0}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.dayStreak')}</p>
                 </div>

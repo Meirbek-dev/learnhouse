@@ -3,23 +3,17 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertCircle, Calendar, Flame, RefreshCw, Star, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getAPIUrl } from '@/services/config/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useSession } from 'next-auth/react';
+import { useGamificationProfile } from '@/hooks/useGamificationProfile';
 
 interface GamificationProfile {
-  current_login_streak: number;
-  longest_login_streak: number;
-  current_learning_streak: number;
-  longest_learning_streak: number;
-  last_login_date: string | null;
-  last_learning_activity_date: string | null;
+  streaks: { login: { current: number; longest: number }; learning: { current: number; longest: number } };
+  last_activity: { login: string | null; learning: string | null };
 }
 
 interface StreakWidgetProps {
@@ -31,63 +25,14 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification.streakWidget');
   const locale = useLocale();
   const format = useFormatter();
-  const { data: session } = useSession();
-  const [profile, setProfile] = useState<GamificationProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { profile, isLoading, error, refetch } = useGamificationProfile({ orgId, enabled: true });
   const [retryCount, setRetryCount] = useState(0);
-
-  const fetchProfile = useCallback(async () => {
-    if (!session?.tokens?.access_token) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10_000); // 10 second timeout
-
-      const response = await fetch(`${getAPIUrl()}gamification/profile/${orgId}`, {
-        ...RequestBodyWithAuthHeader('GET', null, null, session.tokens.access_token),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(data);
-        setRetryCount(0); // Reset retry count on success
-      } else {
-        throw new Error(`Failed to fetch profile: ${response.status} ${response.statusText}`);
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        setError(t('errors.timeout'));
-      } else if (error instanceof Error) {
-        console.error('Error fetching gamification profile:', error);
-        setError(error.message || t('errors.unknown'));
-      } else {
-        setError(t('errors.unknown'));
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [orgId, session?.tokens?.access_token, t]);
-
   const handleRetry = useCallback(() => {
     if (retryCount < 3) {
       setRetryCount((prev) => prev + 1);
-      fetchProfile();
+      refetch();
     }
-  }, [retryCount, fetchProfile]);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  }, [retryCount, refetch]);
 
   const getStreakStatus = useCallback(
     (lastActivityDate: string | null) => {
@@ -216,16 +161,24 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
   const streakData = useMemo(() => {
     if (!profile) return null;
 
+  const loginLast = profile.last_activity.login;
+  const learningLast = profile.last_activity.learning;
+  const loginCurrent = profile.streaks.login.current;
+  const loginLongest = profile.streaks.login.longest;
+  const learningCurrent = profile.streaks.learning.current;
+  const learningLongest = profile.streaks.learning.longest;
     return {
-      loginStatus: getStreakStatus(profile.last_login_date),
-      learningStatus: getStreakStatus(profile.last_learning_activity_date),
-      loginMessage: getStreakMessage(profile.current_login_streak, getStreakStatus(profile.last_login_date), 'login'),
-      learningMessage: getStreakMessage(
-        profile.current_learning_streak,
-        getStreakStatus(profile.last_learning_activity_date),
-        'learning',
-      ),
-    };
+      loginStatus: getStreakStatus(loginLast),
+      learningStatus: getStreakStatus(learningLast),
+      loginMessage: getStreakMessage(loginCurrent, getStreakStatus(loginLast), 'login'),
+      learningMessage: getStreakMessage(learningCurrent, getStreakStatus(learningLast), 'learning'),
+  current_login_streak: loginCurrent, // local structure for rendering
+  longest_login_streak: loginLongest,
+  current_learning_streak: learningCurrent,
+  longest_learning_streak: learningLongest,
+      last_login_date: loginLast,
+      last_learning_activity_date: learningLast,
+    } as any;
   }, [profile, getStreakStatus, getStreakMessage]);
 
   // Loading state
@@ -318,7 +271,7 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
     );
   }
 
-  const { loginStatus, learningStatus, loginMessage, learningMessage } = streakData;
+  const { loginStatus, learningStatus, loginMessage, learningMessage } = streakData as any;
 
   return (
     <TooltipProvider>
@@ -339,14 +292,14 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
                     <Calendar className="h-5 w-5 text-orange-500" />
                     <h3 className="font-semibold">{t('loginStreak')}</h3>
                   </div>
-                  <Badge variant={getStreakBadgeVariant(loginStatus)}>{formatDays(profile.current_login_streak)}</Badge>
+                  <Badge variant={getStreakBadgeVariant(loginStatus)}>{formatDays(streakData.current_login_streak)}</Badge>
                 </div>
 
                 <p className="text-muted-foreground mb-2 text-sm">{loginMessage}</p>
 
-                {profile.longest_login_streak > profile.current_login_streak && (
+        {streakData.longest_login_streak > streakData.current_login_streak && (
                   <p className="text-muted-foreground text-xs">
-                    {t('personalBest', { count: profile.longest_login_streak })}
+          {t('personalBest', { count: streakData.longest_login_streak })}
                   </p>
                 )}
               </div>
@@ -354,12 +307,12 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
             <TooltipContent>
               <div className="space-y-1">
                 <p>{t('tooltips.login')}</p>
-                {profile.last_login_date && (
+                {profile.last_activity.login && (
                   <div className="text-xs font-extralight">
                     <p>
-                      {t('tooltips.lastActivity')}: {getRelativeTime(profile.last_login_date)}
+                      {t('tooltips.lastActivity')}: {getRelativeTime(profile.last_activity.login)}
                     </p>
-                    <p>{formatLastActivityDate(profile.last_login_date)}</p>
+                    <p>{formatLastActivityDate(profile.last_activity.login)}</p>
                   </div>
                 )}
               </div>
@@ -376,15 +329,15 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
                     <h3 className="font-semibold">{t('learningStreak')}</h3>
                   </div>
                   <Badge variant={getStreakBadgeVariant(learningStatus)}>
-                    {formatDays(profile.current_learning_streak)}
+                    {formatDays(streakData.current_learning_streak)}
                   </Badge>
                 </div>
 
                 <p className="text-muted-foreground mb-2 text-sm">{learningMessage}</p>
 
-                {profile.longest_learning_streak > profile.current_learning_streak && (
+        {streakData.longest_learning_streak > streakData.current_learning_streak && (
                   <p className="text-muted-foreground text-xs">
-                    {t('personalBest', { count: profile.longest_learning_streak })}
+          {t('personalBest', { count: streakData.longest_learning_streak })}
                   </p>
                 )}
               </div>
@@ -392,12 +345,12 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
             <TooltipContent>
               <div className="space-y-1">
                 <p>{t('tooltips.learning')}</p>
-                {profile.last_learning_activity_date && (
+                {profile.last_activity.learning && (
                   <div className="text-xs font-extralight">
                     <p>
-                      {t('tooltips.lastActivity')}: {getRelativeTime(profile.last_learning_activity_date)}
+                      {t('tooltips.lastActivity')}: {getRelativeTime(profile.last_activity.learning)}
                     </p>
-                    <p>{formatLastActivityDate(profile.last_learning_activity_date)}</p>
+                    <p>{formatLastActivityDate(profile.last_activity.learning)}</p>
                   </div>
                 )}
               </div>

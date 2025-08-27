@@ -8,6 +8,7 @@ from ulid import ULID
 from src.db.courses.activities import Activity
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
+from src.db.gamification import XPSource
 from src.db.trail_runs import TrailRun, TrailRunRead
 from src.db.trail_steps import TrailStep, TrailStepRead
 from src.db.trails import Trail, TrailCreate, TrailRead
@@ -15,7 +16,8 @@ from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
-from src.services.gamification import update_learning_streak
+from src.services.gamification import create_streak_service
+from src.services.gamification.xp_service import create_xp_service
 
 logger = logging.getLogger(__name__)
 
@@ -270,104 +272,76 @@ async def add_activity_to_trail(
         db_session.commit()
         db_session.refresh(trailstep)
 
-        # Award XP for first-time activity completion (idempotent by checking creation)
+        # Award XP for first-time activity completion (idempotent by source_id)
         try:
-            from src.db.gamification import (
-                XPAwardRequest,
-                XPSource,
-            )  # local import to avoid circular deps
-            from src.services.gamification import award_xp
-
-            award_request = XPAwardRequest(
+            xp_service = create_xp_service(db_session)
+            await xp_service.award_xp(
                 user_id=user.id,
+                org_id=course.org_id,
                 source=XPSource.ACTIVITY_COMPLETION,
-                source_id=str(activity.activity_uuid),
-                idempotency_key=f"activity_completion_{user.id}_{activity.activity_uuid}",
+                source_id=str(activity.id),
                 metadata={
-                    "activity_id": activity.id,
-                    "activity_uuid": activity.activity_uuid,
-                    "activity_name": getattr(activity, "name", None),
+                    "activity_uuid": activity_uuid,
+                    "activity_type": getattr(activity, "activity_type", None),
                     "course_id": course.id,
                     "course_uuid": course.course_uuid,
-                    "course_name": getattr(course, "name", None),
-                    "completed_at": datetime.now().isoformat(),
                 },
             )
-            await award_xp(
-                user_id=user.id,
-                org_id=course.org_id,
-                award_request=award_request,
-                db_session=db_session,
-                request=request,
-            )
-        except Exception as xp_err:  # noqa: BLE001 - we want to log any failure without breaking core flow
+        except Exception as xp_err:  # noqa: BLE001
             logger.warning(
-                "Failed to award activity completion XP (user_id=%s, activity_uuid=%s): %s",
+                "Failed to award activity completion XP (user_id=%s, activity_id=%s): %s",
                 user.id,
-                activity.activity_uuid,
+                activity.id,
                 xp_err,
             )
-
-    # Check if all activities in the course are completed and create certificate if so
-    if course and course.id:
-        await check_course_completion_and_create_certificate(
-            request, user.id, course.id, db_session
+    # Update learning streak (best-effort; ignore failures)
+    try:
+        streak_service = create_streak_service(db_session)
+        await streak_service.update_learning_streak(user.id, course.org_id)
+    except Exception as streak_err:  # noqa: BLE001
+        logger.debug(
+            "Learning streak update failed (user_id=%s, org_id=%s): %s",
+            user.id,
+            course.org_id,
+            streak_err,
         )
-        # Update learning streak (correct signature)
-        try:
-            await update_learning_streak(
-                user_id=user.id,
-                org_id=course.org_id,
-                db_session=db_session,
-                activity_id=str(activity.id) if activity.id is not None else None,
-            )
-        except TypeError as sig_err:  # surface signature issues
-            logger.exception(
-                "update_learning_streak call failed (user_id=%s, org_id=%s): %s",
-                user.id,
-                course.org_id,
-                sig_err,
-            )
-        except Exception as streak_err:  # noqa: BLE001
-            logger.warning(
-                "Learning streak update failed (user_id=%s, org_id=%s): %s",
-                user.id,
-                course.org_id,
-                streak_err,
-            )
 
+    # Rebuild and return updated trail state (mirror logic from other helpers)
     statement = select(TrailRun).where(
         TrailRun.trail_id == trail.id, TrailRun.user_id == user.id
     )
     trail_runs = db_session.exec(statement).all()
-
     trail_runs = [
-        TrailRunRead(
-            **trail_run.model_dump(), course={}, steps=[], course_total_steps=0
-        )
-        for trail_run in trail_runs
+        TrailRunRead(**tr.model_dump(), course={}, steps=[], course_total_steps=0)
+        for tr in trail_runs
     ]
 
-    for trail_run in trail_runs:
-        statement = select(TrailStep).where(
-            TrailStep.trailrun_id == trail_run.id, TrailStep.user_id == user.id
+    # Enrich runs with steps & course metadata
+    for tr in trail_runs:
+        # steps for this run
+        step_stmt = select(TrailStep).where(
+            TrailStep.trailrun_id == tr.id, TrailStep.user_id == user.id
         )
-        trail_steps = db_session.exec(statement).all()
+        steps = db_session.exec(step_stmt).all()
+        tr.steps = [TrailStepRead(**s.model_dump()) for s in steps]
 
-        trail_steps = [
-            TrailStepRead(**trail_step.model_dump()) for trail_step in trail_steps
-        ]
-        trail_run.steps = trail_steps
+        # attach course object & total course steps
+        course_stmt = select(Course).where(Course.id == tr.course_id)
+        course_obj = db_session.exec(course_stmt).first()
+        tr.course = course_obj.model_dump() if course_obj else {}
+        chapter_act_stmt = select(ChapterActivity).where(
+            ChapterActivity.course_id == tr.course_id
+        )
+        tr.course_total_steps = len(db_session.exec(chapter_act_stmt).all())
 
-        for trail_step in trail_steps:
-            statement = select(Course).where(Course.id == trail_step.course_id)
-            course = db_session.exec(statement).first()
-            trail_step.data = {"course": course}
+        # per-step course embedding
+        for s in tr.steps:
+            if s.course_id:
+                c_stmt = select(Course).where(Course.id == s.course_id)
+                c_obj = db_session.exec(c_stmt).first()
+                s.data = {"course": c_obj}
 
-    return TrailRead(
-        **trail.model_dump(),
-        runs=trail_runs,
-    )
+    return TrailRead(**trail.model_dump(), runs=trail_runs)
 
 
 async def remove_activity_from_trail(
@@ -416,38 +390,26 @@ async def remove_activity_from_trail(
         db_session.commit()
 
     # Get updated trail data
+    # Rebuild and return updated trail
     statement = select(TrailRun).where(
         TrailRun.trail_id == trail.id, TrailRun.user_id == user.id
     )
     trail_runs = db_session.exec(statement).all()
-
     trail_runs = [
-        TrailRunRead(
-            **trail_run.model_dump(), course={}, steps=[], course_total_steps=0
-        )
-        for trail_run in trail_runs
+        TrailRunRead(**tr.model_dump(), course={}, steps=[], course_total_steps=0)
+        for tr in trail_runs
     ]
-
-    for trail_run in trail_runs:
+    for tr in trail_runs:
         statement = select(TrailStep).where(
-            TrailStep.trailrun_id == trail_run.id, TrailStep.user_id == user.id
+            TrailStep.trailrun_id == tr.id, TrailStep.user_id == user.id
         )
-        trail_steps = db_session.exec(statement).all()
-
-        trail_steps = [
-            TrailStepRead(**trail_step.model_dump()) for trail_step in trail_steps
-        ]
-        trail_run.steps = trail_steps
-
-        for trail_step in trail_steps:
-            statement = select(Course).where(Course.id == trail_step.course_id)
-            course = db_session.exec(statement).first()
-            trail_step.data = {"course": course}
-
-    return TrailRead(
-        **trail.model_dump(),
-        runs=trail_runs,
-    )
+        steps = db_session.exec(statement).all()
+        tr.steps = [TrailStepRead(**s.model_dump()) for s in steps]
+        for s in tr.steps:
+            statement = select(Course).where(Course.id == s.course_id)
+            c = db_session.exec(statement).first()
+            s.data = {"course": c}
+    return TrailRead(**trail.model_dump(), runs=trail_runs)
 
 
 async def add_course_to_trail(

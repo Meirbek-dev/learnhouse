@@ -20,7 +20,7 @@ interface LeaderboardEntry {
   user_id: number;
   total_xp: number;
   current_level: number;
-  current_login_streak: number;
+  streaks: { login: { current: number; longest: number }; learning: { current: number; longest: number } };
   current_learning_streak: number;
   username?: string;
   avatar_image?: string;
@@ -404,18 +404,18 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
 
                     {/* Streaks */}
                     <div className="flex items-center gap-2">
-                      {entry.current_login_streak > 0 && (
+                      {entry.streaks?.login.current > 0 && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Badge
                               variant="outline"
                               className="cursor-help text-xs"
                             >
-                              🔥 {entry.current_login_streak}
+                              🔥 {entry.streaks.login.current}
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{t('leaderboard.loginStreakTooltip', { count: entry.current_login_streak })}</p>
+                            <p>{t('leaderboard.loginStreakTooltip', { count: entry.streaks.login.current })}</p>
                           </TooltipContent>
                         </Tooltip>
                       )}
