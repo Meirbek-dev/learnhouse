@@ -56,7 +56,7 @@ const CourseClient = (props: any) => {
   const { course } = props;
   const org = useOrg() as any;
   const isMobile = useIsMobile();
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const {

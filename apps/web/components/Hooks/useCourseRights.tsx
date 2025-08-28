@@ -38,7 +38,7 @@ export interface CourseRights {
 }
 
 export function useCourseRights(courseuuid: string) {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const {

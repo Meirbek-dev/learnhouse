@@ -73,7 +73,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 
 const UserBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.UserBlock');
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const editorState = useEditorProvider() as any;
   const { isEditable } = editorState;
   const router = useRouter();

@@ -124,7 +124,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Debounce the search query value

@@ -18,7 +18,7 @@ import EvaluateAssignment from './Modals/EvaluateAssignment';
 
 const AssignmentSubmissionsSubPage = ({ assignment_uuid }: { assignment_uuid: string }) => {
   const t = useTranslations('DashPage.Assignments');
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const { data: assignmentSubmission, error: assignmentError } = useSWR(
@@ -74,7 +74,7 @@ const AssignmentSubmissionsSubPage = ({ assignment_uuid }: { assignment_uuid: st
 
 const SubmissionBox = ({ assignment_uuid, user_id, submission }: any) => {
   const t = useTranslations('DashPage.Assignments');
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const [gradeSudmissionModal, setGradeSubmissionModal] = useState({
     open: false,

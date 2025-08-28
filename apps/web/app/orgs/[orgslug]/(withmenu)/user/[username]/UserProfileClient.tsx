@@ -79,7 +79,7 @@ const ImageModal: FC<{
 };
 
 const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('UserProfilePage');
   const [selectedImage, setSelectedImage] = useState<{

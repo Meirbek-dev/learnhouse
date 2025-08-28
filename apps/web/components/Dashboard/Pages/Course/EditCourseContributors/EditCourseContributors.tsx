@@ -170,7 +170,7 @@ const StatusDropdown = ({
 const EditCourseContributors = (props: EditCourseContributorsProps) => {
   const t = useTranslations('DashPage.EditCourseContributors');
   const locale = useLocale() as Locale;
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { isLoading, courseStructure } = course;

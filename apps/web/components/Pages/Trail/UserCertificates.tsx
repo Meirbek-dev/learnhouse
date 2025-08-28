@@ -14,7 +14,7 @@ interface UserCertificatesProps {
 }
 
 const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
   const locale = useLocale();
   const format = useFormatter();

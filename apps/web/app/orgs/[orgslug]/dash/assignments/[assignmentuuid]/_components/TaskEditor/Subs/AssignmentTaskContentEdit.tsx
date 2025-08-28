@@ -9,7 +9,7 @@ import TaskFileObject from './TaskTypes/TaskFileObject';
 import { useEffect } from 'react';
 
 const AssignmentTaskContentEdit = () => {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
   const assignment_task = useAssignmentsTask() as any;
 

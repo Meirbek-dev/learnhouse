@@ -42,7 +42,7 @@ const CourseGrid = ({ ownedCourses, orgSlug }: { ownedCourses: any[]; orgSlug: s
 const OwnedCoursesPage = () => {
   const t = useTranslations('DashPage.Courses');
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const {

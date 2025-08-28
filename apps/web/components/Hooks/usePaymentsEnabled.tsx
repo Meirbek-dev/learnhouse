@@ -7,7 +7,7 @@ import useSWR from 'swr';
 
 export function usePaymentsEnabled() {
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
 
   const {

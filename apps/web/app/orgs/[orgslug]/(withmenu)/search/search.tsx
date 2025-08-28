@@ -165,7 +165,7 @@ const EmptyState = ({ query, t }: { query: string; t: (key: string, params?: any
 const SearchPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const org = useOrg() as any;
   const t = useTranslations('SearchPage');
 

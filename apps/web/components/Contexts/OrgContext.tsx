@@ -16,7 +16,7 @@ import useSWR from 'swr';
 export const OrgContext = createContext(null);
 
 export const OrgProvider = ({ children, orgslug }: { children: ReactNode; orgslug: string }) => {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const pathname = usePathname();
   const accessToken = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Org');

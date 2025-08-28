@@ -23,7 +23,7 @@ export interface PaymentsParams {
 const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
   const params = use(props.params);
   const t = useTranslations('DashPage.Payments');
-  const _session = useLHSession() as any;
+  const _session = useLHSession();
   const _org = useOrg() as any;
   const subpage = params.subpage || 'customers';
 

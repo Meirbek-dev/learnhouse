@@ -23,7 +23,7 @@ export interface SettingsParams {
 
 const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
   const params = use(props.params);
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const org = useOrg() as any;
   const t = useTranslations('DashPage.UserSettings');
   const [H1Label, setH1Label] = useState('');

@@ -78,7 +78,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
   const t = useTranslations('CoursePage');
   const [posts, setPosts] = useState<any[]>([]);
   const org = useOrg() as any;
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
 
   // Transform initial posts on component mount and when initialPosts changes

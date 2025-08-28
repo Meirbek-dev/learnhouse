@@ -17,7 +17,7 @@ const AssignmentSubmissionProvider = ({
   children: ReactNode;
   assignment_uuid: string | undefined;
 }) => {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const accessToken = session?.data?.tokens?.access_token;
 
   const { data: assignmentSubmission, error: assignmentError } = useSWR(

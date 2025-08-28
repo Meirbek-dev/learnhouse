@@ -26,7 +26,7 @@ const ADMIN_PATHS = [
 ];
 
 const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMode }) => {
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const org = useOrg() as any;
   const pathname = usePathname();
   const router = useRouter();
