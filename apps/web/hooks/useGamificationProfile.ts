@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getGamificationProfile, getXPSourcesMetadata } from '@/services/gamification/gamification';
 import type { GamificationProfile } from '@/services/gamification/gamification';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 
 interface UseGamificationProfileOptions {
@@ -35,9 +35,9 @@ async function ensureXPSourcesPrefetched() {
       for (const s of sources) {
         xpSourceCache.map[s.key] = {
           label: s.label,
-            default_xp: s.default_xp,
-            category: s.category,
-            description: s.description,
+          default_xp: s.default_xp,
+          category: s.category,
+          description: s.description,
         };
       }
       xpSourceCache.loaded = true;
@@ -62,14 +62,14 @@ export function useGamificationProfile(options: UseGamificationProfileOptions): 
 
   const fetchProfile = useCallback(async () => {
     if (!enabled) return;
-    if (!orgId || !accessToken) return;
+    if (!(orgId && accessToken)) return;
     setIsLoading(true);
     try {
       const p = await getGamificationProfile(orgId, accessToken);
       setProfile(p);
       setError(null);
-    } catch (e: any) {
-      setError(e?.message || 'Failed to load profile');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to load profile');
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ export function useGamificationProfile(options: UseGamificationProfileOptions): 
 
   // Optional XP source metadata prefetch
   useEffect(() => {
-    if (!preloadXPSources || !enabled) return;
+    if (!(preloadXPSources && enabled)) return;
     ensureXPSourcesPrefetched();
   }, [preloadXPSources, enabled]);
 
@@ -100,7 +100,5 @@ export function useGamificationProfile(options: UseGamificationProfileOptions): 
     };
   }, [refreshIntervalMs, fetchProfile, enabled]);
 
-  const xpSources = useMemo(() => xpSourceCache.map, [xpSourceCache.loaded]);
-
-  return { profile, isLoading, error, refetch: fetchProfile, xpSources };
+  return { profile, isLoading, error, refetch: fetchProfile, xpSources: xpSourceCache.map };
 }

@@ -394,7 +394,7 @@ export async function awardXP(orgId: number, accessToken: string, payload: XPAwa
   const idem = payload.idempotency_key || `xp_${payload.source}_${payload.source_id || 'generic'}_${Date.now()}`;
   const params = new URLSearchParams({ source: payload.source });
   if (payload.source_id) params.set('source_id', payload.source_id);
-  if (payload.custom_amount != null) params.set('custom_amount', String(payload.custom_amount));
+  if (payload.custom_amount !== null) params.set('custom_amount', String(payload.custom_amount));
   // metadata currently ignored (backend treats it as query param if provided) – send if simple
   if (payload.metadata && Object.keys(payload.metadata).length > 0) {
     try {
@@ -408,7 +408,7 @@ export async function awardXP(orgId: number, accessToken: string, payload: XPAwa
   const res = await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'X-Idempotency-Key': idem,
     },
     credentials: 'include',
@@ -469,9 +469,9 @@ export function getLevelProgressionData(profile: GamificationProfile): {
     totalXP: profile.total_xp,
     progressPercent: profile.level_progress_percent,
     xpToNextLevel: profile.xp_to_next_level,
-  dailyXPEarned: profile.daily.xp_earned,
-  dailyXPLimit: profile.daily.xp_limit,
-  dailyGoalXP: profile.daily.goal_xp,
+    dailyXPEarned: profile.daily.xp_earned,
+    dailyXPLimit: profile.daily.xp_limit,
+    dailyGoalXP: profile.daily.goal_xp,
   };
 }
 

@@ -42,7 +42,7 @@ export const AssignmentTaskGeneralEdit = () => {
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask() as any;
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
-  const assignment = useAssignments() as any;
+  const assignment = useAssignments();
   const validationSchema = createValidationSchema(t);
 
   // Check if assignment task data is loaded and task is selected
@@ -247,7 +247,7 @@ const UpdateTaskRef = () => {
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask() as any;
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
-  const assignment = useAssignments() as any;
+  const assignment = useAssignments();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('') as any;
   const [_localRefFile, setLocalRefFile] = useState(null) as any;

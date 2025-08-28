@@ -10,7 +10,19 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
-export const AssignmentContext = createContext({});
+interface AssignmentContextType {
+  assignment_object: any | null;
+  assignment_tasks: any[] | null;
+  course_object: any | null;
+  activity_object: any | null;
+}
+
+export const AssignmentContext = createContext<AssignmentContextType>({
+  assignment_object: null,
+  assignment_tasks: null,
+  course_object: null,
+  activity_object: null,
+});
 
 export const AssignmentProvider = ({
   children,
@@ -22,7 +34,7 @@ export const AssignmentProvider = ({
   const session = useLHSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Assignment');
-  const [assignmentsFull, setAssignmentsFull] = useState({
+  const [assignmentsFull, setAssignmentsFull] = useState<AssignmentContextType>({
     assignment_object: null,
     assignment_tasks: null,
     course_object: null,
@@ -75,6 +87,6 @@ export const AssignmentProvider = ({
   return <AssignmentContext value={assignmentsFull}>{children}</AssignmentContext>;
 };
 
-export function useAssignments() {
+export function useAssignments(): AssignmentContextType {
   return use(AssignmentContext);
 }

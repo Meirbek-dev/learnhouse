@@ -17,7 +17,7 @@ const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 const PDFBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.PDFBlock');
   const org = useOrg() as any;
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [pdf, setPDF] = useState(null);

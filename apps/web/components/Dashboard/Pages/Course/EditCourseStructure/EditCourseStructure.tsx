@@ -25,16 +25,12 @@ interface EditCourseStructureProps {
 
 export type OrderPayload =
   | {
-      chapter_order_by_ids: [
-        {
-          chapter_id: number;
-          activities_order_by_ids: [
-            {
-              activity_id: number;
-            },
-          ];
-        },
-      ];
+      chapter_order_by_ids?: Array<{
+        chapter_id: number;
+        activities_order_by_ids: Array<{
+          activity_id: number;
+        }>;
+      }>;
     }
   | undefined;
 
@@ -49,8 +45,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const dispatchCourse = useCourseDispatch() as any;
 
   const [_order, _setOrder] = useState<OrderPayload>();
-  const course = useCourse() as any;
-  const course_structure = useMemo(() => (course ? course.courseStructure : {}), [course]);
+  const course = useCourse();
+  const course_structure = useMemo(() => course.courseStructure, [course]);
   const course_uuid = course ? course.courseStructure.course_uuid : '';
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
   // New Chapter creation
@@ -88,6 +84,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     if (type === 'chapter') {
       const newChapterOrder = [...newCourseStructure.chapters];
       const [movedChapter] = newChapterOrder.splice(source.index, 1);
+      if (!movedChapter) return;
+
       newChapterOrder.splice(destination.index, 0, movedChapter);
       newCourseStructure.chapters = newChapterOrder;
     }
@@ -98,7 +96,12 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       const destinationChapter =
         newChapterOrder.find((chapter: any) => chapter.chapter_uuid === destination.droppableId) ?? sourceChapter;
 
+      if (!sourceChapter || !destinationChapter) return;
+      if (!sourceChapter.activities || !destinationChapter.activities) return;
+
       const [movedActivity] = sourceChapter.activities.splice(source.index, 1);
+      if (!movedActivity) return;
+
       destinationChapter.activities.splice(destination.index, 0, movedActivity);
       newCourseStructure.chapters = newChapterOrder;
     }
@@ -132,7 +135,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {course_structure.chapters?.map((chapter: any, index: any) => {
+                {course_structure.chapters.map((chapter: any, index: any) => {
                   return (
                     <ChapterElement
                       key={chapter.chapter_uuid}

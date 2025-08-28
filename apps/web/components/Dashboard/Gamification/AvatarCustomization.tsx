@@ -1,10 +1,10 @@
 'use client';
 
 import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
-import type { GamificationProfile } from '@/services/gamification/gamification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Crown, Lock, Palette, Settings, User } from 'lucide-react';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
+import { useGamificationProfile } from '@/hooks/useGamificationProfile';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
-import { useGamificationProfile } from '@/hooks/useGamificationProfile';
 
 interface AvatarCustomizationProps {
   orgId: number;

@@ -22,7 +22,7 @@ const AssignmentTaskContentEdit = dynamic(() => import('./Subs/AssignmentTaskCon
 const AssignmentTaskEditor = ({ page }: any) => {
   const t = useTranslations('DashPage.Assignments.TaskEditor');
   const [selectedSubPage, setSelectedSubPage] = useState(page);
-  const assignment = useAssignments() as any;
+  const assignment = useAssignments();
   const assignmentTaskState = useAssignmentsTask() as any;
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
   const session = useLHSession() as any;

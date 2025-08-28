@@ -67,7 +67,7 @@ const Courses = (props: CourseProps) => {
   const searchParams = useSearchParams();
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
-  const isUserAdmin = useAdminStatus() as any;
+  const isUserAdmin = useAdminStatus();
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);

@@ -24,7 +24,7 @@ export default function MiniInfoTooltip({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className={`soft-shadow absolute -top-20 left-1/2 -translate-x-1/2 rounded-lg bg-background p-3 ${width}`}
+      className={`soft-shadow bg-background absolute -top-20 left-1/2 -translate-x-1/2 rounded-lg p-3 ${width}`}
     >
       <div className="flex items-center space-x-3">
         {icon ? (
@@ -37,7 +37,7 @@ export default function MiniInfoTooltip({
         ) : null}
         <p className="text-sm text-gray-700">{message}</p>
       </div>
-      <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 bg-background" />
+      <div className="bg-background absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45" />
       <button
         onClick={onClose}
         className="absolute top-1 right-1 text-gray-400 hover:text-gray-600"

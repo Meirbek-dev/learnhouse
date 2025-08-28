@@ -57,7 +57,7 @@ const Onboarding: FC = () => {
   const isMobile = useIsMobile();
   const router = useRouter();
   const org = useOrg() as any;
-  const isUserAdmin = useAdminStatus() as any;
+  const isUserAdmin = useAdminStatus();
 
   const onboardingData: OnboardingStep[] = [
     {

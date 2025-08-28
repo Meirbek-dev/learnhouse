@@ -158,7 +158,7 @@ export default function UserGamificationSettings() {
     } finally {
       setIsLoading(false);
     }
-  }, [session?.user?.id, orgId, preferences, t]);
+  }, [session?.user?.id, session?.tokens?.access_token, orgId, preferences, t]);
 
   // Reset preferences handler
   const handleResetPreferences = useCallback(() => {

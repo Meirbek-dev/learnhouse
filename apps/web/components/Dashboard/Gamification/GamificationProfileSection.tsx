@@ -2,16 +2,15 @@
 
 import { Activity, Award, Crown, Flame, MoreHorizontal, Star, Target, Trophy, Zap } from 'lucide-react';
 import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
-import type { GamificationProfile } from '@/services/gamification/gamification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
+import { useGamificationProfile } from '@/hooks/useGamificationProfile';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { useGamificationProfile } from '@/hooks/useGamificationProfile';
+import { useMemo } from 'react';
 
 interface GamificationProfileSectionProps {
   orgId: number;

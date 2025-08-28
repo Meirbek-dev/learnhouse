@@ -16,7 +16,7 @@ import BreadCrumbs from './BreadCrumbs';
 import SaveState from './SaveState';
 
 export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) => {
-  const course = useCourse() as any;
+  const course = useCourse();
   const org = useOrg() as any;
   const t = useTranslations('DashPage.CourseOverview');
 

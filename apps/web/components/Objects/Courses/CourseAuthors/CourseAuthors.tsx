@@ -140,7 +140,7 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
   const adminStatus = useAdminStatus();
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`, (url) =>
@@ -206,7 +206,7 @@ type UpdateFormValues = z.infer<ReturnType<typeof createUpdateFormSchema>>;
 
 const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
   const org = useOrg() as any;
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const t = useTranslations('Courses.CourseAuthors');
   const validationSchema = createUpdateFormSchema(t);
@@ -295,7 +295,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
 };
 
 const UpdatesListView = () => {
-  const course = useCourse() as any;
+  const course = useCourse();
   const adminStatus = useAdminStatus();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -355,7 +355,7 @@ const UpdatesListView = () => {
 
 const DeleteUpdateButton = ({ update }: any) => {
   const session = useLHSession() as any;
-  const course = useCourse() as any;
+  const course = useCourse();
   const t = useTranslations('Courses.CourseAuthors');
 
   const handleDelete = async () => {

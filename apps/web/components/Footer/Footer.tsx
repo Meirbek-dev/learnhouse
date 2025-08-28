@@ -7,7 +7,7 @@ import OrgScripts from '@/components/OrgScripts/OrgScripts';
 
 const Footer: React.FC = () => {
   const pathname = usePathname();
-  const isDashboard = pathname?.startsWith('/dashboard');
+  const isDashboard = pathname?.startsWith('/dash');
 
   // Don't run scripts in dashboard pages
   if (isDashboard) {

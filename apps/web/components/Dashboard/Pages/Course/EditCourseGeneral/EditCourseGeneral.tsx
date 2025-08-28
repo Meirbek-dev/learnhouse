@@ -2,11 +2,11 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { AlertTriangle, BookOpen, Image, Loader2, Tag, Video } from 'lucide-react';
+import { AlertTriangle, BookOpen, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
 import { TagsInput } from '@components/ui/custom/tags-input';
-import { useEffect, useId, useRef, useState } from 'react';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';
@@ -101,15 +101,18 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
     return [];
   };
 
-  const getInitialValues = (): FormValues => ({
-    name: courseStructure?.name || '',
-    description: courseStructure?.description || '',
-    about: courseStructure?.about || '',
-    learnings: initializeLearnings(courseStructure?.learnings || ''),
-    tags: parseTags(courseStructure?.tags),
-    public: courseStructure?.public,
-    thumbnail_type: courseStructure?.thumbnail_type || 'image',
-  });
+  const getInitialValues = useCallback(
+    (): FormValues => ({
+      name: courseStructure?.name || '',
+      description: courseStructure?.description || '',
+      about: courseStructure?.about || '',
+      learnings: initializeLearnings(courseStructure?.learnings || ''),
+      tags: parseTags(courseStructure?.tags),
+      public: courseStructure?.public,
+      thumbnail_type: courseStructure?.thumbnail_type || 'image',
+    }),
+    [courseStructure],
+  );
 
   const form = useForm<FormValues>({
     defaultValues: getInitialValues(),
@@ -355,7 +358,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                           <SelectContent>
                             <SelectItem value="image">
                               <div className="flex items-center gap-2">
-                                <Image
+                                <ImageIcon
                                   className="h-4 w-4"
                                   aria-hidden="true"
                                 />
@@ -373,7 +376,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                             </SelectItem>
                             <SelectItem value="both">
                               <div className="flex items-center gap-2">
-                                <Image
+                                <ImageIcon
                                   className="h-4 w-4"
                                   aria-hidden="true"
                                 />

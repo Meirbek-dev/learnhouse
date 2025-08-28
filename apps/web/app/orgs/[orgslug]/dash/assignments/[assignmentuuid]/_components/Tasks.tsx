@@ -12,7 +12,7 @@ import NewTaskModal from './Modals/NewTaskModal';
 
 const AssignmentTasks = ({ assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.Tasks');
-  const assignments = useAssignments() as any;
+  const assignments = useAssignments();
   const assignmentTask = useAssignmentsTask() as any;
   const assignmentTaskHook = useAssignmentsTaskDispatch() as any;
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
@@ -29,7 +29,7 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
   return (
     <div className="flex h-full w-full overflow-auto">
       <div className="mx-auto flex flex-col space-y-3 p-4">
-        {assignments && assignments?.assignment_tasks?.length < 10 ? (
+        {assignments?.assignment_tasks && assignments.assignment_tasks.length < 10 ? (
           <Modal
             isDialogOpen={isNewTaskModalOpen}
             onOpenChange={setIsNewTaskModalOpen}

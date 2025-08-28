@@ -15,7 +15,7 @@ import { mutate } from 'swr';
 
 const SaveState = (props: { orgslug: string }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const router = useRouter();
   const saved = course ? course.isSaved : false;

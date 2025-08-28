@@ -30,7 +30,7 @@ const AdminAuthorization: FC<AuthorizationProps> = ({ children, authorizationMod
   const org = useOrg() as any;
   const pathname = usePathname();
   const router = useRouter();
-  const { isAdmin, loading } = useAdminStatus() as any;
+  const { isAdmin, loading } = useAdminStatus();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const t = useTranslations('Security');
 

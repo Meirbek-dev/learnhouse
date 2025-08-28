@@ -156,9 +156,9 @@ export function useGamification({
               return; // Done
             }
           }
-        } catch (e) {
+        } catch (error) {
           // HEAD may fail (older server / network); fall back silently
-          logger.debug('HEAD streak preflight skipped/fallback', e);
+          logger.debug('HEAD streak preflight skipped/fallback', error);
         }
 
         // 2. Perform POST update since not yet updated (or HEAD unsupported)

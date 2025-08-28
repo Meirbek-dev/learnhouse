@@ -14,7 +14,7 @@ import Link from 'next/link';
 
 const EvaluateAssignment = ({ user_id }: any) => {
   const t = useTranslations('DashPage.Assignments.EvaluateModal');
-  const assignments = useAssignments() as any;
+  const assignments = useAssignments();
   const session = useLHSession() as any;
   const org = useOrg() as any;
 

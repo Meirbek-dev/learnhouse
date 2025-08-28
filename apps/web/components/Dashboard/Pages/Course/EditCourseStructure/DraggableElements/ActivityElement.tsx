@@ -39,7 +39,7 @@ const ActivityElement = (props: ActivitiyElementProps) => {
   const activityUUID = props.activity.activity_uuid;
   const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');
-  const course = useCourse() as any;
+  const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
   async function deleteActivityUI() {
@@ -318,7 +318,7 @@ const ActivityElementOptions = ({
 }) => {
   const [assignmentUUID, setAssignmentUUID] = useState('');
   const org = useOrg() as any;
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 

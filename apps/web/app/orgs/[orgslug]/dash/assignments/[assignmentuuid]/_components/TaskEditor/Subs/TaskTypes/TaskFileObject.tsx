@@ -38,7 +38,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   const [error, setError] = useState<string | null>(null);
   const [assignmentTask, setAssignmentTask] = useState<any>(null);
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
-  const assignment = useAssignments() as any;
+  const assignment = useAssignments();
 
   /* TEACHER VIEW CODE */
   /* TEACHER VIEW CODE */

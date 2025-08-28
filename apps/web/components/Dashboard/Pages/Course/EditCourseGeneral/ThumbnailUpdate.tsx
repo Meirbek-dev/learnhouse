@@ -30,7 +30,7 @@ type TabType = 'image' | 'video';
 const ThumbnailUpdate = ({ thumbnailType }: ThumbnailUpdateProps) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const [localThumbnail, setLocalThumbnail] = useState<{ file: File; url: string; type: 'image' | 'video' } | null>(

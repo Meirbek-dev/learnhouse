@@ -1,7 +1,7 @@
 'use client';
 
 import type { GamificationProfile, XPAwardRequest } from '@/services/gamification/gamification';
-import { getGamificationProfile, awardXP } from '@/services/gamification/gamification';
+import { awardXP, getGamificationProfile } from '@/services/gamification/gamification';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -169,7 +169,7 @@ export function useXPTracking(orgId: number) {
         if (profile) {
           const optimistic = { ...profile } as any;
           optimistic.total_xp += amount;
-          if (optimistic.xp_in_level != null && optimistic.xp_to_next_level != null) {
+          if (optimistic.xp_in_level !== null && optimistic.xp_to_next_level !== null) {
             if (amount >= optimistic.xp_to_next_level) {
               const spill = amount - optimistic.xp_to_next_level;
               optimistic.current_level += 1;
@@ -192,8 +192,8 @@ export function useXPTracking(orgId: number) {
           ...extras,
         } as any;
         await awardXP(orgId, session.tokens.access_token, payload);
-      } catch (e) {
-        console.warn('[useXPTracking] awardXP failed', e);
+      } catch (error) {
+        console.warn('[useXPTracking] awardXP failed', error);
         if (before) (window as any).__lastGamificationProfile = before;
       } finally {
         await refetch();

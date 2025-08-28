@@ -107,7 +107,7 @@ const AssignmentEdit = () => {
 export default AssignmentEdit;
 
 const BrdCmpx = () => {
-  const assignment = useAssignments() as any;
+  const assignment = useAssignments();
 
   useEffect(() => {}, [assignment]);
 
@@ -121,7 +121,7 @@ const BrdCmpx = () => {
 
 const PublishingState = () => {
   const t = useTranslations('DashPage.Assignments.AssignmentPage');
-  const assignment = useAssignments() as any;
+  const assignment = useAssignments();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

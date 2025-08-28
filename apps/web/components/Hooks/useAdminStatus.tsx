@@ -1,6 +1,7 @@
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useEffect, useMemo, useState } from 'react';
+import type { Session } from 'next-auth';
 
 interface Role {
   org: { id: number; org_uuid: string };
@@ -73,23 +74,45 @@ interface Rights {
 }
 
 interface UseAdminStatusReturn {
-  isAdmin: boolean | null;
+  isAdmin: boolean;
   loading: boolean;
   userRoles: Role[];
   rights: Rights | null;
 }
 
+// Type guard to check if session data has roles
+function hasRoles(sessionData: Session | null): sessionData is Session & {
+  roles: Role[];
+} {
+  return (
+    sessionData !== null &&
+    typeof sessionData === 'object' &&
+    'roles' in sessionData &&
+    Array.isArray((sessionData as any).roles)
+  );
+}
+
+// Type guard to check if org has id
+function hasOrgId(org: any): org is { id: number } {
+  return org !== null && typeof org === 'object' && 'id' in org && typeof org.id === 'number';
+}
+
 function useAdminStatus(): UseAdminStatusReturn {
-  const session = useLHSession() as any;
-  const org = useOrg() as any;
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const session = useLHSession();
+  const org = useOrg();
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [rights, setRights] = useState<Rights | null>(null);
 
-  const userRoles = useMemo(() => session?.data?.roles || [], [session?.data?.roles]);
+  const userRoles = useMemo((): Role[] => {
+    if (hasRoles(session.data)) {
+      return session.data.roles;
+    }
+    return [];
+  }, [session.data]);
 
   useEffect(() => {
-    if (session.status === 'authenticated' && org?.id) {
+    if (session.status === 'authenticated' && hasOrgId(org)) {
       // Extract rights from the backend session data
       const extractRightsFromRoles = (): Rights | null => {
         if (!userRoles || userRoles.length === 0) return null;
@@ -98,7 +121,7 @@ function useAdminStatus(): UseAdminStatusReturn {
         const orgRoles = userRoles.filter((role: Role) => role.org.id === org.id);
         if (orgRoles.length === 0) return null;
 
-        // Merge rights from all roles for this organization
+        // Initialize merged rights with default values
         const mergedRights: Rights = {
           courses: {
             action_create: false,
@@ -160,10 +183,14 @@ function useAdminStatus(): UseAdminStatusReturn {
         orgRoles.forEach((role: Role) => {
           if (role.role.rights) {
             Object.keys(role.role.rights).forEach((resourceType) => {
-              if (mergedRights[resourceType as keyof Rights] && role.role.rights?.[resourceType]) {
+              const resourceKey = resourceType as keyof Rights;
+              if (mergedRights[resourceKey] && role.role.rights?.[resourceType]) {
                 Object.keys(role.role.rights[resourceType]).forEach((action) => {
                   if (role.role.rights?.[resourceType]?.[action] === true) {
-                    (mergedRights[resourceType as keyof Rights] as any)[action] = true;
+                    const actionKey = action as keyof Rights[typeof resourceKey];
+                    if (actionKey in mergedRights[resourceKey]) {
+                      (mergedRights[resourceKey] as any)[actionKey] = true;
+                    }
                   }
                 });
               }
@@ -187,7 +214,7 @@ function useAdminStatus(): UseAdminStatusReturn {
       setRights(null);
       setLoading(false);
     }
-  }, [session.status, userRoles, org.id]);
+  }, [session.status, userRoles, org]);
 
   return { isAdmin, loading, userRoles, rights };
 }

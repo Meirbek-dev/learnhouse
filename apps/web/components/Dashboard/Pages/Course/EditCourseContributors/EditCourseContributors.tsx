@@ -172,7 +172,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
   const locale = useLocale() as Locale;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const course = useCourse() as any;
+  const course = useCourse();
   const { isLoading, courseStructure } = course;
   const dispatchCourse = useCourseDispatch() as any;
   const org = useOrg() as any;

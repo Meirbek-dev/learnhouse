@@ -26,7 +26,7 @@ interface LinkToUserGroupProps {
 
 const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const t = useTranslations('Components.LinkToUserGroup');
-  const course = useCourse() as any;
+  const course = useCourse();
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;

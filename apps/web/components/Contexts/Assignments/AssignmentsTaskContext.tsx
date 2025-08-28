@@ -32,7 +32,7 @@ export const AssignmentsTaskDispatchContext = createContext<React.Dispatch<Actio
 export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignment = useAssignments() as any;
+  const assignment = useAssignments();
 
   const [state, dispatch] = useReducer(assignmentsTaskReducer, initialState);
 

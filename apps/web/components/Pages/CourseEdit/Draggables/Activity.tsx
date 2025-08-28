@@ -23,7 +23,7 @@ const Activity = (props: any) => {
   const [modifiedActivity, setModifiedActivity] = useState<ModifiedActivityInterface | undefined>();
   const [selectedActivity, setSelectedActivity] = useState<string | undefined>();
   const t = useTranslations('CourseEdit');
-  const course = useCourse() as any;
+  const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
   async function removeActivity() {

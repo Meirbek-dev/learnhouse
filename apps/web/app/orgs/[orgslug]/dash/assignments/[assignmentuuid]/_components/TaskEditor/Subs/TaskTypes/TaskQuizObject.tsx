@@ -57,7 +57,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask() as any;
   const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
-  const assignment = useAssignments() as any;
+  const assignment = useAssignments();
 
   /* TEACHER VIEW CODE */
   const [questions, setQuestions] = useState<QuizSchema[]>([

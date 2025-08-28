@@ -34,7 +34,7 @@ const ChapterElement = (props: ChapterElementProps) => {
   const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>();
   const [selectedChapter, setSelectedChapter] = useState<string | undefined>();
   const t = useTranslations('CourseEdit');
-  const course = useCourse() as any;
+  const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
   const router = useRouter();

@@ -23,7 +23,7 @@ interface EditCourseAccessProps {
 const EditCourseAccess = (_props: EditCourseAccessProps) => {
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const course = useCourse() as any;
+  const course = useCourse();
   const { isLoading, courseStructure } = course;
   const dispatchCourse = useCourseDispatch() as any;
   const t = useTranslations('DashPage.Courses.Access');
@@ -133,7 +133,7 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
 };
 
 const UserGroupsSection = ({ usergroups }: { usergroups: any[] }) => {
-  const course = useCourse() as any;
+  const course = useCourse();
   const [userGroupModal, setUserGroupModal] = useState(false);
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;

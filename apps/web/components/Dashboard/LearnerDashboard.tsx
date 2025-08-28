@@ -1,12 +1,13 @@
 'use client';
 
+import { getGamificationDashboard as fetchGamificationDashboardService } from '@/services/gamification/gamification';
 import { GamificationProfileSection } from '@/components/Dashboard/Gamification/GamificationProfileSection';
 import { GamificationDashboard, Leaderboard, StreakWidget } from '@/components/Dashboard/Gamification';
+import type { GamificationDashboard as DashboardData } from '@/services/gamification/gamification';
 import { Award, BookOpen, Flame, Star, TrendingUp, Trophy, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGamification } from '@/hooks/useGamification';
-import { getGamificationDashboard as fetchGamificationDashboardService, type GamificationDashboard as DashboardData } from '@/services/gamification/gamification';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -40,8 +41,8 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
         setIsLoadingDashboard(true);
         const data = await fetchGamificationDashboardService(orgId, session.tokens.access_token);
         if (!cancelled) setDashboardData(data);
-      } catch (err) {
-        if (!cancelled) console.error('Error fetching gamification dashboard:', err);
+      } catch (error) {
+        if (!cancelled) console.error('Error fetching gamification dashboard:', error);
       } finally {
         if (!cancelled) setIsLoadingDashboard(false);
       }
@@ -114,7 +115,9 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
                   <p className="text-2xl font-bold">
                     {isLoadingDashboard
                       ? '...'
-                      : (dashboardData?.profile?.totals?.courses_completed ?? (dashboardData as any)?.total_courses_completed ?? 0)}
+                      : (dashboardData?.profile?.totals?.courses_completed ??
+                        (dashboardData as any)?.total_courses_completed ??
+                        0)}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.completed')}</p>
                 </div>

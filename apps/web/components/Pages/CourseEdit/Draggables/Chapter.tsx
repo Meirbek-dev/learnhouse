@@ -24,7 +24,7 @@ const Chapter = (props: any) => {
   const t = useTranslations('CourseEdit');
   const [modifiedChapter, setModifiedChapter] = useState<ModifiedChapterInterface | undefined>();
   const [selectedChapter, setSelectedChapter] = useState<string | undefined>();
-  const course = useCourse() as any;
+  const course = useCourse();
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
   async function updateChapterName(chapterId: number) {

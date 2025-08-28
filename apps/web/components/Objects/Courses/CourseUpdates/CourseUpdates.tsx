@@ -25,7 +25,7 @@ import useSWR, { mutate } from 'swr';
 import { z } from 'zod';
 
 const CourseUpdates = () => {
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const locale = useDateFnsLocale();
   const access_token = session?.data?.tokens?.access_token;
@@ -128,7 +128,7 @@ type UpdateFormValues = z.infer<ReturnType<typeof createUpdateFormSchema>>;
 
 const NewUpdateForm = ({ setSelectedView }: any) => {
   const org = useOrg() as any;
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const t = useTranslations('Courses.CourseUpdates');
   const validationSchema = createUpdateFormSchema(t);
@@ -230,7 +230,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
 };
 
 const UpdatesListView = () => {
-  const course = useCourse() as any;
+  const course = useCourse();
   const adminStatus = useAdminStatus();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -281,7 +281,7 @@ const UpdatesListView = () => {
 
 const DeleteUpdateButton = ({ update }: any) => {
   const session = useLHSession() as any;
-  const course = useCourse() as any;
+  const course = useCourse();
   const t = useTranslations('Courses.CourseUpdates');
 
   const handleDelete = async () => {

@@ -15,7 +15,7 @@ import Link from 'next/link';
 const AssignmentStudentActivity = () => {
   const t = useTranslations('Activities.AssignmentStudentActivity');
   const format = useFormatter();
-  const assignments = useAssignments() as any;
+  const assignments = useAssignments();
   const org = useOrg() as any;
 
   useEffect(() => {}, [assignments, org]);

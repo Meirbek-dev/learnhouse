@@ -28,7 +28,7 @@ const CoursesHome = (params: CourseProps) => {
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const { orgslug } = params;
   const { courses } = params;
-  const isUserAdmin = useAdminStatus() as any;
+  const isUserAdmin = useAdminStatus();
   const t = useTranslations('DashPage.Courses.HomePageClient');
   const org = useOrg() as any;
 

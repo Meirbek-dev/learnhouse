@@ -15,7 +15,7 @@ const StripeConnectCallback = () => {
   const t = useTranslations('Stripe');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const session = useLHSession() as any;
+  const session = useLHSession();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('');
 
@@ -26,14 +26,14 @@ const StripeConnectCallback = () => {
         const state = searchParams.get('state');
         const orgId = state?.split('=')[1]; // Extract org_id value after '='
 
-        if (!(code && orgId)) {
+        if (!(code && orgId && session?.data?.tokens?.access_token)) {
           throw new Error(t('missingParameters'));
         }
 
         const _response = await verifyStripeConnection(
           Number.parseInt(orgId, 10),
           code,
-          session?.data?.tokens?.access_token,
+          session.data.tokens.access_token,
         );
 
         await new Promise((resolve) => setTimeout(resolve, 1000));

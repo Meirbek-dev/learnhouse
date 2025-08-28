@@ -3,13 +3,13 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertCircle, Calendar, Flame, RefreshCw, Star, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useGamificationProfile } from '@/hooks/useGamificationProfile';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useCallback, useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useGamificationProfile } from '@/hooks/useGamificationProfile';
 
 interface GamificationProfile {
   streaks: { login: { current: number; longest: number }; learning: { current: number; longest: number } };
@@ -161,21 +161,21 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
   const streakData = useMemo(() => {
     if (!profile) return null;
 
-  const loginLast = profile.last_activity.login;
-  const learningLast = profile.last_activity.learning;
-  const loginCurrent = profile.streaks.login.current;
-  const loginLongest = profile.streaks.login.longest;
-  const learningCurrent = profile.streaks.learning.current;
-  const learningLongest = profile.streaks.learning.longest;
+    const loginLast = profile.last_activity.login;
+    const learningLast = profile.last_activity.learning;
+    const loginCurrent = profile.streaks.login.current;
+    const loginLongest = profile.streaks.login.longest;
+    const learningCurrent = profile.streaks.learning.current;
+    const learningLongest = profile.streaks.learning.longest;
     return {
       loginStatus: getStreakStatus(loginLast),
       learningStatus: getStreakStatus(learningLast),
       loginMessage: getStreakMessage(loginCurrent, getStreakStatus(loginLast), 'login'),
       learningMessage: getStreakMessage(learningCurrent, getStreakStatus(learningLast), 'learning'),
-  current_login_streak: loginCurrent, // local structure for rendering
-  longest_login_streak: loginLongest,
-  current_learning_streak: learningCurrent,
-  longest_learning_streak: learningLongest,
+      current_login_streak: loginCurrent, // local structure for rendering
+      longest_login_streak: loginLongest,
+      current_learning_streak: learningCurrent,
+      longest_learning_streak: learningLongest,
       last_login_date: loginLast,
       last_learning_activity_date: learningLast,
     } as any;
@@ -292,14 +292,16 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
                     <Calendar className="h-5 w-5 text-orange-500" />
                     <h3 className="font-semibold">{t('loginStreak')}</h3>
                   </div>
-                  <Badge variant={getStreakBadgeVariant(loginStatus)}>{formatDays(streakData.current_login_streak)}</Badge>
+                  <Badge variant={getStreakBadgeVariant(loginStatus)}>
+                    {formatDays(streakData.current_login_streak)}
+                  </Badge>
                 </div>
 
                 <p className="text-muted-foreground mb-2 text-sm">{loginMessage}</p>
 
-        {streakData.longest_login_streak > streakData.current_login_streak && (
+                {streakData.longest_login_streak > streakData.current_login_streak && (
                   <p className="text-muted-foreground text-xs">
-          {t('personalBest', { count: streakData.longest_login_streak })}
+                    {t('personalBest', { count: streakData.longest_login_streak })}
                   </p>
                 )}
               </div>
@@ -335,9 +337,9 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
 
                 <p className="text-muted-foreground mb-2 text-sm">{learningMessage}</p>
 
-        {streakData.longest_learning_streak > streakData.current_learning_streak && (
+                {streakData.longest_learning_streak > streakData.current_learning_streak && (
                   <p className="text-muted-foreground text-xs">
-          {t('personalBest', { count: streakData.longest_learning_streak })}
+                    {t('personalBest', { count: streakData.longest_learning_streak })}
                   </p>
                 )}
               </div>

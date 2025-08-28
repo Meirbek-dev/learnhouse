@@ -23,7 +23,7 @@ interface NewActivityButtonProps {
 const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
   const router = useRouter();
-  const course = useCourse() as any;
+  const course = useCourse();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
