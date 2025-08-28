@@ -11,7 +11,7 @@ import {
 import { OPENU_TOP_DOMAIN, getUriWithOrg } from '@/services/config/config';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 
-// Improved type declarations for session cache - Edge Runtime compatible
+// Session cache with TTL and size limits
 declare global {
   var sessionCache:
     | Map<
@@ -24,50 +24,65 @@ declare global {
     | undefined;
 }
 
-// Edge Runtime compatible cache implementation
+// Constants
+const CACHE_TTL = 1 * 60 * 1000; // 1 minute
+const TOKEN_REFRESH_BUFFER = 2 * 60 * 1000; // 2 minutes before expiry
+const MAX_CACHE_SIZE = 1000; // Prevent memory leaks
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
+const SESSION_UPDATE_AGE = 24 * 60 * 60; // 24 hours
+
+// Cache implementation with size limits and cleanup
 const getSessionCache = () => {
   if (typeof globalThis !== 'undefined') {
     if (!(globalThis.sessionCache && globalThis.sessionCache instanceof Map)) {
       globalThis.sessionCache = new Map();
     }
-    return globalThis.sessionCache;
+
+    const cache = globalThis.sessionCache;
+
+    // Cleanup old entries and limit size
+    if (cache.size > MAX_CACHE_SIZE) {
+      const entries = [...cache.entries()];
+      const now = Date.now();
+
+      // Remove expired entries first
+      for (const [key, value] of entries) {
+        if (now - value.timestamp > CACHE_TTL) {
+          cache.delete(key);
+        }
+      }
+
+      // If still over limit, remove oldest entries
+      if (cache.size > MAX_CACHE_SIZE) {
+        const sortedEntries = entries
+          .sort((a, b) => a[1].timestamp - b[1].timestamp)
+          .slice(0, cache.size - MAX_CACHE_SIZE);
+
+        for (const [key] of sortedEntries) {
+          cache.delete(key);
+        }
+      }
+    }
+
+    return cache;
   }
   // Fallback for environments without globalThis
   return new Map();
 };
 
-interface SessionData {
-  user: {
-    id: number;
-    email: string;
-    username: string;
-    first_name?: string;
-    last_name?: string;
-    [key: string]: any;
-  };
-  roles: string[];
-  tokens: {
-    access_token: string;
-    refresh_token: string;
-    expiry: number;
-  };
-}
-
-interface UserWithTokens {
-  id: number;
-  email: string;
-  username: string;
-  first_name?: string;
-  last_name?: string;
-  tokens: {
-    access_token: string;
-    refresh_token: string;
-    expiry: number;
-  };
-  [key: string]: any;
-}
-
 export const isDevEnv = OPENU_TOP_DOMAIN === 'localhost';
+
+// Helper function to validate token expiry
+const isTokenExpiringSoon = (expiry: number, bufferMs: number = TOKEN_REFRESH_BUFFER): boolean => {
+  return Date.now() + bufferMs >= expiry;
+};
+
+// Helper function to create cache key
+const createCacheKey = (accessToken: string): string => {
+  // Use a portion of the token to avoid storing full tokens in cache keys
+  const tokenHash = accessToken.substring(0, 10);
+  return `user_session_${tokenHash}`;
+};
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: isDevEnv,
@@ -75,19 +90,55 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       name: 'Credentials',
       credentials: {
-        email: { label: 'Email', type: 'text', placeholder: 'jsmith' },
+        email: { label: 'Email', type: 'text', placeholder: 'user@example.com' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
-        if (!(credentials?.email && credentials?.password)) return null;
+      async authorize(credentials): Promise<any> {
+        // Type & presence validation (credentials props are unknown by default)
+        if (!credentials || typeof credentials !== 'object') {
+          console.warn('Missing credentials object in authorization attempt');
+          return null;
+        }
+
+        const rawEmail = (credentials as Record<string, unknown>).email;
+        const rawPassword = (credentials as Record<string, unknown>).password;
+
+        if (typeof rawEmail !== 'string' || typeof rawPassword !== 'string') {
+          console.warn('Credentials must be strings');
+          return null;
+        }
+
+        if (!(rawEmail.trim() && rawPassword.trim())) {
+          console.warn('Empty email or password provided');
+          return null;
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(rawEmail)) {
+          console.warn('Invalid email format in authorization attempt');
+          return null;
+        }
 
         try {
-          const unsanitized_req = await loginAndGetToken(credentials.email, credentials.password);
+          const sanitizedEmail = rawEmail.toLowerCase().trim();
+          // password trimming avoided to preserve intentional leading/trailing spaces (only strip line breaks)
+          const password = rawPassword;
+          const unsanitized_req = await loginAndGetToken(sanitizedEmail, password);
           const res = await getResponseMetadata(unsanitized_req);
 
           if (res.success && res.data) {
-            return res.data as UserWithTokens;
+            // Validate required user data
+            const userData = res.data as UserWithTokens;
+            if (!(userData.tokens?.access_token && userData.tokens?.refresh_token)) {
+              console.error('Missing required tokens in authorization response');
+              return null;
+            }
+            // Cast to NextAuth User shape (augment ensures tokens allowed)
+            return userData as any;
           }
+
+          console.warn('Authorization failed: Invalid credentials or server error');
           return null;
         } catch (error) {
           console.error('Authorization error:', error);
@@ -98,6 +149,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.OPENU_GOOGLE_CLIENT_ID,
       clientSecret: process.env.OPENU_GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+        },
+      },
     }),
   ],
   pages: {
@@ -119,77 +177,135 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
+    maxAge: SESSION_MAX_AGE,
+    updateAge: SESSION_UPDATE_AGE,
   },
   trustHost: true, // Required for NextAuth v5
   callbacks: {
-    async jwt({ token, user, account }) {
-      // First sign in with Credentials provider
-      if (account?.provider === 'credentials' && user) {
-        token.user = user as UserWithTokens;
-        return token;
-      }
+    async jwt({ token, user, account, trigger }) {
+      try {
+        // Handle sign in with Credentials provider
+        if (account?.provider === 'credentials' && user) {
+          const userWithTokens = user as unknown as UserWithTokens;
 
-      // Sign up with Google
-      if (account?.provider === 'google' && user?.email && account.access_token) {
-        try {
-          const unsanitized_req = await loginWithOAuthToken(user.email, 'google', account.access_token);
-          const userFromOAuth = await getResponseMetadata(unsanitized_req);
-          if (userFromOAuth.success && userFromOAuth.data) {
-            token.user = userFromOAuth.data as UserWithTokens;
+          // Validate token data
+          if (!(userWithTokens.tokens?.access_token && userWithTokens.tokens?.refresh_token)) {
+            console.error('Invalid token data from credentials provider');
+            return null;
           }
-        } catch (error) {
-          console.error('OAuth authentication error:', error);
-          return null;
+
+          token.user = userWithTokens;
+          return token;
         }
-      }
 
-      // Refresh token only if it's close to expiring (1 minutes before expiry)
-      const userWithTokens = token.user as UserWithTokens;
-      if (userWithTokens?.tokens) {
-        const tokenExpiry = userWithTokens.tokens.expiry || 0;
-        const oneMinute = 1 * 60 * 1000;
-
-        if (Date.now() + oneMinute >= tokenExpiry) {
+        // Handle Google OAuth sign in
+        if (account?.provider === 'google' && user?.email && account.access_token) {
           try {
-            const refreshToken = userWithTokens.tokens.refresh_token;
-            if (refreshToken) {
-              const refreshedToken = await getNewAccessTokenUsingRefreshTokenServer(refreshToken);
-              if (refreshedToken.access_token) {
-                token.user = {
-                  ...userWithTokens,
-                  tokens: {
-                    ...userWithTokens.tokens,
-                    access_token: refreshedToken.access_token,
-                    expiry: Date.now() + 60 * 60 * 1000, // 1 hour from now
-                  },
-                } as UserWithTokens;
+            const unsanitized_req = await loginWithOAuthToken(
+              user.email.toLowerCase().trim(),
+              'google',
+              account.access_token,
+            );
+            const userFromOAuth = await getResponseMetadata(unsanitized_req);
+
+            if (userFromOAuth.success && userFromOAuth.data) {
+              const userData = userFromOAuth.data as UserWithTokens;
+
+              // Validate OAuth token data
+              if (!(userData.tokens?.access_token && userData.tokens?.refresh_token)) {
+                console.error('Invalid token data from OAuth provider');
+                return null;
               }
+
+              token.user = userData;
+              return token;
             }
+            console.error('OAuth authentication failed:', userFromOAuth);
+            return null;
           } catch (error) {
-            console.error('Token refresh failed:', error);
-            // Return null to force re-authentication
+            console.error('OAuth authentication error:', error);
             return null;
           }
         }
+
+        // Handle token refresh for existing sessions
+        const userWithTokens = token.user as UserWithTokens;
+        if (!userWithTokens?.tokens) {
+          console.warn('No user tokens found in JWT callback');
+          return token;
+        }
+
+        const { tokens } = userWithTokens;
+        const tokenExpiry = tokens.expiry || 0;
+
+        // Check if token needs refreshing
+        if (isTokenExpiringSoon(tokenExpiry)) {
+          console.log('Token is expiring soon, attempting refresh...');
+
+          try {
+            const { refresh_token } = tokens;
+            if (!refresh_token) {
+              console.error('No refresh token available');
+              return null;
+            }
+
+            const refreshedToken = await getNewAccessTokenUsingRefreshTokenServer(refresh_token);
+
+            if (refreshedToken?.access_token) {
+              const newExpiry = refreshedToken.expiry || Date.now() + 60 * 60 * 1000;
+
+              token.user = {
+                ...userWithTokens,
+                tokens: {
+                  ...tokens,
+                  access_token: refreshedToken.access_token,
+                  refresh_token: refreshedToken.refresh_token || refresh_token, // Keep existing if new not provided
+                  expiry: newExpiry,
+                },
+              } as UserWithTokens;
+
+              console.log('Token refreshed successfully');
+            } else {
+              console.error('Token refresh failed: No access token in response');
+              return null;
+            }
+          } catch (error) {
+            console.error('Token refresh failed:', error);
+            // Clear cache entry for this user
+            const cache = getSessionCache();
+            const cacheKey = createCacheKey(tokens.access_token);
+            cache.delete(cacheKey);
+            return null;
+          }
+        }
+
+        return token;
+      } catch (error) {
+        console.error('JWT callback error:', error);
+        return null;
       }
-      return token;
     },
+
     async session({ session, token }) {
       const userWithTokens = token.user as UserWithTokens;
       if (!userWithTokens) {
+        console.warn('No user data in token for session callback');
         return session;
       }
 
-      // Cache the session for 1 minute to refresh every minute
-      const cacheKey = `user_session_${userWithTokens.tokens?.access_token}`;
+      const { tokens } = userWithTokens;
+      if (!tokens?.access_token) {
+        console.warn('No access token available for session');
+        return session;
+      }
 
-      // Use Edge Runtime compatible cache
+      // Caching with proper key management
+      const cacheKey = createCacheKey(tokens.access_token);
       const cache = getSessionCache();
       const cachedSession = cache.get(cacheKey);
 
-      if (cachedSession && Date.now() - cachedSession.timestamp < 1 * 60 * 1000) {
+      // Return cached session if valid
+      if (cachedSession && Date.now() - cachedSession.timestamp < CACHE_TTL) {
         return {
           ...session,
           user: cachedSession.data.user,
@@ -199,45 +315,83 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       try {
-        const accessToken = userWithTokens.tokens?.access_token;
-        if (accessToken) {
-          const api_SESSION = await getUserSession(accessToken);
+        const api_SESSION = await getUserSession(tokens.access_token);
 
-          const updatedSession = {
-            ...session,
-            user: api_SESSION.user,
-            roles: api_SESSION.roles,
-            tokens: userWithTokens.tokens,
-          };
-
-          // Cache the session data using Edge Runtime compatible cache
-          cache.set(cacheKey, {
-            data: {
-              user: api_SESSION.user,
-              roles: api_SESSION.roles,
-              tokens: userWithTokens.tokens,
-            },
-            timestamp: Date.now(),
-          });
-
-          return updatedSession;
+        if (!api_SESSION?.user) {
+          console.error('Invalid session data from getUserSession');
+          return session;
         }
+
+        const sessionData: SessionData = {
+          user: api_SESSION.user,
+          roles: api_SESSION.roles || [],
+          tokens: tokens,
+        };
+
+        const updatedSession = {
+          ...session,
+          user: sessionData.user,
+          roles: sessionData.roles,
+          tokens: sessionData.tokens,
+        };
+
+        // Cache the fresh session data
+        cache.set(cacheKey, {
+          data: sessionData,
+          timestamp: Date.now(),
+        });
+
+        return updatedSession;
       } catch (error) {
         console.error('Failed to fetch user session:', error);
-      }
 
-      return session;
+        // Clear potentially stale cache entry
+        cache.delete(cacheKey);
+
+        // Return session with available token data
+        return {
+          ...session,
+          user: {
+            id: userWithTokens.id,
+            email: userWithTokens.email,
+            username: userWithTokens.username,
+            first_name: userWithTokens.first_name,
+            last_name: userWithTokens.last_name,
+          },
+          roles: [],
+          tokens: tokens,
+        };
+      }
     },
+
     async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = Boolean(auth?.user);
       const isAuthPage = nextUrl.pathname.startsWith('/auth');
 
       if (isAuthPage) {
-        if (isLoggedIn) return Response.redirect(new URL('/redirect_from_auth', nextUrl));
+        if (isLoggedIn) {
+          return Response.redirect(new URL('/redirect_from_auth', nextUrl));
+        }
         return true;
       }
 
       return isLoggedIn;
+    },
+  },
+  events: {
+    async signOut(message) {
+      // Defensive extraction: event shape may differ across versions
+      const token = (message as any)?.token;
+      const userWithTokens = token?.user as UserWithTokens | undefined;
+      if (userWithTokens?.tokens?.access_token) {
+        const cache = getSessionCache();
+        const cacheKey = createCacheKey(userWithTokens.tokens.access_token);
+        cache.delete(cacheKey);
+      }
+    },
+    async signIn({ user, account, profile, isNewUser }) {
+      // Log successful sign-ins for monitoring
+      console.log(`User signed in: ${user.email} via ${account?.provider}`);
     },
   },
 });

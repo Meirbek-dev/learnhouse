@@ -1,21 +1,6 @@
 import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
-// Auth service types and interfaces
-interface AuthTokens {
-  access_token: string;
-  refresh_token: string;
-}
-
-interface AuthUser {
-  id: number;
-  email: string;
-  username: string;
-  first_name?: string;
-  last_name?: string;
-  [key: string]: any;
-}
-
 interface LoginResponse {
   user: AuthUser;
   tokens: AuthTokens;

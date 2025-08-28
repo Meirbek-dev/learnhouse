@@ -145,12 +145,6 @@ async def update_login_streak_endpoint(
         user_id=user.id, org_id=org_id, db_session=services.xp.db_session
     )
     raise_for_result(profile_result)
-    # Update cache proactively with fresh profile (already loaded by helper)
-    try:  # pragma: no cover
-        cache = create_cache_service()
-        cache.set_profile(user.id, org_id, profile_result.value)
-    except Exception:
-        pass
     return {
         "data": {
             "profile": profile_result.value,
@@ -177,11 +171,6 @@ async def update_learning_streak_endpoint(
         user_id=user.id, org_id=org_id, db_session=services.xp.db_session
     )
     raise_for_result(profile_result)
-    try:  # pragma: no cover
-        cache = create_cache_service()
-        cache.set_profile(user.id, org_id, profile_result.value)
-    except Exception:
-        pass
     return {
         "data": {
             "profile": profile_result.value,

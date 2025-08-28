@@ -19,143 +19,242 @@ export const config = {
      * 5. /examples (inside /public)
      * 6. all root files inside /public (e.g. /favicon.ico)
      */
-
     '/((?!api|_next|fonts|umami|examples|[\\w-]+\\.\\w+).*)',
     '/sitemap.xml',
     '/payments/stripe/connect/oauth',
   ],
 };
 
-export default async function middleware(req: NextRequest) {
-  // Get initial data
-  const hosting_mode = isMultiOrgModeEnabled() ? 'multi' : 'single';
-  const default_org = getDefaultOrg();
-  const { pathname, search } = req.nextUrl;
-  const fullhost = req.headers ? req.headers.get('host') : '';
-  const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value;
+const STANDARD_PATHS = ['/home'] as const;
+const AUTH_PATHS = ['/login', '/signup', '/reset', '/forgot'] as const;
+const COOKIE_NAME = 'openu_current_orgslug';
+const COURSE_ACTIVITY_EDIT_PATTERN = /^\/course\/[^/]+\/activity\/[^/]+\/edit$/;
 
-  // Out of orgslug paths & rewrite
-  const standard_paths = ['/home'];
-  const auth_paths = ['/login', '/signup', '/reset', '/forgot'];
-  if (standard_paths.includes(pathname)) {
-    // Redirect to the same pathname with the original search params
+// Helper functions
+function getCookieDomain(): string | undefined {
+  return OPENU_TOP_DOMAIN === 'localhost' ? '' : OPENU_TOP_DOMAIN;
+}
+
+function extractOrgslugFromHost(host: string): string {
+  return host.replace(`.${OPENU_DOMAIN}`, '');
+}
+
+function createCookieConfig(value: string) {
+  return {
+    name: COOKIE_NAME,
+    value,
+    domain: getCookieDomain(),
+    path: '/',
+    // Add security settings for production
+    ...(OPENU_TOP_DOMAIN !== 'localhost' && {
+      secure: true,
+      sameSite: 'lax' as const,
+    }),
+  };
+}
+
+function setOrgslugCookie(response: NextResponse, orgslug: string): void {
+  response.cookies.set(createCookieConfig(orgslug));
+}
+
+function handleStandardPaths(pathname: string, search: string, req: NextRequest): NextResponse | null {
+  if (STANDARD_PATHS.includes(pathname as any)) {
     return NextResponse.rewrite(new URL(`${pathname}${search}`, req.url));
   }
+  return null;
+}
 
-  if (auth_paths.includes(pathname)) {
+function handleAuthPaths(pathname: string, search: string, req: NextRequest): NextResponse | null {
+  if (AUTH_PATHS.includes(pathname as any)) {
     const response = NextResponse.rewrite(new URL(`/auth${pathname}${search}`, req.url));
 
-    // Parse the search params
     const searchParams = new URLSearchParams(search);
     const orgslug = searchParams.get('orgslug');
 
     if (orgslug) {
-      response.cookies.set({
-        name: 'openu_current_orgslug',
-        value: orgslug,
-        domain: OPENU_TOP_DOMAIN === 'localhost' ? '' : OPENU_TOP_DOMAIN,
-      });
+      setOrgslugCookie(response, orgslug);
     }
+
     return response;
   }
+  return null;
+}
 
-  // Dynamic Pages Editor
-  if (/^\/course\/[^/]+\/activity\/[^/]+\/edit$/.test(pathname)) {
+function handleCourseActivityEdit(pathname: string, req: NextRequest): NextResponse | null {
+  if (COURSE_ACTIVITY_EDIT_PATTERN.test(pathname)) {
     return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url));
   }
+  return null;
+}
 
-  // Check if the request is for the Stripe callback URL
-  if (req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
-    const { searchParams } = req.nextUrl;
-    const orgslug = searchParams.get('state')?.split('_')[0]; // Assuming state parameter contains orgslug_randomstring
-
-    // Construct the new URL with the required parameters
-    const redirectUrl = new URL('/payments/stripe/connect/oauth', req.url);
-
-    // Preserve all original search parameters
-    searchParams.forEach((value, key) => {
-      redirectUrl.searchParams.append(key, value);
-    });
-
-    // Add orgslug if available
-    if (orgslug) {
-      redirectUrl.searchParams.set('orgslug', orgslug);
-    }
-
-    return NextResponse.rewrite(redirectUrl);
+function handleStripeCallback(req: NextRequest): NextResponse | null {
+  if (!req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
+    return null;
   }
 
-  // Health Check
+  const { searchParams } = req.nextUrl;
+  const state = searchParams.get('state');
+  const orgslug = state?.split('_')[0];
+
+  const redirectUrl = new URL('/payments/stripe/connect/oauth', req.url);
+
+  // Preserve all original search parameters
+  searchParams.forEach((value, key) => {
+    redirectUrl.searchParams.append(key, value);
+  });
+
+  // Add orgslug if available
+  if (orgslug) {
+    redirectUrl.searchParams.set('orgslug', orgslug);
+  }
+
+  return NextResponse.rewrite(redirectUrl);
+}
+
+function handleHealthCheck(pathname: string, req: NextRequest): NextResponse | null {
   if (pathname.startsWith('/health')) {
     return NextResponse.rewrite(new URL('/api/health', req.url));
   }
+  return null;
+}
 
-  // Auth Redirects
-  if (pathname === '/redirect_from_auth') {
-    if (cookie_orgslug) {
-      const { searchParams } = req.nextUrl;
-      const queryString = searchParams.toString();
-      const redirectUrl = new URL(getUriWithOrg(cookie_orgslug, '/'), req.url);
-      if (queryString) {
-        redirectUrl.search = queryString;
-      }
-      return NextResponse.redirect(redirectUrl);
-    }
+function handleAuthRedirect(
+  pathname: string,
+  cookieOrgslug: string | undefined,
+  req: NextRequest,
+): NextResponse | string | null {
+  if (pathname !== '/redirect_from_auth') {
+    return null;
+  }
+
+  if (!cookieOrgslug) {
     return 'Did not find the orgslug in the cookie';
   }
 
-  if (pathname.startsWith('/sitemap.xml')) {
-    let orgslug: string;
+  const { searchParams } = req.nextUrl;
+  const queryString = searchParams.toString();
+  const redirectUrl = new URL(getUriWithOrg(cookieOrgslug, '/'), req.url);
 
-    if (hosting_mode === 'multi') {
-      orgslug = fullhost ? fullhost.replace(`.${OPENU_DOMAIN}`, '') : (default_org as string);
-    } else {
-      // Single hosting mode
-      orgslug = default_org as string;
+  if (queryString) {
+    redirectUrl.search = queryString;
+  }
+
+  return NextResponse.redirect(redirectUrl);
+}
+
+function handleSitemap(
+  pathname: string,
+  hostingMode: string,
+  fullhost: string,
+  defaultOrg: string,
+  req: NextRequest,
+): NextResponse | null {
+  if (!pathname.startsWith('/sitemap.xml')) {
+    return null;
+  }
+
+  let orgslug: string;
+
+  if (hostingMode === 'multi') {
+    orgslug = fullhost ? extractOrgslugFromHost(fullhost) : defaultOrg;
+  } else {
+    orgslug = defaultOrg;
+  }
+
+  const sitemapUrl = new URL('/api/sitemap', req.url);
+  const response = NextResponse.rewrite(sitemapUrl);
+
+  // Set the orgslug in a header for the API route to use
+  response.headers.set('X-Sitemap-Orgslug', orgslug);
+
+  return response;
+}
+
+function handleOrganizationMode(
+  hostingMode: string,
+  fullhost: string,
+  defaultOrg: string,
+  pathname: string,
+  req: NextRequest,
+): NextResponse | null {
+  let orgslug: string;
+
+  if (hostingMode === 'multi') {
+    orgslug = fullhost ? extractOrgslugFromHost(fullhost) : defaultOrg;
+  } else if (hostingMode === 'single') {
+    orgslug = defaultOrg;
+  } else {
+    // Fallback for unknown hosting mode
+    console.warn(`Unknown hosting mode: ${hostingMode}, falling back to single mode`);
+    orgslug = defaultOrg;
+  }
+
+  const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
+  setOrgslugCookie(response, orgslug);
+
+  return response;
+}
+
+export default async function middleware(req: NextRequest) {
+  try {
+    const hostingMode = isMultiOrgModeEnabled() ? 'multi' : 'single';
+    const defaultOrg = getDefaultOrg();
+
+    if (!defaultOrg) {
+      console.error('Default organization not found');
+      return NextResponse.next();
     }
 
-    const sitemapUrl = new URL('/api/sitemap', req.url);
+    const { pathname, search } = req.nextUrl;
+    const fullhost = req.headers?.get('host') || '';
+    const cookieOrgslug = req.cookies.get(COOKIE_NAME)?.value;
 
-    // Create a response object
-    const response = NextResponse.rewrite(sitemapUrl);
+    // Handle different path types in order of specificity
 
-    // Set the orgslug in a header
-    response.headers.set('X-Sitemap-Orgslug', orgslug);
+    // 1. Standard paths (no org needed)
+    const standardPathResponse = handleStandardPaths(pathname, search, req);
+    if (standardPathResponse) return standardPathResponse;
 
-    return response;
-  }
+    // 2. Auth paths
+    const authPathResponse = handleAuthPaths(pathname, search, req);
+    if (authPathResponse) return authPathResponse;
 
-  // Multi Organization Mode
-  if (hosting_mode === 'multi') {
-    // Get the organization slug from the URL
-    const orgslug = fullhost ? fullhost.replace(`.${OPENU_DOMAIN}`, '') : (default_org as string);
-    const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
+    // 3. Course activity editor
+    const editorResponse = handleCourseActivityEdit(pathname, req);
+    if (editorResponse) return editorResponse;
 
-    // Set the cookie with the orgslug value
-    response.cookies.set({
-      name: 'openu_current_orgslug',
-      value: orgslug,
-      domain: OPENU_TOP_DOMAIN === 'localhost' ? '' : OPENU_TOP_DOMAIN,
-      path: '/',
+    // 4. Stripe callback
+    const stripeResponse = handleStripeCallback(req);
+    if (stripeResponse) return stripeResponse;
+
+    // 5. Health check
+    const healthResponse = handleHealthCheck(pathname, req);
+    if (healthResponse) return healthResponse;
+
+    // 6. Auth redirect
+    const authRedirectResponse = handleAuthRedirect(pathname, cookieOrgslug, req);
+    if (authRedirectResponse) return authRedirectResponse;
+
+    // 7. Sitemap
+    const sitemapResponse = handleSitemap(pathname, hostingMode, fullhost, defaultOrg, req);
+    if (sitemapResponse) return sitemapResponse;
+
+    // 8. Organization-specific routing (multi/single mode)
+    const orgResponse = handleOrganizationMode(hostingMode, fullhost, defaultOrg, pathname, req);
+    if (orgResponse) return orgResponse;
+
+    // Fallback - should not reach here normally
+    console.warn(`Unhandled middleware path: ${pathname}`);
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', {
+      error: error instanceof Error ? error.message : String(error),
+      pathname: req.nextUrl.pathname,
+      host: req.headers?.get('host'),
+      userAgent: req.headers?.get('user-agent'),
     });
 
-    return response;
-  }
-
-  // Single Organization Mode
-  if (hosting_mode === 'single') {
-    // Get the default organization slug
-    const orgslug = default_org as string;
-    const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
-
-    // Set the cookie with the orgslug value
-    response.cookies.set({
-      name: 'openu_current_orgslug',
-      value: orgslug,
-      domain: OPENU_TOP_DOMAIN === 'localhost' ? '' : OPENU_TOP_DOMAIN,
-      path: '/',
-    });
-
-    return response;
+    // Return a safe fallback response instead of breaking the app
+    return NextResponse.next();
   }
 }

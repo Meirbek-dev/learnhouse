@@ -5,7 +5,6 @@ import LHSessionProvider from '@components/Contexts/LHSessionContext';
 import { SessionProvider } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
-import { GamificationProfileProvider } from '@/contexts/GamificationProfileContext';
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -31,7 +30,6 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       refetchWhenOffline={false}
     >
       <LHSessionProvider>
-        {/* Org selection TBD: for now provider disabled until orgId resolved; we can dynamically mount where orgId known */}
         <StyledComponentsRegistry>
           <motion.main
             variants={variants}

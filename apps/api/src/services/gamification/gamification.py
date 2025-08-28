@@ -35,7 +35,11 @@ async def get_or_create_profile(
     try:
         cached = cache.get_profile(user_id, org_id)
         if cached:
-            return cached
+            if isinstance(cached, dict):
+                # Invalidate the corrupted cache entry
+                cache.delete(f"profile:{org_id}:{user_id}")
+            else:
+                return cached
 
         statement = select(UserGamificationProfile).where(
             UserGamificationProfile.user_id == user_id,
