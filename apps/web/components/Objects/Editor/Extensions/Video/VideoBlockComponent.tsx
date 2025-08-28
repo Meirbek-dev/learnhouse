@@ -136,7 +136,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
     { html: t('subtitles.english'), url: '/subtitle.en.srt' },
     { html: t('subtitles.kazakh'), url: '/subtitle.kz.srt' },
   ];
-  const editorState = useEditorProvider() as EditorState;
+  const editorState = useEditorProvider();
   const session = useLHSession() as Session;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadZoneRef = useRef<HTMLDivElement>(null);

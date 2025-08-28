@@ -171,7 +171,7 @@ const EmbedObjectsComponent = (props: any) => {
   const isMobile = useIsMobile();
   const resizeRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
   // Add ResizeObserver to track parent container size changes

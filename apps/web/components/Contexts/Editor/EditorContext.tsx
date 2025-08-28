@@ -1,26 +1,29 @@
 'use client';
-import { createContext, use, useState } from 'react';
+import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
 
-export const EditorProviderContext = createContext(null) as any;
+// Properly typed context
+export const EditorProviderContext = createContext<EditorProviderState | null>(null);
+
+export interface EditorProviderState {
+  isEditable: boolean;
+}
 
 interface EditorProviderProps {
   children: ReactNode;
   options: EditorProviderState;
 }
 
-interface EditorProviderState {
-  isEditable: boolean;
-}
-
 const EditorOptionsProvider = ({ children, options }: EditorProviderProps) => {
-  const [editorOptions, _setEditorOptions] = useState<EditorProviderState>(options);
-
-  return <EditorProviderContext value={editorOptions}>{children}</EditorProviderContext>;
+  return <EditorProviderContext.Provider value={options}>{children}</EditorProviderContext.Provider>;
 };
 
 export default EditorOptionsProvider;
 
-export function useEditorProvider() {
-  return use(EditorProviderContext);
+export function useEditorProvider(): EditorProviderState {
+  const context = use(EditorProviderContext);
+  if (!context) {
+    throw new Error('useEditorProvider must be used within an EditorOptionsProvider');
+  }
+  return context;
 }

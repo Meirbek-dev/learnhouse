@@ -212,7 +212,7 @@ const MathEquationBlockComponent = (props: any) => {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showSymbols, setShowSymbols] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const { isEditable } = editorState;
   const inputRef = useRef<HTMLInputElement>(null);
   const templatesRef = useRef<HTMLDivElement>(null);

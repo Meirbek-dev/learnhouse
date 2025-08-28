@@ -25,7 +25,7 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { isLoading, courseStructure } = course;
-  const dispatchCourse = useCourseDispatch() as any;
+  const dispatchCourse = useCourseDispatch();
   const t = useTranslations('DashPage.Courses.Access');
 
   const { data: usergroups } = useSWR(

@@ -72,7 +72,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   const t = useTranslations('CourseEdit.General');
   const [error, setError] = useState('');
   const course = useCourse();
-  const dispatchCourse = useCourseDispatch() as any;
+  const dispatchCourse = useCourseDispatch();
   const { isLoading, courseStructure } = course as any;
   const formId = useId();
 

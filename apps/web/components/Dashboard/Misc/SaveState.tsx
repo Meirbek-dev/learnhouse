@@ -19,7 +19,7 @@ const SaveState = (props: { orgslug: string }) => {
   const session = useLHSession() as any;
   const router = useRouter();
   const saved = course ? course.isSaved : false;
-  const dispatchCourse = useCourseDispatch() as any;
+  const dispatchCourse = useCourseDispatch();
   const course_structure = course.courseStructure;
   const t = useTranslations('Common');
   const isInitialized = useRef(false);

@@ -19,7 +19,7 @@ const ButtonsExtension: FC = (props: any) => {
   const pickerRef = useRef<HTMLDivElement>(null);
   const linkInputRef = useRef<HTMLInputElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
   useEffect(() => {

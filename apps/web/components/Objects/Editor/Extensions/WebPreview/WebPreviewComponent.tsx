@@ -95,7 +95,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(!node.attrs.url);
   const inputRef = useRef<HTMLInputElement>(null);
-  const editorContext = useEditorProvider() as EditorContext;
+  const editorContext = useEditorProvider();
   const isEditable = editorContext?.isEditable ?? true;
 
   const previewData = useMemo(

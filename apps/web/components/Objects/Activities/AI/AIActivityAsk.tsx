@@ -3,7 +3,6 @@
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
-import type { AIChatBotStateTypes } from '@components/Contexts/AI/AIChatBotContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import touEmblemLight from 'public/tou_emblem_light.webp';
@@ -25,7 +24,7 @@ const AIActivityAsk = (props: AIActivityAskProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'activity_ask' });
   const [isButtonAvailable, setIsButtonAvailable] = useState(false);
-  const dispatchAIChatBot = useAIChatBotDispatch() as any;
+  const dispatchAIChatBot = useAIChatBotDispatch();
 
   useEffect(() => {
     if (is_ai_feature_enabled) {
@@ -74,8 +73,8 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes;
-  const dispatchAIChatBot = useAIChatBotDispatch() as any;
+  const aiChatBotState = useAIChatBot();
+  const dispatchAIChatBot = useAIChatBotDispatch();
 
   // TODO : come up with a better way to handle this
   const inputClass = clsx(
@@ -354,7 +353,7 @@ const AIMessagePlaceHolder = (props: { activity_uuid: string; sendMessage: any }
   const t = useTranslations('Activities.AIActivityAsk');
   const session = useLHSession() as any;
   const [_feedbackModal, _setFeedbackModal] = useState(false);
-  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes;
+  const aiChatBotState = useAIChatBot();
 
   if (!aiChatBotState.error.isError) {
     return (

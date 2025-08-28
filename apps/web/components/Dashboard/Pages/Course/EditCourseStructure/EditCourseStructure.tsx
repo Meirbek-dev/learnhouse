@@ -42,7 +42,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const [winReady, setwinReady] = useState(false);
   const t = useTranslations('CourseEdit.Structure');
 
-  const dispatchCourse = useCourseDispatch() as any;
+  const dispatchCourse = useCourseDispatch();
 
   const [_order, _setOrder] = useState<OrderPayload>();
   const course = useCourse();

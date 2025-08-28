@@ -1,6 +1,5 @@
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
-import type { AIChatBotStateTypes } from '@components/Contexts/AI/AIChatBotContext';
 import { BookOpen, FormInput, Languages, MoreVertical } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -94,8 +93,8 @@ const AIActionButton = (props: { editor: Editor; label: string; activity: any })
   const t = useTranslations('Activities.AICanvaToolkit');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const dispatchAIChatBot = useAIChatBotDispatch() as any;
-  const aiChatBotState = useAIChatBot() as AIChatBotStateTypes;
+  const dispatchAIChatBot = useAIChatBotDispatch();
+  const aiChatBotState = useAIChatBot();
 
   async function handleAction(label: string) {
     const selection = getTipTapEditorSelectedText();

@@ -18,10 +18,10 @@ from src.db.gamification import (
     UserGamificationProfile,
     XPSource,
 )
+from src.services.gamification.cache_service import create_cache_service
 from src.services.gamification.config import get_gamification_config
 from src.services.gamification.result import Result
 from src.services.gamification.xp_service import XPService
-from src.services.gamification.cache_service import create_cache_service
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +184,9 @@ class StreakService:
                 cache = create_cache_service()
                 cache.set_profile(user_id, org_id, profile)
             except Exception:  # pragma: no cover
-                logger.debug("Failed updating profile cache after streak update", exc_info=True)
+                logger.debug(
+                    "Failed updating profile cache after streak update", exc_info=True
+                )
 
             logger.info(
                 f"Streak updated: user={user_id}, type={streak_type}, streak={new_streak}, bonus={milestone_bonus}"

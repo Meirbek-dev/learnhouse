@@ -16,7 +16,7 @@ const BadgesExtension: FC = (props: any) => {
   const [showPredefinedCallouts, setShowPredefinedCallouts] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
   useEffect(() => {

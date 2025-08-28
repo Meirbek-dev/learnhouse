@@ -47,7 +47,6 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
   const access_token = session?.tokens?.access_token ?? null;
   const { activityuuid, courseid } = params;
 
-  // This Promise.all() is correct as it handles two promises
   const [courseInfo, activity] = await Promise.all([
     getCourseMetadata(courseid, { revalidate: 0, tags: ['courses'] }, access_token),
     getActivityWithAuthHeader(activityuuid, { revalidate: 0, tags: ['activities'] }, access_token),

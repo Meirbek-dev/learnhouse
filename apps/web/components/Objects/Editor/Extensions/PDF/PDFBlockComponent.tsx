@@ -25,7 +25,7 @@ const PDFBlockComponent = (props: any) => {
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const fileId = blockObject ? `${blockObject.content.file_id}.${blockObject.content.file_format}` : null;
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
   const handlePDFChange = (event: React.ChangeEvent<any>) => {

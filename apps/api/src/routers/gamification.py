@@ -3,6 +3,7 @@
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+
 from src.db.gamification import (
     OrganizationLeaderboard,
     UserGamificationPreferenceRead,
@@ -15,18 +16,18 @@ from src.services.gamification import (
     calculate_level_details,
     get_gamification_config,
 )
+from src.services.gamification.cache_service import create_cache_service
 from src.services.gamification.gamification import (
     get_gamification_dashboard_result,
     get_gamification_preferences_result,
-    update_gamification_preferences_result,
     get_gamification_profile_result,
+    update_gamification_preferences_result,
 )
 from src.services.gamification.service_container import (
     GamificationServices,
     get_gamification_services,
 )
 from src.services.gamification.xp_sources import list_xp_sources
-from src.services.gamification.cache_service import create_cache_service
 
 router = APIRouter()
 

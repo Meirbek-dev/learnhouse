@@ -26,7 +26,7 @@ const QuizBlockComponent = (props: any) => {
   const [userAnswers, setUserAnswers] = useState([]) as [any[], any];
   const [submitted, setSubmitted] = useState(false) as [boolean, any];
   const [submissionMessage, setSubmissionMessage] = useState('') as [string, any];
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
   const handleAnswerClick = (question_id: string, answer_id: string) => {

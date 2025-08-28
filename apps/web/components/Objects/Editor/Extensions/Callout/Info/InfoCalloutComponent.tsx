@@ -85,7 +85,7 @@ const InfoCalloutWrapper = styled.div.withConfig({
 `;
 
 const InfoCalloutComponent = (props: any) => {
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const { isEditable } = editorState;
   const [dismissed, setDismissed] = useState(false);
 

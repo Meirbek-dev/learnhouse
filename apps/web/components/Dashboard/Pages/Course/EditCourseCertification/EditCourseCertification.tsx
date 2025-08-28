@@ -27,7 +27,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
   const [isPending, startTransition] = useTransition();
   const [hasInitialized, setHasInitialized] = useState(false);
   const course = useCourse();
-  const dispatchCourse = useCourseDispatch() as any;
+  const dispatchCourse = useCourseDispatch();
   const { isLoading, courseStructure } = course as any;
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;

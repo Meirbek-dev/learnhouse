@@ -19,9 +19,9 @@ from src.db.gamification import (
     XPTransactionRead,
 )
 from src.db.gamification_events import EventType, GamificationEvent
+from src.services.gamification.cache_service import create_cache_service
 from src.services.gamification.config import get_gamification_config
 from src.services.gamification.event_bus import EventBus, LevelUpEvent, XPAwardedEvent
-from src.services.gamification.cache_service import create_cache_service
 
 from .level_calculator import calculate_level_details
 from .result import Result
@@ -238,7 +238,7 @@ class XPService:
         finally:
             # Ensure cache is refreshed with latest profile after any attempt if commit succeeded earlier
             try:  # pragma: no cover - best effort cache refresh
-                if 'profile' in locals() and getattr(profile, 'id', None):
+                if "profile" in locals() and getattr(profile, "id", None):
                     cache = create_cache_service()
                     cache.set_profile(user_id, org_id, profile)
             except Exception:  # pragma: no cover

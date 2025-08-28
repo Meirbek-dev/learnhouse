@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
 import { sendActivityAIChatMessage, startActivityAIChatSession } from '@services/ai/ai';
-import type { AIEditorStateTypes } from '@components/Contexts/AI/AIEditorContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useGetAIFeatures from '@components/Hooks/useGetAIFeatures';
 import touEmblemLight from 'public/tou_emblem_light.webp';
@@ -34,8 +33,8 @@ interface AIPromptsLabels {
 }
 
 const AIEditorToolkit = (props: AIEditorToolkitProps) => {
-  const dispatchAIEditor = useAIEditorDispatch() as any;
-  const aiEditorState = useAIEditor() as AIEditorStateTypes;
+  const dispatchAIEditor = useAIEditorDispatch();
+  const aiEditorState = useAIEditor();
   const t = useTranslations('Activities.AIEditorToolkit');
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
   const [isToolkitAvailable, setIsToolkitAvailable] = useState(true);
@@ -136,8 +135,8 @@ const AIEditorToolkit = (props: AIEditorToolkitProps) => {
 };
 
 const UserFeedbackModal = (props: AIEditorToolkitProps) => {
-  const dispatchAIEditor = useAIEditorDispatch() as any;
-  const aiEditorState = useAIEditor() as AIEditorStateTypes;
+  const dispatchAIEditor = useAIEditorDispatch();
+  const aiEditorState = useAIEditor();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Activities.AIEditorToolkit');
@@ -477,7 +476,7 @@ const UserFeedbackModal = (props: AIEditorToolkitProps) => {
 };
 
 const AiEditorToolButton = (props: any) => {
-  const dispatchAIEditor = useAIEditorDispatch() as any;
+  const dispatchAIEditor = useAIEditorDispatch();
   const t = useTranslations('Activities.AIEditorToolkit');
 
   const handleToolButtonClick = async (
@@ -506,8 +505,8 @@ const AiEditorToolButton = (props: any) => {
 };
 
 const AiEditorActionScreen = ({ handleOperation }: { handleOperation: any }) => {
-  const dispatchAIEditor = useAIEditorDispatch() as any;
-  const aiEditorState = useAIEditor() as AIEditorStateTypes;
+  const dispatchAIEditor = useAIEditorDispatch();
+  const aiEditorState = useAIEditor();
   const t = useTranslations('Activities.AIEditorToolkit');
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {

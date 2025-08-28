@@ -3,7 +3,6 @@
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useSession } from 'next-auth/react';
 import { createContext, use } from 'react';
-import type { Session } from 'next-auth';
 import type { ReactNode } from 'react';
 
 // Extended session data interface to match actual usage patterns

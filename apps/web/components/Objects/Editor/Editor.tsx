@@ -71,8 +71,8 @@ const Editor = (props: EditorProps) => {
   let dispatchAIEditor: any = null;
   let aiEditorState: AIEditorStateTypes | null = null;
 
-  dispatchAIEditor = useAIEditorDispatch() as any;
-  aiEditorState = useAIEditor() as AIEditorStateTypes;
+  dispatchAIEditor = useAIEditorDispatch();
+  aiEditorState = useAIEditor();
 
   const is_ai_feature_enabled = useGetAIFeatures({ feature: 'editor' });
   const [isButtonAvailable, setIsButtonAvailable] = useState(false);

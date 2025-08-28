@@ -19,7 +19,7 @@ const ImageBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.ImageBlock');
   const org = useOrg() as any;
   const course = useCourse();
-  const editorState = useEditorProvider() as any;
+  const editorState = useEditorProvider();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
