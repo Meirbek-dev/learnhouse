@@ -16,7 +16,7 @@ interface State {
 }
 
 interface Action {
-  type: string;
+  type: 'setSelectedAssignmentTaskUUID' | 'setAssignmentTask' | 'reload' | 'SET_MULTIPLE_STATES';
   payload?: any;
 }
 

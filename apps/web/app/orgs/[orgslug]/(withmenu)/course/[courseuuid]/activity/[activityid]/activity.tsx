@@ -1,4 +1,8 @@
 'use client';
+import AssignmentSubmissionProvider, {
+  useAssignmentSubmission,
+  type AssignmentSubmission,
+} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import {
   BookOpenCheck,
   CheckCircle,
@@ -10,9 +14,6 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
-import AssignmentSubmissionProvider, {
-  useAssignmentSubmission,
-} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import {
   getAssignmentFromActivityUUID,
   getFinalGrade,
@@ -1336,7 +1337,8 @@ const AssignmentTools = (props: {
   assignment: any;
   t: ReturnType<typeof useTranslations<'ActivityPage'>>;
 }) => {
-  const submission = useAssignmentSubmission() as any;
+  const submissionContext = useAssignmentSubmission();
+  const submission = submissionContext.submissions;
   const session = useLHSession() as any;
   const [finalGrade, setFinalGrade] = useState(null) as any;
   const { t } = props;
@@ -1400,7 +1402,7 @@ const AssignmentTools = (props: {
   }, [session.data?.user?.id, props.assignment?.assignment_uuid, session.data?.tokens?.access_token, t, setFinalGrade]);
 
   useEffect(() => {
-    if (submission && submission.length > 0 && submission[0].submission_status === 'GRADED') {
+    if (submission && submission.length > 0 && submission[0]?.submission_status === 'GRADED') {
       getGradingBasedOnMethod();
     }
   }, [submission, props.assignment, getGradingBasedOnMethod]);
@@ -1426,7 +1428,10 @@ const AssignmentTools = (props: {
     );
   }
 
-  if (submission[0].submission_status === 'SUBMITTED') {
+  // At this point, submission is guaranteed to be an array with at least one element
+  const firstSubmission = (submission as AssignmentSubmission[])[0];
+
+  if (firstSubmission?.submission_status === 'SUBMITTED') {
     return (
       <div className="soft-shadow flex flex-col rounded-md bg-amber-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
         <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
@@ -1438,7 +1443,7 @@ const AssignmentTools = (props: {
     );
   }
 
-  if (submission[0].submission_status === 'GRADED') {
+  if (firstSubmission?.submission_status === 'GRADED') {
     return (
       <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
         <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>

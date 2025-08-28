@@ -8,29 +8,61 @@ import useSWR from 'swr';
 
 import { useLHSession } from '../LHSessionContext';
 
-export const AssignmentSubmissionContext = createContext({});
+// Types for assignment submission
+export type AssignmentSubmissionStatus = 'PENDING' | 'SUBMITTED' | 'GRADED' | 'LATE' | 'NOT_SUBMITTED';
 
-const AssignmentSubmissionProvider = ({
-  children,
-  assignment_uuid,
-}: {
+export interface AssignmentSubmission {
+  id: number;
+  submission_status: AssignmentSubmissionStatus;
+  grade: number;
+  user_id: number;
+  assignment_id: number;
+  creation_date: string;
+  update_date: string;
+}
+
+export interface AssignmentSubmissionContextType {
+  submissions: AssignmentSubmission[] | null;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export const AssignmentSubmissionContext = createContext<AssignmentSubmissionContextType>({
+  submissions: null,
+  isLoading: false,
+  error: null,
+});
+
+interface AssignmentSubmissionProviderProps {
   children: ReactNode;
   assignment_uuid: string | undefined;
-}) => {
+}
+
+const AssignmentSubmissionProvider = ({ children, assignment_uuid }: AssignmentSubmissionProviderProps) => {
   const session = useLHSession();
   const accessToken = session?.data?.tokens?.access_token;
 
-  const { data: assignmentSubmission, error: assignmentError } = useSWR(
+  const {
+    data: assignmentSubmission,
+    error: assignmentError,
+    isLoading,
+  } = useSWR<AssignmentSubmission[]>(
     assignment_uuid && assignment_uuid !== 'undefined'
       ? `${getAPIUrl()}assignments/${assignment_uuid}/submissions/me`
       : null,
     (url) => swrFetcher(url, accessToken),
   );
 
-  return <AssignmentSubmissionContext value={assignmentSubmission}>{children}</AssignmentSubmissionContext>;
+  const contextValue: AssignmentSubmissionContextType = {
+    submissions: assignmentSubmission || null,
+    isLoading,
+    error: assignmentError || null,
+  };
+
+  return <AssignmentSubmissionContext value={contextValue}>{children}</AssignmentSubmissionContext>;
 };
 
-export function useAssignmentSubmission() {
+export function useAssignmentSubmission(): AssignmentSubmissionContextType {
   return use(AssignmentSubmissionContext);
 }
 

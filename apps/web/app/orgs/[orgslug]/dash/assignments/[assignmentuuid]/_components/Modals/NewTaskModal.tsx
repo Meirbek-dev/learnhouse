@@ -11,7 +11,7 @@ const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.NewTaskModal');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
 
   function showReminderToast() {
     // Check if the reminder has already been shown using sessionStorage

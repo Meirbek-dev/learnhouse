@@ -55,8 +55,8 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const t = useTranslations('DashPage.Assignments.TaskQuizObject');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskState = useAssignmentsTask() as any;
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
+  const assignmentTaskState = useAssignmentsTask();
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const assignment = useAssignments();
 
   /* TEACHER VIEW CODE */
@@ -398,7 +398,8 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
 
   useEffect(() => {
     assignmentTaskStateHook({
-      setSelectedAssignmentTaskUUID: assignmentTaskUUID,
+      type: 'setSelectedAssignmentTaskUUID',
+      payload: assignmentTaskUUID,
     });
     // Teacher area
     if (view === 'teacher' && assignmentTaskState.assignmentTask.contents?.questions) {

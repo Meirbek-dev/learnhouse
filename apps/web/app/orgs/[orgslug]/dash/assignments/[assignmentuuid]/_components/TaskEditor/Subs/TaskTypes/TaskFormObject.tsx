@@ -48,8 +48,8 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   const t = useTranslations('Components.TaskFormObject');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskState = useAssignmentsTask() as any;
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
+  const assignmentTaskState = useAssignmentsTask();
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const assignment = useAssignments();
 
   /* TEACHER VIEW CODE */
@@ -369,7 +369,8 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
 
     // Set assignment task UUID in context
     assignmentTaskStateHook({
-      setSelectedAssignmentTaskUUID: assignmentTaskUUID,
+      type: 'setSelectedAssignmentTaskUUID',
+      payload: assignmentTaskUUID,
     });
 
     // Teacher area - Load from context first, then from API if needed

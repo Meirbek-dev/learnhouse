@@ -13,8 +13,8 @@ import NewTaskModal from './Modals/NewTaskModal';
 const AssignmentTasks = ({ assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.Tasks');
   const assignments = useAssignments();
-  const assignmentTask = useAssignmentsTask() as any;
-  const assignmentTaskHook = useAssignmentsTaskDispatch() as any;
+  const assignmentTask = useAssignmentsTask();
+  const assignmentTaskHook = useAssignmentsTaskDispatch();
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
 
   async function setSelectTask(task_uuid: string) {

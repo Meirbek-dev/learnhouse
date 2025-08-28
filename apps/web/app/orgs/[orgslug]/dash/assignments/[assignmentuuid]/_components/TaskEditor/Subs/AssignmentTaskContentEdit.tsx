@@ -10,8 +10,8 @@ import { useEffect } from 'react';
 
 const AssignmentTaskContentEdit = () => {
   const session = useLHSession();
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
-  const assignment_task = useAssignmentsTask() as any;
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
+  const assignment_task = useAssignmentsTask();
 
   useEffect(() => {}, [assignment_task, assignmentTaskStateHook]);
 

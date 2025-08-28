@@ -40,8 +40,8 @@ export const AssignmentTaskGeneralEdit = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskState = useAssignmentsTask() as any;
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
+  const assignmentTaskState = useAssignmentsTask();
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const assignment = useAssignments();
   const validationSchema = createValidationSchema(t);
 
@@ -245,8 +245,8 @@ const UpdateTaskRef = () => {
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskState = useAssignmentsTask() as any;
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
+  const assignmentTaskState = useAssignmentsTask();
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const assignment = useAssignments();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('') as any;

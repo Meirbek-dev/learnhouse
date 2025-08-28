@@ -23,8 +23,8 @@ const AssignmentTaskEditor = ({ page }: any) => {
   const t = useTranslations('DashPage.Assignments.TaskEditor');
   const [selectedSubPage, setSelectedSubPage] = useState(page);
   const assignment = useAssignments();
-  const assignmentTaskState = useAssignmentsTask() as any;
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch() as any;
+  const assignmentTaskState = useAssignmentsTask();
+  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 

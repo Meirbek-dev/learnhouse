@@ -34,7 +34,8 @@ const AssignmentBoxUI = ({
 }: AssignmentBoxProps) => {
   const t = useTranslations('Activities.AssignmentBoxUI');
   const [customGrade, setCustomGrade] = useState<number>(0);
-  const submission = useAssignmentSubmission() as any;
+  const submissionContext = useAssignmentSubmission();
+  const submission = submissionContext.submissions;
   const session = useLHSession();
 
   useEffect(() => {
