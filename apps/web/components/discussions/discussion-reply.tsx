@@ -47,7 +47,6 @@ export default function DiscussionReply({
     const last = lastName || '';
     return `${first} ${last}`.trim() || reply.username;
   };
-
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Check if content has meaningful text (not just empty HTML tags)
@@ -101,9 +100,11 @@ export default function DiscussionReply({
               <div className="flex flex-shrink-0 items-center gap-1 text-xs text-slate-400">
                 <Clock size={12} />
                 <span>{format.relativeTime(new Date(reply.createDate), now)}</span>
-                {reply.updateDate !== reply.createDate && (
-                  <span className="text-xs text-slate-400">({t('edited')})</span>
-                )}
+                {reply.updateDate &&
+                  reply.createDate &&
+                  new Date(reply.updateDate).getTime() !== new Date(reply.createDate).getTime() && (
+                    <span className="text-xs text-slate-400">({t('edited')})</span>
+                  )}
               </div>
             </div>
 

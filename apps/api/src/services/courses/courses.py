@@ -89,7 +89,7 @@ async def get_course_by_id(
             detail="Course not found",
         )
 
-    # RBAC check
+    # RBAC check role-based access control
     await courses_rbac_check(
         request, course.course_uuid, current_user, "read", db_session
     )

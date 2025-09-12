@@ -234,8 +234,8 @@ class StreakService:
         if days_diff == 1:
             # Consecutive day - increment streak
             return current_streak + 1, True
-        if days_diff <= 1 and self._is_within_grace_period(last_date, current_time):
-            # Within grace period - maintain streak
+        if days_diff > 1 and self._is_within_grace_period(last_date, current_time):
+            # More than one day passed, but within grace period - maintain streak
             return current_streak + 1, True
         # Streak broken - reset to 1
         return 1, False

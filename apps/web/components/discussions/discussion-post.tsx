@@ -114,9 +114,11 @@ export default function DiscussionPost({
                 <div className="flex items-center gap-1 text-xs text-slate-400">
                   <Clock size={12} />
                   <span>{format.relativeTime(new Date(post.createDate), now)}</span>
-                  {post.updateDate !== post.createDate && (
-                    <span className="text-xs text-slate-400">({t('edited')})</span>
-                  )}
+                  {post.updateDate &&
+                    post.createDate &&
+                    new Date(post.updateDate).getTime() !== new Date(post.createDate).getTime() && (
+                      <span className="text-xs text-slate-400">({t('edited')})</span>
+                    )}
                 </div>
               </div>
               {(isAdmin || isOwnPost) && !editingPost && (

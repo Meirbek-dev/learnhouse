@@ -16,7 +16,6 @@ from src.services.gamification import (
     calculate_level_details,
     get_gamification_config,
 )
-from src.services.gamification.cache_service import create_cache_service
 from src.services.gamification.gamification import (
     get_gamification_dashboard_result,
     get_gamification_preferences_result,

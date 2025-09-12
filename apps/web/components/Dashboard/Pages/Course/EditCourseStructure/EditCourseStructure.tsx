@@ -25,12 +25,12 @@ interface EditCourseStructureProps {
 
 export type OrderPayload =
   | {
-      chapter_order_by_ids?: Array<{
+      chapter_order_by_ids?: {
         chapter_id: number;
         activities_order_by_ids: Array<{
           activity_id: number;
         }>;
-      }>;
+      }[];
     }
   | undefined;
 
@@ -96,8 +96,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       const destinationChapter =
         newChapterOrder.find((chapter: any) => chapter.chapter_uuid === destination.droppableId) ?? sourceChapter;
 
-      if (!sourceChapter || !destinationChapter) return;
-      if (!sourceChapter.activities || !destinationChapter.activities) return;
+      if (!(sourceChapter && destinationChapter)) return;
+      if (!(sourceChapter.activities && destinationChapter.activities)) return;
 
       const [movedActivity] = sourceChapter.activities.splice(source.index, 1);
       if (!movedActivity) return;

@@ -1,8 +1,4 @@
 'use client';
-import AssignmentSubmissionProvider, {
-  useAssignmentSubmission,
-  type AssignmentSubmission,
-} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import {
   BookOpenCheck,
   CheckCircle,
@@ -14,12 +10,16 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
+import AssignmentSubmissionProvider, {
+  useAssignmentSubmission,
+} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import {
   getAssignmentFromActivityUUID,
   getFinalGrade,
   submitAssignmentForGrading,
 } from '@services/courses/assignments';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
+import type { AssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';

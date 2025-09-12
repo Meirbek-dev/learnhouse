@@ -31,30 +31,23 @@ class GamificationEventHandler:
     async def handle_user_login(
         self, user_id: int, org_id: int, metadata: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Handle user login event."""
+        """Handle user login without double-awarding XP.
+
+        Daily login bonus is handled inside StreakService.update_login_streak,
+        which uses a semantic idempotency key. We only call streak update here.
+        """
         try:
-            results = {}
-
-            # Award login bonus XP
-            xp_result = await self.xp_service.award_xp(
-                user_id=user_id,
-                org_id=org_id,
-                source=XPSource.LOGIN_BONUS,
-                metadata=metadata,
-            )
-            results["xp_award"] = (
-                xp_result.value if xp_result.ok else {"error": xp_result.code}
-            )
-
-            # Update login streak
             streak_result = await self.streak_service.update_login_streak(
                 user_id, org_id
             )
-            results["streak_update"] = streak_result
-
+            if not streak_result.ok:
+                return {
+                    "success": False,
+                    "error": streak_result.error,
+                    "code": streak_result.code,
+                }
             logger.info(f"Login event processed: user={user_id}, org={org_id}")
-            return {"success": True, "results": results}
-
+            return {"success": True, "results": {"streak_update": streak_result.value}}
         except Exception as e:
             logger.exception(f"Error handling login event: {e}")
             return {"success": False, "error": str(e)}

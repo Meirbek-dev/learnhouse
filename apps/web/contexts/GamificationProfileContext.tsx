@@ -18,7 +18,7 @@ const GamificationProfileContext = createContext<GamificationContextValue | unde
 
 function computeProgressPercent(p: GamificationProfile): number {
   if (p.level_progress_percent !== null) return p.level_progress_percent; // server authoritative preferred
-  if (p.xp_in_level != null && p.xp_to_next_level != null && p.xp_to_next_level > 0) {
+  if (p.xp_in_level !== null && p.xp_to_next_level !== null && p.xp_to_next_level > 0) {
     return Math.max(0, Math.min(100, (p.xp_in_level / (p.xp_in_level + p.xp_to_next_level)) * 100));
   }
   return 0;
@@ -52,7 +52,7 @@ export const GamificationProfileProvider: React.FC<{ children: React.ReactNode; 
         const clone: any = { ...prev };
         clone.total_xp += amount;
         clone.daily = clone.daily ? { ...clone.daily, xp_earned: clone.daily.xp_earned + amount } : undefined;
-        if (clone.xp_in_level != null && clone.xp_to_next_level != null) {
+        if (clone.xp_in_level !== null && clone.xp_to_next_level !== null) {
           if (amount >= clone.xp_to_next_level) {
             // simple level up rollover; precise server calc will correct
             const spill = amount - clone.xp_to_next_level;

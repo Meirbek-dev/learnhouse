@@ -327,52 +327,56 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         setUserSubmissionObject(res.data);
       }
     }
-  }, [access_token, user_id, assignmentTaskUUID, assignment]);
+  }, [access_token, user_id, assignmentTaskUUID, assignment.assignment_object?.assignment_uuid]);
+
+  const loadAssignmentTask = useCallback(async () => {
+    if (assignmentTaskUUID) {
+      const res = await getAssignmentTask(assignmentTaskUUID, access_token);
+      if (res.success) {
+        setAssignmentTaskOutsideProvider(res.data);
+        // Only set questions if they exist
+        if (res.data.contents?.questions && res.data.contents.questions.length > 0) {
+          setQuestions(res.data.contents.questions);
+        } else if (view !== 'teacher') {
+          // For non-teacher views, set empty array if no questions exist
+          setQuestions([]);
+        }
+        // For teacher view, don't modify questions if no data exists - keep initial state
+      }
+    }
+  }, [assignmentTaskUUID, access_token, view]);
+
+  const loadUserSubmissions = useCallback(async () => {
+    if (view === 'student' && assignmentTaskUUID) {
+      const res = await getAssignmentTaskSubmissionsMe(
+        assignmentTaskUUID,
+        assignment.assignment_object.assignment_uuid,
+        access_token,
+      );
+      if (res.success) {
+        setUserSubmissions({
+          ...res.data.task_submission,
+          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+        });
+        setInitialUserSubmissions({
+          ...res.data.task_submission,
+          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+        });
+      }
+    }
+  }, [view, assignmentTaskUUID, assignment.assignment_object?.assignment_uuid, access_token]);
+
+  // Set assignment task UUID in context - separate effect to avoid dependency issues
+  useEffect(() => {
+    if (assignmentTaskUUID) {
+      assignmentTaskStateHook({
+        type: 'setSelectedAssignmentTaskUUID',
+        payload: assignmentTaskUUID,
+      });
+    }
+  }, [assignmentTaskUUID, assignmentTaskStateHook]);
 
   useEffect(() => {
-    const loadAssignmentTask = async () => {
-      if (assignmentTaskUUID) {
-        const res = await getAssignmentTask(assignmentTaskUUID, access_token);
-        if (res.success) {
-          setAssignmentTaskOutsideProvider(res.data);
-          // Only set questions if they exist and we're not in teacher view, or if we're in teacher view and there are existing questions
-          if (res.data.contents?.questions && res.data.contents.questions.length > 0) {
-            setQuestions(res.data.contents.questions);
-          } else if (view !== 'teacher') {
-            // For non-teacher views, set empty array if no questions exist
-            setQuestions([]);
-          }
-          // For teacher view, keep the initial state if no questions exist
-        }
-      }
-    };
-
-    const loadUserSubmissions = async () => {
-      if (view === 'student' && assignmentTaskUUID) {
-        const res = await getAssignmentTaskSubmissionsMe(
-          assignmentTaskUUID,
-          assignment.assignment_object.assignment_uuid,
-          access_token,
-        );
-        if (res.success) {
-          setUserSubmissions({
-            ...res.data.task_submission,
-            assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-          });
-          setInitialUserSubmissions({
-            ...res.data.task_submission,
-            assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-          });
-        }
-      }
-    };
-
-    // Set assignment task UUID in context
-    assignmentTaskStateHook({
-      type: 'setSelectedAssignmentTaskUUID',
-      payload: assignmentTaskUUID,
-    });
-
     // Teacher area - Load from context first, then from API if needed
     if (view === 'teacher') {
       if (assignmentTaskState.assignmentTask.contents?.questions) {
@@ -392,12 +396,11 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
   }, [
-    assignmentTaskState,
-    assignment,
-    assignmentTaskStateHook,
-    access_token,
-    assignmentTaskUUID,
+    assignmentTaskState.assignmentTask.contents?.questions,
+    assignmentTaskState.selectedAssignmentTaskUUID,
     view,
+    loadAssignmentTask,
+    loadUserSubmissions,
     getAssignmentTaskSubmissionFromIdentifiedUserUI,
   ]);
 
@@ -409,25 +412,8 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     }
   }, [userSubmissions, initialUserSubmissions]);
 
-  // Ensure questions is always an array for teacher view
-  if (view === 'teacher' && (!questions || questions.length === 0)) {
-    setQuestions([
-      {
-        questionText: '',
-        questionUUID: `question_${crypto.randomUUID()}`,
-        blanks: [
-          {
-            placeholder: t('blankPlaceholder'),
-            correctAnswer: '',
-            hint: '',
-            blankUUID: `blank_${crypto.randomUUID()}`,
-          },
-        ],
-      },
-    ]);
-    return null; // Return null to prevent rendering while state updates
-  }
-
+  // Show main UI for teacher view (always has at least the default question)
+  // or when questions exist for other views
   if (view === 'teacher' || (questions && questions.length > 0)) {
     return (
       <AssignmentBoxUI

@@ -54,7 +54,7 @@ async def _get_activity_data(
     if not result:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    activity_db, course_db, org_db, org_config_db = result
+    activity_db, course_db, _org_db, org_config_db = result
 
     # Convert to Pydantic models
     activity = ActivityRead.model_validate(activity_db)

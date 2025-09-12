@@ -47,12 +47,12 @@ interface CourseStructure {
 
 // Course order interface
 interface CourseOrder {
-  chapter_order_by_ids?: Array<{
+  chapter_order_by_ids?: {
     chapter_id: number;
     activities_order_by_ids: Array<{
       activity_id: number;
     }>;
-  }>;
+  }[];
   [key: string]: any; // For additional properties
 }
 

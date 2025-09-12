@@ -271,7 +271,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   }, [
     assignmentTaskUUID,
     view,
-    assignment,
+    assignment.assignment_object?.assignment_uuid,
     access_token,
     user_id,
     getAssignmentTaskUI,

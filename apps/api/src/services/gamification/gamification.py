@@ -23,6 +23,7 @@ from src.db.users import User
 from .cache_service import create_cache_service
 from .level_calculator import calculate_level_details
 from .result import Result
+from .config import get_gamification_config
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,7 @@ async def get_or_create_profile(
             cache.set_profile(user_id, org_id, profile)
             return profile
 
+        cfg = get_gamification_config()
         new_profile = UserGamificationProfile(
             user_id=user_id,
             org_id=org_id,
@@ -61,6 +63,8 @@ async def get_or_create_profile(
             longest_learning_streak=0,
             last_login_date=None,
             last_learning_activity_date=None,
+            daily_xp_limit=cfg.daily_caps.max_daily_xp,
+            daily_goal_xp=cfg.daily_caps.default_daily_goal,
             created_at=now_local(),
             updated_at=now_local(),
         )

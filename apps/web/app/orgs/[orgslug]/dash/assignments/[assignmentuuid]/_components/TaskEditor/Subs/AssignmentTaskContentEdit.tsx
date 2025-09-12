@@ -13,12 +13,26 @@ const AssignmentTaskContentEdit = () => {
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();
   const assignment_task = useAssignmentsTask();
 
-  useEffect(() => {}, [assignment_task, assignmentTaskStateHook]);
+  useEffect(() => {}, [
+    assignment_task?.assignmentTask.assignment_type,
+    assignment_task?.assignmentTask.assignment_task_uuid,
+    assignmentTaskStateHook,
+  ]);
 
   return (
     <div>
-      {assignment_task?.assignmentTask.assignment_type === 'QUIZ' && <TaskQuizObject view="teacher" />}
-      {assignment_task?.assignmentTask.assignment_type === 'FILE_SUBMISSION' && <TaskFileObject view="teacher" />}
+      {assignment_task?.assignmentTask.assignment_type === 'QUIZ' && (
+        <TaskQuizObject
+          view="teacher"
+          assignmentTaskUUID={assignment_task?.assignmentTask.assignment_task_uuid}
+        />
+      )}
+      {assignment_task?.assignmentTask.assignment_type === 'FILE_SUBMISSION' && (
+        <TaskFileObject
+          view="teacher"
+          assignmentTaskUUID={assignment_task?.assignmentTask.assignment_task_uuid}
+        />
+      )}
       {assignment_task?.assignmentTask.assignment_type === 'FORM' && (
         <TaskFormObject
           view="teacher"
