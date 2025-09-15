@@ -19,7 +19,7 @@ const GamificationProfileContext = createContext<GamificationContextValue | unde
 function computeProgressPercent(p: GamificationProfile): number {
   if (p.level_progress_percent !== null) return p.level_progress_percent; // server authoritative preferred
   if (p.xp_in_level !== null && p.xp_to_next_level !== null && p.xp_to_next_level > 0) {
-    return Math.max(0, Math.min(100, (p.xp_in_level / (p.xp_in_level + p.xp_to_next_level)) * 100));
+    return Math.max(0, Math.min(100, (p.xp_in_level! / (p.xp_in_level! + p.xp_to_next_level!)) * 100));
   }
   return 0;
 }
