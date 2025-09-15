@@ -3787,7 +3787,7 @@
           "streakMessages": {
             "active": "{count} дн. подряд! 🔥",
             "atRisk": "Не прерывайте серию! {action} сегодня.",
-            "broken": "Начните свою {type}-серию сегодня!",
+            "broken": "Начните свою серию-{type} сегодня!",
             "completeAction": "Выполните задание",
             "learning": "обучения",
             "login": "входа",

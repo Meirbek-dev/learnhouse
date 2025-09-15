@@ -2,7 +2,7 @@
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
 from src.db.gamification import (
     OrganizationLeaderboard,
@@ -27,6 +27,10 @@ from src.services.gamification.service_container import (
     get_gamification_services,
 )
 from src.services.gamification.xp_sources import list_xp_sources
+from src.services.gamification.etag import (
+    make_dashboard_etag,
+    make_profile_etag,
+)
 
 router = APIRouter()
 
@@ -79,13 +83,29 @@ async def get_profile(
     org_id: int,
     user: Annotated[PublicUser, Depends(get_current_user)],
     services: Annotated[GamificationServices, Depends(get_gamification_services)],
+    request: Request,
+    response: Response,
 ):
     """Get user's gamification profile (Result-based)."""
     result = await get_gamification_profile_result(
         user_id=user.id, org_id=org_id, db_session=services.xp.db_session
     )
     raise_for_result(result)
-    return {"data": {"profile": result.value}, "meta": {"version": 1}}
+    payload = result.value
+    # ETag support: weak cache on profile snapshot
+    try:
+        etag = make_profile_etag(
+            profile_id=payload["id"],
+            updated_at=payload.get("updated_at"),
+            total_xp=payload.get("total_xp", 0),
+        )
+        inm = request.headers.get("If-None-Match")
+        if inm and inm == etag:
+            raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
+        response.headers["ETag"] = etag
+    except Exception:  # pragma: no cover - optional feature
+        pass
+    return {"data": {"profile": payload}, "meta": {"version": 1}}
 
 
 @router.post(
@@ -352,6 +372,8 @@ async def get_dashboard(
     org_id: int,
     user: Annotated[PublicUser, Depends(get_current_user)],
     services: Annotated[GamificationServices, Depends(get_gamification_services)],
+    request: Request,
+    response: Response,
 ):
     """Get gamification dashboard data."""
     result = await get_gamification_dashboard_result(
@@ -360,7 +382,30 @@ async def get_dashboard(
         db_session=services.xp.db_session,
     )
     raise_for_result(result)
-    return result.value
+    payload = result.value
+    # Compute a simple recent_tx hash for ETag
+    try:
+        txs = payload.get("recent_transactions", [])
+        recent_tx_hash = "|".join(
+            f"{t.get('id')}@{t.get('created_at')}@{t.get('xp_awarded')}" for t in txs
+        )
+        etag = make_dashboard_etag(
+            profile_id=payload.get("profile").id if payload.get("profile") else 0,
+            updated_at=(
+                payload.get("profile").updated_at.isoformat()
+                if payload.get("profile") and getattr(payload.get("profile"), "updated_at", None)
+                else None
+            ),
+            total_xp=(payload.get("profile").total_xp if payload.get("profile") else 0),
+            recent_tx_hash=recent_tx_hash,
+        )
+        inm = request.headers.get("If-None-Match")
+        if inm and inm == etag:
+            raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
+        response.headers["ETag"] = etag
+    except Exception:  # pragma: no cover - optional feature
+        pass
+    return payload
 
 
 @router.get("/streaks/summary/{org_id}", summary="Get streak summary")

@@ -5,8 +5,8 @@ Clean service handling streak logic with proper timezone support,
 grace periods, and milestone bonuses.
 """
 
-import logging
 from datetime import datetime, timedelta
+import logging
 from typing import Optional, Tuple
 
 from sqlmodel import Session, and_, select
@@ -221,23 +221,32 @@ class StreakService:
             Tuple of (new_streak_count, streak_maintained)
         """
         if not last_date:
-            # First time activity
+            # First ever activity
             return 1, True
 
-        current_date = current_time.date()
-        last_date_only = last_date.date()
-        days_diff = (current_date - last_date_only).days
+        # Normalize both to the same timezone (app local)
+        tz = current_time.tzinfo
+        last_local = last_date
+        if tz is not None:
+            if last_local.tzinfo is None:
+                last_local = last_local.replace(tzinfo=tz)
+            elif last_local.tzinfo != tz:
+                last_local = last_local.astimezone(tz)
 
-        if days_diff == 0:
-            # Same day - no change
+        # Calculate exact elapsed hours and calendar day diff
+        elapsed = current_time - last_local
+        elapsed_hours = max(elapsed.total_seconds() / 3600.0, 0.0)  # guard against negative due to clock skew
+        days_diff = (current_time.date() - last_local.date()).days
+
+        # Same calendar day: do nothing
+        if days_diff <= 0:
             return current_streak, True
-        if days_diff == 1:
-            # Consecutive day - increment streak
+
+        # Within 24h + grace window: count as consecutive
+        if elapsed_hours <= 24.0 + float(self.config.streaks.grace_period_hours):
             return current_streak + 1, True
-        if days_diff > 1 and self._is_within_grace_period(last_date, current_time):
-            # More than one day passed, but within grace period - maintain streak
-            return current_streak + 1, True
-        # Streak broken - reset to 1
+
+        # Otherwise, streak is broken and starts over
         return 1, False
 
     def _is_within_grace_period(
@@ -312,20 +321,24 @@ class StreakService:
     def _get_streak_status(
         self, last_date: datetime | None, current_time: datetime
     ) -> str:
-        """Get current status of streak."""
+        """Get current status of streak using 24h + grace threshold."""
         if not last_date:
             return "inactive"
 
-        current_date = current_time.date()
-        last_date_only = last_date.date()
-        days_diff = (current_date - last_date_only).days
+        # Normalize tz
+        tz = current_time.tzinfo
+        last_local = last_date
+        if tz is not None:
+            if last_local.tzinfo is None:
+                last_local = last_local.replace(tzinfo=tz)
+            elif last_local.tzinfo != tz:
+                last_local = last_local.astimezone(tz)
 
-        if days_diff == 0:
+        elapsed_hours = max((current_time - last_local).total_seconds() / 3600.0, 0.0)
+        if current_time.date() == last_local.date():
             return "active_today"
-        if days_diff == 1:
+        if elapsed_hours <= 24.0 + float(self.config.streaks.grace_period_hours):
             return "due_today"
-        if self._is_within_grace_period(last_date, current_time):
-            return "grace_period"
         return "broken"
 
     def _get_next_milestone(self, current_streak: int) -> int | None:

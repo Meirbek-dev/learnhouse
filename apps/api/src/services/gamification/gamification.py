@@ -4,6 +4,7 @@ Essential functions needed by the router.
 """
 
 import logging
+from datetime import datetime
 from typing import Any, Dict
 from uuid import UUID
 
@@ -173,6 +174,60 @@ async def get_gamification_profile_result(
     """
     try:
         profile = await get_or_create_profile(user_id, org_id, db_session)
+
+        # Auto-correct stale streaks on read to reflect reality even without explicit update calls
+        try:
+            cfg = get_gamification_config()
+            now = now_local()
+
+            def _normalize(dt: datetime) -> datetime:
+                tz = now.tzinfo
+                if dt.tzinfo is None and tz is not None:
+                    return dt.replace(tzinfo=tz)
+                if tz is not None and dt.tzinfo != tz:
+                    return dt.astimezone(tz)
+                return dt
+
+            changed = False
+
+            # Check login streak
+            if profile.last_login_date is not None and profile.last_login_date.date() != now.date():
+                last = _normalize(profile.last_login_date)
+                elapsed_hours = max((now - last).total_seconds() / 3600.0, 0.0)
+                if elapsed_hours > 24.0 + float(cfg.streaks.grace_period_hours):
+                    if profile.current_login_streak != 0:
+                        profile.current_login_streak = 0
+                        changed = True
+
+            # Check learning streak
+            if (
+                profile.last_learning_activity_date is not None
+                and profile.last_learning_activity_date.date() != now.date()
+            ):
+                last = _normalize(profile.last_learning_activity_date)
+                elapsed_hours = max((now - last).total_seconds() / 3600.0, 0.0)
+                if elapsed_hours > 24.0 + float(cfg.streaks.grace_period_hours):
+                    if profile.current_learning_streak != 0:
+                        profile.current_learning_streak = 0
+                        changed = True
+
+            if changed:
+                profile.updated_at = now
+                db_session.add(profile)
+                try:
+                    db_session.commit()
+                    # best-effort cache refresh
+                    try:
+                        cache = create_cache_service()
+                        cache.set_profile(user_id, org_id, profile)
+                    except Exception:
+                        logger.debug("profile cache refresh failed after streak autocorrect", exc_info=True)
+                except Exception:
+                    db_session.rollback()
+                    logger.debug("streak autocorrect commit failed; continuing with stale values", exc_info=True)
+        except Exception:
+            # Non-fatal; continue with existing values
+            logger.debug("streak autocorrect check failed", exc_info=True)
         lvl = calculate_level_details(profile.total_xp or 0)
         payload = {
             "id": profile.id,
