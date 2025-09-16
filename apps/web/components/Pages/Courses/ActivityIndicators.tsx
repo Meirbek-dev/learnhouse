@@ -4,10 +4,11 @@ import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trop
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 // Gamification imports
 import { LevelIndicatorBadge } from '@components/Dashboard/Gamification';
-import { useLevelIndicator } from '@/hooks/useLevelIndicator';
+import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Fragment, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -231,7 +232,9 @@ const ActivityIndicators = (props: Props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Gamification
-  const { profile: gamificationProfile, showLevelIndicator } = useLevelIndicator(org?.id);
+  const { data: session } = useSession();
+  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
+  const { profile: gamificationProfile } = useUnifiedGamification({ orgId: org?.id, accessToken, enabled: !!org?.id });
 
   const done_activity_style = 'bg-teal-600 hover:bg-teal-700';
   const black_activity_style = 'bg-zinc-300 hover:bg-zinc-400';
@@ -441,7 +444,7 @@ const ActivityIndicators = (props: Props) => {
         />
 
         {/* Level Indicator Badge */}
-        {showLevelIndicator && gamificationProfile && (
+        {gamificationProfile && (
           <div className="ml-2">
             <LevelIndicatorBadge
               level={gamificationProfile.current_level}

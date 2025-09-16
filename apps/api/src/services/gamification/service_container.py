@@ -33,28 +33,29 @@ from .xp_service import XPService, create_xp_service
 class GamificationServices:
     xp: XPService
     streaks: StreakService
-    achievements: AchievementService
+    achievements: Optional[AchievementService]
     leaderboard: LeaderboardService
     cache: CacheService
-    events: EventBus | None = None
+    events: Optional[EventBus] = None
 
 
 def build_services(
-    db_session: Session, *, event_bus: EventBus | None = None
+    db_session: Session, *, event_bus: Optional[EventBus] = None
 ) -> GamificationServices:
     """Construct only core services by default (xp, streaks, leaderboard).
 
-    avoid wiring the event bus and achievements until those subsystems are
+    Avoid wiring the event bus and achievements until those subsystems are
     complete to keep the core path lean and predictable.
     """
     cache = create_cache_service()
-    xp_service = create_xp_service(db_session, event_bus)
+    # Keep core services lean; don't wire EventBus by default
+    xp_service = create_xp_service(db_session)
     streak_service = create_streak_service(db_session)
     leaderboard_service = create_leaderboard_service(db_session, cache)
     return GamificationServices(
         xp=xp_service,
         streaks=streak_service,
-        achievements=None,  # type: ignore[assignment]
+        achievements=None,
         leaderboard=leaderboard_service,
         cache=cache,
         events=event_bus,
@@ -69,11 +70,11 @@ try:  # pragma: no cover - only executed when FastAPI imported
 
     def get_gamification_services(
         db: Session = Depends(get_db_session),
-    ) -> GamificationServices:  # type: ignore
+    ) -> GamificationServices:
         return build_services(db)
 except (
     Exception
 ):  # pragma: no cover - allow import without FastAPI in pure domain tests
 
-    def get_gamification_services(db: Session) -> GamificationServices:  # type: ignore
+    def get_gamification_services(db: Session) -> GamificationServices:
         return build_services(db)

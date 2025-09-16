@@ -19,10 +19,8 @@ from src.db.gamification import (
     XPTransaction,
     XPTransactionRead,
 )
-from src.db.gamification_events import EventType, GamificationEvent
 from src.services.gamification.cache_service import create_cache_service
 from src.services.gamification.config import get_gamification_config
-from src.services.gamification.event_bus import EventBus, LevelUpEvent, XPAwardedEvent
 
 from .level_calculator import calculate_level_details
 from .result import Result
@@ -31,10 +29,9 @@ logger = logging.getLogger(__name__)
 
 
 class XPService:
-    def __init__(self, db_session: Session, event_bus: EventBus | None = None) -> None:
+    def __init__(self, db_session: Session) -> None:
         self.db_session = db_session
         self.config = get_gamification_config()
-        self.event_bus = event_bus
 
     async def award_xp(
         self,
@@ -45,6 +42,7 @@ class XPService:
         metadata: dict[str, Any] | None = None,
         custom_amount: int | None = None,
         idempotency_key: str | None = None,
+        admin_user_id: int | None = None,
     ) -> Result[XPAwardResponse]:
         metadata = metadata or {}
         try:
@@ -93,22 +91,35 @@ class XPService:
             if xp_amount <= 0:
                 return Result.fail("invalid_amount")
 
-            # Calculate today's awarded XP from transactions to enforce cap atomically
-            today = datetime.now(UTC).date()
+            # Calculate today's awarded XP from transactions to enforce cap
+            # Use UTC server-day semantics consistently
+            now_utc = datetime.now(UTC)
+            today = now_utc.date()
             start_ts = datetime.combine(today, datetime.min.time(), tzinfo=UTC)
             end_ts = datetime.combine(today, datetime.max.time(), tzinfo=UTC)
+            # Reset profile.daily_xp_earned if last award was on a previous day
             try:
-                today_awarded = self.db_session.exec(
-                    select(XPTransaction).where(
-                        and_(
-                            XPTransaction.user_id == user_id,
-                            XPTransaction.org_id == org_id,
-                            XPTransaction.created_at >= start_ts,
-                            XPTransaction.created_at <= end_ts,
+                if profile.last_xp_award_date and profile.last_xp_award_date.date() != today:
+                    profile.daily_xp_earned = 0
+            except Exception:
+                pass
+            # Use SUM aggregate rather than loading all rows
+            try:
+                from sqlalchemy import func
+                today_sum = (
+                    self.db_session.exec(
+                        select(func.coalesce(func.sum(XPTransaction.xp_amount), 0)).where(
+                            and_(
+                                XPTransaction.user_id == user_id,
+                                XPTransaction.org_id == org_id,
+                                XPTransaction.created_at >= start_ts,
+                                XPTransaction.created_at <= end_ts,
+                            )
                         )
-                    )
-                ).all()
-                today_sum = sum(t.xp_amount for t in today_awarded)
+                    ).one()
+                )
+                # today_sum may be a scalar or tuple depending on driver
+                today_sum = int(today_sum[0] if isinstance(today_sum, tuple) else today_sum)
             except Exception:
                 today_sum = profile.daily_xp_earned or 0
 
@@ -120,7 +131,7 @@ class XPService:
             prev_level = profile.current_level
             profile.total_xp += awarded
             profile.daily_xp_earned += awarded
-            profile.last_xp_award_date = datetime.now(UTC)
+            profile.last_xp_award_date = now_utc
 
             lvl = calculate_level_details(profile.total_xp)
             profile.current_level = lvl["level"]
@@ -139,6 +150,8 @@ class XPService:
                 previous_level=prev_level,
                 new_level=profile.current_level,
                 triggered_level_up=profile.current_level > prev_level,
+                created_by_admin=bool(admin_user_id) if source == XPSource.ADMIN_AWARD else False,
+                admin_user_id=admin_user_id if source == XPSource.ADMIN_AWARD else None,
             )
             self.db_session.add(tx)
             self.db_session.add(profile)
@@ -174,72 +187,7 @@ class XPService:
                         )
                 return Result.fail("integrity_error")
 
-            # Record events (best effort)
-            try:
-                await self._record_event(
-                    EventType.XP_AWARDED,
-                    user_id,
-                    org_id,
-                    f"profile:{profile.id}",
-                    "user_profile",
-                    {
-                        "xp_amount": awarded,
-                        "source": source.value,
-                        "source_id": source_id,
-                        "total_xp": profile.total_xp,
-                        "previous_level": prev_level,
-                        "new_level": profile.current_level,
-                        "idempotency_key": idempotency_key,
-                    },
-                )
-                if profile.current_level > prev_level:
-                    await self._record_event(
-                        EventType.LEVEL_UP,
-                        user_id,
-                        org_id,
-                        f"profile:{profile.id}",
-                        "user_profile",
-                        {
-                            "previous_level": prev_level,
-                            "new_level": profile.current_level,
-                            "total_xp": profile.total_xp,
-                            "source": source.value,
-                        },
-                    )
-                self.db_session.commit()
-            except Exception:  # pragma: no cover
-                self.db_session.rollback()
-                logger.exception("event record failed")
-
-            if self.event_bus:
-                try:
-                    await self.event_bus.emit(
-                        XPAwardedEvent(
-                            user_id=user_id,
-                            org_id=org_id,
-                            xp_amount=awarded,
-                            source=source,
-                            source_id=source_id,
-                            total_xp=profile.total_xp,
-                            previous_level=prev_level,
-                            new_level=profile.current_level,
-                            metadata=metadata,
-                        )
-                    )
-                    if profile.current_level > prev_level:
-                        await self.event_bus.emit(
-                            LevelUpEvent(
-                                user_id=user_id,
-                                org_id=org_id,
-                                previous_level=prev_level,
-                                new_level=profile.current_level,
-                                total_xp=profile.total_xp,
-                                xp_source=source,
-                                metadata=metadata,
-                            )
-                        )
-                except Exception:  # pragma: no cover
-                    logger.exception("event bus emit failed")
+            # No outbox/event-bus side effects in the simplified core path
 
             return Result.success(await self._build_response(profile, tx, is_new=True))
         except Exception as e:  # pragma: no cover
@@ -277,6 +225,16 @@ class XPService:
     async def _build_response(
         self, profile: UserGamificationProfile, tx: XPTransaction, is_new: bool
     ) -> XPAwardResponse:
+        # Determine whether default config XP was used or a custom amount (admin)
+        custom_amt = None
+        try:
+            meta = getattr(tx, "transaction_metadata", {}) or {}
+            if isinstance(meta, dict) and "custom_amount" in meta:
+                custom_amt = int(meta.get("custom_amount") or 0) or None
+        except Exception:
+            custom_amt = None
+        used_default = (tx.source != XPSource.ADMIN_AWARD) or (custom_amt is None)
+
         return XPAwardResponse(
             transaction=XPTransactionRead.model_validate(tx, from_attributes=True),
             profile=UserGamificationProfileRead.model_validate(
@@ -286,6 +244,8 @@ class XPService:
             previous_level=tx.previous_level,
             achievements_unlocked=None,
             is_new_transaction=is_new,
+            used_default_xp=used_default,
+            used_custom_amount=custom_amt,
         )
 
     async def _get_or_create_profile(
@@ -306,37 +266,5 @@ class XPService:
         self.db_session.refresh(profile)
         return profile
 
-    async def _record_event(
-        self,
-        event_type: EventType,
-        user_id: int,
-        org_id: int,
-        aggregate_id: str,
-        aggregate_type: str,
-        data: dict[str, Any],
-    ) -> None:
-        # If no event bus is wired, skip persisting events to the outbox table.
-        # This avoids accumulating undelivered events when the async pipeline
-        # isn't configured yet.
-        if not self.event_bus:
-            return
-        try:
-            # Minimal insertion for observers/processors that may read the table
-            evt = GamificationEvent(
-                event_type=event_type,
-                aggregate_id=aggregate_id,
-                aggregate_type=aggregate_type,
-                sequence_number=0,
-                user_id=user_id,
-                org_id=org_id,
-                event_data=data,
-            )
-            self.db_session.add(evt)
-        except Exception:  # pragma: no cover
-            logger.debug("Skipping event record; outbox unavailable", exc_info=True)
-
-
-def create_xp_service(
-    db_session: Session, event_bus: EventBus | None = None
-) -> XPService:
-    return XPService(db_session, event_bus)
+def create_xp_service(db_session: Session) -> XPService:
+    return XPService(db_session)

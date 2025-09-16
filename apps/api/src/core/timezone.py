@@ -14,7 +14,7 @@ should use the configured local timezone (Kazakhstan Astana => Asia/Almaty).
 try:  # pragma: no cover - stdlib presence
     from zoneinfo import ZoneInfo  # Python 3.9+
 except ImportError:  # pragma: no cover
-    ZoneInfo = None  # type: ignore
+    ZoneInfo = None
 
 
 DEFAULT_TZ_NAME = "Asia/Almaty"

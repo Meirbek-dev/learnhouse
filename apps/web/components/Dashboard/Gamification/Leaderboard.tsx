@@ -20,18 +20,17 @@ interface LeaderboardEntry {
   user_id: number;
   total_xp: number;
   current_level: number;
-  streaks: { login: { current: number; longest: number }; learning: { current: number; longest: number } };
-  current_learning_streak: number;
-  username?: string;
+  username?: string | null;
   avatar_image?: string;
   user_uuid?: string;
   first_name?: string;
   last_name?: string;
+  is_current_user?: boolean;
 }
 
 interface OrganizationLeaderboard {
   org_id: number;
-  leaderboard_entries: LeaderboardEntry[];
+  entries: LeaderboardEntry[];
   total_participants: number;
 }
 
@@ -168,7 +167,7 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
   );
 
   const topEntries = useMemo(() => {
-    return leaderboard?.leaderboard_entries.slice(0, limit) || [];
+    return leaderboard?.entries.slice(0, limit) || [];
   }, [leaderboard, limit]);
 
   // Loading state
@@ -268,7 +267,7 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
                         }
                         predefined_avatar={entry.avatar_image ? undefined : 'empty'}
                         userId={entry.user_id}
-                        username={entry.username}
+                        username={entry.username ?? undefined}
                         fallbackText={
                           entry.first_name && entry.last_name
                             ? `${entry.first_name[0]}${entry.last_name[0]}`.toUpperCase()
@@ -366,7 +365,7 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
                         }
                         predefined_avatar={entry.avatar_image ? undefined : 'empty'}
                         userId={entry.user_id}
-                        username={entry.username}
+                        username={entry.username ?? undefined}
                         fallbackText={
                           entry.first_name && entry.last_name
                             ? `${entry.first_name[0]?.toUpperCase()}${entry.last_name[0]?.toUpperCase()}`
@@ -402,39 +401,7 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
                       </div>
                     </div>
 
-                    {/* Streaks */}
-                    <div className="flex items-center gap-2">
-                      {entry.streaks?.login.current > 0 && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge
-                              variant="outline"
-                              className="cursor-help text-xs"
-                            >
-                              🔥 {entry.streaks.login.current}
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{t('leaderboard.loginStreakTooltip', { count: entry.streaks.login.current })}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                      {entry.current_learning_streak > 0 && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge
-                              variant="outline"
-                              className="cursor-help text-xs"
-                            >
-                              ⭐ {entry.current_learning_streak}
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{t('leaderboard.learningStreakTooltip', { count: entry.current_learning_streak })}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
+                    {/* Streaks intentionally omitted in compact contract; use streak summary endpoint if needed */}
 
                     {/* Rank Badge */}
                     <Badge variant={getRankBadgeVariant(entry.rank)}>#{entry.rank}</Badge>

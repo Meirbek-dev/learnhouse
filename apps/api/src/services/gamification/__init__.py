@@ -18,6 +18,13 @@ New Architecture:
 
 # Public service factories / utilities
 from src.db.gamification import XPSource
+from src.schemas.gamification import (
+    ProfileRead,
+    DashboardRead,
+    StreakSummaryRead,
+    StreakUpdateRead,
+    LeaderboardRead,
+)
 
 from .config import get_gamification_config
 from .level_calculator import calculate_level_details, get_level_metadata

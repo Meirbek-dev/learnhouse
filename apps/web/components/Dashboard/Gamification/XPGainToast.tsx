@@ -139,21 +139,4 @@ const StreakBonusToastContent = ({ streakDays, bonusXP }: { streakDays: number; 
   );
 };
 
-/**
- * Shows a streak bonus toast notification
- */
-export function showStreakBonusToast(streakDays: number, bonusXP: number) {
-  toast.custom(
-    () => (
-      <StreakBonusToastContent
-        streakDays={streakDays}
-        bonusXP={bonusXP}
-      />
-    ),
-    {
-      duration: 5000,
-    },
-  );
-}
-
 export default showXPGainToast;

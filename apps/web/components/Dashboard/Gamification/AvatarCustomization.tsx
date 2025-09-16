@@ -4,12 +4,13 @@ import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objec
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Crown, Lock, Palette, Settings, User } from 'lucide-react';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
-import { useGamificationProfile } from '@/hooks/useGamificationProfile';
+import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
@@ -30,7 +31,9 @@ interface AvatarCustomization {
 
 export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustomizationProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const { profile, isLoading, error } = useGamificationProfile({ orgId, enabled: true });
+  const { data: session } = useSession();
+  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
+  const { profile, isLoading, error } = useUnifiedGamification({ orgId, accessToken, enabled: true });
   const [isSaving, setIsSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
   const isMobile = useIsMobile();

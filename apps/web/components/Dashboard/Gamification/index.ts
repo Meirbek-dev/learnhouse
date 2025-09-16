@@ -6,4 +6,4 @@ export { LevelDisplay, LevelIndicatorBadge, LevelProgressBar, LevelUpAnimation }
 export { LevelUpNotification } from './LevelUpNotification';
 export { NavbarLevelIndicator } from './NavbarLevelIndicator';
 export { StreakWidget } from './StreakWidget';
-export { showStreakBonusToast, showXPGainToast } from './XPGainToast';
+export { showXPGainToast } from './XPGainToast';

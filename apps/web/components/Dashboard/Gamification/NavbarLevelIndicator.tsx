@@ -1,8 +1,9 @@
 'use client';
 
 import { LevelIndicatorBadge } from '@components/Dashboard/Gamification';
-import { useLevelIndicator } from '@/hooks/useLevelIndicator';
+import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { useSession } from 'next-auth/react';
 
 interface NavbarLevelIndicatorProps {
   /** Additional CSS classes */
@@ -14,9 +15,11 @@ interface NavbarLevelIndicatorProps {
  */
 export function NavbarLevelIndicator({ className = '' }: NavbarLevelIndicatorProps) {
   const org = useOrg() as any;
-  const { profile, showLevelIndicator } = useLevelIndicator(org?.id);
+  const { data: session } = useSession();
+  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
+  const { profile } = useUnifiedGamification({ orgId: org?.id, accessToken, enabled: !!org?.id });
 
-  if (!(showLevelIndicator && profile)) {
+  if (!profile) {
     return null;
   }
 

@@ -23,7 +23,7 @@ class LevelConfig:
     """Level progression configuration."""
 
     base_xp: int = 100
-    multiplier: float = 1.15  # More balanced than 1.2
+    multiplier: float = 1.25
     max_level: int = 50  # Realistic ceiling
 
     def __post_init__(self):
@@ -46,7 +46,6 @@ class XPRewardConfig:
     keyed directly by XPSource for easier dynamic overrides.
     """
 
-    # Core learning activities
     activity_completion: int = 40
     course_completion: int = 500
     chapter_completion: int = 120
@@ -85,7 +84,7 @@ class XPRewardConfig:
     def as_mapping(self) -> dict[str, int]:
         return {
             k: getattr(self, k)
-            for k in self.__dataclass_fields__  # type: ignore[attr-defined]
+            for k in self.__dataclass_fields__  [attr-defined]
             if not k.startswith("_")
         }
 
@@ -94,10 +93,13 @@ class XPRewardConfig:
 class StreakConfig:
     """Streak tracking configuration."""
 
-    grace_period_hours: int = 2  # More reasonable than 6
-    login_milestones: tuple = (3, 7, 14, 30, 90, 180, 365)
-    learning_milestones: tuple = (3, 7, 14, 30, 90, 180, 365)
+    grace_period_hours: int = 12
+    # Canonical milestone sets
+    milestones: tuple[int, ...] = (3, 7, 14, 30, 60, 100)
+    learning_milestones: tuple[int, ...] = (3, 7, 14, 30, 90, 180, 365)
     milestone_bonuses: dict[int, int] = None
+    # Optional weekly bonus cadence (in days); None to disable
+    weekly_bonus_interval: int | None = None
 
     def __post_init__(self):
         if self.milestone_bonuses is None:
@@ -122,12 +124,18 @@ class StreakConfig:
             return self.milestone_bonuses[streak_count]
         return 0
 
+    # Back-compat aliases used by routers/UI
+    @property
+    def login_milestones(self) -> tuple[int, ...]:
+        # Older code expects "login_milestones"; use general milestones
+        return self.milestones
+
 
 @dataclass(frozen=True)
 class DailyCapsConfig:
     """Daily limits and caps configuration."""
 
-    max_daily_xp: int = 800  # Reasonable daily cap
+    max_daily_xp: int = 500
     default_daily_goal: int = 50  # Achievable daily goal
     # Use UTC for deterministic server-day semantics
     reset_timezone: TimeZone = TimeZone.UTC
@@ -154,7 +162,8 @@ class CacheConfig:
 class GamificationConfig:
     """Main gamification configuration class."""
 
-    levels: LevelConfig = None
+    timezone: TimeZone
+    levels: LevelConfig
     xp_rewards: XPRewardConfig = None
     streaks: StreakConfig = None
     daily_caps: DailyCapsConfig = None
@@ -216,7 +225,15 @@ def get_gamification_config() -> GamificationConfig:
     """Get global gamification configuration."""
     global _config
     if _config is None:
-        _config = GamificationConfig.from_env()
+        # Provide sensible production-ready defaults
+        _config = GamificationConfig(
+            timezone=TimeZone.UTC,
+            levels=LevelConfig(),
+            xp_rewards=XPRewardConfig(),
+            streaks=StreakConfig(),
+            daily_caps=DailyCapsConfig(),
+            cache=CacheConfig(),
+        )
     return _config
 
 

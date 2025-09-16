@@ -74,16 +74,73 @@ const CourseClient = (props: any) => {
   );
 
   const getLearningTags = useCallback(() => {
-    if (!course?.learnings) {
-      setLearnings([]);
-      return;
-    }
-    // Try to parse as JSON (new format)
-    const parsedLearnings = JSON.parse(course.learnings);
-    if (Array.isArray(parsedLearnings)) {
-      // New format: array of learning items with text and emoji
-      setLearnings(parsedLearnings);
-    }
+    // Normalizes various formats of `course.learnings` into an array that the UI can render
+    // Accepts: JSON array (new), array, JSON object with `learnings`, plain text (legacy), or null/empty
+    const normalize = (input: unknown): any[] => {
+      if (!input) return [];
+
+      // Already an array
+      if (Array.isArray(input)) {
+        return input
+          .map((item) => {
+            if (typeof item === 'string') {
+              const s = item.trim();
+              if (!s || s.toLowerCase() === 'null' || s.toLowerCase() === 'undefined') return null;
+              return s;
+            }
+            if (item && typeof item === 'object') {
+              // Keep shape but ensure text field exists if possible
+              const text = (item as any).text ?? (item as any).name ?? (item as any).title;
+              const t = typeof text === 'string' ? text.trim() : text != null ? String(text).trim() : '';
+              if (!t || t.toLowerCase() === 'null' || t.toLowerCase() === 'undefined') return null;
+              return { ...(item as any), text: t };
+            }
+            return null;
+          })
+          .filter(Boolean) as any[];
+      }
+
+      // Object: maybe { learnings: [...] } or similar
+      if (input && typeof input === 'object') {
+        const obj = input as any;
+        if (Array.isArray(obj.learnings)) return normalize(obj.learnings);
+        if (Array.isArray(obj.items)) return normalize(obj.items);
+        if (Array.isArray(obj.data)) return normalize(obj.data);
+        // Single object with text
+        const text = obj.text ?? obj.name ?? obj.title;
+        if (text) return normalize([String(text)]);
+        return [];
+      }
+
+      // String: try JSON first if it looks like JSON, else split plain text
+      if (typeof input === 'string') {
+        const raw = input.trim();
+        if (!raw || raw.toLowerCase() === 'null' || raw.toLowerCase() === 'undefined') return [];
+        const looksJson = raw.startsWith('[') || raw.startsWith('{');
+        if (looksJson) {
+          try {
+            const parsed = JSON.parse(raw);
+            return normalize(parsed);
+          } catch {
+            // fall through to plain-text handling
+          }
+        }
+        // Legacy: plain text list. Prefer newlines/semicolons/bullets; avoid splitting on commas aggressively.
+        const parts = raw
+          .split(/\r?\n|\u2022|\u2023|\u25E6|;|\||·|–|—/)
+          .map((s) => s.replace(/^[-*\s]+/, '').trim())
+          .filter((s) => s.length > 0 && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined');
+        // If nothing split out meaningfully, keep as single item
+        if (parts.length === 0) return [raw];
+        return parts;
+      }
+
+      return [];
+    };
+
+    const src = course?.learnings as unknown;
+    const normalized = normalize(src);
+    setLearnings(normalized);
   }, [course?.learnings]);
 
   useEffect(() => {
@@ -347,6 +404,12 @@ const CourseClient = (props: any) => {
                       const learningText = typeof learning === 'string' ? learning : learning.text;
                       const learningEmoji = typeof learning === 'string' ? null : learning.emoji;
                       const learningId = typeof learning === 'string' ? learning : learning.id || learning.text;
+                      // Sanitize href: only allow strings that look like URLs or absolute/relative paths
+                      const rawHref = typeof learning === 'object' && learning ? learning.link : undefined;
+                      const href = typeof rawHref === 'string' ? rawHref.trim() : '';
+                      const hasValidHref = Boolean(
+                        href && /^(?:[a-z][a-z0-9+.-]*:|\/|\.\/|\.\.\/|#)/i.test(href),
+                      );
                       if (!learningText) return null;
                       return (
                         <div
@@ -364,14 +427,14 @@ const CourseClient = (props: any) => {
                             )}
                           </div>
                           <p>{learningText}</p>
-                          {learning.link ? (
+                          {hasValidHref ? (
                             <Button
                               variant="link"
                               size="sm"
                               asChild
                             >
                               <a
-                                href={learning.link}
+                                href={href}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-sm"

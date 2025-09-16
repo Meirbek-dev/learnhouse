@@ -15,14 +15,15 @@ from sqlmodel import Session, select
 
 # UTC-first semantics; avoid local time utilities here
 from src.db.gamification import (
-    OrganizationLeaderboard,
-    ProfileRead,
-    DashboardRead,
-    RecentTransactionRead,
     UserGamificationPreferenceRead,
     UserGamificationPreferenceUpsert,
     UserGamificationProfile,
     XPTransaction,
+)
+from src.schemas.gamification import (
+    ProfileRead,
+    DashboardRead,
+    RecentTransactionRead,
 )
 from src.db.users import User
 

@@ -4,10 +4,11 @@ import { Activity, Award, Crown, Flame, MoreHorizontal, Star, Target, Trophy, Za
 import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
-import { useGamificationProfile } from '@/hooks/useGamificationProfile';
+import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
@@ -30,7 +31,9 @@ export function GamificationProfileSection({
   showAchievements = true,
 }: GamificationProfileSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const { profile, isLoading, error } = useGamificationProfile({ orgId, enabled: true, preloadXPSources: true });
+  const { data: session } = useSession();
+  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
+  const { profile, isLoading, error } = useUnifiedGamification({ orgId, accessToken, enabled: true });
   const { levelInfo, nextMilestone, unlockedFrames, unlockedAccessories } = useMemo(() => {
     if (!profile) {
       return {
@@ -136,23 +139,27 @@ export function GamificationProfileSection({
               <div className="flex items-center gap-2">
                 <Flame className="h-4 w-4 text-orange-500" />
                 <span>
-                  {t('streaks.login.title')}: {(() => {
+                  {t('streaks.login.title')}:{' '}
+                  {(() => {
                     const s = profile.streaks as any;
                     const login = s?.login;
                     if (typeof login === 'number') return login;
                     return login?.current ?? 0;
-                  })()} {t('streaks.days')}
+                  })()}{' '}
+                  {t('streaks.days')}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-green-500" />
                 <span>
-                  {t('streaks.learning.title')}: {(() => {
+                  {t('streaks.learning.title')}:{' '}
+                  {(() => {
                     const s = profile.streaks as any;
                     const learning = s?.learning;
                     if (typeof learning === 'number') return learning;
                     return learning?.current ?? 0;
-                  })()} {t('streaks.days')}
+                  })()}{' '}
+                  {t('streaks.days')}
                 </span>
               </div>
             </div>
@@ -265,7 +272,7 @@ export function GamificationProfileSection({
               {(() => {
                 const s = profile.streaks as any;
                 const login = s?.login;
-                const current = typeof login === 'number' ? login : login?.current ?? 0;
+                const current = typeof login === 'number' ? login : (login?.current ?? 0);
                 return current >= 7;
               })() && (
                 <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-2">

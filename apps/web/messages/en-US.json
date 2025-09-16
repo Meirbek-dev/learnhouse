@@ -100,6 +100,7 @@
     "unknownActivity": "Unknown Activity"
   },
   "ActivityPage": {
+    "activityCompleted": "Activity completed",
     "activityCounter": "{current} of {total}",
     "activityNotPublished": "This activity is not published yet",
     "activityTypes": {
@@ -1006,6 +1007,7 @@
     },
     "RolesUpdate": {
       "adminRole": "Admin",
+      "errorPrefix": "Error",
       "loadingButton": "Loading...",
       "loadingRoles": "Loading roles...",
       "maintainerRole": "Maintainer",
@@ -1016,8 +1018,7 @@
       "toastSuccess": "Role updated",
       "updateButton": "Update Role",
       "updateErrorDetail": "Role update error: {error}",
-      "userRole": "User",
-      "errorPrefix": "Error"
+      "userRole": "User"
     },
     "SearchBar": {
       "collectionType": "Collection",
@@ -1071,12 +1072,12 @@
       "removeQuestion": "Remove Question",
       "saveError": "Error saving task, please retry later.",
       "savedSuccessfully": "Task saved successfully",
+      "submissionSummary": "Submission Summary",
       "submitError": "Error submitting form, please retry later.",
       "submitForGrading": "Submit for grading",
       "submittedSuccessfully": "Form submitted successfully!",
-      "userIdRequired": "User ID is required for grading.",
-      "submissionSummary": "Submission Summary",
-      "totalBlanks": "Total Blanks"
+      "totalBlanks": "Total Blanks",
+      "userIdRequired": "User ID is required for grading."
     },
     "TypeOfContentTitle": {
       "logoAlt": "{type} logo"

@@ -100,6 +100,7 @@
     "unknownActivity": "Неизвестная активность"
   },
   "ActivityPage": {
+    "activityCompleted": "Активность выполнена",
     "activityCounter": "{current} из {total}",
     "activityNotPublished": "Эта активность еще не опубликована",
     "activityTypes": {

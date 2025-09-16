@@ -9,7 +9,8 @@ from src.core.events.database import get_db_session
 from src.db.courses.activities import Activity
 from src.db.courses.assignments import Assignment, AssignmentTaskSubmission
 from src.db.courses.courses import Course
-from src.db.gamification import UserGamificationProfile, DashboardRead
+from src.db.gamification import UserGamificationProfile
+from src.schemas.gamification import DashboardRead
 from src.db.organizations import Organization
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization

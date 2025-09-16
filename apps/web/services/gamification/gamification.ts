@@ -58,6 +58,8 @@ export interface XPAwardResponse {
   previous_level: number;
   achievements_unlocked?: string[];
   is_new_transaction?: boolean; // new backend field
+  used_default_xp?: boolean;
+  used_custom_amount?: number | null;
 }
 
 export interface GamificationDashboard {
@@ -131,6 +133,8 @@ function normalizeAwardResponse(input: any): XPAwardResponse {
     previous_level: raw.previous_level ?? transaction.previous_level ?? profile.current_level,
     achievements_unlocked: raw.achievements_unlocked || [],
     is_new_transaction: raw.is_new_transaction,
+    used_default_xp: raw.used_default_xp,
+    used_custom_amount: raw.used_custom_amount ?? null,
   };
 }
 
@@ -158,17 +162,15 @@ function normalizeDashboard(input: any): GamificationDashboard {
 export interface LeaderboardEntry {
   rank: number;
   user_id: number;
-  total_xp?: number;
-  current_level?: number;
-  current_login_streak?: number;
-  current_learning_streak?: number;
+  username?: string | null;
+  total_xp: number;
+  current_level: number;
+  is_current_user?: boolean;
 }
 
 export interface OrganizationLeaderboard {
   org_id: number;
-  leaderboard_type: string;
-  period: string;
-  leaderboard_entries: LeaderboardEntry[];
+  entries: LeaderboardEntry[];
   total_participants: number;
   current_user_rank?: number | null;
   last_updated: string;
@@ -177,6 +179,16 @@ export interface OrganizationLeaderboard {
 export type StreakStatus = 'active' | 'at_risk' | 'broken' | 'none';
 
 // Core API Functions
+
+// Lightweight in-memory ETag/data caches per org
+const _etagCache = {
+  profile: new Map<number, string>(),
+  dashboard: new Map<number, string>(),
+};
+const _dataCache = {
+  profile: new Map<number, GamificationProfile>(),
+  dashboard: new Map<number, GamificationDashboard>(),
+};
 
 /**
  * Get user's gamification profile for an organization
@@ -189,13 +201,23 @@ export async function getGamificationProfile(orgId: number, accessToken: string)
     throw new Error('Access token is required');
   }
 
-  const result = await fetch(
-    `${getAPIUrl()}gamification/profile/${orgId}`,
-    RequestBodyWithAuthHeader('GET', null, null, accessToken),
-  );
-
-  const raw = await errorHandling(result);
-  return normalizeProfile(raw);
+  const url = `${getAPIUrl()}gamification/profile/${orgId}`;
+  const init = RequestBodyWithAuthHeader('GET', null, null, accessToken) as RequestInit;
+  const etag = _etagCache.profile.get(orgId);
+  const headers = { ...(init.headers as any) };
+  if (etag) headers['If-None-Match'] = etag;
+  const res = await fetch(url, { ...init, headers });
+  if (res.status === 304) {
+    const cached = _dataCache.profile.get(orgId);
+    if (cached) return cached;
+    // fall through if cache miss
+  }
+  const raw = await errorHandling(res);
+  const data = normalizeProfile(raw);
+  const newEtag = res.headers.get('ETag');
+  if (newEtag) _etagCache.profile.set(orgId, newEtag);
+  _dataCache.profile.set(orgId, data);
+  return data;
 }
 
 /**
@@ -215,7 +237,10 @@ export async function updateLoginStreak(orgId: number, accessToken: string): Pro
   );
 
   const raw = await errorHandling(result);
-  return normalizeProfile(raw);
+  const payload = raw?.profile ?? raw;
+  const profile = normalizeProfile(payload);
+  _dataCache.profile.set(orgId, profile);
+  return profile;
 }
 
 /**
@@ -235,7 +260,10 @@ export async function updateLearningStreak(orgId: number, accessToken: string): 
   );
 
   const raw = await errorHandling(result);
-  return normalizeProfile(raw);
+  const payload = raw?.profile ?? raw;
+  const profile = normalizeProfile(payload);
+  _dataCache.profile.set(orgId, profile);
+  return profile;
 }
 
 /**
@@ -249,13 +277,22 @@ export async function getGamificationDashboard(orgId: number, accessToken: strin
     throw new Error('Access token is required');
   }
 
-  const result = await fetch(
-    `${getAPIUrl()}gamification/dashboard/${orgId}`,
-    RequestBodyWithAuthHeader('GET', null, null, accessToken),
-  );
-
-  const raw = await errorHandling(result);
-  return normalizeDashboard(raw);
+  const url = `${getAPIUrl()}gamification/dashboard/${orgId}`;
+  const init = RequestBodyWithAuthHeader('GET', null, null, accessToken) as RequestInit;
+  const etag = _etagCache.dashboard.get(orgId);
+  const headers = { ...(init.headers as any) };
+  if (etag) headers['If-None-Match'] = etag;
+  const res = await fetch(url, { ...init, headers });
+  if (res.status === 304) {
+    const cached = _dataCache.dashboard.get(orgId);
+    if (cached) return cached;
+  }
+  const raw = await errorHandling(res);
+  const data = normalizeDashboard(raw);
+  const newEtag = res.headers.get('ETag');
+  if (newEtag) _etagCache.dashboard.set(orgId, newEtag);
+  _dataCache.dashboard.set(orgId, data);
+  return data;
 }
 
 /**
@@ -286,8 +323,8 @@ export async function getOrganizationLeaderboard(
   );
   const data = await errorHandling(result);
   // Basic numeric safety for leaderboard entries
-  if (data?.leaderboard_entries) {
-    data.leaderboard_entries = data.leaderboard_entries.map((e: any) => ({
+  if (data?.entries) {
+    data.entries = data.entries.map((e: any) => ({
       ...e,
       total_xp: safeNumber(e.total_xp),
       current_level: safeNumber(e.current_level, 1),
@@ -308,7 +345,10 @@ export async function awardXP(orgId: number, accessToken: string, payload: XPAwa
   const idem = payload.idempotency_key || `xp_${payload.source}_${payload.source_id || 'generic'}_${Date.now()}`;
   const params = new URLSearchParams({ source: payload.source });
   if (payload.source_id) params.set('source_id', payload.source_id);
-  if (payload.custom_amount !== null) params.set('custom_amount', String(payload.custom_amount));
+  // Only pass custom_amount for admin awards; router ignores for other sources
+  if (payload.source === 'admin_award' && payload.custom_amount != null) {
+    params.set('custom_amount', String(payload.custom_amount));
+  }
   // metadata currently ignored (backend treats it as query param if provided) – send if simple
   if (payload.metadata && Object.keys(payload.metadata).length > 0) {
     try {

@@ -7,7 +7,7 @@ import type { GamificationDashboard as DashboardData } from '@/services/gamifica
 import { Award, BookOpen, Flame, Star, TrendingUp, Trophy, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGamification } from '@/hooks/useGamification';
+import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -26,8 +26,9 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
 
-  // Initialize gamification tracking
-  useGamification({ orgId, enabled: !!session?.user });
+  // Initialize unified gamification (auto profile fetch)
+  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
+  useUnifiedGamification({ orgId, accessToken, enabled: !!session?.user });
 
   // Fetch gamification dashboard (normalized) for Quick Stats
   useEffect(() => {

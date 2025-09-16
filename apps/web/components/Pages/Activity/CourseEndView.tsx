@@ -1,16 +1,17 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { ArrowLeft, BookOpen, Download, Loader2, Shield, Target, Trophy } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 // Gamification imports
 import { LevelDisplay } from '@components/Dashboard/Gamification';
-import { useLevelIndicator } from '@/hooks/useLevelIndicator';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { useEffect, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import ReactConfetti from 'react-confetti';
 import html2canvas from 'html2canvas-pro';
 import type { FC } from 'react';
@@ -49,7 +50,9 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   );
 
   // Gamification state
-  const { profile: gamificationProfile, showLevelIndicator } = useLevelIndicator(org?.id);
+  const { data: authSession } = useSession();
+  const accessToken: string | undefined = (authSession as any)?.tokens?.access_token;
+  const { profile: gamificationProfile } = useUnifiedGamification({ orgId: org?.id, accessToken, enabled: !!org?.id });
 
   // Check if course is actually completed
   const isCourseCompleted = useMemo(() => {
@@ -571,7 +574,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           <p className="text-gray-500">{t('completionDescription')}</p>
 
           {/* Gamification Celebration */}
-          {showLevelIndicator && gamificationProfile && (
+          {gamificationProfile && (
             <div className="space-y-4 rounded-lg border border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50 p-6">
               <div className="flex items-center justify-center space-x-2">
                 <Trophy className="h-6 w-6 text-yellow-600" />

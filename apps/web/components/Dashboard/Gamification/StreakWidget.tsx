@@ -3,13 +3,14 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertCircle, Calendar, Flame, RefreshCw, Star, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGamificationProfile } from '@/hooks/useGamificationProfile';
+import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCallback, useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useSession } from 'next-auth/react';
 
 // Note: Profile shape comes from services/gamification. It exposes `streaks`
 // as either a mapping { login: number, learning: number } or a generic map.
@@ -25,7 +26,9 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification.streakWidget');
   const locale = useLocale();
   const format = useFormatter();
-  const { profile, isLoading, error, refetch } = useGamificationProfile({ orgId, enabled: true });
+  const { data: session } = useSession();
+  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
+  const { profile, isLoading, error, refetch } = useUnifiedGamification({ orgId, accessToken, enabled: true });
   const [retryCount, setRetryCount] = useState(0);
   const handleRetry = useCallback(() => {
     if (retryCount < 3) {

@@ -55,6 +55,9 @@ class LeaderboardService:
     async def get_top_xp(
         self, org_id: int, limit: int = 20, current_user_id: int | None = None
     ) -> Result[LeaderboardResult]:
+        # Index note: Postgres benefits from idx_profile_org_xp and idx_profile_org_xp_desc
+        # when ordering by total_xp DESC. SQLite ignores DESC ops in indexes, but since we
+        # limit to small N (<=100) this remains efficient enough for MVP.
         try:
             cache_key = f"lb:xp:{org_id}:{limit}"
             if self.cache:

@@ -100,6 +100,7 @@
     "unknownActivity": "Белгісіз әрекет"
   },
   "ActivityPage": {
+    "activityCompleted": "Әрекет аяқталды",
     "activityCounter": "{current} / {total}",
     "activityNotPublished": "Бұл белсенділік әлі жарияланған жоқ",
     "activityTypes": {

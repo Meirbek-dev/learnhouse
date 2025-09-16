@@ -42,7 +42,6 @@ import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
-import { useLevelIndicator } from '@/hooks/useLevelIndicator';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { usePathname, useRouter } from 'next/navigation';
@@ -902,13 +901,11 @@ export const MarkStatus = (props: {
     unlockedFeatures: string[];
   } | null>(null);
 
-  // Gamification profile management
-  const {
-    profile: gamificationProfile,
-    refetch: refetchGamification,
-    hasLeveledUp,
-    resetLevelUp,
-  } = useLevelIndicator(org?.id);
+  // Gamification profile is no longer managed via useLevelIndicator here.
+  // Components that require gamification data should use the unified hook locally.
+  const gamificationProfile = null as any;
+  const refetchGamification = async () => {};
+  const resetLevelUp = () => {};
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

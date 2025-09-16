@@ -6,14 +6,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response,
 from datetime import datetime
 
 from src.db.gamification import (
+    UserGamificationPreferenceRead,
+    UserGamificationPreferenceUpsert,
+    XPSource,
+)
+from src.schemas.gamification import (
     DashboardRead,
     ProfileRead,
     StreakSummaryRead,
     StreakUpdateRead,
-    OrganizationLeaderboard,
-    UserGamificationPreferenceRead,
-    UserGamificationPreferenceUpsert,
-    XPSource,
+    LeaderboardRead,
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
@@ -36,6 +38,7 @@ from src.services.gamification.etag import (
     make_dashboard_etag,
     make_profile_etag,
 )
+from src.routers.admin import is_user_admin_of_org
 
 router = APIRouter()
 
@@ -98,7 +101,7 @@ async def get_profile(
     )
     raise_for_result(result)
     payload = result.value  # ProfileRead
-    # ETag support: weak cache on profile snapshot
+    # ETag support: cache on profile snapshot
     try:
         # Synthesize a stable numeric profile_id from (org_id, user_id)
         synthetic_id = (payload.org_id << 32) ^ payload.user_id
@@ -108,9 +111,11 @@ async def get_profile(
             total_xp=payload.total_xp,
         )
         inm = request.headers.get("If-None-Match")
-        if inm and inm == etag:
+        quoted = f'"p-{etag}"'
+        if inm and inm.strip() == quoted:
             raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
-        response.headers["ETag"] = etag
+        response.headers["ETag"] = quoted
+        response.headers["Cache-Control"] = "private, max-age=0, must-revalidate"
     except Exception:  # pragma: no cover - optional feature
         pass
     return payload
@@ -134,14 +139,61 @@ async def award_xp_endpoint(
     """Award XP to user (idempotent via X-Idempotency-Key header)."""
     try:
         idem_key = request.headers.get("X-Idempotency-Key")
+
+        # Router-level guardrails
+        # 1) Enforce X-Idempotency-Key for admin-triggered awards
+        if source == XPSource.ADMIN_AWARD:
+            if not idem_key or not idem_key.strip():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="X-Idempotency-Key header is required for ADMIN_AWARD",
+                )
+            # Enforce admin/maintainer rights within this org (or global admin)
+            is_admin = await is_user_admin_of_org(user.id, org_id, services.xp.db_session)
+            if not is_admin:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Not authorized to perform admin XP awards",
+                )
+            # Optional clamp to keep single admin awards bounded
+            try:
+                config = get_gamification_config()
+                max_single_award = max(1, int(config.daily_caps.max_daily_xp))
+            except Exception:
+                max_single_award = 1000  # safe fallback
+            if custom_amount is None or custom_amount <= 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="custom_amount must be a positive integer for ADMIN_AWARD",
+                )
+            if custom_amount > max_single_award:
+                custom_amount = max_single_award
+        else:
+            # Non-admin sources are server-controlled; ignore any client-provided custom amount
+            custom_amount = None
+
+        # 2) Explicit source validation (defensive; Enum already validates unknown sources)
+        if not isinstance(source, XPSource):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unknown XP source",
+            )
+        # Include minimal metadata; for admin awards carry custom_amount for observability
+        safe_metadata: dict[str, Any] = {}
+        if metadata:
+            safe_metadata.update(metadata)
+        if source == XPSource.ADMIN_AWARD and custom_amount is not None:
+            safe_metadata.setdefault("custom_amount", int(custom_amount))
+
         result = await services.xp.award_xp(
             user_id=user.id,
             org_id=org_id,
             source=source,
             source_id=source_id,
-            metadata=metadata or {},
+            metadata=safe_metadata,
             custom_amount=custom_amount,
             idempotency_key=idem_key,
+            admin_user_id=user.id if source == XPSource.ADMIN_AWARD else None,
         )
         raise_for_result(result)
 
@@ -403,9 +455,11 @@ async def get_dashboard(
             recent_tx_hash=recent_tx_hash,
         )
         inm = request.headers.get("If-None-Match")
-        if inm and inm == etag:
+        quoted = f'"d-{etag}"'
+        if inm and inm.strip() == quoted:
             raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
-        response.headers["ETag"] = etag
+        response.headers["ETag"] = quoted
+        response.headers["Cache-Control"] = "private, max-age=0, must-revalidate"
     except Exception:  # pragma: no cover - optional feature
         pass
     return payload
@@ -470,7 +524,7 @@ async def streak_summary(
 
 @router.get(
     "/leaderboard/{org_id}",
-    response_model=OrganizationLeaderboard,
+    response_model=LeaderboardRead,
     summary="Organization leaderboard",
     response_description="Leaderboard entries for organization",
 )
@@ -490,9 +544,7 @@ async def get_leaderboard(
         lb = result.value
         return {
             "org_id": lb.org_id,
-            "leaderboard_type": "xp_leaderboard",
-            "period": "all_time",
-            "leaderboard_entries": [
+            "entries": [
                 {
                     "rank": e.rank,
                     "user_id": e.user_id,
@@ -524,6 +576,8 @@ async def list_achievements(
     user: Annotated[PublicUser, Depends(get_current_user)],
     services: Annotated[GamificationServices, Depends(get_gamification_services)],
 ):
+    if not get_gamification_config().enable_achievements:
+        raise HTTPException(status_code=404, detail="Achievements feature is disabled")
     progress_result = await services.achievements.get_user_achievement_progress(
         user.id, org_id
     )
@@ -537,6 +591,8 @@ async def check_achievements(
     user: Annotated[PublicUser, Depends(get_current_user)],
     services: Annotated[GamificationServices, Depends(get_gamification_services)],
 ):
+    if not get_gamification_config().enable_achievements:
+        raise HTTPException(status_code=404, detail="Achievements feature is disabled")
     result = await services.achievements.check_user_achievements(user.id, org_id)
     raise_for_result(result)
     return {"data": [a.achievement_key for a in result.value]}
@@ -549,6 +605,8 @@ async def award_badge(
     user: Annotated[PublicUser, Depends(get_current_user)],
     services: Annotated[GamificationServices, Depends(get_gamification_services)],
 ):
+    if not get_gamification_config().enable_achievements:
+        raise HTTPException(status_code=404, detail="Achievements feature is disabled")
     result = await services.achievements.award_badge(user.id, org_id, badge_key)
     raise_for_result(result)
     badge = result.value
