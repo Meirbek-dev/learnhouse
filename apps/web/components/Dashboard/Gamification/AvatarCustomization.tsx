@@ -45,8 +45,11 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
   });
 
   useEffect(() => {
-    if (profile?.preferences?.avatar_customization) {
-      setCustomization(profile.preferences.avatar_customization as any);
+    // Preferences are not part of GamificationProfile type; backend returns them via dashboard/preferences.
+    // Use an any-cast to gracefully hydrate from runtime data if present.
+    const prefs = (profile as any)?.preferences?.avatar_customization;
+    if (prefs) {
+      setCustomization(prefs as AvatarCustomization);
     }
   }, [profile]);
 

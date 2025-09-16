@@ -113,11 +113,7 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Star className="mx-auto mb-2 h-8 w-8 text-yellow-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard
-                      ? '...'
-                      : (dashboardData?.profile?.totals?.courses_completed ??
-                        (dashboardData as any)?.total_courses_completed ??
-                        0)}
+                    {isLoadingDashboard ? '...' : ((dashboardData as any)?.total_courses_completed ?? 0)}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.completed')}</p>
                 </div>
@@ -131,7 +127,14 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Flame className="mx-auto mb-2 h-8 w-8 text-orange-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard ? '...' : dashboardData?.profile?.streaks?.login?.current || 0}
+                    {isLoadingDashboard
+                      ? '...'
+                      : (() => {
+                          const s: any = dashboardData?.profile?.streaks;
+                          const login = s?.login;
+                          if (typeof login === 'number') return login;
+                          return login?.current ?? 0;
+                        })()}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.dayStreak')}</p>
                 </div>

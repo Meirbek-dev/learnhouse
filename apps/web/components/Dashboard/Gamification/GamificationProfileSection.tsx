@@ -136,13 +136,23 @@ export function GamificationProfileSection({
               <div className="flex items-center gap-2">
                 <Flame className="h-4 w-4 text-orange-500" />
                 <span>
-                  {t('streaks.login.title')}: {profile.streaks.login.current} {t('streaks.days')}
+                  {t('streaks.login.title')}: {(() => {
+                    const s = profile.streaks as any;
+                    const login = s?.login;
+                    if (typeof login === 'number') return login;
+                    return login?.current ?? 0;
+                  })()} {t('streaks.days')}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-green-500" />
                 <span>
-                  {t('streaks.learning.title')}: {profile.streaks.learning.current} {t('streaks.days')}
+                  {t('streaks.learning.title')}: {(() => {
+                    const s = profile.streaks as any;
+                    const learning = s?.learning;
+                    if (typeof learning === 'number') return learning;
+                    return learning?.current ?? 0;
+                  })()} {t('streaks.days')}
                 </span>
               </div>
             </div>
@@ -252,7 +262,12 @@ export function GamificationProfileSection({
 
             <div className="grid grid-cols-1 gap-2">
               {/* Example achievements - replace with real data */}
-              {profile.streaks.login.current >= 7 && (
+              {(() => {
+                const s = profile.streaks as any;
+                const login = s?.login;
+                const current = typeof login === 'number' ? login : login?.current ?? 0;
+                return current >= 7;
+              })() && (
                 <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
                     <Flame className="h-4 w-4 text-orange-600" />
