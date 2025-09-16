@@ -3186,7 +3186,6 @@
             "sizeLabel": "Size",
             "sizeLarge": "Large",
             "sizeMedium": "Medium",
-            "sizePlaceholder": "Select size",
             "sizeSmall": "Small",
             "uploadButton": "Upload Illustration"
           },
@@ -3523,7 +3522,10 @@
             "smartGlasses": "Smart Glasses",
             "wizardHat": "Wizard Hat"
           },
-          "featuresMore": "more",
+          "featuresMore": {
+            "one": "+{count} more",
+            "other": "+{count} more"
+          },
           "frames": {
             "diamond": "Diamond Frame",
             "golden": "Golden Frame",
@@ -4596,8 +4598,6 @@
     "metaDescription": "Create a new collection of courses",
     "metaTitle": "Create new collection",
     "nameLabel": "Collection Name",
-    "namePlaceholder": "Enter collection name",
-    "noCoursesAvailable": "No courses available. Create some courses first.",
     "selectCoursesLabel": "Select Courses",
     "selectedCount": "{count, plural, =0 {No courses selected} one {# course selected} other {# courses selected}}",
     "title": "Create New Collection",

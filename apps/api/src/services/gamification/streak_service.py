@@ -1,11 +1,12 @@
 """
 Streak Service - Focused service for streak tracking and management
 
-Clean service handling streak logic with proper timezone support,
-grace periods, and milestone bonuses.
+Updated to count streaks strictly by
+server-day boundaries (UTC) — a streak increments only when a new server day
+starts. Grace-period based calculations are no longer used for incrementing.
 """
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 import logging
 from typing import Optional, Tuple
 
@@ -66,8 +67,9 @@ class StreakService:
         """Update streak with proper validation and bonus handling."""
         try:
             profile = await self.xp_service._get_or_create_profile(user_id, org_id)
-            current_time = now_local()
-            current_date = today_local()
+            # Use server time (UTC) for streak day boundaries
+            current_time = datetime.now(UTC)
+            current_date = current_time.date()
 
             # Determine last activity date based on streak type
             if streak_type == StreakType.LOGIN:
@@ -83,8 +85,8 @@ class StreakService:
             else:
                 return {"streak_updated": False, "message": "Unsupported streak type"}
 
-            # Check if already updated today
-            if last_date and last_date.date() == current_date:
+            # Check if already updated today (by server date)
+            if last_date and self._to_server_date(last_date) == current_date:
                 return {
                     "streak_updated": False,
                     "message": "Streak already updated today",
@@ -155,7 +157,8 @@ class StreakService:
             # (source, source_id) uniqueness: source_id encodes date.
             login_bonus_awarded = 0
             if streak_type == StreakType.LOGIN and (
-                last_date is None or (last_date and last_date.date() != current_date)
+                last_date is None
+                or (last_date and self._to_server_date(last_date) != current_date)
             ):
                 # Only award if this call actually advanced/maintained streak for a new day
                 try:
@@ -215,38 +218,42 @@ class StreakService:
         self, last_date: datetime | None, current_time: datetime, current_streak: int
     ) -> tuple[int, bool]:
         """
-        Calculate new streak count based on last activity date.
+        Calculate new streak count based strictly on server (UTC) calendar days.
 
-        Returns:
-            Tuple of (new_streak_count, streak_maintained)
+        Rules:
+        - If it's the same server day as the last activity, don't change the streak.
+        - If it's exactly the next server day, increment the streak.
+        - If more than one server day has passed, reset the streak to 1.
+
+        Returns a tuple of (new_streak_count, streak_maintained).
         """
         if not last_date:
             # First ever activity
             return 1, True
 
-        # Normalize both to the same timezone (app local)
-        tz = current_time.tzinfo
-        last_local = last_date
-        if tz is not None:
-            if last_local.tzinfo is None:
-                last_local = last_local.replace(tzinfo=tz)
-            elif last_local.tzinfo != tz:
-                last_local = last_local.astimezone(tz)
+        # Convert last activity to server date (UTC)
+        last_server_date = (
+            last_date.astimezone(UTC).date()
+            if last_date.tzinfo is not None
+            else last_date.date()
+        )
+        current_server_date = (
+            current_time.astimezone(UTC).date()
+            if current_time.tzinfo is not None
+            else current_time.date()
+        )
 
-        # Calculate exact elapsed hours and calendar day diff
-        elapsed = current_time - last_local
-        elapsed_hours = max(elapsed.total_seconds() / 3600.0, 0.0)  # guard against negative due to clock skew
-        days_diff = (current_time.date() - last_local.date()).days
+        days_diff = (current_server_date - last_server_date).days
 
-        # Same calendar day: do nothing
-        if days_diff <= 0:
+        # Same server day: no change
+        if days_diff == 0:
             return current_streak, True
 
-        # Within 24h + grace window: count as consecutive
-        if elapsed_hours <= 24.0 + float(self.config.streaks.grace_period_hours):
+        # Next server day: increment
+        if days_diff == 1:
             return current_streak + 1, True
 
-        # Otherwise, streak is broken and starts over
+        # Skipped one or more days: reset
         return 1, False
 
     def _is_within_grace_period(
@@ -321,25 +328,31 @@ class StreakService:
     def _get_streak_status(
         self, last_date: datetime | None, current_time: datetime
     ) -> str:
-        """Get current status of streak using 24h + grace threshold."""
+        """Get current status of streak using server-day boundaries (UTC)."""
         if not last_date:
             return "inactive"
 
-        # Normalize tz
-        tz = current_time.tzinfo
-        last_local = last_date
-        if tz is not None:
-            if last_local.tzinfo is None:
-                last_local = last_local.replace(tzinfo=tz)
-            elif last_local.tzinfo != tz:
-                last_local = last_local.astimezone(tz)
+        last_server_date = (
+            last_date.astimezone(UTC).date()
+            if last_date.tzinfo is not None
+            else last_date.date()
+        )
+        current_server_date = (
+            current_time.astimezone(UTC).date()
+            if current_time.tzinfo is not None
+            else current_time.date()
+        )
 
-        elapsed_hours = max((current_time - last_local).total_seconds() / 3600.0, 0.0)
-        if current_time.date() == last_local.date():
+        if current_server_date == last_server_date:
             return "active_today"
-        if elapsed_hours <= 24.0 + float(self.config.streaks.grace_period_hours):
+        if (current_server_date - last_server_date).days == 1:
             return "due_today"
         return "broken"
+
+    @staticmethod
+    def _to_server_date(dt: datetime) -> datetime.date:
+        """Normalize a datetime to server (UTC) date for comparisons."""
+        return dt.astimezone(UTC).date() if dt.tzinfo is not None else dt.date()
 
     def _get_next_milestone(self, current_streak: int) -> int | None:
         """Get the next milestone the user can reach."""
