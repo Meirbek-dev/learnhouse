@@ -17,9 +17,10 @@ interface GamificationContextValue {
 const GamificationProfileContext = createContext<GamificationContextValue | undefined>(undefined);
 
 function computeProgressPercent(p: GamificationProfile): number {
-  if (p.level_progress_percent !== null) return p.level_progress_percent; // server authoritative preferred
-  if (p.xp_in_level !== null && p.xp_to_next_level !== null && p.xp_to_next_level > 0) {
-    return Math.max(0, Math.min(100, (p.xp_in_level! / (p.xp_in_level! + p.xp_to_next_level!)) * 100));
+  if (p.progress !== undefined && p.progress !== null) return Math.max(0, Math.min(100, (p.progress || 0) * 100));
+  if (p.xp_in_level !== null && (p as any).xp_to_next !== null && (p as any).xp_to_next > 0) {
+    const next = (p as any).xp_to_next as number;
+    return Math.max(0, Math.min(100, (p.xp_in_level! / (p.xp_in_level! + next)) * 100));
   }
   return 0;
 }
@@ -51,22 +52,21 @@ export const GamificationProfileProvider: React.FC<{ children: React.ReactNode; 
         if (!prev) return prev;
         const clone: any = { ...prev };
         clone.total_xp += amount;
-        clone.daily = clone.daily ? { ...clone.daily, xp_earned: clone.daily.xp_earned + amount } : undefined;
-        if (clone.xp_in_level !== null && clone.xp_to_next_level !== null) {
-          if (amount >= clone.xp_to_next_level) {
+        if (clone.xp_in_level !== null && clone.xp_to_next !== null) {
+          if (amount >= clone.xp_to_next) {
             // simple level up rollover; precise server calc will correct
-            const spill = amount - clone.xp_to_next_level;
+            const spill = amount - clone.xp_to_next;
             clone.current_level += 1;
             clone.xp_in_level = spill;
             // rough next requirement guess keeps bar moving
-            clone.xp_to_next_level = Math.round(clone.xp_to_next_level * 1.15);
+            clone.xp_to_next = Math.round((clone.xp_to_next || 100) * 1.15);
             toast.success(`Level ${clone.current_level}!`, { duration: 3000 });
           } else {
             clone.xp_in_level += amount;
-            clone.xp_to_next_level -= amount;
+            clone.xp_to_next = Math.max(0, (clone.xp_to_next || 0) - amount);
           }
         }
-        clone.level_progress_percent = computeProgressPercent(clone);
+        clone.progress = Math.max(0, Math.min(1, computeProgressPercent(clone) / 100));
         return clone;
       });
       try {

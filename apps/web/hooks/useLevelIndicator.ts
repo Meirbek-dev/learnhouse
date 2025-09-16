@@ -169,19 +169,19 @@ export function useXPTracking(orgId: number) {
         if (profile) {
           const optimistic = { ...profile } as any;
           optimistic.total_xp += amount;
-          if (optimistic.xp_in_level !== null && optimistic.xp_to_next_level !== null) {
-            if (amount >= optimistic.xp_to_next_level) {
-              const spill = amount - optimistic.xp_to_next_level;
+          if (optimistic.xp_in_level !== null && optimistic.xp_to_next !== null) {
+            if (amount >= optimistic.xp_to_next) {
+              const spill = amount - optimistic.xp_to_next;
               optimistic.current_level += 1;
               optimistic.xp_in_level = spill;
-              optimistic.xp_to_next_level = Math.round((optimistic.xp_to_next_level || 100) * 1.15);
+              optimistic.xp_to_next = Math.round((optimistic.xp_to_next || 100) * 1.15);
             } else {
               optimistic.xp_in_level += amount;
-              optimistic.xp_to_next_level -= amount;
+              optimistic.xp_to_next = Math.max(0, (optimistic.xp_to_next || 0) - amount);
             }
-            optimistic.level_progress_percent = Math.max(
+            optimistic.progress = Math.max(
               0,
-              Math.min(100, (optimistic.xp_in_level / (optimistic.xp_in_level + optimistic.xp_to_next_level)) * 100),
+              Math.min(1, optimistic.xp_in_level / Math.max(1, optimistic.xp_in_level + (optimistic.xp_to_next || 0))),
             );
           }
           (window as any).__lastGamificationProfile = optimistic;

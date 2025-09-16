@@ -9,12 +9,15 @@ from src.core.events.database import get_db_session
 from src.db.courses.activities import Activity
 from src.db.courses.assignments import Assignment, AssignmentTaskSubmission
 from src.db.courses.courses import Course
-from src.db.gamification import UserGamificationProfile
+from src.db.gamification import UserGamificationProfile, DashboardRead
 from src.db.organizations import Organization
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.auth import get_current_user
+from src.services.gamification.gamification import (
+    get_gamification_dashboard_result,
+)
 
 """
   The function `is_user_admin_of_org` checks if a user has an admin role in a specified organization.
@@ -1108,6 +1111,33 @@ async def get_admin_retention_metrics(
             status_code=500, detail=f"Error fetching retention metrics: {e!s}"
         )
 
+
+@router.get(
+    "/metrics/gamification/user-dashboard",
+    response_model=DashboardRead,
+)
+async def get_admin_user_gamification_dashboard(
+    org_id: Annotated[int, Query()] = ...,
+    user_id: Annotated[int, Query()] = ...,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser | AnonymousUser = Depends(get_current_user),
+):
+    """Admin: get a specific user's gamification dashboard (typed DashboardRead)."""
+
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    if not await is_user_admin_of_org(current_user.id, org_id, db_session):
+        raise HTTPException(
+            status_code=403, detail="Not authorized to access admin metrics"
+        )
+
+    result = await get_gamification_dashboard_result(
+        user_id=user_id, org_id=org_id, db_session=db_session
+    )
+    if not result.ok:
+        raise HTTPException(status_code=500, detail=result.error or "Failed to load dashboard")
+    return result.value
 
 @router.get("/metrics/realtime")
 async def get_admin_realtime_metrics(

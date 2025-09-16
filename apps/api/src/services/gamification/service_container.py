@@ -21,9 +21,9 @@ from typing import Optional
 
 from sqlmodel import Session
 
-from .achievement_service import AchievementService, create_achievement_service
+from .achievement_service import AchievementService  # optional, may be disabled
 from .cache_service import CacheService, create_cache_service
-from .event_bus import EventBus, create_event_bus
+from .event_bus import EventBus  # optional bus; not constructed by default
 from .leaderboard_service import LeaderboardService, create_leaderboard_service
 from .streak_service import StreakService, create_streak_service
 from .xp_service import XPService, create_xp_service
@@ -42,19 +42,22 @@ class GamificationServices:
 def build_services(
     db_session: Session, *, event_bus: EventBus | None = None
 ) -> GamificationServices:
+    """Construct only core services by default (xp, streaks, leaderboard).
+
+    avoid wiring the event bus and achievements until those subsystems are
+    complete to keep the core path lean and predictable.
+    """
     cache = create_cache_service()
-    bus = event_bus or create_event_bus()
-    xp_service = create_xp_service(db_session, bus)
+    xp_service = create_xp_service(db_session, event_bus)
     streak_service = create_streak_service(db_session)
-    achievement_service = create_achievement_service(db_session, bus)
     leaderboard_service = create_leaderboard_service(db_session, cache)
     return GamificationServices(
         xp=xp_service,
         streaks=streak_service,
-        achievements=achievement_service,
+        achievements=None,  # type: ignore[assignment]
         leaderboard=leaderboard_service,
         cache=cache,
-        events=bus,
+        events=event_bus,
     )
 
 

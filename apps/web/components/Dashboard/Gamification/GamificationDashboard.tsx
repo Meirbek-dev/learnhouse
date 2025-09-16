@@ -14,22 +14,14 @@ import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
 
 interface GamificationProfile {
-  id: number;
   user_id: number;
   org_id: number;
   total_xp: number;
   current_level: number;
-  xp_to_next_level: number;
-  current_login_streak: number;
-  longest_login_streak: number;
-  current_learning_streak: number;
-  longest_learning_streak: number;
-  last_login_date: string | null;
-  last_learning_activity_date: string | null;
-  profile_data: Record<string, any>;
-  created_at: string;
+  xp_in_level: number;
+  xp_to_next: number;
+  progress: number;
   updated_at: string;
-  version: number;
 }
 
 interface XPTransaction {
@@ -121,7 +113,7 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
     const xpForCurrentLevel = 100 * 1.2 ** (profile.current_level - 1);
     const xpForNextLevel = 100 * 1.2 ** profile.current_level;
     const totalXpNeeded = xpForNextLevel - xpForCurrentLevel;
-    const currentProgress = totalXpNeeded - profile.xp_to_next_level;
+    const currentProgress = totalXpNeeded - (profile.xp_to_next || 0);
     return Math.max(0, Math.min(100, (currentProgress / totalXpNeeded) * 100));
   }, []);
 
@@ -328,7 +320,7 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
               <div className="flex justify-between text-sm">
                 <span>{t('levelIndicators.xpToLevel', { level: profile.current_level + 1 })}</span>
                 <span>
-                  {profile.xp_to_next_level} {t('levelIndicators.xpToNext')}
+                  {profile.xp_to_next || 0} {t('levelIndicators.xpToNext')}
                 </span>
               </div>
               <Progress

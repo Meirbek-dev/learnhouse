@@ -102,7 +102,7 @@ export function LevelProgressBar({
   const format = useFormatter();
   const levelInfo = getLevelInfo(profile.current_level, t);
   // Rely exclusively on server-calculated progress (authoritative)
-  const progressPercentage = Math.max(0, Math.min(100, profile.level_progress_percent));
+  const progressPercentage = Math.max(0, Math.min(100, (profile.progress || 0) * 100));
 
   if (variant === 'compact') {
     return (
@@ -118,7 +118,7 @@ export function LevelProgressBar({
               {profile.current_level}
             </span>
             <span>
-              {profile.xp_to_next_level} {t('levelIndicators.xpToNext')}
+              {profile.xp_to_next} {t('levelIndicators.xpToNext')}
             </span>
           </div>
         )}
@@ -156,7 +156,7 @@ export function LevelProgressBar({
           <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}</span>
           <span>{t('levelIndicators.progress', { percentage: format.number(Math.round(progressPercentage)) })}</span>
           <span>
-            {t('levelIndicators.totalXp', { total: format.number(profile.total_xp + profile.xp_to_next_level) })}
+            {t('levelIndicators.totalXp', { total: format.number(profile.total_xp + (profile.xp_to_next || 0)) })}
           </span>
         </div>
       )}
@@ -227,7 +227,7 @@ export function LevelDisplay({
               {t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}
             </div>
             <div className="text-muted-foreground text-sm">
-              {t('levelIndicators.xpToNextLevel', { xp: format.number(profile.xp_to_next_level) })}
+              {t('levelIndicators.xpToNextLevel', { xp: format.number(profile.xp_to_next || 0) })}
             </div>
           </div>
         )}

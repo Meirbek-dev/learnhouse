@@ -10,30 +10,17 @@ import { getAPIUrl } from '@/services/config/config';
 // ---------------------------------------------------------------------------
 
 // Modern gamification interfaces aligned with new server architecture
+// New server contracts (public API)
 export interface GamificationProfile {
-  id: number;
   user_id: number;
   org_id: number;
   total_xp: number;
   current_level: number;
-  xp_to_next_level: number;
-  level_progress_percent: number; // 0-100 authoritative percent
-  xp_in_level?: number;
-  last_xp_award_date?: string | null;
-  // Nested structures (authoritative)
-  streaks: {
-    login: { current: number; longest: number };
-    learning: { current: number; longest: number };
-  };
-  last_activity: { login: string | null; learning: string | null };
-  daily: { xp_earned: number; xp_limit: number; goal_xp: number };
-  totals: { activities_completed: number; courses_completed: number };
-  total_sessions?: number;
-  avg_session_duration?: number;
-  preferences: Record<string, any>;
-  version?: number;
-  created_at?: string;
-  updated_at?: string;
+  xp_in_level: number;
+  xp_to_next: number;
+  progress: number; // 0-1
+  updated_at: string; // ISO
+  streaks?: { [k: string]: number } | { login: number; learning: number } | null;
 }
 
 export interface XPTransaction {
@@ -75,28 +62,15 @@ export interface XPAwardResponse {
 
 export interface GamificationDashboard {
   profile: GamificationProfile;
-  // Normalized list of transactions (from either XPTransactionRead or simplified recent_transactions)
-  recent_xp_transactions: XPTransaction[];
-  // These legacy fields may not be provided by new backend; keep optional
-  daily_xp_history?: { date: string; xp: number; transactions: number }[];
-  streak_status?: any; // Not yet fully aligned; kept loose to avoid breaking UI placeholders
-  next_level_preview?: { level: number; xp_required: number; unlocks?: string[] };
-  daily_progress?: {
-    xp_earned: number;
-    xp_limit: number;
-    goal_xp: number;
-    goal_progress: number;
-    limit_progress: number;
-  };
-  // Additional server-provided raw fragments allowed
-  level_details?: {
-    level: number;
-    xp_in_level: number;
-    xp_to_next_level: number;
-    progress_percent?: number; // derived percent
-    progress?: number; // 0-1 (server forms)
-  };
-  statistics?: Record<string, any>;
+  recent_tx: Array<{
+    transaction_id: number;
+    amount: number;
+    source: string;
+    source_id?: string | null;
+    created_at: string;
+    metadata?: Record<string, any> | null;
+  }>;
+  preferences?: Record<string, any> | null;
 }
 
 // --------------------------- Normalization Utilities -----------------------
@@ -107,58 +81,19 @@ function safeNumber(val: any, fallback = 0): number {
 }
 
 function normalizeProfile(input: any): GamificationProfile {
-  if (!input || typeof input !== 'object') throw new Error('Invalid profile payload');
-  // New backend always wraps under {data: {profile}} for profile/streak endpoints
-  const raw = input.data?.profile ? input.data.profile : input.profile ? input.profile : input;
-
-  const profile: GamificationProfile = {
-    id: raw.id ?? 0,
-    user_id: raw.user_id ?? raw.userId ?? 0,
-    org_id: raw.org_id ?? raw.orgId ?? 0,
+  const raw = input?.data?.profile ?? input?.profile ?? input;
+  if (!raw || typeof raw !== 'object') throw new Error('Invalid profile payload');
+  return {
+    user_id: safeNumber(raw.user_id),
+    org_id: safeNumber(raw.org_id),
     total_xp: safeNumber(raw.total_xp),
     current_level: safeNumber(raw.current_level, 1),
-    xp_to_next_level: safeNumber(raw.xp_to_next_level),
-    level_progress_percent: safeNumber(
-      raw.level_progress_percent ?? raw.levelProgressPercent ?? (raw.level_details?.progress ?? 0) * 100,
-    ),
-    xp_in_level: safeNumber(raw.xp_in_level ?? raw.level_details?.xp_in_level),
-    last_xp_award_date: raw.last_xp_award_date ?? null,
-    streaks: {
-      login: {
-        current: safeNumber(raw.streaks?.login?.current ?? raw.current_login_streak),
-        longest: safeNumber(raw.streaks?.login?.longest ?? raw.longest_login_streak),
-      },
-      learning: {
-        current: safeNumber(raw.streaks?.learning?.current ?? raw.current_learning_streak),
-        longest: safeNumber(raw.streaks?.learning?.longest ?? raw.longest_learning_streak),
-      },
-    },
-    last_activity: {
-      login: raw.last_activity?.login ?? raw.last_login_date ?? null,
-      learning: raw.last_activity?.learning ?? raw.last_learning_activity_date ?? null,
-    },
-    daily: {
-      xp_earned: safeNumber(raw.daily?.xp_earned ?? raw.daily_xp_earned),
-      xp_limit: safeNumber(raw.daily?.xp_limit ?? raw.daily_xp_limit),
-      goal_xp: safeNumber(raw.daily?.goal_xp ?? raw.daily_goal_xp ?? 50),
-    },
-    totals: {
-      activities_completed: safeNumber(raw.totals?.activities_completed ?? raw.total_activities_completed),
-      courses_completed: safeNumber(raw.totals?.courses_completed ?? raw.total_courses_completed),
-    },
-    total_sessions: safeNumber(raw.total_sessions),
-    avg_session_duration: safeNumber(raw.avg_session_duration),
-    preferences: raw.preferences || {},
-    version: safeNumber(raw.version, 1),
-    created_at: raw.created_at ?? raw.creation_date,
-    updated_at: raw.updated_at ?? raw.update_date,
+    xp_in_level: safeNumber(raw.xp_in_level),
+    xp_to_next: safeNumber(raw.xp_to_next),
+    progress: Number(raw.progress) || 0,
+    updated_at: typeof raw.updated_at === 'string' ? raw.updated_at : new Date(raw.updated_at).toISOString(),
+    streaks: raw.streaks ?? null,
   };
-
-  if (!Number.isFinite(profile.level_progress_percent)) profile.level_progress_percent = 0;
-  if (!Number.isFinite(profile.xp_to_next_level)) profile.xp_to_next_level = 0;
-  // Populate nested convenience objects if backend didn't supply them
-  // All nested objects always present now.
-  return profile;
 }
 
 function normalizeTransaction(raw: any): XPTransaction {
@@ -200,44 +135,23 @@ function normalizeAwardResponse(input: any): XPAwardResponse {
 }
 
 function normalizeDashboard(input: any): GamificationDashboard {
-  if (!input || typeof input !== 'object') throw new Error('Invalid dashboard payload');
-  const raw = input.data ? input.data : input; // server returns plain dict now
-  const profile = normalizeProfile({ profile: raw.profile || raw.profile });
-  const txListRaw = raw.recent_xp_transactions || raw.recent_transactions || [];
-  const recent_xp_transactions: XPTransaction[] = Array.isArray(txListRaw)
-    ? txListRaw.map((t: any) => {
-        try {
-          return normalizeTransaction(t);
-        } catch {
-          return {
-            id: t?.id ?? 0,
-            user_id: profile.user_id,
-            org_id: profile.org_id,
-            xp_amount: safeNumber(t?.xp_amount ?? t?.xp_awarded),
-            source: t?.source ?? 'unknown',
-            created_at: t?.created_at ?? new Date().toISOString(),
-          } as XPTransaction;
-        }
-      })
+  const raw = input?.data ?? input;
+  if (!raw || typeof raw !== 'object') throw new Error('Invalid dashboard payload');
+  const profile = normalizeProfile(raw.profile ? { profile: raw.profile } : raw);
+  const recent_tx = Array.isArray(raw.recent_tx)
+    ? raw.recent_tx.map((t: any) => ({
+        transaction_id: safeNumber(t.transaction_id),
+        amount: safeNumber(t.amount),
+        source: t.source,
+        source_id: t.source_id ?? null,
+        created_at: typeof t.created_at === 'string' ? t.created_at : new Date(t.created_at).toISOString(),
+        metadata: t.metadata ?? null,
+      }))
     : [];
-  const level_details = raw.level_details
-    ? {
-        level: safeNumber(raw.level_details.level, profile.current_level),
-        xp_in_level: safeNumber(raw.level_details.xp_in_level),
-        xp_to_next_level: safeNumber(raw.level_details.xp_to_next_level ?? raw.level_details.xp_to_next),
-        progress_percent: safeNumber(raw.level_details.progress_percent ?? (raw.level_details.progress ?? 0) * 100),
-        progress: raw.level_details.progress,
-      }
-    : undefined;
   return {
     profile,
-    recent_xp_transactions,
-    level_details,
-    statistics: raw.statistics,
-    daily_xp_history: raw.daily_xp_history,
-    streak_status: raw.streak_status,
-    next_level_preview: raw.next_level_preview,
-    daily_progress: raw.daily_progress,
+    recent_tx,
+    preferences: raw.preferences ?? null,
   };
 }
 
@@ -281,7 +195,7 @@ export async function getGamificationProfile(orgId: number, accessToken: string)
   );
 
   const raw = await errorHandling(result);
-  return normalizeProfile(raw); // normalizer now unwraps nested data
+  return normalizeProfile(raw);
 }
 
 /**
@@ -460,18 +374,12 @@ export function getLevelProgressionData(profile: GamificationProfile): {
   totalXP: number;
   progressPercent: number;
   xpToNextLevel: number;
-  dailyXPEarned: number;
-  dailyXPLimit: number;
-  dailyGoalXP: number;
 } {
   return {
     currentLevel: profile.current_level,
     totalXP: profile.total_xp,
-    progressPercent: profile.level_progress_percent,
-    xpToNextLevel: profile.xp_to_next_level,
-    dailyXPEarned: profile.daily.xp_earned,
-    dailyXPLimit: profile.daily.xp_limit,
-    dailyGoalXP: profile.daily.goal_xp,
+    progressPercent: Math.max(0, Math.min(100, (profile.progress || 0) * 100)),
+    xpToNextLevel: profile.xp_to_next,
   };
 }
 
@@ -479,7 +387,7 @@ export function getLevelProgressionData(profile: GamificationProfile): {
  * Calculate level progress percentage
  */
 export function calculateLevelProgress(profile: GamificationProfile): number {
-  return Math.max(0, Math.min(100, profile.level_progress_percent || 0));
+  return Math.max(0, Math.min(100, (profile.progress || 0) * 100));
 }
 
 /**

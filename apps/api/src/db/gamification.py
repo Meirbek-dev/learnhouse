@@ -197,6 +197,7 @@ class XPTransaction(SQLModelStrictBaseModel, table=True):
     __tablename__ = "xp_transactions"
     __table_args__ = (
         Index("idx_xp_user_org", "user_id", "org_id"),
+        Index("idx_xp_org_user", "org_id", "user_id"),  # helps org-scoped queries
         Index("idx_xp_source", "source"),
         Index("idx_xp_created", "created_at"),
         Index("idx_xp_user_source", "user_id", "source"),
@@ -475,6 +476,102 @@ class UserGamificationProfileRead(PydanticStrictBaseModel):
     created_at: datetime
     updated_at: datetime
     version: int
+
+
+# --- Public API Contracts (lean) ---
+class ProfileRead(PydanticStrictBaseModel):
+    user_id: int
+    org_id: int
+    total_xp: int
+    current_level: int
+    xp_in_level: int
+    xp_to_next: int
+    progress: float
+    updated_at: datetime
+    streaks: dict[str, int] | None = None
+
+
+class RecentTransactionRead(PydanticStrictBaseModel):
+    transaction_id: int
+    amount: int
+    source: str
+    source_id: str | None = None
+    created_at: datetime
+    metadata: dict[str, Any] | None = None
+
+
+class DashboardRead(PydanticStrictBaseModel):
+    profile: ProfileRead
+    recent_tx: list[RecentTransactionRead]
+    preferences: dict[str, Any] | None = None
+
+
+class LeaderboardEntryRead(PydanticStrictBaseModel):
+    user_id: int
+    username: str | None
+    total_xp: int
+    level: int
+    rank: int
+    is_current_user: bool = False
+
+
+class LeaderboardRead(PydanticStrictBaseModel):
+    org_id: int
+    entries: list[LeaderboardEntryRead]
+    total_participants: int
+    last_updated: datetime
+    current_user_rank: int | None = None
+
+
+class XPAwardResponseLight(PydanticStrictBaseModel):
+    amount: int
+    source: str
+    source_id: str | None = None
+    total_xp: int
+    previous_level: int
+    new_level: int
+    transaction_id: int
+    created_at: datetime
+
+
+# --- Streak response wrappers (for typed router responses) ---
+
+
+class StreakUpdateRead(PydanticStrictBaseModel):
+    """Response for streak update endpoints.
+
+    Kept intentionally small to avoid exposing unstable internals.
+    """
+
+    profile: ProfileRead
+    streak_updated: bool
+    message: str | None = None
+
+
+class StreakDetailRead(PydanticStrictBaseModel):
+    current: int
+    longest: int
+    last_activity: datetime | None
+    status: str  # 'active_today' | 'due_today' | 'inactive' | 'broken'
+    next_milestone: int | None = None
+
+
+class StreakRecordItemRead(PydanticStrictBaseModel):
+    streak_type: str
+    streak_count: int
+    is_milestone: bool
+    activities_completed: int
+    xp_earned_today: int
+    date: datetime
+    metadata: dict[str, Any] | None = None
+
+
+class StreakSummaryRead(PydanticStrictBaseModel):
+    login_streak: StreakDetailRead
+    learning_streak: StreakDetailRead
+    milestones: dict[int, int]
+    grace_period_hours: int
+    recent_records: list[StreakRecordItemRead]
 
 
 class UserGamificationProfileCreate(PydanticStrictBaseModel):

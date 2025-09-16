@@ -148,7 +148,11 @@ export function LevelIndicator({
             {t('levelIndicators.level')} {profile.current_level}
           </span>
         </div>
-        {showXP && <span className="text-muted-foreground text-sm">{format.number(profile.total_xp)} {t('levels.progress.xpAbbreviation')}</span>}
+        {showXP && (
+          <span className="text-muted-foreground text-sm">
+            {format.number(profile.total_xp)} {t('levels.progress.xpAbbreviation')}
+          </span>
+        )}
       </div>
     );
   }
@@ -169,7 +173,7 @@ export function LevelIndicator({
           <div className="text-right">
             <div className="text-sm font-medium">{format.number(profile.total_xp)} XP</div>
             <div className="text-muted-foreground text-xs">
-              {profile.xp_to_next_level} {t('levelIndicators.xpToNext')}
+              {profile.xp_to_next || 0} {t('levelIndicators.xpToNext')}
             </div>
           </div>
         )}
@@ -216,7 +220,7 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
             {t('levelIndicators.level')} {profile.current_level}
           </span>
           <span className="text-muted-foreground">
-            {profile.xp_to_next_level} {t('levels.progress.xpAbbreviation')} {t('levelIndicators.xpToNext')}
+            {profile.xp_to_next || 0} {t('levels.progress.xpAbbreviation')} {t('levelIndicators.xpToNext')}
           </span>
         </div>
       )}
@@ -233,8 +237,12 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
       </div>
       {showLabels && (
         <div className="text-muted-foreground flex justify-between text-xs">
-          <span>{format.number(profile.total_xp)} {t('levels.progress.xpAbbreviation')}</span>
-          <span>{format.number(profile.total_xp + profile.xp_to_next_level)} {t('levels.progress.xpAbbreviation')}</span>
+          <span>
+            {format.number(profile.total_xp)} {t('levels.progress.xpAbbreviation')}
+          </span>
+          <span>
+            {format.number(profile.total_xp + (profile.xp_to_next || 0))} {t('levels.progress.xpAbbreviation')}
+          </span>
         </div>
       )}
     </div>

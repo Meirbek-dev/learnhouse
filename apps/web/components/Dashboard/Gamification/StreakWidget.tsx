@@ -11,10 +11,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-interface GamificationProfile {
-  streaks: { login: { current: number; longest: number }; learning: { current: number; longest: number } };
-  last_activity: { login: string | null; learning: string | null };
-}
+// Note: Profile shape comes from services/gamification. It exposes `streaks`
+// as either a mapping { login: number, learning: number } or a generic map.
+// It does not guarantee last_activity fields; this widget derives display-safe
+// values and guards for missing data.
 
 interface StreakWidgetProps {
   orgId: number;
@@ -161,12 +161,36 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
   const streakData = useMemo(() => {
     if (!profile) return null;
 
-    const loginLast = profile.last_activity.login;
-    const learningLast = profile.last_activity.learning;
-    const loginCurrent = profile.streaks.login.current;
-    const loginLongest = profile.streaks.login.longest;
-    const learningCurrent = profile.streaks.learning.current;
-    const learningLongest = profile.streaks.learning.longest;
+    // Extract streak counts from flexible profile.streaks
+    const rawStreaks: any = (profile as any).streaks ?? {};
+    let loginCurrent = 0;
+    let loginLongest = 0;
+    let learningCurrent = 0;
+    let learningLongest = 0;
+
+    if (rawStreaks) {
+      // Support: { login: number } OR { login: { current, longest } }
+      const sLogin = rawStreaks.login;
+      const sLearning = rawStreaks.learning;
+      if (typeof sLogin === 'number') {
+        loginCurrent = sLogin;
+        loginLongest = sLogin; // fallback: no separate longest provided
+      } else if (sLogin && typeof sLogin === 'object') {
+        loginCurrent = Number(sLogin.current) || 0;
+        loginLongest = Number(sLogin.longest) || loginCurrent;
+      }
+      if (typeof sLearning === 'number') {
+        learningCurrent = sLearning;
+        learningLongest = sLearning;
+      } else if (sLearning && typeof sLearning === 'object') {
+        learningCurrent = Number(sLearning.current) || 0;
+        learningLongest = Number(sLearning.longest) || learningCurrent;
+      }
+    }
+
+    // Last activity fields are not part of the normalized profile; treat as optional
+    const loginLast: string | null = (profile as any)?.last_activity?.login ?? null;
+    const learningLast: string | null = (profile as any)?.last_activity?.learning ?? null;
     return {
       loginStatus: getStreakStatus(loginLast),
       learningStatus: getStreakStatus(learningLast),
@@ -309,12 +333,12 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
             <TooltipContent>
               <div className="space-y-1">
                 <p>{t('tooltips.login')}</p>
-                {profile.last_activity.login && (
+                {(streakData as any).last_login_date && (
                   <div className="text-xs font-extralight">
                     <p>
-                      {t('tooltips.lastActivity')}: {getRelativeTime(profile.last_activity.login)}
+                      {t('tooltips.lastActivity')}: {getRelativeTime((streakData as any).last_login_date)}
                     </p>
-                    <p>{formatLastActivityDate(profile.last_activity.login)}</p>
+                    <p>{formatLastActivityDate((streakData as any).last_login_date)}</p>
                   </div>
                 )}
               </div>
@@ -347,12 +371,12 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
             <TooltipContent>
               <div className="space-y-1">
                 <p>{t('tooltips.learning')}</p>
-                {profile.last_activity.learning && (
+                {(streakData as any).last_learning_activity_date && (
                   <div className="text-xs font-extralight">
                     <p>
-                      {t('tooltips.lastActivity')}: {getRelativeTime(profile.last_activity.learning)}
+                      {t('tooltips.lastActivity')}: {getRelativeTime((streakData as any).last_learning_activity_date)}
                     </p>
-                    <p>{formatLastActivityDate(profile.last_activity.learning)}</p>
+                    <p>{formatLastActivityDate((streakData as any).last_learning_activity_date)}</p>
                   </div>
                 )}
               </div>

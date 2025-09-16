@@ -5,11 +5,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from datetime import UTC, datetime
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, and_, select
 
-from src.core.timezone import now_local, today_local
+# Use UTC server time for deterministic calculations
 from src.db.gamification import (
     UserGamificationProfile,
     UserGamificationProfileRead,
@@ -92,16 +93,26 @@ class XPService:
             if xp_amount <= 0:
                 return Result.fail("invalid_amount")
 
-            # Daily reset
-            if (
-                profile.last_xp_award_date
-                and profile.last_xp_award_date.date() != today_local()
-            ):
-                profile.daily_xp_earned = 0
+            # Calculate today's awarded XP from transactions to enforce cap atomically
+            today = datetime.now(UTC).date()
+            start_ts = datetime.combine(today, datetime.min.time(), tzinfo=UTC)
+            end_ts = datetime.combine(today, datetime.max.time(), tzinfo=UTC)
+            try:
+                today_awarded = self.db_session.exec(
+                    select(XPTransaction).where(
+                        and_(
+                            XPTransaction.user_id == user_id,
+                            XPTransaction.org_id == org_id,
+                            XPTransaction.created_at >= start_ts,
+                            XPTransaction.created_at <= end_ts,
+                        )
+                    )
+                ).all()
+                today_sum = sum(t.xp_amount for t in today_awarded)
+            except Exception:
+                today_sum = profile.daily_xp_earned or 0
 
-            remaining_cap = max(
-                0, self.config.daily_caps.max_daily_xp - profile.daily_xp_earned
-            )
+            remaining_cap = max(0, self.config.daily_caps.max_daily_xp - today_sum)
             if remaining_cap <= 0:
                 return Result.fail("daily_cap")
             awarded = min(xp_amount, remaining_cap)
@@ -109,7 +120,7 @@ class XPService:
             prev_level = profile.current_level
             profile.total_xp += awarded
             profile.daily_xp_earned += awarded
-            profile.last_xp_award_date = now_local()
+            profile.last_xp_award_date = datetime.now(UTC)
 
             lvl = calculate_level_details(profile.total_xp)
             profile.current_level = lvl["level"]
@@ -304,29 +315,25 @@ class XPService:
         aggregate_type: str,
         data: dict[str, Any],
     ) -> None:
+        # If no event bus is wired, skip persisting events to the outbox table.
+        # This avoids accumulating undelivered events when the async pipeline
+        # isn't configured yet.
+        if not self.event_bus:
+            return
         try:
-            seq = (
-                self.db_session.exec(
-                    select(GamificationEvent).where(
-                        GamificationEvent.aggregate_id == aggregate_id,
-                        GamificationEvent.aggregate_type == aggregate_type,
-                    )
-                ).count()
-                if hasattr(self.db_session, "exec")
-                else 0
+            # Minimal insertion for observers/processors that may read the table
+            evt = GamificationEvent(
+                event_type=event_type,
+                aggregate_id=aggregate_id,
+                aggregate_type=aggregate_type,
+                sequence_number=0,
+                user_id=user_id,
+                org_id=org_id,
+                event_data=data,
             )
-        except Exception:
-            seq = 0
-        evt = GamificationEvent(
-            event_type=event_type,
-            aggregate_id=aggregate_id,
-            aggregate_type=aggregate_type,
-            sequence_number=seq,
-            user_id=user_id,
-            org_id=org_id,
-            event_data=data,
-        )
-        self.db_session.add(evt)
+            self.db_session.add(evt)
+        except Exception:  # pragma: no cover
+            logger.debug("Skipping event record; outbox unavailable", exc_info=True)
 
 
 def create_xp_service(

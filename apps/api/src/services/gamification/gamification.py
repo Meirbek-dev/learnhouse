@@ -1,19 +1,24 @@
 """
+Essential functions needed by the router (thin orchestration only).
 
-Essential functions needed by the router.
+Delegates profile lifecycle to XPService to avoid duplication and drift.
+All time handling uses UTC to ensure deterministic server-day semantics.
 """
 
 import logging
-from datetime import datetime
-from typing import Any, Dict
+from datetime import UTC, datetime
+from typing import Any, Dict, List
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
-from src.core.timezone import now_local
+# UTC-first semantics; avoid local time utilities here
 from src.db.gamification import (
     OrganizationLeaderboard,
+    ProfileRead,
+    DashboardRead,
+    RecentTransactionRead,
     UserGamificationPreferenceRead,
     UserGamificationPreferenceUpsert,
     UserGamificationProfile,
@@ -29,6 +34,53 @@ from .config import get_gamification_config
 logger = logging.getLogger(__name__)
 
 
+# ------------------------------------------------------------
+# Small mappers to public API contracts (ProfileRead/DashboardRead)
+# ------------------------------------------------------------
+
+
+def _map_profile_read(profile: UserGamificationProfile) -> ProfileRead:
+    """Build ProfileRead from the SQLModel entity using UTC semantics."""
+    lvl = calculate_level_details(profile.total_xp or 0)
+    return ProfileRead(
+        user_id=profile.user_id,
+        org_id=profile.org_id,
+        total_xp=profile.total_xp or 0,
+        current_level=int(lvl["level"]),
+        xp_in_level=int(lvl["xp_in_level"]),
+        xp_to_next=int(lvl["xp_to_next"]),
+        progress=float(lvl["progress"]),
+        updated_at=profile.updated_at,
+        streaks={
+            "login": int(profile.current_login_streak or 0),
+            "learning": int(profile.current_learning_streak or 0),
+        },
+    )
+
+
+def _map_dashboard_read(
+    profile: UserGamificationProfile, recent_transactions: List[XPTransaction]
+) -> DashboardRead:
+    tx_models: list[RecentTransactionRead] = []
+    for tx in recent_transactions:
+        src_val = tx.source.value if hasattr(tx.source, "value") else str(tx.source)
+        tx_models.append(
+            RecentTransactionRead(
+                transaction_id=tx.id,
+                amount=tx.xp_amount,
+                source=src_val,
+                source_id=tx.source_id,
+                created_at=tx.created_at,
+                metadata=tx.transaction_metadata or None,
+            )
+        )
+    return DashboardRead(
+        profile=_map_profile_read(profile),
+        recent_tx=tx_models,
+        preferences=profile.preferences or None,
+    )
+
+
 async def get_or_create_profile(
     user_id: int, org_id: int, db_session: Session
 ) -> UserGamificationProfile:
@@ -42,38 +94,13 @@ async def get_or_create_profile(
                 cache.delete(f"profile:{org_id}:{user_id}")
             else:
                 return cached
+        # Delegate to XPService for single source of truth
+        from .xp_service import create_xp_service
 
-        statement = select(UserGamificationProfile).where(
-            UserGamificationProfile.user_id == user_id,
-            UserGamificationProfile.org_id == org_id,
-        )
-        profile = db_session.exec(statement).first()
-        if profile:
-            cache.set_profile(user_id, org_id, profile)
-            return profile
-
-        cfg = get_gamification_config()
-        new_profile = UserGamificationProfile(
-            user_id=user_id,
-            org_id=org_id,
-            total_xp=0,
-            current_level=1,
-            current_login_streak=0,
-            longest_login_streak=0,
-            current_learning_streak=0,
-            longest_learning_streak=0,
-            last_login_date=None,
-            last_learning_activity_date=None,
-            daily_xp_limit=cfg.daily_caps.max_daily_xp,
-            daily_goal_xp=cfg.daily_caps.default_daily_goal,
-            created_at=now_local(),
-            updated_at=now_local(),
-        )
-        db_session.add(new_profile)
-        db_session.commit()
-        db_session.refresh(new_profile)
-        cache.set_profile(user_id, org_id, new_profile)
-        return new_profile
+        xp = create_xp_service(db_session)
+        profile = await xp._get_or_create_profile(user_id, org_id)
+        cache.set_profile(user_id, org_id, profile)
+        return profile
     except Exception as e:
         logger.exception(
             "Error getting/creating profile user=%s org=%s: %s", user_id, org_id, e
@@ -85,8 +112,8 @@ async def get_or_create_profile(
 
 async def get_gamification_dashboard_result(
     user_id: int, org_id: int, db_session: Session
-) -> Result[dict[str, Any]]:
-    """Get gamification dashboard data (Result)."""
+) -> Result[DashboardRead]:
+    """Get gamification dashboard data (typed)."""
     try:
         profile = await get_or_create_profile(user_id, org_id, db_session)
 
@@ -100,38 +127,8 @@ async def get_gamification_dashboard_result(
 
         recent_transactions = db_session.exec(xp_statement).all()
 
-        # Calculate level details
-        level_details = calculate_level_details(profile.total_xp or 0)
-
-        payload = {
-            "profile": profile,
-            "level_details": {
-                "level": level_details["level"],
-                "xp_in_level": level_details["xp_in_level"],
-                "xp_to_next_level": level_details["xp_to_next"],
-                "progress_percent": level_details["progress"] * 100,
-                "total_xp_for_level": level_details.get("total_xp_for_level", 0),
-            },
-            "recent_transactions": [
-                {
-                    "id": tx.id,
-                    "xp_awarded": tx.xp_amount,
-                    "source": tx.source.value,
-                    "created_at": tx.created_at,
-                    "metadata": tx.transaction_metadata or {},
-                }
-                for tx in recent_transactions
-            ],
-            "statistics": {
-                "total_xp": profile.total_xp or 0,
-                "current_level": level_details["level"],
-                "login_streak": profile.current_login_streak or 0,
-                "learning_streak": profile.current_learning_streak or 0,
-                "longest_login_streak": profile.longest_login_streak or 0,
-                "longest_learning_streak": profile.longest_learning_streak or 0,
-            },
-        }
-        return Result.success(payload)
+        dashboard = _map_dashboard_read(profile, recent_transactions)
+        return Result.success(dashboard)
     except Exception as e:  # pragma: no cover - defensive
         logger.exception(
             "Error getting dashboard for user %s org %s: %s", user_id, org_id, e
@@ -166,19 +163,15 @@ async def get_gamification_preferences_result(
 
 async def get_gamification_profile_result(
     user_id: int, org_id: int, db_session: Session
-) -> Result[dict[str, Any]]:
-    """Get a user's gamification profile (normalized minimal shape) wrapped in Result.
-
-    Returns a dict matching the existing router response's inner profile structure so
-    the frontend normalization logic remains unchanged.
-    """
+) -> Result[ProfileRead]:
+    """Get a user's gamification profile as ProfileRead (typed)."""
     try:
         profile = await get_or_create_profile(user_id, org_id, db_session)
 
         # Auto-correct stale streaks on read to reflect reality even without explicit update calls
         try:
             cfg = get_gamification_config()
-            now = now_local()
+            now = datetime.now(UTC)
 
             def _normalize(dt: datetime) -> datetime:
                 tz = now.tzinfo
@@ -191,7 +184,10 @@ async def get_gamification_profile_result(
             changed = False
 
             # Check login streak
-            if profile.last_login_date is not None and profile.last_login_date.date() != now.date():
+            if (
+                profile.last_login_date is not None
+                and profile.last_login_date.date() != now.date()
+            ):
                 last = _normalize(profile.last_login_date)
                 elapsed_hours = max((now - last).total_seconds() / 3600.0, 0.0)
                 if elapsed_hours > 24.0 + float(cfg.streaks.grace_period_hours):
@@ -221,53 +217,20 @@ async def get_gamification_profile_result(
                         cache = create_cache_service()
                         cache.set_profile(user_id, org_id, profile)
                     except Exception:
-                        logger.debug("profile cache refresh failed after streak autocorrect", exc_info=True)
+                        logger.debug(
+                            "profile cache refresh failed after streak autocorrect",
+                            exc_info=True,
+                        )
                 except Exception:
                     db_session.rollback()
-                    logger.debug("streak autocorrect commit failed; continuing with stale values", exc_info=True)
+                    logger.debug(
+                        "streak autocorrect commit failed; continuing with stale values",
+                        exc_info=True,
+                    )
         except Exception:
             # Non-fatal; continue with existing values
             logger.debug("streak autocorrect check failed", exc_info=True)
-        lvl = calculate_level_details(profile.total_xp or 0)
-        payload = {
-            "id": profile.id,
-            "user_id": profile.user_id,
-            "org_id": profile.org_id,
-            "total_xp": profile.total_xp,
-            "current_level": lvl["level"],
-            "xp_to_next_level": lvl["xp_to_next"],
-            "level_progress_percent": round(lvl["progress"] * 100, 2),
-            "streaks": {
-                "login": {
-                    "current": profile.current_login_streak,
-                    "longest": profile.longest_login_streak,
-                },
-                "learning": {
-                    "current": profile.current_learning_streak,
-                    "longest": profile.longest_learning_streak,
-                },
-            },
-            "last_activity": {
-                "login": profile.last_login_date.isoformat()
-                if profile.last_login_date
-                else None,
-                "learning": profile.last_learning_activity_date.isoformat()
-                if profile.last_learning_activity_date
-                else None,
-            },
-            "daily": {
-                "xp_earned": profile.daily_xp_earned,
-                "xp_limit": profile.daily_xp_limit,
-                "goal_xp": profile.daily_goal_xp,
-            },
-            "totals": {
-                "activities_completed": profile.total_activities_completed,
-                "courses_completed": profile.total_courses_completed,
-            },
-            "preferences": profile.preferences or {},
-            "created_at": profile.created_at.isoformat(),
-            "updated_at": profile.updated_at.isoformat(),
-        }
+        payload = _map_profile_read(profile)
         return Result.success(payload)
     except Exception as e:  # pragma: no cover - defensive
         logger.exception("Failed to get profile user=%s org=%s: %s", user_id, org_id, e)
@@ -298,7 +261,7 @@ async def update_gamification_preferences_result(
         stored["show_achievements"] = preferences.show_achievements
 
     profile.preferences = stored
-    profile.updated_at = now_local()
+    profile.updated_at = datetime.now(UTC)
 
     try:
         db_session.add(profile)

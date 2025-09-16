@@ -3,8 +3,13 @@
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from datetime import datetime
 
 from src.db.gamification import (
+    DashboardRead,
+    ProfileRead,
+    StreakSummaryRead,
+    StreakUpdateRead,
     OrganizationLeaderboard,
     UserGamificationPreferenceRead,
     UserGamificationPreferenceUpsert,
@@ -78,6 +83,7 @@ def result_endpoint(fn):  # decorator to DRY error unwrapping for simple endpoin
     "/profile/{org_id}",
     summary="Get gamification profile",
     response_description="Current gamification profile with level & streak info",
+    response_model=ProfileRead,
 )
 async def get_profile(
     org_id: int,
@@ -91,13 +97,15 @@ async def get_profile(
         user_id=user.id, org_id=org_id, db_session=services.xp.db_session
     )
     raise_for_result(result)
-    payload = result.value
+    payload = result.value  # ProfileRead
     # ETag support: weak cache on profile snapshot
     try:
+        # Synthesize a stable numeric profile_id from (org_id, user_id)
+        synthetic_id = (payload.org_id << 32) ^ payload.user_id
         etag = make_profile_etag(
-            profile_id=payload["id"],
-            updated_at=payload.get("updated_at"),
-            total_xp=payload.get("total_xp", 0),
+            profile_id=synthetic_id,
+            updated_at=payload.updated_at,
+            total_xp=payload.total_xp,
         )
         inm = request.headers.get("If-None-Match")
         if inm and inm == etag:
@@ -105,7 +113,7 @@ async def get_profile(
         response.headers["ETag"] = etag
     except Exception:  # pragma: no cover - optional feature
         pass
-    return {"data": {"profile": payload}, "meta": {"version": 1}}
+    return payload
 
 
 @router.post(
@@ -151,6 +159,7 @@ async def award_xp_endpoint(
     "/login-streak/{org_id}",
     summary="Update login streak",
     response_description="Updated login streak status (idempotent per day)",
+    response_model=StreakUpdateRead,
 )
 async def update_login_streak_endpoint(
     org_id: int,
@@ -166,11 +175,9 @@ async def update_login_streak_endpoint(
     )
     raise_for_result(profile_result)
     return {
-        "data": {
-            "profile": profile_result.value,
-            "streak_updated": result.value.get("streak_updated", False),
-        },
-        "meta": {"version": 1},
+        "profile": profile_result.value,
+        "streak_updated": result.value.get("streak_updated", False),
+        "message": result.value.get("message"),
     }
 
 
@@ -178,6 +185,7 @@ async def update_login_streak_endpoint(
     "/learning-streak/{org_id}",
     summary="Update learning streak",
     response_description="Updated learning streak status (idempotent per day)",
+    response_model=StreakUpdateRead,
 )
 async def update_learning_streak_endpoint(
     org_id: int,
@@ -192,11 +200,9 @@ async def update_learning_streak_endpoint(
     )
     raise_for_result(profile_result)
     return {
-        "data": {
-            "profile": profile_result.value,
-            "streak_updated": result.value.get("streak_updated", False),
-        },
-        "meta": {"version": 1},
+        "profile": profile_result.value,
+        "streak_updated": result.value.get("streak_updated", False),
+        "message": result.value.get("message"),
     }
 
 
@@ -367,6 +373,7 @@ async def update_preferences(
     "/dashboard/{org_id}",
     summary="Gamification dashboard",
     response_description="Aggregated gamification dashboard data",
+    response_model=DashboardRead,
 )
 async def get_dashboard(
     org_id: int,
@@ -382,21 +389,17 @@ async def get_dashboard(
         db_session=services.xp.db_session,
     )
     raise_for_result(result)
-    payload = result.value
+    payload = result.value  # DashboardRead
     # Compute a simple recent_tx hash for ETag
     try:
-        txs = payload.get("recent_transactions", [])
+        txs = payload.recent_tx
         recent_tx_hash = "|".join(
-            f"{t.get('id')}@{t.get('created_at')}@{t.get('xp_awarded')}" for t in txs
+            f"{t.transaction_id}@{t.created_at.isoformat()}@{t.amount}" for t in txs
         )
         etag = make_dashboard_etag(
-            profile_id=payload.get("profile").id if payload.get("profile") else 0,
-            updated_at=(
-                payload.get("profile").updated_at.isoformat()
-                if payload.get("profile") and getattr(payload.get("profile"), "updated_at", None)
-                else None
-            ),
-            total_xp=(payload.get("profile").total_xp if payload.get("profile") else 0),
+            profile_id=(payload.profile.org_id << 32) ^ payload.profile.user_id,
+            updated_at=payload.profile.updated_at,
+            total_xp=payload.profile.total_xp,
             recent_tx_hash=recent_tx_hash,
         )
         inm = request.headers.get("If-None-Match")
@@ -408,7 +411,11 @@ async def get_dashboard(
     return payload
 
 
-@router.get("/streaks/summary/{org_id}", summary="Get streak summary")
+@router.get(
+    "/streaks/summary/{org_id}",
+    summary="Get streak summary",
+    response_model=StreakSummaryRead,
+)
 async def streak_summary(
     org_id: int,
     user: Annotated[PublicUser, Depends(get_current_user)],
@@ -416,7 +423,49 @@ async def streak_summary(
 ):
     result = await services.streaks.get_streak_summary(user.id, org_id)
     raise_for_result(result)
-    return {"data": result.value}
+    # Map service dict -> typed response model
+    v = result.value
+
+    def _parse_dt(val):
+        if val is None:
+            return None
+        if isinstance(val, datetime):
+            return val
+        if isinstance(val, str):
+            try:
+                return datetime.fromisoformat(val)
+            except Exception:
+                try:
+                    return datetime.fromisoformat(val.replace("Z", "+00:00"))
+                except Exception:
+                    return None
+        return None
+
+    login = dict(v.get("login_streak", {}))
+    learning = dict(v.get("learning_streak", {}))
+    if "last_activity" in login:
+        login["last_activity"] = _parse_dt(login["last_activity"])
+    if "last_activity" in learning:
+        learning["last_activity"] = _parse_dt(learning["last_activity"])
+
+    return {
+        "login_streak": login,
+        "learning_streak": learning,
+        "milestones": v["milestones"],
+        "grace_period_hours": v["grace_period_hours"],
+        "recent_records": [
+            {
+                "streak_type": r.get("streak_type"),
+                "streak_count": r.get("streak_count", 0),
+                "is_milestone": r.get("is_milestone", False),
+                "activities_completed": r.get("activities_completed", 0),
+                "xp_earned_today": r.get("xp_earned_today", 0),
+                "date": _parse_dt(r.get("date")),
+                "metadata": r.get("metadata") or None,
+            }
+            for r in v.get("recent_records", [])
+        ],
+    }
 
 
 @router.get(

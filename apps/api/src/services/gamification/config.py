@@ -1,4 +1,4 @@
-"""Gamification configuration (modern only)."""
+"""Gamification configuration (focused, UTC-first)."""
 
 import os
 from dataclasses import dataclass
@@ -129,7 +129,8 @@ class DailyCapsConfig:
 
     max_daily_xp: int = 800  # Reasonable daily cap
     default_daily_goal: int = 50  # Achievable daily goal
-    reset_timezone: TimeZone = TimeZone.ALMATY
+    # Use UTC for deterministic server-day semantics
+    reset_timezone: TimeZone = TimeZone.UTC
     reset_hour: int = 0  # Midnight reset
 
     def __post_init__(self):
@@ -161,7 +162,7 @@ class GamificationConfig:
 
     # Feature flags
     enable_streaks: bool = True
-    enable_achievements: bool = True
+    enable_achievements: bool = False  # off by default until completed
     enable_leaderboards: bool = True
     enable_daily_goals: bool = True
 
@@ -197,7 +198,7 @@ class GamificationConfig:
             enable_streaks=os.getenv("GAMIFICATION_ENABLE_STREAKS", "true").lower()
             == "true",
             enable_achievements=os.getenv(
-                "GAMIFICATION_ENABLE_ACHIEVEMENTS", "true"
+                "GAMIFICATION_ENABLE_ACHIEVEMENTS", "false"
             ).lower()
             == "true",
             enable_leaderboards=os.getenv(

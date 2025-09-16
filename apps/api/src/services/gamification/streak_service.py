@@ -11,8 +11,6 @@ import logging
 from typing import Optional, Tuple
 
 from sqlmodel import Session, and_, select
-
-from src.core.timezone import now_local, today_local
 from src.db.gamification import (
     StreakRecord,
     StreakType,
@@ -267,7 +265,7 @@ class StreakService:
     async def get_streak_summary(self, user_id: int, org_id: int) -> Result[dict]:
         """Get comprehensive streak summary for user (Result)."""
         profile = await self.xp_service._get_or_create_profile(user_id, org_id)
-        current_time = now_local()
+        current_time = datetime.now(UTC)
 
         # Get recent streak records
         recent_records_stmt = (

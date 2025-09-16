@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from functools import lru_cache
 
 from config.config import get_openu_config
@@ -47,3 +47,18 @@ def now_local() -> datetime:
 
 def today_local() -> datetime.date:
     return now_local().date()
+
+
+# --- UTC-first helpers (preferred for server-day logic) ---
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+def utc_date(dt: datetime) -> datetime.date:
+    """Return the date in UTC for a given datetime.
+
+    If dt is naive, treat it as UTC.
+    """
+    if dt.tzinfo is None:
+        return dt.date()
+    return dt.astimezone(UTC).date()

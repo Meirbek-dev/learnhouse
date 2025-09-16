@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class BaseEvent:
     user_id: int
     org_id: int
-    occurred_at: datetime = datetime.now(UTC)
+    occurred_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, Any] | None = None
 
 
