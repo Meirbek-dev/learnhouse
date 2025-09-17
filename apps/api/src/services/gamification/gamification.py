@@ -20,17 +20,17 @@ from src.db.gamification import (
     UserGamificationProfile,
     XPTransaction,
 )
+from src.db.users import User
 from src.schemas.gamification import (
-    ProfileRead,
     DashboardRead,
+    ProfileRead,
     RecentTransactionRead,
 )
-from src.db.users import User
 
 from .cache_service import create_cache_service
+from .config import get_gamification_config
 from .level_calculator import calculate_level_details
 from .result import Result
-from .config import get_gamification_config
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def _map_profile_read(profile: UserGamificationProfile) -> ProfileRead:
 
 
 def _map_dashboard_read(
-    profile: UserGamificationProfile, recent_transactions: List[XPTransaction]
+    profile: UserGamificationProfile, recent_transactions: list[XPTransaction]
 ) -> DashboardRead:
     tx_models: list[RecentTransactionRead] = []
     for tx in recent_transactions:

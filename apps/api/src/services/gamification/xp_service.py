@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from typing import Any
 
-from datetime import UTC, datetime
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, and_, select
@@ -99,27 +99,31 @@ class XPService:
             end_ts = datetime.combine(today, datetime.max.time(), tzinfo=UTC)
             # Reset profile.daily_xp_earned if last award was on a previous day
             try:
-                if profile.last_xp_award_date and profile.last_xp_award_date.date() != today:
+                if (
+                    profile.last_xp_award_date
+                    and profile.last_xp_award_date.date() != today
+                ):
                     profile.daily_xp_earned = 0
             except Exception:
                 pass
             # Use SUM aggregate rather than loading all rows
             try:
                 from sqlalchemy import func
-                today_sum = (
-                    self.db_session.exec(
-                        select(func.coalesce(func.sum(XPTransaction.xp_amount), 0)).where(
-                            and_(
-                                XPTransaction.user_id == user_id,
-                                XPTransaction.org_id == org_id,
-                                XPTransaction.created_at >= start_ts,
-                                XPTransaction.created_at <= end_ts,
-                            )
+
+                today_sum = self.db_session.exec(
+                    select(func.coalesce(func.sum(XPTransaction.xp_amount), 0)).where(
+                        and_(
+                            XPTransaction.user_id == user_id,
+                            XPTransaction.org_id == org_id,
+                            XPTransaction.created_at >= start_ts,
+                            XPTransaction.created_at <= end_ts,
                         )
-                    ).one()
-                )
+                    )
+                ).one()
                 # today_sum may be a scalar or tuple depending on driver
-                today_sum = int(today_sum[0] if isinstance(today_sum, tuple) else today_sum)
+                today_sum = int(
+                    today_sum[0] if isinstance(today_sum, tuple) else today_sum
+                )
             except Exception:
                 today_sum = profile.daily_xp_earned or 0
 
@@ -150,7 +154,9 @@ class XPService:
                 previous_level=prev_level,
                 new_level=profile.current_level,
                 triggered_level_up=profile.current_level > prev_level,
-                created_by_admin=bool(admin_user_id) if source == XPSource.ADMIN_AWARD else False,
+                created_by_admin=bool(admin_user_id)
+                if source == XPSource.ADMIN_AWARD
+                else False,
                 admin_user_id=admin_user_id if source == XPSource.ADMIN_AWARD else None,
             )
             self.db_session.add(tx)
@@ -265,6 +271,7 @@ class XPService:
         self.db_session.commit()
         self.db_session.refresh(profile)
         return profile
+
 
 def create_xp_service(db_session: Session) -> XPService:
     return XPService(db_session)

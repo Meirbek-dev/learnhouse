@@ -19,11 +19,11 @@ New Architecture:
 # Public service factories / utilities
 from src.db.gamification import XPSource
 from src.schemas.gamification import (
-    ProfileRead,
     DashboardRead,
+    LeaderboardRead,
+    ProfileRead,
     StreakSummaryRead,
     StreakUpdateRead,
-    LeaderboardRead,
 )
 
 from .config import get_gamification_config

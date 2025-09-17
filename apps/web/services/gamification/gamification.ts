@@ -388,7 +388,7 @@ export async function getGamificationPreferences(orgId: number, accessToken: str
 export async function updateGamificationPreferences(orgId: number, accessToken: string, preferences: any) {
   const res = await fetch(
     `${getAPIUrl()}gamification/preferences/${orgId}`,
-    RequestBodyWithAuthHeader('PUT', JSON.stringify({ preferences }), 'application/json', accessToken),
+    RequestBodyWithAuthHeader('PUT', { preferences }, null, accessToken),
   );
   return errorHandling(res);
 }

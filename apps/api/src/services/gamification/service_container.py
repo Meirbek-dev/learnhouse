@@ -33,14 +33,14 @@ from .xp_service import XPService, create_xp_service
 class GamificationServices:
     xp: XPService
     streaks: StreakService
-    achievements: Optional[AchievementService]
+    achievements: AchievementService | None
     leaderboard: LeaderboardService
     cache: CacheService
-    events: Optional[EventBus] = None
+    events: EventBus | None = None
 
 
 def build_services(
-    db_session: Session, *, event_bus: Optional[EventBus] = None
+    db_session: Session, *, event_bus: EventBus | None = None
 ) -> GamificationServices:
     """Construct only core services by default (xp, streaks, leaderboard).
 

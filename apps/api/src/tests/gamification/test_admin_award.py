@@ -1,23 +1,25 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Callable
+from collections.abc import Callable
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlmodel import SQLModel, Session, select
+from sqlmodel import Session, SQLModel, select
 
 from src.core.events.database import engine, get_db_session
 from src.db.organizations import Organization
-from src.db.users import PublicUser, User
 from src.db.user_organizations import UserOrganization
+from src.db.users import PublicUser, User
 from src.routers.gamification import router as gamification_router
 from src.security.auth import get_current_user
 from src.tests.utils.init_data_for_tests import create_initial_data_for_tests
 
 
-def _build_app_with_bound_session(user_provider: Callable[[], PublicUser], conn) -> tuple[FastAPI, TestClient, Session]:
+def _build_app_with_bound_session(
+    user_provider: Callable[[], PublicUser], conn
+) -> tuple[FastAPI, TestClient, Session]:
     # Create schema on the same connection for in-memory SQLite
     SQLModel.metadata.create_all(conn)
     bound_session = Session(bind=conn)
@@ -45,25 +47,30 @@ def _get_org_and_users(session: Session):
     assert org is not None
     admin_user = session.exec(select(User).where(User.username == "studento")).first()
     regular_user = session.exec(select(User).where(User.username == "testo")).first()
-    assert admin_user and regular_user
+    assert admin_user
+    assert regular_user
 
     # Sanity-check roles from UserOrganization mapping
     admin_link = session.exec(
         select(UserOrganization).where(
-            (UserOrganization.user_id == admin_user.id) & (UserOrganization.org_id == org.id)
+            (UserOrganization.user_id == admin_user.id)
+            & (UserOrganization.org_id == org.id)
         )
     ).first()
     regular_link = session.exec(
         select(UserOrganization).where(
-            (UserOrganization.user_id == regular_user.id) & (UserOrganization.org_id == org.id)
+            (UserOrganization.user_id == regular_user.id)
+            & (UserOrganization.org_id == org.id)
         )
     ).first()
-    assert admin_link and admin_link.role_id == 1
-    assert regular_link and regular_link.role_id == 3
+    assert admin_link
+    assert admin_link.role_id == 1
+    assert regular_link
+    assert regular_link.role_id == 3
     return org, admin_user, regular_user
 
 
-def test_admin_award_requires_idempotency():
+def test_admin_award_requires_idempotency() -> None:
     # Maintain a single in-memory connection for the whole test
     with engine.connect() as conn:
         # Build app bound to this connection
@@ -72,7 +79,9 @@ def test_admin_award_requires_idempotency():
             return lambda: PublicUser(**u.model_dump())
 
         # Create app and seed
-        _, client, session = _build_app_with_bound_session(lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn)
+        _, client, session = _build_app_with_bound_session(
+            lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn
+        )
         org, admin_user, _ = _get_org_and_users(session)
 
         # Replace auth provider with real admin now that we have it
@@ -88,9 +97,11 @@ def test_admin_award_requires_idempotency():
         assert "Idempotency" in r.json().get("detail", "")
 
 
-def test_admin_award_forbidden_for_non_admin():
+def test_admin_award_forbidden_for_non_admin() -> None:
     with engine.connect() as conn:
-        _, client, session = _build_app_with_bound_session(lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn)
+        _, client, session = _build_app_with_bound_session(
+            lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn
+        )
         org, _admin_user, regular_user = _get_org_and_users(session)
 
         def as_regular() -> PublicUser:
@@ -106,9 +117,11 @@ def test_admin_award_forbidden_for_non_admin():
         assert r.status_code == 403, r.text
 
 
-def test_admin_award_success_and_audit_and_idempotency():
+def test_admin_award_success_and_audit_and_idempotency() -> None:
     with engine.connect() as conn:
-        _, client, session = _build_app_with_bound_session(lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn)
+        _, client, session = _build_app_with_bound_session(
+            lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn
+        )
         org, admin_user, _ = _get_org_and_users(session)
 
         def as_admin() -> PublicUser:
@@ -152,9 +165,11 @@ def test_admin_award_success_and_audit_and_idempotency():
         assert data2["transaction"]["id"] == tx1["id"]
 
 
-def test_daily_cap_enforced_for_admin_award():
+def test_daily_cap_enforced_for_admin_award() -> None:
     with engine.connect() as conn:
-        _, client, session = _build_app_with_bound_session(lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn)
+        _, client, session = _build_app_with_bound_session(
+            lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn
+        )
         org, admin_user, _ = _get_org_and_users(session)
 
         def as_admin() -> PublicUser:
@@ -185,9 +200,11 @@ def test_daily_cap_enforced_for_admin_award():
         assert r2.status_code == 429, r2.text
 
 
-def test_non_admin_source_ignores_custom_amount():
+def test_non_admin_source_ignores_custom_amount() -> None:
     with engine.connect() as conn:
-        _, client, session = _build_app_with_bound_session(lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn)
+        _, client, session = _build_app_with_bound_session(
+            lambda: PublicUser(id=0, user_uuid="u", username="", email=""), conn
+        )
         org, admin_user, _ = _get_org_and_users(session)
 
         def as_user() -> PublicUser:

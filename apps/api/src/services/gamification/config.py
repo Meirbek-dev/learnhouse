@@ -84,7 +84,7 @@ class XPRewardConfig:
     def as_mapping(self) -> dict[str, int]:
         return {
             k: getattr(self, k)
-            for k in self.__dataclass_fields__  [attr-defined]
+            for k in self.__dataclass_fields__
             if not k.startswith("_")
         }
 

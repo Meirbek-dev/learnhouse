@@ -27,7 +27,8 @@ const createRequestInit = (
     next,
   };
 
-  if (isJson) {
+  // Only set JSON content-type when sending a body (avoid preflight on simple GET/HEAD)
+  if (isJson && data != null) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -85,9 +86,7 @@ export const RequestBodyFormWithAuthHeader = (method: string, data: any, next: a
 };
 
 export const swrFetcher = async (url: string, token?: string) => {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers: Record<string, string> = {};
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }

@@ -6,11 +6,12 @@ server-day boundaries (UTC) — a streak increments only when a new server day
 starts. Grace-period based calculations are no longer used for incrementing.
 """
 
-from datetime import UTC, datetime, timedelta
 import logging
+from datetime import UTC, datetime, timedelta
 from typing import Optional, Tuple
 
 from sqlmodel import Session, and_, select
+
 from src.db.gamification import (
     StreakRecord,
     StreakType,

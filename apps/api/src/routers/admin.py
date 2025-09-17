@@ -10,11 +10,11 @@ from src.db.courses.activities import Activity
 from src.db.courses.assignments import Assignment, AssignmentTaskSubmission
 from src.db.courses.courses import Course
 from src.db.gamification import UserGamificationProfile
-from src.schemas.gamification import DashboardRead
 from src.db.organizations import Organization
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
+from src.schemas.gamification import DashboardRead
 from src.security.auth import get_current_user
 from src.services.gamification.gamification import (
     get_gamification_dashboard_result,
@@ -1137,8 +1137,11 @@ async def get_admin_user_gamification_dashboard(
         user_id=user_id, org_id=org_id, db_session=db_session
     )
     if not result.ok:
-        raise HTTPException(status_code=500, detail=result.error or "Failed to load dashboard")
+        raise HTTPException(
+            status_code=500, detail=result.error or "Failed to load dashboard"
+        )
     return result.value
+
 
 @router.get("/metrics/realtime")
 async def get_admin_realtime_metrics(
