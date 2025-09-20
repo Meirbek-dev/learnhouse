@@ -28,7 +28,7 @@ const createRequestInit = (
   };
 
   // Only set JSON content-type when sending a body (avoid preflight on simple GET/HEAD)
-  if (isJson && data != null) {
+  if (isJson && data !== null) {
     headers['Content-Type'] = 'application/json';
   }
 

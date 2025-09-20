@@ -9,16 +9,14 @@ from src.core.events.database import get_db_session
 from src.db.courses.activities import Activity
 from src.db.courses.assignments import Assignment, AssignmentTaskSubmission
 from src.db.courses.courses import Course
-from src.db.gamification import UserGamificationProfile
+from src.db.gamification import GamificationProfile
 from src.db.organizations import Organization
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
 from src.schemas.gamification import DashboardRead
 from src.security.auth import get_current_user
-from src.services.gamification.gamification import (
-    get_gamification_dashboard_result,
-)
+from src.services.gamification import simple_service as gamification_service
 
 """
   The function `is_user_admin_of_org` checks if a user has an admin role in a specified organization.
@@ -185,12 +183,12 @@ async def get_admin_overview_metrics(
 
         # Active users in last 30 days (using gamification profile updates as proxy)
         active_users_query = select(
-            func.count(func.distinct(UserGamificationProfile.user_id))
+            func.count(func.distinct(GamificationProfile.user_id))
         ).where(
             and_(
-                UserGamificationProfile.org_id == org_id,
-                UserGamificationProfile.last_login_date.is_not(None),
-                UserGamificationProfile.last_login_date
+                GamificationProfile.org_id == org_id,
+                GamificationProfile.last_login_date.is_not(None),
+                GamificationProfile.last_login_date
                 >= thirty_days_ago.strftime("%Y-%m-%d"),
             )
         )
@@ -451,13 +449,13 @@ async def get_admin_overview_metrics(
         # Calculate average time between user activities as a proxy for session duration
         avg_session_query = text("""
             SELECT AVG(EXTRACT(EPOCH FROM (
-                LAG(update_date::timestamp) OVER (PARTITION BY user_id ORDER BY update_date DESC) -
-                update_date::timestamp
+                LAG(updated_at::timestamp) OVER (PARTITION BY user_id ORDER BY updated_at DESC) -
+                updated_at::timestamp
             ))) / 60 as avg_minutes
-            FROM usergamificationprofile
+            FROM gamification_profiles
             WHERE org_id = :org_id
-            AND update_date IS NOT NULL
-            AND update_date >= :thirty_days_ago
+            AND updated_at IS NOT NULL
+            AND updated_at >= :thirty_days_ago
         """)
 
         try:
@@ -533,12 +531,12 @@ async def get_admin_analytics_metrics(
         # Get active users today (using gamification as proxy)
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         daily_active_query = select(
-            func.count(func.distinct(UserGamificationProfile.user_id))
+            func.count(func.distinct(GamificationProfile.user_id))
         ).where(
             and_(
-                UserGamificationProfile.org_id == org_id,
-                UserGamificationProfile.last_login_date.is_not(None),
-                UserGamificationProfile.last_login_date >= today.strftime("%Y-%m-%d"),
+                GamificationProfile.org_id == org_id,
+                GamificationProfile.last_login_date.is_not(None),
+                GamificationProfile.last_login_date >= today.strftime("%Y-%m-%d"),
             )
         )
         daily_active_result = db_session.exec(daily_active_query).first()
@@ -634,11 +632,11 @@ async def get_admin_analytics_metrics(
 
         # Calculate actual return rate from gamification data
         users_with_streaks_query = select(
-            func.count(UserGamificationProfile.user_id)
+            func.count(GamificationProfile.user_id)
         ).where(
             and_(
-                UserGamificationProfile.org_id == org_id,
-                UserGamificationProfile.current_login_streak > 1,
+                GamificationProfile.org_id == org_id,
+                GamificationProfile.login_streak > 1,
             )
         )
         users_with_streaks_result = db_session.exec(users_with_streaks_query).first()
@@ -720,12 +718,12 @@ async def get_admin_analytics_metrics(
             WITH activity_sessions AS (
                 SELECT
                     user_id,
-                    update_date::timestamp as activity_time,
-                    LAG(update_date::timestamp) OVER (PARTITION BY user_id ORDER BY update_date) as prev_activity
-                FROM usergamificationprofile
+                    updated_at::timestamp as activity_time,
+                    LAG(updated_at::timestamp) OVER (PARTITION BY user_id ORDER BY updated_at) as prev_activity
+                FROM gamification_profiles
                 WHERE org_id = :org_id
-                AND update_date IS NOT NULL
-                AND update_date >= :seven_days_ago
+                AND updated_at IS NOT NULL
+                AND updated_at >= :seven_days_ago
             )
             SELECT AVG(
                 EXTRACT(EPOCH FROM (activity_time - prev_activity)) / 60
@@ -759,13 +757,13 @@ async def get_admin_analytics_metrics(
         # Peak hours analysis based on actual activity timestamps
         peak_hours_query = text("""
             SELECT
-                EXTRACT(HOUR FROM update_date::timestamp) as hour,
+                EXTRACT(HOUR FROM updated_at::timestamp) as hour,
                 COUNT(*) as activity_count
-            FROM usergamificationprofile
+            FROM gamification_profiles
             WHERE org_id = :org_id
-            AND update_date IS NOT NULL
-            AND update_date >= :seven_days_ago
-            GROUP BY EXTRACT(HOUR FROM update_date::timestamp)
+            AND updated_at IS NOT NULL
+            AND updated_at >= :seven_days_ago
+            GROUP BY EXTRACT(HOUR FROM updated_at::timestamp)
             ORDER BY activity_count DESC
             LIMIT 5
         """)
@@ -787,15 +785,10 @@ async def get_admin_analytics_metrics(
         # Device types estimation based on profile data patterns
         device_types_query = text("""
             SELECT
-                CASE
-                    WHEN profile_data::text LIKE '%mobile%' THEN 'mobile'
-                    WHEN profile_data::text LIKE '%tablet%' THEN 'tablet'
-                    ELSE 'desktop'
-                END as device_type,
+                COALESCE(preferences->>'device', 'desktop') as device_type,
                 COUNT(*) as count
-            FROM usergamificationprofile
+            FROM gamification_profiles
             WHERE org_id = :org_id
-            AND profile_data IS NOT NULL
             GROUP BY device_type
         """)
 
@@ -881,57 +874,55 @@ async def get_admin_gamification_metrics(
 
     try:
         # Get total gamification profiles
-        total_profiles_query = select(
-            func.count(UserGamificationProfile.user_id)
-        ).where(UserGamificationProfile.org_id == org_id)
+        total_profiles_query = select(func.count(GamificationProfile.user_id)).where(
+            GamificationProfile.org_id == org_id
+        )
         total_profiles = db_session.exec(total_profiles_query).first() or 0
 
         # Get level distribution
         level_distribution_query = (
             select(
-                UserGamificationProfile.current_level,
-                func.count(UserGamificationProfile.user_id).label("count"),
+                GamificationProfile.level,
+                func.count(GamificationProfile.user_id).label("count"),
             )
-            .where(UserGamificationProfile.org_id == org_id)
-            .group_by(UserGamificationProfile.current_level)
-            .order_by(UserGamificationProfile.current_level)
+            .where(GamificationProfile.org_id == org_id)
+            .group_by(GamificationProfile.level)
+            .order_by(GamificationProfile.level)
         )
 
         level_distribution_result = db_session.exec(level_distribution_query).all()
         level_distribution = [
-            {"level": level.current_level, "users": level.count}
+            {"level": level.level, "users": level.count}
             for level in level_distribution_result
         ]
 
         # Get average XP and highest achievers
-        avg_xp_query = select(func.avg(UserGamificationProfile.total_xp)).where(
-            UserGamificationProfile.org_id == org_id
+        avg_xp_query = select(func.avg(GamificationProfile.total_xp)).where(
+            GamificationProfile.org_id == org_id
         )
         avg_xp = db_session.exec(avg_xp_query).first() or 0
 
-        max_xp_query = select(func.max(UserGamificationProfile.total_xp)).where(
-            UserGamificationProfile.org_id == org_id
+        max_xp_query = select(func.max(GamificationProfile.total_xp)).where(
+            GamificationProfile.org_id == org_id
         )
         max_xp = db_session.exec(max_xp_query).first() or 0
 
         # Get streak statistics
-        avg_streak_query = select(
-            func.avg(UserGamificationProfile.current_login_streak)
-        ).where(UserGamificationProfile.org_id == org_id)
+        avg_streak_query = select(func.avg(GamificationProfile.login_streak)).where(
+            GamificationProfile.org_id == org_id
+        )
         avg_login_streak = db_session.exec(avg_streak_query).first() or 0
 
         max_streak_query = select(
-            func.max(UserGamificationProfile.longest_login_streak)
-        ).where(UserGamificationProfile.org_id == org_id)
+            func.max(GamificationProfile.longest_login_streak)
+        ).where(GamificationProfile.org_id == org_id)
         max_login_streak = db_session.exec(max_streak_query).first() or 0
 
         # Get active gamified users (users with XP > 0)
-        active_gamified_query = select(
-            func.count(UserGamificationProfile.user_id)
-        ).where(
+        active_gamified_query = select(func.count(GamificationProfile.user_id)).where(
             and_(
-                UserGamificationProfile.org_id == org_id,
-                UserGamificationProfile.total_xp > 0,
+                GamificationProfile.org_id == org_id,
+                GamificationProfile.total_xp > 0,
             )
         )
         active_gamified_users = db_session.exec(active_gamified_query).first() or 0
@@ -955,7 +946,7 @@ async def get_admin_gamification_metrics(
                     ELSE '5000+ XP'
                 END as xp_range,
                 COUNT(*) as user_count
-            FROM usergamificationprofile
+            FROM gamification_profiles
             WHERE org_id = :org_id
             GROUP BY xp_range
             ORDER BY MIN(total_xp)
@@ -1044,11 +1035,11 @@ async def get_admin_retention_metrics(
                 check_end = check_start + timedelta(days=30)
 
                 active_users_query = select(
-                    func.count(func.distinct(UserGamificationProfile.user_id))
+                    func.count(func.distinct(GamificationProfile.user_id))
                 ).where(
                     and_(
-                        UserGamificationProfile.org_id == org_id,
-                        UserGamificationProfile.user_id.in_(
+                        GamificationProfile.org_id == org_id,
+                        GamificationProfile.user_id.in_(
                             select(UserOrganization.user_id).where(
                                 and_(
                                     UserOrganization.org_id == org_id,
@@ -1057,9 +1048,9 @@ async def get_admin_retention_metrics(
                                 )
                             )
                         ),
-                        UserGamificationProfile.last_login_date
+                        GamificationProfile.last_login_date
                         >= check_start.strftime("%Y-%m-%d"),
-                        UserGamificationProfile.last_login_date
+                        GamificationProfile.last_login_date
                         < check_end.strftime("%Y-%m-%d"),
                     )
                 )
@@ -1133,14 +1124,56 @@ async def get_admin_user_gamification_dashboard(
             status_code=403, detail="Not authorized to access admin metrics"
         )
 
-    result = await get_gamification_dashboard_result(
-        user_id=user_id, org_id=org_id, db_session=db_session
-    )
-    if not result.ok:
-        raise HTTPException(
-            status_code=500, detail=result.error or "Failed to load dashboard"
-        )
-    return result.value
+    try:
+        data = gamification_service.get_dashboard_data(db_session, user_id, org_id)
+        # Minimal shaping to match previous response
+        return {
+            "profile": {
+                "id": data["profile"].id,
+                "user_id": data["profile"].user_id,
+                "organization_id": data["profile"].org_id,
+                "total_xp": data["profile"].total_xp,
+                "level": data["profile"].level,
+                "current_streak": data["profile"].login_streak,
+                "longest_streak": data["profile"].longest_login_streak,
+                "last_activity_date": data["profile"].last_login_date.isoformat()
+                if data["profile"].last_login_date
+                else None,
+                "preferences": data["profile"].preferences,
+                "created_at": data["profile"].created_at.isoformat(),
+                "updated_at": data["profile"].updated_at.isoformat(),
+            },
+            "recent_transactions": [
+                {
+                    "id": tx.id,
+                    "user_id": tx.user_id,
+                    "organization_id": tx.org_id,
+                    "amount": tx.amount,
+                    "activity_type": tx.source.value,
+                    "activity_id": tx.source_id,
+                    "reason": tx.source.value,
+                    "created_at": tx.created_at.isoformat(),
+                }
+                for tx in data["recent_transactions"]
+            ],
+            "leaderboard": {
+                "organization_id": org_id,
+                "period": "all_time",
+                "entries": [
+                    {
+                        "user_id": p.user_id,
+                        "total_xp": p.total_xp,
+                        "level": p.level,
+                        "rank": i + 1,
+                    }
+                    for i, p in enumerate(data["leaderboard"])
+                ],
+                "generated_at": None,
+            },
+            "streak_info": data["streak_info"],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/metrics/realtime")
@@ -1166,11 +1199,11 @@ async def get_admin_realtime_metrics(
 
         # Live user activity (last 5 minutes)
         recent_activity_query = select(
-            func.count(func.distinct(UserGamificationProfile.user_id))
+            func.count(func.distinct(GamificationProfile.user_id))
         ).where(
             and_(
-                UserGamificationProfile.org_id == org_id,
-                UserGamificationProfile.last_login_date
+                GamificationProfile.org_id == org_id,
+                GamificationProfile.last_login_date
                 >= (now - timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S"),
             )
         )
@@ -1180,23 +1213,22 @@ async def get_admin_realtime_metrics(
         active_sessions_query = (
             select(
                 Course.name,
-                func.count(UserGamificationProfile.user_id).label("sessions"),
+                func.count(GamificationProfile.user_id).label("sessions"),
             )
             .join(UserOrganization, UserOrganization.org_id == Course.org_id)
             .join(
-                UserGamificationProfile,
-                UserGamificationProfile.user_id == UserOrganization.user_id,
+                GamificationProfile,
+                GamificationProfile.user_id == UserOrganization.user_id,
             )
             .where(
                 and_(
                     Course.org_id == org_id,
-                    UserGamificationProfile.last_login_date
-                    >= today.strftime("%Y-%m-%d"),
-                    UserGamificationProfile.org_id == org_id,
+                    GamificationProfile.last_login_date >= today.strftime("%Y-%m-%d"),
+                    GamificationProfile.org_id == org_id,
                 )
             )
             .group_by(Course.name)
-            .order_by(func.count(UserGamificationProfile.user_id).desc())
+            .order_by(func.count(GamificationProfile.user_id).desc())
             .limit(5)
         )
 
@@ -1286,10 +1318,10 @@ async def get_admin_alerts(
             and_(
                 UserOrganization.org_id == org_id,
                 UserOrganization.user_id.not_in(
-                    select(UserGamificationProfile.user_id).where(
+                    select(GamificationProfile.user_id).where(
                         and_(
-                            UserGamificationProfile.org_id == org_id,
-                            UserGamificationProfile.last_login_date
+                            GamificationProfile.org_id == org_id,
+                            GamificationProfile.last_login_date
                             >= inactive_threshold.strftime("%Y-%m-%d"),
                         )
                     )
@@ -1425,22 +1457,22 @@ async def bulk_user_operation(
 
                 if action == "reset_progress":
                     # Reset gamification progress
-                    profile_query = select(UserGamificationProfile).where(
+                    profile_query = select(GamificationProfile).where(
                         and_(
-                            UserGamificationProfile.user_id == user_id,
-                            UserGamificationProfile.org_id == org_id,
+                            GamificationProfile.user_id == user_id,
+                            GamificationProfile.org_id == org_id,
                         )
                     )
                     profile = db_session.exec(profile_query).first()
 
                     if profile:
                         profile.total_xp = 0
-                        profile.current_level = 1
-                        profile.current_login_streak = 0
+                        profile.level = 1
+                        profile.login_streak = 0
                         profile.longest_login_streak = 0
-                        profile.current_learning_streak = 0
+                        profile.learning_streak = 0
                         profile.longest_learning_streak = 0
-                        profile.update_date = str(datetime.now())
+                        profile.updated_at = datetime.now()
                         db_session.add(profile)
 
                 elif action in ["activate", "deactivate"]:
@@ -1632,7 +1664,7 @@ async def get_user_analytics(
     page: Annotated[int, Query(ge=1)] = 1,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     sort_by: Annotated[
-        str, Query(regex="^(total_xp|current_level|last_login_date|creation_date)$")
+        str, Query(regex="^(total_xp|level|last_login_date|creation_date)$")
     ] = "total_xp",
     sort_order: Annotated[str, Query(regex="^(asc|desc)$")] = "desc",
     db_session: Session = Depends(get_db_session),
@@ -1661,17 +1693,17 @@ async def get_user_analytics(
                 User.last_name,
                 User.email,
                 User.creation_date,
-                UserGamificationProfile.total_xp,
-                UserGamificationProfile.current_level,
-                UserGamificationProfile.current_login_streak,
-                UserGamificationProfile.last_login_date,
+                GamificationProfile.total_xp,
+                GamificationProfile.level,
+                GamificationProfile.login_streak,
+                GamificationProfile.last_login_date,
             )
             .join(UserOrganization, User.id == UserOrganization.user_id)
             .join(
-                UserGamificationProfile,
+                GamificationProfile,
                 and_(
-                    User.id == UserGamificationProfile.user_id,
-                    UserGamificationProfile.org_id == org_id,
+                    User.id == GamificationProfile.user_id,
+                    GamificationProfile.org_id == org_id,
                 ),
                 isouter=True,
             )
@@ -1680,11 +1712,11 @@ async def get_user_analytics(
 
         # Apply sorting
         if sort_by == "total_xp":
-            order_column = UserGamificationProfile.total_xp
-        elif sort_by == "current_level":
-            order_column = UserGamificationProfile.current_level
+            order_column = GamificationProfile.total_xp
+        elif sort_by == "level":
+            order_column = GamificationProfile.level
         elif sort_by == "last_login_date":
-            order_column = UserGamificationProfile.last_login_date
+            order_column = GamificationProfile.last_login_date
         else:  # creation_date
             order_column = User.creation_date
 
@@ -1728,8 +1760,8 @@ async def get_user_analytics(
                     "joinDate": user.creation_date,
                     "gamification": {
                         "totalXP": user.total_xp or 0,
-                        "currentLevel": user.current_level or 1,
-                        "loginStreak": user.current_login_streak or 0,
+                        "level": user.level or 1,
+                        "loginStreak": user.login_streak or 0,
                         "lastLoginDate": user.last_login_date,
                     },
                     "performance": {
@@ -1760,7 +1792,7 @@ async def get_user_analytics(
                     [u for u in user_analytics if u["gamification"]["totalXP"] > 0]
                 ),
                 "avgLevel": round(
-                    sum(u["gamification"]["currentLevel"] for u in user_analytics)
+                    sum(u["gamification"]["level"] for u in user_analytics)
                     / len(user_analytics)
                     if user_analytics
                     else 0,
@@ -1806,22 +1838,22 @@ async def update_user_status(
 
         if action == "reset_progress":
             # Reset gamification progress
-            profile_query = select(UserGamificationProfile).where(
+            profile_query = select(GamificationProfile).where(
                 and_(
-                    UserGamificationProfile.user_id == user_id,
-                    UserGamificationProfile.org_id == org_id,
+                    GamificationProfile.user_id == user_id,
+                    GamificationProfile.org_id == org_id,
                 )
             )
             profile = db_session.exec(profile_query).first()
 
             if profile:
                 profile.total_xp = 0
-                profile.current_level = 1
-                profile.current_login_streak = 0
+                profile.level = 1
+                profile.login_streak = 0
                 profile.longest_login_streak = 0
-                profile.current_learning_streak = 0
+                profile.learning_streak = 0
                 profile.longest_learning_streak = 0
-                profile.update_date = str(datetime.now())
+                profile.updated_at = datetime.now()
                 db_session.add(profile)
                 db_session.commit()
 
@@ -2080,15 +2112,15 @@ async def export_organization_data(
                     User.email,
                     User.creation_date,
                     UserOrganization.creation_date.label("join_date"),
-                    UserGamificationProfile.total_xp,
-                    UserGamificationProfile.current_level,
+                    GamificationProfile.total_xp,
+                    GamificationProfile.level,
                 )
                 .join(UserOrganization, User.id == UserOrganization.user_id)
                 .join(
-                    UserGamificationProfile,
+                    GamificationProfile,
                     and_(
-                        User.id == UserGamificationProfile.user_id,
-                        UserGamificationProfile.org_id == org_id,
+                        User.id == GamificationProfile.user_id,
+                        GamificationProfile.org_id == org_id,
                     ),
                     isouter=True,
                 )
@@ -2107,7 +2139,7 @@ async def export_organization_data(
                         "userCreationDate": user.creation_date,
                         "organizationJoinDate": user.join_date,
                         "totalXP": user.total_xp or 0,
-                        "currentLevel": user.current_level or 1,
+                        "level": user.level or 1,
                     }
                 )
 
@@ -2169,11 +2201,11 @@ async def export_organization_data(
             active_users = (
                 db_session.exec(
                     select(
-                        func.count(func.distinct(UserGamificationProfile.user_id))
+                        func.count(func.distinct(GamificationProfile.user_id))
                     ).where(
                         and_(
-                            UserGamificationProfile.org_id == org_id,
-                            UserGamificationProfile.last_login_date
+                            GamificationProfile.org_id == org_id,
+                            GamificationProfile.last_login_date
                             >= thirty_days_ago.strftime("%Y-%m-%d"),
                         )
                     )
@@ -2236,18 +2268,18 @@ async def get_admin_users(
                 User.email,
                 User.creation_date,
                 UserOrganization.creation_date.label("join_date"),
-                UserGamificationProfile.total_xp,
-                UserGamificationProfile.current_level,
-                UserGamificationProfile.last_login_date,
+                GamificationProfile.total_xp,
+                GamificationProfile.level,
+                GamificationProfile.last_login_date,
                 Role.name.label("role_name"),
             )
             .join(UserOrganization, User.id == UserOrganization.user_id)
             .join(Role, UserOrganization.role_id == Role.id, isouter=True)
             .join(
-                UserGamificationProfile,
+                GamificationProfile,
                 and_(
-                    User.id == UserGamificationProfile.user_id,
-                    UserGamificationProfile.org_id == org_id,
+                    User.id == GamificationProfile.user_id,
+                    GamificationProfile.org_id == org_id,
                 ),
                 isouter=True,
             )
@@ -2270,16 +2302,16 @@ async def get_admin_users(
         if filter == "active":
             thirty_days_ago = datetime.now() - timedelta(days=30)
             base_query = base_query.where(
-                UserGamificationProfile.last_login_date
+                GamificationProfile.last_login_date
                 >= thirty_days_ago.strftime("%Y-%m-%d")
             )
         elif filter == "inactive":
             thirty_days_ago = datetime.now() - timedelta(days=30)
             base_query = base_query.where(
                 or_(
-                    UserGamificationProfile.last_login_date
+                    GamificationProfile.last_login_date
                     < thirty_days_ago.strftime("%Y-%m-%d"),
-                    UserGamificationProfile.last_login_date.is_(None),
+                    GamificationProfile.last_login_date.is_(None),
                 )
             )
 
@@ -2648,10 +2680,14 @@ async def perform_system_action(
         if action == "reset_analytics":
             # Reset gamification analytics for the organization
             reset_query = text("""
-                UPDATE usergamificationprofile
-                SET total_xp = 0, current_level = 1, current_login_streak = 0,
-                    longest_login_streak = 0, current_learning_streak = 0,
-                    longest_learning_streak = 0
+                UPDATE gamification_profiles
+                SET total_xp = 0,
+                    level = 1,
+                    login_streak = 0,
+                    longest_login_streak = 0,
+                    learning_streak = 0,
+                    longest_learning_streak = 0,
+                    updated_at = NOW()
                 WHERE org_id = :org_id
             """)
             db_session.exec(reset_query.params(org_id=org_id))

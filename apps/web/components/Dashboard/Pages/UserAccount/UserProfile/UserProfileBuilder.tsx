@@ -201,7 +201,6 @@ type GamificationSection = {
     showLevel: boolean;
     showXP: boolean;
     showStreaks: boolean;
-    showAchievements: boolean;
     showLeaderboard: boolean;
   };
 } & BaseSection;
@@ -355,7 +354,6 @@ const UserProfileBuilder = () => {
             showLevel: true,
             showXP: true,
             showStreaks: true,
-            showAchievements: true,
             showLeaderboard: false,
           },
         };

@@ -24,8 +24,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { GamificationProfileSection } from '@/components/Dashboard/Gamification/GamificationProfileSection';
 import { AvatarCustomization } from '@/components/Dashboard/Gamification/AvatarCustomization';
+import { GamificationProfileSection } from '@/components/Dashboard/Gamification';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -80,31 +80,15 @@ const DEFAULT_PREFERENCES: GamificationPreferences = {
 };
 
 // Remote persistence helpers (server authoritative with optimistic local fallback)
-import { getAPIUrl } from '@/services/config/config';
+import { getGamificationPreferences, updateGamificationPreferences } from '@/services/gamification/gamification';
 
 async function fetchPreferences(orgId: number, token: string): Promise<GamificationPreferences> {
-  const res = await fetch(`${getAPIUrl()}gamification/preferences/${orgId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    console.error('Failed to fetch preferences:', res.status, res.statusText, await res.text());
-    throw new Error(`Failed to load preferences: ${res.status} ${res.statusText}`);
-  }
-  const data = await res.json();
-  return { ...DEFAULT_PREFERENCES, ...data.preferences };
+  const prefs = await getGamificationPreferences(orgId, token);
+  return { ...DEFAULT_PREFERENCES, ...prefs };
 }
 
 async function savePreferencesRemote(orgId: number, token: string, prefs: GamificationPreferences) {
-  const res = await fetch(`${getAPIUrl()}gamification/preferences/${orgId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ preferences: prefs }),
-  });
-  if (!res.ok) {
-    console.error('Failed to save preferences:', res.status, res.statusText, await res.text());
-    throw new Error(`Failed to save preferences: ${res.status} ${res.statusText}`);
-  }
-  return await res.json();
+  return updateGamificationPreferences(orgId, token, prefs);
 }
 
 export default function UserGamificationSettings() {
@@ -280,9 +264,8 @@ export default function UserGamificationSettings() {
             >
               <GamificationProfileSection
                 orgId={orgId}
-                variant="full"
-                showUnlocks
-                showAchievements
+                variant="compact"
+                showUnlocks={false}
               />
             </TabsContent>
 

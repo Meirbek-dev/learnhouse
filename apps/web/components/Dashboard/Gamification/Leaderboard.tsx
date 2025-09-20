@@ -1,7 +1,7 @@
 'use client';
 
-import { AlertCircle, Award, Crown, Medal, RefreshCw, TrendingUp, Trophy, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertCircle, Award, Crown, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
@@ -29,9 +29,7 @@ interface LeaderboardEntry {
 }
 
 interface OrganizationLeaderboard {
-  org_id: number;
   entries: LeaderboardEntry[];
-  total_participants: number;
 }
 
 interface LeaderboardProps {
@@ -39,13 +37,20 @@ interface LeaderboardProps {
   className?: string;
   limit?: number;
   compact?: boolean;
+  data?: OrganizationLeaderboard | null;
 }
 
-export function Leaderboard({ orgId, className = '', limit = 20, compact = false }: LeaderboardProps) {
+export function Leaderboard({
+  orgId,
+  className = '',
+  limit = 20,
+  compact = false,
+  data: serverData,
+}: LeaderboardProps) {
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(serverData ?? null);
+  const [isLoading, setIsLoading] = useState(!serverData);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
@@ -96,8 +101,10 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
   }, [retryCount, fetchLeaderboard]);
 
   useEffect(() => {
-    fetchLeaderboard();
-  }, [fetchLeaderboard]);
+    if (!serverData) {
+      fetchLeaderboard();
+    }
+  }, [fetchLeaderboard, serverData]);
 
   const getRankIcon = useCallback(
     (rank: number) => {
@@ -321,17 +328,7 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
               <Trophy className="h-5 w-5" />
               {t('leaderboard.title')}
             </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-muted-foreground flex cursor-help items-center gap-1 text-sm">
-                  <Users className="h-4 w-4" />
-                  {t('leaderboard.totalParticipants', { total: leaderboard.total_participants })}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t('leaderboard.totalParticipants', { total: leaderboard.total_participants })}</p>
-              </TooltipContent>
-            </Tooltip>
+            {/* Total participants removed from simplified leaderboard contract */}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -420,13 +417,7 @@ export function Leaderboard({ orgId, className = '', limit = 20, compact = false
             ))}
           </div>
 
-          {leaderboard.total_participants > limit && (
-            <div className="mt-4 text-center">
-              <p className="text-muted-foreground text-sm">
-                {t('leaderboard.showingTop', { limit, total: leaderboard.total_participants })}
-              </p>
-            </div>
-          )}
+          {/* Pagination / total participants messaging removed with simplified data */}
         </CardContent>
       </Card>
     </TooltipProvider>

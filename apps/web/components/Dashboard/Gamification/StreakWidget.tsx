@@ -3,19 +3,19 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertCircle, Calendar, Flame, RefreshCw, Star, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useGamification } from '@/hooks/useGamification';
+import { useProvideStreaks } from '@/hooks/useStreaks';
 import { useCallback, useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
 
-// Note: Profile shape comes from services/gamification. It exposes `streaks`
-// as either a mapping { login: number, learning: number } or a generic map.
-// It does not guarantee last_activity fields; this widget derives display-safe
-// values and guards for missing data.
+// Note: Profile shape comes from services/gamification. It uses UserGamificationProfile
+// which has current_streak, longest_streak, and last_activity_date fields.
+// Learning streaks are not currently tracked separately in the new profile structure.
 
 interface StreakWidgetProps {
   orgId: number;
@@ -28,7 +28,12 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
   const format = useFormatter();
   const { data: session } = useSession();
   const accessToken: string | undefined = (session as any)?.tokens?.access_token;
-  const { profile, isLoading, error, refetch } = useUnifiedGamification({ orgId, accessToken, enabled: true });
+  const { profile, isLoading, error, refetch } = useGamification({
+    orgId,
+    accessToken,
+    enabled: !!orgId && !!accessToken,
+  });
+  const { streaks } = useProvideStreaks(orgId, accessToken);
   const [retryCount, setRetryCount] = useState(0);
   const handleRetry = useCallback(() => {
     if (retryCount < 3) {
@@ -44,18 +49,6 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
       try {
         const lastDate = new Date(lastActivityDate);
         const today = new Date();
-
-        // Use locale-aware date comparison
-        const lastDateString = lastDate.toLocaleDateString(locale, {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        });
-        const todayString = today.toLocaleDateString(locale, {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        });
 
         // Reset time to compare dates only
         lastDate.setHours(0, 0, 0, 0);
@@ -94,20 +87,39 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
 
   const getStreakMessage = useCallback(
     (streak: number, status: string, type: 'login' | 'learning') => {
+      // Use a safe translation wrapper to prevent runtime errors if a message key
+      // expects placeholders we don't supply or next-intl encounters malformed ICU.
+      const safeT = (key: string, values?: Record<string, unknown>) => {
+        try {
+          const res = t(key as any, values as any);
+          // Ensure we always return a string
+          if (typeof res === 'string') return res;
+          if (res === null) return '';
+          return String(res);
+        } catch {
+          // Fallback to empty string to avoid passing undefined into ICU
+          return '';
+        }
+      };
+
       if (status === 'active' && streak > 0) {
-        return t('streakMessages.active', {
-          count: streak,
-          plural: streak > 1 ? 's' : '',
-        });
+        // Provide only count; translation now uses ICU plural rules.
+        return safeT('streakMessages.active', { count: Number.isFinite(streak) ? streak : 0 });
       }
+
       if (status === 'at-risk') {
-        const action = type === 'login' ? t('streakMessages.loginAction') : t('streakMessages.completeAction');
-        return t('streakMessages.atRisk', { action });
+        const actionRaw =
+          type === 'login' ? safeT('streakMessages.loginAction') : safeT('streakMessages.completeAction');
+        const action = actionRaw || ''; // never undefined
+        return safeT('streakMessages.atRisk', { action });
       }
+
       if (status === 'broken' || streak === 0) {
-        const typeText = type === 'login' ? t('streakMessages.login') : t('streakMessages.learning');
-        return t('streakMessages.broken', { type: typeText });
+        const typeTextRaw = type === 'login' ? safeT('streakMessages.login') : safeT('streakMessages.learning');
+        const typeText = typeTextRaw || '';
+        return safeT('streakMessages.broken', { type: typeText });
       }
+
       return '';
     },
     [t],
@@ -120,6 +132,9 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
 
       try {
         const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) {
+          return t('tooltips.invalidDate');
+        }
         return format.dateTime(date, {
           year: 'numeric',
           month: 'long',
@@ -142,69 +157,104 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
 
       try {
         const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) {
+          return t('tooltips.invalidDate');
+        }
+
         const now = new Date();
-        return format.relativeTime(date, now);
+        const diffMs = date.getTime() - now.getTime();
+        const absMs = Math.abs(diffMs);
+
+        // Prefer days/hours granularity
+        const minute = 60 * 1000;
+        const hour = 60 * minute;
+        const day = 24 * hour;
+
+        let value: number;
+        let unit: Intl.RelativeTimeFormatUnit;
+
+        if (absMs >= day) {
+          value = Math.round(diffMs / day);
+          unit = 'day';
+        } else if (absMs >= hour) {
+          value = Math.round(diffMs / hour);
+          unit = 'hour';
+        } else {
+          value = Math.round(diffMs / minute);
+          unit = 'minute';
+        }
+
+        let rel: string;
+        try {
+          const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
+          rel = rtf.format(value, unit);
+        } catch {
+          // Very old browsers: simple fallback
+          const suffix = value < 0 ? t('tooltips.ago') : t('tooltips.in');
+          rel = `${Math.abs(value)} ${unit} ${suffix}`.trim();
+        }
+        return rel;
       } catch (error) {
         console.warn('Invalid date format in getRelativeTime:', dateString, error);
         return t('tooltips.invalidDate');
       }
     },
-    [format, t],
+    [t],
   );
 
-  // Localized day(s) using next-intl's number formatting
+  // Localized day(s) using next-intl's plural rules. IMPORTANT: pass a raw number (not a formatted string)
+  // so pluralization works and libraries don't attempt value.toString() on an undefined placeholder.
   const formatDays = useCallback(
     (count: number) => {
-      const formattedNumber = format.number(count);
-      return t('days', { count: formattedNumber });
+      const safeCount = Number.isFinite(count) ? count : 0;
+      try {
+        const result = t('days', { count: safeCount });
+        if (typeof result === 'undefined' || result === null) {
+          return `${safeCount}`;
+        }
+        return typeof result === 'string' ? result : String(result);
+      } catch {
+        // Fallback if translation or formatting fails
+        return `${safeCount}`;
+      }
     },
-    [format, t],
+    [t],
   );
 
   const streakData = useMemo(() => {
     if (!profile) return null;
-
-    // Extract streak counts from flexible profile.streaks
-    const rawStreaks: any = (profile as any).streaks ?? {};
-    let loginCurrent = 0;
-    let loginLongest = 0;
-    let learningCurrent = 0;
-    let learningLongest = 0;
-
-    if (rawStreaks) {
-      // Support: { login: number } OR { login: { current, longest } }
-      const sLogin = rawStreaks.login;
-      const sLearning = rawStreaks.learning;
-      if (typeof sLogin === 'number') {
-        loginCurrent = sLogin;
-        loginLongest = sLogin; // fallback: no separate longest provided
-      } else if (sLogin && typeof sLogin === 'object') {
-        loginCurrent = Number(sLogin.current) || 0;
-        loginLongest = Number(sLogin.longest) || loginCurrent;
+    try {
+      // Basic sanity log in dev
+      if (process.env.NODE_ENV !== 'production') {
+        console.debug('[StreakWidget] profile snapshot', {
+          current_streak: (profile as any)?.current_streak,
+          longest_streak: (profile as any)?.longest_streak,
+          last_activity_date: (profile as any)?.last_activity_date,
+        });
       }
-      if (typeof sLearning === 'number') {
-        learningCurrent = sLearning;
-        learningLongest = sLearning;
-      } else if (sLearning && typeof sLearning === 'object') {
-        learningCurrent = Number(sLearning.current) || 0;
-        learningLongest = Number(sLearning.longest) || learningCurrent;
-      }
-    }
+    } catch {}
 
-    // Last activity fields are not part of the normalized profile; treat as optional
-    const loginLast: string | null = (profile as any)?.last_activity?.login ?? null;
-    const learningLast: string | null = (profile as any)?.last_activity?.learning ?? null;
+    // UserGamificationProfile has current_streak and longest_streak
+    // We'll use current_streak for login streak and set learning streak to 0
+    // Use the correct field names from the updated profile structure
+    const loginCurrent = (streaks?.login ?? profile.login_streak) || 0;
+    const loginLongest = (streaks?.maxLogin ?? profile.longest_login_streak) || 0;
+    const learningCurrent = (streaks?.learning ?? profile.learning_streak) || 0;
+    const learningLongest = (streaks?.maxLearning ?? profile.longest_learning_streak) || 0;
+
+    const lastActivityDate = profile.last_login_date || profile.last_learning_date || null;
+
     return {
-      loginStatus: getStreakStatus(loginLast),
-      learningStatus: getStreakStatus(learningLast),
-      loginMessage: getStreakMessage(loginCurrent, getStreakStatus(loginLast), 'login'),
-      learningMessage: getStreakMessage(learningCurrent, getStreakStatus(learningLast), 'learning'),
-      current_login_streak: loginCurrent, // local structure for rendering
+      loginStatus: getStreakStatus(lastActivityDate),
+      learningStatus: 'none', // No learning streak data in new profile
+      loginMessage: getStreakMessage(loginCurrent, getStreakStatus(lastActivityDate), 'login'),
+      learningMessage: getStreakMessage(learningCurrent, 'none', 'learning'),
+      current_login_streak: loginCurrent,
       longest_login_streak: loginLongest,
       current_learning_streak: learningCurrent,
       longest_learning_streak: learningLongest,
-      last_login_date: loginLast,
-      last_learning_activity_date: learningLast,
+      last_login_date: lastActivityDate,
+      last_learning_activity_date: null, // Not available in new profile
     } as any;
   }, [profile, getStreakStatus, getStreakMessage]);
 
@@ -320,15 +370,15 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
                     <h3 className="font-semibold">{t('loginStreak')}</h3>
                   </div>
                   <Badge variant={getStreakBadgeVariant(loginStatus)}>
-                    {formatDays(streakData.current_login_streak)}
+                    {formatDays(streakData?.current_login_streak || 0)}
                   </Badge>
                 </div>
 
                 <p className="text-muted-foreground mb-2 text-sm">{loginMessage}</p>
 
-                {streakData.longest_login_streak > streakData.current_login_streak && (
+                {(streakData?.longest_login_streak || 0) > (streakData?.current_login_streak || 0) && (
                   <p className="text-muted-foreground text-xs">
-                    {t('personalBest', { count: streakData.longest_login_streak })}
+                    {t('personalBest', { count: streakData?.longest_login_streak || 0 })}
                   </p>
                 )}
               </div>
@@ -358,15 +408,15 @@ export function StreakWidget({ orgId, className = '' }: StreakWidgetProps) {
                     <h3 className="font-semibold">{t('learningStreak')}</h3>
                   </div>
                   <Badge variant={getStreakBadgeVariant(learningStatus)}>
-                    {formatDays(streakData.current_learning_streak)}
+                    {formatDays(streakData?.current_learning_streak || 0)}
                   </Badge>
                 </div>
 
                 <p className="text-muted-foreground mb-2 text-sm">{learningMessage}</p>
 
-                {streakData.longest_learning_streak > streakData.current_learning_streak && (
+                {(streakData?.longest_learning_streak || 0) > (streakData?.current_learning_streak || 0) && (
                   <p className="text-muted-foreground text-xs">
-                    {t('personalBest', { count: streakData.longest_learning_streak })}
+                    {t('personalBest', { count: streakData?.longest_learning_streak || 0 })}
                   </p>
                 )}
               </div>

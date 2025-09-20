@@ -1,6 +1,6 @@
 {
   "name": "openu",
-  "packageManager": "pnpm@10.16.1",
+  "packageManager": "pnpm@10.17.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -8,14 +8,16 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,md,css,json}\"",
     "lint": "turbo run lint",
     "oxlint": "oxlint --fix --fix-suggestions",
-    "start": "turbo run start"
+    "start": "turbo run start",
+    "openapi:gen": "pnpm -C apps/web openapi:gen",
+    "openapi:gen:local": "pnpm -C apps/web openapi:gen:local"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
-    "eslint": "^9.35.0",
+    "eslint": "^9.36.0",
     "oxlint": "^1.16.0",
     "prettier": "^3.6.2",
-    "prettier-plugin-organize-imports": "^4.2.0",
+    "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-sort-imports": "^1.8.8",
     "prettier-plugin-sort-json": "^4.1.1",
     "prettier-plugin-tailwindcss": "^0.6.14",

@@ -49,9 +49,9 @@ interface CourseStructure {
 interface CourseOrder {
   chapter_order_by_ids?: {
     chapter_id: number;
-    activities_order_by_ids: Array<{
+    activities_order_by_ids: {
       activity_id: number;
-    }>;
+    }[];
   }[];
   [key: string]: any; // For additional properties
 }

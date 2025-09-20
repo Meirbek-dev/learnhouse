@@ -62,27 +62,6 @@ Before responding to any request, follow these steps:
 - Minimize 'use client' directives
 - Implement proper error boundaries
 - Use Suspense for async operations
-- Optimize for performance and Web Vitals
-
-### State Management
-
-- Use `useActionState` instead of deprecated `useFormState`
-- Leverage enhanced `useFormStatus` with new properties (data, method, action)
-- Implement URL state management with 'nuqs'
-- Minimize client-side state
-
-### Async Request APIs
-
-```typescript
-// Always use async versions of runtime APIs
-const cookieStore = await cookies();
-const headersList = await headers();
-const { isEnabled } = await draftMode();
-
-// Handle async params in layouts/pages
-const params = await props.params;
-const searchParams = await props.searchParams;
-```
 
 # Other
 
@@ -104,3 +83,57 @@ const searchParams = await props.searchParams;
 - Use shadcn UI best practices
 - This project is not deployed and doesn't have users yer. So you can do breaking changes, leaving
   no legacy/compatibility code.
+
+---
+
+description: Next.js with TypeScript and Tailwind UI best practices globs: **/\*.tsx, **/\*.ts
+
+---
+
+# Next.js Best Practices
+
+## Project Structure
+
+- Place shared components in `components` directory
+- Place utilities and helpers in `lib` directory
+
+## Components
+
+- Use Server Components by default
+- Mark client components explicitly with 'use client'
+- Wrap client components in Suspense with fallback
+- Use dynamic loading for non-critical components
+- Implement proper error boundaries
+- Place static content and interfaces at file end
+
+## Performance
+
+- Favor Server Components (RSC) where possible
+- Use dynamic loading for non-critical components
+- Implement proper caching strategies
+
+## Data Fetching
+
+- Use Server Components for data fetching when possible
+- Implement proper error handling for data fetching
+- Handle loading and error states appropriately
+
+## Routing
+
+- Use the App Router conventions
+- Implement proper loading and error states for routes
+- Use dynamic routes appropriately
+- Handle parallel routes when needed
+
+## Forms and Validation
+
+- Use Zod for form validation
+- Implement proper server-side validation
+- Handle form errors appropriately
+- Show loading states during form submission
+
+## State Management
+
+- Minimize client-side state
+- Prefer server state when possible
+- Implement proper loading states

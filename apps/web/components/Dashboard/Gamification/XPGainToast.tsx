@@ -1,5 +1,6 @@
 'use client';
 
+import { useOptionalXPSourcesContext } from './XPSourcesProvider';
 import { Award, Star, Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -22,7 +23,23 @@ interface XPGainToastProps {
  */
 const XPGainToastContent = ({ xpAmount, source, sourceDisplayName, context }: XPGainToastProps) => {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification.xpGainToast');
-  const displayName = sourceDisplayName || source.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  // Access context unconditionally to satisfy React Hooks rules; fall back gracefully if missing.
+  const optionalCtx = useOptionalXPSourcesContext();
+  // Prefer passed prop, then provider, then translation, raw humanized key
+  let displayName = sourceDisplayName;
+  if (!displayName) {
+    const getLabel = optionalCtx?.getLabel;
+    if (getLabel) {
+      displayName = getLabel(source);
+    }
+  }
+  if (!displayName) {
+    try {
+      displayName = t(`sources.${source}` as any);
+    } catch {
+      displayName = source.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+    }
+  }
 
   // Choose icon based on source
   const getIcon = () => {
@@ -92,7 +109,7 @@ export function showXPGainToast(props: XPGainToastProps) {
 /**
  * Streak Bonus Toast Content Component
  */
-const StreakBonusToastContent = ({ streakDays, bonusXP }: { streakDays: number; bonusXP: number }) => {
+const _StreakBonusToastContent = ({ streakDays, bonusXP }: { streakDays: number; bonusXP: number }) => {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification.xpGainToast');
 
   return (

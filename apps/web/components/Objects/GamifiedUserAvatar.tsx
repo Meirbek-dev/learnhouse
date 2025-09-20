@@ -1,10 +1,10 @@
 'use client';
 
-import type { GamificationProfile } from '@services/gamification/gamification';
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { AVATAR_UNLOCKS, LevelIndicator } from './GamificationLevel';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
+import type { UserGamificationProfile } from '@/types/gamification';
 import { getUserByUsername } from '@services/users/users';
 import { getUriWithOrg } from '@services/config/config';
 import { useParams } from 'next/navigation';
@@ -33,7 +33,7 @@ interface GamifiedUserAvatarProps {
   // Gamification props
   showLevelIndicator?: boolean;
   showLevelBadge?: boolean;
-  gamificationProfile?: GamificationProfile | null;
+  gamificationProfile?: UserGamificationProfile | null;
   levelIndicatorPosition?: 'top-right' | 'bottom-right' | 'bottom-center';
   showAvatarFrame?: boolean;
   showAvatarAccessories?: boolean;
@@ -185,7 +185,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const getAvatarFrame = (): string | null => {
     if (!(showAvatarFrame && gamificationProfile)) return null;
 
-    const level = gamificationProfile.current_level;
+    const level = gamificationProfile.level;
     const availableFrames = AVATAR_UNLOCKS.frames.filter((frame) => level >= frame.level);
 
     // Return the highest unlocked frame
@@ -196,7 +196,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const getAvatarAccessory = (): string | null => {
     if (!(showAvatarAccessories && gamificationProfile)) return null;
 
-    const level = gamificationProfile.current_level;
+    const level = gamificationProfile.level;
     const availableAccessories = AVATAR_UNLOCKS.accessories.filter((accessory) => level >= accessory.level);
 
     // Return the highest unlocked accessory
@@ -244,7 +244,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
             },
           )}
         >
-          {gamificationProfile.current_level}
+          {gamificationProfile.level}
         </div>
       )}
 

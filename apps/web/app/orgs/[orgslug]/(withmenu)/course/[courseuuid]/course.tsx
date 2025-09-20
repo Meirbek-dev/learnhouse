@@ -407,9 +407,7 @@ const CourseClient = (props: any) => {
                       // Sanitize href: only allow strings that look like URLs or absolute/relative paths
                       const rawHref = typeof learning === 'object' && learning ? learning.link : undefined;
                       const href = typeof rawHref === 'string' ? rawHref.trim() : '';
-                      const hasValidHref = Boolean(
-                        href && /^(?:[a-z][a-z0-9+.-]*:|\/|\.\/|\.\.\/|#)/i.test(href),
-                      );
+                      const hasValidHref = Boolean(href && /^(?:[a-z][a-z0-9+.-]*:|\/|\.\/|\.\.\/|#)/i.test(href));
                       if (!learningText) return null;
                       return (
                         <div

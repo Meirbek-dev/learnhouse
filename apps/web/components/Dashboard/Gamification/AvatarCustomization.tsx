@@ -4,8 +4,8 @@ import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objec
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Crown, Lock, Palette, Settings, User } from 'lucide-react';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
-import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useGamification } from '@/hooks/useGamification';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const { data: session } = useSession();
   const accessToken: string | undefined = (session as any)?.tokens?.access_token;
-  const { profile, isLoading, error } = useUnifiedGamification({ orgId, accessToken, enabled: true });
+  const { profile, isLoading } = useGamification({ orgId, accessToken, enabled: !!orgId && !!accessToken });
   const [isSaving, setIsSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
   const isMobile = useIsMobile();
@@ -78,9 +78,9 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
       return { unlockedFrames: [], unlockedAccessories: [], levelInfo: null };
     }
     return {
-      unlockedFrames: AVATAR_UNLOCKS.frames.filter((f) => profile.current_level >= f.level),
-      unlockedAccessories: AVATAR_UNLOCKS.accessories.filter((a) => profile.current_level >= a.level),
-      levelInfo: getLevelInfo(profile.current_level, t),
+      unlockedFrames: AVATAR_UNLOCKS.frames.filter((f) => profile.level >= f.level),
+      unlockedAccessories: AVATAR_UNLOCKS.accessories.filter((a) => profile.level >= a.level),
+      levelInfo: getLevelInfo(profile.level, t),
     };
   }, [profile, t]);
 
@@ -322,7 +322,7 @@ export function AvatarCustomization({ orgId, className, onUpdate }: AvatarCustom
           </h4>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {AVATAR_UNLOCKS.frames
-              .filter((f) => profile.current_level < f.level)
+              .filter((f) => profile.level < f.level)
               .slice(0, 3)
               .map((frame) => (
                 <div

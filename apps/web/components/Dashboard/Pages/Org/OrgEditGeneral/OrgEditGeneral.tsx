@@ -107,7 +107,7 @@ const OrgEditGeneral: FC = () => {
       name: org?.name || '',
       description: org?.description || '',
       about: org?.about || '',
-      label: org?.label || '',
+      label: org?.label || 'education',
       explore: org?.explore ?? false,
     },
   });

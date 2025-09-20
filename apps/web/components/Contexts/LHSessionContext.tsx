@@ -26,8 +26,6 @@ interface ExtendedSessionData {
         [key: string]: any;
       }
     | undefined;
-  // Also support direct username for backward compatibility
-  username: string | undefined;
   expires: string;
   [key: string]: any; // Allow additional properties
 }

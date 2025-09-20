@@ -391,8 +391,6 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
       const selectedUsernames =
         contributors?.filter((c) => selectedContributors.includes(c.user_id)).map((c) => c.user.username) || [];
 
-      console.log('Sending usernames:', selectedUsernames);
-
       const response = await bulkRemoveContributors(courseStructure.course_uuid, selectedUsernames, access_token);
 
       if (response.status === 200) {

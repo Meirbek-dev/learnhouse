@@ -1,44 +1,34 @@
 """
-Gamification Services
+Simple Gamification Services
 
-Server-authoritative gamification system with enhanced features including:
-- XP and leveling systems with atomic transactions
-- Streak tracking with milestone bonuses
-- Achievement system with progress tracking
-- Leaderboards with multiple ranking types
-- Real-time caching and analytics
+Clean, focused implementation with:
+- XP and leveling with atomic transactions
+- Streak tracking (UTC-only semantics)
+- Simple leaderboard (top by XP)
+- No over-engineering or unused abstractions
 
-New Architecture:
-- XPService: Focused XP awarding and management
-- StreakService: Streak tracking and milestone bonuses
-- LevelCalculator: Fast O(1) mathematical level calculations
-- EventHandlers: Clean event-driven architecture
-- Config: Flexible configuration system
+All functionality is provided by simple_service and exposed via routers. This package exports
+shared enums, schemas and config helpers only.
 """
 
-# Public service factories / utilities
-from src.db.gamification import XPSource
+# Expose enums and typed schemas for external modules
+from src.db.gamification import StreakType, XPSource
 from src.schemas.gamification import (
     DashboardRead,
     LeaderboardRead,
     ProfileRead,
-    StreakSummaryRead,
     StreakUpdateRead,
+    XPAwardRequest,
+    XPAwardResponse,
 )
 
-from .config import get_gamification_config
-from .level_calculator import calculate_level_details, get_level_metadata
-from .streak_service import StreakService, create_streak_service
-from .xp_service import XPService, create_xp_service
-
 __all__ = [
-    "StreakService",
-    # New services
-    "XPService",
+    "DashboardRead",
+    "LeaderboardRead",
+    "ProfileRead",
+    "StreakType",
+    "StreakUpdateRead",
+    "XPAwardRequest",
+    "XPAwardResponse",
     "XPSource",
-    "calculate_level_details",
-    "create_streak_service",
-    "create_xp_service",
-    "get_gamification_config",
-    "get_level_metadata",
 ]

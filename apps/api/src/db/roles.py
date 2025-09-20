@@ -38,7 +38,6 @@ class Permission(PydanticStrictBaseModel):
         return getattr(self, item)
 
     def __json__(self) -> dict:
-        """Custom JSON serialization for psycopg3 compatibility"""
         return self.model_dump()
 
     @classmethod
@@ -81,7 +80,6 @@ class Rights(PydanticStrictBaseModel):
         return getattr(self, item)
 
     def __json__(self) -> dict:
-        """Custom JSON serialization for psycopg3 compatibility"""
         return self.model_dump()
 
     @classmethod

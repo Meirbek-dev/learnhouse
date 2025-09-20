@@ -1,11 +1,11 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { ArrowLeft, BookOpen, Download, Loader2, Shield, Target, Trophy } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
 import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 // Gamification imports
 import { LevelDisplay } from '@components/Dashboard/Gamification';
+import { useGamification } from '@/hooks/useGamification';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -52,7 +52,11 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   // Gamification state
   const { data: authSession } = useSession();
   const accessToken: string | undefined = (authSession as any)?.tokens?.access_token;
-  const { profile: gamificationProfile } = useUnifiedGamification({ orgId: org?.id, accessToken, enabled: !!org?.id });
+  const { profile: gamificationProfile } = useGamification({
+    orgId: org?.id,
+    accessToken,
+    enabled: !!org?.id && !!accessToken,
+  });
 
   // Check if course is actually completed
   const isCourseCompleted = useMemo(() => {

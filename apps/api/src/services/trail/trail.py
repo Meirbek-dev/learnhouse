@@ -16,8 +16,7 @@ from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
-from src.services.gamification import create_streak_service
-from src.services.gamification.xp_service import create_xp_service
+from src.services.gamification import simple_service as gamification_service
 
 logger = logging.getLogger(__name__)
 
@@ -239,18 +238,14 @@ async def add_activity_to_trail(
 
         # Award XP for first-time activity completion (idempotent by source_id)
         try:
-            xp_service = create_xp_service(db_session)
-            await xp_service.award_xp(
+            gamification_service.award_xp(
+                db=db_session,
                 user_id=user.id,
                 org_id=course.org_id,
-                source=XPSource.ACTIVITY_COMPLETION,
+                source=XPSource.ACTIVITY_COMPLETION.value,
+                amount=None,
                 source_id=str(activity.id),
-                metadata={
-                    "activity_uuid": activity_uuid,
-                    "activity_type": getattr(activity, "activity_type", None),
-                    "course_id": course.id,
-                    "course_uuid": course.course_uuid,
-                },
+                idempotency_key=f"activity_{activity.id}_{user.id}",
             )
         except Exception as xp_err:  # noqa: BLE001
             logger.warning(
@@ -261,8 +256,12 @@ async def add_activity_to_trail(
             )
     # Update learning streak (best-effort; ignore failures)
     try:
-        streak_service = create_streak_service(db_session)
-        await streak_service.update_learning_streak(user.id, course.org_id)
+        gamification_service.update_streak(
+            db=db_session,
+            user_id=user.id,
+            org_id=course.org_id,
+            streak_type="learning",
+        )
     except Exception as streak_err:  # noqa: BLE001
         logger.debug(
             "Learning streak update failed (user_id=%s, org_id=%s): %s",

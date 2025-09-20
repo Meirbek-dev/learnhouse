@@ -1,12 +1,11 @@
 'use client';
 
-import type { GamificationProfile } from '@/services/gamification/gamification';
 import { getLevelInfo } from '@/components/Objects/GamificationLevel';
+import type { UserGamificationProfile } from '@/types/gamification';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
 interface LevelIndicatorBadgeProps {
   level: number;
   variant?: 'default' | 'compact' | 'mini';
@@ -15,7 +14,7 @@ interface LevelIndicatorBadgeProps {
 }
 
 interface LevelProgressBarProps {
-  profile: GamificationProfile;
+  profile: UserGamificationProfile;
   variant?: 'default' | 'compact';
   showLabels?: boolean;
   animated?: boolean;
@@ -23,7 +22,7 @@ interface LevelProgressBarProps {
 }
 
 interface LevelDisplayProps {
-  profile: GamificationProfile;
+  profile: UserGamificationProfile;
   variant?: 'full' | 'compact' | 'badge';
   showProgress?: boolean;
   showXP?: boolean;
@@ -100,9 +99,10 @@ export function LevelProgressBar({
 }: LevelProgressBarProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
-  const levelInfo = getLevelInfo(profile.current_level, t);
-  // Rely exclusively on server-calculated progress (authoritative)
-  const progressPercentage = Math.max(0, Math.min(100, (profile.progress || 0) * 100));
+  const levelInfo = getLevelInfo(profile.level, t);
+  // Server-provided values are authoritative
+  const progressPercentage = (profile as any).level_progress_percent ?? 0;
+  const xpToNext = (profile as any).xp_to_next_level ?? 0;
 
   if (variant === 'compact') {
     return (
@@ -115,10 +115,10 @@ export function LevelProgressBar({
           <div className="text-muted-foreground flex justify-between text-xs">
             <span>
               {t('levelIndicators.levelAbbrev')}
-              {profile.current_level}
+              {profile.level}
             </span>
             <span>
-              {profile.xp_to_next} {t('levelIndicators.xpToNext')}
+              {xpToNext} {t('levelIndicators.xpToNext')}
             </span>
           </div>
         )}
@@ -131,11 +131,9 @@ export function LevelProgressBar({
       {showLabels && (
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
-            {t('levelIndicators.level')} {profile.current_level}
+            {t('levelIndicators.level')} {profile.level}
           </span>
-          <span className="text-muted-foreground">
-            {t('levelIndicators.xpToLevel', { level: profile.current_level + 1 })}
-          </span>
+          <span className="text-muted-foreground">{t('levelIndicators.xpToLevel', { level: profile.level + 1 })}</span>
         </div>
       )}
 
@@ -147,7 +145,10 @@ export function LevelProgressBar({
 
         {/* Level icon overlay */}
         <div className={cn('absolute top-0 left-2 flex h-full items-center', levelInfo.color)}>
-          <levelInfo.icon className="h-3 w-3" />
+          {(() => {
+            const Icon = (levelInfo as any)?.icon;
+            return Icon ? <Icon className="h-3 w-3" /> : null;
+          })()}
         </div>
       </div>
 
@@ -155,9 +156,7 @@ export function LevelProgressBar({
         <div className="text-muted-foreground flex justify-between text-xs">
           <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}</span>
           <span>{t('levelIndicators.progress', { percentage: format.number(Math.round(progressPercentage)) })}</span>
-          <span>
-            {t('levelIndicators.totalXp', { total: format.number(profile.total_xp + (profile.xp_to_next || 0)) })}
-          </span>
+          <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp + xpToNext) })}</span>
         </div>
       )}
     </div>
@@ -173,13 +172,14 @@ export function LevelDisplay({
 }: LevelDisplayProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
-  const levelInfo = getLevelInfo(profile.current_level, t);
+  const levelInfo = getLevelInfo(profile.level, t);
+  const xpToNext = (profile as any).xp_to_next_level ?? 0;
   const Icon = levelInfo.icon;
 
   if (variant === 'badge') {
     return (
       <LevelIndicatorBadge
-        level={profile.current_level}
+        level={profile.level}
         className={className}
       />
     );
@@ -193,7 +193,7 @@ export function LevelDisplay({
           <div>
             <span className="font-semibold">
               {t('levelIndicators.levelAbbrev')}
-              {profile.current_level}
+              {profile.level}
             </span>
             <span className="ml-2 text-sm font-medium">{levelInfo.title}</span>
           </div>
@@ -216,7 +216,7 @@ export function LevelDisplay({
           <Icon className="h-6 w-6" />
           <div>
             <span className="text-lg font-bold">
-              {t('levelIndicators.level')} {profile.current_level}
+              {t('levelIndicators.level')} {profile.level}
             </span>
             <span className="ml-2 text-base font-medium">{levelInfo.title}</span>
           </div>
@@ -227,7 +227,7 @@ export function LevelDisplay({
               {t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}
             </div>
             <div className="text-muted-foreground text-sm">
-              {t('levelIndicators.xpToNextLevel', { xp: format.number(profile.xp_to_next || 0) })}
+              {t('levelIndicators.xpToNextLevel', { xp: format.number(xpToNext) })}
             </div>
           </div>
         )}

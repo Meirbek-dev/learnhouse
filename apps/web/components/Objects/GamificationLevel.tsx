@@ -1,7 +1,6 @@
 'use client';
 
-import type { GamificationProfile } from '@services/gamification/gamification';
-import { calculateLevelProgress } from '@services/gamification/gamification';
+import type { UserGamificationProfile } from '@/types/gamification';
 import { Crown, Star, Target, Trophy, Zap } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Progress } from '@components/ui/progress';
@@ -65,7 +64,7 @@ export const AVATAR_UNLOCKS = {
 };
 
 interface LevelIndicatorProps {
-  profile: GamificationProfile;
+  profile: UserGamificationProfile;
   variant?: 'compact' | 'full' | 'badge';
   showXP?: boolean;
   showProgress?: boolean;
@@ -121,8 +120,21 @@ export function LevelIndicator({
 }: LevelIndicatorProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
-  const levelInfo = getLevelInfo(profile.current_level, t);
-  const progressPercentage = calculateLevelProgress(profile);
+  const levelInfo = getLevelInfo(profile.level, t);
+  const progressPercentage =
+    (profile as any).level_progress_percent !== undefined
+      ? (profile as any).level_progress_percent
+      : (() => {
+          const xpPerLevel = 100;
+          return ((profile.total_xp % xpPerLevel) / xpPerLevel) * 100;
+        })();
+  const xpToNext =
+    (profile as any).xp_to_next_level !== undefined
+      ? (profile as any).xp_to_next_level
+      : (() => {
+          const xpPerLevel = 100;
+          return xpPerLevel - (profile.total_xp % xpPerLevel);
+        })();
   const Icon = levelInfo.icon;
 
   if (variant === 'badge') {
@@ -133,7 +145,7 @@ export function LevelIndicator({
       >
         <Icon className="h-3 w-3" />
         <span className="font-medium">
-          {t('levelIndicators.level')} {profile.current_level}
+          {t('levelIndicators.level')} {profile.level}
         </span>
       </Badge>
     );
@@ -145,7 +157,7 @@ export function LevelIndicator({
         <div className={cn('flex items-center gap-1', levelInfo.color)}>
           <Icon className="h-4 w-4" />
           <span className="font-semibold">
-            {t('levelIndicators.level')} {profile.current_level}
+            {t('levelIndicators.level')} {profile.level}
           </span>
         </div>
         {showXP && (
@@ -164,7 +176,7 @@ export function LevelIndicator({
           <Icon className="h-5 w-5" />
           <div>
             <span className="font-semibold">
-              {t('levelIndicators.level')} {profile.current_level}
+              {t('levelIndicators.level')} {profile.level}
             </span>
             <span className="ml-2 text-sm font-medium">{levelInfo.title}</span>
           </div>
@@ -173,7 +185,7 @@ export function LevelIndicator({
           <div className="text-right">
             <div className="text-sm font-medium">{format.number(profile.total_xp)} XP</div>
             <div className="text-muted-foreground text-xs">
-              {profile.xp_to_next || 0} {t('levelIndicators.xpToNext')}
+              {xpToNext} {t('levelIndicators.xpToNext')}
             </div>
           </div>
         )}
@@ -186,11 +198,11 @@ export function LevelIndicator({
           />
           <div className="text-muted-foreground flex justify-between text-xs">
             <span>
-              {t('levelIndicators.level')} {profile.current_level}
+              {t('levelIndicators.level')} {profile.level}
             </span>
             <span>{(progressPercentage || 0).toFixed(0)}%</span>
             <span>
-              {t('levelIndicators.level')} {profile.current_level + 1}
+              {t('levelIndicators.level')} {profile.level + 1}
             </span>
           </div>
         </div>
@@ -200,7 +212,7 @@ export function LevelIndicator({
 }
 
 interface ExperienceBarProps {
-  profile: GamificationProfile;
+  profile: UserGamificationProfile;
   animated?: boolean;
   showLabels?: boolean;
   className?: string;
@@ -209,18 +221,31 @@ interface ExperienceBarProps {
 export function ExperienceBar({ profile, animated = true, showLabels = true, className }: ExperienceBarProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
-  const progressPercentage = calculateLevelProgress(profile);
-  const levelInfo = getLevelInfo(profile.current_level, t);
+  const progressPercentage =
+    (profile as any).level_progress_percent !== undefined
+      ? (profile as any).level_progress_percent
+      : (() => {
+          const xpPerLevel = 100;
+          return ((profile.total_xp % xpPerLevel) / xpPerLevel) * 100;
+        })();
+  const xpToNext =
+    (profile as any).xp_to_next_level !== undefined
+      ? (profile as any).xp_to_next_level
+      : (() => {
+          const xpPerLevel = 100;
+          return xpPerLevel - (profile.total_xp % xpPerLevel);
+        })();
+  const levelInfo = getLevelInfo(profile.level, t);
 
   return (
     <div className={cn('space-y-2', className)}>
       {showLabels && (
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
-            {t('levelIndicators.level')} {profile.current_level}
+            {t('levelIndicators.level')} {profile.level}
           </span>
           <span className="text-muted-foreground">
-            {profile.xp_to_next || 0} {t('levels.progress.xpAbbreviation')} {t('levelIndicators.xpToNext')}
+            {xpToNext} {t('levels.progress.xpAbbreviation')} {t('levelIndicators.xpToNext')}
           </span>
         </div>
       )}
@@ -232,7 +257,10 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
 
         {/* Level indicator overlay */}
         <div className={cn('absolute top-0 left-2 flex h-full items-center', levelInfo.color)}>
-          <levelInfo.icon className="h-3 w-3" />
+          {(() => {
+            const Icon = (levelInfo as any)?.icon;
+            return Icon ? <Icon className="h-3 w-3" /> : null;
+          })()}
         </div>
       </div>
       {showLabels && (
@@ -241,7 +269,7 @@ export function ExperienceBar({ profile, animated = true, showLabels = true, cla
             {format.number(profile.total_xp)} {t('levels.progress.xpAbbreviation')}
           </span>
           <span>
-            {format.number(profile.total_xp + (profile.xp_to_next || 0))} {t('levels.progress.xpAbbreviation')}
+            {format.number(profile.total_xp + xpToNext)} {t('levels.progress.xpAbbreviation')}
           </span>
         </div>
       )}

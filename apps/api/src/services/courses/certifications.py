@@ -19,7 +19,8 @@ from src.db.courses.courses import Course
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
 from src.security.courses_security import courses_rbac_check_for_certifications
-from src.services.gamification import XPSource, create_streak_service, create_xp_service
+from src.services.gamification import StreakType, XPSource
+from src.services.gamification import simple_service as gamification_service
 
 ####################################################
 # CRUD
@@ -551,18 +552,23 @@ async def check_course_completion_and_create_certificate(
                 from src.db.courses import get_course_activity_count
 
                 try:
-                    xp_service = create_xp_service(db_session)
                     # Award course completion XP (idempotent via source_id)
-                    await xp_service.award_xp(
+                    gamification_service.award_xp(
+                        db=db_session,
                         user_id=user_id,
                         org_id=course.org_id,
-                        source=XPSource.COURSE_COMPLETION,
+                        source=XPSource.COURSE_COMPLETION.value,
+                        amount=None,
                         source_id=str(course_id),
-                        metadata={"activity_count": len(course_activities)},
+                        idempotency_key=f"course_{course_id}_{user_id}",
                     )
                     # Update learning streak
-                    streak_service = create_streak_service(db_session)
-                    await streak_service.update_learning_streak(user_id, course.org_id)
+                    gamification_service.update_streak(
+                        db=db_session,
+                        user_id=user_id,
+                        org_id=course.org_id,
+                        streak_type="learning",
+                    )
                 except Exception as xp_error:
                     # Log the error but don't fail the certification process
                     # In production, this should use structured logging

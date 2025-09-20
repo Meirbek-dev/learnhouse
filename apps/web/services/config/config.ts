@@ -16,8 +16,6 @@ export const getAPIUrl = () => {
     const { protocol, hostname, port } = window.location;
     const portPart = port ? `:${port}` : '';
     base = `${protocol}//${hostname}${portPart}/api/v1/`;
-    // eslint-disable-next-line no-console
-    console.warn('[config] NEXT_PUBLIC_OPENU_API_URL not set. Falling back to', base);
   }
 
   if (!base) {

@@ -1,5 +1,6 @@
 'use client';
 
+import { XPSourcesProvider } from '@components/Dashboard/Gamification';
 import OrgMenu from '@components/Objects/Menus/org-menu';
 import type { ReactElement, ReactNode } from 'react';
 import { Children, cloneElement } from 'react';
@@ -11,7 +12,7 @@ interface WithMenuClientLayoutProps {
 
 export default function WithMenuClientLayout({ children, orgslug }: WithMenuClientLayoutProps) {
   return (
-    <>
+    <XPSourcesProvider>
       <OrgMenu
         key={`${orgslug}-orgmenu`}
         orgslug={orgslug}
@@ -23,6 +24,6 @@ export default function WithMenuClientLayout({ children, orgslug }: WithMenuClie
           key: `${orgslug}-child-${index}`,
         }),
       )}
-    </>
+    </XPSourcesProvider>
   );
 }

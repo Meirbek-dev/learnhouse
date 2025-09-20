@@ -1,17 +1,19 @@
 'use client';
 
-import { Activity, Award, Crown, Flame, MoreHorizontal, Star, Target, Trophy, Zap } from 'lucide-react';
 import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
+import { Activity, Award, Crown, Flame, Star, Target, Trophy, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
-import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
+import { useGamification } from '@/hooks/useGamification';
+import { useProvideStreaks } from '@/hooks/useStreaks';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
+
+import type { UserGamificationProfile } from '@/types/gamification';
 
 interface GamificationProfileSectionProps {
   orgId: number;
@@ -19,7 +21,7 @@ interface GamificationProfileSectionProps {
   className?: string;
   variant?: 'full' | 'compact';
   showUnlocks?: boolean;
-  showAchievements?: boolean;
+  data?: UserGamificationProfile | null;
 }
 
 export function GamificationProfileSection({
@@ -28,12 +30,19 @@ export function GamificationProfileSection({
   className,
   variant = 'full',
   showUnlocks = true,
-  showAchievements = true,
+  data,
 }: GamificationProfileSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const { data: session } = useSession();
   const accessToken: string | undefined = (session as any)?.tokens?.access_token;
-  const { profile, isLoading, error } = useUnifiedGamification({ orgId, accessToken, enabled: true });
+  const {
+    profile: liveProfile,
+    isLoading: hookLoading,
+    error,
+  } = useGamification({ orgId, accessToken, enabled: !data, initialData: data ?? undefined });
+  const { streaks } = useProvideStreaks(orgId, accessToken);
+  const profile = data ?? liveProfile;
+  const isLoading = !profile && hookLoading;
   const { levelInfo, nextMilestone, unlockedFrames, unlockedAccessories } = useMemo(() => {
     if (!profile) {
       return {
@@ -44,10 +53,10 @@ export function GamificationProfileSection({
       };
     }
     return {
-      levelInfo: getLevelInfo(profile.current_level, t),
-      nextMilestone: getNextMilestone(profile.current_level),
-      unlockedFrames: AVATAR_UNLOCKS.frames.filter((f) => profile.current_level >= f.level),
-      unlockedAccessories: AVATAR_UNLOCKS.accessories.filter((a) => profile.current_level >= a.level),
+      levelInfo: getLevelInfo(profile.level, t),
+      nextMilestone: getNextMilestone(profile.level),
+      unlockedFrames: AVATAR_UNLOCKS.frames.filter((f) => profile.level >= f.level),
+      unlockedAccessories: AVATAR_UNLOCKS.accessories.filter((a) => profile.level >= a.level),
     };
   }, [profile, t]);
 
@@ -108,7 +117,10 @@ export function GamificationProfileSection({
               variant="outline"
               className={cn('flex items-center gap-1', levelInfo.color)}
             >
-              <levelInfo.icon className="h-3 w-3" />
+              {(() => {
+                const Icon = (levelInfo as any).icon;
+                return Icon ? <Icon className="h-3 w-3" /> : null;
+              })()}
               {levelInfo.title}
             </Badge>
           )}
@@ -139,27 +151,13 @@ export function GamificationProfileSection({
               <div className="flex items-center gap-2">
                 <Flame className="h-4 w-4 text-orange-500" />
                 <span>
-                  {t('streaks.login.title')}:{' '}
-                  {(() => {
-                    const s = profile.streaks as any;
-                    const login = s?.login;
-                    if (typeof login === 'number') return login;
-                    return login?.current ?? 0;
-                  })()}{' '}
-                  {t('streaks.days')}
+                  {t('streaks.login.title')}: {(streaks?.login ?? profile.login_streak) || 0} {t('streaks.days')}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-green-500" />
                 <span>
-                  {t('streaks.learning.title')}:{' '}
-                  {(() => {
-                    const s = profile.streaks as any;
-                    const learning = s?.learning;
-                    if (typeof learning === 'number') return learning;
-                    return learning?.current ?? 0;
-                  })()}{' '}
-                  {t('streaks.days')}
+                  {t('streaks.learning.title')}: {profile.longest_login_streak} {t('streaks.days')}
                 </span>
               </div>
             </div>
@@ -251,57 +249,7 @@ export function GamificationProfileSection({
           </div>
         )}
 
-        {/* Achievements Preview */}
-        {showAchievements && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="flex items-center gap-2 text-sm font-medium">
-                <Star className="h-4 w-4" />
-                {t('dashboard.recentAchievements')}
-              </h4>
-              <Button
-                variant="ghost"
-                size="sm"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2">
-              {/* Example achievements - replace with real data */}
-              {(() => {
-                const s = profile.streaks as any;
-                const login = s?.login;
-                const current = typeof login === 'number' ? login : (login?.current ?? 0);
-                return current >= 7;
-              })() && (
-                <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
-                    <Flame className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{t('dashboard.achievements.weekWarrior')}</p>
-                    <p className="text-muted-foreground text-xs">{t('dashboard.achievements.weekWarriorDesc')}</p>
-                  </div>
-                </div>
-              )}
-
-              {profile.current_level >= 10 && (
-                <div className="bg-muted/30 flex items-center gap-3 rounded-lg p-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
-                    <Crown className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{t('dashboard.achievements.scholar')}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {t('dashboard.achievements.reachedLevel', { level: 10 })}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Achievements section removed (legacy) */}
       </CardContent>
     </Card>
   );

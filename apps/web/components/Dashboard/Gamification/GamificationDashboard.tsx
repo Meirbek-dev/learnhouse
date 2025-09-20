@@ -3,26 +3,18 @@
 import { Award, Calendar, Flame, RefreshCw, Star, TrendingUp, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
+import type { UserGamificationProfile } from '@/types/gamification';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useGamification } from '@/hooks/useGamification';
 import { useFormatter, useTranslations } from 'next-intl';
 import { getAPIUrl } from '@/services/config/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
+import { useXPSources } from '@/hooks/useXPSources';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession } from 'next-auth/react';
-
-interface GamificationProfile {
-  user_id: number;
-  org_id: number;
-  total_xp: number;
-  current_level: number;
-  xp_in_level: number;
-  xp_to_next: number;
-  progress: number;
-  updated_at: string;
-}
 
 interface XPTransaction {
   id: number;
@@ -35,20 +27,25 @@ interface XPTransaction {
   created_at: string;
 }
 
-interface GamificationDashboard {
-  profile: GamificationProfile;
-  recent_xp_transactions: XPTransaction[];
-  active_streaks: any[];
-  total_activities_completed: number;
-  total_courses_completed: number;
-  total_certificates: number;
-  rank_in_organization: number | null;
+interface GamificationDashboardData {
+  profile: UserGamificationProfile;
+  // normalized on server services)
+  recent_tx?: {
+    transaction_id: number;
+    amount: number;
+    source: string;
+    source_id?: string | null;
+    created_at: string;
+    metadata?: Record<string, any> | null;
+  }[];
+  rank_in_organization?: number | null;
 }
 
 interface GamificationDashboardProps {
   orgId: number;
   className?: string;
-  onProfileUpdate?: (profile: GamificationProfile) => void;
+  onProfileUpdate?: (profile: UserGamificationProfile) => void;
+  data?: GamificationDashboardData | null;
 }
 
 // Memoized components for better performance
@@ -97,44 +94,46 @@ const TransactionItem = ({
   </div>
 );
 
-export function GamificationDashboard({ orgId, className = '', onProfileUpdate }: GamificationDashboardProps) {
+export function GamificationDashboard({
+  orgId,
+  className = '',
+  onProfileUpdate,
+  data: serverData,
+}: GamificationDashboardProps) {
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
+  const { map: xpSourcesMap } = useXPSources(true);
 
-  const [dashboardData, setDashboardData] = useState<GamificationDashboard | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<GamificationDashboardData | null>(serverData ?? null);
+  const [isLoading, setIsLoading] = useState(!serverData);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Memoized helper functions
-  const calculateLevelProgress = useCallback((profile: GamificationProfile): number => {
-    const xpForCurrentLevel = 100 * 1.2 ** (profile.current_level - 1);
-    const xpForNextLevel = 100 * 1.2 ** profile.current_level;
-    const totalXpNeeded = xpForNextLevel - xpForCurrentLevel;
-    const currentProgress = totalXpNeeded - (profile.xp_to_next || 0);
-    return Math.max(0, Math.min(100, (currentProgress / totalXpNeeded) * 100));
-  }, []);
+  // Seed SWR cache for gamification profile using server data, to avoid nulls in other widgets
+  useGamification({
+    orgId,
+    accessToken: (session as any)?.tokens?.access_token,
+    enabled: !serverData,
+    initialData: serverData?.profile,
+  });
 
+  // Memoized helper functions
   const getXpSourceDisplayName = useCallback(
     (source: string): string => {
-      const sourceMap: Record<string, string> = {
-        login_daily: t('xpSources.login_daily'),
-        activity_completion: t('xpSources.activity_completion'),
-        course_completion: t('xpSources.course_completion'),
-        perfect_score: t('xpSources.perfect_score'),
-        first_activity: t('xpSources.first_activity'),
-        login_streak_7_days: t('xpSources.login_streak_7_days'),
-        login_streak_30_days: t('xpSources.login_streak_30_days'),
-        login_streak_100_days: t('xpSources.login_streak_100_days'),
-        streak_bonus_7_days: t('xpSources.login_streak_7_days'),
-        streak_bonus_30_days: t('xpSources.login_streak_30_days'),
-        streak_bonus_100_days: t('xpSources.login_streak_100_days'),
-      };
-      return sourceMap[source] || t('xpSources.unknown', { source });
+      // 1. SWR metadata map
+      const meta = xpSourcesMap?.[source];
+      if (meta?.label) return meta.label;
+      // 2. Translation fallback
+      try {
+        return t(`xpSources.${source}` as any);
+      } catch {
+        // 3. Humanize key
+        return source.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+      }
     },
-    [t],
+    [t, xpSourcesMap],
   );
 
   const formatTransactionDate = useCallback(
@@ -237,8 +236,10 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
 
   // Initial fetch
   useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    if (!serverData) {
+      fetchDashboardData();
+    }
+  }, [fetchDashboardData, serverData]);
 
   // Auto-retry logic with exponential backoff
   useEffect(() => {
@@ -255,16 +256,28 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
 
   // Memoized computed values
   const levelProgress = useMemo(() => {
-    return dashboardData?.profile ? calculateLevelProgress(dashboardData.profile) : 0;
-  }, [dashboardData?.profile, calculateLevelProgress]);
+    if (!dashboardData?.profile) return 0;
+    const p: any = dashboardData.profile;
+    return p.level_progress_percent ?? 0;
+  }, [dashboardData?.profile]);
 
   const sortedTransactions = useMemo(() => {
-    if (!dashboardData?.recent_xp_transactions) return [];
-
-    return [...dashboardData.recent_xp_transactions]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 10);
-  }, [dashboardData?.recent_xp_transactions]);
+    if (!dashboardData) return [];
+    const list: XPTransaction[] = (dashboardData.recent_tx || []).map(
+      (t) =>
+        ({
+          id: t.transaction_id,
+          user_id: dashboardData.profile.user_id,
+          org_id: orgId,
+          xp_amount: t.amount,
+          source: t.source,
+          source_id: t.source_id ?? null,
+          transaction_metadata: t.metadata ?? {},
+          created_at: t.created_at,
+        }) as XPTransaction,
+    );
+    return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10);
+  }, [dashboardData, orgId]);
 
   if (isLoading) {
     return <LoadingSkeleton className={className} />;
@@ -308,7 +321,7 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-muted-foreground text-sm">{t('levelIndicators.level')}</p>
-                <p className="text-2xl font-bold">{profile.current_level}</p>
+                <p className="text-2xl font-bold">{profile.level}</p>
               </div>
               <div className="text-right">
                 <p className="text-muted-foreground text-sm">{t('stats.totalXP')}</p>
@@ -318,9 +331,9 @@ export function GamificationDashboard({ orgId, className = '', onProfileUpdate }
 
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>{t('levelIndicators.xpToLevel', { level: profile.current_level + 1 })}</span>
+                <span>{t('levelIndicators.xpToLevel', { level: profile.level + 1 })}</span>
                 <span>
-                  {profile.xp_to_next || 0} {t('levelIndicators.xpToNext')}
+                  {(profile as any).xp_to_next_level ?? 0} {t('levelIndicators.xpToNext')}
                 </span>
               </div>
               <Progress

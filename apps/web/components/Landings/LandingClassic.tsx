@@ -5,8 +5,8 @@ import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCours
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
+import LearnerDashboardServer from '@components/Dashboard/LearnerDashboard.server';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { LearnerDashboard } from '@components/Dashboard/LearnerDashboard';
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -122,7 +122,7 @@ const LandingClassic = ({
         {/* Learner Dashboard Section */}
         {showLearnerDashboard && (
           <section className="mb-8">
-            <LearnerDashboard
+            <LearnerDashboardServer
               orgId={org_id}
               orgSlug={orgslug}
               courses={courses}

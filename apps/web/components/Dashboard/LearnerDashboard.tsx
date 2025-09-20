@@ -1,13 +1,18 @@
 'use client';
 
+import {
+  GamificationDashboard as ClientGamificationDashboard,
+  Leaderboard as ClientLeaderboard,
+  GamificationProfileSection,
+  StreakWidget,
+} from '@/components/Dashboard/Gamification';
 import { getGamificationDashboard as fetchGamificationDashboardService } from '@/services/gamification/gamification';
-import { GamificationProfileSection } from '@/components/Dashboard/Gamification/GamificationProfileSection';
-import { GamificationDashboard, Leaderboard, StreakWidget } from '@/components/Dashboard/Gamification';
-import type { GamificationDashboard as DashboardData } from '@/services/gamification/gamification';
 import { Award, BookOpen, Flame, Star, TrendingUp, Trophy, Users } from 'lucide-react';
+import type { DashboardData, OrganizationLeaderboard } from '@/types/gamification';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
+import { useGamification } from '@/hooks/useGamification';
+import { useProvideStreaks } from '@/hooks/useStreaks';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -17,23 +22,45 @@ interface LearnerDashboardProps {
   orgSlug: string;
   courses?: any[];
   className?: string;
+  serverDashboardData?: DashboardData | null;
+  serverLeaderboardData?: OrganizationLeaderboard | null;
 }
 
-export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' }: LearnerDashboardProps) {
+export function LearnerDashboard({
+  orgId,
+  orgSlug,
+  courses = [],
+  className = '',
+  serverDashboardData = null,
+  serverLeaderboardData = null,
+}: LearnerDashboardProps) {
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [activeTab, setActiveTab] = useState('profile');
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(serverDashboardData);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(!serverDashboardData);
 
   // Initialize unified gamification (auto profile fetch)
+  // Seed profile cache with server data to avoid nulls in other widgets
+  useGamification({
+    orgId,
+    accessToken: (session as any)?.tokens?.access_token,
+    enabled: !serverDashboardData,
+    initialData: serverDashboardData?.profile,
+  });
   const accessToken: string | undefined = (session as any)?.tokens?.access_token;
-  useUnifiedGamification({ orgId, accessToken, enabled: !!session?.user });
+  useGamification({ orgId, accessToken, enabled: !!session?.user });
+  const { streaks } = useProvideStreaks(orgId, accessToken);
 
   // Fetch gamification dashboard (normalized) for Quick Stats
   useEffect(() => {
     let cancelled = false;
     async function run() {
+      if (serverDashboardData) {
+        // Already provided by server
+        setIsLoadingDashboard(false);
+        return;
+      }
       if (!session?.tokens?.access_token) {
         setIsLoadingDashboard(false);
         return;
@@ -52,7 +79,7 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
     return () => {
       cancelled = true;
     };
-  }, [orgId, session?.tokens?.access_token]);
+  }, [orgId, session?.tokens?.access_token, serverDashboardData]);
 
   // Don't show for anonymous users
   if (!session?.user) {
@@ -128,14 +155,7 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Flame className="mx-auto mb-2 h-8 w-8 text-orange-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard
-                      ? '...'
-                      : (() => {
-                          const s: any = dashboardData?.profile?.streaks;
-                          const login = s?.login;
-                          if (typeof login === 'number') return login;
-                          return login?.current ?? 0;
-                        })()}
+                    {isLoadingDashboard ? '...' : (streaks?.login ?? dashboardData?.profile?.login_streak ?? 0)}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.dayStreak')}</p>
                 </div>
@@ -143,8 +163,11 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
             </CardContent>
           </Card>
 
-          {/* Detailed Progress Section */}
-          <GamificationDashboard orgId={orgId} />
+          {/* Detailed Progress Section (server-provided data if available) */}
+          <ClientGamificationDashboard
+            orgId={orgId}
+            data={serverDashboardData}
+          />
         </TabsContent>
 
         {/* Profile Tab */}
@@ -157,7 +180,7 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
               orgId={orgId}
               variant="full"
               showUnlocks
-              showAchievements
+              data={serverDashboardData?.profile}
             />
             <StreakWidget orgId={orgId} />
           </div>
@@ -168,9 +191,10 @@ export function LearnerDashboard({ orgId, orgSlug, courses = [], className = '' 
           value="community"
           className="space-y-6"
         >
-          <Leaderboard
+          <ClientLeaderboard
             orgId={orgId}
             limit={20}
+            data={serverLeaderboardData ?? null}
           />
         </TabsContent>
       </Tabs>

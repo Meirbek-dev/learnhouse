@@ -4,7 +4,7 @@ import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trop
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 // Gamification imports
 import { LevelIndicatorBadge } from '@components/Dashboard/Gamification';
-import { useUnifiedGamification } from '@/hooks/useUnifiedGamification';
+import { useGamification } from '@/hooks/useGamification';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Fragment, useMemo, useState } from 'react';
@@ -234,7 +234,11 @@ const ActivityIndicators = (props: Props) => {
   // Gamification
   const { data: session } = useSession();
   const accessToken: string | undefined = (session as any)?.tokens?.access_token;
-  const { profile: gamificationProfile } = useUnifiedGamification({ orgId: org?.id, accessToken, enabled: !!org?.id });
+  const { profile: gamificationProfile } = useGamification({
+    orgId: org?.id,
+    accessToken,
+    enabled: !!org?.id && !!accessToken,
+  });
 
   const done_activity_style = 'bg-teal-600 hover:bg-teal-700';
   const black_activity_style = 'bg-zinc-300 hover:bg-zinc-400';
@@ -447,7 +451,7 @@ const ActivityIndicators = (props: Props) => {
         {gamificationProfile && (
           <div className="ml-2">
             <LevelIndicatorBadge
-              level={gamificationProfile.current_level}
+              level={gamificationProfile.level}
               className="h-[20px] w-[20px] text-xs"
             />
           </div>
