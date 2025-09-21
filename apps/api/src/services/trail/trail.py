@@ -16,7 +16,7 @@ from src.db.users import AnonymousUser, PublicUser
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
-from src.services.gamification import simple_service as gamification_service
+from src.services.gamification import service as gamification_service
 
 logger = logging.getLogger(__name__)
 

@@ -248,8 +248,6 @@ export function GamificationProfileSection({
             </div>
           </div>
         )}
-
-        {/* Achievements section removed (legacy) */}
       </CardContent>
     </Card>
   );

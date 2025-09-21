@@ -1,4 +1,4 @@
-"""Simple API schemas for gamification (unified with database models)."""
+"""API schemas for gamification (unified with database models)."""
 
 from datetime import datetime
 from typing import Any

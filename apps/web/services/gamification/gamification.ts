@@ -26,8 +26,8 @@ export async function getGamificationProfile(orgId: number, accessToken: string)
     throw new Error('Access token is required');
   }
 
-  // Use simplified unified endpoint and extract profile
-  const url = `${getAPIUrl()}simple-gamification/dashboard/${orgId}`;
+  // Use unified endpoint and extract profile
+  const url = `${getAPIUrl()}gamification/dashboard/${orgId}`;
   const res = await fetch(url, RequestBodyWithAuthHeader('GET', null, null, accessToken) as RequestInit);
   const data = await errorHandling(res);
   // The simplified dashboard returns { profile, ... }
@@ -45,7 +45,7 @@ export async function getGamificationDashboard(orgId: number, accessToken: strin
     throw new Error('Access token is required');
   }
 
-  const url = `${getAPIUrl()}simple-gamification/dashboard/${orgId}`;
+  const url = `${getAPIUrl()}gamification/dashboard/${orgId}`;
   const res = await fetch(url, RequestBodyWithAuthHeader('GET', null, null, accessToken) as RequestInit);
   const data = await errorHandling(res);
 
@@ -104,7 +104,7 @@ export async function getOrganizationLeaderboard(
   }
 
   // Fetch from unified dashboard and extract leaderboard
-  const url = `${getAPIUrl()}simple-gamification/dashboard/${orgId}`;
+  const url = `${getAPIUrl()}gamification/dashboard/${orgId}`;
   const res = await fetch(url, RequestBodyWithAuthHeader('GET', null, null, accessToken) as RequestInit);
   const data = await errorHandling(res);
 
@@ -136,7 +136,7 @@ export async function awardXP(orgId: number, accessToken: string, payload: XPAwa
   if (!accessToken) throw new Error('access token required');
   if (!payload?.source) throw new Error('source required');
 
-  const url = `${getAPIUrl()}simple-gamification/award-xp/${orgId}`;
+  const url = `${getAPIUrl()}gamification/award-xp/${orgId}`;
   const res = await fetch(url, RequestBodyWithAuthHeader('POST', payload, null, accessToken) as RequestInit);
   const data = await errorHandling(res);
 
@@ -162,8 +162,8 @@ export async function awardXP(orgId: number, accessToken: string, payload: XPAwa
  * Update login streak
  */
 export async function updateLoginStreak(orgId: number, accessToken: string): Promise<StreakUpdate> {
-  const url = `${getAPIUrl()}simple-gamification/update-streak/${orgId}`;
-  // Simplified endpoint expects { streak_type: 'login' }
+  const url = `${getAPIUrl()}gamification/update-streak/${orgId}`;
+  // Endpoint expects { streak_type: 'login' }
   const res = await fetch(
     url,
     RequestBodyWithAuthHeader('POST', { streak_type: 'login' }, null, accessToken) as RequestInit,
@@ -183,7 +183,7 @@ export async function updateLoginStreak(orgId: number, accessToken: string): Pro
  * Update learning streak
  */
 export async function updateLearningStreak(orgId: number, accessToken: string): Promise<StreakUpdate> {
-  const url = `${getAPIUrl()}simple-gamification/update-streak/${orgId}`;
+  const url = `${getAPIUrl()}gamification/update-streak/${orgId}`;
   const res = await fetch(
     url,
     RequestBodyWithAuthHeader('POST', { streak_type: 'learning' }, null, accessToken) as RequestInit,
@@ -204,7 +204,7 @@ export async function updateLearningStreak(orgId: number, accessToken: string): 
  */
 export async function getGamificationPreferences(orgId: number, accessToken: string): Promise<Record<string, any>> {
   const res = await fetch(
-    `${getAPIUrl()}simple-gamification/preferences/${orgId}`,
+    `${getAPIUrl()}gamification/preferences/${orgId}`,
     RequestBodyWithAuthHeader('GET', null, null, accessToken) as RequestInit,
   );
   const data = await errorHandling(res);
@@ -220,7 +220,7 @@ export async function updateGamificationPreferences(
   preferences: Record<string, any>,
 ): Promise<Record<string, any>> {
   const res = await fetch(
-    `${getAPIUrl()}simple-gamification/preferences/${orgId}`,
+    `${getAPIUrl()}gamification/preferences/${orgId}`,
     RequestBodyWithAuthHeader('PUT', { preferences }, null, accessToken) as RequestInit,
   );
   const data = await errorHandling(res);
@@ -233,7 +233,7 @@ export async function updateGamificationPreferences(
 export async function getXPSourcesMetadata(): Promise<
   { key: string; label: string; description: string; default_xp: number; category: string }[]
 > {
-  const res = await fetch(`${getAPIUrl()}simple-gamification/config`);
+  const res = await fetch(`${getAPIUrl()}gamification/config`);
   const data = await errorHandling(res);
   return data.xp_sources;
 }
@@ -242,7 +242,7 @@ export async function getXPSourcesMetadata(): Promise<
  * Get gamification configuration
  */
 export async function getGamificationConfig() {
-  const res = await fetch(`${getAPIUrl()}simple-gamification/config`);
+  const res = await fetch(`${getAPIUrl()}gamification/config`);
   return errorHandling(res);
 }
 

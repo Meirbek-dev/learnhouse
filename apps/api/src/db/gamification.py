@@ -161,6 +161,3 @@ class XPTransaction(SQLModel, table=True):
         Index("idx_transaction_user_org", "user_id", "org_id"),
         Index("idx_transaction_source", "source", "source_id"),
     )
-
-
-# NOTE: No backward-compatibility aliases; use GamificationProfile directly

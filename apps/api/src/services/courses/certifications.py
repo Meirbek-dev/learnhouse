@@ -20,7 +20,7 @@ from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser
 from src.security.courses_security import courses_rbac_check_for_certifications
 from src.services.gamification import StreakType, XPSource
-from src.services.gamification import simple_service as gamification_service
+from src.services.gamification import service as gamification_service
 
 ####################################################
 # CRUD

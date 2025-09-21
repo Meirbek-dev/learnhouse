@@ -16,7 +16,7 @@ from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
 from src.schemas.gamification import DashboardRead
 from src.security.auth import get_current_user
-from src.services.gamification import simple_service as gamification_service
+from src.services.gamification import service as gamification_service
 
 """
   The function `is_user_admin_of_org` checks if a user has an admin role in a specified organization.

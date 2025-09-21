@@ -42,14 +42,13 @@ export function LearnerDashboard({
 
   // Initialize unified gamification (auto profile fetch)
   // Seed profile cache with server data to avoid nulls in other widgets
+  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
   useGamification({
     orgId,
-    accessToken: (session as any)?.tokens?.access_token,
+    accessToken,
     enabled: !serverDashboardData,
     initialData: serverDashboardData?.profile,
   });
-  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
-  useGamification({ orgId, accessToken, enabled: !!session?.user });
   const { streaks } = useProvideStreaks(orgId, accessToken);
 
   // Fetch gamification dashboard (normalized) for Quick Stats

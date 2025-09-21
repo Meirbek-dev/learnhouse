@@ -13,11 +13,11 @@ from src.routers import (
     admin,
     auth,
     dev,
+    gamification,
     health,
     orgs,
     roles,
     search,
-    simple_gamification,
     trail,
     usergroups,
     users,
@@ -67,11 +67,11 @@ v1_router.include_router(
 )
 v1_router.include_router(trail.router, prefix="/trail", tags=["trail"])
 
-# Gamification (simplified)
+# Gamification
 v1_router.include_router(
-    simple_gamification.router,
-    prefix="/simple-gamification",
-    tags=["simple-gamification"],
+    gamification.router,
+    prefix="/gamification",
+    tags=["gamification"],
 )
 
 # Admin and AI

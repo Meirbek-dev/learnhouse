@@ -17,7 +17,7 @@ export async function getServerGamificationProfile(
 ): Promise<UserGamificationProfile> {
   const accessToken = await requireAccessToken();
   // Use simplified unified endpoint and extract profile
-  const res = await fetch(`${getAPIUrl()}simple-gamification/dashboard/${orgId}`, {
+  const res = await fetch(`${getAPIUrl()}gamification/dashboard/${orgId}`, {
     method: 'GET',
     headers: { Authorization: `Bearer ${accessToken}` },
     next: {
@@ -63,7 +63,7 @@ export async function getServerGamificationDashboard(
   opts?: { revalidate?: number; tags?: string[] },
 ): Promise<DashboardData> {
   const accessToken = await requireAccessToken();
-  const res = await fetch(`${getAPIUrl()}simple-gamification/dashboard/${orgId}`, {
+  const res = await fetch(`${getAPIUrl()}gamification/dashboard/${orgId}`, {
     method: 'GET',
     headers: { Authorization: `Bearer ${accessToken}` },
     next: {
@@ -137,7 +137,7 @@ export async function getServerOrganizationLeaderboard(
 ): Promise<OrganizationLeaderboard> {
   const accessToken = await requireAccessToken();
   // Use the unified dashboard endpoint and extract leaderboard
-  const res = await fetch(`${getAPIUrl()}simple-gamification/dashboard/${orgId}`, {
+  const res = await fetch(`${getAPIUrl()}gamification/dashboard/${orgId}`, {
     method: 'GET',
     headers: { Authorization: `Bearer ${accessToken}` },
     next: {

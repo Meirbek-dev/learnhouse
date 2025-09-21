@@ -1,14 +1,19 @@
 """
-Simple Gamification Services
+Gamification Services
 
-Clean, focused implementation with:
+Clean, focused implementation:
 - XP and leveling with atomic transactions
 - Streak tracking (UTC-only semantics)
 - Simple leaderboard (top by XP)
-- No over-engineering or unused abstractions
+- Single source of truth in service.py
 
-All functionality is provided by simple_service and exposed via routers. This package exports
-shared enums, schemas and config helpers only.
+Core implementation:
+- Database models: src.db.gamification (GamificationProfile, XPTransaction)
+- Service logic: src.services.gamification.service
+- API router: src.routers.gamification
+- API schemas: src.schemas.gamification
+
+This package exports shared enums and schemas for external modules.
 """
 
 # Expose enums and typed schemas for external modules

@@ -1,7 +1,7 @@
 """
-Simplified Gamification Router - Single Endpoint Strategy
+Gamification Router
 
-Eliminates over-engineering with:
+Clean, focused implementation with:
 - One unified dashboard endpoint
 - Clean error handling
 - Direct service calls
@@ -18,8 +18,8 @@ from src.core.events.database import get_db_session
 from src.db.gamification import XPSource
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.services.gamification import simple_service
-from src.services.gamification.simple_service import (
+from src.services.gamification import service
+from src.services.gamification.service import (
     DailyLimitExceededError,
     GamificationError,
 )
@@ -36,7 +36,7 @@ async def get_dashboard(
 ):
     """Get complete gamification dashboard - single endpoint for everything"""
     try:
-        data = simple_service.get_dashboard_data(db, user.id, org_id)
+        data = service.get_dashboard_data(db, user.id, org_id)
 
         # Transform to expected format
         return {
@@ -114,7 +114,7 @@ async def get_preferences(
 ):
     """Return the user's gamification preferences for this org."""
     try:
-        profile = simple_service.get_profile(db, user_id=user.id, org_id=org_id)
+        profile = service.get_profile(db, user_id=user.id, org_id=org_id)
         return {"preferences": profile.preferences or {}}
     except Exception as e:
         logger.exception(
@@ -139,7 +139,7 @@ async def update_preferences(
         if new_prefs is None or not isinstance(new_prefs, dict):
             raise HTTPException(status_code=400, detail="Invalid preferences payload")
 
-        profile = simple_service.get_profile(db, user_id=user.id, org_id=org_id)
+        profile = service.get_profile(db, user_id=user.id, org_id=org_id)
         # Shallow merge to preserve unknown keys
         merged = {**(profile.preferences or {}), **new_prefs}
         profile.preferences = merged
@@ -165,7 +165,7 @@ async def award_xp(
 ):
     """Award XP to user"""
     try:
-        profile, level_up = simple_service.award_xp(
+        profile, level_up = service.award_xp(
             db=db,
             user_id=user.id,
             org_id=org_id,
@@ -226,7 +226,7 @@ async def update_streak(
 ):
     """Update user streak"""
     try:
-        profile = simple_service.update_streak(
+        profile = service.update_streak(
             db=db,
             user_id=user.id,
             org_id=org_id,
