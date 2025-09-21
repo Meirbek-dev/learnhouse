@@ -552,22 +552,14 @@ async def check_course_completion_and_create_certificate(
                 from src.db.courses import get_course_activity_count
 
                 try:
-                    # Award course completion XP (idempotent via source_id)
-                    gamification_service.award_xp(
+                    # Centralized domain helper handles XP + counters (+ optional streak in future)
+                    gamification_service.on_course_completed(
                         db=db_session,
                         user_id=user_id,
                         org_id=course.org_id,
-                        source=XPSource.COURSE_COMPLETION.value,
-                        amount=None,
+                        course_id=course_id,
                         source_id=str(course_id),
                         idempotency_key=f"course_{course_id}_{user_id}",
-                    )
-                    # Update learning streak
-                    gamification_service.update_streak(
-                        db=db_session,
-                        user_id=user_id,
-                        org_id=course.org_id,
-                        streak_type="learning",
                     )
                 except Exception as xp_error:
                     # Log the error but don't fail the certification process

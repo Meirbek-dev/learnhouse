@@ -24,7 +24,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { AvatarCustomization } from '@/components/Dashboard/Gamification/AvatarCustomization';
 import { GamificationProfileSection } from '@/components/Dashboard/Gamification';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,16 +78,23 @@ const DEFAULT_PREFERENCES: GamificationPreferences = {
   },
 };
 
-// Remote persistence helpers (server authoritative with optimistic local fallback)
-import { getGamificationPreferences, updateGamificationPreferences } from '@/services/gamification/gamification';
-
-async function fetchPreferences(orgId: number, token: string): Promise<GamificationPreferences> {
-  const prefs = await getGamificationPreferences(orgId, token);
-  return { ...DEFAULT_PREFERENCES, ...prefs };
+// Remote persistence helpers via internal API route
+async function fetchPreferences(orgId: number): Promise<GamificationPreferences> {
+  const res = await fetch(`/api/gamification/${orgId}`, { method: 'GET' });
+  if (!res.ok) throw new Error('Failed to load');
+  const json = await res.json();
+  const serverPrefs = json?.dashboard?.profile?.preferences ?? {};
+  return { ...DEFAULT_PREFERENCES, ...serverPrefs };
 }
 
-async function savePreferencesRemote(orgId: number, token: string, prefs: GamificationPreferences) {
-  return updateGamificationPreferences(orgId, token, prefs);
+async function savePreferencesRemote(orgId: number, prefs: GamificationPreferences) {
+  const res = await fetch(`/api/gamification/${orgId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'update_preferences', preferences: prefs }),
+  });
+  if (!res.ok) throw new Error('Failed to save');
+  return res.json();
 }
 
 export default function UserGamificationSettings() {
@@ -106,10 +112,10 @@ export default function UserGamificationSettings() {
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      if (!(session?.tokens?.access_token && session.user?.id && orgId)) return;
+      if (!session?.user?.id || !orgId) return;
       setIsLoading(true);
       try {
-        const remote = await fetchPreferences(orgId, session.tokens.access_token);
+        const remote = await fetchPreferences(orgId);
         if (!cancelled) setPreferences(remote);
       } catch {
         // Fall back to defaults silently
@@ -132,9 +138,8 @@ export default function UserGamificationSettings() {
 
     setIsLoading(true);
     try {
-      if (!session.tokens?.access_token) throw new Error('No token');
-      // Optimistic: local state already updated; push to server
-      await savePreferencesRemote(orgId, session.tokens.access_token, preferences);
+  // Optimistic: local state already updated; push to server via internal API
+  await savePreferencesRemote(orgId, preferences);
       toast.success(t('toast.preferencesSaved'));
     } catch (error) {
       console.error('Failed to save preferences:', error);
@@ -274,7 +279,18 @@ export default function UserGamificationSettings() {
               value="customization"
               className="space-y-6"
             >
-              <AvatarCustomization orgId={orgId} />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Avatar Customization</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Alert>
+                    <AlertDescription>
+                      Avatar customization has been simplified. Basic avatars are now managed through your profile settings.
+                    </AlertDescription>
+                  </Alert>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Preferences Tab */}

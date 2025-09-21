@@ -170,8 +170,6 @@ async def lifespan(app: FastAPI):
                     logger.info("Using uvloop for enhanced performance")
                 except ImportError:
                     logger.info("uvloop not available, using default event loop")
-
-        logger.info("OpenU API server started successfully")
         yield
 
     except Exception as e:

@@ -19,8 +19,23 @@ export interface GamificationError {
   details?: any;
 }
 
+// Backend-aligned enums (string unions) with known sources; keep extensible
+export const XP_SOURCES = [
+  'activity_completion',
+  'course_completion',
+  'login_bonus',
+  'quiz_completion',
+  'assignment_submission',
+  'streak_bonus',
+  'admin_award',
+] as const;
+export type XPSource = (typeof XP_SOURCES)[number] | (string & {}); // allow forward-compatible values
+
+export type StreakType = 'login' | 'learning';
+
+// Frontend profile type; backend ProfileRead omits `id`, but we keep it optional for forward-compat
 export interface UserGamificationProfile {
-  id: number; // Consistent with backend
+  id?: number; // optional; not present in backend ProfileRead
   user_id: number; // Consistent with backend
   org_id: number; // Consistent naming
   total_xp: number;
@@ -54,20 +69,22 @@ export interface UserGamificationProfile {
 }
 
 export interface XPAwardRequest {
-  source: string;
-  sourceId?: string;
-  customAmount?: number;
+  source: XPSource;
+  amount?: number;
+  source_id?: string;
+  idempotency_key?: string;
 }
 
 export interface XPTransaction {
-  id: string;
-  user_id: string;
-  organization_id: string;
+  id: number;
+  user_id: number;
+  org_id: number;
   amount: number;
-  activity_type: string;
-  activity_id?: string;
-  reason?: string;
-  created_at: string;
+  source: XPSource;
+  source_id?: string | null;
+  triggered_level_up: boolean;
+  previous_level: number;
+  created_at: string; // ISO string
 }
 
 export interface StreakRecord {
@@ -106,10 +123,11 @@ export interface DashboardData {
 
 export interface XPAwardResponse {
   transaction: XPTransaction;
-  new_total_xp: number;
-  new_level: number;
-  level_up: boolean;
   profile: UserGamificationProfile;
+
+  // Optional convenience flags; prefer reading from transaction/profile
+  triggered_level_up?: boolean; // mirrors transaction.triggered_level_up
+  previous_level?: number; // mirrors transaction.previous_level
 }
 
 export interface StreakUpdate {
@@ -152,13 +170,14 @@ export const UserGamificationProfileSchema = z.object({
 });
 
 export const XPTransactionSchema = z.object({
-  id: z.string(),
-  user_id: z.string(),
-  organization_id: z.string(),
+  id: z.number(),
+  user_id: z.number(),
+  org_id: z.number(),
   amount: z.number(),
-  activity_type: z.string(),
-  activity_id: z.string().optional(),
-  reason: z.string().optional(),
+  source: z.string(),
+  source_id: z.string().nullable().optional(),
+  triggered_level_up: z.boolean(),
+  previous_level: z.number(),
   created_at: z.string(),
 });
 
@@ -198,10 +217,10 @@ export const DashboardDataSchema = z.object({
 
 export const XPAwardResponseSchema = z.object({
   transaction: XPTransactionSchema,
-  new_total_xp: z.number(),
-  new_level: z.number(),
-  level_up: z.boolean(),
   profile: UserGamificationProfileSchema,
+  // Optional convenience flags
+  triggered_level_up: z.boolean().optional(),
+  previous_level: z.number().optional(),
 });
 
 export const StreakUpdateSchema = z.object({
@@ -216,4 +235,12 @@ export const GamificationPreferencesSchema = z.object({
   public_profile: z.boolean(),
   show_on_leaderboard: z.boolean(),
   preferred_activity_types: z.array(z.string()),
+});
+
+// Optional: schema for award request (useful for client-side validation)
+export const XPAwardRequestSchema = z.object({
+  source: z.string(),
+  amount: z.number().positive().optional(),
+  source_id: z.string().optional(),
+  idempotency_key: z.string().optional(),
 });

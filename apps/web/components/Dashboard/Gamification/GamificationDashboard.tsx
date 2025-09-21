@@ -1,55 +1,23 @@
 'use client';
 
-import { Award, Calendar, Flame, RefreshCw, Star, TrendingUp, Trophy } from 'lucide-react';
+import { Award, Calendar, Flame, Star, TrendingUp, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
-import type { UserGamificationProfile } from '@/types/gamification';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useGamification } from '@/hooks/useGamification';
+import type { DashboardData, UserGamificationProfile, XPTransaction } from '@/types/gamification';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
-import { getAPIUrl } from '@/services/config/config';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { useXPSources } from '@/hooks/useXPSources';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useSession } from 'next-auth/react';
-
-interface XPTransaction {
-  id: number;
-  user_id: number;
-  org_id: number;
-  xp_amount: number;
-  source: string;
-  source_id: string | null;
-  transaction_metadata: Record<string, any>;
-  created_at: string;
-}
-
-interface GamificationDashboardData {
-  profile: UserGamificationProfile;
-  // normalized on server services)
-  recent_tx?: {
-    transaction_id: number;
-    amount: number;
-    source: string;
-    source_id?: string | null;
-    created_at: string;
-    metadata?: Record<string, any> | null;
-  }[];
-  rank_in_organization?: number | null;
-}
 
 interface GamificationDashboardProps {
   orgId: number;
   className?: string;
   onProfileUpdate?: (profile: UserGamificationProfile) => void;
-  data?: GamificationDashboardData | null;
+  data?: DashboardData | null;
 }
 
 // Memoized components for better performance
-const XPSourceIcon = ({ source }: { source: string }) => {
+const XPSourceIcon = ({ activityType }: { activityType: string }) => {
   const iconMap: Record<string, React.ReactNode> = useMemo(
     () => ({
       login_daily: <Calendar className="h-4 w-4" />,
@@ -66,7 +34,7 @@ const XPSourceIcon = ({ source }: { source: string }) => {
     }),
     [],
   );
-  return iconMap[source] || <Star className="h-4 w-4" />;
+  return iconMap[activityType] || <Star className="h-4 w-4" />;
 };
 
 const TransactionItem = ({
@@ -79,20 +47,23 @@ const TransactionItem = ({
   formatTransactionDate: (date: string) => string;
   formatXPAmount: (amount: number) => string;
   getXpSourceDisplayName: (source: string) => string;
-}) => (
-  <div className="bg-muted/50 flex items-center justify-between rounded-lg p-3">
-    <div className="flex items-center gap-3">
-      <XPSourceIcon source={transaction.source} />
-      <div>
-        <p className="text-sm font-medium">{getXpSourceDisplayName(transaction.source)}</p>
-        <p className="text-muted-foreground text-xs">{formatTransactionDate(transaction.created_at)}</p>
+}) => {
+  const source = (transaction as any).source ?? 'unknown';
+  return (
+    <div className="bg-muted/50 flex items-center justify-between rounded-lg p-3">
+      <div className="flex items-center gap-3">
+        <XPSourceIcon activityType={source} />
+        <div>
+          <p className="text-sm font-medium">{getXpSourceDisplayName(source)}</p>
+          <p className="text-muted-foreground text-xs">{formatTransactionDate(transaction.created_at)}</p>
+        </div>
       </div>
+      <Badge variant={transaction.amount > 0 ? 'default' : 'destructive'}>
+        {formatXPAmount(transaction.amount)}
+      </Badge>
     </div>
-    <Badge variant={transaction.xp_amount > 0 ? 'default' : 'destructive'}>
-      {formatXPAmount(transaction.xp_amount)}
-    </Badge>
-  </div>
-);
+  );
+};
 
 export function GamificationDashboard({
   orgId,
@@ -100,40 +71,22 @@ export function GamificationDashboard({
   onProfileUpdate,
   data: serverData,
 }: GamificationDashboardProps) {
-  const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
-  const { map: xpSourcesMap } = useXPSources(true);
 
-  const [dashboardData, setDashboardData] = useState<GamificationDashboardData | null>(serverData ?? null);
-  const [isLoading, setIsLoading] = useState(!serverData);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
-
-  // Seed SWR cache for gamification profile using server data, to avoid nulls in other widgets
-  useGamification({
-    orgId,
-    accessToken: (session as any)?.tokens?.access_token,
-    enabled: !serverData,
-    initialData: serverData?.profile,
-  });
+  const dashboardData = serverData ?? null;
 
   // Memoized helper functions
   const getXpSourceDisplayName = useCallback(
     (source: string): string => {
-      // 1. SWR metadata map
-      const meta = xpSourcesMap?.[source];
-      if (meta?.label) return meta.label;
-      // 2. Translation fallback
+      // 1) Translation (if key exists), 2) Humanized fallback
       try {
         return t(`xpSources.${source}` as any);
       } catch {
-        // 3. Humanize key
         return source.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
       }
     },
-    [t, xpSourcesMap],
+    [t],
   );
 
   const formatTransactionDate = useCallback(
@@ -166,93 +119,14 @@ export function GamificationDashboard({
     [format],
   );
 
-  const fetchDashboardData = useCallback(
-    async (isRefresh = false) => {
-      if (!session?.tokens?.access_token) {
-        setError(t('dashboard.notAuthenticated'));
-        setIsLoading(false);
-        return;
-      }
-
+  // No client fetching; this component is purely presentational.
+  useEffect(() => {
+    if (onProfileUpdate && dashboardData?.profile) {
       try {
-        if (isRefresh) {
-          setIsRefreshing(true);
-        } else {
-          setIsLoading(true);
-        }
-        setError(null);
-
-        const response = await fetch(
-          `${getAPIUrl()}gamification/dashboard/${orgId}`,
-          RequestBodyWithAuthHeader('GET', null, null, session.tokens.access_token),
-        );
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error(t('dashboard.profileNotFound'));
-          }
-          if (response.status === 403) {
-            throw new Error(t('dashboard.accessDenied'));
-          }
-          throw new Error(`${t('dashboard.fetchError')}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        // Validate the response data
-        if (!data?.profile) {
-          throw new Error(t('dashboard.invalidResponse'));
-        }
-
-        setDashboardData(data);
-        setRetryCount(0); // Reset retry count on success
-
-        // Notify parent component of profile update
-        if (onProfileUpdate && data.profile) {
-          onProfileUpdate(data.profile);
-        }
-      } catch (error) {
-        console.error('Error fetching gamification dashboard:', error);
-        const errorMessage = error instanceof Error ? error.message : t('dashboard.unexpectedError');
-        setError(errorMessage);
-
-        // Increment retry count for exponential backoff
-        setRetryCount((prev) => prev + 1);
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    },
-    [orgId, session?.tokens?.access_token, t, onProfileUpdate],
-  );
-
-  const handleRetry = useCallback(() => {
-    fetchDashboardData(false);
-  }, [fetchDashboardData]);
-
-  const handleRefresh = useCallback(() => {
-    fetchDashboardData(true);
-  }, [fetchDashboardData]);
-
-  // Initial fetch
-  useEffect(() => {
-    if (!serverData) {
-      fetchDashboardData();
+        onProfileUpdate(dashboardData.profile);
+      } catch {}
     }
-  }, [fetchDashboardData, serverData]);
-
-  // Auto-retry logic with exponential backoff
-  useEffect(() => {
-    if (error && retryCount > 0 && retryCount <= 3) {
-      const retryDelay = Math.min(1000 * 2 ** (retryCount - 1), 10_000); // Cap at 10s
-      const timer = setTimeout(() => {
-        console.log(`Retrying gamification dashboard fetch (attempt ${retryCount})`);
-        fetchDashboardData();
-      }, retryDelay);
-
-      return () => clearTimeout(timer);
-    }
-  }, [error, retryCount, fetchDashboardData]);
+  }, [onProfileUpdate, dashboardData?.profile]);
 
   // Memoized computed values
   const levelProgress = useMemo(() => {
@@ -262,40 +136,17 @@ export function GamificationDashboard({
   }, [dashboardData?.profile]);
 
   const sortedTransactions = useMemo(() => {
-    if (!dashboardData) return [];
-    const list: XPTransaction[] = (dashboardData.recent_tx || []).map(
-      (t) =>
-        ({
-          id: t.transaction_id,
-          user_id: dashboardData.profile.user_id,
-          org_id: orgId,
-          xp_amount: t.amount,
-          source: t.source,
-          source_id: t.source_id ?? null,
-          transaction_metadata: t.metadata ?? {},
-          created_at: t.created_at,
-        }) as XPTransaction,
-    );
-    return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10);
-  }, [dashboardData, orgId]);
+    const list: XPTransaction[] = dashboardData?.recent_transactions ?? [];
+    return [...list]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 10);
+  }, [dashboardData]);
 
-  if (isLoading) {
+  if (!dashboardData) {
     return <LoadingSkeleton className={className} />;
   }
 
-  if (error || !dashboardData) {
-    return (
-      <ErrorState
-        className={className}
-        error={error || t('dashboard.failedToLoad')}
-        onRetry={handleRetry}
-        retryCount={retryCount}
-        isRetrying={isLoading}
-      />
-    );
-  }
-
-  const { profile, rank_in_organization } = dashboardData;
+  const { profile, user_rank } = dashboardData;
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -306,15 +157,7 @@ export function GamificationDashboard({
             <Trophy className="h-5 w-5" />
             {t('dashboard.yourProgress')}
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="h-8 w-8 p-0"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
+          {/* Refresh action handled by parent/server; no client fetch here */}
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -342,10 +185,10 @@ export function GamificationDashboard({
               />
             </div>
 
-            {rank_in_organization && (
+            {user_rank != null && (
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                <span className="text-sm">{t('dashboard.rankInOrg', { rank: rank_in_organization })}</span>
+                <span className="text-sm">{t('dashboard.rankInOrg', { rank: user_rank })}</span>
               </div>
             )}
           </div>
@@ -408,44 +251,4 @@ const LoadingSkeleton = ({ className }: { className: string }) => (
 );
 
 // Error state component with retry logic
-const ErrorState = ({
-  className,
-  error,
-  onRetry,
-  retryCount,
-  isRetrying,
-}: {
-  className: string;
-  error: string;
-  onRetry: () => void;
-  retryCount: number;
-  isRetrying: boolean;
-}) => {
-  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-
-  return (
-    <Card className={className}>
-      <CardContent className="p-6 text-center">
-        <Alert className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            onClick={onRetry}
-            disabled={isRetrying}
-            className="inline-flex items-center gap-2"
-          >
-            {isRetrying && <RefreshCw className="h-4 w-4 animate-spin" />}
-            {t('dashboard.tryAgain')}
-          </Button>
-
-          {retryCount > 0 && (
-            <p className="text-muted-foreground text-sm">{t('dashboard.retryAttempt', { count: retryCount })}</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+// Legacy ErrorState removed (no client fetching)

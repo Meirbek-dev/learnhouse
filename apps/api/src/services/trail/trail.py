@@ -236,39 +236,23 @@ async def add_activity_to_trail(
         db_session.commit()
         db_session.refresh(trailstep)
 
-        # Award XP for first-time activity completion (idempotent by source_id)
+        # Award XP + learning streak via domain helper (idempotent)
         try:
-            gamification_service.award_xp(
+            gamification_service.on_activity_completed(
                 db=db_session,
                 user_id=user.id,
                 org_id=course.org_id,
-                source=XPSource.ACTIVITY_COMPLETION.value,
-                amount=None,
+                activity_id=activity.id,
                 source_id=str(activity.id),
                 idempotency_key=f"activity_{activity.id}_{user.id}",
             )
-        except Exception as xp_err:  # noqa: BLE001
+        except Exception as err:  # noqa: BLE001
             logger.warning(
-                "Failed to award activity completion XP (user_id=%s, activity_id=%s): %s",
+                "Gamification.on_activity_completed failed (user_id=%s, activity_id=%s): %s",
                 user.id,
                 activity.id,
-                xp_err,
+                err,
             )
-    # Update learning streak (best-effort; ignore failures)
-    try:
-        gamification_service.update_streak(
-            db=db_session,
-            user_id=user.id,
-            org_id=course.org_id,
-            streak_type="learning",
-        )
-    except Exception as streak_err:  # noqa: BLE001
-        logger.debug(
-            "Learning streak update failed (user_id=%s, org_id=%s): %s",
-            user.id,
-            course.org_id,
-            streak_err,
-        )
 
     # Rebuild and return updated trail state
     return _hydrate_trail(trail, user.id, db_session)

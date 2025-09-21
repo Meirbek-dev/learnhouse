@@ -1,6 +1,6 @@
 'use client';
 
-import { getLevelInfo } from '@/components/Objects/GamificationLevel';
+import { getLevelInfo } from '@/lib/gamification/levels';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Progress } from '@/components/ui/progress';

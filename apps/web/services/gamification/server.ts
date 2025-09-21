@@ -2,6 +2,8 @@
 
 import type { DashboardData, OrganizationLeaderboard, UserGamificationProfile } from '@/types/gamification';
 import { getAPIUrl } from '@/services/config/config';
+import { gamificationTags } from '@/lib/cacheTags';
+import { revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
 async function requireAccessToken(): Promise<string> {
@@ -10,27 +12,30 @@ async function requireAccessToken(): Promise<string> {
   if (!token) throw new Error('Authentication required');
   return token;
 }
+async function getUnifiedServerData(orgId: number, opts?: { revalidate?: number; tags?: string[] }) {
+  const accessToken = await requireAccessToken();
+  // New unified endpoint returns DashboardRead (profile + recent_transactions)
+  const res = await fetch(`${getAPIUrl()}gamification/${orgId}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${accessToken}` },
+    next: {
+      revalidate: opts?.revalidate ?? 30,
+      tags: opts?.tags ?? gamificationTags(orgId),
+    },
+  });
+
+  if (!res.ok) throw new Error(`Failed to fetch gamification data: ${res.status}`);
+  return res.json();
+}
 
 export async function getServerGamificationProfile(
   orgId: number,
   opts?: { revalidate?: number; tags?: string[] },
 ): Promise<UserGamificationProfile> {
-  const accessToken = await requireAccessToken();
-  // Use simplified unified endpoint and extract profile
-  const res = await fetch(`${getAPIUrl()}gamification/dashboard/${orgId}`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${accessToken}` },
-    next: {
-      revalidate: opts?.revalidate ?? 30,
-      tags: opts?.tags ?? [`gamification:profile:${orgId}`],
-    },
-  });
+  const json = await getUnifiedServerData(orgId, opts);
 
-  if (!res.ok) throw new Error(`Failed to fetch profile: ${res.status}`);
-  const json = await res.json();
-
-  // Transform API response to frontend UserGamificationProfile type (aligned with new types)
-  const p = json?.profile ?? json; // support both dashboard payload and direct profile (if ever used)
+  // Transform API response to frontend UserGamificationProfile type
+  const p = json?.profile ?? json;
   const profile: UserGamificationProfile = {
     id: Number(p.id) || 0,
     user_id: Number(p.user_id) || 0,
@@ -62,68 +67,51 @@ export async function getServerGamificationDashboard(
   orgId: number,
   opts?: { revalidate?: number; tags?: string[] },
 ): Promise<DashboardData> {
-  const accessToken = await requireAccessToken();
-  const res = await fetch(`${getAPIUrl()}gamification/dashboard/${orgId}`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${accessToken}` },
-    next: {
-      revalidate: opts?.revalidate ?? 30,
-      tags: opts?.tags ?? [`gamification:dashboard:${orgId}`, `gamification:profile:${orgId}`],
-    },
-  });
+  const json = await getUnifiedServerData(orgId, opts);
 
-  if (!res.ok) throw new Error(`Failed to fetch dashboard: ${res.status}`);
-  const json = await res.json();
-
-  // Transform the backend dashboard data to match the frontend DashboardData interface
+  // Transform backend DashboardRead (profile + recent_transactions)
+  const profile = json.profile ?? {};
   const dashboardData: DashboardData = {
     profile: {
-      id: Number(json.profile?.id) || 0,
-      user_id: Number(json.profile?.user_id) || 0,
-      org_id: Number(json.profile?.org_id) || 0,
-      total_xp: Number(json.profile?.total_xp) || 0,
-      level: Number(json.profile?.level) || 1,
-      login_streak: Number(json.profile?.login_streak) || 0,
-      learning_streak: Number(json.profile?.learning_streak) || 0,
-      longest_login_streak: Number(json.profile?.longest_login_streak) || 0,
-      longest_learning_streak: Number(json.profile?.longest_learning_streak) || 0,
-      total_activities_completed: Number(json.profile?.total_activities_completed) || 0,
-      total_courses_completed: Number(json.profile?.total_courses_completed) || 0,
-      daily_xp_earned: Number(json.profile?.daily_xp_earned) || 0,
-      xp_to_next_level: json.profile?.xp_to_next_level ?? undefined,
-      level_progress_percent: json.profile?.level_progress_percent ?? undefined,
-      xp_in_current_level: json.profile?.xp_in_current_level ?? undefined,
-      last_xp_award_date: json.profile?.last_xp_award_date ?? null,
-      last_login_date: json.profile?.last_login_date ?? null,
-      last_learning_date: json.profile?.last_learning_date ?? null,
-      created_at: json.profile?.created_at || new Date().toISOString(),
-      updated_at: json.profile?.updated_at || new Date().toISOString(),
-      preferences: json.profile?.preferences || {},
+      id: Number(profile.id) || 0,
+      user_id: Number(profile.user_id) || 0,
+      org_id: Number(profile.org_id) || 0,
+      total_xp: Number(profile.total_xp) || 0,
+      level: Number(profile.level) || 1,
+      login_streak: Number(profile.login_streak) || 0,
+      learning_streak: Number(profile.learning_streak) || 0,
+      longest_login_streak: Number(profile.longest_login_streak) || 0,
+      longest_learning_streak: Number(profile.longest_learning_streak) || 0,
+      total_activities_completed: Number(profile.total_activities_completed) || 0,
+      total_courses_completed: Number(profile.total_courses_completed) || 0,
+      daily_xp_earned: Number(profile.daily_xp_earned) || 0,
+      xp_to_next_level: profile.xp_to_next_level ?? undefined,
+      level_progress_percent: profile.level_progress_percent ?? undefined,
+      xp_in_current_level: profile.xp_in_current_level ?? undefined,
+      last_xp_award_date: profile.last_xp_award_date ?? null,
+      last_login_date: profile.last_login_date ?? null,
+      last_learning_date: profile.last_learning_date ?? null,
+      created_at: profile.created_at || new Date().toISOString(),
+      updated_at: profile.updated_at || new Date().toISOString(),
+      preferences: profile.preferences || {},
     },
     recent_transactions: (json.recent_transactions || []).map((tx: any) => ({
-      id: tx?.id?.toString() || '0',
-      user_id: tx?.user_id?.toString() || '0',
-      organization_id: tx?.org_id?.toString() || tx?.organization_id?.toString() || '0',
-      amount: tx?.xp_amount ?? tx?.amount ?? 0,
-      activity_type: tx?.source ?? tx?.activity_type ?? 'unknown',
-      activity_id: tx?.source_id?.toString() || tx?.activity_id?.toString() || undefined,
-      reason: tx?.reason || undefined,
+      id: Number(tx?.id) || 0,
+      user_id: Number(tx?.user_id) || 0,
+      org_id: Number(tx?.org_id) || 0,
+      amount: Number(tx?.amount) || 0,
+      source: String(tx?.source ?? 'unknown'),
+      source_id: tx?.source_id ?? null,
+      triggered_level_up: Boolean(tx?.triggered_level_up ?? false),
+      previous_level: Number(tx?.previous_level ?? 0),
       created_at: tx?.created_at || new Date().toISOString(),
     })),
-    leaderboard: {
-      entries: (json.leaderboard?.entries || []).map((entry: any, index: number) => ({
-        rank: entry?.rank || index + 1,
-        user_id: Number(entry?.user_id) || 0,
-        total_xp: entry?.total_xp || 0,
-        current_level: entry?.level || 1,
-        level: entry?.level || 1,
-        username: entry?.username || entry?.user?.username || null,
-      })),
-    },
+    // Keep API stable: fill optional derived sections with sane defaults
+    leaderboard: { entries: [] },
     streak_info: {
-      current_streak: json.streak_info?.current_streak || 0,
-      longest_streak: json.streak_info?.longest_streak || 0,
-      last_activity: json.streak_info?.last_activity || null,
+      current_streak: Number(profile.login_streak) || 0,
+      longest_streak: Number(profile.longest_login_streak) || 0,
+      last_activity: profile.last_login_date ?? null,
     },
   };
 
@@ -136,32 +124,88 @@ export async function getServerOrganizationLeaderboard(
   opts?: { revalidate?: number; tags?: string[] },
 ): Promise<OrganizationLeaderboard> {
   const accessToken = await requireAccessToken();
-  // Use the unified dashboard endpoint and extract leaderboard
-  const res = await fetch(`${getAPIUrl()}gamification/dashboard/${orgId}`, {
+  const res = await fetch(`${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`, {
     method: 'GET',
     headers: { Authorization: `Bearer ${accessToken}` },
     next: {
       revalidate: opts?.revalidate ?? 30,
-      tags: opts?.tags ?? [`gamification:leaderboard:${orgId}`, `gamification:dashboard:${orgId}`],
+      tags: opts?.tags ?? gamificationTags(orgId),
     },
   });
-
   if (!res.ok) throw new Error(`Failed to fetch leaderboard: ${res.status}`);
   const json = await res.json();
 
-  const entries = (json?.leaderboard?.entries ?? []) as any[];
-  const limited = entries.slice(0, Math.max(0, limit));
-
-  const transformedLeaderboard: OrganizationLeaderboard = {
-    entries: limited.map((entry: any, index: number) => ({
+  const transformed: OrganizationLeaderboard = {
+    entries: (json?.entries ?? []).map((entry: any, index: number) => ({
       user_id: Number(entry.user_id) || 0,
-      total_xp: entry.total_xp || 0,
-      level: entry.level || entry.current_level || 1,
-      current_level: entry.current_level || entry.level || 1,
-      rank: entry.rank || index + 1,
-      username: entry.username || entry.user?.username || null,
+      total_xp: Number(entry.total_xp) || 0,
+      level: Number(entry.level) || 1,
+      current_level: Number(entry.level) || 1,
+      rank: Number(entry.rank ?? index + 1),
+      username: entry.username ?? null,
     })),
   };
+  return transformed;
+}
 
-  return transformedLeaderboard;
+// Server-only revalidation utility after successful mutations
+export async function revalidateGamificationTags(orgId: number) {
+  if (!orgId) return;
+  for (const tag of gamificationTags(orgId)) {
+    revalidateTag(tag);
+  }
+}
+
+// Server-side mutation helpers
+export async function awardXPOnServer(orgId: number, payload: Record<string, any>) {
+  const accessToken = await requireAccessToken();
+  // Map legacy client payload to backend shape
+  const body = {
+    source: payload.source,
+    source_id: payload.source_id ?? undefined,
+    custom_amount: payload.amount ?? payload.custom_amount ?? undefined,
+    idempotency_key: payload.idempotency_key ?? undefined,
+  };
+  const res = await fetch(`${getAPIUrl()}gamification/${orgId}/xp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Failed to award XP: ${res.status}`);
+  const json = await res.json();
+  await revalidateGamificationTags(orgId);
+  return json;
+}
+
+export async function updateStreakOnServer(orgId: number, type: 'login' | 'learning') {
+  const accessToken = await requireAccessToken();
+  const res = await fetch(`${getAPIUrl()}gamification/${orgId}/streaks/${encodeURIComponent(type)}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  if (!res.ok) throw new Error(`Failed to update streak: ${res.status}`);
+  const json = await res.json();
+  await revalidateGamificationTags(orgId);
+  return json;
+}
+
+export async function updatePreferencesOnServer(orgId: number, preferences: Record<string, any>) {
+  const accessToken = await requireAccessToken();
+  const res = await fetch(`${getAPIUrl()}gamification/${orgId}/preferences`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(preferences),
+  });
+  if (!res.ok) throw new Error(`Failed to update preferences: ${res.status}`);
+  const json = await res.json();
+  await revalidateGamificationTags(orgId);
+  return json;
 }

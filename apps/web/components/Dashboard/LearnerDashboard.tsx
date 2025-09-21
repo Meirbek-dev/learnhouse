@@ -4,18 +4,15 @@ import {
   GamificationDashboard as ClientGamificationDashboard,
   Leaderboard as ClientLeaderboard,
   GamificationProfileSection,
-  StreakWidget,
 } from '@/components/Dashboard/Gamification';
-import { getGamificationDashboard as fetchGamificationDashboardService } from '@/services/gamification/gamification';
+import { GamificationProvider, useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { Award, BookOpen, Flame, Star, TrendingUp, Trophy, Users } from 'lucide-react';
 import type { DashboardData, OrganizationLeaderboard } from '@/types/gamification';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGamification } from '@/hooks/useGamification';
-import { useProvideStreaks } from '@/hooks/useStreaks';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface LearnerDashboardProps {
   orgId: number;
@@ -26,59 +23,25 @@ interface LearnerDashboardProps {
   serverLeaderboardData?: OrganizationLeaderboard | null;
 }
 
-export function LearnerDashboard({
+// Inner component that uses the context
+function LearnerDashboardContent({
   orgId,
-  orgSlug,
+  orgSlug: _orgSlug,
   courses = [],
   className = '',
-  serverDashboardData = null,
-  serverLeaderboardData = null,
 }: LearnerDashboardProps) {
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [activeTab, setActiveTab] = useState('profile');
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(serverDashboardData);
-  const [isLoadingDashboard, setIsLoadingDashboard] = useState(!serverDashboardData);
 
-  // Initialize unified gamification (auto profile fetch)
-  // Seed profile cache with server data to avoid nulls in other widgets
-  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
-  useGamification({
-    orgId,
-    accessToken,
-    enabled: !serverDashboardData,
-    initialData: serverDashboardData?.profile,
-  });
-  const { streaks } = useProvideStreaks(orgId, accessToken);
+  // Use unified context - eliminates redundant state management
+  const gamificationContext = useOptionalGamificationContext();
 
-  // Fetch gamification dashboard (normalized) for Quick Stats
-  useEffect(() => {
-    let cancelled = false;
-    async function run() {
-      if (serverDashboardData) {
-        // Already provided by server
-        setIsLoadingDashboard(false);
-        return;
-      }
-      if (!session?.tokens?.access_token) {
-        setIsLoadingDashboard(false);
-        return;
-      }
-      try {
-        setIsLoadingDashboard(true);
-        const data = await fetchGamificationDashboardService(orgId, session.tokens.access_token);
-        if (!cancelled) setDashboardData(data);
-      } catch (error) {
-        if (!cancelled) console.error('Error fetching gamification dashboard:', error);
-      } finally {
-        if (!cancelled) setIsLoadingDashboard(false);
-      }
-    }
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [orgId, session?.tokens?.access_token, serverDashboardData]);
+  if (!gamificationContext) {
+    throw new Error('LearnerDashboardContent must be used within GamificationProvider');
+  }
+
+  const { profile, dashboard, leaderboard, isLoading, streaks } = gamificationContext;
 
   // Don't show for anonymous users
   if (!session?.user) {
@@ -86,8 +49,7 @@ export function LearnerDashboard({
   }
 
   return (
-    <div className={`w-full space-y-6 ${className}`}>
-      {/* Dashboard Tabs */}
+    <div className={`space-y-6 ${className}`}>
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
@@ -140,21 +102,21 @@ export function LearnerDashboard({
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Star className="mx-auto mb-2 h-8 w-8 text-yellow-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard ? '...' : ((dashboardData as any)?.total_courses_completed ?? 0)}
+                    {isLoading ? '...' : (profile?.total_courses_completed ?? 0)}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.completed')}</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Award className="mx-auto mb-2 h-8 w-8 text-green-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard ? '...' : (dashboardData as any)?.total_certificates || 0}
+                    {isLoading ? '...' : '0'}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.certificates')}</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Flame className="mx-auto mb-2 h-8 w-8 text-orange-500" />
                   <p className="text-2xl font-bold">
-                    {isLoadingDashboard ? '...' : (streaks?.login ?? dashboardData?.profile?.login_streak ?? 0)}
+                    {isLoading ? '...' : (streaks?.login ?? 0)}
                   </p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.dayStreak')}</p>
                 </div>
@@ -162,10 +124,10 @@ export function LearnerDashboard({
             </CardContent>
           </Card>
 
-          {/* Detailed Progress Section (server-provided data if available) */}
+          {/* Detailed Progress Section */}
           <ClientGamificationDashboard
             orgId={orgId}
-            data={serverDashboardData}
+            data={dashboard}
           />
         </TabsContent>
 
@@ -174,15 +136,12 @@ export function LearnerDashboard({
           value="profile"
           className="space-y-6"
         >
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <GamificationProfileSection
-              orgId={orgId}
-              variant="full"
-              showUnlocks
-              data={serverDashboardData?.profile}
-            />
-            <StreakWidget orgId={orgId} />
-          </div>
+          <GamificationProfileSection
+            orgId={orgId}
+            variant="full"
+            showUnlocks
+            data={profile}
+          />
         </TabsContent>
 
         {/* Community Tab */}
@@ -193,10 +152,26 @@ export function LearnerDashboard({
           <ClientLeaderboard
             orgId={orgId}
             limit={20}
-            data={serverLeaderboardData ?? null}
+            data={leaderboard}
           />
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+// Main component with provider wrapper
+export function LearnerDashboard(props: LearnerDashboardProps) {
+  return (
+    <GamificationProvider
+      orgId={props.orgId}
+      initialData={{
+        profile: props.serverDashboardData?.profile,
+        dashboard: props.serverDashboardData,
+        leaderboard: props.serverLeaderboardData,
+      }}
+    >
+      <LearnerDashboardContent {...props} />
+    </GamificationProvider>
   );
 }

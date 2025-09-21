@@ -149,9 +149,10 @@ const LoggedInJoinScreen = (props: any) => {
           </span>
           <span>{t('joinQuestion', { orgName: org?.name })}</span>
         </p>
-        <button
-          onClick={() => join()}
-          className="text-md flex h-[35px] w-fit items-center space-x-2 rounded-lg bg-black px-6 py-2 font-semibold text-white shadow-md"
+        <Button
+          onClick={join}
+          disabled={isSumbitting}
+          className="text-md h-[35px] font-semibold"
         >
           {isSumbitting ? (
             <BarLoader
@@ -165,7 +166,7 @@ const LoggedInJoinScreen = (props: any) => {
               <p>{t('join')}</p>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

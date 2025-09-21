@@ -10,7 +10,6 @@ import os
 from fastapi import APIRouter, Depends
 
 from src.routers import (
-    admin,
     auth,
     dev,
     gamification,
@@ -74,8 +73,6 @@ v1_router.include_router(
     tags=["gamification"],
 )
 
-# Admin and AI
-v1_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 v1_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 
 # Payments/EE

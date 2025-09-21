@@ -1,17 +1,16 @@
 'use client';
 
-import { AVATAR_UNLOCKS, LevelIndicator, getLevelInfo } from '@/components/Objects/GamificationLevel';
+import { AVATAR_UNLOCKS, getLevelInfo } from '@/lib/gamification/levels';
+import { LevelDisplay, LevelProgressBar } from './LevelIndicators';
 import { Activity, Award, Crown, Flame, Star, Target, Trophy, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
-import { useGamification } from '@/hooks/useGamification';
-import { useProvideStreaks } from '@/hooks/useStreaks';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
+import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 
 import type { UserGamificationProfile } from '@/types/gamification';
 
@@ -26,30 +25,23 @@ interface GamificationProfileSectionProps {
 
 export function GamificationProfileSection({
   orgId,
-  userId,
+  userId: _userId,
   className,
-  variant = 'full',
+  variant: _variant = 'full',
   showUnlocks = true,
   data,
 }: GamificationProfileSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const { data: session } = useSession();
-  const accessToken: string | undefined = (session as any)?.tokens?.access_token;
-  const {
-    profile: liveProfile,
-    isLoading: hookLoading,
-    error,
-  } = useGamification({ orgId, accessToken, enabled: !data, initialData: data ?? undefined });
-  const { streaks } = useProvideStreaks(orgId, accessToken);
-  const profile = data ?? liveProfile;
-  const isLoading = !profile && hookLoading;
+  const ctx = useOptionalGamificationContext();
+  const profile = data ?? ctx?.profile ?? null;
+  const isLoading = !profile && !!ctx?.isLoading;
   const { levelInfo, nextMilestone, unlockedFrames, unlockedAccessories } = useMemo(() => {
     if (!profile) {
       return {
-        levelInfo: null,
-        nextMilestone: null,
-        unlockedFrames: [] as typeof AVATAR_UNLOCKS.frames,
-        unlockedAccessories: [] as typeof AVATAR_UNLOCKS.accessories,
+        levelInfo: null as any,
+        nextMilestone: null as any,
+        unlockedFrames: [] as Array<(typeof AVATAR_UNLOCKS.frames)[number]>,
+        unlockedAccessories: [] as Array<(typeof AVATAR_UNLOCKS.accessories)[number]>,
       };
     }
     return {
@@ -80,7 +72,7 @@ export function GamificationProfileSection({
     );
   }
 
-  if (error || !profile) {
+  if (!profile) {
     return (
       <Card className={className}>
         <CardHeader>
@@ -90,7 +82,7 @@ export function GamificationProfileSection({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground py-4 text-center">{error || t('dashboard.noData')}</p>
+          <p className="text-muted-foreground py-4 text-center">{t('dashboard.noData')}</p>
         </CardContent>
       </Card>
     );
@@ -139,7 +131,7 @@ export function GamificationProfileSection({
             className="shrink-0"
           />
           <div className="flex-1 space-y-3">
-            <LevelIndicator
+            <LevelDisplay
               profile={profile}
               variant="full"
               showXP
@@ -151,7 +143,7 @@ export function GamificationProfileSection({
               <div className="flex items-center gap-2">
                 <Flame className="h-4 w-4 text-orange-500" />
                 <span>
-                  {t('streaks.login.title')}: {(streaks?.login ?? profile.login_streak) || 0} {t('streaks.days')}
+                  {t('streaks.login.title')}: {profile.login_streak || 0} {t('streaks.days')}
                 </span>
               </div>
               <div className="flex items-center gap-2">

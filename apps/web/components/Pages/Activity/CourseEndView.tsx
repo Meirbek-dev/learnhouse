@@ -5,7 +5,7 @@ import { getUserCertificates } from '@services/courses/certifications';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 // Gamification imports
 import { LevelDisplay } from '@components/Dashboard/Gamification';
-import { useGamification } from '@/hooks/useGamification';
+import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -49,14 +49,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({
     `/certificates/${userCertificate?.certificate_user.user_certification_uuid}/verify`,
   );
 
-  // Gamification state
-  const { data: authSession } = useSession();
-  const accessToken: string | undefined = (authSession as any)?.tokens?.access_token;
-  const { profile: gamificationProfile } = useGamification({
-    orgId: org?.id,
-    accessToken,
-    enabled: !!org?.id && !!accessToken,
-  });
+  // Gamification state via unified context
+  const gamificationProfile = useOptionalGamificationContext()?.profile ?? null;
 
   // Check if course is actually completed
   const isCourseCompleted = useMemo(() => {

@@ -26,14 +26,12 @@ import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/Assign
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
-import { LevelUpNotification, showXPGainToast } from '@components/Dashboard/Gamification';
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
-import { getUnlockedFeatures } from '@components/Objects/GamificationLevel';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -205,7 +203,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   };
 
   // Add SWR for trail data
-  const { data: trailData, error } = useSWR(`${getAPIUrl()}trail/org/${org?.id}/trail`, (url) =>
+  const { data: trailData } = useSWR(`${getAPIUrl()}trail/org/${org?.id}/trail`, (url) =>
     swrFetcher(url, access_token),
   );
 
@@ -888,24 +886,14 @@ export const MarkStatus = (props: {
   const router = useRouter();
   const session = useLHSession() as any;
   const org = useOrg() as any;
-  const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(false);
   const [showMarkedTooltip, setShowMarkedTooltip] = useState(false);
   const [showUnmarkedTooltip, setShowUnmarkedTooltip] = useState(false);
 
-  // Gamification state
-  const [showLevelUpNotification, setShowLevelUpNotification] = useState(false);
-  const [levelUpData, setLevelUpData] = useState<{
-    newLevel: number;
-    xpGained: number;
-    unlockedFeatures: string[];
-  } | null>(null);
-
-  // Gamification profile is no longer managed via useLevelIndicator here.
+  // Gamification state - simplified to use toast notifications
   // Components that require gamification data should use the unified hook locally.
   const gamificationProfile = null as any;
   const refetchGamification = async () => {};
-  const resetLevelUp = () => {};
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -995,14 +983,7 @@ export const MarkStatus = (props: {
       await refetchGamification();
 
       // Show XP gain notification
-      showXPGainToast({
-        xpAmount: 25, // Standard activity completion XP
-        source: 'activity_completion',
-        sourceDisplayName: t('activityCompleted'),
-        context: {
-          activity_name: props.activity.title,
-        },
-      });
+      toast.success(`🎉 +25 XP for completing "${props.activity.title}"!`);
 
       // Check for level up after a brief delay to allow for profile update
       setTimeout(async () => {
@@ -1010,16 +991,9 @@ export const MarkStatus = (props: {
         const updatedProfile = gamificationProfile;
 
         if (updatedProfile && updatedProfile.current_level > previousLevel) {
-          const unlockedFeatures = getUnlockedFeatures(updatedProfile.current_level, t);
-          const previousUnlocked = getUnlockedFeatures(previousLevel, t);
-          const newUnlocks = unlockedFeatures.filter((f) => !previousUnlocked.includes(f));
-
-          setLevelUpData({
-            newLevel: updatedProfile.current_level,
-            xpGained: 25,
-            unlockedFeatures: newUnlocks,
+          toast.success(`🎉 Level Up! You've reached Level ${updatedProfile.current_level}!`, {
+            duration: 5000,
           });
-          setShowLevelUpNotification(true);
         }
       }, 1000);
 
@@ -1186,20 +1160,6 @@ export const MarkStatus = (props: {
         </div>
       )}
 
-      {/* Level Up Notification */}
-      {showLevelUpNotification && levelUpData && (
-        <LevelUpNotification
-          isVisible={showLevelUpNotification}
-          newLevel={levelUpData.newLevel}
-          xpGained={levelUpData.xpGained}
-          unlockedFeatures={levelUpData.unlockedFeatures}
-          onDismiss={() => {
-            setShowLevelUpNotification(false);
-            setLevelUpData(null);
-            resetLevelUp();
-          }}
-        />
-      )}
     </>
   );
 };

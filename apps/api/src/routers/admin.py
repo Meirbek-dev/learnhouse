@@ -14,7 +14,7 @@ from src.db.organizations import Organization
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
-from src.schemas.gamification import DashboardRead
+from src.db.gamification import DashboardRead
 from src.security.auth import get_current_user
 from src.services.gamification import service as gamification_service
 

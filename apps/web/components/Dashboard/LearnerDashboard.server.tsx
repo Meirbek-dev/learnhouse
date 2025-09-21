@@ -1,5 +1,6 @@
 // Server wrapper for LearnerDashboard — fetches data on the server using cache tags
 import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
+import { gamificationTag } from '@/lib/cacheTags';
 import { LearnerDashboard as ClientLearnerDashboard } from './LearnerDashboard';
 
 export default async function LearnerDashboardServer({
@@ -17,11 +18,11 @@ export default async function LearnerDashboardServer({
 }) {
   const dashboard = await getServerGamificationDashboard(orgId, {
     revalidate: 30,
-    tags: [`gamification:dashboard:${orgId}`, `gamification:profile:${orgId}`],
+    tags: [gamificationTag.dashboard(orgId), gamificationTag.profile(orgId)],
   });
   const leaderboard = await getServerOrganizationLeaderboard(orgId, leaderboardLimit, {
     revalidate: 30,
-    tags: [`gamification:leaderboard:${orgId}`],
+    tags: [gamificationTag.leaderboard(orgId)],
   });
 
   return (

@@ -2,7 +2,8 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { AVATAR_UNLOCKS, LevelIndicator } from './GamificationLevel';
+import { AVATAR_UNLOCKS } from '@/lib/gamification/levels';
+import { LevelIndicatorBadge } from '@/components/Dashboard/Gamification/LevelIndicators';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { getUserByUsername } from '@services/users/users';
@@ -261,12 +262,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
             },
           )}
         >
-          <LevelIndicator
-            profile={gamificationProfile}
-            variant="badge"
-            showXP={false}
-            showProgress={false}
-          />
+          <LevelIndicatorBadge level={gamificationProfile.level} variant="mini" />
         </div>
       )}
     </div>

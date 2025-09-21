@@ -1,36 +1,15 @@
+
 'use client';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertCircle, Award, Crown, Medal, RefreshCw, TrendingUp, Trophy } from 'lucide-react';
+import { Award, Crown, Medal, TrendingUp, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RequestBodyWithAuthHeader } from '@/services/utils/ts/requests';
-import { getUserAvatarMediaDirectory } from '@/services/media/media';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useCallback, useMemo } from 'react';
 import UserAvatar from '@/components/Objects/UserAvatar';
-import { getAPIUrl } from '@/services/config/config';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-
-interface LeaderboardEntry {
-  rank: number;
-  user_id: number;
-  total_xp: number;
-  current_level: number;
-  username?: string | null;
-  avatar_image?: string;
-  user_uuid?: string;
-  first_name?: string;
-  last_name?: string;
-  is_current_user?: boolean;
-}
-
-interface OrganizationLeaderboard {
-  entries: LeaderboardEntry[];
-}
+import type { OrganizationLeaderboard } from '@/types/gamification';
 
 interface LeaderboardProps {
   orgId: number;
@@ -38,6 +17,7 @@ interface LeaderboardProps {
   limit?: number;
   compact?: boolean;
   data?: OrganizationLeaderboard | null;
+  currentUserId?: number;
 }
 
 export function Leaderboard({
@@ -46,65 +26,10 @@ export function Leaderboard({
   limit = 20,
   compact = false,
   data: serverData,
+  currentUserId,
 }: LeaderboardProps) {
-  const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(serverData ?? null);
-  const [isLoading, setIsLoading] = useState(!serverData);
-  const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
-
-  const fetchLeaderboard = useCallback(async () => {
-    if (!session?.tokens?.access_token) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10_000);
-
-      const response = await fetch(`${getAPIUrl()}gamification/leaderboard/${orgId}?limit=${limit}`, {
-        ...RequestBodyWithAuthHeader('GET', null, null, session.tokens.access_token),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch leaderboard: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setLeaderboard(data);
-      setRetryCount(0); // Reset retry count on success
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        setError(t('leaderboard.loadingTimeout') || t('common.tryAgain'));
-      } else {
-        console.error('Error fetching leaderboard:', error);
-        setError(error instanceof Error ? error.message : t('leaderboard.failedToLoad'));
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [orgId, limit, session?.tokens?.access_token, t]);
-
-  const handleRetry = useCallback(() => {
-    if (retryCount < 3) {
-      setRetryCount((prev) => prev + 1);
-      fetchLeaderboard();
-    }
-  }, [retryCount, fetchLeaderboard]);
-
-  useEffect(() => {
-    if (!serverData) {
-      fetchLeaderboard();
-    }
-  }, [fetchLeaderboard, serverData]);
+  const leaderboard = serverData ?? null;
 
   const getRankIcon = useCallback(
     (rank: number) => {
@@ -167,10 +92,8 @@ export function Leaderboard({
   }, []);
 
   const isCurrentUser = useCallback(
-    (userId: number) => {
-      return session?.user?.id === userId;
-    },
-    [session?.user?.id],
+    (userId: number) => currentUserId != null && currentUserId === userId,
+    [currentUserId],
   );
 
   const topEntries = useMemo(() => {
@@ -178,23 +101,16 @@ export function Leaderboard({
   }, [leaderboard, limit]);
 
   // Loading state
-  if (isLoading) {
+  if (!leaderboard) {
     return (
       <Card className={className}>
         <CardHeader>
           <Skeleton className="h-6 w-32" />
         </CardHeader>
         <CardContent>
-          <div
-            className="space-y-3"
-            role="status"
-            aria-label={t('leaderboard.loading')}
-          >
+          <div className="space-y-3" role="status" aria-label={t('leaderboard.loading')}>
             {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 rounded-lg border p-3"
-              >
+              <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
                 <Skeleton className="h-8 w-8 rounded-full" />
                 <div className="flex-1">
                   <Skeleton className="mb-1 h-4 w-24" />
@@ -204,33 +120,6 @@ export function Leaderboard({
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Error state with retry
-  if (error || !leaderboard) {
-    return (
-      <Card className={className}>
-        <CardContent className="p-6">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>{error || t('leaderboard.failedToLoad')}</span>
-              {retryCount < 3 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRetry}
-                  className="ml-2"
-                >
-                  <RefreshCw className="mr-1 h-4 w-4" />
-                  {t('leaderboard.retry')}
-                </Button>
-              )}
-            </AlertDescription>
-          </Alert>
         </CardContent>
       </Card>
     );
@@ -267,21 +156,10 @@ export function Leaderboard({
                       <div className="flex items-center gap-1">{getRankIcon(entry.rank)}</div>
                       <UserAvatar
                         size="sm"
-                        avatar_url={
-                          entry.avatar_image && entry.user_uuid
-                            ? getUserAvatarMediaDirectory(entry.user_uuid, entry.avatar_image)
-                            : ''
-                        }
-                        predefined_avatar={entry.avatar_image ? undefined : 'empty'}
                         userId={entry.user_id}
                         username={entry.username ?? undefined}
-                        fallbackText={
-                          entry.first_name && entry.last_name
-                            ? `${entry.first_name[0]}${entry.last_name[0]}`.toUpperCase()
-                            : entry.username && entry.username.length > 0
-                              ? entry.username[0]?.toUpperCase()
-                              : getUserInitials(entry.user_id)
-                        }
+                        predefined_avatar="empty"
+                        fallbackText={(entry.username?.[0] || getUserInitials(entry.user_id)).toUpperCase()}
                         showProfilePopup
                       />
                       <div className="min-w-0 flex-1">
@@ -355,21 +233,10 @@ export function Leaderboard({
                     <div className="flex min-w-0 flex-1 items-center gap-3">
                       <UserAvatar
                         size="md"
-                        avatar_url={
-                          entry.avatar_image && entry.user_uuid
-                            ? getUserAvatarMediaDirectory(entry.user_uuid, entry.avatar_image)
-                            : ''
-                        }
-                        predefined_avatar={entry.avatar_image ? undefined : 'empty'}
                         userId={entry.user_id}
                         username={entry.username ?? undefined}
-                        fallbackText={
-                          entry.first_name && entry.last_name
-                            ? `${entry.first_name[0]?.toUpperCase()}${entry.last_name[0]?.toUpperCase()}`
-                            : entry.username && entry.username.length > 0
-                              ? entry.username[0]?.toUpperCase()
-                              : getUserInitials(entry.user_id)
-                        }
+                        predefined_avatar="empty"
+                        fallbackText={(entry.username?.[0] || getUserInitials(entry.user_id)).toUpperCase()}
                         showProfilePopup
                       />
 
