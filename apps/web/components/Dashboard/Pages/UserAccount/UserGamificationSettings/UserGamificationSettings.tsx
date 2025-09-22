@@ -138,8 +138,8 @@ export default function UserGamificationSettings() {
 
     setIsLoading(true);
     try {
-  // Optimistic: local state already updated; push to server via internal API
-  await savePreferencesRemote(orgId, preferences);
+      // Optimistic: local state already updated; push to server via internal API
+      await savePreferencesRemote(orgId, preferences);
       toast.success(t('toast.preferencesSaved'));
     } catch (error) {
       console.error('Failed to save preferences:', error);
@@ -285,9 +285,7 @@ export default function UserGamificationSettings() {
                 </CardHeader>
                 <CardContent>
                   <Alert>
-                    <AlertDescription>
-                      Описание
-                    </AlertDescription>
+                    <AlertDescription>Описание</AlertDescription>
                   </Alert>
                 </CardContent>
               </Card>

@@ -1,7 +1,13 @@
 'use client';
 
+import type {
+  UserGamificationProfile,
+  DashboardData,
+  OrganizationLeaderboard,
+  XPAwardRequest,
+  XPAwardResponse,
+} from '@/types/gamification';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import type { UserGamificationProfile, DashboardData, OrganizationLeaderboard, XPAwardRequest, XPAwardResponse } from '@/types/gamification';
 
 /**
  * UNIFIED GAMIFICATION CONTEXT
@@ -51,27 +57,23 @@ interface GamificationProviderProps {
 }
 
 export function GamificationProvider({ children, orgId, initialData }: GamificationProviderProps) {
-
   // Unified State
-  const [profile, setProfile] = useState<UserGamificationProfile | null>(
-    initialData?.profile || null
-  );
-  const [dashboard, setDashboard] = useState<DashboardData | null>(
-    initialData?.dashboard || null
-  );
-  const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(
-    initialData?.leaderboard || null
-  );
+  const [profile, setProfile] = useState<UserGamificationProfile | null>(initialData?.profile || null);
+  const [dashboard, setDashboard] = useState<DashboardData | null>(initialData?.dashboard || null);
+  const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(initialData?.leaderboard || null);
   const [isLoading, setIsLoading] = useState(!initialData?.profile);
   const [error, setError] = useState<string | null>(null);
 
   // Computed streaks
-  const streaks = React.useMemo(() => ({
-    login: profile?.login_streak || 0,
-    learning: profile?.learning_streak || 0,
-    maxLogin: profile?.longest_login_streak || 0,
-    maxLearning: profile?.longest_learning_streak || 0,
-  }), [profile]);
+  const streaks = React.useMemo(
+    () => ({
+      login: profile?.login_streak || 0,
+      learning: profile?.learning_streak || 0,
+      maxLogin: profile?.longest_login_streak || 0,
+      maxLearning: profile?.longest_learning_streak || 0,
+    }),
+    [profile],
+  );
 
   // Unified data fetcher
   const fetchData = React.useCallback(async () => {
@@ -104,51 +106,60 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   }, [fetchData, initialData?.profile]);
 
   // Action Handlers
-  const awardXP = React.useCallback(async (payload: XPAwardRequest): Promise<XPAwardResponse> => {
-    if (!orgId) throw new Error('Organization required');
-    // Keep using internal route to reuse server auth/session
-    const res = await fetch(`/api/gamification/${orgId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'award_xp', ...payload }),
-    });
-    if (!res.ok) throw new Error('Failed to award XP');
-    const result = (await res.json()) as XPAwardResponse;
-    if (result.profile) {
-      setProfile(result.profile);
-      setDashboard((prev) => (prev ? { ...prev, profile: result.profile } : prev));
-    }
-    return result;
-  }, [orgId]);
+  const awardXP = React.useCallback(
+    async (payload: XPAwardRequest): Promise<XPAwardResponse> => {
+      if (!orgId) throw new Error('Organization required');
+      // Keep using internal route to reuse server auth/session
+      const res = await fetch(`/api/gamification/${orgId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'award_xp', ...payload }),
+      });
+      if (!res.ok) throw new Error('Failed to award XP');
+      const result = (await res.json()) as XPAwardResponse;
+      if (result.profile) {
+        setProfile(result.profile);
+        setDashboard((prev) => (prev ? { ...prev, profile: result.profile } : prev));
+      }
+      return result;
+    },
+    [orgId],
+  );
 
-  const updateStreak = React.useCallback(async (type: 'login' | 'learning') => {
-    if (!orgId) throw new Error('Organization required');
-    // Use internal route proxy to server util which calls /streaks/{type}
-    const res = await fetch(`/api/gamification/${orgId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'update_streak', streak_type: type }),
-    });
-    if (!res.ok) throw new Error('Failed to update streak');
-    await fetchData();
-  }, [orgId, fetchData]);
+  const updateStreak = React.useCallback(
+    async (type: 'login' | 'learning') => {
+      if (!orgId) throw new Error('Organization required');
+      // Use internal route proxy to server util which calls /streaks/{type}
+      const res = await fetch(`/api/gamification/${orgId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_streak', streak_type: type }),
+      });
+      if (!res.ok) throw new Error('Failed to update streak');
+      await fetchData();
+    },
+    [orgId, fetchData],
+  );
 
-  const updatePreferences = React.useCallback(async (preferences: Record<string, any>) => {
-    if (!orgId) throw new Error('Organization required');
-    // Use internal route proxy to server util which PATCHes /preferences
-    const res = await fetch(`/api/gamification/${orgId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'update_preferences', preferences }),
-    });
-    if (!res.ok) throw new Error('Failed to update preferences');
-    const result = await res.json();
-    if (profile && result?.preferences) {
-      const updatedProfile = { ...profile, preferences: result.preferences } as UserGamificationProfile;
-      setProfile(updatedProfile);
-      setDashboard((prev) => (prev ? { ...prev, profile: updatedProfile } : prev));
-    }
-  }, [orgId, profile]);
+  const updatePreferences = React.useCallback(
+    async (preferences: Record<string, any>) => {
+      if (!orgId) throw new Error('Organization required');
+      // Use internal route proxy to server util which PATCHes /preferences
+      const res = await fetch(`/api/gamification/${orgId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_preferences', preferences }),
+      });
+      if (!res.ok) throw new Error('Failed to update preferences');
+      const result = await res.json();
+      if (profile && result?.preferences) {
+        const updatedProfile = { ...profile, preferences: result.preferences } as UserGamificationProfile;
+        setProfile(updatedProfile);
+        setDashboard((prev) => (prev ? { ...prev, profile: updatedProfile } : prev));
+      }
+    },
+    [orgId, profile],
+  );
 
   const value: GamificationContextValue = {
     profile,
@@ -163,11 +174,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     streaks,
   };
 
-  return (
-    <GamificationContext.Provider value={value}>
-      {children}
-    </GamificationContext.Provider>
-  );
+  return <GamificationContext.Provider value={value}>{children}</GamificationContext.Provider>;
 }
 
 export function useGamificationContext(): GamificationContextValue {

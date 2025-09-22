@@ -24,12 +24,7 @@ interface LearnerDashboardProps {
 }
 
 // Inner component that uses the context
-function LearnerDashboardContent({
-  orgId,
-  orgSlug: _orgSlug,
-  courses = [],
-  className = '',
-}: LearnerDashboardProps) {
+function LearnerDashboardContent({ orgId, orgSlug: _orgSlug, courses = [], className = '' }: LearnerDashboardProps) {
   const { data: session } = useSession();
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [activeTab, setActiveTab] = useState('profile');
@@ -101,23 +96,17 @@ function LearnerDashboardContent({
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Star className="mx-auto mb-2 h-8 w-8 text-yellow-500" />
-                  <p className="text-2xl font-bold">
-                    {isLoading ? '...' : (profile?.total_courses_completed ?? 0)}
-                  </p>
+                  <p className="text-2xl font-bold">{isLoading ? '...' : (profile?.total_courses_completed ?? 0)}</p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.completed')}</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Award className="mx-auto mb-2 h-8 w-8 text-green-500" />
-                  <p className="text-2xl font-bold">
-                    {isLoading ? '...' : '0'}
-                  </p>
+                  <p className="text-2xl font-bold">{isLoading ? '...' : '0'}</p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.certificates')}</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Flame className="mx-auto mb-2 h-8 w-8 text-orange-500" />
-                  <p className="text-2xl font-bold">
-                    {isLoading ? '...' : (streaks?.login ?? 0)}
-                  </p>
+                  <p className="text-2xl font-bold">{isLoading ? '...' : (streaks?.login ?? 0)}</p>
                   <p className="text-muted-foreground text-sm">{t('dashboard.dayStreak')}</p>
                 </div>
               </div>

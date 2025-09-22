@@ -35,6 +35,7 @@ import TableOfContents from './TableOfContents';
 import StarterKit from '@tiptap/starter-kit';
 import { styled } from 'styled-components';
 import { useMemo } from 'react';
+import Flipcard from '@components/Objects/Editor/Extensions/Flipcard/Flipcard';
 
 interface Editor {
   content: string;
@@ -135,6 +136,10 @@ const Canva = (props: Editor) => {
       getLinkExtension(),
       WebPreview.configure({
         editable: true,
+        activity: props.activity,
+      }),
+      Flipcard.configure({
+        editable: false,
         activity: props.activity,
       }),
       TableRow,

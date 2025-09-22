@@ -1,10 +1,10 @@
 'use client';
 
+import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import OrgMenu from '@components/Objects/Menus/org-menu';
+import { useOrg } from '@components/Contexts/OrgContext';
 import type { ReactElement, ReactNode } from 'react';
 import { Children, cloneElement } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 
 interface WithMenuClientLayoutProps {
   children: ReactNode;

@@ -31,6 +31,7 @@ import js from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
 import VideoBlock from './Extensions/Video/VideoBlock';
 import ImageBlock from './Extensions/Image/ImageBlock';
+import Flipcard from './Extensions/Flipcard/Flipcard';
 import TableCell from '@tiptap/extension-table-cell';
 import UserBlock from './Extensions/Users/UserBlock';
 import java from 'highlight.js/lib/languages/java';
@@ -169,6 +170,10 @@ const Editor = (props: EditorProps) => {
       TableCell,
       getLinkExtension(),
       WebPreview.configure({
+        editable: true,
+        activity: props.activity,
+      }),
+      Flipcard.configure({
         editable: true,
         activity: props.activity,
       }),

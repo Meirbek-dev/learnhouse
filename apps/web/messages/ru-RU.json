@@ -2670,6 +2670,9 @@
         "bold": "Жирный",
         "bulletList": "Маркированный список",
         "button": "Кнопка",
+        "flipcard": "Карточка-перевёртыш",
+        "flipcardQuestionDefault": "Нажмите, чтобы показать ответ",
+        "flipcardAnswerDefault": "Это ответ",
         "calloutDefault": "Выноска (По умолчанию)",
         "calloutError": "Выноска (Ошибка)",
         "calloutInfo": "Выноска (Информация)",
@@ -2713,6 +2716,32 @@
         "webPreview": "Предварительный просмотр веб-страницы",
         "youtube": "YouTube",
         "youtubeVideo": "Видео с YouTube"
+      },
+      "Flipcard": {
+        "enterQuestionPlaceholder": "Введите ваш вопрос...",
+        "enterAnswerPlaceholder": "Введите ваш ответ...",
+        "clickToFlip": "Нажмите, чтобы перевернуть",
+        "clickToFlipBack": "Нажмите, чтобы перевернуть обратно",
+        "alignLeft": "Выровнять влево",
+        "alignCenter": "Выровнять по центру",
+        "alignRight": "Выровнять вправо",
+        "smallSize": "Маленький размер",
+        "mediumSize": "Средний размер",
+        "largeSize": "Большой размер",
+        "changeColor": "Изменить цвет",
+        "previewFlip": "Предпросмотр переворота",
+        "colors": {
+          "sky": "Небесный",
+          "green": "Зелёный",
+          "yellow": "Жёлтый",
+          "red": "Красный",
+          "purple": "Пурпурный",
+          "teal": "Бирюзовый",
+          "amber": "Янтарный",
+          "indigo": "Индиго",
+          "neutral": "Нейтральный",
+          "blue": "Синий"
+        }
       },
       "UserBlock": {
         "errorNotFound": "Пользователь не найден",

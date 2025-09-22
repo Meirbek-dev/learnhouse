@@ -1,10 +1,10 @@
 'use client';
 
-import { Award, Calendar, Flame, Star, TrendingUp, Trophy } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DashboardData, UserGamificationProfile, XPTransaction } from '@/types/gamification';
-import { useCallback, useEffect, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Award, Calendar, Flame, Star, TrendingUp, Trophy } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -58,9 +58,7 @@ const TransactionItem = ({
           <p className="text-muted-foreground text-xs">{formatTransactionDate(transaction.created_at)}</p>
         </div>
       </div>
-      <Badge variant={transaction.amount > 0 ? 'default' : 'destructive'}>
-        {formatXPAmount(transaction.amount)}
-      </Badge>
+      <Badge variant={transaction.amount > 0 ? 'default' : 'destructive'}>{formatXPAmount(transaction.amount)}</Badge>
     </div>
   );
 };
@@ -137,9 +135,7 @@ export function GamificationDashboard({
 
   const sortedTransactions = useMemo(() => {
     const list: XPTransaction[] = dashboardData?.recent_transactions ?? [];
-    return [...list]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 10);
+    return [...list].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10);
   }, [dashboardData]);
 
   if (!dashboardData) {

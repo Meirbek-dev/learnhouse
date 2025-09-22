@@ -2661,6 +2661,32 @@
         "submit": "Submit",
         "title": "Quiz"
       },
+      "Flipcard": {
+        "enterQuestionPlaceholder": "Enter your question...",
+        "enterAnswerPlaceholder": "Enter your answer...",
+        "clickToFlip": "Click to flip",
+        "clickToFlipBack": "Click to flip back",
+        "alignLeft": "Align Left",
+        "alignCenter": "Align Center",
+        "alignRight": "Align Right",
+        "smallSize": "Small Size",
+        "mediumSize": "Medium Size",
+        "largeSize": "Large Size",
+        "changeColor": "Change Color",
+        "previewFlip": "Preview Flip",
+        "colors": {
+          "sky": "Sky",
+          "green": "Green",
+          "yellow": "Yellow",
+          "red": "Red",
+          "purple": "Purple",
+          "teal": "Teal",
+          "amber": "Amber",
+          "indigo": "Indigo",
+          "neutral": "Neutral",
+          "blue": "Blue"
+        }
+      },
       "Toolbar": {
         "addColumnRight": "Add column right",
         "addRowBelow": "Add row below",
@@ -2670,6 +2696,9 @@
         "bold": "Bold",
         "bulletList": "Bullet List",
         "button": "Button",
+        "flipcard": "Flipcard",
+        "flipcardQuestionDefault": "Click to reveal the answer",
+        "flipcardAnswerDefault": "This is the answer",
         "calloutDefault": "Callout (Default)",
         "calloutError": "Callout (Error)",
         "calloutInfo": "Callout (Info)",

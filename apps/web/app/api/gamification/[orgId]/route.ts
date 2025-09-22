@@ -1,4 +1,3 @@
-import { NextResponse, NextRequest } from 'next/server';
 import {
   awardXPOnServer,
   getServerGamificationDashboard,
@@ -7,11 +6,9 @@ import {
   updatePreferencesOnServer,
   updateStreakOnServer,
 } from '@/services/gamification/server';
+import { NextResponse, NextRequest } from 'next/server';
 
-export async function GET(
-  _req: NextRequest,
-  context: { params: Promise<{ orgId: string }> },
-) {
+export async function GET(_req: NextRequest, context: { params: Promise<{ orgId: string }> }) {
   const params = await context.params;
   const orgId = Number(params.orgId);
   if (!orgId) return NextResponse.json({ error: 'Invalid orgId' }, { status: 400 });

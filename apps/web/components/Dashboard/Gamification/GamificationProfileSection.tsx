@@ -1,16 +1,16 @@
 'use client';
 
-import { AVATAR_UNLOCKS, getLevelInfo } from '@/lib/gamification/levels';
-import { LevelDisplay } from './LevelIndicators';
+import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { Activity, Award, Crown, Flame, Star, Target, Trophy, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
+import { AVATAR_UNLOCKS, getLevelInfo } from '@/lib/gamification/levels';
 import { Separator } from '@/components/ui/separator';
+import { LevelDisplay } from './LevelIndicators';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
-import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 
 import type { UserGamificationProfile } from '@/types/gamification';
 

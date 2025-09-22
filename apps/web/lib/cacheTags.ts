@@ -8,11 +8,7 @@ export const gamificationTag = {
 } as const;
 
 export function gamificationTags(orgId: number): string[] {
-  return [
-    gamificationTag.profile(orgId),
-    gamificationTag.dashboard(orgId),
-    gamificationTag.leaderboard(orgId),
-  ];
+  return [gamificationTag.profile(orgId), gamificationTag.dashboard(orgId), gamificationTag.leaderboard(orgId)];
 }
 
 export async function revalidateGamification(orgId: number) {

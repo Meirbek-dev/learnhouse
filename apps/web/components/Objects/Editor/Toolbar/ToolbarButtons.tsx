@@ -28,6 +28,7 @@ import {
   List,
   ListOrdered,
   MousePointerClick,
+  RotateCw,
   Sigma,
   Tags,
   User,
@@ -173,7 +174,11 @@ export const ToolbarButtons = ({ editor, props }: any) => {
       >
         <StrikethroughIcon />
       </ToolBtn>
-      <ListMenuWrapper>
+      <ListMenuWrapper
+        onMouseEnter={() => setShowListMenu(true)}
+        onMouseLeave={() => setShowListMenu(false)}
+        contentEditable={false as any}
+      >
         <ToolBtn
           onClick={() => {
             setShowListMenu(!showListMenu);
@@ -241,7 +246,11 @@ export const ToolbarButtons = ({ editor, props }: any) => {
         <option value="5">{t('headingLevel', { level: 5 })}</option>
         <option value="6">{t('headingLevel', { level: 6 })}</option>
       </ToolSelect>
-      <TableMenuWrapper>
+      <TableMenuWrapper
+        onMouseEnter={() => setShowTableMenu(true)}
+        onMouseLeave={() => setShowTableMenu(false)}
+        contentEditable={false as any}
+      >
         <ToolTip content={t('table')}>
           <ToolBtn
             onClick={() => {
@@ -484,6 +493,28 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           }
         >
           <Globe size={15} />
+        </ToolBtn>
+      </ToolTip>
+      <ToolTip content={t('flipcard')}>
+        <ToolBtn
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'flipcard',
+                attrs: {
+                  question: t('flipcardQuestionDefault'),
+                  answer: t('flipcardAnswerDefault'),
+                  color: 'blue',
+                  alignment: 'center',
+                  size: 'medium',
+                },
+              })
+              .run()
+          }
+        >
+          <RotateCw size={15} />
         </ToolBtn>
       </ToolTip>
     </ToolButtonsWrapper>

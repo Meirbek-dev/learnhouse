@@ -124,14 +124,17 @@ export async function getServerOrganizationLeaderboard(
   opts?: { revalidate?: number; tags?: string[] },
 ): Promise<OrganizationLeaderboard> {
   const accessToken = await requireAccessToken();
-  const res = await fetch(`${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${accessToken}` },
-    next: {
-      revalidate: opts?.revalidate ?? 30,
-      tags: opts?.tags ?? gamificationTags(orgId),
+  const res = await fetch(
+    `${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`,
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+      next: {
+        revalidate: opts?.revalidate ?? 30,
+        tags: opts?.tags ?? gamificationTags(orgId),
+      },
     },
-  });
+  );
   if (!res.ok) throw new Error(`Failed to fetch leaderboard: ${res.status}`);
   const json = await res.json();
 
@@ -169,7 +172,7 @@ export async function awardXPOnServer(orgId: number, payload: Record<string, any
   const res = await fetch(`${getAPIUrl()}gamification/${orgId}/xp`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
@@ -199,7 +202,7 @@ export async function updatePreferencesOnServer(orgId: number, preferences: Reco
   const res = await fetch(`${getAPIUrl()}gamification/${orgId}/preferences`, {
     method: 'PATCH',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(preferences),

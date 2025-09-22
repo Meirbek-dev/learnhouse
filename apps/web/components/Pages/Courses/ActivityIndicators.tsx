@@ -1,12 +1,12 @@
 'use client';
 
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trophy, Video } from 'lucide-react';
+import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 // Gamification imports
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Fragment, useMemo, useState } from 'react';
-import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -229,9 +229,9 @@ const ActivityIndicators = (props: Props) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-    // Gamification: use unified context if available (no client fetching here)
-    const gamificationCtx = useOptionalGamificationContext();
-    const gamificationProfile = gamificationCtx?.profile ?? null;
+  // Gamification: use unified context if available (no client fetching here)
+  const gamificationCtx = useOptionalGamificationContext();
+  const gamificationProfile = gamificationCtx?.profile ?? null;
 
   const done_activity_style = 'bg-teal-600 hover:bg-teal-700';
   const black_activity_style = 'bg-zinc-300 hover:bg-zinc-400';

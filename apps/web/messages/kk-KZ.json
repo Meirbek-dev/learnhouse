@@ -2670,6 +2670,9 @@
         "bold": "Қалың",
         "bulletList": "Нүктелі тізім",
         "button": "Түйме",
+        "flipcard": "Аударылатын карточка",
+        "flipcardQuestionDefault": "Жауапты көру үшін басыңыз",
+        "flipcardAnswerDefault": "Бұл жауап",
         "calloutDefault": "Шығару (Әдепкі)",
         "calloutError": "Шығару (Қате)",
         "calloutInfo": "Шығару (Ақпарат)",
@@ -2713,6 +2716,32 @@
         "webPreview": "Веб-бетті алдын ала қарау",
         "youtube": "YouTube",
         "youtubeVideo": "YouTube бейнесі"
+      },
+      "Flipcard": {
+        "enterQuestionPlaceholder": "Сұрағыңызды енгізіңіз...",
+        "enterAnswerPlaceholder": "Жауабыңызды енгізіңіз...",
+        "clickToFlip": "Аудару үшін басыңыз",
+        "clickToFlipBack": "Кері аудару үшін басыңыз",
+        "alignLeft": "Солға туралау",
+        "alignCenter": "Ортасына туралау",
+        "alignRight": "Оңға туралау",
+        "smallSize": "Кіші өлшем",
+        "mediumSize": "Орташа өлшем",
+        "largeSize": "Үлкен өлшем",
+        "changeColor": "Түсін өзгерту",
+        "previewFlip": "Аударуды алдын ала қарау",
+        "colors": {
+          "sky": "Көкжиек",
+          "green": "Жасыл",
+          "yellow": "Сары",
+          "red": "Қызыл",
+          "purple": "Күлгін",
+          "teal": "Көгілдір",
+          "amber": "Кәріптас",
+          "indigo": "Индиго",
+          "neutral": "Бейтарап",
+          "blue": "Көк"
+        }
       },
       "UserBlock": {
         "errorNotFound": "Пайдаланушы табылмады",
