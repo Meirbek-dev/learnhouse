@@ -11,7 +11,6 @@ import { getUriWithOrg } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { useEffect, useMemo, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import ReactConfetti from 'react-confetti';
 import html2canvas from 'html2canvas-pro';
 import type { FC } from 'react';

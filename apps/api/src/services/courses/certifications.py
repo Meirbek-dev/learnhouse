@@ -428,6 +428,21 @@ async def get_user_certificates_for_course(
         request, course_uuid, current_user, "read", db_session
     )
 
+    # Proactively ensure a certificate exists if the course is fully completed.
+    # This is idempotent and guarantees the UI sees the certificate once all steps are done.
+    try:
+        await check_course_completion_and_create_certificate(
+            request=request,
+            user_id=current_user.id,
+            course_id=course.id,
+            db_session=db_session,
+        )
+    except Exception as err:  # noqa: BLE001
+        # Don't fail the request on certificate creation errors; just log and proceed to list.
+        print(
+            f"check_course_completion_and_create_certificate failed during get_user_certificates_for_course: {err}"
+        )
+
     # Get all certifications for this course
     statement = select(Certifications).where(Certifications.course_id == course.id)
     certifications = db_session.exec(statement).all()

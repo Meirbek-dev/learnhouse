@@ -964,33 +964,35 @@ async def get_course_user_rights(
         or has_user_permissions
     ):
         rights["permissions"]["read"] = True
-
+    is_instructor_or_admin_or_maintainer_role: bool = (
+        is_instructor or is_admin or is_maintainer_role
+    )
     # CREATE permissions (course creation)
     if is_instructor or is_admin or is_maintainer_role:
         rights["permissions"]["create"] = True
 
     # UPDATE permissions (course-level updates)
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["update"] = True
 
     # DELETE permissions (course deletion)
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["delete"] = True
 
     # CONTENT CREATION permissions (activities, assignments, chapters, etc.)
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["create_content"] = True
 
     # CONTENT UPDATE permissions
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["update_content"] = True
 
     # CONTENT DELETE permissions
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["delete_content"] = True
 
     # CONTRIBUTOR MANAGEMENT permissions
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["manage_contributors"] = True
 
     # ACCESS MANAGEMENT permissions (public, open_to_contributors)
@@ -1003,15 +1005,15 @@ async def get_course_user_rights(
         rights["permissions"]["manage_access"] = True
 
     # GRADING permissions
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["grade_assignments"] = True
 
     # ACTIVITY MARKING permissions
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["mark_activities_done"] = True
 
     # CERTIFICATION permissions
-    if is_course_owner or is_admin or is_maintainer_role:
+    if is_instructor_or_admin_or_maintainer_role:
         rights["permissions"]["create_certifications"] = True
 
     return rights

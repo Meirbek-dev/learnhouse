@@ -281,12 +281,12 @@ export default function UserGamificationSettings() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Avatar Customization</CardTitle>
+                  <CardTitle>Аватар</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Alert>
                     <AlertDescription>
-                      Avatar customization has been simplified. Basic avatars are now managed through your profile settings.
+                      Описание
                     </AlertDescription>
                   </Alert>
                 </CardContent>

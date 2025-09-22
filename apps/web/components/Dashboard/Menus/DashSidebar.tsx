@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Backpack, BadgeDollarSign, BarChart3, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
+import { Backpack, BadgeDollarSign, BookCopy, Home, LogOut, School, Settings, Users } from 'lucide-react';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useFeatureFlag from '@components/Hooks/useFeatureFlag';
@@ -140,13 +140,6 @@ const useNavigationItems = () => {
         icon: School,
         tooltip: t('tooltips.organization'),
         isActive: pathname.startsWith('/dash/org'),
-      },
-      {
-        title: t('tooltips.admin'),
-        href: '/dash/admin/overview',
-        icon: BarChart3,
-        tooltip: t('tooltips.admin'),
-        isActive: pathname.startsWith('/dash/admin'),
       },
     ],
     [pathname, t, isPaymentsEnabled],

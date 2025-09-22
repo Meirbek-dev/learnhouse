@@ -254,6 +254,20 @@ async def add_activity_to_trail(
                 err,
             )
 
+    # After ensuring the step exists (created or already present), check if the course is now
+    # completed and create a certificate if appropriate. This is idempotent and inexpensive.
+    try:
+        await check_course_completion_and_create_certificate(
+            request, user.id, course.id, db_session
+        )
+    except Exception as err:  # noqa: BLE001
+        logger.warning(
+            "check_course_completion_and_create_certificate failed (user_id=%s, course_id=%s): %s",
+            user.id,
+            course.id if course else None,
+            err,
+        )
+
     # Rebuild and return updated trail state
     return _hydrate_trail(trail, user.id, db_session)
 

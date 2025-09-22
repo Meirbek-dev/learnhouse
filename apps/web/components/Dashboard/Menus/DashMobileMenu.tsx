@@ -1,6 +1,6 @@
 'use client';
 
-import { Backpack, BadgeDollarSign, BarChart3, BookCopy, Home, School, Settings, Users } from 'lucide-react';
+import { Backpack, BadgeDollarSign, BookCopy, Home, School, Settings, Users } from 'lucide-react';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import AdminAuthorization from '@components/Security/AdminAuthorization';
@@ -107,20 +107,6 @@ const DashMobileMenu = () => {
             >
               <School size={20} />
               <span className="mt-1 text-xs">{t('mobile.org')}</span>
-            </Link>
-          </ToolTip>
-          <ToolTip
-            content={t('tooltips.admin')}
-            slateBlack
-            sideOffset={8}
-            side="top"
-          >
-            <Link
-              href="/dash/admin/overview"
-              className="flex flex-col items-center p-2"
-            >
-              <BarChart3 size={20} />
-              <span className="mt-1 text-xs">{t('mobile.admin')}</span>
             </Link>
           </ToolTip>
         </AdminAuthorization>

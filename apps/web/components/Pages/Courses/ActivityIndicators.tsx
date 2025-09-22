@@ -3,11 +3,9 @@
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trophy, Video } from 'lucide-react';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 // Gamification imports
-import { LevelIndicatorBadge } from '@components/Dashboard/Gamification';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Fragment, useMemo, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -441,16 +439,6 @@ const ActivityIndicators = (props: Props) => {
           orgslug={orgslug}
           isCompleted={isCourseCompleted}
         />
-
-        {/* Level Indicator Badge */}
-        {gamificationProfile && (
-          <div className="ml-2">
-            <LevelIndicatorBadge
-              level={gamificationProfile.level}
-              className="h-[20px] w-[20px] text-xs"
-            />
-          </div>
-        )}
       </div>
 
       {enableNavigation ? (

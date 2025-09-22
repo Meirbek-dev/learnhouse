@@ -3,4 +3,4 @@
 export { GamificationDashboard } from './GamificationDashboard';
 export { GamificationProfileSection } from './GamificationProfileSection';
 export { Leaderboard } from './Leaderboard';
-export { LevelDisplay, LevelIndicatorBadge, LevelProgressBar, LevelUpAnimation } from './LevelIndicators';
+export { LevelDisplay, LevelProgressBar, LevelUpAnimation } from './LevelIndicators';

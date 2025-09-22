@@ -1,7 +1,7 @@
 'use client';
 
 import { AVATAR_UNLOCKS, getLevelInfo } from '@/lib/gamification/levels';
-import { LevelDisplay, LevelProgressBar } from './LevelIndicators';
+import { LevelDisplay } from './LevelIndicators';
 import { Activity, Award, Crown, Flame, Star, Target, Trophy, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';

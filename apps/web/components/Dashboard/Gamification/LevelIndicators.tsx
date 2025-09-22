@@ -1,17 +1,11 @@
 'use client';
 
-import { getLevelInfo } from '@/lib/gamification/levels';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { useFormatter, useTranslations } from 'next-intl';
+import { getLevelInfo } from '@/lib/gamification/levels';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-interface LevelIndicatorBadgeProps {
-  level: number;
-  variant?: 'default' | 'compact' | 'mini';
-  showIcon?: boolean;
-  className?: string;
-}
 
 interface LevelProgressBarProps {
   profile: UserGamificationProfile;
@@ -27,67 +21,6 @@ interface LevelDisplayProps {
   showProgress?: boolean;
   showXP?: boolean;
   className?: string;
-}
-
-export function LevelIndicatorBadge({
-  level,
-  variant = 'default',
-  showIcon = true,
-  className,
-}: LevelIndicatorBadgeProps) {
-  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const levelInfo = getLevelInfo(level, t);
-  const Icon = levelInfo.icon;
-
-  if (variant === 'mini') {
-    return (
-      <div
-        className={cn(
-          'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs',
-          'border border-primary/20 bg-primary/10 text-primary',
-          className,
-        )}
-      >
-        {showIcon && <Icon className="h-3 w-3" />}
-        <span>{level}</span>
-      </div>
-    );
-  }
-
-  if (variant === 'compact') {
-    return (
-      <Badge
-        variant="outline"
-        className={cn(
-          'flex items-center gap-1 px-2 py-0.5',
-          levelInfo.color,
-          'border-current bg-current/10',
-          className,
-        )}
-      >
-        {showIcon && <Icon className="h-3 w-3" />}
-        <span className="font-medium">
-          {t('levelIndicators.levelAbbrev')}
-          {level}
-        </span>
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge
-      variant="outline"
-      className={cn('flex items-center gap-2 px-3 py-1', levelInfo.color, 'border-current bg-current/10', className)}
-    >
-      {showIcon && <Icon className="h-4 w-4" />}
-      <div className="flex flex-col">
-        <span className="text-xs font-medium">
-          {t('levelIndicators.level')} {level}
-        </span>
-        <span className="text-xs opacity-80">{levelInfo.title}</span>
-      </div>
-    </Badge>
-  );
 }
 
 export function LevelProgressBar({
@@ -175,15 +108,6 @@ export function LevelDisplay({
   const levelInfo = getLevelInfo(profile.level, t);
   const xpToNext = (profile as any).xp_to_next_level ?? 0;
   const Icon = levelInfo.icon;
-
-  if (variant === 'badge') {
-    return (
-      <LevelIndicatorBadge
-        level={profile.level}
-        className={className}
-      />
-    );
-  }
 
   if (variant === 'compact') {
     return (
