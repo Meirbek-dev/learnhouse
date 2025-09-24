@@ -1,6 +1,7 @@
 {
   "version": "0.1.0",
   "name": "openu",
+  "type": "module",
   "pnpm": {
     "overrides": {
       "@types/react": "19.1.13",
