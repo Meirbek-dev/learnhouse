@@ -112,7 +112,7 @@ export default function UserGamificationSettings() {
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      if (!session?.user?.id || !orgId) return;
+      if (!(session?.user?.id && orgId)) return;
       setIsLoading(true);
       try {
         const remote = await fetchPreferences(orgId);
@@ -147,7 +147,7 @@ export default function UserGamificationSettings() {
     } finally {
       setIsLoading(false);
     }
-  }, [session?.user?.id, session?.tokens?.access_token, orgId, preferences, t]);
+  }, [session?.user?.id, orgId, preferences, t]);
 
   // Reset preferences handler
   const handleResetPreferences = useCallback(() => {

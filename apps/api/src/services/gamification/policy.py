@@ -44,11 +44,24 @@ def get_org_policy(db: Session, org_id: int) -> tuple[dict[str, int], int]:
         if isinstance(cfg.rewards, dict):
             for k, v in cfg.rewards.items():
                 try:
-                    rewards[k] = int(v)  # type: ignore[arg-type]
+                    iv = int(v)  # type: ignore[arg-type]
                 except Exception:
                     continue
-        if cfg.daily_xp_limit is not None and cfg.daily_xp_limit >= 0:
-            daily_limit = int(cfg.daily_xp_limit)
+                # Only accept non-positive overrides for admin_award; for other sources enforce > 0
+                if k == "admin_award":
+                    if iv >= 0:
+                        rewards[k] = iv
+                elif iv > 0:
+                    rewards[k] = iv
+        # IMPORTANT: treat 0 or negative as "unset" to avoid blocking all XP by mistake
+        # Only positive values will override the default daily limit
+        if cfg.daily_xp_limit is not None:
+            try:
+                dl = int(cfg.daily_xp_limit)
+            except Exception:
+                dl = None  # type: ignore[assignment]
+            if dl is not None and dl > 0:
+                daily_limit = dl
 
     _CACHE[org_id] = (rewards, daily_limit, now)
     return rewards, daily_limit

@@ -7,8 +7,8 @@ Default is NoopPublisher; can be swapped to HttpPublisher via DI or module confi
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 from urllib import request as _urlrequest
 from urllib.error import URLError
 
@@ -19,7 +19,7 @@ class EventPublisher:
 
 
 class NoopPublisher(EventPublisher):
-    def publish_gamification_updated(self, org_id: int) -> None:  # noqa: D401
+    def publish_gamification_updated(self, org_id: int) -> None:
         """Do nothing."""
         return
 
@@ -34,7 +34,9 @@ class HttpPublisher(EventPublisher):
         headers = {"Content-Type": "application/json"}
         for url in self.urls:
             try:
-                req = _urlrequest.Request(url, data=payload, headers=headers, method="POST")
+                req = _urlrequest.Request(
+                    url, data=payload, headers=headers, method="POST"
+                )
                 with _urlrequest.urlopen(req, timeout=self.timeout) as resp:  # noqa: S310
                     if 200 <= resp.status < 300:
                         return
@@ -55,4 +57,6 @@ else:
         "http://localhost/api/revalidate/gamification",
     ]
 
-publisher: EventPublisher = HttpPublisher(urls=urls, timeout=float(os.environ.get("GAMIFICATION_REVALIDATE_TIMEOUT", "1.5")))
+publisher: EventPublisher = HttpPublisher(
+    urls=urls, timeout=float(os.environ.get("GAMIFICATION_REVALIDATE_TIMEOUT", "1.5"))
+)

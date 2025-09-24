@@ -269,7 +269,8 @@ class StreakUpdateRead(PydanticStrictBaseModel):
 class XPAwardRequest(PydanticStrictBaseModel):
     """Request to award XP."""
 
-    source: XPSource
+    # Accept both enum and raw string to be robust under strict validation
+    source: XPSource | str
     source_id: str | None = None
     custom_amount: int | None = None
     idempotency_key: str | None = None

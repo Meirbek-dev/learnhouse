@@ -40,8 +40,8 @@ export function GamificationProfileSection({
       return {
         levelInfo: null as any,
         nextMilestone: null as any,
-        unlockedFrames: [] as Array<(typeof AVATAR_UNLOCKS.frames)[number]>,
-        unlockedAccessories: [] as Array<(typeof AVATAR_UNLOCKS.accessories)[number]>,
+        unlockedFrames: [] as (typeof AVATAR_UNLOCKS.frames)[number][],
+        unlockedAccessories: [] as (typeof AVATAR_UNLOCKS.accessories)[number][],
       };
     }
     return {
@@ -149,7 +149,7 @@ export function GamificationProfileSection({
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-green-500" />
                 <span>
-                  {t('streaks.learning.title')}: {profile.longest_login_streak} {t('streaks.days')}
+                  {t('streaks.learning.title')}: {profile.learning_streak || 0} {t('streaks.days')}
                 </span>
               </div>
             </div>

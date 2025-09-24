@@ -153,7 +153,7 @@ const PublishingState = () => {
     <>
       <div className="mx-auto mt-5 flex items-center space-x-4">
         <div
-          className={`mx-auto flex rounded-full px-3.5 py-2 text-xs font-bold outline-1 ${!assignment?.assignment_object?.published ? 'bg-gray-200/60 outline-gray-300' : 'bg-green-200/60 outline-green-300'}`}
+          className={`mx-auto flex rounded-full px-3.5 py-2 text-xs font-bold text-nowrap outline-1 ${!assignment?.assignment_object?.published ? 'bg-gray-200/60 outline-gray-300' : 'bg-green-200/60 outline-green-300'}`}
         >
           {assignment?.assignment_object?.published ? t('published') : t('unpublished')}
         </div>

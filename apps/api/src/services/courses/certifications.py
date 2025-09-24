@@ -413,6 +413,10 @@ async def get_user_certificates_for_course(
 ) -> list[dict]:
     """Get all certificates for a user in a specific course with certification details"""
 
+    # Accept both raw id and 'course_'-prefixed UUIDs
+    if not course_uuid.startswith("course_"):
+        course_uuid = f"course_{course_uuid}"
+
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -504,7 +508,7 @@ async def check_course_completion_and_create_certificate(
         idempotency_key: Optional idempotency key to prevent duplicate certificates
 
     Returns:
-        bool: True if certificate was created or already existed, False otherwise
+        bool: True if course completion was processed (certificate created/existed or XP awarded), False otherwise
     """
 
     # Get the user object for gamification
@@ -540,7 +544,23 @@ async def check_course_completion_and_create_certificate(
 
     # Check if all activities are completed
     if len(completed_activities) >= len(course_activities):
-        # All activities completed, check if certification exists for this course
+        # Always award XP for course completion (idempotent), regardless of certificate availability
+        try:
+            gamification_service.on_course_completed(
+                db=db_session,
+                user_id=user_id,
+                org_id=course.org_id,
+                course_id=course_id,
+                source_id=str(course_id),
+                idempotency_key=f"course_{course_id}_{user_id}",
+            )
+        except Exception as xp_error:
+            # Log the error but don't fail subsequent certificate logic
+            print(
+                f"Failed to award XP for course completion (user_id: {user_id}, course_id: {course_id}): {xp_error}"
+            )
+
+        # Then attempt to create a certificate if the course has certification configured
         statement = select(Certifications).where(Certifications.course_id == course_id)
         certification = db_session.exec(statement).first()
 
@@ -552,8 +572,6 @@ async def check_course_completion_and_create_certificate(
                         f"course_completion_{user_id}_{course_id}_{course.course_uuid}"
                     )
 
-                # SECURITY: Create certificate user link (system operation, no RBAC needed here)
-                # This is called from mark_activity_as_done_for_user which already has proper RBAC checks
                 await create_certificate_user(
                     request=request,
                     user_id=user_id,
@@ -561,27 +579,6 @@ async def check_course_completion_and_create_certificate(
                     db_session=db_session,
                     idempotency_key=idempotency_key,
                 )
-
-                # Award XP for course completion using event-driven system
-                # Import here to avoid circular imports
-                from src.db.courses import get_course_activity_count
-
-                try:
-                    # Centralized domain helper handles XP + counters (+ optional streak in future)
-                    gamification_service.on_course_completed(
-                        db=db_session,
-                        user_id=user_id,
-                        org_id=course.org_id,
-                        course_id=course_id,
-                        source_id=str(course_id),
-                        idempotency_key=f"course_{course_id}_{user_id}",
-                    )
-                except Exception as xp_error:
-                    # Log the error but don't fail the certification process
-                    # In production, this should use structured logging
-                    print(
-                        f"Failed to award XP for course completion (user_id: {user_id}, course_id: {course_id}): {xp_error}"
-                    )
 
                 return True
 
@@ -603,11 +600,11 @@ async def check_course_completion_and_create_certificate(
                 )
                 raise
         else:
-            # No certification configured for this course
-            # This is not an error condition, just log for debugging
+            # No certification configured for this course — course completion still processed
             print(
                 f"No certification found for course {course_id} ({course.course_uuid})"
             )
+            return True
     else:
         # Course not yet completed
         completed_count = len(completed_activities)
@@ -622,7 +619,7 @@ async def check_course_completion_and_create_certificate(
 async def get_certificate_by_user_certification_uuid(
     request: Request,
     user_certification_uuid: str,
-    current_user: PublicUser | AnonymousUser,
+    current_user: PublicUser | AnonymousUser | None,
     db_session: Session,
 ) -> dict:
     """Get a certificate by user_certification_uuid with certification details"""

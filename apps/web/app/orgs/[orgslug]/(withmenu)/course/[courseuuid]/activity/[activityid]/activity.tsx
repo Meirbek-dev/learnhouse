@@ -26,6 +26,7 @@ import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/Assign
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper';
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
+import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
@@ -195,6 +196,9 @@ const ActivityClient = (props: ActivityClientProps) => {
   const t = useTranslations('ActivityPage');
   const locale = useLocale();
   const format = useFormatter();
+  const gamificationContext = useOptionalGamificationContext();
+  const gamificationProfile = gamificationContext?.profile ?? null;
+  const refetchGamification = gamificationContext?.refetch ?? (async () => {});
 
   // Helper to get relative time using next-intl
   const getRelativeTimeIntl = (date: Date) => {
@@ -890,10 +894,10 @@ export const MarkStatus = (props: {
   const [showMarkedTooltip, setShowMarkedTooltip] = useState(false);
   const [showUnmarkedTooltip, setShowUnmarkedTooltip] = useState(false);
 
-  // Gamification state - simplified to use toast notifications
-  // Components that require gamification data should use the unified hook locally.
-  const gamificationProfile = null as any;
-  const refetchGamification = async () => {};
+  // Gamification state via unified context
+  const gamificationContext = useOptionalGamificationContext();
+  const gamificationProfile = gamificationContext?.profile ?? null;
+  const refetchGamification = gamificationContext?.refetch ?? (async () => {});
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -967,7 +971,8 @@ export const MarkStatus = (props: {
   async function markActivityAsCompleteFront() {
     try {
       const willCompleteAll = areAllActivitiesCompleted();
-      const previousLevel = gamificationProfile?.current_level || 1;
+      const previousLevel = gamificationProfile?.level || 1;
+      const previousXP = gamificationProfile?.total_xp || 0;
       setIsLoading(true);
 
       await markActivityAsComplete(
@@ -979,20 +984,18 @@ export const MarkStatus = (props: {
 
       await mutate(`${getAPIUrl()}trail/org/${org?.id}/trail`);
 
-      // Refresh gamification profile and check for level up
-      await refetchGamification();
-
-      // Show XP gain notification
-      toast.success(`🎉 +25 XP for completing "${props.activity.title}"!`);
-
-      // Check for level up after a brief delay to allow for profile update
+      // Show XP notification after a short delay to allow backend processing
       setTimeout(async () => {
-        await refetchGamification();
-        const updatedProfile = gamificationProfile;
+        if (refetchGamification) {
+          await refetchGamification();
 
-        if (updatedProfile && updatedProfile.current_level > previousLevel) {
-          toast.success(`🎉 Level Up! You've reached Level ${updatedProfile.current_level}!`, {
-            duration: 5000,
+          // Show a generic success message since we can't reliably get updated state here
+          toast.success(`🔥 +25 XP earned for completing "${props.activity.title}"!`, {
+            style: {
+              borderRadius: '8px',
+              background: '#333',
+              color: '#fff',
+            },
           });
         }
       }, 1000);

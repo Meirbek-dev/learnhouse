@@ -1,19 +1,20 @@
 import {
-  RotateCw,
-  Edit,
-  AlignLeft,
   AlignCenter,
+  AlignLeft,
   AlignRight,
-  Palette,
+  Edit,
   Maximize2,
   Minimize2,
+  Palette,
+  RotateCw,
   Square,
 } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { useEffect, useRef, useState } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
-import React, { useState, useRef, useEffect } from 'react';
-import { twMerge } from 'tailwind-merge';
 import { useTranslations } from 'next-intl';
+import { twMerge } from 'tailwind-merge';
+import type React from 'react';
 
 const FlipcardExtension: React.FC = (props: any) => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -47,7 +48,7 @@ const FlipcardExtension: React.FC = (props: any) => {
 
   const handleFlip = () => {
     // Allow flipping in both edit and view modes, but prevent when editing text
-    if (!isEditingQuestion && !isEditingAnswer) {
+    if (!(isEditingQuestion || isEditingAnswer)) {
       setIsFlipped(!isFlipped);
     }
   };
@@ -90,57 +91,73 @@ const FlipcardExtension: React.FC = (props: any) => {
 
   const getAlignmentClass = () => {
     switch (alignment) {
-      case 'left':
+      case 'left': {
         return 'text-left justify-start';
-      case 'center':
+      }
+      case 'center': {
         return 'text-center justify-center';
-      case 'right':
+      }
+      case 'right': {
         return 'text-right justify-end';
-      default:
+      }
+      default: {
         return 'text-center justify-center';
+      }
     }
   };
 
   const getSizeClass = () => {
     switch (size) {
-      case 'small':
+      case 'small': {
         return 'w-64 h-36';
-      case 'medium':
+      }
+      case 'medium': {
         return 'w-80 h-48';
-      case 'large':
+      }
+      case 'large': {
         return 'w-96 h-60';
-      default:
+      }
+      default: {
         return 'w-80 h-48';
+      }
     }
   };
 
   const getFontSizeClass = () => {
     switch (size) {
-      case 'small':
+      case 'small': {
         return 'text-sm';
-      case 'medium':
+      }
+      case 'medium': {
         return 'text-lg';
-      case 'large':
+      }
+      case 'large': {
         return 'text-xl';
-      default:
+      }
+      default: {
         return 'text-lg';
+      }
     }
   };
 
   const getIconSizeClass = () => {
     switch (size) {
-      case 'small':
+      case 'small': {
         return 16;
-      case 'medium':
+      }
+      case 'medium': {
         return 20;
-      case 'large':
+      }
+      case 'large': {
         return 24;
-      default:
+      }
+      default: {
         return 20;
+      }
     }
   };
 
-  const getCardColor = (color: string, isBack: boolean = false) => {
+  const getCardColor = (color: string, isBack = false) => {
     const baseColors = {
       sky: isBack ? 'bg-sky-600 border-sky-700' : 'bg-sky-500 border-sky-600',
       green: isBack ? 'bg-green-600 border-green-700' : 'bg-green-500 border-green-600',
@@ -186,31 +203,31 @@ const FlipcardExtension: React.FC = (props: any) => {
           {/* Front Side (Question) */}
           <div
             className={twMerge(
-              'flipcard-front border-2 text-white p-6 nice-shadow flex flex-col items-center justify-center text-center',
+              'flipcard-front nice-shadow flex flex-col items-center justify-center border-2 p-6 text-center text-white',
               getCardColor(color, false),
             )}
           >
-            <div className="flex items-center justify-center mb-3 select-none pointer-events-none">
+            <div className="pointer-events-none mb-3 flex items-center justify-center select-none">
               <RotateCw
                 size={getIconSizeClass()}
                 className="opacity-70"
               />
             </div>
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-1 items-center justify-center">
               {isEditable && isEditingQuestion ? (
                 <textarea
                   ref={questionInputRef}
                   value={question}
                   onChange={handleQuestionChange}
                   onBlur={handleQuestionBlur}
-                  className="bg-white/20 backdrop-blur-sm text-white placeholder-white/70 p-2 rounded-lg w-full h-20 resize-none border-none outline-none text-center"
+                  className="h-20 w-full resize-none rounded-lg border-none bg-white/20 p-2 text-center text-white placeholder-white/70 backdrop-blur-sm outline-none"
                   placeholder={t('enterQuestionPlaceholder')}
                 />
               ) : (
                 <div
-                  className={`text-center font-medium ${getFontSizeClass()} leading-relaxed flex items-center justify-center select-none`}
+                  className={`text-center font-medium ${getFontSizeClass()} flex items-center justify-center leading-relaxed select-none`}
                 >
-                  <span className="select-none pointer-events-none">{question}</span>
+                  <span className="pointer-events-none select-none">{question}</span>
                   {isEditable && (
                     <button
                       data-flipcard-ui
@@ -223,7 +240,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      className="ml-2 opacity-60 hover:opacity-100 flex-shrink-0 pointer-events-auto"
+                      className="pointer-events-auto ml-2 flex-shrink-0 opacity-60 hover:opacity-100"
                     >
                       <Edit size={14} />
                     </button>
@@ -232,38 +249,38 @@ const FlipcardExtension: React.FC = (props: any) => {
               )}
             </div>
             {!isEditingQuestion && (
-              <div className="text-xs opacity-70 mt-3 select-none pointer-events-none">{t('clickToFlip')}</div>
+              <div className="pointer-events-none mt-3 text-xs opacity-70 select-none">{t('clickToFlip')}</div>
             )}
           </div>
 
           {/* Back Side (Answer) */}
           <div
             className={twMerge(
-              'flipcard-back border-2 text-white p-6 nice-shadow flex flex-col items-center justify-center text-center',
+              'flipcard-back nice-shadow flex flex-col items-center justify-center border-2 p-6 text-center text-white',
               getCardColor(color, true),
             )}
           >
-            <div className="flex items-center justify-center mb-3 select-none pointer-events-none">
+            <div className="pointer-events-none mb-3 flex items-center justify-center select-none">
               <RotateCw
                 size={getIconSizeClass()}
-                className="opacity-70 rotate-180"
+                className="rotate-180 opacity-70"
               />
             </div>
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-1 items-center justify-center">
               {isEditable && isEditingAnswer ? (
                 <textarea
                   ref={answerInputRef}
                   value={answer}
                   onChange={handleAnswerChange}
                   onBlur={handleAnswerBlur}
-                  className="bg-white/20 backdrop-blur-sm text-white placeholder-white/70 p-2 rounded-lg w-full h-20 resize-none border-none outline-none text-center"
+                  className="h-20 w-full resize-none rounded-lg border-none bg-white/20 p-2 text-center text-white placeholder-white/70 backdrop-blur-sm outline-none"
                   placeholder={t('enterAnswerPlaceholder')}
                 />
               ) : (
                 <div
-                  className={`text-center font-medium ${getFontSizeClass()} leading-relaxed flex items-center justify-center select-none`}
+                  className={`text-center font-medium ${getFontSizeClass()} flex items-center justify-center leading-relaxed select-none`}
                 >
-                  <span className="select-none pointer-events-none">{answer}</span>
+                  <span className="pointer-events-none select-none">{answer}</span>
                   {isEditable && (
                     <button
                       data-flipcard-ui
@@ -276,7 +293,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      className="ml-2 opacity-60 hover:opacity-100 flex-shrink-0 pointer-events-auto"
+                      className="pointer-events-auto ml-2 flex-shrink-0 opacity-60 hover:opacity-100"
                     >
                       <Edit size={14} />
                     </button>
@@ -284,14 +301,14 @@ const FlipcardExtension: React.FC = (props: any) => {
                 </div>
               )}
             </div>
-            {!isEditingAnswer && <div className="text-xs opacity-70 mt-3">{t('clickToFlipBack')}</div>}
+            {!isEditingAnswer && <div className="mt-3 text-xs opacity-70">{t('clickToFlipBack')}</div>}
           </div>
         </div>
 
         {/* Editor Controls */}
         {isEditable && (
           <div
-            className="flex mt-3 space-x-1 justify-center opacity-60 hover:opacity-100 transition-opacity"
+            className="mt-3 flex justify-center space-x-1 opacity-60 transition-opacity hover:opacity-100"
             contentEditable={false}
             onMouseDown={(e) => {
               e.preventDefault();
@@ -306,7 +323,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                 handleAlignmentChange('left');
               }}
               onMouseDown={(e) => e.preventDefault()}
-              className={`p-1.5 rounded-md transition-colors text-xs ${alignment === 'left' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+              className={`rounded-md p-1.5 text-xs transition-colors ${alignment === 'left' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               title={t('alignLeft')}
             >
               <AlignLeft size={12} />
@@ -319,7 +336,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                 handleAlignmentChange('center');
               }}
               onMouseDown={(e) => e.preventDefault()}
-              className={`p-1.5 rounded-md transition-colors text-xs ${alignment === 'center' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+              className={`rounded-md p-1.5 text-xs transition-colors ${alignment === 'center' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               title={t('alignCenter')}
             >
               <AlignCenter size={12} />
@@ -332,14 +349,14 @@ const FlipcardExtension: React.FC = (props: any) => {
                 handleAlignmentChange('right');
               }}
               onMouseDown={(e) => e.preventDefault()}
-              className={`p-1.5 rounded-md transition-colors text-xs ${alignment === 'right' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+              className={`rounded-md p-1.5 text-xs transition-colors ${alignment === 'right' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               title={t('alignRight')}
             >
               <AlignRight size={12} />
             </button>
 
             {/* Size Controls */}
-            <div className="w-px h-4 bg-gray-300 self-center mx-1"></div>
+            <div className="mx-1 h-4 w-px self-center bg-gray-300" />
 
             <button
               data-flipcard-ui
@@ -349,7 +366,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                 handleSizeChange('small');
               }}
               onMouseDown={(e) => e.preventDefault()}
-              className={`p-1.5 rounded-md transition-colors text-xs ${size === 'small' ? 'bg-green-100 text-green-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+              className={`rounded-md p-1.5 text-xs transition-colors ${size === 'small' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               title={t('smallSize')}
             >
               <Minimize2 size={12} />
@@ -362,7 +379,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                 handleSizeChange('medium');
               }}
               onMouseDown={(e) => e.preventDefault()}
-              className={`p-1.5 rounded-md transition-colors text-xs ${size === 'medium' ? 'bg-green-100 text-green-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+              className={`rounded-md p-1.5 text-xs transition-colors ${size === 'medium' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               title={t('mediumSize')}
             >
               <Square size={12} />
@@ -375,13 +392,13 @@ const FlipcardExtension: React.FC = (props: any) => {
                 handleSizeChange('large');
               }}
               onMouseDown={(e) => e.preventDefault()}
-              className={`p-1.5 rounded-md transition-colors text-xs ${size === 'large' ? 'bg-green-100 text-green-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+              className={`rounded-md p-1.5 text-xs transition-colors ${size === 'large' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               title={t('largeSize')}
             >
               <Maximize2 size={12} />
             </button>
 
-            <div className="w-px h-4 bg-gray-300 self-center mx-1"></div>
+            <div className="mx-1 h-4 w-px self-center bg-gray-300" />
 
             <button
               data-flipcard-ui
@@ -394,7 +411,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md transition-colors text-xs"
+              className="rounded-md bg-gray-100 p-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-200"
               title={t('changeColor')}
             >
               <Palette size={12} />
@@ -407,7 +424,7 @@ const FlipcardExtension: React.FC = (props: any) => {
                 setIsFlipped(!isFlipped);
               }}
               onMouseDown={(e) => e.preventDefault()}
-              className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md transition-colors text-xs"
+              className="rounded-md bg-gray-100 p-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-200"
               title={t('previewFlip')}
             >
               <RotateCw size={12} />
@@ -420,18 +437,18 @@ const FlipcardExtension: React.FC = (props: any) => {
           <div
             data-flipcard-ui
             ref={colorPickerRef}
-            className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 p-3 bg-white rounded-lg nice-shadow z-10"
+            className="nice-shadow absolute top-full left-1/2 z-10 mt-2 -translate-x-1/2 transform rounded-lg bg-white p-3"
             contentEditable={false}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex flex-wrap gap-2 max-w-xs">
+            <div className="flex max-w-xs flex-wrap gap-2">
               {colors.map((c) => (
                 <button
                   data-flipcard-ui
                   type="button"
                   key={c}
-                  className={`w-8 h-8 rounded-full border-2 border-white hover:scale-110 transform transition-transform ${getCardColor(c)} ${color === c ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                  className={`h-8 w-8 transform rounded-full border-2 border-white transition-transform hover:scale-110 ${getCardColor(c)} ${color === c ? 'ring-2 ring-gray-400 ring-offset-2' : ''}`}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={(e) => {
                     e.stopPropagation();

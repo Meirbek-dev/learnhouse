@@ -1,9 +1,9 @@
 'use client';
 
 import type {
-  UserGamificationProfile,
   DashboardData,
   OrganizationLeaderboard,
+  UserGamificationProfile,
   XPAwardRequest,
   XPAwardResponse,
 } from '@/types/gamification';
@@ -91,8 +91,8 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
         setDashboard(dash);
       }
       if (lb) setLeaderboard(lb);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch gamification data');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to fetch gamification data');
     } finally {
       setIsLoading(false);
     }
@@ -104,6 +104,48 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
       fetchData();
     }
   }, [fetchData, initialData?.profile]);
+
+  // Auto-login streak updater + daily login bonus
+  // Runs when profile becomes available. Ensures at most once per day per org in the client by localStorage guard.
+  useEffect(() => {
+    if (!orgId) return;
+    if (!profile) return;
+    try {
+      const todayKey = `gamification:lastLoginAward:${orgId}:${new Date().toISOString().slice(0, 10)}`;
+      const alreadyDone = typeof window !== 'undefined' ? localStorage.getItem(todayKey) : '1';
+      if (alreadyDone) return;
+
+      // Fire-and-forget: update login streak, then award login bonus using internal API route
+      // Backend is idempotent and enforces daily caps; client guard prevents extra calls.
+      (async () => {
+        try {
+          // Update login streak
+          await fetch(`/api/gamification/${orgId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update_streak', streak_type: 'login' }),
+          });
+          // Award login bonus with idempotency key per user/day/org
+          await fetch(`/api/gamification/${orgId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'award_xp',
+              source: 'login_bonus',
+              idempotency_key: `login_bonus_${profile.user_id}_${orgId}_${new Date().toISOString().slice(0, 10)}`,
+            }),
+          });
+          localStorage.setItem(todayKey, '1');
+          // Refresh cached dashboard/profile
+          fetchData();
+        } catch {
+          // non-fatal
+        }
+      })();
+    } catch {
+      // ignore storage errors (e.g., SSR)
+    }
+  }, [orgId, profile, fetchData]);
 
   // Action Handlers
   const awardXP = React.useCallback(

@@ -6,7 +6,8 @@ import {
   updatePreferencesOnServer,
   updateStreakOnServer,
 } from '@/services/gamification/server';
-import { NextResponse, NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function GET(_req: NextRequest, context: { params: Promise<{ orgId: string }> }) {
   const params = await context.params;
@@ -18,8 +19,9 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ orgId:
       getServerOrganizationLeaderboard(orgId, 20, { revalidate: 0 }),
     ]);
     return NextResponse.json({ dashboard, leaderboard });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Failed to fetch' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -46,7 +48,8 @@ export async function POST(req: NextRequest, context: { params: Promise<{ orgId:
       return NextResponse.json(result);
     }
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Action failed' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Action failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

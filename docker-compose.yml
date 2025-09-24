@@ -27,7 +27,7 @@ services:
       timeout: 5s
       retries: 5
   redis:
-    image: redis:8.2.1-alpine
+    image: redis:8.2.1-bookworm
     restart: unless-stopped
     ports:
       - '6379:6379'
@@ -40,4 +40,4 @@ services:
     image: chromadb/chroma:1.1.0
     restart: unless-stopped
     ports:
-      - '8000:8000'
+      - '8001:8000'

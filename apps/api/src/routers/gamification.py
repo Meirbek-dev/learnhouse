@@ -11,14 +11,29 @@ Clean API (no legacy):
 """
 
 import logging
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Body, Query
-from sqlmodel import Session
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from sqlmodel import Session, and_, select
 
 from src.core.events.database import get_db_session
-from src.db.gamification import XPSource, GamificationProfile, XPTransaction, StreakType as DBStreakType
+from src.db.gamification import (
+    DashboardRead,
+    GamificationProfile,
+    LeaderboardEntryRead,
+    LeaderboardRead,
+    ProfileRead,
+    StreakUpdateRead,
+    TransactionRead,
+    XPAwardRequest,
+    XPAwardResponse,
+    XPSource,
+    XPTransaction,
+)
+from src.db.gamification import (
+    StreakType as DBStreakType,
+)
 from src.db.users import PublicUser
 from src.db.users import User as DBUser
 from src.security.auth import get_current_user
@@ -28,17 +43,6 @@ from src.services.gamification.service import (
     GamificationError,
 )
 from src.services.security.security import is_user_admin_of_org
-from src.db.gamification import (
-    DashboardRead,
-    LeaderboardEntryRead,
-    LeaderboardRead,
-    ProfileRead,
-    StreakUpdateRead,
-    TransactionRead,
-    XPAwardRequest,
-    XPAwardResponse,
-)
-from sqlmodel import and_, select
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -138,11 +142,21 @@ async def award_xp(
                     detail="Admin privileges required for custom awards",
                 )
 
+        # Normalize source: allow raw string or enum from request
+        try:
+            normalized_source = (
+                payload.source.value
+                if isinstance(payload.source, XPSource)
+                else XPSource(str(payload.source)).value
+            )
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid XP source")
+
         profile, transaction, level_up, is_new = service.award_xp(
             db=db,
             user_id=user.id,
             org_id=org_id,
-            source=payload.source.value,
+            source=normalized_source,
             amount=payload.custom_amount,
             source_id=payload.source_id,
             idempotency_key=payload.idempotency_key,
@@ -181,14 +195,13 @@ async def update_streak(
                 longest_count=profile.longest_login_streak,
                 is_new_record=profile.login_streak == profile.longest_login_streak,
             )
-        else:
-            return StreakUpdateRead(
-                streak_type=streak_type.value,
-                current_count=profile.learning_streak,
-                longest_count=profile.longest_learning_streak,
-                is_new_record=profile.learning_streak
-                == profile.longest_learning_streak,
-            )
+        return StreakUpdateRead(
+            streak_type=streak_type.value,
+            current_count=profile.learning_streak,
+            longest_count=profile.longest_learning_streak,
+            is_new_record=profile.learning_streak
+            == profile.longest_learning_streak,
+        )
     except GamificationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -201,7 +214,7 @@ async def update_streak(
 @router.patch("/{org_id}/preferences", response_model=ProfileRead)
 async def update_preferences(
     org_id: int,
-    data: dict[str, Any] = Body(...),
+    data: Annotated[dict[str, Any], Body()] = ...,
     user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db: Annotated[Session, Depends(get_db_session)] = None,
 ):
@@ -220,14 +233,13 @@ async def update_preferences(
 @router.get("/{org_id}/leaderboard", response_model=LeaderboardRead)
 async def get_leaderboard(
     org_id: int,
-    limit: int = Query(10, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
+    offset: Annotated[int, Query(ge=0)] = 0,
     user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db: Annotated[Session, Depends(get_db_session)] = None,
 ):
     try:
-        lb = service.get_leaderboard_read(db, org_id, limit=limit, offset=offset)
-        return lb
+        return service.get_leaderboard_read(db, org_id, limit=limit, offset=offset)
     except Exception as e:
         logger.exception("Leaderboard error for org %s: %s", org_id, e)
         raise HTTPException(status_code=500, detail="Failed to get leaderboard")

@@ -6,6 +6,7 @@ import InfoCallout from '@components/Objects/Editor/Extensions/Callout/Info/Info
 import WebPreview from '@components/Objects/Editor/Extensions/WebPreview/WebPreview';
 import VideoBlock from '@components/Objects/Editor/Extensions/Video/VideoBlock';
 import ImageBlock from '@components/Objects/Editor/Extensions/Image/ImageBlock';
+import Flipcard from '@components/Objects/Editor/Extensions/Flipcard/Flipcard';
 import UserBlock from '@components/Objects/Editor/Extensions/Users/UserBlock';
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import QuizBlock from '@components/Objects/Editor/Extensions/Quiz/QuizBlock';
@@ -35,7 +36,6 @@ import TableOfContents from './TableOfContents';
 import StarterKit from '@tiptap/starter-kit';
 import { styled } from 'styled-components';
 import { useMemo } from 'react';
-import Flipcard from '@components/Objects/Editor/Extensions/Flipcard/Flipcard';
 
 interface Editor {
   content: string;

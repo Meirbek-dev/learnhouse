@@ -120,14 +120,13 @@ async def api_get_user_certificates_for_course(
 async def api_get_certificate_by_user_certification_uuid(
     request: Request,
     user_certification_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> dict:
     """
     Get a certificate by user_certification_uuid with certification and course details
     """
     return await get_certificate_by_user_certification_uuid(
-        request, user_certification_uuid, current_user, db_session
+        request, user_certification_uuid, None, db_session
     )
 
 

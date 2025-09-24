@@ -14,6 +14,7 @@ Notes:
 
 from __future__ import annotations
 
+import contextlib
 from datetime import UTC, datetime
 from typing import Any
 
@@ -40,14 +41,22 @@ class DailyLimitExceededError(GamificationError):
     """Daily XP limit exceeded"""
 
 
-def _exceeds_daily_limit(profile: GamificationProfile, amount: int, daily_limit: int) -> bool:
+def _exceeds_daily_limit(
+    profile: GamificationProfile, amount: int, daily_limit: int
+) -> bool:
+    # Non-positive limit means "unlimited" (ignore). This also safeguards against
+    # transient misconfiguration cached in policy.
+    if daily_limit <= 0:
+        return False
     today = datetime.now(UTC).date()
     if profile.last_xp_award_date and profile.last_xp_award_date.date() == today:
         return (profile.daily_xp_earned + amount) > daily_limit
     return amount > daily_limit
 
 
-def _update_daily_tracking_with_policy(profile: GamificationProfile, amount: int, now: datetime) -> None:
+def _update_daily_tracking_with_policy(
+    profile: GamificationProfile, amount: int, now: datetime
+) -> None:
     today = now.date()
     if profile.last_xp_award_date and profile.last_xp_award_date.date() == today:
         profile.daily_xp_earned += amount
@@ -58,12 +67,12 @@ def _update_daily_tracking_with_policy(profile: GamificationProfile, amount: int
 
 def get_profile(db: Session, user_id: int, org_id: int) -> GamificationProfile:
     stmt = select(GamificationProfile).where(
-        and_(GamificationProfile.user_id == user_id, GamificationProfile.org_id == org_id)
+        and_(
+            GamificationProfile.user_id == user_id, GamificationProfile.org_id == org_id
+        )
     )
-    try:
+    with contextlib.suppress(Exception):
         stmt = stmt.with_for_update()
-    except Exception:
-        pass
     profile = db.exec(stmt).first()
     if not profile:
         profile = GamificationProfile(user_id=user_id, org_id=org_id)
@@ -91,12 +100,16 @@ def award_xp(
         try:
             xp_source = XPSource(source)
         except ValueError:
-            raise GamificationError(f"Invalid XP source: {source}")
+            msg = f"Invalid XP source: {source}"
+            raise GamificationError(msg)
 
         rewards, daily_limit = get_org_policy(db, org_id)
-        resolved_amount = amount if amount is not None else rewards.get(xp_source.value, 0)
+        resolved_amount = (
+            amount if amount is not None else rewards.get(xp_source.value, 0)
+        )
         if resolved_amount <= 0:
-            raise GamificationError(f"Invalid XP amount: {resolved_amount}")
+            msg = f"Invalid XP amount: {resolved_amount}"
+            raise GamificationError(msg)
 
         pre_profile = get_profile(db, user_id, org_id)
         old_level = pre_profile.level
@@ -114,8 +127,11 @@ def award_xp(
         db.flush()
 
         profile = get_profile(db, user_id, org_id)
-        if xp_source != XPSource.ADMIN_AWARD and _exceeds_daily_limit(profile, resolved_amount, daily_limit):
-            raise DailyLimitExceededError("Daily XP limit exceeded")
+        if xp_source != XPSource.ADMIN_AWARD and _exceeds_daily_limit(
+            profile, resolved_amount, daily_limit
+        ):
+            msg = "Daily XP limit exceeded"
+            raise DailyLimitExceededError(msg)
 
         profile.total_xp += resolved_amount
         profile.level = calculate_level(profile.total_xp)
@@ -130,7 +146,10 @@ def award_xp(
         return profile, tx, tx.triggered_level_up, True
     except IntegrityError as e:
         db.rollback()
-        if any(s in str(e).lower() for s in ["uq_xp_tx_user_org_source_once", "idempotency_key", "unique"]):
+        if any(
+            s in str(e).lower()
+            for s in ["uq_xp_tx_user_org_source_once", "idempotency_key", "unique"]
+        ):
             profile = get_profile(db, user_id, org_id)
             stmt = None
             if idempotency_key:
@@ -159,26 +178,36 @@ def award_xp(
             if existing_tx is None:
                 existing_tx = db.exec(
                     select(XPTransaction)
-                    .where(and_(XPTransaction.user_id == user_id, XPTransaction.org_id == org_id))
+                    .where(
+                        and_(
+                            XPTransaction.user_id == user_id,
+                            XPTransaction.org_id == org_id,
+                        )
+                    )
                     .order_by(XPTransaction.created_at.desc())
                 ).first()
             if existing_tx is None:
-                raise GamificationError("Transaction not found after idempotent insert")
+                msg = "Transaction not found after idempotent insert"
+                raise GamificationError(msg)
             return profile, existing_tx, False, False
-        raise GamificationError(f"Database error: {e}")
+        msg = f"Database error: {e}"
+        raise GamificationError(msg)
     except Exception:
         db.rollback()
         raise
 
 
-def update_streak(db: Session, user_id: int, org_id: int, streak_type: str) -> GamificationProfile:
+def update_streak(
+    db: Session, user_id: int, org_id: int, streak_type: str
+) -> GamificationProfile:
     profile = get_profile(db, user_id, org_id)
     now = datetime.now(UTC)
     today = now.date()
     try:
         s_type = StreakType(streak_type)
     except ValueError:
-        raise GamificationError(f"Invalid streak type: {streak_type}")
+        msg = f"Invalid streak type: {streak_type}"
+        raise GamificationError(msg)
 
     if s_type == StreakType.LOGIN:
         last_date = profile.last_login_date
@@ -205,7 +234,9 @@ def update_streak(db: Session, user_id: int, org_id: int, streak_type: str) -> G
         profile.longest_login_streak = max(profile.longest_login_streak, new_streak)
     else:
         profile.learning_streak = new_streak
-        profile.longest_learning_streak = max(profile.longest_learning_streak, new_streak)
+        profile.longest_learning_streak = max(
+            profile.longest_learning_streak, new_streak
+        )
 
     profile.updated_at = now
     db.commit()
@@ -214,7 +245,9 @@ def update_streak(db: Session, user_id: int, org_id: int, streak_type: str) -> G
     return profile
 
 
-def get_leaderboard(db: Session, org_id: int, limit: int = 10, offset: int = 0) -> list[GamificationProfile]:
+def get_leaderboard(
+    db: Session, org_id: int, limit: int = 10, offset: int = 0
+) -> list[GamificationProfile]:
     stmt = (
         select(GamificationProfile)
         .where(GamificationProfile.org_id == org_id)
@@ -225,7 +258,9 @@ def get_leaderboard(db: Session, org_id: int, limit: int = 10, offset: int = 0) 
     return list(db.exec(stmt).all())
 
 
-def get_recent_transactions(db: Session, user_id: int, org_id: int, limit: int = 10) -> list[XPTransaction]:
+def get_recent_transactions(
+    db: Session, user_id: int, org_id: int, limit: int = 10
+) -> list[XPTransaction]:
     stmt = (
         select(XPTransaction)
         .where(and_(XPTransaction.user_id == user_id, XPTransaction.org_id == org_id))
@@ -244,7 +279,12 @@ def get_dashboard_data(db: Session, user_id: int, org_id: int) -> dict:
     _res = db.exec(
         select(func.count())
         .select_from(GamificationProfile)
-        .where(and_(GamificationProfile.org_id == org_id, GamificationProfile.total_xp > user_xp))
+        .where(
+            and_(
+                GamificationProfile.org_id == org_id,
+                GamificationProfile.total_xp > user_xp,
+            )
+        )
     )
     try:
         higher_count = int(_res.scalar_one())  # type: ignore[attr-defined]
@@ -254,7 +294,11 @@ def get_dashboard_data(db: Session, user_id: int, org_id: int) -> dict:
             higher_count = int(_one if isinstance(_one, (int, float)) else _one[0])
         except Exception:
             _first = _res.first()
-            higher_count = int(_first if isinstance(_first, (int, float)) else (_first[0] if _first else 0))
+            higher_count = int(
+                _first
+                if isinstance(_first, (int, float))
+                else (_first[0] if _first else 0)
+            )
     user_rank = higher_count + 1 if profile else None
 
     return {
@@ -295,12 +339,10 @@ def update_preferences(
     return profile
 
 
-def get_leaderboard_read(
-    db: Session, org_id: int, limit: int = 10, offset: int = 0
-):
+def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int = 0):
     """Return typed LeaderboardRead including total participants and usernames."""
-    from src.db.users import User as DBUser
     from src.db.gamification import LeaderboardEntryRead, LeaderboardRead
+    from src.db.users import User as DBUser
 
     profiles = get_leaderboard(db, org_id, limit=limit, offset=offset)
     # total participants
@@ -317,7 +359,11 @@ def get_leaderboard_read(
             total = int(_one if isinstance(_one, (int, float)) else _one[0])
         except Exception:
             _first = _res.first()
-            total = int(_first if isinstance(_first, (int, float)) else (_first[0] if _first else 0))
+            total = int(
+                _first
+                if isinstance(_first, (int, float))
+                else (_first[0] if _first else 0)
+            )
 
     ids = [p.user_id for p in profiles]
     user_map: dict[int, DBUser] = {}
@@ -334,7 +380,9 @@ def get_leaderboard_read(
             user_id=p.user_id,
             total_xp=p.total_xp,
             level=p.level,
-            username=(user_map.get(p.user_id).username if user_map.get(p.user_id) else None),
+            username=(
+                user_map.get(p.user_id).username if user_map.get(p.user_id) else None
+            ),
         )
         for i, p in enumerate(profiles)
     ]
@@ -348,7 +396,12 @@ def get_user_rank(db: Session, user_id: int, org_id: int) -> int | None:
     _res = db.exec(
         select(func.count())
         .select_from(GamificationProfile)
-        .where(and_(GamificationProfile.org_id == org_id, GamificationProfile.total_xp > profile.total_xp))
+        .where(
+            and_(
+                GamificationProfile.org_id == org_id,
+                GamificationProfile.total_xp > profile.total_xp,
+            )
+        )
     )
     try:
         higher_count = int(_res.scalar_one())  # type: ignore[attr-defined]
@@ -358,7 +411,11 @@ def get_user_rank(db: Session, user_id: int, org_id: int) -> int | None:
             higher_count = int(_one if isinstance(_one, (int, float)) else _one[0])
         except Exception:
             _first = _res.first()
-            higher_count = int(_first if isinstance(_first, (int, float)) else (_first[0] if _first else 0))
+            higher_count = int(
+                _first
+                if isinstance(_first, (int, float))
+                else (_first[0] if _first else 0)
+            )
     return higher_count + 1
 
 
@@ -368,6 +425,7 @@ def on_activity_completed(
     org_id: int,
     *,
     activity_id: int | None = None,
+    source_id: str | None = None,
     idempotency_key: str | None = None,
 ):
     profile, _tx, _level_up, _is_new = award_xp(
@@ -376,17 +434,23 @@ def on_activity_completed(
         org_id=org_id,
         source=XPSource.ACTIVITY_COMPLETION.value,
         amount=None,
-        source_id=str(activity_id),
+        source_id=source_id
+        if source_id is not None
+        else (str(activity_id) if activity_id is not None else None),
         idempotency_key=idempotency_key,
     )
-    profile = update_streak(db, user_id, org_id, StreakType.LEARNING.value)
-    profile = get_profile(db, user_id, org_id)
-    profile.total_activities_completed = (profile.total_activities_completed or 0) + 1
-    profile.updated_at = datetime.now(UTC)
-    db.add(profile)
-    db.commit()
-    db.refresh(profile)
-    publisher.publish_gamification_updated(org_id)
+    # Only update streaks and counters if this call resulted in a new XP transaction
+    if _is_new:
+        profile = update_streak(db, user_id, org_id, StreakType.LEARNING.value)
+        profile = get_profile(db, user_id, org_id)
+        profile.total_activities_completed = (
+            profile.total_activities_completed or 0
+        ) + 1
+        profile.updated_at = datetime.now(UTC)
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+        publisher.publish_gamification_updated(org_id)
     return profile
 
 
@@ -396,6 +460,7 @@ def on_course_completed(
     org_id: int,
     *,
     course_id: int | None = None,
+    source_id: str | None = None,
     idempotency_key: str | None = None,
 ):
     profile, _tx, _level_up, _is_new = award_xp(
@@ -404,15 +469,19 @@ def on_course_completed(
         org_id=org_id,
         source=XPSource.COURSE_COMPLETION.value,
         amount=None,
-        source_id=str(course_id),
+        source_id=source_id
+        if source_id is not None
+        else (str(course_id) if course_id is not None else None),
         idempotency_key=idempotency_key,
     )
-    profile = update_streak(db, user_id, org_id, StreakType.LEARNING.value)
-    profile = get_profile(db, user_id, org_id)
-    profile.total_courses_completed = (profile.total_courses_completed or 0) + 1
-    profile.updated_at = datetime.now(UTC)
-    db.add(profile)
-    db.commit()
-    db.refresh(profile)
-    publisher.publish_gamification_updated(org_id)
+    # Only update streaks and counters if this call resulted in a new XP transaction
+    if _is_new:
+        profile = update_streak(db, user_id, org_id, StreakType.LEARNING.value)
+        profile = get_profile(db, user_id, org_id)
+        profile.total_courses_completed = (profile.total_courses_completed or 0) + 1
+        profile.updated_at = datetime.now(UTC)
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+        publisher.publish_gamification_updated(org_id)
     return profile

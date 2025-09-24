@@ -91,7 +91,7 @@ const CourseClient = (props: any) => {
             if (item && typeof item === 'object') {
               // Keep shape but ensure text field exists if possible
               const text = (item as any).text ?? (item as any).name ?? (item as any).title;
-              const t = typeof text === 'string' ? text.trim() : text != null ? String(text).trim() : '';
+              const t = typeof text === 'string' ? text.trim() : text !== null ? String(text).trim() : '';
               if (!t || t.toLowerCase() === 'null' || t.toLowerCase() === 'undefined') return null;
               return { ...(item as any), text: t };
             }
@@ -288,7 +288,7 @@ const CourseClient = (props: any) => {
                   }
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
+                      <div className="relative max-h-192 w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
                         <img
                           src={getCourseThumbnailMediaDirectory(
                             org?.org_uuid,

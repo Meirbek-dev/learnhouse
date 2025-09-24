@@ -342,7 +342,7 @@
       "courseName": "Название курса",
       "courseThumbnailAlt": "эскиз",
       "cryptographicallySecure": "ID сертификата защищен криптографически",
-      "differentOrganization": "Сертификат выдан другой организацией",
+      "differentOrganization": "Сертификат уже выдан",
       "downloadCertificate": "Скачать сертификат",
       "errorLoadingCertificate": "Ошибка при загрузке сертификата",
       "expiredCertificate": "Сертификат просрочен",
@@ -610,7 +610,7 @@
       "thumbnailChoose": "Выбрать из галереи",
       "thumbnailUpload": "Загрузить изображение",
       "toastError": "Не удалось создать курс",
-      "toastErrorOrgMissing": "Информация об организации отсутствует",
+      "toastErrorOrgMissing": "Информация отсутствует",
       "toastErrorUnsplash": "Не удалось получить изображение из Unsplash",
       "toastLoading": "Создание курса...",
       "toastSuccess": "Курс успешно создан",
@@ -980,8 +980,8 @@
         "updating": "Обновление роли..."
       },
       "actions": "Действия",
-      "cardDescription": "Управляйте ролями и разрешениями вашей организации",
-      "cardTitle": "Роли организации",
+      "cardDescription": "Управляйте ролями и разрешениями OpenU",
+      "cardTitle": "Роли OpenU",
       "createRole": "Создать роль",
       "createRoleDescription": "Определите новую роль с конкретными разрешениями",
       "createRoleTitle": "Создание новой роли",
@@ -1717,7 +1717,7 @@
         "deactivateUsers": "Деактивировать пользователей",
         "executeAction": "Выполнить действие",
         "exportData": "Экспорт данных",
-        "exportDescription": "Скачать данные организации в CSV",
+        "exportDescription": "Скачать данные OpenU в CSV",
         "failed": "Неудачно",
         "highPriority": "Высокий приоритет",
         "importData": "Импорт данных",
@@ -2093,7 +2093,7 @@
       "recentActions": "Недавние действия",
       "recentActionsDescription": "Журнал недавних административных операций",
       "recentActivity": "Недавняя активность",
-      "recentActivityDescription": "Последние события в организации",
+      "recentActivityDescription": "Последние события в OpenU",
       "retention": "Удержание",
       "retentionInfo": "Когорты, отток и коэффициенты возврата",
       "retry": "Повторить",
@@ -2287,11 +2287,11 @@
         "title": "Курсы"
       },
       "Organization": {
-        "description": "Настройте общие параметры вашей организации",
+        "description": "Настройте общие параметры OpenU",
         "title": "Организация"
       },
       "Users": {
-        "description": "Управляйте пользователями и ролями вашей организации",
+        "description": "Управляйте пользователями и ролями OpenU",
         "title": "Пользователи"
       },
       "openuLogo": "Логотип OpenU",
@@ -2402,7 +2402,7 @@
             "permissions": {
               "allPermissions": "Все права",
               "manageCourses": "Управлять курсами",
-              "manageOrganization": "Управлять организацией",
+              "manageOrganization": "Управлять OpenU",
               "manageRoles": "Управлять ролями",
               "manageUsers": "Управлять пользователями"
             }
@@ -2585,6 +2585,32 @@
         "uploadFile": "Загрузить файл",
         "uploadFiles": "Загрузить файлы"
       },
+      "Flipcard": {
+        "alignCenter": "Выровнять по центру",
+        "alignLeft": "Выровнять влево",
+        "alignRight": "Выровнять вправо",
+        "changeColor": "Изменить цвет",
+        "clickToFlip": "Нажмите, чтобы перевернуть",
+        "clickToFlipBack": "Нажмите, чтобы перевернуть обратно",
+        "colors": {
+          "amber": "Янтарный",
+          "blue": "Синий",
+          "green": "Зелёный",
+          "indigo": "Индиго",
+          "neutral": "Нейтральный",
+          "purple": "Пурпурный",
+          "red": "Красный",
+          "sky": "Небесный",
+          "teal": "Бирюзовый",
+          "yellow": "Жёлтый"
+        },
+        "enterAnswerPlaceholder": "Введите ваш ответ...",
+        "enterQuestionPlaceholder": "Введите ваш вопрос...",
+        "largeSize": "Большой размер",
+        "mediumSize": "Средний размер",
+        "previewFlip": "Предпросмотр переворота",
+        "smallSize": "Маленький размер"
+      },
       "ImageBlock": {
         "alignCenter": "Выровнять по центру",
         "alignLeft": "Выровнять по левому краю",
@@ -2670,9 +2696,6 @@
         "bold": "Жирный",
         "bulletList": "Маркированный список",
         "button": "Кнопка",
-        "flipcard": "Карточка-перевёртыш",
-        "flipcardQuestionDefault": "Нажмите, чтобы показать ответ",
-        "flipcardAnswerDefault": "Это ответ",
         "calloutDefault": "Выноска (По умолчанию)",
         "calloutError": "Выноска (Ошибка)",
         "calloutInfo": "Выноска (Информация)",
@@ -2687,6 +2710,9 @@
         "document": "Документ",
         "equation": "Уравнение",
         "externalObject": "Внешний объект (Встраивание)",
+        "flipcard": "Карточка-перевёртыш",
+        "flipcardAnswerDefault": "Это ответ",
+        "flipcardQuestionDefault": "Нажмите, чтобы показать ответ",
         "heading": "Заголовок",
         "heading1": "Заголовок 1",
         "heading2": "Заголовок 2",
@@ -2716,32 +2742,6 @@
         "webPreview": "Предварительный просмотр веб-страницы",
         "youtube": "YouTube",
         "youtubeVideo": "Видео с YouTube"
-      },
-      "Flipcard": {
-        "enterQuestionPlaceholder": "Введите ваш вопрос...",
-        "enterAnswerPlaceholder": "Введите ваш ответ...",
-        "clickToFlip": "Нажмите, чтобы перевернуть",
-        "clickToFlipBack": "Нажмите, чтобы перевернуть обратно",
-        "alignLeft": "Выровнять влево",
-        "alignCenter": "Выровнять по центру",
-        "alignRight": "Выровнять вправо",
-        "smallSize": "Маленький размер",
-        "mediumSize": "Средний размер",
-        "largeSize": "Большой размер",
-        "changeColor": "Изменить цвет",
-        "previewFlip": "Предпросмотр переворота",
-        "colors": {
-          "sky": "Небесный",
-          "green": "Зелёный",
-          "yellow": "Жёлтый",
-          "red": "Красный",
-          "purple": "Пурпурный",
-          "teal": "Бирюзовый",
-          "amber": "Янтарный",
-          "indigo": "Индиго",
-          "neutral": "Нейтральный",
-          "blue": "Синий"
-        }
       },
       "UserBlock": {
         "errorNotFound": "Пользователь не найден",
@@ -2822,7 +2822,7 @@
         "shareProgress": "Делиться прогрессом",
         "shareProgressDescription": "Разрешить делиться вашим прогрессом с другими пользователями",
         "showOnLeaderboard": "Показывать в рейтинге",
-        "showOnLeaderboardDescription": "Отображать ваш прогресс в организационном рейтинге",
+        "showOnLeaderboardDescription": "Отображать ваш прогресс в рейтинге OpenU",
         "title": "Конфиденциальность и видимость"
       },
       "savePreferences": "Сохранить настройки",
@@ -3049,9 +3049,9 @@
       "Images": {
         "Buttons": {
           "addPreview": "Добавить предварительный просмотр",
-          "ariaLabelLogo": "Выберите логотип организации для загрузки",
+          "ariaLabelLogo": "Выберите логотип для загрузки",
           "ariaLabelPreview": "Выберите предварительное изображение для загрузки",
-          "ariaLabelThumbnail": "Выберите миниатюру организации для загрузки",
+          "ariaLabelThumbnail": "Выберите миниатюру для загрузки",
           "selectLogoFile": "Выберите файл логотипа",
           "selectPreviewFile": "Выберите предварительный просмотр файла",
           "selectThumbnailFile": "Выберите файл миниатюры",
@@ -3631,8 +3631,8 @@
           "profile": "Профиль",
           "progress": "Прогресс",
           "quickStats": "Быстрая статистика",
-          "rank": "Место №{rank} в организации",
-          "rankInOrg": "Место №{rank} в организации",
+          "rank": "Место №{rank} в OpenU",
+          "rankInOrg": "Место №{rank} в OpenU",
           "recentAchievements": "Недавние достижения",
           "recentActivities": "Недавние активности",
           "title": "Прогресс обучения",
@@ -3658,7 +3658,7 @@
           "loadFailed": "Не удалось загрузить данные геймификации"
         },
         "errors": {
-          "orgNotAvailable": "Данные организации недоступны. Пожалуйста, обновите страницу."
+          "orgNotAvailable": "Данные OpenU недоступны. Пожалуйста, обновите страницу."
         },
         "leaderboard": {
           "aria": {
@@ -3786,7 +3786,7 @@
           "shareProgress": "Делиться прогрессом",
           "shareProgressDescription": "Разрешить делиться прогрессом обучения с другими",
           "showOnLeaderboard": "Показывать в таблице лидеров",
-          "showOnLeaderboardDescription": "Отображать прогресс в рейтингах организации",
+          "showOnLeaderboardDescription": "Отображать прогресс в рейтингах OpenU",
           "title": "Настройки конфиденциальности"
         },
         "rank": "Место",
@@ -3884,6 +3884,7 @@
           "first_activity": "Первое задание",
           "forum_participation": "Участие в форуме",
           "learning_streak_bonus": "Бонус за серию обучения",
+          "login_bonus": "Ежедневный вход",
           "login_daily": "Ежедневный вход",
           "login_streak_100_days": "Серия входов 100 дн.",
           "login_streak_30_days": "Серия входов 30 дн.",
@@ -4572,7 +4573,7 @@
   },
   "HomeClient": {
     "hello": "Здравствуйте",
-    "noOrganizations": "Вы пока не являетесь членом ни одной организации, присоединитесь, чтобы увидеть её здесь.",
+    "noOrganizations": "Вы пока не являетесь членом OpenU.",
     "signOut": "Выйти",
     "yourOrganizations": "Ваши организации"
   },
@@ -4634,7 +4635,7 @@
       "success": "Коллекция успешно создана!"
     },
     "visibilityLabel": "Видимость",
-    "visibilityPrivate": "Частная коллекция — Видна только членам организации",
+    "visibilityPrivate": "Частная коллекция — Видна только членам OpenU",
     "visibilityPublic": "Публичная коллекция — Видна всем"
   },
   "NotFoundPage": {
@@ -4714,7 +4715,7 @@
       "home": "Главная панель",
       "logout": "Выйти",
       "metrics": "Метрики",
-      "organization": "Настройки организации",
+      "organization": "Настройки OpenU",
       "payments": "Платежи",
       "userSettings": "Настройки @{username}",
       "users": "Пользователи"
@@ -4738,7 +4739,7 @@
     "inviteCodeValid": "Код приглашения действителен, вы будете перенаправлены на страницу регистрации через секунду!",
     "join": "Присоединиться ",
     "joinQuestion": "Присоединиться к {orgname}?",
-    "orgJoinSuccess": "Успешно присоединились к организации.",
+    "orgJoinSuccess": "Успешно присоединились к OpenU.",
     "submit": "Отправить "
   },
   "Trail": {

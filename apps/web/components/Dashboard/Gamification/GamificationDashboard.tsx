@@ -181,7 +181,7 @@ export function GamificationDashboard({
               />
             </div>
 
-            {user_rank != null && (
+            {typeof user_rank === 'number' && (
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 <span className="text-sm">{t('dashboard.rankInOrg', { rank: user_rank })}</span>

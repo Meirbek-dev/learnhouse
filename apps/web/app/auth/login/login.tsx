@@ -91,13 +91,13 @@ const LoginClient = (props: LoginClientProps) => {
           </div>
           <div className="flex flex-row bg-white">
             <div className="m-auto w-72">
+              {/* TODO: Add padding */}
               {error ? (
                 <div className="flex items-center justify-center space-x-2 rounded-md bg-red-200 p-4 text-red-950 shadow-xs transition-all">
                   <AlertTriangle size={22} />
                   <div className="text-sm font-semibold">{t('wrongCredentials')}</div>
                 </div>
               ) : null}
-
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(handleSubmit)}
@@ -144,9 +144,8 @@ const LoginClient = (props: LoginClientProps) => {
                     <Link
                       href={{
                         pathname: getUriWithoutOrg('/forgot'),
-                        query: props.org.slug ? { orgslug: props.org.slug } : null,
+                        query: props.org.slug ? { orgslug: props.org.slug } : undefined,
                       }}
-                      passHref
                       className="text-xs text-gray-500 transition-colors hover:text-gray-700 hover:underline"
                     >
                       {t('forgotPassword')}
@@ -180,7 +179,7 @@ const LoginClient = (props: LoginClientProps) => {
                 <Link
                   href={{
                     pathname: getUriWithoutOrg('/signup'),
-                    query: props.org.slug ? { orgslug: props.org.slug } : null,
+                    query: props.org.slug ? { orgslug: props.org.slug } : undefined,
                   }}
                   className="text-md flex w-full items-center justify-center space-x-3 rounded-md bg-gray-800 p-2 py-3 text-center font-semibold text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-700 hover:text-white"
                 >

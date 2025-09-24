@@ -59,7 +59,7 @@ async def join_org(
 
     if userorg:
         raise HTTPException(
-            status_code=400, detail="User is already part of that organization"
+            status_code=400, detail="Пользователь уже является частью OpenU"
         )
 
     if join_method == "inviteOnly":

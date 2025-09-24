@@ -91,7 +91,7 @@ export function Leaderboard({
   }, []);
 
   const isCurrentUser = useCallback(
-    (userId: number) => currentUserId != null && currentUserId === userId,
+    (userId: number) => currentUserId !== null && currentUserId === userId,
     [currentUserId],
   );
 
