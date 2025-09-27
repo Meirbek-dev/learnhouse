@@ -990,7 +990,7 @@ export const MarkStatus = (props: {
           await refetchGamification();
 
           // Show a generic success message since we can't reliably get updated state here
-          toast.success(`🔥 +25 XP earned for completing "${props.activity.title}"!`, {
+          toast.success(`🔥 +25 XP за завершение "${props.activity.title}"!`, {
             style: {
               borderRadius: '8px',
               background: '#333',

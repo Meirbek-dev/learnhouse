@@ -29,7 +29,6 @@ from src.db.gamification import (
     XPTransaction,
     calculate_level,
 )
-from src.services.gamification.events import publisher
 from src.services.gamification.policy import get_org_policy
 
 
@@ -142,7 +141,6 @@ def award_xp(
 
         db.commit()
         db.refresh(profile)
-        publisher.publish_gamification_updated(org_id)
         return profile, tx, tx.triggered_level_up, True
     except IntegrityError as e:
         db.rollback()
@@ -241,7 +239,6 @@ def update_streak(
     profile.updated_at = now
     db.commit()
     db.refresh(profile)
-    publisher.publish_gamification_updated(org_id)
     return profile
 
 
@@ -335,7 +332,6 @@ def update_preferences(
     db.add(profile)
     db.commit()
     db.refresh(profile)
-    publisher.publish_gamification_updated(org_id)
     return profile
 
 
@@ -447,10 +443,9 @@ def on_activity_completed(
             profile.total_activities_completed or 0
         ) + 1
         profile.updated_at = datetime.now(UTC)
-        db.add(profile)
-        db.commit()
-        db.refresh(profile)
-        publisher.publish_gamification_updated(org_id)
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
     return profile
 
 
@@ -480,8 +475,7 @@ def on_course_completed(
         profile = get_profile(db, user_id, org_id)
         profile.total_courses_completed = (profile.total_courses_completed or 0) + 1
         profile.updated_at = datetime.now(UTC)
-        db.add(profile)
-        db.commit()
-        db.refresh(profile)
-        publisher.publish_gamification_updated(org_id)
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
     return profile

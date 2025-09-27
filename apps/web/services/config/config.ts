@@ -1,4 +1,4 @@
-export const OPENU_HTTP_PROTOCOL = process.env.NEXT_PUBLIC_OPENU_HTTPS === 'true' ? 'https://' : 'http://';
+export const OPENU_HTTP_PROTOCOL = process.env.NEXT_PUBLIC_OPENU_HTTPS?.toLowerCase() === 'true' ? 'https://' : 'http://';
 const OPENU_API_URL = `${process.env.NEXT_PUBLIC_OPENU_API_URL || ''}`;
 export const OPENU_BACKEND_URL = `${process.env.NEXT_PUBLIC_OPENU_BACKEND_URL || ''}`;
 export const OPENU_DOMAIN = process.env.NEXT_PUBLIC_OPENU_DOMAIN;
