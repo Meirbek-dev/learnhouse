@@ -1,5 +1,48 @@
 import { getUriWithOrg } from '@services/config/config';
 
+type FetchCacheConfig = (
+  | {
+      revalidate?: number | null | undefined;
+      tags?: string[];
+      cache?: RequestCache | null | undefined;
+      [key: string]: any;
+    }
+  | undefined
+);
+
+const sanitizeFetchConfig = (
+  config: FetchCacheConfig,
+): { next?: Record<string, any>; cache?: RequestCache } => {
+  if (!config) return {};
+
+  const sanitized: Record<string, any> = { ...config };
+  let cache: RequestCache | undefined;
+
+  if ('cache' in sanitized) {
+    const cacheValue = sanitized.cache;
+    if (cacheValue === 'no-store' || cacheValue === 'force-cache' || cacheValue === 'only-if-cached') {
+      cache = cacheValue;
+    }
+    delete sanitized.cache;
+  }
+
+  if (sanitized.revalidate !== undefined && sanitized.revalidate !== null) {
+    const parsed = Number(sanitized.revalidate);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      cache = 'no-store';
+      delete sanitized.revalidate;
+    } else {
+      sanitized.revalidate = parsed;
+    }
+  }
+
+  if (Object.keys(sanitized).length === 0) {
+    return cache ? { cache } : {};
+  }
+
+  return cache ? { next: sanitized, cache } : { next: sanitized };
+};
+
 // Internal helper to create request options, reducing code duplication.
 const createRequestInit = (
   method: string,
@@ -21,11 +64,18 @@ const createRequestInit = (
 
   const options: RequestInit & { next?: any } = {
     method,
-    headers,
     redirect: 'follow',
     credentials: 'include',
-    next,
+    headers,
   };
+
+  const { next: sanitizedNext, cache } = sanitizeFetchConfig(next);
+  if (cache) {
+    options.cache = cache;
+  }
+  if (sanitizedNext) {
+    options.next = sanitizedNext;
+  }
 
   // Only set JSON content-type when sending a body (avoid preflight on simple GET/HEAD)
   if (isJson && data !== null) {
@@ -67,8 +117,16 @@ export const RequestBodyForm = (method: string, data: any, next: any) => {
     headers: {},
     redirect: 'follow',
     credentials: 'include',
-    next,
   };
+
+  const { next: sanitizedNext, cache } = sanitizeFetchConfig(next);
+  if (cache) {
+    options.cache = cache;
+  }
+  if (sanitizedNext) {
+    options.next = sanitizedNext;
+  }
+
   if (method === 'POST' || method === 'PUT') {
     options.body = JSON.stringify(data);
   }

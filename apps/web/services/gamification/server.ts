@@ -6,23 +6,68 @@ import { gamificationTags } from '@/lib/cacheTags';
 import { revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
+type GamificationFetchOptions = {
+  revalidate?: number | null;
+  tags?: string[];
+  cache?: RequestCache | null;
+};
+
 async function requireAccessToken(): Promise<string> {
   const session = await auth();
   const token = (session as any)?.tokens?.access_token as string | undefined;
   if (!token) throw new Error('Authentication required');
   return token;
 }
-async function getUnifiedServerData(orgId: number, opts?: { revalidate?: number; tags?: string[] }) {
+
+function buildCacheOptions(
+  orgId: number,
+  opts: GamificationFetchOptions | undefined,
+  fallbackRevalidate: number,
+): { next?: Record<string, any>; cache?: RequestCache } {
+  const next: Record<string, any> = {};
+  const tags = opts?.tags ?? gamificationTags(orgId);
+  if (tags?.length) {
+    next.tags = tags;
+  }
+
+  let cache: RequestCache | undefined;
+  if (opts?.cache) {
+    cache = opts.cache;
+  }
+
+  const revalidate = opts?.revalidate;
+  if (revalidate !== undefined && revalidate !== null) {
+    const parsed = Number(revalidate);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      next.revalidate = parsed;
+    } else {
+      cache = 'no-store';
+    }
+  } else if (fallbackRevalidate > 0) {
+    next.revalidate = fallbackRevalidate;
+  }
+
+  if (Object.keys(next).length === 0) {
+    return cache ? { cache } : {};
+  }
+
+  return cache ? { next, cache } : { next };
+}
+async function getUnifiedServerData(orgId: number, opts?: GamificationFetchOptions) {
   const accessToken = await requireAccessToken();
   // New unified endpoint returns DashboardRead (profile + recent_transactions)
-  const res = await fetch(`${getAPIUrl()}gamification/${orgId}`, {
+  const { next, cache } = buildCacheOptions(orgId, opts, 30);
+  const fetchOptions: RequestInit & { next?: Record<string, any> } = {
     method: 'GET',
     headers: { Authorization: `Bearer ${accessToken}` },
-    next: {
-      revalidate: opts?.revalidate ?? 30,
-      tags: opts?.tags ?? gamificationTags(orgId),
-    },
-  });
+  };
+  if (cache) {
+    fetchOptions.cache = cache;
+  }
+  if (next) {
+    fetchOptions.next = next;
+  }
+  const res = await fetch(`${getAPIUrl()}gamification/${orgId}`, fetchOptions);
 
   if (!res.ok) throw new Error(`Failed to fetch gamification data: ${res.status}`);
   return res.json();
@@ -30,7 +75,7 @@ async function getUnifiedServerData(orgId: number, opts?: { revalidate?: number;
 
 export async function getServerGamificationProfile(
   orgId: number,
-  opts?: { revalidate?: number; tags?: string[] },
+  opts?: GamificationFetchOptions,
 ): Promise<UserGamificationProfile> {
   const json = await getUnifiedServerData(orgId, opts);
 
@@ -65,7 +110,7 @@ export async function getServerGamificationProfile(
 
 export async function getServerGamificationDashboard(
   orgId: number,
-  opts?: { revalidate?: number; tags?: string[] },
+  opts?: GamificationFetchOptions,
 ): Promise<DashboardData> {
   const json = await getUnifiedServerData(orgId, opts);
 
@@ -121,19 +166,23 @@ export async function getServerGamificationDashboard(
 export async function getServerOrganizationLeaderboard(
   orgId: number,
   limit = 20,
-  opts?: { revalidate?: number; tags?: string[] },
+  opts?: GamificationFetchOptions,
 ): Promise<OrganizationLeaderboard> {
   const accessToken = await requireAccessToken();
+  const { next, cache } = buildCacheOptions(orgId, opts, 30);
+  const fetchOptions: RequestInit & { next?: Record<string, any> } = {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  };
+  if (cache) {
+    fetchOptions.cache = cache;
+  }
+  if (next) {
+    fetchOptions.next = next;
+  }
   const res = await fetch(
     `${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`,
-    {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${accessToken}` },
-      next: {
-        revalidate: opts?.revalidate ?? 30,
-        tags: opts?.tags ?? gamificationTags(orgId),
-      },
-    },
+    fetchOptions,
   );
   if (!res.ok) throw new Error(`Failed to fetch leaderboard: ${res.status}`);
   const json = await res.json();

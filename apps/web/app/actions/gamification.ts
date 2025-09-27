@@ -12,13 +12,13 @@ import type { DashboardData, OrganizationLeaderboard, XPAwardResponse } from '@/
 
 export async function getDashboardDataAction(orgId: number): Promise<DashboardData | null> {
   if (!orgId) return null;
-  const data = await getServerGamificationDashboard(orgId, { revalidate: 0 });
+  const data = await getServerGamificationDashboard(orgId, { cache: 'no-store' });
   return data ?? null;
 }
 
 export async function getLeaderboardAction(orgId: number, limit = 20): Promise<OrganizationLeaderboard | null> {
   if (!orgId) return null;
-  const data = await getServerOrganizationLeaderboard(orgId, limit, { revalidate: 0 });
+  const data = await getServerOrganizationLeaderboard(orgId, limit, { cache: 'no-store' });
   return data ?? null;
 }
 

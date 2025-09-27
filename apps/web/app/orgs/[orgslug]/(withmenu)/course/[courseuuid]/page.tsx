@@ -23,7 +23,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   });
   const course_meta = await getCourseMetadata(
     params.courseuuid,
-    { revalidate: 60, tags: ['courses'] },
+    { cache: 'no-store', tags: ['courses'] },
     access_token || null,
   );
 
@@ -68,7 +68,7 @@ const CoursePage = async (params: any) => {
   const { courseuuid, orgslug } = await params.params;
 
   // Fetch course metadata once
-  const course_meta = await getCourseMetadata(courseuuid, { revalidate: 0, tags: ['courses'] }, access_token || null);
+  const course_meta = await getCourseMetadata(courseuuid, { cache: 'no-store', tags: ['courses'] }, access_token || null);
 
   return (
     <CourseClient

@@ -137,8 +137,8 @@ def install_default_elements(db_session: Session) -> bool:
 
     # Create default roles
     role_global_admin = Role(
-        name="Admin",
-        description="Full platform control",
+        name="Админ",
+        description="Полный контроль над платформой",
         id=1,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_admin",
@@ -204,7 +204,7 @@ def install_default_elements(db_session: Session) -> bool:
 
     role_global_maintainer = Role(
         name="Maintainer",
-        description="Mid-level manager, wide permissions but no platform control",
+        description="Менеджер среднего звена, широкие полномочия, но нет контроля над платформой",
         id=2,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_maintainer",
@@ -269,8 +269,8 @@ def install_default_elements(db_session: Session) -> bool:
     )
 
     role_global_instructor = Role(
-        name="Instructor",
-        description="Can manage their own content",
+        name="Преподаватель",
+        description="Может управлять своим собственным контентом",
         id=3,
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_instructor",
@@ -335,8 +335,8 @@ def install_default_elements(db_session: Session) -> bool:
     )
 
     role_global_user = Role(
-        name="User",
-        description="Read-Only Learner",
+        name="Пользователь",
+        description="Студент (только для чтения)",
         role_type=RoleTypeEnum.TYPE_GLOBAL,
         role_uuid="role_global_user",
         id=4,
@@ -515,7 +515,7 @@ def install_create_organization_user(
     if result.first():
         raise HTTPException(
             status_code=409,
-            detail="Email already exists",
+            detail="Пользователь с данной электронной почтой уже существует",
         )
 
     # Exclude unset values

@@ -50,7 +50,7 @@ async function CoursesPage(params: any) {
   });
   const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const courses = await getOrgCourses(orgslug, { revalidate: 0, tags: ['courses'] }, access_token || null);
+  const courses = await getOrgCourses(orgslug, { cache: 'no-store', tags: ['courses'] }, access_token || null);
 
   return (
     <CoursesHome

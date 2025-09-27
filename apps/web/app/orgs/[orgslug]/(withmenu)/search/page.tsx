@@ -16,7 +16,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const t = await getTranslations('General');
 
   const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 0,
+    cache: 'no-store',
     tags: ['organizations'],
   });
 

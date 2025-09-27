@@ -222,7 +222,7 @@ export const HeaderProfileBox = () => {
                         </Tooltip>
                       ))}
                     </div>
-                    <p className="text-start text-muted-foreground text-xs">{session.data.user.email}</p>
+                    <p className="text-muted-foreground text-start text-xs">{session.data.user.email}</p>
                   </div>
                   <ChevronDown
                     size={16}

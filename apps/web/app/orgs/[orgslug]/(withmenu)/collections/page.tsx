@@ -22,7 +22,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params;
   const t = await getTranslations('HomePage.Collections');
   const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 0,
+    cache: 'no-store',
     tags: ['organizations'],
   });
 
@@ -67,7 +67,7 @@ const CollectionsPage = async (params: any) => {
   });
   const org_id = org.id;
   const collections = await getOrgCollections(org_id, access_token, {
-    revalidate: 0,
+    cache: 'no-store',
     tags: ['collections'],
   });
 

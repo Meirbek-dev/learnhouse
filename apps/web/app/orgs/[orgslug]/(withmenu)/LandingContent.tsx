@@ -14,15 +14,15 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
   const access_token = session?.tokens?.access_token;
 
   const [courses, org, collections] = await Promise.all([
-    getOrgCourses(orgslug, { revalidate: 0, tags: ['courses'] }, access_token || null),
+    getOrgCourses(orgslug, { cache: 'no-store', tags: ['courses'] }, access_token || null),
     getOrganizationContextInfo(orgslug, {
-      revalidate: 0,
+      cache: 'no-store',
       tags: ['organizations'],
     }),
     getOrgCollections(
-      (await getOrganizationContextInfo(orgslug, { revalidate: 0, tags: ['organizations'] })).id,
+      (await getOrganizationContextInfo(orgslug, { cache: 'no-store', tags: ['organizations'] })).id,
       access_token,
-      { revalidate: 0, tags: ['courses'] },
+      { cache: 'no-store', tags: ['courses'] },
     ),
   ]);
 

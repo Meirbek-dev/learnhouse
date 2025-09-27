@@ -25,7 +25,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     tags: ['organizations'],
   });
   const col = await getCollectionById(params.collectionid, access_token || '', {
-    revalidate: 0,
+    cache: 'no-store',
     tags: ['collections'],
   });
 
@@ -62,7 +62,7 @@ const CollectionPage = async (params: any) => {
   });
   const { orgslug } = resolvedParams;
   const col = await getCollectionById(resolvedParams.collectionid, access_token || '', {
-    revalidate: 0,
+    cache: 'no-store',
     tags: ['collections'],
   });
 

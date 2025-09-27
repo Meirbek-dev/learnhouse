@@ -15,8 +15,8 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ orgId:
   if (!orgId) return NextResponse.json({ error: 'Invalid orgId' }, { status: 400 });
   try {
     const [dashboard, leaderboard] = await Promise.all([
-      getServerGamificationDashboard(orgId, { revalidate: 0 }),
-      getServerOrganizationLeaderboard(orgId, 20, { revalidate: 0 }),
+      getServerGamificationDashboard(orgId, { cache: 'no-store' }),
+      getServerOrganizationLeaderboard(orgId, 20, { cache: 'no-store' }),
     ]);
     return NextResponse.json({ dashboard, leaderboard });
   } catch (error: unknown) {

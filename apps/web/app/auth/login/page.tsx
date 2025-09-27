@@ -14,7 +14,7 @@ export async function generateMetadata(params: MetadataProps): Promise<Metadata>
   const t = await getTranslations('Auth.Login');
 
   const org = await getOrganizationContextInfo(orgslug, {
-    revalidate: 0,
+    cache: 'no-store',
     tags: ['organizations'],
   });
 
@@ -26,7 +26,7 @@ export async function generateMetadata(params: MetadataProps): Promise<Metadata>
 const Login = async (params: MetadataProps) => {
   const { orgslug } = await params.searchParams;
   const org = await getOrganizationContextInfo(orgslug, {
-    revalidate: 0,
+    cache: 'no-store',
     tags: ['organizations'],
   });
 
