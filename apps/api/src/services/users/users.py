@@ -382,7 +382,7 @@ async def _validate_unique_username(
     if db_session.exec(statement).first():
         raise HTTPException(
             status_code=400,
-            detail="Username already exists",
+            detail="Имя пользователя уже существует",
         )
 
 

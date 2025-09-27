@@ -505,7 +505,7 @@ def install_create_organization_user(
     if result.first():
         raise HTTPException(
             status_code=409,
-            detail="Username already exists",
+            detail="Имя пользователя уже существует",
         )
 
     # Email

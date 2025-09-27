@@ -8,9 +8,7 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,md,css,json}\"",
     "lint": "turbo run lint",
     "oxlint": "oxlint --fix --fix-suggestions",
-    "start": "turbo run start",
-    "openapi:gen": "pnpm -C apps/web openapi:gen",
-    "openapi:gen:local": "pnpm -C apps/web openapi:gen:local"
+    "start": "turbo run start"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
