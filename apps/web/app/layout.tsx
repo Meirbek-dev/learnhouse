@@ -1,20 +1,11 @@
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import ClientLayout from './client-layout';
-import { Inter } from 'next/font/google';
 import { isDevEnv } from '@/auth';
 import Script from 'next/script';
+import { inter, jetBrainsMono } from '@/lib/fonts';
 
 import '../styles/globals.css';
-
-const inter = Inter({
-  subsets: ['latin', 'cyrillic'],
-  variable: '--font-inter',
-  display: 'swap',
-  preload: true,
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-});
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
@@ -23,7 +14,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html
-      className={`${inter.variable}`}
+      className={`${inter.variable} ${jetBrainsMono.variable}`}
       lang={locale}
     >
       <head>

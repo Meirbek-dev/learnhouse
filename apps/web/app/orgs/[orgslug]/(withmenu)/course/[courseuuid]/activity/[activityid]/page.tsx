@@ -1,7 +1,6 @@
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
-import { JetBrains_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
 
@@ -22,15 +21,6 @@ interface Session {
 async function fetchCourseMetadata(courseuuid: string, access_token: string | null | undefined) {
   return await getCourseMetadata(courseuuid, { revalidate: 60, tags: ['courses'] }, access_token || null);
 }
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-jetbrains-mono',
-  display: 'swap',
-  preload: true,
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
-  style: ['normal', 'italic'],
-});
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const { orgslug, courseuuid, activityid } = await props.params;
@@ -92,7 +82,7 @@ const ActivityPage = async (params: any) => {
   ]);
 
   return (
-    <div className={jetbrainsMono.variable}>
+    <div className="font-mono">
       <ActivityClient
         activityid={activityid}
         courseuuid={courseuuid}

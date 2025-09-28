@@ -131,7 +131,17 @@
   --sidebar-ring: oklch(0.6231 0.188 259.8145);
   --font-sans: var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-serif: 'Source Serif Pro', 'Source Serif 4', Georgia, serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-mono:
+    var(--font-jetbrains-mono),
+    'JetBrains Mono',
+    'Fira Code',
+    ui-monospace,
+    SFMono-Regular,
+    'SF Mono',
+    Consolas,
+    'Liberation Mono',
+    Menlo,
+    monospace;
   --radius: 0.5rem;
   --shadow-color: oklch(0 0 0);
   --shadow-opacity: 0.1;
@@ -265,18 +275,17 @@
     padding: 0;
     margin: 0;
     transition: all 0.1s ease;
-    font-family:
-      var(--font-inter),
-      Inter,
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      Roboto,
-      'Helvetica Neue',
-      Arial,
-      sans-serif;
+    font-family: var(--font-sans);
     font-synthesis: none;
     min-height: 100vh;
+  }
+
+  .font-mono,
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
   }
 
   a {
@@ -363,7 +372,7 @@
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
     font-size: 0.875rem;
-    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--font-mono);
   }
 
   .prose-editor .ProseMirror pre {
