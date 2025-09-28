@@ -5,7 +5,7 @@ export const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
   preload: true,
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  weight: ['400', '500', '600', '700', '800'],
   fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
 });
 
@@ -13,7 +13,7 @@ export const jetBrainsMono = JetBrains_Mono({
   subsets: ['latin', 'latin-ext'],
   variable: '--font-jetbrains-mono',
   display: 'swap',
-  preload: true,
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
+  preload: false,
+  weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
 });
