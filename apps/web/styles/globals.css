@@ -132,16 +132,8 @@
   --font-sans: var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-serif: 'Source Serif Pro', 'Source Serif 4', Georgia, serif;
   --font-mono:
-    var(--font-jetbrains-mono),
-    'JetBrains Mono',
-    'Fira Code',
-    ui-monospace,
-    SFMono-Regular,
-    'SF Mono',
-    Consolas,
-    'Liberation Mono',
-    Menlo,
-    monospace;
+    var(--font-jetbrains-mono), 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, 'SF Mono', Consolas,
+    'Liberation Mono', Menlo, monospace;
   --radius: 0.5rem;
   --shadow-color: oklch(0 0 0);
   --shadow-opacity: 0.1;

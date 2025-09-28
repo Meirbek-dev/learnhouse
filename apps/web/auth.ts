@@ -15,12 +15,12 @@ import { getResponseMetadata } from '@/services/utils/ts/requests';
 declare global {
   var sessionCache:
     | Map<
-      string,
-      {
-        data: SessionData;
-        timestamp: number;
-      }
-    >
+        string,
+        {
+          data: SessionData;
+          timestamp: number;
+        }
+      >
     | undefined;
 }
 
@@ -70,7 +70,7 @@ const getSessionCache = () => {
   return new Map();
 };
 
-export const isDevEnv = process.env.NODE_ENV !== "production";
+export const isDevEnv = process.env.NODE_ENV !== 'production';
 
 // Helper function to validate token expiry
 const isTokenExpiringSoon = (expiry: number, bufferMs: number = TOKEN_REFRESH_BUFFER): boolean => {

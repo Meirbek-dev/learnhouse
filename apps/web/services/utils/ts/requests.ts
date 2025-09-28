@@ -1,18 +1,15 @@
 import { getUriWithOrg } from '@services/config/config';
 
-type FetchCacheConfig = (
+type FetchCacheConfig =
   | {
       revalidate?: number | null | undefined;
       tags?: string[];
       cache?: RequestCache | null | undefined;
       [key: string]: any;
     }
-  | undefined
-);
+  | undefined;
 
-const sanitizeFetchConfig = (
-  config: FetchCacheConfig,
-): { next?: Record<string, any>; cache?: RequestCache } => {
+const sanitizeFetchConfig = (config: FetchCacheConfig): { next?: Record<string, any>; cache?: RequestCache } => {
   if (!config) return {};
 
   const sanitized: Record<string, any> = { ...config };

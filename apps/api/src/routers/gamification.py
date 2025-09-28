@@ -199,8 +199,7 @@ async def update_streak(
             streak_type=streak_type.value,
             current_count=profile.learning_streak,
             longest_count=profile.longest_learning_streak,
-            is_new_record=profile.learning_streak
-            == profile.longest_learning_streak,
+            is_new_record=profile.learning_streak == profile.longest_learning_streak,
         )
     except GamificationError as e:
         raise HTTPException(status_code=400, detail=str(e))

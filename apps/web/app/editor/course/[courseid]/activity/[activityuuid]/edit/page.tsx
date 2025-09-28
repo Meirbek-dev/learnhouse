@@ -38,8 +38,8 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
   const { activityuuid, courseid } = params;
 
   const [courseInfo, activity] = await Promise.all([
-  getCourseMetadata(courseid, { cache: 'no-store', tags: ['courses'] }, access_token),
-  getActivityWithAuthHeader(activityuuid, { cache: 'no-store', tags: ['activities'] }, access_token),
+    getCourseMetadata(courseid, { cache: 'no-store', tags: ['courses'] }, access_token),
+    getActivityWithAuthHeader(activityuuid, { cache: 'no-store', tags: ['activities'] }, access_token),
   ]);
 
   const org = await getOrganizationContextInfoWithId(

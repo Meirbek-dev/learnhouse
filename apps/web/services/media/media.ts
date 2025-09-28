@@ -1,6 +1,5 @@
 import { getBackendUrl } from '@services/config/config';
 
-
 function getMediaUrl(): string {
   return process.env.NEXT_PUBLIC_OPENU_MEDIA_URL || getBackendUrl();
 }

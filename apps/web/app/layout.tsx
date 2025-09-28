@@ -1,9 +1,9 @@
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
+import { inter, jetBrainsMono } from '@/lib/fonts';
 import { NextIntlClientProvider } from 'next-intl';
 import ClientLayout from './client-layout';
 import { isDevEnv } from '@/auth';
 import Script from 'next/script';
-import { inter, jetBrainsMono } from '@/lib/fonts';
 
 import '../styles/globals.css';
 

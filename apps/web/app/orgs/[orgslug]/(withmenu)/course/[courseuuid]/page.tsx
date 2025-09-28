@@ -68,7 +68,11 @@ const CoursePage = async (params: any) => {
   const { courseuuid, orgslug } = await params.params;
 
   // Fetch course metadata once
-  const course_meta = await getCourseMetadata(courseuuid, { cache: 'no-store', tags: ['courses'] }, access_token || null);
+  const course_meta = await getCourseMetadata(
+    courseuuid,
+    { cache: 'no-store', tags: ['courses'] },
+    access_token || null,
+  );
 
   return (
     <CourseClient

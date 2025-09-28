@@ -6,11 +6,11 @@ import { gamificationTags } from '@/lib/cacheTags';
 import { revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
-type GamificationFetchOptions = {
+interface GamificationFetchOptions {
   revalidate?: number | null;
   tags?: string[];
   cache?: RequestCache | null;
-};
+}
 
 async function requireAccessToken(): Promise<string> {
   const session = await auth();
