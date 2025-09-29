@@ -41,9 +41,9 @@ COPY --from=frontend-deps /app/node_modules ./node_modules
 COPY apps/web .
 
 # Set environment variables for the build
-ENV NEXT_PUBLIC_OPENU_API_URL=http://localhost/api/v1/
-ENV NEXT_PUBLIC_OPENU_BACKEND_URL=http://localhost/
-ENV NEXT_PUBLIC_OPENU_DOMAIN=localhost
+ENV NEXT_PUBLIC_OPENU_API_URL=http://192.168.12.35/api/v1/
+ENV NEXT_PUBLIC_OPENU_BACKEND_URL=http://192.168.12.35/
+ENV NEXT_PUBLIC_OPENU_DOMAIN=192.168.12.35
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry

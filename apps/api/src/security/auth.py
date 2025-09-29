@@ -14,6 +14,21 @@ from src.security.security import ALGORITHM, SECRET_KEY
 from src.services.dev.dev import isDevModeEnabled
 from src.services.users.users import security_get_user, security_verify_password
 
+
+def _normalize_secure_flag(value: bool | str | None) -> bool:
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1", "yes", "on"}:
+            return True
+        if lowered in {"false", "0", "no", "off"}:
+            return False
+    return bool(value)
+
+
+_OPENU_CONFIG = get_openu_config()
+_COOKIE_DOMAIN = _OPENU_CONFIG.hosting_config.cookie_config.domain
+_COOKIE_SECURE = _normalize_secure_flag(_OPENU_CONFIG.hosting_config.ssl)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
@@ -26,8 +41,8 @@ class Settings(PydanticStrictBaseModel):
         False if isDevModeEnabled() else timedelta(hours=8).total_seconds()
     )
     authjwt_cookie_samesite: str = "lax"
-    authjwt_cookie_secure: bool = True
-    authjwt_cookie_domain: str = get_openu_config().hosting_config.cookie_config.domain
+    authjwt_cookie_secure: bool = _COOKIE_SECURE
+    authjwt_cookie_domain: str | None = _COOKIE_DOMAIN
 
 
 @AuthJWT.load_config

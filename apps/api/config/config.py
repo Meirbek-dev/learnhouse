@@ -1,4 +1,5 @@
 import os
+import ipaddress
 from typing import Literal
 
 import yaml  # PyYAML types not available
@@ -8,7 +9,7 @@ from src.db.strict_base_model import PydanticStrictBaseModel
 
 
 class CookieConfig(PydanticStrictBaseModel):
-    domain: str
+    domain: str | None = None
 
 
 class GeneralConfig(PydanticStrictBaseModel):
@@ -92,6 +93,35 @@ class OpenUConfig(PydanticStrictBaseModel):
     ai_config: AIConfig
     mailing_config: MailingConfig
     payments_config: InternalPaymentsConfig
+
+
+def _normalize_cookie_domain(raw_domain: str | None) -> str | None:
+    if not raw_domain:
+        return None
+
+    cleaned = raw_domain.strip()
+    if not cleaned:
+        return None
+
+    cleaned = cleaned.lstrip(".")
+    if not cleaned:
+        return None
+
+    lowered = cleaned.lower()
+    if lowered == "localhost":
+        return None
+
+    try:
+        ipaddress.ip_address(cleaned)
+        return None
+    except ValueError:
+        pass
+
+    if ":" in cleaned:
+        # Basic guard for IPv6-like strings that ip_address might not catch when abbreviated improperly
+        return None
+
+    return cleaned
 
 
 def get_openu_config() -> OpenUConfig:
@@ -180,7 +210,7 @@ def get_openu_config() -> OpenUConfig:
     cookies_domain = env_cookie_domain or yaml_config.get("hosting_config", {}).get(
         "cookies_config", {}
     ).get("domain")
-    cookie_config = CookieConfig(domain=cookies_domain)
+    cookie_config = CookieConfig(domain=_normalize_cookie_domain(cookies_domain))
 
     env_content_delivery_type = os.environ.get("OPENU_CONTENT_DELIVERY_TYPE")
     content_delivery_type: str = env_content_delivery_type or (

@@ -1,9 +1,9 @@
 import {
   OPENU_DOMAIN,
-  OPENU_TOP_DOMAIN,
   getDefaultOrg,
   getUriWithOrg,
   isMultiOrgModeEnabled,
+  getTopLevelCookieDomain,
 } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -29,6 +29,7 @@ export default async function middleware(req: NextRequest) {
   // Get initial data
   const hosting_mode = isMultiOrgModeEnabled() ? 'multi' : 'single';
   const default_org = getDefaultOrg();
+  const cookieDomain = getTopLevelCookieDomain();
   const { pathname, search } = req.nextUrl;
   const fullhost = req.headers ? req.headers.get('host') : '';
   const cookie_orgslug = req.cookies.get('openu_current_orgslug')?.value;
@@ -52,7 +53,7 @@ export default async function middleware(req: NextRequest) {
       response.cookies.set({
         name: 'openu_current_orgslug',
         value: orgslug,
-        domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+        domain: cookieDomain,
       });
     }
     return response;
@@ -136,7 +137,7 @@ export default async function middleware(req: NextRequest) {
     response.cookies.set({
       name: 'openu_current_orgslug',
       value: orgslug,
-      domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+      domain: cookieDomain,
       path: '/',
     });
 
@@ -153,7 +154,7 @@ export default async function middleware(req: NextRequest) {
     response.cookies.set({
       name: 'openu_current_orgslug',
       value: orgslug,
-      domain: OPENU_TOP_DOMAIN == 'localhost' ? '' : OPENU_TOP_DOMAIN,
+      domain: cookieDomain,
       path: '/',
     });
 

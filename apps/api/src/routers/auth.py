@@ -15,6 +15,24 @@ from src.services.auth.utils import signWithGoogle
 
 router = APIRouter()
 
+COOKIE_TTL_SECONDS = int(timedelta(hours=8).total_seconds())
+
+
+def _set_access_cookie(response: Response, value: str) -> None:
+    cookie_domain = get_openu_config().hosting_config.cookie_config.domain
+    cookie_kwargs: dict[str, object] = {
+        "httponly": False,
+        "expires": COOKIE_TTL_SECONDS,
+    }
+    if cookie_domain:
+        cookie_kwargs["domain"] = cookie_domain
+
+    response.set_cookie(
+        key="access_token_cookie",
+        value=value,
+        **cookie_kwargs,
+    )
+
 
 @router.get("/refresh")
 def refresh(response: Response, Authorize: Annotated[AuthJWT, Depends()]):
@@ -29,13 +47,7 @@ def refresh(response: Response, Authorize: Annotated[AuthJWT, Depends()]):
     current_user = Authorize.get_jwt_subject()
     new_access_token = Authorize.create_access_token(subject=current_user)
 
-    response.set_cookie(
-        key="access_token_cookie",
-        value=new_access_token,
-        httponly=False,
-        domain=get_openu_config().hosting_config.cookie_config.domain,
-        expires=int(timedelta(hours=8).total_seconds()),
-    )
+    _set_access_cookie(response, new_access_token)
     return {"access_token": new_access_token}
 
 
@@ -62,13 +74,7 @@ async def login(
     Authorize.set_refresh_cookies(refresh_token)
 
     # set cookies using fastapi
-    response.set_cookie(
-        key="access_token_cookie",
-        value=access_token,
-        httponly=False,
-        domain=get_openu_config().hosting_config.cookie_config.domain,
-        expires=int(timedelta(hours=8).total_seconds()),
-    )
+    _set_access_cookie(response, access_token)
 
     user = UserRead.model_validate(user)
 
@@ -113,13 +119,7 @@ async def third_party_login(
     Authorize.set_refresh_cookies(refresh_token)
 
     # set cookies using fastapi
-    response.set_cookie(
-        key="access_token_cookie",
-        value=access_token,
-        httponly=False,
-        domain=get_openu_config().hosting_config.cookie_config.domain,
-        expires=int(timedelta(hours=8).total_seconds()),
-    )
+    _set_access_cookie(response, access_token)
 
     user = UserRead.model_validate(user)
 

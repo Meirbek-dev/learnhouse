@@ -8,7 +8,7 @@ import {
   loginAndGetToken,
   loginWithOAuthToken,
 } from '@/services/auth/auth';
-import { OPENU_TOP_DOMAIN, getUriWithOrg } from '@/services/config/config';
+import { getUriWithOrg, getTopLevelCookieDomain } from '@/services/config/config';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 
 // Session cache with TTL and size limits
@@ -83,6 +83,23 @@ const createCacheKey = (accessToken: string): string => {
   const tokenHash = accessToken.substring(0, 10);
   return `user_session_${tokenHash}`;
 };
+
+const cookieDomain = !isDevEnv ? getTopLevelCookieDomain() : undefined;
+
+const normalizeBoolean = (value?: string | null) => {
+  if (!value) return undefined;
+  const normalized = value.trim().toLowerCase();
+  if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+  if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+  return undefined;
+};
+
+const httpsFlag = normalizeBoolean(process.env.NEXT_PUBLIC_OPENU_HTTPS);
+const sslFlag = normalizeBoolean(process.env.OPENU_SSL);
+const nextAuthUrl = process.env.NEXTAUTH_URL;
+const isHttpsUrl = typeof nextAuthUrl === 'string' && nextAuthUrl.startsWith('https://');
+const cookieSecure = !isDevEnv && (isHttpsUrl || httpsFlag === true || sslFlag === true);
+const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: isDevEnv,
@@ -165,13 +182,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   cookies: {
     sessionToken: {
-      name: `${!isDevEnv ? '__Secure-' : ''}next-auth.session-token`,
+      name: `${cookieNamePrefix}next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: 'lax' as const,
         path: '/',
-        domain: isDevEnv ? undefined : `.${OPENU_TOP_DOMAIN}`,
-        secure: !isDevEnv,
+        domain: cookieDomain ? `.${cookieDomain}` : undefined,
+        secure: cookieSecure,
       },
     },
   },

@@ -5,6 +5,29 @@ export const OPENU_BACKEND_URL = `${process.env.NEXT_PUBLIC_OPENU_BACKEND_URL ||
 export const OPENU_DOMAIN = process.env.NEXT_PUBLIC_OPENU_DOMAIN;
 export const OPENU_TOP_DOMAIN = process.env.NEXT_PUBLIC_OPENU_TOP_DOMAIN;
 
+const isLikelyIPv4 = (host: string) => {
+  if (!host) return false;
+  const parts = host.split('.');
+  if (parts.length !== 4) return false;
+  return parts.every((segment) => {
+    if (!/^(\d{1,3})$/.test(segment)) return false;
+    const value = Number(segment);
+    return value >= 0 && value <= 255;
+  });
+};
+
+const isLikelyIPv6 = (host: string) => host.includes(':');
+
+const isUnsupportedCookieDomain = (host?: string | null) => {
+  if (!host) return true;
+  if (host === 'localhost') return true;
+  if (isLikelyIPv4(host) || isLikelyIPv6(host)) return true;
+  return false;
+};
+
+export const getTopLevelCookieDomain = () =>
+  isUnsupportedCookieDomain(OPENU_TOP_DOMAIN) ? undefined : OPENU_TOP_DOMAIN;
+
 /**
  * Returns the API base URL (always ending with a slash).
  * Falls back to current window origin + /api/v1/ in the browser when env is missing.
