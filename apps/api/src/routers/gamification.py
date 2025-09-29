@@ -264,14 +264,3 @@ async def get_user_rank(
     except Exception as e:
         logger.exception("User rank error for user %s org %s: %s", user.id, org_id, e)
         raise HTTPException(status_code=500, detail="Failed to get user rank")
-
-
-# Backward compatibility endpoints (deprecated)
-@router.get("/dashboard/{org_id}")
-async def get_dashboard_deprecated(
-    org_id: int,
-    user: Annotated[PublicUser, Depends(get_current_user)],
-    db: Annotated[Session, Depends(get_db_session)],
-):
-    """Deprecated: Use GET /{org_id} instead"""
-    return await get_unified_dashboard(org_id, user, db)

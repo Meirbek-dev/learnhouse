@@ -3,7 +3,6 @@
 import { BookOpenCheck, Check, ChevronLeft, ChevronRight, FileText, Layers, Trophy, Video } from 'lucide-react';
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
-// Gamification imports
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
 import { Fragment, useMemo, useState } from 'react';

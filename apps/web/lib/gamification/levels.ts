@@ -1,5 +1,5 @@
-// Shared gamification level utilities (no React hooks here)
-// Centralizes level config, unlocks, and helpers to avoid duplication
+// Shared gamification level utilities
+// Centralizes level config, unlocks, and helpers
 
 export interface LevelInfo {
   level: number;

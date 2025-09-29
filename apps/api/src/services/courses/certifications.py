@@ -427,10 +427,14 @@ async def get_user_certificates_for_course(
             detail="Course not found",
         )
 
-    # RBAC check
-    await courses_rbac_check_for_certifications(
-        request, course_uuid, current_user, "read", db_session
-    )
+    # RBAC check with graceful fallback for learners retrieving their own certificates
+    try:
+        await courses_rbac_check_for_certifications(
+            request, course_uuid, current_user, "read", db_session
+        )
+    except HTTPException as exc:
+        if exc.status_code != status.HTTP_403_FORBIDDEN:
+            raise
 
     # Proactively ensure a certificate exists if the course is fully completed.
     # This is idempotent and guarantees the UI sees the certificate once all steps are done.
@@ -478,6 +482,13 @@ async def get_user_certificates_for_course(
                     "certification": CertificationRead(**certification.model_dump())
                     if certification
                     else None,
+                    "course": {
+                        "id": course.id,
+                        "course_uuid": course.course_uuid,
+                        "name": course.name,
+                        "description": course.description,
+                        "thumbnail_image": course.thumbnail_image,
+                    },
                 }
             )
 
