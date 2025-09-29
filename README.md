@@ -1,16 +1,10 @@
-<p align="center">
-  <a href="https://learnhouse.app">
-    <img src=".github/images/readme.png" height="300">
-  </a>
-</p>
-
-LearnHouse is an open source platform that makes it easy for anyone to provide world-class
+OpenU is an open source platform that makes it easy for anyone to provide world-class
 educational content and it offers a variety of content types : Dynamic Pages, Videos, Documents &
 more..
 
 ## Progress
 
-🚧 LearnHouse is still on early development (alpha), as we reach stability we will release a stable
+🚧 OpenU is still on early development (alpha), as we reach stability we will release a stable
 version and add more features.
 
 ## Roadmap
@@ -23,8 +17,6 @@ prioritize issues by commenting on them and sharing your thoughts
 [👨‍💻 Detailed Roadmap](https://github.com/orgs/learnhouse/projects/4)
 
 ## Overview
-
-![image](https://docs.learnhouse.app/img/pages/features.png)
 
 - 📄✨Dynamic notion-like Blocks-based Courses & editor
 - 🏎️ Easy to use
@@ -41,13 +33,9 @@ prioritize issues by commenting on them and sharing your thoughts
 - 👪 Multiplayer Course edition
 - More to come
 
-## Community
-
-Please visit our [Discord](https://discord.gg/CMyZjjYZ6x) community 👋
-
 ## Contributing
 
-Thank you for you interest 💖, here is how you can help :
+Here is how you can help :
 
 - [Getting Started](/CONTRIBUTING.md)
 - [Developers Quick start](https://docs.learnhouse.app/setup-dev-environment)
@@ -86,18 +74,3 @@ LearnHouse uses a number of open source projects to work properly:
 - **Redis** - In-Memory Database
 - **LangChain** - LangChain is a framework for developing applications powered by language models
 - **React** - duh
-
-## LearnHouse University
-
-<a href="https://tou.edu.kz/ru/">
-<img width="208" alt="lh_univ" src="https://github.com/learnhouse/learnhouse/assets/29493708/72a892cd-7c5a-4437-9130-ff1682a10b24">
-</a>
-
-Learn about LearnHouse and how to use it, using LearnHouse
-
-## A word
-
-Learnhouse is made with 💜, from the UI to the features it is carefully designed to make students
-and teachers lives easier and make education software more enjoyable.
-
-Thank you and have fun using/developing/testing LearnHouse !
