@@ -144,9 +144,17 @@ async def get_user_trail_with_orgid(
     request: Request, user: PublicUser | AnonymousUser, org_id: int, db_session: Session
 ) -> TrailRead:
     if isinstance(user, AnonymousUser):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Anonymous users cannot access this endpoint",
+        # Anonymous visitors can view public trail metadata but never persist data.
+        # Return a consistent empty payload instead of erroring so upstream callers
+        # (SSR sitemap, marketing pages, etc.) do not fail while unauthenticated.
+        return TrailRead(
+            id=None,
+            trail_uuid=None,
+            org_id=org_id,
+            user_id=user.id,
+            creation_date=None,
+            update_date=None,
+            runs=[],
         )
 
     trail = await check_trail_presence(
