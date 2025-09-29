@@ -1,6 +1,7 @@
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
+import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
 
@@ -82,7 +83,7 @@ const ActivityPage = async (params: any) => {
   ]);
 
   return (
-    <div className="font-mono">
+    <div className={jetBrainsMono.variable}>
       <ActivityClient
         activityid={activityid}
         courseuuid={courseuuid}

@@ -160,7 +160,7 @@ const UpdatesSection = () => {
             <span className="text-sm font-semibold text-neutral-600">{t('courseUpdates')}</span>
           </div>
           {updates && updates.length > 0 ? (
-            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
+            <span className="text-nowrap rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
               {updates.length} {updates.length === 1 ? t('update') : t('updates')}
             </span>
           ) : null}
@@ -170,7 +170,7 @@ const UpdatesSection = () => {
             onClick={() => {
               setSelectedView(selectedView === 'new' ? 'list' : 'new');
             }}
-            className={`inline-flex items-center space-x-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
+            className={`ml-2 inline-flex items-center space-x-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
               selectedView === 'new'
                 ? 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
                 : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'

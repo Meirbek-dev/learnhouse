@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
-    ppr: true,
+    ppr: false,
     reactCompiler: true,
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },

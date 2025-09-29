@@ -5,6 +5,7 @@ import AIEditorProvider from '@components/Contexts/AI/AIEditorContext';
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
+import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
 
@@ -52,7 +53,7 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
   );
 
   return (
-    <div className="font-mono">
+    <div className={jetBrainsMono.variable}>
       <EditorOptionsProvider options={{ isEditable: true }}>
         <AIEditorProvider>
           <EditorWrapper

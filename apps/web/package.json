@@ -81,7 +81,7 @@
     "katex": "^0.16.22",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.544.0",
-    "next": "15.6.0-canary.32",
+    "next": "15.6.0-canary.33",
     "next-auth": "5.0.0-beta.29",
     "next-intl": "4.3.9",
     "nextjs-toploader": "^3.9.17",
