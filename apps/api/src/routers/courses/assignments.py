@@ -285,9 +285,17 @@ async def api_read_user_assignment_task_submissions(
     """
     Read task submissions for an assignment from a user
     """
-    return await read_user_assignment_task_submissions(
+    result = await read_user_assignment_task_submissions(
         request, assignment_task_uuid, user_id, current_user, db_session
     )
+
+    if result is None:
+        return {
+            "assignment_task_submission_uuid": None,
+            "task_submission": None,
+        }
+
+    return result
 
 
 @router.get("/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/me")
@@ -298,17 +306,22 @@ async def api_read_user_assignment_task_submissions_me(
     db_session=Depends(get_db_session),
 ):
     """
-    Read task submissions for an assignment from a user
+    Read task submissions for an assignment from the current user.
+
+    Returns an empty payload instead of a 404 when no submission exists yet.
+    This avoids treating the "not submitted" state as an error both in the API
+    and in upstream logging.
     """
     result = await read_user_assignment_task_submissions_me(
         request, assignment_task_uuid, current_user, db_session
     )
 
     if result is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Assignment Task Submission not found",
-        )
+        return {
+            "assignment_task_submission_uuid": None,
+            "task_submission": None,
+        }
+
     return result
 
 

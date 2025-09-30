@@ -3,7 +3,7 @@ import logging
 import os
 from collections.abc import Iterator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import QueuePool
@@ -255,6 +255,11 @@ def get_db_session() -> Iterator[Session]:
         session = Session(db_engine)
         try:
             yield session
+        except HTTPException:
+            # Business-level errors are expected; avoid noisy logs while still
+            # rolling back any pending transaction.
+            session.rollback()
+            raise
         except Exception as e:
             logger.exception(f"Database session error: {e}")
             session.rollback()
