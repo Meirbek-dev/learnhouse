@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import NextAuth from 'next-auth';
@@ -79,8 +80,10 @@ const isTokenExpiringSoon = (expiry: number, bufferMs: number = TOKEN_REFRESH_BU
 
 // Helper function to create cache key
 const createCacheKey = (accessToken: string): string => {
-  // Use a portion of the token to avoid storing full tokens in cache keys
-  const tokenHash = accessToken.substring(0, 10);
+  if (!accessToken) return 'user_session_anonymous';
+
+  // Hash the full token to avoid collisions while still not storing raw tokens.
+  const tokenHash = createHash('sha256').update(accessToken).digest('hex');
   return `user_session_${tokenHash}`;
 };
 
