@@ -1,12 +1,21 @@
+import logging
 from datetime import datetime
 from typing import Literal
 
 from fastapi import HTTPException, Request, UploadFile, status
+from pydantic import ValidationError
 from sqlmodel import Session, select
 from ulid import ULID
 
 from src.db.organizations import Organization, OrganizationRead
-from src.db.roles import Role, RoleRead
+from src.db.roles import (
+    DashboardPermission,
+    Permission,
+    PermissionsWithOwn,
+    Rights,
+    Role,
+    RoleRead,
+)
 from src.db.user_organizations import UserOrganization
 from src.db.users import (
     AnonymousUser,
@@ -34,6 +43,9 @@ from src.services.users.usergroups import add_users_to_usergroup
 
 # Rebuild user models to resolve forward references after all imports
 rebuild_user_models()
+
+
+logger = logging.getLogger(__name__)
 
 
 async def create_user(
@@ -291,8 +303,8 @@ async def get_user_session(
         if role and org:
             roles.append(
                 UserRoleWithOrg(
-                    role=RoleRead.model_validate(role),
-                    org=OrganizationRead.model_validate(org),
+                    role=_safe_role_read(role),
+                    org=_safe_organization_read(org),
                 )
             )
 
@@ -423,6 +435,138 @@ async def _create_and_validate_user(
     db_session.refresh(user)
 
     return user
+
+
+def _normalize_permission_schema(data: Permission | dict | None) -> Permission:
+    """Ensure permission payload contains all required keys."""
+    if isinstance(data, Permission):
+        return data
+
+    normalized = {
+        "action_create": False,
+        "action_read": False,
+        "action_update": False,
+        "action_delete": False,
+    }
+
+    if isinstance(data, dict):
+        for key in normalized:
+            if key in data:
+                normalized[key] = bool(data[key])
+
+    return Permission(**normalized)
+
+
+def _normalize_permissions_with_own_schema(
+    data: PermissionsWithOwn | dict | None,
+) -> PermissionsWithOwn:
+    """Ensure permissions-with-own payload contains all required keys."""
+    if isinstance(data, PermissionsWithOwn):
+        return data
+
+    normalized = {
+        "action_create": False,
+        "action_read": False,
+        "action_read_own": False,
+        "action_update": False,
+        "action_update_own": False,
+        "action_delete": False,
+        "action_delete_own": False,
+    }
+
+    if isinstance(data, dict):
+        for key in normalized:
+            if key in data:
+                normalized[key] = bool(data[key])
+
+    return PermissionsWithOwn(**normalized)
+
+
+def _normalize_dashboard_permission_schema(
+    data: DashboardPermission | dict | None,
+) -> DashboardPermission:
+    """Ensure dashboard permission payload is well formed."""
+    if isinstance(data, DashboardPermission):
+        return data
+
+    normalized = {"action_access": False}
+
+    if isinstance(data, dict) and "action_access" in data:
+        normalized["action_access"] = bool(data["action_access"])
+
+    return DashboardPermission(**normalized)
+
+
+def _normalize_rights_schema(rights: Rights | dict | None) -> Rights:
+    """Normalize rights payload to satisfy RoleRead validation."""
+    if isinstance(rights, Rights):
+        return rights
+
+    rights_data: dict = {}
+    if isinstance(rights, dict):
+        rights_data = rights
+
+    return Rights(
+        courses=_normalize_permissions_with_own_schema(rights_data.get("courses")),
+        users=_normalize_permission_schema(rights_data.get("users")),
+        usergroups=_normalize_permission_schema(rights_data.get("usergroups")),
+        collections=_normalize_permission_schema(rights_data.get("collections")),
+        organizations=_normalize_permission_schema(rights_data.get("organizations")),
+        coursechapters=_normalize_permission_schema(rights_data.get("coursechapters")),
+        activities=_normalize_permission_schema(rights_data.get("activities")),
+        roles=_normalize_permission_schema(rights_data.get("roles")),
+        dashboard=_normalize_dashboard_permission_schema(rights_data.get("dashboard")),
+    )
+
+
+def _safe_role_read(role: Role) -> RoleRead:
+    """Convert Role to RoleRead with graceful degradation on legacy payloads."""
+    try:
+        return RoleRead.model_validate(role)
+    except ValidationError as exc:  # pragma: no cover - defensive path
+        logger.warning(
+            "Role validation failed for role_id=%s. Attempting rights normalization. Error: %s",
+            getattr(role, "id", None),
+            exc,
+        )
+
+        normalized_role = role.model_dump()
+        normalized_role["rights"] = _normalize_rights_schema(normalized_role.get("rights"))
+
+        try:
+            return RoleRead.model_validate(normalized_role)
+        except ValidationError as fallback_exc:  # pragma: no cover - defensive path
+            logger.error(
+                "Role normalization failed for role_id=%s. Falling back to default rights. Error: %s",
+                getattr(role, "id", None),
+                fallback_exc,
+            )
+
+            return RoleRead.model_construct(  # type: ignore[arg-type]
+                name=role.name,
+                description=role.description,
+                rights=_normalize_rights_schema(getattr(role, "rights", None)),
+                org_id=role.org_id,
+                role_type=role.role_type,
+                role_uuid=role.role_uuid,
+                creation_date=role.creation_date,
+                update_date=role.update_date,
+                id=role.id,
+            )
+
+
+def _safe_organization_read(org: Organization) -> OrganizationRead:
+    """Convert Organization to OrganizationRead, tolerating legacy fields."""
+    try:
+        return OrganizationRead.model_validate(org)
+    except ValidationError as exc:  # pragma: no cover - defensive path
+        logger.warning(
+            "Organization validation failed for org_id=%s. Using best-effort fallback. Error: %s",
+            getattr(org, "id", None),
+            exc,
+        )
+
+        return OrganizationRead.model_construct(**org.model_dump())
 
 
 async def _link_user_to_organization(
