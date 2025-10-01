@@ -45,6 +45,15 @@ export const getAPIUrl = () => {
   if (!base) {
     // Last-resort sensible default for local dev
     base = 'http://localhost:1338/api/v1/';
+
+    // Warn in server context when using fallback
+    if (typeof window === 'undefined') {
+      console.warn(
+        '[Config] Using fallback API URL in server context. ' +
+        'Please set NEXT_PUBLIC_OPENU_API_URL environment variable. ' +
+        `Current fallback: ${base}`
+      );
+    }
   }
 
   // Ensure trailing slash

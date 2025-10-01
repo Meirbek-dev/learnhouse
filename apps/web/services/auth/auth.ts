@@ -386,6 +386,9 @@ export async function getNewAccessTokenUsingRefreshTokenServer(refreshToken: str
     throw createAuthError('Refresh token is required', 400, 'MISSING_REFRESH_TOKEN');
   }
 
+  const apiUrl = getAPIUrl();
+  const fullUrl = `${apiUrl}${AUTH_ENDPOINTS.refresh}`;
+
   try {
     const headers = createHeaders('application/json', {
       Cookie: `refresh_token_cookie=${refreshToken.trim()}`,
@@ -399,13 +402,29 @@ export async function getNewAccessTokenUsingRefreshTokenServer(refreshToken: str
       cache: 'no-cache',
     };
 
-    const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.refresh}`, requestOptions);
+    console.log('[Auth] Attempting token refresh at:', fullUrl);
+    const response = await fetch(fullUrl, requestOptions);
+
+    if (!response.ok) {
+      console.error('[Auth] Token refresh failed:', response.status, response.statusText);
+    }
+
     return await handleAuthResponse<AuthTokens>(response, 'refresh token server');
   } catch (error) {
+    console.error('[Auth] Token refresh error:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      apiUrl,
+      fullUrl,
+    });
+
     if (error instanceof Error) {
       // Re-throw AuthError instances
       if ('status' in error) throw error;
-      throw createAuthError(`Server token refresh failed: ${error.message}`, undefined, 'SERVER_TOKEN_REFRESH_ERROR');
+      throw createAuthError(
+        `Server token refresh failed: ${error.message} (URL: ${fullUrl})`,
+        undefined,
+        'SERVER_TOKEN_REFRESH_ERROR'
+      );
     }
     throw createAuthError('Unknown server token refresh error', undefined, 'UNKNOWN_ERROR');
   }
