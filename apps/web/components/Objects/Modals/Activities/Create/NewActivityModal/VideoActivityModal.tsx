@@ -28,14 +28,13 @@ import { useCallback, useMemo, useState } from 'react';
 import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
+import { cn, generateUUID } from '@/lib/utils';
 import * as Form from '@radix-ui/react-form';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { generateUUID } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
-import { cn } from '@/lib/utils';
 
 const SUPPORTED_VIDEO_FILES = constructAcceptValue(['mp4', 'mkv', 'webm']);
 const SUPPORTED_SUBTITLE_FILES = constructAcceptValue(['srt', 'vtt']);

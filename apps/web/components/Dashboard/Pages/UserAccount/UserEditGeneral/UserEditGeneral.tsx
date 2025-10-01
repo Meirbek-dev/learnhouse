@@ -33,6 +33,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { ChangeEvent, ElementType } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
+import { ThemeSelector } from '@/lib/theme-system';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@components/ui/button';
 import { getUserLocale } from '@/i18n/locale';
@@ -412,6 +413,9 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                 </FormItem>
               )}
             />
+
+            {/* Theme Selector */}
+            <ThemeSelector className="border-t pt-6" />
 
             <div className="space-y-4">
               <div className="flex flex-col gap-3">

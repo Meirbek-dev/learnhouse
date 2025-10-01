@@ -63,7 +63,7 @@ export const AVATAR_UNLOCKS = {
 export function getLevelInfo(level: number, t: (key: string) => string): LevelInfo {
   const availableLevels = Object.keys(LEVEL_CONFIG)
     .map(Number)
-    .sort((a, b) => b - a);
+    .toSorted((a, b) => b - a);
   const currentLevelConfig = availableLevels.find((configLevel) => level >= configLevel) || 1;
   const baseConfig = LEVEL_CONFIG[currentLevelConfig]!;
 

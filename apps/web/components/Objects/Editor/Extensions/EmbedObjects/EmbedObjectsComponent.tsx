@@ -15,7 +15,7 @@ import {
   SiX,
   SiYoutube,
 } from '@icons-pack/react-simple-icons';
-import type { CSSProperties, ChangeEvent, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
+import type { ChangeEvent, CSSProperties, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { AlignCenter, Code, GripHorizontal, GripVertical, Link as LinkIcon } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';

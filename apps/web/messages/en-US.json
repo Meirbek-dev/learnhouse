@@ -4011,6 +4011,10 @@
         "email": "Email",
         "emailChangeWarning": "Changing your email will require you to sign in again",
         "emailPlaceholder": "Enter your email",
+        "themeSelector": {
+          "title": "Color Theme",
+          "beta": "BETA"
+        },
         "firstName": "First Name",
         "firstNamePlaceholder": "Enter your first name",
         "language": "Language",
@@ -4546,6 +4550,176 @@
     "sunrise": "Sunrise",
     "sunset_blaze": "Sunset Blaze",
     "volcanic": "Volcanic"
+  },
+  "Themes": {
+    "default": {
+      "name": "Default",
+      "description": "The default OpenU theme"
+    },
+    "black": {
+      "name": "Black",
+      "description": "Minimalistic black and white theme"
+    },
+    "amberminimal": {
+      "name": "Amber Minimal",
+      "description": "Minimalistic amber theme"
+    },
+    "amethysthaze": {
+      "name": "Amethyst Haze",
+      "description": "Soft purple haze theme with amethyst accents"
+    },
+    "boldtech": {
+      "name": "Bold Tech",
+      "description": "Bold purple tech theme with vibrant accents"
+    },
+    "bubblegum": {
+      "name": "Bubblegum",
+      "description": "Playful pink bubblegum theme with flat shadows"
+    },
+    "caffeine": {
+      "name": "Caffeine",
+      "description": "Warm coffee-inspired theme with rich brown tones"
+    },
+    "candyland": {
+      "name": "Candyland",
+      "description": "Sweet candy-colored theme with pastel rainbow accents"
+    },
+    "catppuccin": {
+      "name": "Catppuccin",
+      "description": "Soothing pastel theme inspired by Catppuccin color palette"
+    },
+    "claude": {
+      "name": "Claude",
+      "description": "Warm beige theme inspired by Claude AI with copper accents"
+    },
+    "claymorphism": {
+      "name": "Claymorphism",
+      "description": "Soft clay-textured theme with prominent rounded corners and depth"
+    },
+    "cleanSlate": {
+      "name": "Clean Slate",
+      "description": "Crisp minimalist theme with clean neutral tones"
+    },
+    "cosmicnight": {
+      "name": "Cosmic Night",
+      "description": "Deep purple cosmic theme with starry night aesthetics"
+    },
+    "cyberpunk": {
+      "name": "Cyberpunk",
+      "description": "Neon-infused futuristic theme with vibrant pink and cyan accents"
+    },
+    "darkmatter": {
+      "name": "Darkmatter",
+      "description": "Deep space theme with mysterious dark matter aesthetics and golden accents"
+    },
+    "doom64": {
+      "name": "Doom 64",
+      "description": "Retro gaming theme inspired by Doom 64 with sharp corners and bold colors"
+    },
+    "elegantLuxury": {
+      "name": "Elegant Luxury",
+      "description": "Sophisticated luxury theme with elegant cream tones and rich mahogany accents"
+    },
+    "graphite": {
+      "name": "Graphite",
+      "description": "Professional monochrome theme with smooth graphite gray tones"
+    },
+    "kodamaGrave": {
+      "name": "Kodama Grave",
+      "description": "Nature-inspired theme with peaceful forest green and earthy tones"
+    },
+    "midnightBloom": {
+      "name": "Midnight Bloom",
+      "description": "Elegant nighttime theme with rich purple blooms and soft shadows"
+    },
+    "mochaMousse": {
+      "name": "Mocha Mousse",
+      "description": "Warm coffee-inspired theme with rich mocha and cream tones"
+    },
+    "mono": {
+      "name": "Mono",
+      "description": "Ultra-minimal monochrome theme with pure black and white, no shadows"
+    },
+    "nature": {
+      "name": "Nature",
+      "description": "Fresh nature-inspired theme with organic green tones and earthy accents"
+    },
+    "neoBrutalism": {
+      "name": "Neo Brutalism",
+      "description": "Bold brutalist design with thick black borders and strong shadows"
+    },
+    "northernLights": {
+      "name": "Northern Lights",
+      "description": "Magical aurora borealis theme with ethereal green and purple gradients"
+    },
+    "notebook": {
+      "name": "Notebook",
+      "description": "Paper notebook theme with ruled lines aesthetic and handwritten font style"
+    },
+    "oceanBreeze": {
+      "name": "Ocean Breeze",
+      "description": "Refreshing ocean-inspired theme with cool turquoise and seafoam tones"
+    },
+    "pastelDreams": {
+      "name": "Pastel Dreams",
+      "description": "Dreamy pastel theme with soft lavender and pink cotton candy colors"
+    },
+    "perpetuity": {
+      "name": "Perpetuity",
+      "description": "Timeless monospace terminal theme with cyan-tinted blue aesthetics"
+    },
+    "quantumRose": {
+      "name": "Quantum Rose",
+      "description": "Futuristic rose-tinted theme with quantum-inspired pink and magenta hues"
+    },
+    "retroArcade": {
+      "name": "Retro Arcade",
+      "description": "Bold neon-inspired palette with playful contrasts, evoking the vibrant glow of 80s arcades"
+    },
+    "softPop": {
+      "name": "Soft Pop",
+      "description": "Bright, bubbly theme with pastel accents and clean contrasts for a playful yet modern look"
+    },
+    "solarDusk": {
+      "name": "Solar Dusk",
+      "description": "Warm, golden tones fading into deep shadows—captures the calm glow of dusk before nightfall"
+    },
+    "starryNight": {
+      "name": "Starry Night",
+      "description": "Deep midnight blues and luminous highlights, evoking a tranquil star-filled night sky"
+    },
+    "sunsetHorizon": {
+      "name": "Sunset Horizon",
+      "description": "Radiant oranges and glowing ambers that reflect the warmth of a summer sunset on the horizon"
+    },
+    "supabase": {
+      "name": "Supabase",
+      "description": "Clean minimalism with fresh green accents, inspired by the signature Supabase brand identity"
+    },
+    "t3chat": {
+      "name": "T3 Chat",
+      "description": "Modern chat-inspired design with vibrant magentas and cool contrasts for lively conversations"
+    },
+    "tangerine": {
+      "name": "Tangerine",
+      "description": "Juicy citrus tones blended with cool accents, delivering a fresh and energetic aesthetic"
+    },
+    "twitter": {
+      "name": "Twitter",
+      "description": "Clean whites with iconic Twitter blue highlights, optimized for clarity and social interaction"
+    },
+    "vercel": {
+      "name": "Vercel",
+      "description": "Minimalist monochrome design with sharp contrasts, reflecting Vercel's sleek and modern aesthetic"
+    },
+    "vintagePaper": {
+      "name": "Vintage Paper",
+      "description": "Soft parchment tones with muted contrasts, evoking the warmth and texture of aged paper"
+    },
+    "violetBloom": {
+      "name": "Violet Bloom",
+      "description": "Radiant purples with soft highlights, capturing the elegance and freshness of blooming violets"
+    }
   },
   "Header": {
     "adminBadge": "ADMIN",

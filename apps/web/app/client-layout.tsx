@@ -2,6 +2,7 @@
 
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 import LHSessionProvider from '@components/Contexts/LHSessionContext';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SessionProvider } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
@@ -30,17 +31,19 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       refetchWhenOffline={false}
     >
       <LHSessionProvider>
-        <StyledComponentsRegistry>
-          <motion.main
-            variants={variants}
-            initial="hidden"
-            animate="enter"
-            exit="exit"
-            transition={pageTransition}
-          >
-            {children}
-          </motion.main>
-        </StyledComponentsRegistry>
+        <ThemeProvider>
+          <StyledComponentsRegistry>
+            <motion.main
+              variants={variants}
+              initial="hidden"
+              animate="enter"
+              exit="exit"
+              transition={pageTransition}
+            >
+              {children}
+            </motion.main>
+          </StyledComponentsRegistry>
+        </ThemeProvider>
       </LHSessionProvider>
     </SessionProvider>
   );

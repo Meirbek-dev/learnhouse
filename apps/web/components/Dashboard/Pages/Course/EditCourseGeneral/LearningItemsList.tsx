@@ -196,7 +196,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
   // Restore focus after re-render if an item was focused
   useEffect(() => {
-    if (!focusedItemId || !isMountedRef.current) return;
+    if (!(focusedItemId && isMountedRef.current)) return;
 
     const timeoutId = setTimeout(() => {
       if (!isMountedRef.current) return;

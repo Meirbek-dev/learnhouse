@@ -212,13 +212,13 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
       <CardFooter className="p-4 pt-0">
         {isEnrolled ? (
           <div className="w-full space-y-2">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="text-muted-foreground flex items-center justify-between text-xs">
               <span>{t('progress', { defaultValue: 'Progress' })}</span>
               <span className="font-semibold">{progressPercentage}%</span>
             </div>
-            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
               <div
-                className="h-full bg-primary transition-all duration-300"
+                className="bg-primary h-full transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>

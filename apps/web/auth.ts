@@ -56,7 +56,7 @@ const getSessionCache = () => {
       // If still over limit, remove oldest entries
       if (cache.size > MAX_CACHE_SIZE) {
         const sortedEntries = entries
-          .sort((a, b) => a[1].timestamp - b[1].timestamp)
+          .toSorted((a, b) => a[1].timestamp - b[1].timestamp)
           .slice(0, cache.size - MAX_CACHE_SIZE);
 
         for (const [key] of sortedEntries) {
