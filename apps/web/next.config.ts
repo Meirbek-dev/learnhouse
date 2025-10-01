@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
     ppr: false,
     reactCompiler: true,
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
+    turbo: {
+      root: '../../',
+    },
   },
   compiler: {
     styledComponents: true,

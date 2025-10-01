@@ -2,6 +2,13 @@
   "name": "openu",
   "packageManager": "pnpm@10.17.1",
   "private": true,
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.1.16",
+      "@types/react-dom": "19.1.9",
+      "react-is": "^19.1.1"
+    }
+  },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
