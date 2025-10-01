@@ -75,8 +75,8 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData
   const isEnrolled = !!courseRun;
 
   // Use course_total_steps from the run (backend provides this) or fallback to counting from chapters
-  const totalActivities = courseRun?.course_total_steps ||
-    course.chapters?.reduce((acc, chapter) => acc + chapter.activities.length, 0) || 0;
+  const totalActivities =
+    courseRun?.course_total_steps || course.chapters?.reduce((acc, chapter) => acc + chapter.activities.length, 0) || 0;
 
   // Count completed steps - filter by complete === true
   const completedActivities = courseRun?.steps?.filter((step: any) => step.complete === true)?.length || 0;

@@ -9,8 +9,8 @@ import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { swrFetcher } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -81,7 +81,7 @@ const Courses = (props: CourseProps) => {
   // Fetch trail data to show progress on course thumbnails
   const { data: trailData } = useSWR(
     org?.id && access_token ? `${getAPIUrl()}trail/org/${org.id}/trail` : null,
-    (url) => swrFetcher(url, access_token)
+    (url) => swrFetcher(url, access_token),
   );
 
   async function closeNewCourseModal() {

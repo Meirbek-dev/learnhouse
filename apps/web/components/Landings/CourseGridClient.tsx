@@ -2,8 +2,8 @@
 
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { swrFetcher } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import useSWR from 'swr';
 
@@ -20,7 +20,7 @@ export default function CourseGridClient({ courses, orgslug }: CourseGridClientP
   // Fetch trail data to show progress on course thumbnails
   const { data: trailData } = useSWR(
     org?.id && access_token ? `${getAPIUrl()}trail/org/${org.id}/trail` : null,
-    (url) => swrFetcher(url, access_token)
+    (url) => swrFetcher(url, access_token),
   );
 
   return (

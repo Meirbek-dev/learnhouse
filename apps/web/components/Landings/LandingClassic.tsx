@@ -7,9 +7,9 @@ import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlace
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import LearnerDashboardServer from '@components/Dashboard/LearnerDashboard.server';
 import { getUriWithOrg } from '@services/config/config';
+import CourseGridClient from './CourseGridClient';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import CourseGridClient from './CourseGridClient';
 
 interface LandingClassicProps {
   courses: any[];

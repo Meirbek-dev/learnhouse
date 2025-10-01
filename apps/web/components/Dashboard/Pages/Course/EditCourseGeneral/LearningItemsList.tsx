@@ -6,6 +6,7 @@ import { Link as LinkIcon, Plus, X } from 'lucide-react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
+import { generateUUID } from '@/lib/utils';
 
 interface LearningItem {
   id: string;
@@ -19,15 +20,6 @@ interface LearningItemsListProps {
   onChange: (value: string) => void;
   error?: string;
 }
-
-// Generate unique IDs using crypto API or fallback
-const generateUniqueId = (): string => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  // Fallback for environments without crypto.randomUUID
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-};
 
 const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) => {
   const [items, setItems] = useState<LearningItem[]>([]);
@@ -66,7 +58,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           const newStandardizedItems: LearningItem[] = parsedItems.map((item: unknown) => {
             const safeItem = item as Partial<LearningItem>;
             return {
-              id: safeItem.id || generateUniqueId(),
+              id: safeItem.id || generateUUID(),
               text: safeItem.text ?? '',
               emoji: safeItem.emoji || '📝',
               link: safeItem.link || undefined,
@@ -85,7 +77,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         } else {
           // Invalid array or empty - initialize with default
           const defaultItem: LearningItem = {
-            id: generateUniqueId(),
+            id: generateUUID(),
             text: '',
             emoji: '📝',
           };
@@ -96,7 +88,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       } else {
         // No value provided - initialize with default
         const defaultItem: LearningItem = {
-          id: generateUniqueId(),
+          id: generateUUID(),
           text: '',
           emoji: '📝',
         };
@@ -108,7 +100,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       console.error('Error parsing learning items:', error);
       // Fallback to default item on error
       const defaultItem: LearningItem = {
-        id: generateUniqueId(),
+        id: generateUUID(),
         text: '',
         emoji: '📝',
       };
@@ -121,7 +113,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   // Add a new empty item
   const addItem = useCallback(() => {
     const newItem: LearningItem = {
-      id: generateUniqueId(),
+      id: generateUUID(),
       text: '',
       emoji: '📝',
     };

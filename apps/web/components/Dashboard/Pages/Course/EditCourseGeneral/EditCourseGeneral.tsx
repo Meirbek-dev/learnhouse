@@ -13,9 +13,10 @@ import { Textarea } from '@components/ui/textarea';
 import ThumbnailUpdate from './ThumbnailUpdate';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
+import { generateUUID } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 
-const generateId = () => crypto.randomUUID();
+const generateId = () => generateUUID();
 
 interface EditCourseStructureProps {
   orgslug: string;

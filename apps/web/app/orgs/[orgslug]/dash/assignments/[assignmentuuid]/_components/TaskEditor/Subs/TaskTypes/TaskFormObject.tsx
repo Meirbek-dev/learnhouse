@@ -1,3 +1,5 @@
+'use client';
+
 import {
   getAssignmentTask,
   getAssignmentTaskSubmissionsMe,
@@ -15,6 +17,7 @@ import { Check, Info, Minus, Plus, PlusCircle, Type, X } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { generateUUID } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 interface FormSchema {
@@ -58,13 +61,13 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       ? [
           {
             questionText: '',
-            questionUUID: `question_${crypto.randomUUID()}`,
+            questionUUID: `question_${generateUUID()}`,
             blanks: [
               {
                 placeholder: t('blankPlaceholder'),
                 correctAnswer: '',
                 hint: '',
-                blankUUID: `blank_${crypto.randomUUID()}`,
+                blankUUID: `blank_${generateUUID()}`,
               },
             ],
           },
@@ -100,7 +103,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         placeholder: t('blankPlaceholder'),
         correctAnswer: '',
         hint: '',
-        blankUUID: `blank_${crypto.randomUUID()}`,
+        blankUUID: `blank_${generateUUID()}`,
       });
       setQuestions(updatedQuestions);
     }
@@ -121,13 +124,13 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       ...questions,
       {
         questionText: '',
-        questionUUID: `question_${crypto.randomUUID()}`,
+        questionUUID: `question_${generateUUID()}`,
         blanks: [
           {
             placeholder: t('blankPlaceholder'),
             correctAnswer: '',
             hint: '',
-            blankUUID: `blank_${crypto.randomUUID()}`,
+            blankUUID: `blank_${generateUUID()}`,
           },
         ],
       },

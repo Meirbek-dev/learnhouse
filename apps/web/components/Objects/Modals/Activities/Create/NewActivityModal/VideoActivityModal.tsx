@@ -1,3 +1,5 @@
+'use client';
+
 import {
   AlertCircle,
   AlertTriangle,
@@ -31,6 +33,7 @@ import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
+import { generateUUID } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 
@@ -200,7 +203,7 @@ const SubtitleManager = ({
         return;
       }
 
-      const fileId = crypto.randomUUID();
+      const fileId = generateUUID();
       setUploadingFiles((prev) => [...prev, fileId]);
 
       try {

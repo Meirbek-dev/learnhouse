@@ -5,6 +5,7 @@ import { BadgeHelp, Check, Minus, Plus, RefreshCcw } from 'lucide-react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import ReactConfetti from 'react-confetti';
+import { generateUUID } from '@/lib/utils';
 import { twMerge } from 'tailwind-merge';
 import { useState } from 'react';
 
@@ -96,12 +97,12 @@ const QuizBlockComponent = (props: any) => {
   };
   const addSampleQuestion = () => {
     const newQuestion = {
-      question_id: crypto.randomUUID(),
+      question_id: generateUUID(),
       question: '',
       type: 'multiple_choice',
       answers: [
         {
-          answer_id: crypto.randomUUID(),
+          answer_id: generateUUID(),
           answer: '',
           correct: false,
         },
@@ -112,7 +113,7 @@ const QuizBlockComponent = (props: any) => {
 
   const addAnswer = (question_id: string) => {
     const newAnswer = {
-      answer_id: crypto.randomUUID(),
+      answer_id: generateUUID(),
       answer: '',
       correct: false,
     };
