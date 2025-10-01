@@ -6,11 +6,16 @@ import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCours
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl } from '@services/config/config';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import useSWR from 'swr';
 
 interface CourseProps {
   orgslug: string;
@@ -45,7 +50,7 @@ const EmptyStateMessage = ({ isUserAdmin, t, newCourseButtonTrigger }: any) => (
   </div>
 );
 
-const CourseGrid = ({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
+const CourseGrid = ({ courses, orgslug, trailData }: { courses: any[]; orgslug: string; trailData?: any }) => (
   <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
     {courses.map((course: any) => (
       <div
@@ -55,6 +60,7 @@ const CourseGrid = ({ courses, orgslug }: { courses: any[]; orgslug: string }) =
         <CourseThumbnail
           course={course}
           orgslug={orgslug}
+          trailData={trailData}
         />
       </div>
     ))}
@@ -68,6 +74,15 @@ const Courses = (props: CourseProps) => {
   const isCreatingCourse = Boolean(searchParams.get('new'));
   const [newCourseModal, setNewCourseModal] = useState(isCreatingCourse);
   const isUserAdmin = useAdminStatus();
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
+  const access_token = session?.data?.tokens?.access_token;
+
+  // Fetch trail data to show progress on course thumbnails
+  const { data: trailData } = useSWR(
+    org?.id && access_token ? `${getAPIUrl()}trail/org/${org.id}/trail` : null,
+    (url) => swrFetcher(url, access_token)
+  );
 
   async function closeNewCourseModal() {
     setNewCourseModal(false);
@@ -126,6 +141,7 @@ const Courses = (props: CourseProps) => {
             <CourseGrid
               courses={courses}
               orgslug={orgslug}
+              trailData={trailData}
             />
           )}
         </div>

@@ -573,6 +573,7 @@
     "CourseThumbnail": {
       "authorLabel": "{count, plural, one {Автор} other {Авторлар}}",
       "authors": "Авторлар",
+      "continueLearning": "Оқуды жалғастыру",
       "courseOptions": "Курстың нұсқалары",
       "courseThumbnailAlt": "Курс эскизі {{joursename}",
       "delete": "Курсты жою",
@@ -582,6 +583,7 @@
       "deleting": "Жойылуда...",
       "editContent": "Мазмұнды өңдеу",
       "noThumbnailAlt": "Әдепкі курстық нобай",
+      "progress": "Прогресс",
       "settings": "Параметрлер",
       "startLearning": "Оқуды бастау",
       "startLearningButton": "Оқуды бастау",

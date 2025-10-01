@@ -6,10 +6,10 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import LearnerDashboardServer from '@components/Dashboard/LearnerDashboard.server';
-import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import CourseGridClient from './CourseGridClient';
 
 interface LandingClassicProps {
   courses: any[];
@@ -91,21 +91,7 @@ const CollectionGrid = ({ collections, orgslug, org_id }: { collections: any[]; 
   </div>
 );
 
-const CourseGrid = ({ courses, orgslug }: { courses: any[]; orgslug: string }) => (
-  <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
-    {courses.map((course: any) => (
-      <div
-        key={course.course_uuid}
-        className="flex justify-center"
-      >
-        <CourseThumbnail
-          course={course}
-          orgslug={orgslug}
-        />
-      </div>
-    ))}
-  </div>
-);
+// CourseGrid component is now extracted to CourseGridClient.tsx
 
 const LandingClassic = ({
   courses,
@@ -155,7 +141,7 @@ const LandingClassic = ({
           {courses.length === 0 ? (
             <EmptyCoursesState t={t} />
           ) : (
-            <CourseGrid
+            <CourseGridClient
               courses={courses}
               orgslug={orgslug}
             />

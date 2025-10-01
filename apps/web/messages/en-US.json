@@ -573,6 +573,7 @@
     "CourseThumbnail": {
       "authorLabel": "{count, plural, one {Author} other {Authors}}",
       "authors": "Authors",
+      "continueLearning": "Continue Learning",
       "courseOptions": "Course options",
       "courseThumbnailAlt": "Course thumbnail for {courseName}",
       "delete": "Delete course",
@@ -582,6 +583,7 @@
       "deleting": "Deleting course...",
       "editContent": "Edit content",
       "noThumbnailAlt": "Default course thumbnail",
+      "progress": "Progress",
       "settings": "Settings",
       "startLearning": "Start Learning",
       "startLearningButton": "Start Learning",

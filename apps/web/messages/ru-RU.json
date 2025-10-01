@@ -573,6 +573,7 @@
     "CourseThumbnail": {
       "authorLabel": "{count, plural, one {Автор} other {Авторы}}",
       "authors": "Авторы",
+      "continueLearning": "Продолжить обучение",
       "courseOptions": "Опции курса",
       "courseThumbnailAlt": "Миниатюра курса {courseName}",
       "delete": "Удалить курс",
@@ -582,6 +583,7 @@
       "deleting": "Удаление курса...",
       "editContent": "Редактировать содержание",
       "noThumbnailAlt": "Миниатюра курса по умолчанию",
+      "progress": "Прогресс",
       "settings": "Настройки",
       "startLearning": "Начать обучение",
       "startLearningButton": "Начать обучение",

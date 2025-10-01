@@ -40,17 +40,21 @@ export interface Course {
     authorship: 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER';
     authorship_status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
   }[];
+  chapters?: {
+    activities: any[];
+  }[];
 }
 
 export interface PropsType {
   course: Course;
   orgslug: string;
   customLink?: string;
+  trailData?: any;
 }
 
 export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('course_', '');
 
-const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsType) => {
+const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink, trailData }: PropsType) => {
   const t = useTranslations('Components.CourseThumbnail');
   const locale = useLocale();
   const router = useRouter();
@@ -61,6 +65,35 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
   const displayedAuthors = activeAuthors.slice(0, 3);
   const hasMoreAuthors = activeAuthors.length > 3;
   const remainingAuthorsCount = activeAuthors.length - 3;
+
+  // Calculate enrollment and progress
+  const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+  const courseRun = trailData?.runs?.find((run: any) => {
+    const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
+    return cleanRunCourseUuid === cleanCourseUuid;
+  });
+  const isEnrolled = !!courseRun;
+
+  // Use course_total_steps from the run (backend provides this) or fallback to counting from chapters
+  const totalActivities = courseRun?.course_total_steps ||
+    course.chapters?.reduce((acc, chapter) => acc + chapter.activities.length, 0) || 0;
+
+  // Count completed steps - filter by complete === true
+  const completedActivities = courseRun?.steps?.filter((step: any) => step.complete === true)?.length || 0;
+  const progressPercentage = totalActivities > 0 ? Math.round((completedActivities / totalActivities) * 100) : 0;
+
+  // Debug logging (can be removed after verification)
+  if (isEnrolled && typeof window !== 'undefined') {
+    console.log(`[CourseThumbnail Debug] Course: ${course.name}`, {
+      cleanCourseUuid,
+      isEnrolled,
+      totalActivities,
+      completedActivities,
+      progressPercentage,
+      courseRunSteps: courseRun?.steps?.length,
+      completedSteps: courseRun?.steps?.filter((s: any) => s.complete === true).length,
+    });
+  }
 
   const deleteCourse = async () => {
     const toastId = toast.loading(t('deleting'));
@@ -177,13 +210,35 @@ const CourseThumbnail: FC<PropsType> = ({ course, orgslug, customLink }: PropsTy
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button
-          asChild
-          size="sm"
-          className="group-hover:bg-primary/90 w-full transition-all duration-200"
-        >
-          <Link href={courseUrl}>{t('startLearning')}</Link>
-        </Button>
+        {isEnrolled ? (
+          <div className="w-full space-y-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{t('progress', { defaultValue: 'Progress' })}</span>
+              <span className="font-semibold">{progressPercentage}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+            <Button
+              asChild
+              size="sm"
+              className="group-hover:bg-primary/90 w-full transition-all duration-200"
+            >
+              <Link href={courseUrl}>{t('continueLearning', { defaultValue: 'Continue Learning' })}</Link>
+            </Button>
+          </div>
+        ) : (
+          <Button
+            asChild
+            size="sm"
+            className="group-hover:bg-primary/90 w-full transition-all duration-200"
+          >
+            <Link href={courseUrl}>{t('startLearning')}</Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
