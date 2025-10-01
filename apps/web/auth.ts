@@ -1,6 +1,6 @@
-import { createHash } from 'crypto';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
+import { createHash } from 'node:crypto';
 import NextAuth from 'next-auth';
 
 import {
@@ -9,7 +9,7 @@ import {
   loginAndGetToken,
   loginWithOAuthToken,
 } from '@/services/auth/auth';
-import { getUriWithOrg, getTopLevelCookieDomain } from '@/services/config/config';
+import { getTopLevelCookieDomain, getUriWithOrg } from '@/services/config/config';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 
 // Session cache with TTL and size limits
@@ -287,15 +287,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               console.log('Token refreshed successfully');
             } else {
               console.error('Token refresh failed: No access token in response');
-              return null;
+              // Don't return null - keep the session alive with existing (possibly expired) token
+              // This prevents unnecessary logouts due to transient refresh failures
+              console.warn('Continuing with existing token despite refresh failure');
             }
           } catch (error) {
             console.error('Token refresh failed:', error);
-            // Clear cache entry for this user
+            // Log the error but don't kill the session
+            // The next request will retry or the user will naturally re-authenticate
+            console.warn('Continuing with existing token despite refresh error');
+            // Clear cache entry for this user to force fresh fetch next time
             const cache = getSessionCache();
             const cacheKey = createCacheKey(tokens.access_token);
             cache.delete(cacheKey);
-            return null;
           }
         }
 

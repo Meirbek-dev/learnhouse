@@ -1,5 +1,5 @@
-import os
 import ipaddress
+import os
 from typing import Literal
 
 import yaml  # PyYAML types not available

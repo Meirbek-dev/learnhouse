@@ -177,19 +177,19 @@ const CourseOverviewPage = (props: { params: Promise<CourseOverviewParams> }) =>
           className="relative h-full overflow-y-auto"
         >
           <div className="absolute inset-0">
-            {params.subpage == 'content' && hasPermission('update_content') ? (
+            {params.subpage === 'content' && hasPermission('update_content') ? (
               <EditCourseStructure orgslug={params.orgslug} />
             ) : null}
-            {params.subpage == 'general' && hasPermission('update') ? (
+            {params.subpage === 'general' && hasPermission('update') ? (
               <EditCourseGeneral orgslug={params.orgslug} />
             ) : null}
-            {params.subpage == 'access' && hasPermission('manage_access') ? (
+            {params.subpage === 'access' && hasPermission('manage_access') ? (
               <EditCourseAccess orgslug={params.orgslug} />
             ) : null}
-            {params.subpage == 'contributors' && hasPermission('manage_contributors') ? (
+            {params.subpage === 'contributors' && hasPermission('manage_contributors') ? (
               <EditCourseContributors orgslug={params.orgslug} />
             ) : null}
-            {params.subpage == 'certification' && hasPermission('create_certifications') ? (
+            {params.subpage === 'certification' && hasPermission('create_certifications') ? (
               <EditCourseCertification orgslug={params.orgslug} />
             ) : null}
           </div>

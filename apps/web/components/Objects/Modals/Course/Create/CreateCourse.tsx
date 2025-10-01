@@ -4,13 +4,13 @@ import UnsplashImagePicker from '@components/Dashboard/Pages/Course/EditCourseGe
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Image as ImageIcon, UploadCloud } from 'lucide-react';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { createNewCourse } from '@services/courses/courses';
-import { useCallback, useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
@@ -20,7 +20,6 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import type { ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import { useTransition } from 'react';
 import { z } from 'zod';
 
 const CreateCourseModal = ({ closeModal, orgslug }: any) => {

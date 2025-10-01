@@ -1,9 +1,9 @@
 import {
   OPENU_DOMAIN,
   getDefaultOrg,
+  getTopLevelCookieDomain,
   getUriWithOrg,
   isMultiOrgModeEnabled,
-  getTopLevelCookieDomain,
 } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';

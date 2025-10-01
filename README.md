@@ -1,6 +1,5 @@
-OpenU is an open source platform that makes it easy for anyone to provide world-class
-educational content and it offers a variety of content types : Dynamic Pages, Videos, Documents &
-more..
+OpenU is an open source platform that makes it easy for anyone to provide world-class educational
+content and it offers a variety of content types : Dynamic Pages, Videos, Documents & more..
 
 ## Progress
 

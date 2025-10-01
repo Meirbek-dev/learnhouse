@@ -140,7 +140,7 @@ export const HeaderProfileBox = () => {
 
   return (
     <div className="flex items-center">
-      {session.status == 'unauthenticated' && (
+      {session.status === 'unauthenticated' && (
         <div className="flex flex-grow rounded-lg p-1.5 px-2 text-sm font-bold text-gray-700">
           <ul className="flex items-center space-x-3">
             <li>

@@ -4,7 +4,7 @@ import { createCertification, deleteCertification } from '@services/courses/cert
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { AlertTriangle, Award, FileText, Loader2, Settings } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
@@ -226,14 +226,18 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
   ]);
 
   // Watch form values and update course state (debounced)
-  const watchedValues = form.watch();
-  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
+  const certificationName = form.watch('certification_name');
+  const certificationDescription = form.watch('certification_description');
+  const certificationType = form.watch('certification_type');
+  const certificatePattern = form.watch('certificate_pattern');
+  const certificateInstructor = form.watch('certificate_instructor');
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!isLoading && hasExistingCertification && hasInitialized && watchedValues) {
+    if (!isLoading && hasExistingCertification && hasInitialized) {
       // Clear previous timeout
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
       }
 
       // Set new timeout to debounce updates
@@ -247,18 +251,18 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
           _certificationData: {
             certification_uuid: existingCertification.certification_uuid,
             config: {
-              certification_name: watchedValues.certification_name,
-              certification_description: watchedValues.certification_description,
-              certification_type: watchedValues.certification_type,
-              certificate_pattern: watchedValues.certificate_pattern,
-              certificate_instructor: watchedValues.certificate_instructor,
+              certification_name: certificationName,
+              certification_description: certificationDescription,
+              certification_type: certificationType,
+              certificate_pattern: certificatePattern,
+              certificate_instructor: certificateInstructor,
             },
           },
         };
         dispatchCourse({ type: 'setCourseStructure', payload: updatedCourse });
       }, 300); // 300ms debounce
 
-      setDebounceTimeout(timeout);
+      debounceRef.current = timeout;
 
       // Cleanup function
       return () => {
@@ -268,17 +272,17 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
       };
     }
   }, [
-    watchedValues.certification_name,
-    watchedValues.certification_description,
-    watchedValues.certification_type,
-    watchedValues.certificate_pattern,
-    watchedValues.certificate_instructor,
+    certificationName,
+    certificationDescription,
+    certificationType,
+    certificatePattern,
+  certificateInstructor,
     isLoading,
     hasExistingCertification,
     hasInitialized,
     existingCertification?.certification_uuid,
     dispatchCourse,
-    courseStructure?.id,
+    courseStructure,
   ]);
 
   const onSubmit = (values: FormValues) => {

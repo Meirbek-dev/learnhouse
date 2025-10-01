@@ -531,12 +531,14 @@ def _safe_role_read(role: Role) -> RoleRead:
         )
 
         normalized_role = role.model_dump()
-        normalized_role["rights"] = _normalize_rights_schema(normalized_role.get("rights"))
+        normalized_role["rights"] = _normalize_rights_schema(
+            normalized_role.get("rights")
+        )
 
         try:
             return RoleRead.model_validate(normalized_role)
         except ValidationError as fallback_exc:  # pragma: no cover - defensive path
-            logger.error(
+            logger.exception(
                 "Role normalization failed for role_id=%s. Falling back to default rights. Error: %s",
                 getattr(role, "id", None),
                 fallback_exc,

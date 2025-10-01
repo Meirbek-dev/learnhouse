@@ -7,13 +7,12 @@ import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCo
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getUriWithOrg } from '@services/config/config';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 interface CourseProps {

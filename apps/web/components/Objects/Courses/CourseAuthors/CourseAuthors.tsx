@@ -160,7 +160,7 @@ const UpdatesSection = () => {
             <span className="text-sm font-semibold text-neutral-600">{t('courseUpdates')}</span>
           </div>
           {updates && updates.length > 0 ? (
-            <span className="text-nowrap rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500">
+            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-nowrap text-neutral-500">
               {updates.length} {updates.length === 1 ? t('update') : t('updates')}
             </span>
           ) : null}

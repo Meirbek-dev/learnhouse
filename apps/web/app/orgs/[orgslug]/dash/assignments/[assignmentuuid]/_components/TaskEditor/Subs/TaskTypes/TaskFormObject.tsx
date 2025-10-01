@@ -510,7 +510,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                     <div
                       className={
                         'blank-item soft-shadow flex min-h-[40px] w-full items-center space-x-2 rounded-lg bg-white pr-2 text-sm shadow-sm outline-3 outline-white duration-150 ease-linear hover:bg-opacity-100 hover:shadow-md' +
-                        (view == 'student' ? 'active:scale-105' : '')
+                        (view === 'student' ? 'active:scale-105' : '')
                       }
                     >
                       <div className="flex h-full w-[40px] items-center justify-center rounded-l-md bg-slate-100/80 text-base font-bold text-slate-800">

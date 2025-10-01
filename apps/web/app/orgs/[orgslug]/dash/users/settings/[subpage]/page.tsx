@@ -48,7 +48,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
         setH1Label(t('usergroupsTitle'));
         setH2Label(t('usergroupsDescription'));
       }
-      if (params.subpage == 'roles') {
+      if (params.subpage === 'roles') {
         setH1Label(t('rolesTitle'));
         setH2Label(t('rolesDescription'));
       }
