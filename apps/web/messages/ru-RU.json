@@ -1302,8 +1302,12 @@
     "General": {
       "LearningItems": {
         "addItemButton": "Добавить элемент обучения",
+        "addLinkAriaLabel": "Добавить ссылку для этого пункта обучения",
         "addLinkTooltip": "Добавить ссылку",
+        "changeEmojiAriaLabel": "Измените смайлики для этого предмета обучения",
+        "editLinkAriaLabel": "Изменить ссылку для этого пункта обучения",
         "editLinkTooltip": "Редактировать ссылку",
+        "linkInputAriaLabel": "Введите URL-адрес ссылки для этого пункта обучения",
         "linkInputPlaceholder": "Введите URL-адрес для ссылки (необязательно)",
         "noItems": "Пока не добавлено ни одного элемента обучения.",
         "placeholder": "Введите, что вы узнаете...",

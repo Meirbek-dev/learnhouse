@@ -1302,8 +1302,12 @@
     "General": {
       "LearningItems": {
         "addItemButton": "Оқу элементін қосу",
+        "addLinkAriaLabel": "Осы оқу элементіне сілтеме қосыңыз",
         "addLinkTooltip": "Сілтеме қосу",
+        "changeEmojiAriaLabel": "Осы оқу элементіне арналған эможиді өзгертіңіз",
+        "editLinkAriaLabel": "Осы оқу элементіне сілтемені өңдеңіз",
         "editLinkTooltip": "Сілтемені өңдеу",
+        "linkInputAriaLabel": "Осы оқу элементіне сілтеме URL мекен-жайын енгізіңіз",
         "linkInputPlaceholder": "Сілтеме үшін URL мекенжайын енгізіңіз (міндетті емес)",
         "noItems": "Әзірге ешқандай оқу элементі қосылмаған.",
         "placeholder": "Не білетініңізді енгізіңіз...",

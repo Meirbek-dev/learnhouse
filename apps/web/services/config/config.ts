@@ -50,8 +50,8 @@ export const getAPIUrl = () => {
     if (typeof window === 'undefined') {
       console.warn(
         '[Config] Using fallback API URL in server context. ' +
-        'Please set NEXT_PUBLIC_OPENU_API_URL environment variable. ' +
-        `Current fallback: ${base}`
+          'Please set NEXT_PUBLIC_OPENU_API_URL environment variable. ' +
+          `Current fallback: ${base}`,
       );
     }
   }

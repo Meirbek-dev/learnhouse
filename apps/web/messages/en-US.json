@@ -1302,8 +1302,12 @@
     "General": {
       "LearningItems": {
         "addItemButton": "Add Learning Item",
+        "addLinkAriaLabel": "Add link for this learning item",
         "addLinkTooltip": "Add Link",
+        "changeEmojiAriaLabel": "Change emoji for this learning item",
+        "editLinkAriaLabel": "Edit link for this learning item",
         "editLinkTooltip": "Edit Link",
+        "linkInputAriaLabel": "Enter link URL for this learning item",
         "linkInputPlaceholder": "Enter URL for link (optional)",
         "noItems": "No learning items added yet.",
         "placeholder": "Enter what you will learn...",

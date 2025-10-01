@@ -423,7 +423,7 @@ export async function getNewAccessTokenUsingRefreshTokenServer(refreshToken: str
       throw createAuthError(
         `Server token refresh failed: ${error.message} (URL: ${fullUrl})`,
         undefined,
-        'SERVER_TOKEN_REFRESH_ERROR'
+        'SERVER_TOKEN_REFRESH_ERROR',
       );
     }
     throw createAuthError('Unknown server token refresh error', undefined, 'UNKNOWN_ERROR');

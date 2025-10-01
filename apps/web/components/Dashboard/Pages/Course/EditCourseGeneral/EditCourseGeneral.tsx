@@ -73,7 +73,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   const [error, setError] = useState('');
   const course = useCourse();
   const dispatchCourse = useCourseDispatch();
-  const { isLoading, courseStructure } = course as any;
+  const { isLoading, courseStructure } = course;
   const formId = useId();
 
   const initializeLearnings = (learnings: any) => {
@@ -108,7 +108,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       about: courseStructure?.about || '',
       learnings: initializeLearnings(courseStructure?.learnings || ''),
       tags: parseTags(courseStructure?.tags),
-      public: courseStructure?.public,
+      public: courseStructure?.public ?? false,
       thumbnail_type: courseStructure?.thumbnail_type || 'image',
     }),
     [courseStructure],
@@ -144,8 +144,14 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       const changed = JSON.stringify(values) !== JSON.stringify(initialRef.current);
       if (changed) {
         dispatchCourse({ type: 'setIsNotSaved' });
-        const valuesForContext = { ...values, tags: (values.tags || []).join(', ') } as any;
-        dispatchCourse({ type: 'setCourseStructure', payload: { ...courseStructure, ...valuesForContext } });
+        dispatchCourse({
+          type: 'setCourseStructure',
+          payload: {
+            ...courseStructure,
+            ...values,
+            tags: values.tags?.filter((tag): tag is string => tag !== undefined) ?? [],
+          },
+        });
       }
     });
     return () => sub.unsubscribe();
@@ -224,7 +230,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                       className="text-primary h-8 w-8"
                       aria-hidden="true"
                     />
-                    {t('title', { courseName: courseStructure.name })}
+                    {t('title', { courseName: courseStructure.name || '' })}
                   </h1>
                   <p className="text-md text-muted-foreground">{t('subtitle')}</p>
                 </div>

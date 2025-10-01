@@ -43,9 +43,16 @@ export async function getCourseMetadata(course_uuid: string, next: any, access_t
 }
 
 export async function updateCourse(course_uuid: string, data: any, access_token: string) {
+  // Transform frontend data format to API format
+  const apiData = {
+    ...data,
+    // API expects tags as comma-separated string, frontend uses array
+    tags: Array.isArray(data.tags) ? data.tags.join(', ') : data.tags,
+  };
+
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token),
+    RequestBodyWithAuthHeader('PUT', apiData, null, access_token),
   );
   return await errorHandling(result);
 }
