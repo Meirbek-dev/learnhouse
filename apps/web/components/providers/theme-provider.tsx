@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 
 interface ThemeContextValue {
   theme: Theme;
-  setTheme: (themeName: string) => void;
+  setTheme: (themeName: string, syncToServer?: boolean) => void;
   isLoading: boolean;
 }
 
@@ -16,26 +16,37 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 interface ThemeProviderProps {
   children: ReactNode;
   defaultThemeName?: string;
+  userTheme?: string | null;
 }
 
-export function ThemeProvider({ children, defaultThemeName = 'default' }: ThemeProviderProps) {
+export function ThemeProvider({ children, defaultThemeName = 'default', userTheme }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize theme on mount
   useEffect(() => {
-    const storedTheme = getStoredTheme();
-    const initialTheme = storedTheme ? getTheme(storedTheme) : getTheme(defaultThemeName);
+    // Priority: userTheme from database > localStorage > defaultThemeName
+    const effectiveTheme = userTheme || getStoredTheme() || defaultThemeName;
+    const initialTheme = getTheme(effectiveTheme);
 
     setThemeState(initialTheme);
     applyTheme(initialTheme);
     setIsLoading(false);
-  }, [defaultThemeName]);
+  }, [defaultThemeName, userTheme]);
 
-  const setTheme = (themeName: string) => {
+  const setTheme = (themeName: string, syncToServer = true) => {
     const newTheme = getTheme(themeName);
     setThemeState(newTheme);
     applyTheme(newTheme);
+
+    // Sync to server if user is logged in (handled by the component using this)
+    if (syncToServer && typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('themeChange', {
+          detail: { theme: themeName },
+        })
+      );
+    }
   };
 
   return <ThemeContext.Provider value={{ theme, setTheme, isLoading }}>{children}</ThemeContext.Provider>;

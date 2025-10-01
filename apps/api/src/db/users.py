@@ -20,6 +20,8 @@ class UserBase(SQLModelStrictBaseModel):
     bio: str | None = ""
     details: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
     profile: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
+    theme: str | None = "default"
+    locale: str | None = "ru-RU"
 
 
 class UserCreate(UserBase):
@@ -37,6 +39,8 @@ class UserUpdate(SQLModelStrictBaseModel):
     bio: str | None = None
     details: dict | None = None
     profile: dict | None = None
+    theme: str | None = None
+    locale: str | None = None
 
 
 class UserUpdatePassword(SQLModelStrictBaseModel):

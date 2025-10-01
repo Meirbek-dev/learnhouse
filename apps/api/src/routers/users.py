@@ -212,6 +212,38 @@ async def api_update_user_password(
     return await update_user_password(request, db_session, current_user, user_id, form)
 
 
+@router.put("/preferences/theme/{user_id}", tags=["users"])
+async def api_update_user_theme(
+    *,
+    request: Request,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    user_id: int,
+    theme: str,
+) -> UserRead:
+    """
+    Update User Theme Preference
+    """
+    user_update = UserUpdate(theme=theme)
+    return await update_user(request, db_session, user_id, current_user, user_update)
+
+
+@router.put("/preferences/locale/{user_id}", tags=["users"])
+async def api_update_user_locale(
+    *,
+    request: Request,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    user_id: int,
+    locale: str,
+) -> UserRead:
+    """
+    Update User Locale Preference
+    """
+    user_update = UserUpdate(locale=locale)
+    return await update_user(request, db_session, user_id, current_user, user_update)
+
+
 @router.post("/reset_password/change_password/{email}", tags=["users"])
 async def api_change_password_with_reset_code(
     *,

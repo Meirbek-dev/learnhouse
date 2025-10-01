@@ -39,3 +39,19 @@ export async function updateUserAvatar(user_id: number, avatar_file: any, access
   );
   return await getResponseMetadata(result);
 }
+
+export async function updateUserTheme(user_id: number, theme: string, access_token: string) {
+  const result = await fetch(
+    `${getAPIUrl()}users/preferences/theme/${user_id}?theme=${encodeURIComponent(theme)}`,
+    RequestBodyWithAuthHeader('PUT', null, null, access_token),
+  );
+  return await errorHandling(result);
+}
+
+export async function updateUserLocale(user_id: number, locale: string, access_token: string) {
+  const result = await fetch(
+    `${getAPIUrl()}users/preferences/locale/${user_id}?locale=${encodeURIComponent(locale)}`,
+    RequestBodyWithAuthHeader('PUT', null, null, access_token),
+  );
+  return await errorHandling(result);
+}

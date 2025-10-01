@@ -10,6 +10,8 @@ import { Languages } from 'lucide-react';
 import { locales } from '@/i18n/config';
 import { useTransition } from 'react';
 import { cn } from '@/lib/utils';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { updateUserLocale } from '@services/users/users';
 
 interface LocaleSwitcherProps {
   className?: string;
@@ -21,10 +23,25 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
   const currentLocale = useLocale();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('Components.LocaleSwitcher');
+  const session = useLHSession() as any;
 
   const handleLocaleChange = async (newLocale: Locale) => {
     startTransition(async () => {
       await setUserLocale(newLocale);
+
+      // Sync to database if user is logged in
+      if (session?.data?.user?.id && session?.data?.tokens?.access_token) {
+        try {
+          await updateUserLocale(
+            session.data.user.id,
+            newLocale,
+            session.data.tokens.access_token
+          );
+        } catch (error) {
+          console.error('Failed to sync locale to server:', error);
+        }
+      }
+
       router.refresh();
     });
   };
