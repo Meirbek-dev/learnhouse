@@ -20,26 +20,48 @@ import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
+interface BlankSchema {
+  blankUUID?: string;
+  placeholder: string;
+  correctAnswer: string;
+  hint?: string;
+}
+
 interface FormSchema {
   questionText: string;
   questionUUID?: string;
-  blanks: {
-    blankUUID?: string;
-    placeholder: string;
-    correctAnswer: string;
-    hint?: string;
-  }[];
+  blanks: BlankSchema[];
+}
+
+interface SubmissionItem {
+  questionUUID: string;
+  blankUUID: string;
+  answer: string;
 }
 
 interface FormSubmitSchema {
   questions: FormSchema[];
-  submissions: {
-    questionUUID: string;
-    blankUUID: string;
-    answer: string;
-  }[];
+  submissions: SubmissionItem[];
   assignment_task_submission_uuid?: string;
 }
+
+// Helper functions for data normalization
+const normalizeQuestion = (question: Partial<FormSchema>): FormSchema => ({
+  questionText: question.questionText || '',
+  questionUUID: question.questionUUID || `question_${generateUUID()}`,
+  blanks: Array.isArray(question.blanks) ? question.blanks : [],
+});
+
+const normalizeQuestions = (questions: any[]): FormSchema[] => {
+  if (!Array.isArray(questions)) return [];
+  return questions.map(normalizeQuestion);
+};
+
+const normalizeSubmissions = (data: any): FormSubmitSchema => ({
+  questions: normalizeQuestions(data?.questions),
+  submissions: Array.isArray(data?.submissions) ? data.submissions : [],
+  assignment_task_submission_uuid: data?.assignment_task_submission_uuid,
+});
 
 interface TaskFormObjectProps {
   view: 'teacher' | 'student' | 'grading';
@@ -168,57 +190,43 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   };
 
   /* STUDENT VIEW CODE */
-  const [userSubmissions, setUserSubmissions] = useState<FormSubmitSchema>({
-    questions: [],
-    submissions: [],
-  });
-  const [initialUserSubmissions, setInitialUserSubmissions] = useState<FormSubmitSchema>({
-    questions: [],
-    submissions: [],
-  });
+  const [userSubmissions, setUserSubmissions] = useState<FormSubmitSchema>(normalizeSubmissions({}));
+  const [initialUserSubmissions, setInitialUserSubmissions] = useState<FormSubmitSchema>(normalizeSubmissions({}));
   const [showSavingDisclaimer, setShowSavingDisclaimer] = useState<boolean>(false);
   const [assignmentTaskOutsideProvider, setAssignmentTaskOutsideProvider] = useState<any>(null);
   const [userSubmissionObject, setUserSubmissionObject] = useState<any>(null);
 
   const handleUserAnswerChange = (questionUUID: string, blankUUID: string, answer: string) => {
-    const updatedSubmissions = [...userSubmissions.submissions];
-    const existingIndex = updatedSubmissions.findIndex(
-      (submission) => submission.questionUUID === questionUUID && submission.blankUUID === blankUUID,
-    );
+    setUserSubmissions((prev) => {
+      const updatedSubmissions = [...prev.submissions];
+      const existingIndex = updatedSubmissions.findIndex(
+        (submission) => submission.questionUUID === questionUUID && submission.blankUUID === blankUUID,
+      );
 
-    if (existingIndex !== -1 && updatedSubmissions[existingIndex]) {
-      updatedSubmissions[existingIndex].answer = answer;
-    } else {
-      updatedSubmissions.push({
-        questionUUID,
-        blankUUID,
-        answer,
-      });
-    }
+      if (existingIndex !== -1 && updatedSubmissions[existingIndex]) {
+        updatedSubmissions[existingIndex]!.answer = answer;
+      } else {
+        updatedSubmissions.push({ questionUUID, blankUUID, answer });
+      }
 
-    setUserSubmissions({
-      ...userSubmissions,
-      submissions: updatedSubmissions,
+      return { ...prev, submissions: updatedSubmissions };
     });
   };
 
   const handleUserAnswerBlur = (questionUUID: string, blankUUID: string, answer: string) => {
-    // Auto-focus next blank only when user leaves the current input and it has content
-    if (answer.trim() && view === 'student') {
-      const allBlanks = questions.flatMap((q) =>
-        q.blanks.map((b) => ({ questionUUID: q.questionUUID, blankUUID: b.blankUUID })),
-      );
-      const currentIndex = allBlanks.findIndex((b) => b.questionUUID === questionUUID && b.blankUUID === blankUUID);
-      const nextBlank = allBlanks[currentIndex + 1];
+    if (!answer.trim() || view !== 'student') return;
 
-      if (nextBlank) {
-        setTimeout(() => {
-          const nextInput = document.querySelector(`[data-blank-id="${nextBlank.blankUUID}"]`) as HTMLInputElement;
-          if (nextInput && !nextInput.value.trim()) {
-            nextInput.focus();
-          }
-        }, 100);
-      }
+    const allBlanks = questions.flatMap((q) =>
+      q.blanks.map((b) => ({ questionUUID: q.questionUUID, blankUUID: b.blankUUID })),
+    );
+    const currentIndex = allBlanks.findIndex((b) => b.questionUUID === questionUUID && b.blankUUID === blankUUID);
+    const nextBlank = allBlanks[currentIndex + 1];
+
+    if (nextBlank) {
+      setTimeout(() => {
+        const nextInput = document.querySelector(`[data-blank-id="${nextBlank.blankUUID}"]`) as HTMLInputElement;
+        nextInput?.focus();
+      }, 100);
     }
   };
 
@@ -266,23 +274,17 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     }
 
     // Calculate grade based on correct answers
-    let correctAnswers = 0;
-    let totalBlanks = 0;
+    const allBlanks = questions.flatMap((q) => q.blanks.map((blank) => ({ ...blank, questionUUID: q.questionUUID })));
 
-    questions.forEach((question) => {
-      question.blanks.forEach((blank) => {
-        totalBlanks += 1;
-        const userAnswer = userSubmissions.submissions.find(
-          (submission) => submission.questionUUID === question.questionUUID && submission.blankUUID === blank.blankUUID,
-        );
-        if (userAnswer && userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim()) {
-          correctAnswers += 1;
-        }
-      });
-    });
+    const correctAnswers = allBlanks.filter((blank) => {
+      const userAnswer = userSubmissions.submissions.find(
+        (s) => s.questionUUID === blank.questionUUID && s.blankUUID === blank.blankUUID,
+      );
+      return userAnswer?.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
+    }).length;
 
     const maxPoints = assignmentTaskOutsideProvider?.max_grade_value || 100;
-    const finalGrade = totalBlanks > 0 ? Math.round((correctAnswers / totalBlanks) * maxPoints) : 0;
+    const finalGrade = allBlanks.length > 0 ? Math.round((correctAnswers / allBlanks.length) * maxPoints) : 0;
 
     // Save the grade to the server
     const values = {
@@ -300,7 +302,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     );
     if (res) {
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
-      toast.success(t('gradedSuccessfully', { finalGrade, correctAnswers, totalBlanks }));
+      toast.success(t('gradedSuccessfully', { finalGrade, correctAnswers, totalBlanks: allBlanks.length }));
     } else {
       toast.error(t('gradeError'));
     }
@@ -319,53 +321,47 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         access_token,
       );
       if (res.success) {
-        setUserSubmissions({
+        const normalizedData = normalizeSubmissions({
           ...res.data.task_submission,
           assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
         });
-        setInitialUserSubmissions({
-          ...res.data.task_submission,
-          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-        });
+        setUserSubmissions(normalizedData);
+        setInitialUserSubmissions(normalizedData);
         setUserSubmissionObject(res.data);
       }
     }
   }, [access_token, user_id, assignmentTaskUUID, assignment.assignment_object?.assignment_uuid]);
 
   const loadAssignmentTask = useCallback(async () => {
-    if (assignmentTaskUUID) {
-      const res = await getAssignmentTask(assignmentTaskUUID, access_token);
-      if (res.success) {
-        setAssignmentTaskOutsideProvider(res.data);
-        // Only set questions if they exist
-        if (res.data.contents?.questions && res.data.contents.questions.length > 0) {
-          setQuestions(res.data.contents.questions);
-        } else if (view !== 'teacher') {
-          // For non-teacher views, set empty array if no questions exist
-          setQuestions([]);
-        }
-        // For teacher view, don't modify questions if no data exists - keep initial state
+    if (!assignmentTaskUUID) return;
+
+    const res = await getAssignmentTask(assignmentTaskUUID, access_token);
+    if (res.success) {
+      setAssignmentTaskOutsideProvider(res.data);
+      const normalizedQuestions = normalizeQuestions(res.data.contents?.questions);
+
+      // Only update questions for student/grading view, or if teacher has saved questions
+      if (view !== 'teacher' || normalizedQuestions.length > 0) {
+        setQuestions(normalizedQuestions);
       }
     }
   }, [assignmentTaskUUID, access_token, view]);
 
   const loadUserSubmissions = useCallback(async () => {
-    if (view === 'student' && assignmentTaskUUID) {
-      const res = await getAssignmentTaskSubmissionsMe(
-        assignmentTaskUUID,
-        assignment.assignment_object.assignment_uuid,
-        access_token,
-      );
-      if (res.success) {
-        setUserSubmissions({
-          ...res.data.task_submission,
-          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-        });
-        setInitialUserSubmissions({
-          ...res.data.task_submission,
-          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-        });
-      }
+    if (view !== 'student' || !assignmentTaskUUID) return;
+
+    const res = await getAssignmentTaskSubmissionsMe(
+      assignmentTaskUUID,
+      assignment.assignment_object.assignment_uuid,
+      access_token,
+    );
+    if (res.success) {
+      const normalizedData = normalizeSubmissions({
+        ...res.data.task_submission,
+        assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+      });
+      setUserSubmissions(normalizedData);
+      setInitialUserSubmissions(normalizedData);
     }
   }, [view, assignmentTaskUUID, assignment.assignment_object?.assignment_uuid, access_token]);
 
@@ -380,21 +376,17 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   }, [assignmentTaskUUID, assignmentTaskStateHook]);
 
   useEffect(() => {
-    // Teacher area - Load from context first, then from API if needed
     if (view === 'teacher') {
-      if (assignmentTaskState.assignmentTask.contents?.questions) {
-        setQuestions(assignmentTaskState.assignmentTask.contents.questions);
+      const savedQuestions = assignmentTaskState.assignmentTask.contents?.questions;
+      if (savedQuestions) {
+        setQuestions(normalizeQuestions(savedQuestions));
       } else {
         loadAssignmentTask();
       }
-    }
-    // Student area
-    else if (view === 'student') {
+    } else if (view === 'student') {
       loadAssignmentTask();
       loadUserSubmissions();
-    }
-    // Grading area
-    else if (view === 'grading') {
+    } else if (view === 'grading') {
       loadAssignmentTask();
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
@@ -429,48 +421,34 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         showSavingDisclaimer={showSavingDisclaimer}
         type="form"
       >
-        {view === 'grading' && (
-          <div className="mb-6 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
-            <h3 className="mb-2 text-sm font-semibold text-gray-800">{t('submissionSummary')}</h3>
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div className="text-center">
-                <div className="text-lg font-bold text-blue-600">{questions.flatMap((q) => q.blanks).length}</div>
-                <div className="text-gray-600">{t('totalBlanks')}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-green-600">
-                  {
-                    questions
-                      .flatMap((q) => q.blanks)
-                      .filter((blank) => {
-                        const userAnswer = userSubmissions.submissions.find((s) => s.blankUUID === blank.blankUUID);
-                        return (
-                          userAnswer &&
-                          userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim()
-                        );
-                      }).length
-                  }
+        {view === 'grading' &&
+          (() => {
+            const allBlanks = questions.flatMap((q) => q.blanks);
+            const correctCount = allBlanks.filter((blank) => {
+              const userAnswer = userSubmissions.submissions.find((s) => s.blankUUID === blank.blankUUID);
+              return userAnswer?.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
+            }).length;
+
+            return (
+              <div className="mb-6 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+                <h3 className="mb-2 text-sm font-semibold text-gray-800">{t('submissionSummary')}</h3>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-600">{allBlanks.length}</div>
+                    <div className="text-gray-600">{t('totalBlanks')}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-green-600">{correctCount}</div>
+                    <div className="text-gray-600">{t('correct')}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-red-600">{allBlanks.length - correctCount}</div>
+                    <div className="text-gray-600">{t('incorrect')}</div>
+                  </div>
                 </div>
-                <div className="text-gray-600">{t('correct')}</div>
               </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-red-600">
-                  {questions.flatMap((q) => q.blanks).length -
-                    questions
-                      .flatMap((q) => q.blanks)
-                      .filter((blank) => {
-                        const userAnswer = userSubmissions.submissions.find((s) => s.blankUUID === blank.blankUUID);
-                        return (
-                          userAnswer &&
-                          userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim()
-                        );
-                      }).length}
-                </div>
-                <div className="text-gray-600">{t('incorrect')}</div>
-              </div>
-            </div>
-          </div>
-        )}
+            );
+          })()}
         <div className="flex flex-col space-y-6">
           {questions?.map((question, qIndex) => (
             <div
@@ -564,7 +542,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                         <div className="flex w-full flex-col space-y-1 py-2">
                           <input
                             value={
-                              userSubmissions.submissions?.find(
+                              userSubmissions.submissions.find(
                                 (submission) =>
                                   submission.questionUUID === question.questionUUID &&
                                   submission.blankUUID === blank.blankUUID,
