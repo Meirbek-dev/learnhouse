@@ -1,6 +1,8 @@
 'use client';
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { updateUserLocale } from '@services/users/users';
 import { useLocale, useTranslations } from 'next-intl';
 import { SelectValue } from '@radix-ui/react-select';
 import { setUserLocale } from '@/i18n/locale';
@@ -10,8 +12,6 @@ import { Languages } from 'lucide-react';
 import { locales } from '@/i18n/config';
 import { useTransition } from 'react';
 import { cn } from '@/lib/utils';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { updateUserLocale } from '@services/users/users';
 
 interface LocaleSwitcherProps {
   className?: string;
@@ -32,11 +32,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
       // Sync to database if user is logged in
       if (session?.data?.user?.id && session?.data?.tokens?.access_token) {
         try {
-          await updateUserLocale(
-            session.data.user.id,
-            newLocale,
-            session.data.tokens.access_token
-          );
+          await updateUserLocale(session.data.user.id, newLocale, session.data.tokens.access_token);
         } catch (error) {
           console.error('Failed to sync locale to server:', error);
         }

@@ -3,10 +3,10 @@
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
 import LHSessionProvider from '@components/Contexts/LHSessionContext';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { SessionProvider } from 'next-auth/react';
-import { motion } from 'framer-motion';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { updateUserTheme } from '@services/users/users';
+import { SessionProvider } from 'next-auth/react';
+import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 
@@ -34,11 +34,7 @@ function ThemeSync() {
       const customEvent = event as CustomEvent<{ theme: string }>;
       if (session?.data?.user?.id && session?.data?.tokens?.access_token) {
         try {
-          await updateUserTheme(
-            session.data.user.id,
-            customEvent.detail.theme,
-            session.data.tokens.access_token
-          );
+          await updateUserTheme(session.data.user.id, customEvent.detail.theme, session.data.tokens.access_token);
         } catch (error) {
           console.error('Failed to sync theme to server:', error);
         }

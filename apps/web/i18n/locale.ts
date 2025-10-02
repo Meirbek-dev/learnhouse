@@ -1,10 +1,10 @@
 'use server';
 
+import { getAPIUrl } from '@services/config/config';
 import { defaultLocale } from '@/i18n/config';
 import type { Locale } from '@/i18n/config';
 import { cookies } from 'next/headers';
 import { auth } from '@/auth';
-import { getAPIUrl } from '@services/config/config';
 
 // Here the locale is read from a cookie or user profile in database
 const COOKIE_NAME = 'NEXT_LOCALE';

@@ -82,7 +82,7 @@ export const CSS_VARIABLE_MAP = {
   sidebarAccentForeground: 'sidebar-accent-foreground',
   sidebarBorder: 'sidebar-border',
   sidebarRing: 'sidebar-ring',
-  radius: 'radius'
+  radius: 'radius',
 } as const satisfies Record<keyof ThemeColors, string>;
 
 /**

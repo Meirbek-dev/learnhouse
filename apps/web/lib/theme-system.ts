@@ -4,7 +4,17 @@
  */
 
 // Re-export all themes and utilities
-export { applyTheme, createThemeFromCSS, CSS_VARIABLE_MAP, defaultTheme, getStoredTheme, getTheme, themes, type Theme, type ThemeColors } from '@/lib/themes';
+export {
+  applyTheme,
+  createThemeFromCSS,
+  CSS_VARIABLE_MAP,
+  defaultTheme,
+  getStoredTheme,
+  getTheme,
+  themes,
+  type Theme,
+  type ThemeColors,
+} from '@/lib/themes';
 
 // Re-export theme components
 export { ThemeSelector } from '@components/ui/custom/theme-selector';

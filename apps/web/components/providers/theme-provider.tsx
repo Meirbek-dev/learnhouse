@@ -44,7 +44,7 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
       window.dispatchEvent(
         new CustomEvent('themeChange', {
           detail: { theme: themeName },
-        })
+        }),
       );
     }
   };

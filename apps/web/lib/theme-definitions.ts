@@ -753,7 +753,6 @@ export const elegantLuxuryTheme = createThemeFromCSS(
   'Sophisticated luxury theme with elegant cream tones and rich mahogany accents',
 );
 
-
 /**
  * Graphite theme
  */
@@ -1105,7 +1104,6 @@ export const northernLightsTheme = createThemeFromCSS(
   `,
   'Magical aurora borealis theme with ethereal green and purple gradients',
 );
-
 
 /**
  * Notebook theme
@@ -1459,7 +1457,6 @@ export const solarDuskTheme = createThemeFromCSS(
   'Warm, golden tones fading into deep shadows—captures the calm glow of dusk before nightfall',
 );
 
-
 /**
  * Starry Night theme
  */
@@ -1503,7 +1500,6 @@ export const starryNightTheme = createThemeFromCSS(
   `,
   'Deep midnight blues and luminous highlights, evoking a tranquil star-filled night sky',
 );
-
 
 /**
  * Sunset Horizon theme
