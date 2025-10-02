@@ -18,21 +18,13 @@ def auto_install() -> None:
 
     db_session = Session(engine)
 
-    orgs = db_session.exec(select(Organization)).all()
+    # Check if default organization exists
+    default_org = db_session.exec(
+        select(Organization).where(Organization.slug == "openu")
+    ).first()
 
-    if len(orgs) == 0:
-        print("No organizations found. Starting auto-installation 🏗️")
+    if not default_org:
+        print("No default organization found. Starting auto-installation 🏗️")
         install(short=True)
-
-    if orgs:
-        for _org in orgs:
-            default_org = db_session.exec(
-                select(Organization).where(Organization.slug == "openu")
-            ).first()
-
-            if not default_org:
-                print("No default organization found. Starting auto-installation 🏗️")
-                install(short=True)
-
     else:
-        print("Organizations found. Skipping auto-installation 🚀")
+        print("Default organization found. Skipping auto-installation 🚀")
