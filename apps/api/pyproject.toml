@@ -4,15 +4,15 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.5"
 dependencies = [
-  "boto3>=1.40.42",
-  "botocore>=1.40.42",
+  "boto3>=1.40.43",
+  "botocore>=1.40.43",
   "fastapi[standard-no-fastapi-cloud-cli]==0.118.0",
   "fastapi-another-jwt-auth>=0.1.11",
   "langchain>=0.3.27",
   "langchain-chroma>=0.2.6",
   "langchain-community>=0.3.30",
-  "langchain-core>=0.3.76",
-  "langchain-openai>=0.3.33",
+  "langchain-core>=0.3.77",
+  "langchain-openai>=0.3.34",
   "langchain-text-splitters>=0.3.11",
   "openai>=1.104.2,<2.0.0",
   "psycopg[binary,pool]>=3.2.10",
