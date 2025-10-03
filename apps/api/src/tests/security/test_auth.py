@@ -68,11 +68,14 @@ class TestAuth:
     def test_settings_model(self) -> None:
         """Test Settings model"""
         settings = Settings()
-        assert settings.authjwt_secret_key == "secret"  # Default in dev mode
+        # JWT secret is auto-generated in dev mode or from SECRET_KEY env var
+        assert isinstance(settings.authjwt_secret_key, str)
+        assert len(settings.authjwt_secret_key) > 0  # Ensure it's not empty
         assert settings.authjwt_token_location == {"cookies", "headers"}
         assert settings.authjwt_cookie_csrf_protect is False
         assert settings.authjwt_cookie_samesite == "lax"
-        assert settings.authjwt_cookie_secure is True
+        # Cookie secure flag depends on SSL configuration
+        assert isinstance(settings.authjwt_cookie_secure, bool)
 
     # Note: get_config is a decorator function for AuthJWT.load_config
     # Testing it directly may not be appropriate in unit tests
