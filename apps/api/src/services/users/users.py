@@ -234,6 +234,11 @@ async def update_user_password(
     user.password = security_hash_password(form.new_password)
     user.update_date = str(datetime.now())
 
+    # Add password_changed_at field for session invalidation tracking
+    if user.profile is None:
+        user.profile = {}
+    user.profile["password_changed_at"] = datetime.now().isoformat()
+
     # Update user in database
     db_session.add(user)
     db_session.commit()

@@ -75,6 +75,12 @@ export const isDevEnv = process.env.NODE_ENV !== 'production';
 
 // Helper function to validate token expiry
 const isTokenExpiringSoon = (expiry: number, bufferMs: number = TOKEN_REFRESH_BUFFER): boolean => {
+  // Handle missing or invalid expiry
+  if (!expiry || typeof expiry !== 'number' || expiry <= 0) {
+    console.warn('Invalid token expiry, triggering refresh');
+    return true; // Force refresh if expiry is invalid
+  }
+
   return Date.now() + bufferMs >= expiry;
 };
 
@@ -256,7 +262,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const { tokens } = userWithTokens;
-        const tokenExpiry = tokens.expiry || 0;
+
+        // Ensure expiry exists and is valid
+        const tokenExpiry =
+          tokens.expiry && typeof tokens.expiry === 'number' && tokens.expiry > 0
+            ? tokens.expiry
+            : Date.now() - 1; // Force refresh if invalid
 
         // Check if token needs refreshing
         if (isTokenExpiringSoon(tokenExpiry)) {
@@ -272,34 +283,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             const refreshedToken = await getNewAccessTokenUsingRefreshTokenServer(refresh_token);
 
             if (refreshedToken?.access_token) {
-              const newExpiry = refreshedToken.expiry || Date.now() + 60 * 60 * 1000;
+              // Ensure new expiry is set and valid
+              const newExpiry =
+                refreshedToken.expiry && typeof refreshedToken.expiry === 'number' && refreshedToken.expiry > 0
+                  ? refreshedToken.expiry
+                  : Date.now() + 8 * 60 * 60 * 1000; // Default 8 hours
 
               token.user = {
                 ...userWithTokens,
                 tokens: {
                   ...tokens,
                   access_token: refreshedToken.access_token,
-                  refresh_token: refreshedToken.refresh_token || refresh_token, // Keep existing if new not provided
+                  refresh_token: refreshedToken.refresh_token || refresh_token,
                   expiry: newExpiry,
                 },
               } as UserWithTokens;
 
-              console.log('Token refreshed successfully');
+              console.log('Token refreshed successfully', { newExpiry });
             } else {
               console.error('Token refresh failed: No access token in response');
-              // Don't return null - keep the session alive with existing (possibly expired) token
-              // This prevents unnecessary logouts due to transient refresh failures
-              console.warn('Continuing with existing token despite refresh failure');
+              return null; // Kill session on refresh failure
             }
           } catch (error) {
             console.error('Token refresh failed:', error);
-            // Log the error but don't kill the session
-            // The next request will retry or the user will naturally re-authenticate
-            console.warn('Continuing with existing token despite refresh error');
-            // Clear cache entry for this user to force fresh fetch next time
             const cache = getSessionCache();
             const cacheKey = createCacheKey(tokens.access_token);
             cache.delete(cacheKey);
+            return null; // Kill session on error
           }
         }
 

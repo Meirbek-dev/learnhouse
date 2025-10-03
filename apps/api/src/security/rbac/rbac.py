@@ -200,5 +200,5 @@ async def authorization_verify_if_user_is_anon(user_id: int) -> None:
     if user_id == 0:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You should be logged in to perform this action",
+            detail="You must be logged in to perform this action",
         )
