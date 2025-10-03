@@ -70,14 +70,22 @@ def get_profile(db: Session, user_id: int, org_id: int) -> GamificationProfile:
             GamificationProfile.user_id == user_id, GamificationProfile.org_id == org_id
         )
     )
-    with contextlib.suppress(Exception):
-        stmt = stmt.with_for_update()
+    # Removed with_for_update() lock to prevent hanging on new user creation
+    # The unique constraint on (user_id, org_id) handles concurrency
     profile = db.exec(stmt).first()
     if not profile:
         profile = GamificationProfile(user_id=user_id, org_id=org_id)
         db.add(profile)
-        db.commit()
-        db.refresh(profile)
+        try:
+            db.commit()
+            db.refresh(profile)
+        except IntegrityError:
+            # Handle race condition: another request created the profile
+            db.rollback()
+            profile = db.exec(stmt).first()
+            if not profile:
+                # If still not found, re-raise the error
+                raise
     return profile
 
 

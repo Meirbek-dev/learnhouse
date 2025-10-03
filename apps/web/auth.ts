@@ -277,9 +277,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         // Ensure expiry exists and is valid
         const tokenExpiry =
-          tokens.expiry && typeof tokens.expiry === 'number' && tokens.expiry > 0
-            ? tokens.expiry
-            : Date.now() - 1; // Force refresh if invalid
+          tokens.expiry && typeof tokens.expiry === 'number' && tokens.expiry > 0 ? tokens.expiry : Date.now() - 1; // Force refresh if invalid
 
         // Check if token needs refreshing
         if (isTokenExpiringSoon(tokenExpiry)) {
