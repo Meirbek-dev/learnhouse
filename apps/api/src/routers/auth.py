@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -79,7 +79,9 @@ def refresh(
     Authorize.set_refresh_cookies(new_refresh_token)
 
     # Calculate token expiry timestamp (8 hours from now in milliseconds)
-    expiry_timestamp = int((datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000)
+    expiry_timestamp = int(
+        (datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000
+    )
 
     # Log token refresh with rotation
     client_ip = request.client.host if request.client else "unknown"
@@ -144,7 +146,9 @@ async def login(
     user_read = UserRead.model_validate(user)
 
     # Calculate token expiry timestamp (8 hours from now in milliseconds)
-    expiry_timestamp = int((datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000)
+    expiry_timestamp = int(
+        (datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000
+    )
 
     # Log successful authentication
     logger.info(
@@ -222,7 +226,9 @@ async def third_party_login(
     user_read = UserRead.model_validate(user)
 
     # Calculate token expiry timestamp (8 hours from now in milliseconds)
-    expiry_timestamp = int((datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000)
+    expiry_timestamp = int(
+        (datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000
+    )
 
     # Log successful OAuth authentication
     logger.info(

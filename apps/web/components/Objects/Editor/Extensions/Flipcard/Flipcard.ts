@@ -1,5 +1,5 @@
 import { ReactNodeViewRenderer } from '@tiptap/react';
-import { mergeAttributes, Node } from '@tiptap/core';
+import { Node, mergeAttributes } from '@tiptap/core';
 import FlipcardExtension from './FlipcardExtension';
 
 export default Node.create({

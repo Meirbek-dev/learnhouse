@@ -52,7 +52,7 @@ export const HeaderProfileBox = () => {
     if (orgRoles.length === 0) return null;
 
     // Sort by role priority (admin > maintainer > instructor > user)
-    const sortedRoles = orgRoles.sort((a: any, b: any) => {
+    const sortedRoles = orgRoles.toSorted((a: any, b: any) => {
       const getRolePriority = (role: any) => {
         if (role.role.role_uuid === 'role_global_admin' || role.role.id === 1) return 4;
         if (role.role.role_uuid === 'role_global_maintainer' || role.role.id === 2) return 3;

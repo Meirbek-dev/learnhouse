@@ -71,7 +71,7 @@ const EvaluateAssignment = ({ user_id }: any) => {
   return (
     <div className="min-h-fit flex-col space-y-4 overflow-y-auto px-3 py-3">
       {assignments?.assignment_tasks
-        ?.sort((a: any, b: any) => a.id - b.id)
+        ?.toSorted((a: any, b: any) => a.id - b.id)
         .map((task: any, index: number) => {
           return (
             <div

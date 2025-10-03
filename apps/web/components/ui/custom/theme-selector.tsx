@@ -31,7 +31,7 @@ export function ThemeSelector({ className }: ThemeSelectorProps) {
         {t('title')}{' '}
         <Badge
           className="text-xs"
-          variant={'secondary'}
+          variant="secondary"
         >
           {t('beta')}
         </Badge>

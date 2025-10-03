@@ -125,7 +125,7 @@ export function createThemeFromCSS(
   // Helper to get value with type-safe fallback
   const getVar = (cssName: string, fallback?: string): string => {
     const value = vars.get(cssName);
-    if (!value && !fallback) {
+    if (!(value || fallback)) {
       console.warn(`Theme "${name}": Missing CSS variable --${cssName}, using default`);
       return 'oklch(0.5 0 0)';
     }

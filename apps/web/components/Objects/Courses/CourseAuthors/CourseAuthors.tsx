@@ -415,7 +415,7 @@ const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
   // Filter active authors and sort by role priority
   const sortedAuthors = [...authors]
     .filter((author) => author.authorship_status === 'ACTIVE')
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       const rolePriority: Record<string, number> = {
         CREATOR: 0,
         MAINTAINER: 1,

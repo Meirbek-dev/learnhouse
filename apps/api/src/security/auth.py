@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta
 import logging
 import secrets
+from datetime import datetime, timedelta
+
 import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -37,6 +38,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 #### JWT Auth ####################################################
 
+
 # Generate a secure JWT secret for development mode if not provided
 def _get_jwt_secret() -> str:
     """
@@ -59,9 +61,12 @@ def _get_jwt_secret() -> str:
         return generated_key
 
     # Production without SECRET_KEY should fail explicitly
-    raise ValueError(
+    msg = (
         "OPENU_AUTH_JWT_SECRET_KEY must be set in production environment. "
         "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+    )
+    raise ValueError(
+        msg
     )
 
 

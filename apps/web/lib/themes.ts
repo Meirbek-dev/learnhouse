@@ -7,15 +7,14 @@
 import type { Theme, ThemeColors } from './theme-utils';
 import { CSS_VARIABLE_MAP } from './theme-utils';
 
+// Re-export theme definitions from separate file
+export { defaultTheme, themes } from './theme-definitions';
 // Re-export types and utilities from theme-utils
 export type { Theme, ThemeColors } from './theme-utils';
-export { createThemeFromCSS, CSS_VARIABLE_MAP } from './theme-utils';
-
-// Re-export theme definitions from separate file
-export { themes, defaultTheme } from './theme-definitions';
+export { CSS_VARIABLE_MAP, createThemeFromCSS } from './theme-utils';
 
 // Import for use in utility functions
-import { themes, defaultTheme } from './theme-definitions';
+import { defaultTheme, themes } from './theme-definitions';
 
 /**
  * Type for valid theme names

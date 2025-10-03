@@ -296,14 +296,18 @@ class TestAuth:
         # Verify secret is sufficiently long (secure)
         # token_urlsafe(32) generates ~43 character base64 string
         if secret != "secret":  # If not using hardcoded dev secret
-            assert len(secret) >= 32, "Generated secret should be at least 32 characters"
+            assert len(secret) >= 32, (
+                "Generated secret should be at least 32 characters"
+            )
 
     def test_settings_cookie_security(self) -> None:
         """Test that cookie security settings are properly configured"""
         settings = Settings()
 
         # Verify cookie security settings
-        assert settings.authjwt_cookie_csrf_protect is False  # CSRF protection via SameSite
+        assert (
+            settings.authjwt_cookie_csrf_protect is False
+        )  # CSRF protection via SameSite
         assert settings.authjwt_cookie_samesite == "lax"  # CSRF protection
         assert isinstance(settings.authjwt_cookie_secure, bool)  # Depends on SSL config
 

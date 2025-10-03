@@ -116,7 +116,7 @@ export default function OrgEditImages() {
       }));
 
     const allPreviews = [...imagePreviews, ...videoPreviews];
-    return allPreviews.sort((a, b) => a.order - b.order);
+    return allPreviews.toSorted((a, b) => a.order - b.order);
   });
   const [isPreviewUploading, setIsPreviewUploading] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');

@@ -70,7 +70,7 @@ const AssignmentStudentActivity = () => {
       ) : null}
 
       {assignments?.assignment_tasks
-        ?.sort((a: any, b: any) => a.id - b.id)
+        ?.toSorted((a: any, b: any) => a.id - b.id)
         .map((task: any, index: number) => {
           return (
             <div

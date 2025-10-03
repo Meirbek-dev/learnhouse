@@ -831,7 +831,7 @@ async def handle_assignment_task_submission(
         update_data = assignment_task_submission_object.model_dump(exclude_unset=True)
 
         # Exclude immutable fields that shouldn't be updated
-        immutable_fields = {'assignment_task_submission_uuid'}
+        immutable_fields = {"assignment_task_submission_uuid"}
 
         for field, value in update_data.items():
             if field not in immutable_fields and value is not None:

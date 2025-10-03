@@ -1,9 +1,8 @@
 'use client';
 
+import LHSessionProvider, { useLHSession } from '@components/Contexts/LHSessionContext';
 import StyledComponentsRegistry from '../components/Utils/libs/styled-registry';
-import LHSessionProvider from '@components/Contexts/LHSessionContext';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { updateUserTheme } from '@services/users/users';
 import { SessionProvider } from 'next-auth/react';
 import { motion } from 'framer-motion';

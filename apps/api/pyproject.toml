@@ -4,9 +4,9 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.5"
 dependencies = [
-  "boto3>=1.40.43",
-  "botocore>=1.40.43",
-  "fastapi[standard-no-fastapi-cloud-cli]==0.118.0",
+  "boto3>=1.40.44",
+  "botocore>=1.40.44",
+  "fastapi[standard-no-fastapi-cloud-cli]>=0.118.0",
   "fastapi-another-jwt-auth>=0.1.11",
   "langchain>=0.3.27",
   "langchain-chroma>=0.2.6",
@@ -14,7 +14,7 @@ dependencies = [
   "langchain-core>=0.3.77",
   "langchain-openai>=0.3.34",
   "langchain-text-splitters>=0.3.11",
-  "openai>=2.0.1",
+  "openai>=2.1.0",
   "psycopg[binary,pool]>=3.2.10",
   "pydantic[email]>=2.11.9",
   "python-dotenv>=1.1.1",
@@ -47,23 +47,7 @@ dev = [
   "pytest>=8.4.2",
   "pytest-asyncio>=1.2.0",
   "pytest-cov<6.0.0",
-  "ruff>=0.13.2",
-]
-
-
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
-markers = ["asyncio: mark test as async"]
-filterwarnings = [
-  "ignore::DeprecationWarning",
-  "ignore::UserWarning",
-  "ignore:.*crypt.*deprecated.*",
-  "ignore:.*utcnow.*deprecated.*",
-  "ignore:.*obj.dict.*deprecated.*",
-  "ignore:.*Instrumentation will have no effect.*",
-  "ignore:.*handler names should be lower-case.*",
-  "ignore:.*Importing tools from langchain is deprecated.*",
+  "ruff>=0.13.3",
 ]
 
 [tool.ruff]
@@ -83,6 +67,21 @@ lint.ignore = [
   "D100",    # missing docstring in public module
   "S101",    # Use of `assert` detected
   "TD002",   # Missing author in TODO;
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["asyncio: mark test as async"]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::UserWarning",
+  "ignore:.*crypt.*deprecated.*",
+  "ignore:.*utcnow.*deprecated.*",
+  "ignore:.*obj.dict.*deprecated.*",
+  "ignore:.*Instrumentation will have no effect.*",
+  "ignore:.*handler names should be lower-case.*",
+  "ignore:.*Importing tools from langchain is deprecated.*",
 ]
 
 format.quote-style = "double"

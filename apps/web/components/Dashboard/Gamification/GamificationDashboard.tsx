@@ -135,7 +135,9 @@ export function GamificationDashboard({
 
   const sortedTransactions = useMemo(() => {
     const list: XPTransaction[] = dashboardData?.recent_transactions ?? [];
-    return [...list].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10);
+    return [...list]
+      .toSorted((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 10);
   }, [dashboardData]);
 
   if (!dashboardData) {
