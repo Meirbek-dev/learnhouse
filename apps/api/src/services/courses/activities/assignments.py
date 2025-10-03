@@ -829,8 +829,13 @@ async def handle_assignment_task_submission(
 
         # Update only the fields that were passed in using model_dump with exclude_unset
         update_data = assignment_task_submission_object.model_dump(exclude_unset=True)
+
+        # Exclude immutable fields that shouldn't be updated
+        immutable_fields = {'assignment_task_submission_uuid'}
+
         for field, value in update_data.items():
-            setattr(assignment_task_submission, field, value)
+            if field not in immutable_fields and value is not None:
+                setattr(assignment_task_submission, field, value)
 
         assignment_task_submission.update_date = datetime.now().isoformat()
 
