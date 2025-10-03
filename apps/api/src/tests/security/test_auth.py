@@ -282,3 +282,31 @@ class TestAuth:
 
         assert exc_info.value.status_code == 401
         assert "Not authenticated" in exc_info.value.detail
+
+    def test_jwt_secret_generation_in_dev_mode(self) -> None:
+        """Test that JWT secret is properly generated in development mode"""
+        from src.security.auth import _get_jwt_secret
+
+        secret = _get_jwt_secret()
+
+        # Verify secret is a non-empty string
+        assert isinstance(secret, str)
+        assert len(secret) > 0
+
+        # Verify secret is sufficiently long (secure)
+        # token_urlsafe(32) generates ~43 character base64 string
+        if secret != "secret":  # If not using hardcoded dev secret
+            assert len(secret) >= 32, "Generated secret should be at least 32 characters"
+
+    def test_settings_cookie_security(self) -> None:
+        """Test that cookie security settings are properly configured"""
+        settings = Settings()
+
+        # Verify cookie security settings
+        assert settings.authjwt_cookie_csrf_protect is False  # CSRF protection via SameSite
+        assert settings.authjwt_cookie_samesite == "lax"  # CSRF protection
+        assert isinstance(settings.authjwt_cookie_secure, bool)  # Depends on SSL config
+
+        # Verify token location includes cookies
+        assert "cookies" in settings.authjwt_token_location
+        assert "headers" in settings.authjwt_token_location

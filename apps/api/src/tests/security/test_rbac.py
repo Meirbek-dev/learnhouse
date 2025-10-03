@@ -486,7 +486,7 @@ class TestRBAC:
             await authorization_verify_if_user_is_anon(user_id=0)
 
         assert exc_info.value.status_code == 403
-        assert "You should be logged in to perform this action" in exc_info.value.detail
+        assert "You must be logged in to perform this action" in exc_info.value.detail
 
     @pytest.mark.asyncio
     async def test_authorization_verify_if_user_is_anon_authenticated_user(
