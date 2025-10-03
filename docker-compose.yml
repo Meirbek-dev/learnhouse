@@ -5,7 +5,10 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-      - .:/usr/openu
+      # Mount only the content directory to persist user uploads and org data
+      - app_content:/app/api/content
+      # Mount logs directory to persist application logs
+      - app_logs:/app/api/logs
     env_file:
       - ./extra/.env
     depends_on:
@@ -53,3 +56,5 @@ volumes:
   postgres_data:
   redis_data:
   chromadb_data:
+  app_content:
+  app_logs:
