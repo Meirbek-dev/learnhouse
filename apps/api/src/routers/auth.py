@@ -1,4 +1,5 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
+import logging
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -14,16 +15,31 @@ from src.security.auth import AuthJWT, authenticate_user, get_current_user
 from src.services.auth.utils import signWithGoogle
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 COOKIE_TTL_SECONDS = int(timedelta(hours=8).total_seconds())
 
 
 def _set_access_cookie(response: Response, value: str) -> None:
-    cookie_domain = get_openu_config().hosting_config.cookie_config.domain
+    """
+    Set access token cookie with secure configuration.
+
+    Security features:
+    - httponly=True: Prevents JavaScript access (XSS protection)
+    - secure=True: HTTPS only (when SSL is enabled)
+    - samesite='lax': CSRF protection while allowing normal navigation
+    """
+    openu_config = get_openu_config()
+    cookie_domain = openu_config.hosting_config.cookie_config.domain
+    is_ssl_enabled = openu_config.hosting_config.ssl
+
     cookie_kwargs: dict[str, object] = {
-        "httponly": False,
+        "httponly": True,  # ✅ Prevent XSS attacks
+        "secure": bool(is_ssl_enabled),  # ✅ HTTPS only in production
+        "samesite": "lax",  # ✅ CSRF protection
         "expires": COOKIE_TTL_SECONDS,
     }
+
     if cookie_domain:
         cookie_kwargs["domain"] = cookie_domain
 
@@ -59,10 +75,25 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
+    # Extract client info for security logging
+    client_ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
     user = await authenticate_user(
         request, form_data.username, form_data.password, db_session
     )
+
     if not user:
+        # Log failed authentication attempt
+        logger.warning(
+            "Failed login attempt",
+            extra={
+                "email": form_data.username,
+                "ip_address": client_ip,
+                "user_agent": user_agent,
+                "reason": "invalid_credentials",
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect Email or password",
@@ -76,11 +107,29 @@ async def login(
     # set cookies using fastapi
     _set_access_cookie(response, access_token)
 
-    user = UserRead.model_validate(user)
+    user_read = UserRead.model_validate(user)
+
+    # Calculate token expiry timestamp (8 hours from now in milliseconds)
+    expiry_timestamp = int((datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000)
+
+    # Log successful authentication
+    logger.info(
+        "Successful login",
+        extra={
+            "user_id": user.id,
+            "email": user.email,
+            "ip_address": client_ip,
+            "user_agent": user_agent,
+        },
+    )
 
     return {
-        "user": user,
-        "tokens": {"access_token": access_token, "refresh_token": refresh_token},
+        "user": user_read,
+        "tokens": {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "expiry": expiry_timestamp,
+        },
     }
 
 
@@ -101,6 +150,10 @@ async def third_party_login(
     db_session=Depends(get_db_session),
     Authorize: Annotated[AuthJWT, Depends()] = None,
 ):
+    # Extract client info for security logging
+    client_ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
     # Google
     if body.provider == "google":
         user = await signWithGoogle(
@@ -108,6 +161,17 @@ async def third_party_login(
         )
 
     if not user:
+        # Log failed OAuth attempt
+        logger.warning(
+            "Failed OAuth login",
+            extra={
+                "provider": body.provider,
+                "email": body.email,
+                "ip_address": client_ip,
+                "user_agent": user_agent,
+                "reason": "oauth_authentication_failed",
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect Email or password",
@@ -121,11 +185,30 @@ async def third_party_login(
     # set cookies using fastapi
     _set_access_cookie(response, access_token)
 
-    user = UserRead.model_validate(user)
+    user_read = UserRead.model_validate(user)
+
+    # Calculate token expiry timestamp (8 hours from now in milliseconds)
+    expiry_timestamp = int((datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000)
+
+    # Log successful OAuth authentication
+    logger.info(
+        "Successful OAuth login",
+        extra={
+            "user_id": user.id,
+            "email": user.email,
+            "provider": body.provider,
+            "ip_address": client_ip,
+            "user_agent": user_agent,
+        },
+    )
 
     return {
-        "user": user,
-        "tokens": {"access_token": access_token, "refresh_token": refresh_token},
+        "user": user_read,
+        "tokens": {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "expiry": expiry_timestamp,
+        },
     }
 
 

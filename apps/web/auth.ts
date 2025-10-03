@@ -75,13 +75,25 @@ export const isDevEnv = process.env.NODE_ENV !== 'production';
 
 // Helper function to validate token expiry
 const isTokenExpiringSoon = (expiry: number, bufferMs: number = TOKEN_REFRESH_BUFFER): boolean => {
-  // Handle missing or invalid expiry
+  // Handle missing or invalid expiry - but don't force unnecessary refreshes
   if (!expiry || typeof expiry !== 'number' || expiry <= 0) {
-    console.warn('Invalid token expiry, triggering refresh');
-    return true; // Force refresh if expiry is invalid
+    // If expiry is invalid, assume token is still valid but check on next session callback
+    // This prevents constant refresh attempts when backend doesn't send expiry
+    console.warn('Token missing expiry timestamp, assuming valid for this request');
+    return false; // Don't trigger refresh for missing expiry
   }
 
-  return Date.now() + bufferMs >= expiry;
+  // Token is expiring soon if current time + buffer is past expiry
+  const isExpiring = Date.now() + bufferMs >= expiry;
+
+  if (isExpiring) {
+    console.log('Token expiring soon, will refresh', {
+      expiresAt: new Date(expiry).toISOString(),
+      bufferMs,
+    });
+  }
+
+  return isExpiring;
 };
 
 // Helper function to create cache key

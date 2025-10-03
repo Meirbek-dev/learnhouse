@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-
+import logging
+import secrets
 import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -13,6 +14,8 @@ from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import ALGORITHM, SECRET_KEY
 from src.services.dev.dev import isDevModeEnabled
 from src.services.users.users import security_get_user, security_verify_password
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_secure_flag(value: bool | str | None) -> bool:
@@ -33,8 +36,37 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 #### JWT Auth ####################################################
+
+# Generate a secure JWT secret for development mode if not provided
+def _get_jwt_secret() -> str:
+    """
+    Get JWT secret key with secure fallback for development.
+
+    Security improvements:
+    - Auto-generates secure random key in dev mode
+    - Logs warning when using generated key
+    """
+    if SECRET_KEY:
+        return SECRET_KEY
+
+    # Only generate in dev mode, production must have SECRET_KEY
+    if isDevModeEnabled():
+        generated_key = secrets.token_urlsafe(32)
+        logger.warning(
+            "⚠️  Using auto-generated JWT secret in development mode. "
+            "Set OPENU_AUTH_JWT_SECRET_KEY environment variable for production."
+        )
+        return generated_key
+
+    # Production without SECRET_KEY should fail explicitly
+    raise ValueError(
+        "OPENU_AUTH_JWT_SECRET_KEY must be set in production environment. "
+        "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+    )
+
+
 class Settings(PydanticStrictBaseModel):
-    authjwt_secret_key: str = "secret" if isDevModeEnabled() else SECRET_KEY
+    authjwt_secret_key: str = _get_jwt_secret()
     authjwt_token_location: set[str] = {"cookies", "headers"}
     authjwt_cookie_csrf_protect: bool = False
     authjwt_access_token_expires: float | bool = (
