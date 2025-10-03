@@ -51,20 +51,54 @@ def _set_access_cookie(response: Response, value: str) -> None:
 
 
 @router.get("/refresh")
-def refresh(response: Response, Authorize: Annotated[AuthJWT, Depends()]):
+def refresh(
+    request: Request,
+    response: Response,
+    Authorize: Annotated[AuthJWT, Depends()],
+):
     """
-    The jwt_refresh_token_required() function insures a valid refresh
-    token is present in the request before running any code below that function.
-    we can use the get_jwt_subject() function to get the subject of the refresh
-    token, and use the create_access_token() function again to make a new access token
+    Token refresh with rotation.
+
+    Security features:
+    - Issues new refresh token on each use (token rotation)
+    - Invalidates old refresh token
+    - Logs refresh events for monitoring
+    - Returns both new access and refresh tokens
+
+    This prevents stolen refresh tokens from being used indefinitely.
     """
     Authorize.jwt_refresh_token_required()
 
     current_user = Authorize.get_jwt_subject()
+
+    # Create NEW tokens (both access and refresh)
     new_access_token = Authorize.create_access_token(subject=current_user)
+    new_refresh_token = Authorize.create_refresh_token(subject=current_user)
+
+    # Set the new refresh token in cookies (this invalidates the old one)
+    Authorize.set_refresh_cookies(new_refresh_token)
+
+    # Calculate token expiry timestamp (8 hours from now in milliseconds)
+    expiry_timestamp = int((datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000)
+
+    # Log token refresh with rotation
+    client_ip = request.client.host if request.client else "unknown"
+    logger.info(
+        "Token refresh with rotation",
+        extra={
+            "email": current_user,
+            "ip_address": client_ip,
+            "rotation": True,
+        },
+    )
 
     _set_access_cookie(response, new_access_token)
-    return {"access_token": new_access_token}
+
+    return {
+        "access_token": new_access_token,
+        "refresh_token": new_refresh_token,  # Return new refresh token
+        "expiry": expiry_timestamp,
+    }
 
 
 @router.post("/login")
@@ -213,13 +247,29 @@ async def third_party_login(
 
 
 @router.delete("/logout")
-def logout(Authorize: Annotated[AuthJWT, Depends()]) -> dict[str, str]:
+def logout(
+    request: Request,
+    Authorize: Annotated[AuthJWT, Depends()],
+) -> dict[str, str]:
     """
     Because the JWT are stored in an httponly cookie now, we cannot
     log the user out by simply deleting the cookies in the frontend.
     We need the backend to send us a response to delete the cookies.
     """
     Authorize.jwt_required()
+
+    # Get user info before logout for logging
+    current_user = Authorize.get_jwt_subject()
+    client_ip = request.client.host if request.client else "unknown"
+
+    # Log logout event
+    logger.info(
+        "User logout",
+        extra={
+            "email": current_user,
+            "ip_address": client_ip,
+        },
+    )
 
     Authorize.unset_jwt_cookies()
     return {"msg": "Successfully logout"}
