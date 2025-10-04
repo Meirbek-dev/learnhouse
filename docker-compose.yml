@@ -33,7 +33,7 @@ services:
       timeout: 5s
       retries: 5
   redis:
-    image: redis:8.2.1-bookworm
+    image: redis:8.2.2-bookworm
     restart: unless-stopped
     ports:
       - '6379:6379'

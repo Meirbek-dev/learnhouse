@@ -1,6 +1,6 @@
 'use client';
 
-import * as SheetPrimitive from '@radix-ui/react-dialog';
+import { Dialog as SheetPrimitive } from 'radix-ui';
 import { useTranslations } from 'next-intl';
 import type { ComponentProps } from 'react';
 import { XIcon } from 'lucide-react';

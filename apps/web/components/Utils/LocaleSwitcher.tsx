@@ -1,10 +1,9 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { updateUserLocale } from '@services/users/users';
 import { useLocale, useTranslations } from 'next-intl';
-import { SelectValue } from '@radix-ui/react-select';
 import { setUserLocale } from '@/i18n/locale';
 import { useRouter } from 'next/navigation';
 import type { Locale } from '@/i18n/config';

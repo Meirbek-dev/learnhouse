@@ -19,9 +19,19 @@ import {
   VolumeX,
   Youtube,
 } from 'lucide-react';
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+  useFormField,
+} from '@/components/ui/form';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
-import * as Collapsible from '@radix-ui/react-collapsible';
 import { AnimatePresence, motion } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';
 import { useCallback, useMemo, useState } from 'react';
@@ -29,7 +39,6 @@ import { Separator } from '@components/ui/separator';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
 import { cn, generateUUID } from '@/lib/utils';
-import * as Form from '@radix-ui/react-form';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
@@ -650,12 +659,12 @@ const VideoSettingsForm = ({
   }, [videoDetails.startTime, videoDetails.endTime]);
 
   return (
-    <Collapsible.Root
+    <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
       className="mt-6"
     >
-      <Collapsible.Trigger asChild>
+      <CollapsibleTrigger asChild>
         <Button
           variant="outline"
           className="flex w-full items-center justify-between border-2 p-8 transition-colors duration-200 hover:border-gray-300 hover:bg-gray-50"
@@ -683,9 +692,9 @@ const VideoSettingsForm = ({
             className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           />
         </Button>
-      </Collapsible.Trigger>
+      </CollapsibleTrigger>
 
-      <Collapsible.Content className="data-[state=closed]:animate-slideUp data-[state=open]:animate-slideDown overflow-hidden">
+      <CollapsibleContent className="data-[state=closed]:animate-slideUp data-[state=open]:animate-slideDown overflow-hidden">
         <div className="mt-3 space-y-6 rounded-lg border-2 border-gray-100 bg-gradient-to-br from-gray-50 to-white p-6 shadow-sm">
           {/* Timing Controls */}
           <div className="space-y-4">
@@ -833,8 +842,8 @@ const VideoSettingsForm = ({
             />
           </div>
         </div>
-      </Collapsible.Content>
-    </Collapsible.Root>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
@@ -981,7 +990,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
   return (
     <div className="mx-auto max-w-4xl">
-      <Form.Root
+      <form
         onSubmit={handleSubmit}
         className="space-y-6"
       >
@@ -1263,7 +1272,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
             )}
           </Button>
         </div>
-      </Form.Root>
+      </form>
     </div>
   );
 };

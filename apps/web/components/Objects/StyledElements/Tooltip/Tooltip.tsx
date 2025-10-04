@@ -1,5 +1,5 @@
 'use client';
-import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import { Tooltip, TooltipTrigger, TooltipContent as TooltipContentPrimitive } from '@/components/ui/tooltip';
 import styled, { css, keyframes } from 'styled-components';
 import type { ReactNode } from 'react';
 
@@ -13,21 +13,17 @@ interface TooltipProps {
 }
 
 const ToolTip = ({ sideOffset, content, children, side = 'bottom', slateBlack, unstyled }: TooltipProps) => (
-  <TooltipPrimitive.Provider delayDuration={200}>
-    <TooltipPrimitive.Root>
-      <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
-      <TooltipPrimitive.Portal>
-        <TooltipContent
-          slateBlack={slateBlack}
-          unstyled={unstyled}
-          side={side}
-          sideOffset={sideOffset}
-        >
-          {content}
-        </TooltipContent>
-      </TooltipPrimitive.Portal>
-    </TooltipPrimitive.Root>
-  </TooltipPrimitive.Provider>
+  <Tooltip>
+    <TooltipTrigger asChild>{children}</TooltipTrigger>
+    <StyledTooltipContent
+      slateBlack={slateBlack}
+      unstyled={unstyled}
+      side={side}
+      sideOffset={sideOffset}
+    >
+      {content}
+    </StyledTooltipContent>
+  </Tooltip>
 );
 
 const slideUpAndFade = keyframes({
@@ -60,7 +56,7 @@ interface TooltipContentProps {
   unstyled?: boolean;
 }
 
-const TooltipContent = styled(TooltipPrimitive.Content).withConfig({
+const StyledTooltipContent = styled(TooltipContentPrimitive).withConfig({
   shouldForwardProp: (prop) => !['slateBlack', 'unstyled'].includes(prop),
 })<TooltipContentProps>`
   border-radius: 4px;
