@@ -109,7 +109,7 @@ export default AssignmentEdit;
 const BrdCmpx = () => {
   const assignment = useAssignments();
 
-  useEffect(() => {}, [assignment]);
+  useEffect(() => {}, []);
 
   return (
     <BreadCrumbs
@@ -147,7 +147,7 @@ const PublishingState = () => {
     }
   }
 
-  useEffect(() => {}, [assignment]);
+  useEffect(() => {}, []);
 
   return (
     <>

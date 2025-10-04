@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.5/schema.json",
   "files": {
     "ignoreUnknown": true,
     "includes": ["**"],
@@ -49,7 +49,7 @@
         "useImportExtensions": "off"
       },
       "nursery": {
-        "useSortedClasses": "warn"
+        "useSortedClasses": "off"
       },
       "performance": {
         "noImgElement": "off",
@@ -81,7 +81,8 @@
         "noExplicitAny": "off",
         "noReactSpecificProps": "off",
         "noShadowRestrictedNames": "off",
-        "useAwait": "off"
+        "useAwait": "off",
+        "noUnknownAtRules": "off"
       }
     }
   },

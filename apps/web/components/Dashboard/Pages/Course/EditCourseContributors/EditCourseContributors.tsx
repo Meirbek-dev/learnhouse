@@ -167,7 +167,7 @@ const StatusDropdown = ({
   </DropdownMenu>
 );
 
-const EditCourseContributors = (props: EditCourseContributorsProps) => {
+const EditCourseContributors = (_props: EditCourseContributorsProps) => {
   const t = useTranslations('DashPage.EditCourseContributors');
   const locale = useLocale() as Locale;
   const session = useLHSession();
@@ -438,7 +438,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
                         size={32}
                       />
                       <div className="text-xl font-bold text-slate-700 sm:text-2xl">{t('openToContributorsTitle')}</div>
-                      <div className="sm:text-md w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px]">
+                      <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
                         {t('openToContributorsDescription')}
                       </div>
                     </div>
@@ -468,7 +468,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
                       <div className="text-xl font-bold text-slate-700 sm:text-2xl">
                         {t('closeToContributorsTitle')}
                       </div>
-                      <div className="sm:text-md w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px]">
+                      <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
                         {t('closeToContributorsDescription')}
                       </div>
                     </div>

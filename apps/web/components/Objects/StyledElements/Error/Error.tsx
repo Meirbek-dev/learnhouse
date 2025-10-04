@@ -38,7 +38,7 @@ const ErrorUI = ({ message, submessage }: { message?: string; submessage?: strin
             className="text-rose-200"
             size={17}
           />
-          <span className="text-md font-bold">{t('retryButton')}</span>
+          <span className="text-base font-bold">{t('retryButton')}</span>
         </button>
         <Link
           href={getUriWithoutOrg('/home')}
@@ -48,7 +48,7 @@ const ErrorUI = ({ message, submessage }: { message?: string; submessage?: strin
             className="text-gray-200"
             size={17}
           />
-          <span className="text-md font-bold">{t('homeButton')}</span>
+          <span className="text-base font-bold">{t('homeButton')}</span>
         </Link>
       </div>
     </div>

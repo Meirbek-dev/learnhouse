@@ -28,7 +28,7 @@ const AssignmentSubmissionsSubPage = ({ assignment_uuid }: { assignment_uuid: st
 
   useEffect(() => {
     console.log(assignmentSubmission);
-  }, [session, assignmentSubmission]);
+  }, [assignmentSubmission]);
 
   const renderSubmissions = (status: string) => {
     return assignmentSubmission

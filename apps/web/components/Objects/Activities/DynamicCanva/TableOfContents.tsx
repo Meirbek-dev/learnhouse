@@ -15,7 +15,6 @@ interface HeadingItem {
 
 const TableOfContents = ({ editor }: TableOfContentsProps) => {
   const [headings, setHeadings] = useState<HeadingItem[]>([]);
-  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     if (!editor) return;

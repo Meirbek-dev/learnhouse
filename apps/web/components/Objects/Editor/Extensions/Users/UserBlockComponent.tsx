@@ -18,7 +18,6 @@ import {
   Users,
 } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getUser, getUserByUsername } from '@services/users/users';
 import { useCallback, useEffect, useState } from 'react';
@@ -73,7 +72,6 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 
 const UserBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.UserBlock');
-  const session = useLHSession();
   const editorState = useEditorProvider();
   const { isEditable } = editorState;
   const router = useRouter();

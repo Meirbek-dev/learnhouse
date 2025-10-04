@@ -107,7 +107,7 @@ const CollectionsPage = async (params: any) => {
             <div className="col-span-full flex items-center justify-center py-8">
               <div className="text-center">
                 <h1 className="mb-2 text-xl font-bold text-gray-600">{t('noContent')}</h1>
-                <p className="text-md text-gray-400">
+                <p className="text-base text-gray-400">
                   <ContentPlaceHolderIfUserIsNotAdmin text={t('noContentUserAdmin')} />
                 </p>
                 <div className="mt-4 flex justify-center">

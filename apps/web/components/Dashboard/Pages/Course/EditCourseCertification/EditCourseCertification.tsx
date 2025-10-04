@@ -21,10 +21,10 @@ interface EditCourseCertificationProps {
   course_uuid?: string;
 }
 
-const EditCourseCertification = (props: EditCourseCertificationProps) => {
+const EditCourseCertification = (_props: EditCourseCertificationProps) => {
   const [error, setError] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
   const [hasInitialized, setHasInitialized] = useState(false);
   const course = useCourse();
   const dispatchCourse = useCourseDispatch();
@@ -281,7 +281,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
     courseStructure?.id,
   ]);
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (_values: FormValues) => {
     // This is no longer used - saving is handled by the main Save button
   };
 
@@ -353,7 +353,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
                     >
                       {/* Basic Information Section */}
                       <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
-                        <h3 className="text-md flex items-center gap-2 font-bold text-gray-800">
+                        <h3 className="flex items-center gap-2 text-base font-bold text-gray-800">
                           <FileText size={16} />
                           {t('basicInfo')}
                         </h3>
@@ -439,7 +439,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
 
                       {/* Certificate Design Section */}
                       <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-3 py-3 sm:px-5">
-                        <h3 className="text-md flex items-center gap-2 font-bold text-gray-800">
+                        <h3 className="flex items-center gap-2 text-base font-bold text-gray-800">
                           <Award size={16} />
                           {t('certificateDesign')}
                         </h3>
@@ -557,7 +557,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
                 <div className="lg:col-span-2">
                   <div className="sticky top-6 min-h-[320px] rounded-xl border border-gray-200 bg-white shadow-xs">
                     <div className="mb-3 flex flex-col -space-y-1 rounded-t-xl bg-gray-50 px-3 py-3 sm:px-5">
-                      <h3 className="text-md flex items-center gap-2 font-bold text-gray-800">
+                      <h3 className="flex items-center gap-2 text-base font-bold text-gray-800">
                         <Award size={16} />
                         {t('previewCertificate')}
                       </h3>

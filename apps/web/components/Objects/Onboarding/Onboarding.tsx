@@ -340,7 +340,7 @@ const OnboardingScreen: FC<OnboardingScreenProps> = ({
       </div>
       <div className="onboarding_text flex h-[90px] flex-col px-4 py-2 leading-tight">
         <h2 className="text-xl font-bold">{step.title}</h2>
-        <p className="text-md font-normal">{step.description}</p>
+        <p className="text-base font-normal">{step.description}</p>
       </div>
       <div className="onboarding_actions flex w-full flex-row-reverse px-4">
         <div className="flex w-full flex-row justify-between py-2">

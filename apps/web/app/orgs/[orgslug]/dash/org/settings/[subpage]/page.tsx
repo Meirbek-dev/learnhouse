@@ -87,7 +87,7 @@ const OrgPage = (props: { params: Promise<OrgParams> }) => {
         <div className="my-2 py-2">
           <div className="flex max-w-7xl flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
-            <div className="text-md flex font-medium text-gray-400">{H2Label}</div>
+            <div className="flex text-base font-medium text-gray-400">{H2Label}</div>
           </div>
         </div>
         <div className="flex space-x-0.5 text-sm font-bold">

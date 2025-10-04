@@ -122,7 +122,9 @@ export function GamificationDashboard({
     if (onProfileUpdate && dashboardData?.profile) {
       try {
         onProfileUpdate(dashboardData.profile);
-      } catch {}
+      } catch {
+        // Ignore errors
+      }
     }
   }, [onProfileUpdate, dashboardData?.profile]);
 

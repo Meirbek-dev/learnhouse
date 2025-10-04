@@ -269,11 +269,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
       getAssignmentTaskSubmissionFromIdentifiedUserUI();
     }
   }, [
-    assignmentTaskUUID,
     view,
-    assignment.assignment_object?.assignment_uuid,
-    access_token,
-    user_id,
     getAssignmentTaskUI,
     getAssignmentTaskSubmissionFromUserUI,
     getAssignmentTaskSubmissionFromIdentifiedUserUI,

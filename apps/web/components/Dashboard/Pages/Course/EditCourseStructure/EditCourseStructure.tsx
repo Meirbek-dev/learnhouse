@@ -115,7 +115,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
   useEffect(() => {
     setwinReady(true);
-  }, [props.course_uuid, course_structure, course]);
+  }, []);
 
   if (!course) return <PageLoading />;
 

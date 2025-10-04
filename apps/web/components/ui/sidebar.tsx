@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { VariantProps } from 'class-variance-authority';
-import type { CSSProperties, ComponentProps } from 'react';
+import type { ComponentProps, CSSProperties } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -81,8 +81,12 @@ const SidebarProvider = ({
 
   // Helper to toggle the sidebar.
   const toggleSidebar = useCallback(() => {
-    isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-  }, [isMobile, setOpen, setOpenMobile]);
+    if (isMobile) {
+      setOpenMobile((open) => !open);
+    } else {
+      setOpen((open) => !open);
+    }
+  }, [isMobile, setOpen]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
   useEffect(() => {
@@ -113,7 +117,7 @@ const SidebarProvider = ({
       setOpenMobile,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [state, open, setOpen, isMobile, openMobile, toggleSidebar],
   );
 
   return (

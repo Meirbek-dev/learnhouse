@@ -61,7 +61,7 @@ const AssignmentTaskEditor = ({ page }: any) => {
     if (assignmentTaskState.selectedAssignmentTaskUUID !== assignmentTaskState.assignmentTask.assignment_task_uuid) {
       setSelectedSubPage('general');
     }
-  }, [assignmentTaskState, assignmentTaskStateHook, selectedSubPage, assignment]);
+  }, [assignmentTaskState]);
 
   return (
     <div className="z-20 flex h-full w-full flex-col overflow-auto text-sm font-bold">

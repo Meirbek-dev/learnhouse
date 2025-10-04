@@ -179,7 +179,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [aiChatBotState.messages, session]);
+  }, []);
 
   return (
     <AnimatePresence>
@@ -216,7 +216,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                 />
               </div>
               <div
-                className={`-ml-[120px] flex items-center space-x-1 ${
+                className={`ml-[-120px] flex items-center space-x-1 ${
                   aiChatBotState.isWaitingForResponse ? 'animate-pulse' : ''
                 }`}
               >
@@ -236,7 +236,7 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
                 <div className="flex-col space-y-4">
                   {aiChatBotState.messages.map((message: AIMessage, index: number) => {
                     return (
-                      <AIMessage
+                      <AIMessageComponent
                         key={index}
                         message={message}
                         animated={message.sender === 'ai'}
@@ -301,12 +301,12 @@ const ActivityChatMessageBox = (props: ActivityChatMessageBoxProps) => {
   );
 };
 
-interface AIMessageProps {
+interface AIMessageComponentProps {
   message: AIMessage;
   animated: boolean;
 }
 
-const AIMessage = (props: AIMessageProps) => {
+const AIMessageComponent = (props: AIMessageComponentProps) => {
   const words = props.message.message.split(' ');
 
   return (
@@ -327,7 +327,7 @@ const AIMessage = (props: AIMessageProps) => {
       </div>
       <div className="w-full">
         <p
-          className="text-md w-full rounded-lg px-2 py-1 text-white outline-hidden placeholder:text-white/30"
+          className="w-full rounded-lg px-2 py-1 text-base text-white outline-hidden placeholder:text-white/30"
           id=""
         >
           <AnimatePresence>

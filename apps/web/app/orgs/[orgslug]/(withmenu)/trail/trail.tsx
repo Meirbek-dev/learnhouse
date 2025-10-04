@@ -58,7 +58,7 @@ const Trail = (params: any) => {
     }
   };
 
-  useEffect(() => {}, [trail, org]);
+  useEffect(() => {}, []);
 
   return (
     <GeneralWrapperStyled>

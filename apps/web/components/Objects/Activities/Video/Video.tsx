@@ -93,7 +93,7 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
       const id = getYouTubeID(activity.content.uri);
       setVideoId(id || '');
     }
-  }, [activity, org]);
+  }, [activity]);
 
   const getVideoSrc = () => {
     if (!activity.content?.filename) return '';
@@ -140,7 +140,7 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
                 className="size-full"
                 startTime={activity.details?.startTime}
                 endTime={activity.details?.endTime}
-                onPlayerReady={(art: ArtplayerType) => {}}
+                onPlayerReady={(_art: ArtplayerType) => {}}
               />
             )}
             {activity.activity_sub_type === 'SUBTYPE_VIDEO_YOUTUBE' && (

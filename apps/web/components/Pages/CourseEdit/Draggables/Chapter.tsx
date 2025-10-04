@@ -56,7 +56,7 @@ const Chapter = (props: any) => {
           className="mx-auto mb-5 block max-w-(--breakpoint-2xl) rounded-lg border border-white/[0.19] bg-white px-5 py-3 text-[15px] shadow-sm transition-all duration-200 ease-in-out [&_h3]:px-5"
           key={props.info.list.chapter.id}
         >
-          <div className="text-md flex items-center space-x-2 pt-3 pr-3 font-bold">
+          <div className="flex items-center space-x-2 pt-3 pr-3 text-base font-bold">
             <div className="flex grow items-center space-x-3 rounded-md px-3 py-1 text-lg">
               <div className="rounded-md bg-neutral-100 p-2">
                 <Hexagon

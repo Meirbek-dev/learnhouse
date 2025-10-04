@@ -108,7 +108,7 @@ const ConfirmationModal = (params: ModalParams) => {
         }
       })();
     });
-  }, [params, isPending, startTransition]);
+  }, [params, isPending]);
 
   const statusConfig = getStatusConfig();
   const sizeConfig = getSizeConfig();

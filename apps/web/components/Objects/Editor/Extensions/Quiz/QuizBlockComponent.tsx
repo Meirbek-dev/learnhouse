@@ -272,10 +272,10 @@ const QuizBlockComponent = (props: any) => {
                       onChange={(e) => {
                         changeQuestionValue(question.question_id, e.target.value);
                       }}
-                      className="text-md w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] p-2 font-bold text-slate-800"
+                      className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] p-2 text-base font-bold text-slate-800"
                     />
                   ) : (
-                    <p className="text-md w-full rounded-md bg-[#00008b00] p-2 font-bold break-words text-slate-800">
+                    <p className="w-full rounded-md bg-[#00008b00] p-2 text-base font-bold break-words text-slate-800">
                       {question.question}
                     </p>
                   )}

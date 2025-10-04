@@ -2,8 +2,8 @@
 
 import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
-import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { useFormatter, useTranslations } from 'next-intl';
 import { swrFetcher } from '@services/utils/ts/requests';
 import type React from 'react';
 import Link from 'next/link';
@@ -16,7 +16,6 @@ interface UserCertificatesProps {
 const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   const session = useLHSession();
   const access_token = session?.data?.tokens?.access_token;
-  const locale = useLocale();
   const format = useFormatter();
   const t = useTranslations('Certificates.UserCertificates');
 

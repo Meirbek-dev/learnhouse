@@ -39,7 +39,7 @@ const InfoUI = ({
               className="text-yellow-200"
               size={17}
             />
-            <span className="text-md font-bold">{cta}</span>
+            <span className="text-base font-bold">{cta}</span>
           </Link>
           <Link
             href={getUriWithoutOrg('/home')}
@@ -49,7 +49,7 @@ const InfoUI = ({
               className="text-gray-200"
               size={17}
             />
-            <span className="text-md font-bold">{t('homeButton')}</span>
+            <span className="text-base font-bold">{t('homeButton')}</span>
           </Link>
         </div>
       ) : null}

@@ -7,18 +7,17 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { Backpack, Calendar, Download, EllipsisVertical, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { getTaskRefFileDir } from '@services/media/media';
-import { useFormatter, useTranslations } from 'next-intl';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import Link from 'next/link';
 
 const AssignmentStudentActivity = () => {
   const t = useTranslations('Activities.AssignmentStudentActivity');
-  const format = useFormatter();
   const assignments = useAssignments();
   const org = useOrg() as any;
 
-  useEffect(() => {}, [assignments, org]);
+  useEffect(() => {}, []);
 
   return (
     <div className="flex flex-col space-y-4 md:space-y-6">

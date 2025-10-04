@@ -147,7 +147,7 @@ const useNavigationItems = () => {
 };
 
 // Navigation item component
-const NavigationItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boolean }) => (
+const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boolean }) => (
   <SidebarMenuItem className={isCollapsed ? 'flex w-full justify-center' : ''}>
     <SidebarMenuButton
       asChild
@@ -304,7 +304,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
             <SidebarGroupContent className={isCollapsed ? 'px-2' : ''}>
               <SidebarMenu className={`space-y-1 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
                 {navigationItems.map((item) => (
-                  <NavigationItem
+                  <NavItem
                     key={item.href}
                     item={item}
                     isCollapsed={isCollapsed}

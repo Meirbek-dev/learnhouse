@@ -12,7 +12,7 @@ const OrgScripts: React.FC = () => {
   const t = useTranslations('DashPage.OrgScripts');
 
   // Function to cleanup existing scripts
-  const cleanupExistingScript = (scriptId: string) => {
+  const cleanupExistingScript = useCallback((scriptId: string) => {
     const existingScript = document.getElementById(scriptId);
     if (existingScript) {
       const parent = existingScript.parentNode;
@@ -32,16 +32,16 @@ const OrgScripts: React.FC = () => {
         parent.removeChild(existingScript);
       }
     }
-  };
+  }, []);
 
   // Function to check if script is already loaded
-  const isScriptLoaded = (scriptName: string): boolean => {
+  const isScriptLoaded = useCallback((scriptName: string): boolean => {
     const scripts = document.querySelectorAll(`script[data-script-name="${scriptName}"]`);
     return scripts.length > 0;
-  };
+  }, []);
 
   // Function to sanitize script content using DOMPurify
-  const sanitizeScriptContent = (content: string): string => {
+  const sanitizeScriptContent = useCallback((content: string): string => {
     if (typeof window === 'undefined') {
       return content;
     }
@@ -81,7 +81,7 @@ const OrgScripts: React.FC = () => {
       ALLOWED_ATTR: [],
       WHOLE_DOCUMENT: false,
     });
-  };
+  }, []);
 
   // Function to safely load and execute a script
   const loadScript = useCallback(
@@ -182,7 +182,7 @@ const OrgScripts: React.FC = () => {
         console.error(t('failedToLoadScript', { scriptName }), error);
       }
     },
-    [t, org?.id, org?.slug],
+    [t, org?.id, org?.slug, cleanupExistingScript, isScriptLoaded, sanitizeScriptContent],
   );
 
   useEffect(() => {
@@ -206,7 +206,7 @@ const OrgScripts: React.FC = () => {
         cleanupExistingScript(script.id);
       });
     };
-  }, [org, loadScript]);
+  }, [org, loadScript, cleanupExistingScript]);
 
   return null;
 };

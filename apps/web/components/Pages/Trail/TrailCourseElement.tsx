@@ -38,7 +38,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
 
   async function quitCourse(course_uuid: string) {
     // Close activity
-    const activity = await removeCourse(course_uuid, orgslug, access_token);
+    await removeCourse(course_uuid, orgslug, access_token);
     // Mutate course
     await revalidateTags(['courses'], orgslug);
     router.refresh();
@@ -69,7 +69,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
     fetchCourseCertificate();
   }, [access_token, course_progress, course.course_uuid]);
 
-  useEffect(() => {}, [course, org]);
+  useEffect(() => {}, []);
 
   return (
     <div

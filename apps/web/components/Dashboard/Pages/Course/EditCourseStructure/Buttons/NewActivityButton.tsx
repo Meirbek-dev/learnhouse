@@ -84,7 +84,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     router.refresh();
   };
 
-  useEffect(() => {}, [course]);
+  useEffect(() => {}, []);
 
   return (
     <div className="flex justify-center">

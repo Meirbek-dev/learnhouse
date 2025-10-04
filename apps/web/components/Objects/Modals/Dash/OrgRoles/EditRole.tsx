@@ -510,18 +510,6 @@ function EditRole(props: EditRoleProps) {
   };
 
   const handlePredefinedRole = (roleKey: string) => {
-    const roleKeyMapping: { [key: string]: string } = {
-      'Admin': 'admin',
-      'Course Manager': 'courseManager',
-      'Instructor': 'instructor',
-      'Viewer': 'viewer',
-      'Content Creator': 'contentCreator',
-      'User Manager': 'userManager',
-      'Moderator': 'moderator',
-      'Analyst': 'analyst',
-      'Guest': 'guest',
-    };
-
     const role = predefinedRolesData[roleKey as keyof typeof predefinedRolesData];
     if (role) {
       form.setValue('name', role.name);

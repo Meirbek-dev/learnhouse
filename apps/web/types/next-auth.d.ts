@@ -44,7 +44,10 @@ declare module 'next-auth' {
     expires: string;
   }
 
-  interface User extends UserWithTokens {}
+  // Use a type alias instead of an empty interface extension to avoid
+  // '@typescript-eslint/no-empty-object-type'. This keeps `User` equivalent to
+  // `UserWithTokens` for compatibility with next-auth's types.
+  type User = UserWithTokens;
 }
 
 declare module 'next-auth/jwt' {

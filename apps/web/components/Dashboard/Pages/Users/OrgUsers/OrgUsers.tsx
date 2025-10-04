@@ -69,7 +69,7 @@ const OrgUsers = () => {
           <div className="mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4 shadow-xs">
             <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('activeUsersTitle')}</h1>
-              <h2 className="text-md text-gray-500"> {t('description')}</h2>
+              <h2 className="text-base text-gray-500"> {t('description')}</h2>
             </div>
             <div className="overflow-x-auto">
               <Table className="overflow-hidden">

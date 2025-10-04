@@ -19,18 +19,8 @@ import {
   VolumeX,
   Youtube,
 } from 'lucide-react';
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-  useFormField,
-} from '@/components/ui/form';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { constructAcceptValue } from '@/lib/constants';
@@ -70,15 +60,6 @@ interface ExternalVideoObject {
   chapter_id: number;
   details: VideoDetails;
 }
-
-const LANGUAGE_OPTIONS = [
-  { code: 'en', label: 'English', flag: '🇺🇸' },
-  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
-  { code: 'kz', label: 'Қазақша', flag: '🇰🇿' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-];
 
 const getLocalizedLanguageOptions = (t: any) => [
   { code: 'en', label: t('languageEnglish'), flag: '🇺🇸' },

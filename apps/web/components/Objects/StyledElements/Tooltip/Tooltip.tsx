@@ -1,5 +1,5 @@
 'use client';
-import { Tooltip, TooltipTrigger, TooltipContent as TooltipContentPrimitive } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent as TooltipContentPrimitive, TooltipTrigger } from '@/components/ui/tooltip';
 import styled, { css, keyframes } from 'styled-components';
 import type { ReactNode } from 'react';
 

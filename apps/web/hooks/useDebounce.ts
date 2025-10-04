@@ -3,9 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 // Function debouncing
 type AnyFunction = (...args: any[]) => any;
 
-export function useDebounce<T extends AnyFunction>(callback: T, delay: number): T;
-export function useDebounce<T>(value: T, delay: number): T;
-
 // Implementation
 export function useDebounce<T>(valueOrCallback: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(valueOrCallback);

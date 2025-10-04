@@ -27,7 +27,6 @@ import { z } from 'zod';
 const CourseUpdates = () => {
   const course = useCourse();
   const session = useLHSession() as any;
-  const locale = useDateFnsLocale();
   const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(`${getAPIUrl()}courses/${course?.courseStructure.course_uuid}/updates`, (url) =>
     swrFetcher(url, access_token),
@@ -159,7 +158,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
     }
   };
 
-  useEffect(() => {}, [course, org]);
+  useEffect(() => {}, []);
 
   return (
     <div className="soft-shadow flex w-[700px] flex-col -space-y-2 overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">

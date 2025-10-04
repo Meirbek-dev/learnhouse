@@ -59,7 +59,7 @@ const CreateCourseModal = ({ closeModal, orgslug }: any) => {
       tags: ['organizations'],
     });
     setOrgId(org.id);
-  }, [orgslug, setOrgId]);
+  }, [orgslug]);
 
   useEffect(() => {
     if (orgslug) {

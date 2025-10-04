@@ -48,7 +48,6 @@ export default function OrgEditSocials() {
     defaultValues,
   });
 
-  const socials = form.watch('socials');
   const links = form.watch('links');
   const [isPending, startTransition] = useTransition();
 
@@ -163,7 +162,7 @@ export default function OrgEditSocials() {
           <div className="flex flex-col gap-0">
             <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
               <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
-              <h2 className="text-md text-gray-500">{t('description')}</h2>
+              <h2 className="text-base text-gray-500">{t('description')}</h2>
             </div>
 
             <div className="mx-5 my-5 mt-0 flex flex-col lg:flex-row lg:space-x-8">

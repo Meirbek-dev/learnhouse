@@ -19,7 +19,7 @@ const HomeClient = () => {
     revalidateOnFocus: false,
   });
 
-  useEffect(() => {}, [session, orgs]);
+  useEffect(() => {}, []);
   return (
     <div className="flex flex-col">
       <div className="mx-auto flex items-center space-x-4 rounded-b-2xl pt-16 text-3xl font-semibold">

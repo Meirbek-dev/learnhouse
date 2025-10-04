@@ -102,7 +102,7 @@ const ActivityElement = (props: ActivitiyElementProps) => {
       setSelectedActivity(undefined);
     }
   }
-  useEffect(() => {}, [props.activity]);
+  useEffect(() => {}, []);
 
   return (
     <Draggable

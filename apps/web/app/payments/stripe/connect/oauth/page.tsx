@@ -2,9 +2,9 @@
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
 import touEmblemDark from 'public/tou_emblem_dark.webp';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -13,7 +13,6 @@ import Image from 'next/image';
 
 const StripeConnectCallback = () => {
   const t = useTranslations('Stripe');
-  const router = useRouter();
   const searchParams = useSearchParams();
   const session = useLHSession();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
@@ -55,7 +54,7 @@ const StripeConnectCallback = () => {
     if (session) {
       verifyConnection();
     }
-  }, [session, router, searchParams, t]);
+  }, [session, searchParams, t]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8]">

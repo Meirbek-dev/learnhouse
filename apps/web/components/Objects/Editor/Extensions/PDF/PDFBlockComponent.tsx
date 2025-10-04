@@ -82,7 +82,7 @@ const PDFBlockComponent = (props: any) => {
       )
     : null;
 
-  useEffect(() => {}, [course, org]);
+  useEffect(() => {}, []);
 
   return (
     <>

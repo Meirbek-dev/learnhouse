@@ -180,14 +180,14 @@ const LoginClient = (props: LoginClientProps) => {
                     pathname: getUriWithoutOrg('/signup'),
                     query: props.org.slug ? { orgslug: props.org.slug } : undefined,
                   }}
-                  className="text-md flex w-full items-center justify-center space-x-3 rounded-md bg-gray-800 p-2 py-3 text-center font-semibold text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-700 hover:text-white"
+                  className="flex w-full items-center justify-center space-x-3 rounded-md bg-gray-800 p-2 py-3 text-center text-base font-semibold text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-700 hover:text-white"
                 >
                   <UserRoundPlus size={17} />
                   <span>{t('signup')}</span>
                 </Link>
                 <button
                   onClick={() => startTransition(() => signIn('google', { callbackUrl: '/redirect_from_auth' }))}
-                  className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50"
+                  className="flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center text-base font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50"
                   disabled={isPending}
                 >
                   <Image

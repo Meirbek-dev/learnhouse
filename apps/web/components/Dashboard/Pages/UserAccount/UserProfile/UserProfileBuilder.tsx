@@ -225,25 +225,12 @@ const UserProfileBuilder = () => {
   const access_token = session?.data?.tokens?.access_token;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.UserProfileBuilder');
-  const locale = useLocale();
   const [profileData, setProfileData] = useState<ProfileData>({
     sections: [],
   });
   const [selectedSection, setSelectedSection] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Get the appropriate date-fns locale
-  const getDateFnsLocale = (locale: string): Locale => {
-    const localeMap: Record<string, Locale> = {
-      en: enUS,
-      es,
-      fr,
-      de,
-      ru,
-    };
-    return localeMap[locale] || enUS;
-  };
 
   // Initialize profile data from user data
   useEffect(() => {

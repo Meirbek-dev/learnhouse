@@ -392,7 +392,6 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     }
   }, [
     assignmentTaskState.assignmentTask.contents?.questions,
-    assignmentTaskState.selectedAssignmentTaskUUID,
     view,
     loadAssignmentTask,
     loadUserSubmissions,

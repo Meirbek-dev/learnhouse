@@ -1,6 +1,6 @@
 {
   "name": "openu",
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.18.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -11,8 +11,8 @@
     "start": "turbo run start"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "eslint": "^9.36.0",
+    "@biomejs/biome": "2.2.5",
+    "eslint": "^9.37.0",
     "oxlint": "^1.19.0",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.3.0",

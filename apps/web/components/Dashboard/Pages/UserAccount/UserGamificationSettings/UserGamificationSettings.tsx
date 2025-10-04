@@ -127,7 +127,7 @@ export default function UserGamificationSettings() {
     return () => {
       cancelled = true;
     };
-  }, [session?.tokens?.access_token, session?.user?.id, orgId]);
+  }, [session?.user?.id, orgId]);
 
   // Save preferences handler
   const handleSavePreferences = useCallback(async () => {
@@ -188,7 +188,7 @@ export default function UserGamificationSettings() {
         <div className="flex flex-col">
           <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
             <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
-            <h2 className="text-md text-gray-500">{t('errors.userNotAuthenticated')}</h2>
+            <h2 className="text-base text-gray-500">{t('errors.userNotAuthenticated')}</h2>
           </div>
           <div className="px-8 py-6">
             <Alert>
@@ -208,7 +208,7 @@ export default function UserGamificationSettings() {
         <div className="flex flex-col">
           <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
             <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
-            <h2 className="text-md text-gray-500">{t('errors.orgNotAvailable')}</h2>
+            <h2 className="text-base text-gray-500">{t('errors.orgNotAvailable')}</h2>
           </div>
           <div className="px-8 py-6">
             <Alert>
@@ -227,7 +227,7 @@ export default function UserGamificationSettings() {
         {/* Header */}
         <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-white px-5 py-3">
           <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
-          <h2 className="text-md text-gray-500">{t('description')}</h2>
+          <h2 className="text-base text-gray-500">{t('description')}</h2>
         </div>
 
         {/* Content */}

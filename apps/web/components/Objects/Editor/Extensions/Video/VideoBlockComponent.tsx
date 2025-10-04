@@ -334,7 +334,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                   locale={locale}
                   subtitleEntries={subtitleEntries}
                   className="aspect-video w-full rounded-lg shadow-sm"
-                  onPlayerReady={(art: ArtplayerType) => {}}
+                  onPlayerReady={(_art: ArtplayerType) => {}}
                 />
                 <div className="absolute top-2 right-2 flex gap-1">
                   <button
@@ -558,7 +558,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                         'aspect-video w-full bg-black/95 shadow-sm transition-all duration-200',
                         isLoading && 'opacity-50 blur-sm',
                       )}
-                      onPlayerReady={(art: ArtplayerType) => {}}
+                      onPlayerReady={(_art: ArtplayerType) => {}}
                     />
                     <div className="absolute top-2 right-2 flex gap-1">
                       <button

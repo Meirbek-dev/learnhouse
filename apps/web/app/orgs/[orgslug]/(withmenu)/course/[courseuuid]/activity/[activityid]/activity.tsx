@@ -43,10 +43,9 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { usePathname, useRouter } from 'next/navigation';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import useSWR, { mutate } from 'swr';
 import Link from 'next/link';
@@ -184,11 +183,10 @@ const ActivityClient = (props: ActivityClientProps) => {
   const { course } = props;
   const org = useOrg() as any;
   const session = useLHSession() as any;
-  const pathname = usePathname();
   const access_token = session?.data?.tokens?.access_token;
   const [bgColor, setBgColor] = useState('bg-white');
   const [assignment, setAssignment] = useState(null) as any;
-  const [markStatusButtonActive, setMarkStatusButtonActive] = useState(false);
+  const [_markStatusButtonActive, setMarkStatusButtonActive] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const isInitialRender = useRef(true);
   const { contributorStatus } = useContributorStatus(courseuuid);
@@ -196,9 +194,6 @@ const ActivityClient = (props: ActivityClientProps) => {
   const t = useTranslations('ActivityPage');
   const locale = useLocale();
   const format = useFormatter();
-  const gamificationContext = useOptionalGamificationContext();
-  const gamificationProfile = gamificationContext?.profile ?? null;
-  const refetchGamification = gamificationContext?.refetch ?? (async () => {});
 
   // Helper to get relative time using next-intl
   const getRelativeTimeIntl = (date: Date) => {
@@ -332,7 +327,7 @@ const ActivityClient = (props: ActivityClientProps) => {
     } else {
       setBgColor(isFocusMode ? 'bg-zinc-950' : 'bg-zinc-950 soft-shadow');
     }
-  }, [activity, pathname, isFocusMode, getAssignmentUI]);
+  }, [activity, isFocusMode, getAssignmentUI]);
 
   return (
     <CourseProvider courseuuid={course?.course_uuid}>
@@ -635,7 +630,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                             </Link>
                           </div>
                           <div className="flex flex-col -space-y-1">
-                            <p className="text-md font-bold text-gray-700">{t('courseTitle')} </p>
+                            <p className="text-base font-bold text-gray-700">{t('courseTitle')} </p>
                             <h1 className="text-3xl font-bold text-gray-950 first-letter:uppercase">{course.name}</h1>
                           </div>
                         </div>
@@ -653,7 +648,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                       <div className="flex w-full items-center justify-between">
                         <div className="flex flex-1/3 items-center space-x-3">
                           <div className="flex flex-col -space-y-1">
-                            <p className="text-md font-bold text-gray-700">
+                            <p className="text-base font-bold text-gray-700">
                               {getChapterNameByActivityId(course, activity.id)}
                             </p>
                             <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">{activity.name}</h1>
@@ -665,7 +660,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                                   {course.authors
                                     .filter((a: any) => a.authorship_status === 'ACTIVE')
                                     .slice(0, 3)
-                                    .map((author: any, idx: number) => (
+                                    .map((author: any, _idx: number) => (
                                       <div
                                         key={author.user.user_uuid}
                                         className="relative z-[${10-idx}]"
@@ -896,7 +891,6 @@ export const MarkStatus = (props: {
 
   // Gamification state via unified context
   const gamificationContext = useOptionalGamificationContext();
-  const gamificationProfile = gamificationContext?.profile ?? null;
   const refetchGamification = gamificationContext?.refetch ?? (async () => {});
 
   useEffect(() => {
@@ -971,8 +965,6 @@ export const MarkStatus = (props: {
   async function markActivityAsCompleteFront() {
     try {
       const willCompleteAll = areAllActivitiesCompleted();
-      const previousLevel = gamificationProfile?.level || 1;
-      const previousXP = gamificationProfile?.total_xp || 0;
       setIsLoading(true);
 
       await markActivityAsComplete(
@@ -990,7 +982,7 @@ export const MarkStatus = (props: {
           await refetchGamification();
 
           // Show a generic success message since we can't reliably get updated state here
-          toast.success(`🔥 +25 XP за завершение "${props.activity.title}"!`, {
+          toast.success(`🔥 +25 XP за завершение "${props.activity.name}"!`, {
             style: {
               borderRadius: '8px',
               background: '#333',
@@ -1177,7 +1169,6 @@ const NextActivityButton = ({
 }) => {
   const router = useRouter();
   const t = useTranslations('ActivityPage');
-  const isMobile = useIsMobile();
 
   const findNextActivity = () => {
     const allActivities: any[] = [];
@@ -1237,7 +1228,6 @@ const PreviousActivityButton = ({
   orgslug: string;
 }) => {
   const router = useRouter();
-  const isMobile = useIsMobile();
   const t = useTranslations('ActivityPage');
 
   const findPreviousActivity = () => {
@@ -1318,14 +1308,14 @@ const AssignmentTools = (props: {
   };
 
   // Helper function to convert numeric grade to alphabet grade
-  function convertNumericToAlphabet(grade: number, maxGrade: number) {
+  const convertNumericToAlphabet = useCallback((grade: number, maxGrade: number) => {
     const percentage = (grade / maxGrade) * 100;
     if (percentage >= 90) return 'A';
     if (percentage >= 80) return 'B';
     if (percentage >= 70) return 'C';
     if (percentage >= 60) return 'D';
     return 'F';
-  }
+  }, []);
 
   const getGradingBasedOnMethod = useCallback(async () => {
     const res = await getFinalGrade(
@@ -1358,13 +1348,20 @@ const AssignmentTools = (props: {
       } // Use displayGrade here, e.g., update state or display it
       setFinalGrade(displayGrade);
     }
-  }, [session.data?.user?.id, props.assignment?.assignment_uuid, session.data?.tokens?.access_token, t, setFinalGrade]);
+  }, [
+    session.data?.user?.id,
+    props.assignment?.assignment_uuid,
+    session.data?.tokens?.access_token,
+    t,
+    convertNumericToAlphabet,
+    setFinalGrade,
+  ]);
 
   useEffect(() => {
     if (submission && submission.length > 0 && submission[0]?.submission_status === 'GRADED') {
       getGradingBasedOnMethod();
     }
-  }, [submission, props.assignment, getGradingBasedOnMethod]);
+  }, [submission, getGradingBasedOnMethod]);
 
   if (!submission || submission.length === 0) {
     return (

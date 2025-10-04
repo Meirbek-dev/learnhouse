@@ -28,7 +28,6 @@ import { getDiscussionsSwrKey } from '@services/courses/discussions';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useFormatter, useTranslations } from 'next-intl';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 // Import the new discussions component
@@ -40,13 +39,13 @@ import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import useSWR from 'swr';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');
-  const format = useFormatter();
   const [learnings, setLearnings] = useState<any>([]);
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image');
@@ -158,7 +157,7 @@ const CourseClient = (props: any) => {
       });
       setExpandedChapters(defaultExpanded);
     }
-  }, [org, course, getLearningTags]);
+  }, [course, getLearningTags]);
 
   const getActivityTypeLabel = (activityType: string) => {
     switch (activityType) {

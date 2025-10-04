@@ -41,7 +41,7 @@ export const HeaderProfileBox = () => {
   const org = useOrg() as any;
   const t = useTranslations('Header');
 
-  useEffect(() => {}, [session]);
+  useEffect(() => {}, []);
 
   const userRoleInfo = useMemo((): RoleInfo | null => {
     if (!userRoles || userRoles.length === 0) return null;

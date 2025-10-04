@@ -221,7 +221,7 @@ export function Leaderboard({
             role="list"
             aria-label={t('leaderboard.aria.rankings')}
           >
-            {topEntries.map((entry, index) => (
+            {topEntries.map((entry, _index) => (
               <Tooltip key={entry.user_id}>
                 <TooltipTrigger asChild>
                   <div

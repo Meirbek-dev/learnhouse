@@ -5,9 +5,7 @@ import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersA
 import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess';
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import OrgRoles from '@components/Dashboard/Pages/Users/OrgRoles/OrgRoles';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { getUriWithOrg } from '@services/config/config';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -23,8 +21,6 @@ export interface SettingsParams {
 
 const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
   const params = use(props.params);
-  const session = useLHSession();
-  const org = useOrg() as any;
   const t = useTranslations('DashPage.UserSettings');
   const [H1Label, setH1Label] = useState('');
   const [H2Label, setH2Label] = useState('');
@@ -55,7 +51,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
     };
 
     handleLabels();
-  }, [session, org, params.subpage, t]);
+  }, [params.subpage, t]);
 
   if (isMobile) {
     // TODO: Work on a better mobile experience
@@ -83,7 +79,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
         <div className="my-2 py-3">
           <div className="flex max-w-7xl flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{H1Label}</div>
-            <div className="text-md flex font-medium text-gray-400">{H2Label} </div>
+            <div className="flex text-base font-medium text-gray-400">{H2Label} </div>
           </div>
         </div>
         <div className="flex space-x-5 text-sm font-bold">

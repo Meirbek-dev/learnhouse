@@ -76,7 +76,7 @@ const SettingsPage = ({ params }: { params: Promise<SettingsParams> }) => {
   const { subpage, orgslug } = use(params);
   const session = useLHSession() as Session;
 
-  useEffect(() => {}, [session]);
+  useEffect(() => {}, []);
 
   const navigationItems: NavigationItem[] = [
     {

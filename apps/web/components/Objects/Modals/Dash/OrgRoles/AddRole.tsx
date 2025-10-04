@@ -440,7 +440,7 @@ function AddRole(props: AddRoleProps) {
   const access_token = session?.data?.tokens?.access_token;
   const [isPending, startTransition] = React.useTransition();
   const [rights, setRights] = React.useState<Rights>(defaultRights);
-  const [error, setError] = React.useState('');
+  const [_error, setError] = React.useState('');
   const roleFormSchema = createRoleFormSchema(validationT);
   const predefinedRolesData = predefinedRoles(t);
 
@@ -566,18 +566,6 @@ function AddRole(props: AddRoleProps) {
   };
 
   const handlePredefinedRole = (roleKey: string) => {
-    const roleKeyMapping: { [key: string]: string } = {
-      'Admin': 'admin',
-      'Course Manager': 'courseManager',
-      'Instructor': 'instructor',
-      'Viewer': 'viewer',
-      'Content Creator': 'contentCreator',
-      'User Manager': 'userManager',
-      'Moderator': 'moderator',
-      'Analyst': 'analyst',
-      'Guest': 'guest',
-    };
-
     const role = predefinedRolesData[roleKey as keyof typeof predefinedRolesData];
     if (role) {
       form.setValue('name', role.name);

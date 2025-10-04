@@ -54,7 +54,7 @@ const PaymentsConfigurationPage: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isOnboardingLoading, setIsOnboardingLoading] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
   const t = useTranslations('Payments.Configuration');
 
   const enableStripe = async () => {
@@ -135,7 +135,7 @@ const PaymentsConfigurationPage: FC = () => {
       <div className="soft-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">
         <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
           <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
-          <h2 className="text-md text-gray-500">{t('pageDescription')}</h2>
+          <h2 className="text-base text-gray-500">{t('pageDescription')}</h2>
         </div>
 
         <Alert className="mb-3 border-2 border-blue-100 bg-blue-50/50 p-6">

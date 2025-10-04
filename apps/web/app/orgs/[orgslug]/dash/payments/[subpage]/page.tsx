@@ -82,7 +82,7 @@ const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
         <div className="my-2 py-2">
           <div className="flex w-100 flex-col space-y-1">
             <div className="flex pt-3 text-4xl font-bold tracking-tighter">{h1}</div>
-            <div className="text-md flex font-medium text-gray-400">{h2}</div>
+            <div className="flex text-base font-medium text-gray-400">{h2}</div>
           </div>
         </div>
         <div className="flex space-x-0.5 text-sm font-bold">

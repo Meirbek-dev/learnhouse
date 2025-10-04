@@ -33,7 +33,7 @@ export default function DiscussionReply({
   const t = useTranslations('CoursePage');
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.replyMessage);
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
   const format = useFormatter();
   const now = useNow();
   const org = useOrg() as any;
@@ -71,7 +71,7 @@ export default function DiscussionReply({
   return (
     <div className="group relative ml-6 border-l-2 border-slate-200 py-4 pl-6 transition-colors hover:border-slate-300">
       {/* Connection line dot */}
-      <div className="absolute top-6 -left-[5px] h-2 w-2 rounded-full bg-slate-300 transition-colors group-hover:bg-slate-400" />
+      <div className="absolute top-6 left-[-5px] h-2 w-2 rounded-full bg-slate-300 transition-colors group-hover:bg-slate-400" />
 
       <div className="flex gap-3">
         <UserAvatar

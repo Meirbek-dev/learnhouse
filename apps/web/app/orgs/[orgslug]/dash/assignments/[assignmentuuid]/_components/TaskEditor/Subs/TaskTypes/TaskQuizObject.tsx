@@ -422,12 +422,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     }
   }, [
     assignmentTaskState.assignmentTask.contents?.questions,
-    assignment.assignment_object?.assignment_uuid,
     assignmentTaskStateHook,
-    access_token,
     assignmentTaskUUID,
     view,
-    user_id,
     getAssignmentTaskUI,
     getAssignmentTaskSubmissionFromUserUI,
     getAssignmentTaskSubmissionFromIdentifiedUserUI,

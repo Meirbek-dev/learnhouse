@@ -12,7 +12,6 @@ import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -39,7 +38,6 @@ const getValidationSchema = (t: (key: string) => string) =>
 type ScriptFormData = z.infer<ReturnType<typeof getValidationSchema>>;
 
 const OrgEditOther: FC = () => {
-  const router = useRouter();
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
@@ -47,8 +45,6 @@ const OrgEditOther: FC = () => {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [currentScript, setCurrentScript] = useState<Script | null>(null);
   const t = useTranslations('DashPage.Other');
-
-  const validationSchema = getValidationSchema(t);
 
   // Initialize scripts from org
   useEffect(() => {
@@ -140,7 +136,7 @@ const OrgEditOther: FC = () => {
                   </Tooltip>
                 </TooltipProvider>
               </h1>
-              <h2 className="text-md text-gray-500">{t('scriptsDescription')}</h2>
+              <h2 className="text-base text-gray-500">{t('scriptsDescription')}</h2>
             </div>
             {selectedView === 'list' && (
               <Button

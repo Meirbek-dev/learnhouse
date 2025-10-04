@@ -77,7 +77,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
   const { isLoading, courseStructure } = course;
   const formId = useId();
 
-  const initializeLearnings = (learnings: any) => {
+  const initializeLearnings = useCallback((learnings: any) => {
     if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
     try {
       const parsed = JSON.parse(learnings);
@@ -88,9 +88,9 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       }
     }
     return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
-  };
+  }, []);
 
-  const parseTags = (raw: any): string[] => {
+  const parseTags = useCallback((raw: any): string[] => {
     if (!raw) return [];
     if (Array.isArray(raw)) return raw as string[];
     if (typeof raw === 'string') {
@@ -100,7 +100,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
         .filter(Boolean);
     }
     return [];
-  };
+  }, []);
 
   const getInitialValues = useCallback(
     (): FormValues => ({
@@ -112,7 +112,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
       public: courseStructure?.public ?? false,
       thumbnail_type: courseStructure?.thumbnail_type || 'image',
     }),
-    [courseStructure],
+    [courseStructure, initializeLearnings, parseTags],
   );
 
   const form = useForm<FormValues>({
@@ -233,7 +233,7 @@ function EditCourseGeneral(_props: EditCourseStructureProps) {
                     />
                     {t('title', { courseName: courseStructure.name || '' })}
                   </h1>
-                  <p className="text-md text-muted-foreground">{t('subtitle')}</p>
+                  <p className="text-muted-foreground text-base">{t('subtitle')}</p>
                 </div>
               </div>
             </CardHeader>

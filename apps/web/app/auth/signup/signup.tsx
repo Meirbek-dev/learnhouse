@@ -152,7 +152,7 @@ const LoggedInJoinScreen = (props: any) => {
         <Button
           onClick={join}
           disabled={isSumbitting}
-          className="text-md h-[35px] font-semibold"
+          className="h-[35px] text-base font-semibold"
         >
           {isSumbitting ? (
             <BarLoader
@@ -227,7 +227,7 @@ const NoTokenScreen = (_props: any) => {
           />
           <Button
             onClick={validateCode}
-            className="text-md flex h-fit items-center rounded-lg px-6 py-2 font-semibold shadow-md"
+            className="flex h-fit items-center rounded-lg px-6 py-2 text-base font-semibold shadow-md"
           >
             <Ticket size={18} />
             <p>{t('submit')}</p>

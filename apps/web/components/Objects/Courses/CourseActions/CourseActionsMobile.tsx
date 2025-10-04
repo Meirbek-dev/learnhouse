@@ -78,7 +78,6 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
 
   // Avatar size for mobile
   const avatarSize = 36;
-  const borderSize = 'border-2';
 
   return (
     <div className="flex items-center gap-3">

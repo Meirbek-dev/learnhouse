@@ -24,7 +24,7 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
     });
   }
 
-  useEffect(() => {}, [assignments]);
+  useEffect(() => {}, []);
 
   return (
     <div className="flex h-full w-full overflow-auto">

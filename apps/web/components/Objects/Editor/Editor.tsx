@@ -7,9 +7,6 @@ import { ToolbarButtons } from './Toolbar/ToolbarButtons';
 // Extensions
 import QuizBlock from './Extensions/Quiz/QuizBlock';
 
-// Lowlight
-const lowlight = createLowlight(common);
-
 import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import WarningCallout from './Extensions/Callout/Warning/WarningCallout';

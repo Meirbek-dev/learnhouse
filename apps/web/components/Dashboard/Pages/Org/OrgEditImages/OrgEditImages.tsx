@@ -90,7 +90,7 @@ export default function OrgEditImages() {
   const [localThumbnail, setLocalThumbnail] = useState<string | null>(null);
   const [isLogoUploading, setIsLogoUploading] = useState(false);
   const [isThumbnailUploading, setIsThumbnailUploading] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
   const [previews, setPreviews] = useState<Preview[]>(() => {
     // Initialize with image previews
     const imagePreviews = (org?.previews?.images || [])
@@ -398,7 +398,7 @@ export default function OrgEditImages() {
     <div className="soft-shadow mx-0 mb-16 rounded-xl bg-white px-3 py-3 sm:mx-10 sm:mb-0">
       <div className="mb-2 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
         <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
-        <h2 className="text-md text-gray-500">{t('description')}</h2>
+        <h2 className="text-base text-gray-500">{t('description')}</h2>
       </div>
       <Tabs
         defaultValue="logo"

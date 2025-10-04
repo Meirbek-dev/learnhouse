@@ -91,7 +91,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Auth Redirects
-  if (pathname == '/redirect_from_auth') {
+  if (pathname === '/redirect_from_auth') {
     if (cookie_orgslug) {
       const searchParams = req.nextUrl.searchParams;
       const queryString = searchParams.toString();

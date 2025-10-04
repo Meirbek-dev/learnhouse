@@ -1,6 +1,6 @@
 'use client';
 
-import type { CSSProperties, ComponentProps, ComponentType, ReactElement, ReactNode } from 'react';
+import type { ComponentProps, ComponentType, CSSProperties, ReactElement, ReactNode } from 'react';
 import { createContext, useContext, useId, useMemo } from 'react';
 import * as RechartsPrimitive from 'recharts';
 import { useFormatter } from 'next-intl';

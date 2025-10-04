@@ -20,7 +20,7 @@ export const CourseOverviewTop = ({ params }: { params: CourseOverviewParams }) 
   const org = useOrg() as any;
   const t = useTranslations('DashPage.CourseOverview');
 
-  useEffect(() => {}, [course, org]);
+  useEffect(() => {}, []);
 
   return (
     <>

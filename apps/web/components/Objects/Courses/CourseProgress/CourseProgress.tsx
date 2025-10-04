@@ -96,11 +96,6 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
     }
   };
 
-  const progressPercentage = totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0;
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
-
   const dialogContent = (
     <div className="space-y-4">
       {course.chapters.map((chapter: any) => (

@@ -98,7 +98,7 @@ const ImageBlockComponent = (props: any) => {
       )
     : null;
 
-  useEffect(() => {}, [course, org]);
+  useEffect(() => {}, []);
 
   const getAlignmentClass = () => {
     switch (alignment) {

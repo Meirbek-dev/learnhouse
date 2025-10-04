@@ -219,7 +219,7 @@ const OpenSignUpComponent = () => {
         <div className="mx-10 mt-5 mb-5 flex h-0.5 rounded-2xl bg-slate-100" />
         <button
           onClick={() => startTransition(() => signIn('google', { callbackUrl: '/redirect_from_auth' }))}
-          className="text-md flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full justify-center space-x-3 rounded-md border border-gray-200 bg-white p-2 py-3 text-center text-base font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={isPending}
         >
           <Image

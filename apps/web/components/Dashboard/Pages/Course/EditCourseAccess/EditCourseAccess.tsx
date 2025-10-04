@@ -84,7 +84,7 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
                         size={32}
                       />
                       <div className="text-xl font-bold text-slate-700 sm:text-2xl">{t('publicLabel')}</div>
-                      <div className="sm:text-md w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px]">
+                      <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
                         {t('publicDescription')}
                       </div>
                     </div>
@@ -112,7 +112,7 @@ const EditCourseAccess = (_props: EditCourseAccessProps) => {
                         size={32}
                       />
                       <div className="text-xl font-bold text-slate-700 sm:text-2xl">{t('usersOnlyLabel')}</div>
-                      <div className="sm:text-md w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px]">
+                      <div className="w-full text-center text-sm leading-5 tracking-tight text-gray-400 sm:w-[500px] sm:text-base">
                         {t('usersOnlyDescription')}
                       </div>
                     </div>
