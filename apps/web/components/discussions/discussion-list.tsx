@@ -65,6 +65,7 @@ const transformDiscussionToPost = (discussion: any) => {
         lastName: reply.user?.last_name || '',
         replyMessage: reply.content || '',
         createDate: formatDate(reply.creation_date),
+        updateDate: formatDate(reply.update_date),
         upvotes: Number.parseInt(reply.likes_count, 10) || 0,
         downvotes: Number.parseInt(reply.dislikes_count, 10) || 0,
         userVote: reply.is_liked ? 'up' : reply.is_disliked ? 'down' : null,
@@ -193,6 +194,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
         lastName: newReply.user?.last_name || '',
         replyMessage: newReply.content || '',
         createDate: newReply.creation_date || new Date().toISOString(),
+        updateDate: newReply.update_date || new Date().toISOString(),
         upvotes: Number.parseInt(newReply.likes_count.toString(), 10) || 0,
         downvotes: 0,
         userVote: null,
@@ -422,16 +424,27 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
     }
 
     try {
-      await updateDiscussion(courseUuid, reply.discussion_uuid, { content: newMessage }, access_token);
+      const updatedReply = await updateDiscussion(
+        courseUuid,
+        reply.discussion_uuid,
+        { content: newMessage },
+        access_token,
+      );
 
-      // Update local state
+      // Update local state with the updated reply data from server
       setPosts(
         posts.map((post) =>
           post.id === postId
             ? {
                 ...post,
                 replies: post.replies?.map((reply) =>
-                  reply.id === replyId ? { ...reply, replyMessage: newMessage } : reply,
+                  reply.id === replyId
+                    ? {
+                        ...reply,
+                        replyMessage: updatedReply.content,
+                        updateDate: updatedReply.update_date || new Date().toISOString(),
+                      }
+                    : reply,
                 ),
               }
             : post,

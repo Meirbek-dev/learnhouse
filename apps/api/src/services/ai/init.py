@@ -29,7 +29,7 @@ def get_chromadb_client() -> chromadb.Client:
             try:
                 client = chromadb.HttpClient(
                     host=chromadb_config.db_host,
-                    port=getattr(chromadb_config, "db_port", 8000),
+                    port=getattr(chromadb_config, "db_port", 8001),
                 )
                 # Test the connection
                 client.heartbeat()
