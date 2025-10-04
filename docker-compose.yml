@@ -2,8 +2,8 @@ services:
   app:
     build: .
     ports:
-      - '80:80'
-      - '443:443'
+      - "80:80"
+      - "443:443"
     volumes:
       # Mount only the content directory to persist user uploads and org data
       - app_content:/app/api/content
@@ -20,7 +20,7 @@ services:
     image: postgres:18-trixie
     restart: unless-stopped
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       - POSTGRES_USER=openu
       - POSTGRES_PASSWORD=openu
@@ -28,29 +28,53 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U openu']
+      test: ["CMD-SHELL", "pg_isready -U openu"]
       interval: 10s
       timeout: 5s
       retries: 5
+    labels:
+      - docker-volume-backup.stop-during-backup=true
   redis:
     image: redis:8.2.2-bookworm
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
+    labels:
+      - docker-volume-backup.stop-during-backup=true
   chromadb:
     image: chromadb/chroma:1.1.0
     restart: unless-stopped
     ports:
-      - '8001:8000'
+      - "8001:8000"
     volumes:
       - chromadb_data:/chroma/chroma
+    labels:
+      - docker-volume-backup.stop-during-backup=true
+
+  backup:
+    image: offen/docker-volume-backup:v2.44.0
+    restart: unless-stopped
+    env_file:
+      - ./extra/backup.env
+    volumes:
+      # Database volumes
+      - postgres_data:/backup/postgres:ro
+      - redis_data:/backup/redis:ro
+      - chromadb_data:/backup/chromadb:ro
+      # Application data volumes
+      - app_content:/backup/app_content:ro
+      - app_logs:/backup/app_logs:ro
+      # Docker socket for container management
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Local backup storage
+      - ./backups:/archive
 
 volumes:
   postgres_data:
