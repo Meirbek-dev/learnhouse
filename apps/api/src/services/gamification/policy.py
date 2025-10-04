@@ -9,11 +9,12 @@ Default cache is in-process with a short TTL. Can be swapped to Redis later.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Dict, Tuple
 
 from sqlmodel import Session, select
 
+from src.core.timezone import now as tz_now
 from src.db.gamification import DAILY_XP_LIMIT, XP_REWARDS, OrgGamificationConfig
 
 # In-process TTL cache: org_id -> (rewards, daily_limit, cached_at)
@@ -29,7 +30,7 @@ def invalidate_org_policy(org_id: int | None = None) -> None:
 
 
 def get_org_policy(db: Session, org_id: int) -> tuple[dict[str, int], int]:
-    now = datetime.now(UTC)
+    now = tz_now()
     cached = _CACHE.get(org_id)
     if cached and now - cached[2] < _TTL:
         return cached[0], cached[1]

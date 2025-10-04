@@ -2,13 +2,14 @@
 Gamification Models
 """
 
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
 from sqlalchemy import JSON, CheckConstraint, Column, Index, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
+from src.core.timezone import now as tz_now
 from src.db.strict_base_model import PydanticStrictBaseModel
 
 XP_REWARDS = {
@@ -86,8 +87,8 @@ class GamificationProfile(SQLModel, table=True):
     last_xp_award_date: datetime | None = Field(default=None)
     last_login_date: datetime | None = Field(default=None)
     last_learning_date: datetime | None = Field(default=None)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(default_factory=tz_now)
+    updated_at: datetime = Field(default_factory=tz_now)
 
     # Preferences
     preferences: dict = Field(default_factory=dict, sa_column=Column(JSON))
@@ -148,7 +149,7 @@ class XPTransaction(SQLModel, table=True):
     triggered_level_up: bool = Field(default=False)
 
     # Timestamps
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), index=True)
+    created_at: datetime = Field(default_factory=tz_now, index=True)
 
     # Idempotency
     idempotency_key: str | None = Field(default=None, unique=True)
@@ -180,7 +181,7 @@ class OrgGamificationConfig(SQLModel, table=True):
     # Optional overrides
     daily_xp_limit: int | None = Field(default=None, ge=0)
     rewards: dict | None = Field(default=None, sa_column=Column(JSON))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=tz_now)
 
 
 # ---------------------------------

@@ -11,13 +11,15 @@ Clean API (no legacy):
 """
 
 import logging
-from datetime import UTC, datetime
+
+from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlmodel import Session, and_, select
 
 from src.core.events.database import get_db_session
+from src.core.timezone import now as tz_now
 from src.db.gamification import (
     DashboardRead,
     GamificationProfile,
@@ -25,14 +27,12 @@ from src.db.gamification import (
     LeaderboardRead,
     ProfileRead,
     StreakUpdateRead,
+    StreakType as DBStreakType,
     TransactionRead,
     XPAwardRequest,
     XPAwardResponse,
     XPSource,
     XPTransaction,
-)
-from src.db.gamification import (
-    StreakType as DBStreakType,
 )
 from src.db.users import PublicUser
 from src.db.users import User as DBUser

@@ -65,9 +65,7 @@ def _get_jwt_secret() -> str:
         "OPENU_AUTH_JWT_SECRET_KEY must be set in production environment. "
         "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
     )
-    raise ValueError(
-        msg
-    )
+    raise ValueError(msg)
 
 
 class Settings(PydanticStrictBaseModel):

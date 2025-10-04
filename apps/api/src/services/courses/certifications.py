@@ -1,10 +1,12 @@
 import random
 import string
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
 from ulid import ULID
+
+from src.core.timezone import now as tz_now
 
 from src.db.courses.certifications import (
     CertificateUser,
@@ -290,7 +292,7 @@ async def create_certificate_user(
             request, course.course_uuid, current_user, "create", db_session
         )
 
-    now = datetime.now(UTC)
+    now = tz_now()
 
     try:
         # Use atomic transaction with proper locking for idempotency

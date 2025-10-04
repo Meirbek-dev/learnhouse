@@ -15,13 +15,15 @@ Notes:
 from __future__ import annotations
 
 import contextlib
-from datetime import UTC, datetime
+import logging
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, and_, select
 
+from src.core.timezone import now as tz_now
 from src.db.gamification import (
     GamificationProfile,
     StreakType,
@@ -47,7 +49,7 @@ def _exceeds_daily_limit(
     # transient misconfiguration cached in policy.
     if daily_limit <= 0:
         return False
-    today = datetime.now(UTC).date()
+    today = tz_now().date()
     if profile.last_xp_award_date and profile.last_xp_award_date.date() == today:
         return (profile.daily_xp_earned + amount) > daily_limit
     return amount > daily_limit
@@ -102,7 +104,7 @@ def award_xp(
 
     Returns (profile, transaction, level_up_occurred, is_new_transaction).
     """
-    now = datetime.now(UTC)
+    now = tz_now()
     try:
         try:
             xp_source = XPSource(source)
@@ -207,7 +209,7 @@ def update_streak(
     db: Session, user_id: int, org_id: int, streak_type: str
 ) -> GamificationProfile:
     profile = get_profile(db, user_id, org_id)
-    now = datetime.now(UTC)
+    now = tz_now()
     today = now.date()
     try:
         s_type = StreakType(streak_type)
@@ -336,7 +338,7 @@ def update_preferences(
         else:
             prefs[k] = v
     profile.preferences = prefs
-    profile.updated_at = datetime.now(UTC)
+    profile.updated_at = tz_now()
     db.add(profile)
     db.commit()
     db.refresh(profile)
@@ -450,7 +452,7 @@ def on_activity_completed(
         profile.total_activities_completed = (
             profile.total_activities_completed or 0
         ) + 1
-        profile.updated_at = datetime.now(UTC)
+        profile.updated_at = tz_now()
     db.add(profile)
     db.commit()
     db.refresh(profile)
@@ -482,7 +484,7 @@ def on_course_completed(
         profile = update_streak(db, user_id, org_id, StreakType.LEARNING.value)
         profile = get_profile(db, user_id, org_id)
         profile.total_courses_completed = (profile.total_courses_completed or 0) + 1
-        profile.updated_at = datetime.now(UTC)
+        profile.updated_at = tz_now()
     db.add(profile)
     db.commit()
     db.refresh(profile)
