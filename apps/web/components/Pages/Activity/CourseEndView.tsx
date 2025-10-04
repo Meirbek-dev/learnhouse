@@ -98,9 +98,13 @@ const CourseEndView: FC<CourseEndViewProps> = ({
         const cleanCourseUuid = courseUuid.replace('course_', '');
         const result = await getUserCertificates(`course_${cleanCourseUuid}`, session.data.tokens.access_token);
 
+        console.log('Certificate API response:', result);
+        console.log('Course UUID used:', `course_${cleanCourseUuid}`);
+
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
         } else {
+          console.warn('No certificate found. Result:', result);
           setCertificateError(t('noCertificateFound'));
         }
       } catch (error) {

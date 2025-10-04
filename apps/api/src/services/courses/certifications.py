@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 from datetime import datetime, timezone
@@ -7,7 +8,6 @@ from sqlmodel import Session, select
 from ulid import ULID
 
 from src.core.timezone import now as tz_now
-
 from src.db.courses.certifications import (
     CertificateUser,
     CertificateUserRead,
@@ -23,6 +23,8 @@ from src.db.users import AnonymousUser, PublicUser
 from src.security.courses_security import courses_rbac_check_for_certifications
 from src.services.gamification import StreakType, XPSource
 from src.services.gamification import service as gamification_service
+
+logger = logging.getLogger(__name__)
 
 ####################################################
 # CRUD
@@ -295,112 +297,114 @@ async def create_certificate_user(
     now = tz_now()
 
     try:
-        # Use atomic transaction with proper locking for idempotency
-        with db_session.begin():
-            # Check for existing certificate with database lock to prevent race conditions
-            lock_stmt = (
-                select(CertificateUser)
-                .where(
+        # First check if certificate already exists (without lock)
+        check_stmt = select(CertificateUser).where(
+            CertificateUser.user_id == user_id,
+            CertificateUser.certification_id == certification_id,
+        )
+        existing_cert = db_session.exec(check_stmt).first()
+        if existing_cert:
+            logger.info(
+                f"Certificate already exists for user {user_id} and certification {certification_id}"
+            )
+            return CertificateUserRead.model_validate(existing_cert)
+
+        # Get user to extract user_uuid
+        from src.db.users import User
+
+        user_stmt = select(User).where(User.id == user_id)
+        user = db_session.exec(user_stmt).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found",
+            )
+
+        # Generate unique certificate UUID with better collision resistance and idempotency
+        current_year = now.year
+        current_month = now.month
+        current_day = now.day
+
+        # Extract last 4 characters from user_uuid for uniqueness
+        user_uuid_short = user.user_uuid[-4:] if user.user_uuid else "USER"
+
+        # Generate deterministic prefix if idempotency_key provided, otherwise random
+        if idempotency_key:
+            # Use hash of idempotency key for deterministic but unique prefix
+            import hashlib
+
+            prefix_hash = (
+                hashlib.md5(idempotency_key.encode()).hexdigest()[:2].upper()
+            )
+        else:
+            # Generate random 2-letter prefix
+            prefix_hash = "".join(random.choices(string.ascii_uppercase, k=2))
+
+        # Use timestamp for better uniqueness
+        timestamp_suffix = f"{int(now.timestamp())}"[
+            -6:
+        ]  # Last 6 digits of timestamp
+
+        user_certification_uuid = f"{prefix_hash}-{current_year}{current_month:02d}{current_day:02d}-{user_uuid_short}-{timestamp_suffix}"
+
+        # Create certificate user with enhanced data
+        certificate_data = {
+            "user_id": user_id,
+            "certification_id": certification_id,
+            "user_certification_uuid": user_certification_uuid,
+            "created_at": now.isoformat(),
+            "updated_at": now.isoformat(),
+        }
+
+        certificate_user = CertificateUser(**certificate_data)
+
+        try:
+            db_session.add(certificate_user)
+            db_session.flush()  # Ensure it's written and constraints are checked
+            logger.info(
+                f"Successfully created certificate {user_certification_uuid} for user {user_id} "
+                f"and certification {certification_id}"
+            )
+
+        except Exception as db_exc:
+            # Handle unique constraint violations gracefully
+            if (
+                "unique" in str(db_exc).lower()
+                or "duplicate" in str(db_exc).lower()
+            ):
+                # Race condition occurred, try to get the existing certificate
+                db_session.rollback()
+
+                retry_stmt = select(CertificateUser).where(
                     CertificateUser.user_id == user_id,
                     CertificateUser.certification_id == certification_id,
                 )
-                .with_for_update(skip_locked=True)
-            )
+                existing_cert = db_session.exec(retry_stmt).first()
 
-            existing_certificate = db_session.exec(lock_stmt).first()
-            if existing_certificate:
-                # Certificate already exists, return it (idempotency)
-                return CertificateUserRead.model_validate(existing_certificate)
-
-            # Additional idempotency check using idempotency_key if provided
-            # For now, we rely on the unique constraint as the primary idempotency mechanism
-            # Future enhancement: store idempotency keys in certificate metadata
-
-            # Get user to extract user_uuid
-            from src.db.users import User
-
-            user_stmt = select(User).where(User.id == user_id)
-            user = db_session.exec(user_stmt).first()
-
-            if not user:
-                raise HTTPException(
-                    status_code=404,
-                    detail="User not found",
-                )
-
-            # Generate unique certificate UUID with better collision resistance and idempotency
-            current_year = now.year
-            current_month = now.month
-            current_day = now.day
-
-            # Extract last 4 characters from user_uuid for uniqueness
-            user_uuid_short = user.user_uuid[-4:] if user.user_uuid else "USER"
-
-            # Generate deterministic prefix if idempotency_key provided, otherwise random
-            if idempotency_key:
-                # Use hash of idempotency key for deterministic but unique prefix
-                import hashlib
-
-                prefix_hash = (
-                    hashlib.md5(idempotency_key.encode()).hexdigest()[:2].upper()
-                )
-            else:
-                # Generate random 2-letter prefix
-                prefix_hash = "".join(random.choices(string.ascii_uppercase, k=2))
-
-            # Use timestamp for better uniqueness
-            timestamp_suffix = f"{int(now.timestamp())}"[
-                -6:
-            ]  # Last 6 digits of timestamp
-
-            user_certification_uuid = f"{prefix_hash}-{current_year}{current_month:02d}{current_day:02d}-{user_uuid_short}-{timestamp_suffix}"
-
-            # Create certificate user with enhanced data
-            certificate_data = {
-                "user_id": user_id,
-                "certification_id": certification_id,
-                "user_certification_uuid": user_certification_uuid,
-                "created_at": now.isoformat(),
-                "updated_at": now.isoformat(),
-            }
-
-            # Add idempotency information to certificate metadata if supported
-            # Note: This would require extending the CertificateUser model with metadata field
-            # For now, we rely on unique constraints
-
-            certificate_user = CertificateUser(**certificate_data)
-
-            try:
-                db_session.add(certificate_user)
-                db_session.flush()  # Ensure it's written and constraints are checked
-
-                # Transaction commits automatically at context exit
-
-            except Exception as db_exc:
-                # Handle unique constraint violations gracefully
-                if (
-                    "unique" in str(db_exc).lower()
-                    or "duplicate" in str(db_exc).lower()
-                ):
-                    # Race condition occurred, try to get the existing certificate
-                    db_session.rollback()
-
-                    retry_stmt = select(CertificateUser).where(
-                        CertificateUser.user_id == user_id,
-                        CertificateUser.certification_id == certification_id,
+                if existing_cert:
+                    logger.info(
+                        f"Certificate already exists (race condition detected) for user {user_id} and certification {certification_id}"
                     )
-                    existing_cert = db_session.exec(retry_stmt).first()
+                    return CertificateUserRead.model_validate(existing_cert)
 
-                    if existing_cert:
-                        return CertificateUserRead.model_validate(existing_cert)
+            # Re-raise if it's not a uniqueness violation
+            raise
 
-                # Re-raise if it's not a uniqueness violation
-                raise
+        # Explicitly commit the transaction to ensure it's persisted
+        db_session.commit()
+        logger.info(
+            f"Certificate transaction committed for user {user_id} and certification {certification_id}"
+        )
 
         return CertificateUserRead.model_validate(certificate_user)
 
     except Exception as exc:
         db_session.rollback()
+        logger.error(
+            f"Failed to create certificate for user {user_id} and certification {certification_id}: {exc}",
+            exc_info=True
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create certificate: {exc!s}",
@@ -441,16 +445,20 @@ async def get_user_certificates_for_course(
     # Proactively ensure a certificate exists if the course is fully completed.
     # This is idempotent and guarantees the UI sees the certificate once all steps are done.
     try:
-        await check_course_completion_and_create_certificate(
+        completion_result = await check_course_completion_and_create_certificate(
             request=request,
             user_id=current_user.id,
             course_id=course.id,
             db_session=db_session,
         )
+        logger.debug(
+            f"Certificate check/creation result for user {current_user.id} in course {course_uuid}: {completion_result}"
+        )
     except Exception as err:  # noqa: BLE001
         # Don't fail the request on certificate creation errors; just log and proceed to list.
-        print(
-            f"check_course_completion_and_create_certificate failed during get_user_certificates_for_course: {err}"
+        logger.error(
+            f"check_course_completion_and_create_certificate failed during get_user_certificates_for_course: {err}",
+            exc_info=True
         )
 
     # Get all certifications for this course
@@ -493,6 +501,11 @@ async def get_user_certificates_for_course(
                     },
                 }
             )
+
+    logger.info(
+        f"Found {len(result)} certificates for user {current_user.id} in course {course_uuid}. "
+        f"Certification IDs checked: {certification_ids}"
+    )
 
     return result
 
@@ -557,6 +570,11 @@ async def check_course_completion_and_create_certificate(
 
     # Check if all activities are completed
     if len(completed_activities) >= len(course_activities):
+        logger.info(
+            f"Course {course_id} ({course.course_uuid}) completed by user {user_id}: "
+            f"{len(completed_activities)}/{len(course_activities)} activities"
+        )
+
         # Always award XP for course completion (idempotent), regardless of certificate availability
         try:
             gamification_service.on_course_completed(
@@ -569,7 +587,7 @@ async def check_course_completion_and_create_certificate(
             )
         except Exception as xp_error:
             # Log the error but don't fail subsequent certificate logic
-            print(
+            logger.error(
                 f"Failed to award XP for course completion (user_id: {user_id}, course_id: {course_id}): {xp_error}"
             )
 
@@ -578,6 +596,9 @@ async def check_course_completion_and_create_certificate(
         certification = db_session.exec(statement).first()
 
         if certification and certification.id:
+            logger.info(
+                f"Found certification config (id={certification.id}) for course {course_id}, creating certificate for user {user_id}"
+            )
             try:
                 # Generate idempotency key if not provided
                 if not idempotency_key:
@@ -614,16 +635,17 @@ async def check_course_completion_and_create_certificate(
                 raise
         else:
             # No certification configured for this course — course completion still processed
-            print(
-                f"No certification found for course {course_id} ({course.course_uuid})"
+            logger.warning(
+                f"No certification found for course {course_id} ({course.course_uuid}). "
+                f"User {user_id} completed the course but no certificate will be issued."
             )
             return True
     else:
         # Course not yet completed
         completed_count = len(completed_activities)
         total_count = len(course_activities)
-        print(
-            f"Course {course_id} not completed: {completed_count}/{total_count} activities finished"
+        logger.debug(
+            f"Course {course_id} not completed by user {user_id}: {completed_count}/{total_count} activities finished"
         )
 
     return False
