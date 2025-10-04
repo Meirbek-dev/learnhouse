@@ -20,7 +20,7 @@ const alertVariants = cva(
   },
 );
 
-const Alert = ({ className, variant, ...props }: ComponentProps<'div'> & VariantProps<typeof alertVariants>) => {
+function Alert({ className, variant, ...props }: ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
   return (
     <div
       data-slot="alert"
@@ -29,9 +29,9 @@ const Alert = ({ className, variant, ...props }: ComponentProps<'div'> & Variant
       {...props}
     />
   );
-};
+}
 
-const AlertTitle = ({ className, ...props }: ComponentProps<'div'>) => {
+function AlertTitle({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       data-slot="alert-title"
@@ -39,19 +39,19 @@ const AlertTitle = ({ className, ...props }: ComponentProps<'div'>) => {
       {...props}
     />
   );
-};
+}
 
-const AlertDescription = ({ className, ...props }: ComponentProps<'div'>) => {
+function AlertDescription({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       data-slot="alert-description"
       className={cn(
-        'col-start-2 grid justify-items-start gap-1 text-muted-foreground text-sm [&_p]:leading-relaxed',
+        'text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed',
         className,
       )}
       {...props}
     />
   );
-};
+}
 
-export { Alert, AlertDescription, AlertTitle };
+export { Alert, AlertTitle, AlertDescription };

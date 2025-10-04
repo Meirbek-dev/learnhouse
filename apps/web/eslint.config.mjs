@@ -16,10 +16,10 @@ export default [
     files: ['**/*.{js,jsx,mjs,cjs}'],
     plugins: {
       '@next/next': nextPlugin,
-      'react': reactPlugin,
+      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       'unused-imports': unusedImports,
-      'tailwindcss': tailwind,
+      tailwindcss: tailwind,
     },
     languageOptions: {
       parserOptions: {
@@ -64,10 +64,10 @@ export default [
     plugins: {
       '@typescript-eslint': tsPlugin,
       '@next/next': nextPlugin,
-      'react': reactPlugin,
+      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       'unused-imports': unusedImports,
-      'tailwindcss': tailwind,
+      tailwindcss: tailwind,
     },
     languageOptions: {
       parser: tsParser,

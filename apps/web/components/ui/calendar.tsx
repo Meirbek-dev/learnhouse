@@ -2,16 +2,14 @@
 
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { DayPicker, getDefaultClassNames } from 'react-day-picker';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { de, enUS, es, fr, ru } from 'date-fns/locale';
-import { useLocale, useTranslations } from 'next-intl';
 import type { DayButton } from 'react-day-picker';
-import type { Locale } from 'date-fns/locale';
 import type { ComponentProps } from 'react';
 import { useEffect, useRef } from 'react';
+
+import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-const Calendar = ({
+function Calendar({
   className,
   classNames,
   showOutsideDays = true,
@@ -22,73 +20,23 @@ const Calendar = ({
   ...props
 }: ComponentProps<typeof DayPicker> & {
   buttonVariant?: ComponentProps<typeof Button>['variant'];
-}) => {
-  const getDayPickerLocale = (locale: string): Locale => {
-    const localeMap: Record<string, Locale> = {
-      en: enUS,
-      es,
-      fr,
-      de,
-      ru,
-    };
-    return localeMap[locale] || enUS;
-  };
-
-  const locale = useLocale();
-  const t = useTranslations('calendar');
+}) {
   const defaultClassNames = getDefaultClassNames();
-
-  // Select appropriate date-fns locale
-  const dateLocale = getDayPickerLocale(locale);
-
-  // Localized formatters
-  const localizedFormatters = {
-    formatMonthDropdown: (date: Date) => {
-      return date.toLocaleString(locale, { month: 'long' });
-    },
-    formatYearDropdown: (date: Date) => {
-      return date.getFullYear().toString();
-    },
-    formatWeekdayName: (date: Date) => {
-      return date.toLocaleDateString(locale, { weekday: 'short' });
-    },
-    formatDay: (date: Date) => {
-      return date.getDate().toString();
-    },
-    ...formatters,
-  };
-
-  // Localized labels
-  const localizedLabels = {
-    labelNext: () => t('next'),
-    labelPrevious: () => t('previous'),
-    labelMonthDropdown: () => t('monthDropdown'),
-    labelYearDropdown: () => t('yearDropdown'),
-    labelWeekday: (date: Date) => {
-      return date.toLocaleDateString(locale, { weekday: 'long' });
-    },
-    labelDay: (date: Date) => {
-      return date.toLocaleDateString(locale, {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
-    },
-  };
 
   return (
     <DayPicker
-      locale={dateLocale}
       showOutsideDays={showOutsideDays}
       className={cn(
-        'group/calendar bg-background p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
+        'bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className,
       )}
       captionLayout={captionLayout}
-      formatters={localizedFormatters}
-      labels={localizedLabels}
+      formatters={{
+        formatMonthDropdown: (date) => date.toLocaleString('default', { month: 'short' }),
+        ...formatters,
+      }}
       classNames={{
         root: cn('w-fit', defaultClassNames.root),
         months: cn('flex gap-4 flex-col md:flex-row relative', defaultClassNames.months),
@@ -199,9 +147,9 @@ const Calendar = ({
       {...props}
     />
   );
-};
+}
 
-const CalendarDayButton = ({ className, day, modifiers, ...props }: ComponentProps<typeof DayButton>) => {
+function CalendarDayButton({ className, day, modifiers, ...props }: ComponentProps<typeof DayButton>) {
   const defaultClassNames = getDefaultClassNames();
 
   const ref = useRef<HTMLButtonElement>(null);
@@ -216,19 +164,19 @@ const CalendarDayButton = ({ className, day, modifiers, ...props }: ComponentPro
       size="icon"
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
-        modifiers.selected && !modifiers.range_start && !modifiers.range_end ? !modifiers.range_middle : null
+        modifiers.selected && !modifiers.range_start && !modifiers.range_end && !modifiers.range_middle
       }
       data-range-start={modifiers.range_start}
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 font-normal leading-none data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-start=true]:rounded-l-md data-[range-end=true]:bg-primary data-[range-middle=true]:bg-accent data-[range-start=true]:bg-primary data-[selected-single=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:text-accent-foreground data-[range-start=true]:text-primary-foreground data-[selected-single=true]:text-primary-foreground group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70',
+        'data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70',
         defaultClassNames.day,
         className,
       )}
       {...props}
     />
   );
-};
+}
 
 export { Calendar, CalendarDayButton };

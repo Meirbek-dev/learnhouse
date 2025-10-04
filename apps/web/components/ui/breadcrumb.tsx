@@ -5,7 +5,7 @@ import type { ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils';
 
-const Breadcrumb = ({ ...props }: ComponentProps<'nav'>) => {
+function Breadcrumb({ ...props }: ComponentProps<'nav'>) {
   return (
     <nav
       aria-label="breadcrumb"
@@ -13,22 +13,22 @@ const Breadcrumb = ({ ...props }: ComponentProps<'nav'>) => {
       {...props}
     />
   );
-};
+}
 
-const BreadcrumbList = ({ className, ...props }: ComponentProps<'ol'>) => {
+function BreadcrumbList({ className, ...props }: ComponentProps<'ol'>) {
   return (
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        'flex flex-wrap items-center gap-1.5 break-words font-medium text-muted-foreground text-sm tracking-tight sm:gap-2.5',
+        'text-muted-foreground flex flex-wrap items-center gap-1.5 font-medium break-words sm:gap-2.5',
         className,
       )}
       {...props}
     />
   );
-};
+}
 
-const BreadcrumbItem = ({ className, ...props }: ComponentProps<'li'>) => {
+function BreadcrumbItem({ className, ...props }: ComponentProps<'li'>) {
   return (
     <li
       data-slot="breadcrumb-item"
@@ -36,40 +36,40 @@ const BreadcrumbItem = ({ className, ...props }: ComponentProps<'li'>) => {
       {...props}
     />
   );
-};
+}
 
-const BreadcrumbLink = ({
+function BreadcrumbLink({
   asChild,
   className,
   ...props
 }: ComponentProps<'a'> & {
   asChild?: boolean;
-}) => {
+}) {
   const Comp = asChild ? SlotPrimitive.Slot : 'a';
 
   return (
     <Comp
       data-slot="breadcrumb-link"
-      className={cn('transition-colors hover:text-foreground', className)}
+      className={cn('hover:text-foreground transition-colors', className)}
       {...props}
     />
   );
-};
+}
 
-const BreadcrumbPage = ({ className, ...props }: ComponentProps<'span'>) => {
+function BreadcrumbPage({ className, ...props }: ComponentProps<'span'>) {
   return (
     <span
       data-slot="breadcrumb-page"
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn('font-normal text-foreground', className)}
+      className={cn('text-foreground font-normal', className)}
       {...props}
     />
   );
-};
+}
 
-const BreadcrumbSeparator = ({ children, className, ...props }: ComponentProps<'li'>) => {
+function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<'li'>) {
   return (
     <li
       data-slot="breadcrumb-separator"
@@ -81,9 +81,9 @@ const BreadcrumbSeparator = ({ children, className, ...props }: ComponentProps<'
       {children ?? <ChevronRight />}
     </li>
   );
-};
+}
 
-const BreadcrumbEllipsis = ({ className, ...props }: ComponentProps<'span'>) => {
+function BreadcrumbEllipsis({ className, ...props }: ComponentProps<'span'>) {
   const t = useTranslations('Components.Breadcrumb');
 
   return (
@@ -98,7 +98,7 @@ const BreadcrumbEllipsis = ({ className, ...props }: ComponentProps<'span'>) => 
       <span className="sr-only">{t('more')}</span>
     </span>
   );
-};
+}
 
 export {
   Breadcrumb,
