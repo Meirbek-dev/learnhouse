@@ -67,8 +67,8 @@ export function LevelProgress({
   const format = useFormatter();
   const levelInfo = getLevelInfo(profile.level, t);
 
-  const progressPercent = (profile as any).level_progress_percent ?? 0;
-  const xpToNext = (profile as any).xp_to_next_level ?? 0;
+  const progressPercent = profile.level_progress_percent ?? 0;
+  const xpToNext = profile.xp_to_next_level ?? 0;
 
   if (variant === 'compact') {
     return (
