@@ -4,19 +4,19 @@ name = "openu-api"
 version = "0.1.0"
 requires-python = ">=3.13.5"
 dependencies = [
-  "boto3>=1.40.44",
-  "botocore>=1.40.44",
+  "boto3>=1.40.45",
+  "botocore>=1.40.45",
   "fastapi[standard-no-fastapi-cloud-cli]>=0.118.0",
   "fastapi-another-jwt-auth>=0.1.11",
   "langchain>=0.3.27",
   "langchain-chroma>=0.2.6",
   "langchain-community>=0.3.30",
-  "langchain-core>=0.3.77",
+  "langchain-core>=0.3.78",
   "langchain-openai>=0.3.34",
   "langchain-text-splitters>=0.3.11",
   "openai>=2.1.0",
   "psycopg[binary,pool]>=3.2.10",
-  "pydantic[email]>=2.11.9",
+  "pydantic[email]>=2.11.10",
   "python-dotenv>=1.1.1",
   "pyyaml>=6.0.3",
   "redis[hiredis]>=6.4.0",
@@ -24,11 +24,11 @@ dependencies = [
   "sqlmodel>=0.0.25",
   "tiktoken>=0.11.0",
   "typer>=0.19.2",
-  "chromadb>=1.1.0",
+  "chromadb>=1.1.1",
   "alembic>=1.16.5",
   "alembic-postgresql-enum>=1.8.0",
-  "stripe>=13.0.0",
-  "logfire[fastapi,sqlalchemy]>=4.10.0",
+  "stripe>=13.0.1",
+  "logfire[fastapi,sqlalchemy]>=4.11.0",
   "beautifulsoup4>=4.14.2",
   "python-ulid>=3.1.0",
   "argon2-cffi>=25.1.0",
@@ -52,7 +52,7 @@ dev = [
 
 [tool.ruff]
 target-version = "py314"
-# lint.select = ["ALL"]
+lint.select = ["ALL"]
 lint.fixable = ["ALL"]
 lint.ignore = [
   "F401",

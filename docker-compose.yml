@@ -49,7 +49,7 @@ services:
     labels:
       - docker-volume-backup.stop-during-backup=true
   chromadb:
-    image: chromadb/chroma:1.1.0
+    image: chromadb/chroma:1.1.1
     restart: unless-stopped
     ports:
       - "8001:8000"
