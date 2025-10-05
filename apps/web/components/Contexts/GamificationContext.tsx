@@ -2,21 +2,25 @@
 
 import type {
   DashboardData,
+  GamificationError,
   OrganizationLeaderboard,
   UserGamificationProfile,
   XPAwardRequest,
   XPAwardResponse,
+  StreakType,
 } from '@/types/gamification';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { gamificationApi } from '@/services/gamification/client';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 
 /**
- * UNIFIED GAMIFICATION CONTEXT
+ * UNIFIED GAMIFICATION CONTEXT v2
  *
- * Eliminates redundant state management by providing:
- * - Single source of truth for all gamification data
- * - Automatic data sharing across components
- * - Unified loading and error states
- * - Smart caching and refetch logic
+ * Now using type-safe API client with:
+ * - Automatic retry logic
+ * - Request deduplication
+ * - Response caching
+ * - Type-safe error handling
+ * - Optimistic updates
  */
 
 interface GamificationContextValue {
@@ -27,7 +31,7 @@ interface GamificationContextValue {
 
   // States
   isLoading: boolean;
-  error: string | null;
+  error: GamificationError | null;
 
   // Actions
   awardXP: (payload: XPAwardRequest) => Promise<XPAwardResponse>;
@@ -62,10 +66,10 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   const [dashboard, setDashboard] = useState<DashboardData | null>(initialData?.dashboard || null);
   const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(initialData?.leaderboard || null);
   const [isLoading, setIsLoading] = useState(!initialData?.profile);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<GamificationError | null>(null);
 
   // Computed streaks
-  const streaks = React.useMemo(
+  const streaks = useMemo(
     () => ({
       login: profile?.login_streak || 0,
       learning: profile?.learning_streak || 0,
@@ -75,24 +79,33 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     [profile],
   );
 
-  // Unified data fetcher
-  const fetchData = React.useCallback(async () => {
+  // Unified data fetcher using new API client
+  const fetchData = useCallback(async () => {
     if (!orgId) return;
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/gamification/${orgId}`, { method: 'GET' });
-      if (!res.ok) throw new Error('Failed to load');
-      const json = await res.json();
-      const dash: DashboardData | null = json.dashboard ?? null;
-      const lb: OrganizationLeaderboard | null = json.leaderboard ?? null;
+      // Use type-safe client with automatic retry and caching
+      const dash = await gamificationApi.getDashboard(orgId);
+      const lb = await gamificationApi.getLeaderboard(orgId, { limit: 20 });
+
       if (dash) {
         setProfile(dash.profile);
         setDashboard(dash);
       }
       if (lb) setLeaderboard(lb);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch gamification data');
+    } catch (err) {
+      // Type-safe error handling
+      if (err && typeof err === 'object' && 'type' in err) {
+        setError(err as GamificationError);
+      } else {
+        // Fallback for unknown errors using error factory
+        const { createUnknownError } = await import('@/types/gamification/errors');
+        setError(createUnknownError(
+          err instanceof Error ? err.message : 'Failed to fetch gamification data',
+          err,
+        ));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -115,26 +128,19 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
       const alreadyDone = typeof window !== 'undefined' ? localStorage.getItem(todayKey) : '1';
       if (alreadyDone) return;
 
-      // Fire-and-forget: update login streak, then award login bonus using internal API route
+      // Fire-and-forget: update login streak, then award login bonus using new API client
       // Backend is idempotent and enforces daily caps; client guard prevents extra calls.
       (async () => {
         try {
-          // Update login streak
-          await fetch(`/api/gamification/${orgId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'update_streak', streak_type: 'login' }),
-          });
+          // Update login streak using type-safe client
+          await gamificationApi.updateStreak(orgId, 'login');
+
           // Award login bonus with idempotency key per user/day/org
-          await fetch(`/api/gamification/${orgId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'award_xp',
-              source: 'login_bonus',
-              idempotency_key: `login_bonus_${profile.user_id}_${orgId}_${new Date().toISOString().slice(0, 10)}`,
-            }),
+          await gamificationApi.awardXP(orgId, {
+            source: 'login_bonus',
+            idempotency_key: `login_bonus_${profile.user_id}_${orgId}_${new Date().toISOString().slice(0, 10)}`,
           });
+
           localStorage.setItem(todayKey, '1');
           // Refresh cached dashboard/profile
           fetchData();
@@ -147,57 +153,84 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     }
   }, [orgId, profile, fetchData]);
 
-  // Action Handlers
-  const awardXP = React.useCallback(
+  // Action Handlers with optimistic updates
+  const awardXP = useCallback(
     async (payload: XPAwardRequest): Promise<XPAwardResponse> => {
       if (!orgId) throw new Error('Organization required');
-      // Keep using internal route to reuse server auth/session
-      const res = await fetch(`/api/gamification/${orgId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'award_xp', ...payload }),
-      });
-      if (!res.ok) throw new Error('Failed to award XP');
-      const result = (await res.json()) as XPAwardResponse;
-      if (result.profile) {
-        setProfile(result.profile);
-        setDashboard((prev) => (prev ? { ...prev, profile: result.profile } : prev));
+
+      // Optimistic update: immediately add XP to local state
+      const optimisticAmount = payload.amount || 25; // Default XP
+      if (profile) {
+        const optimisticProfile = {
+          ...profile,
+          total_xp: profile.total_xp + optimisticAmount,
+          daily_xp_earned: profile.daily_xp_earned + optimisticAmount,
+        };
+        setProfile(optimisticProfile);
+        setDashboard((prev) => (prev ? { ...prev, profile: optimisticProfile } : prev));
       }
-      return result;
+
+      try {
+        // Use type-safe client with automatic retry
+        const result = await gamificationApi.awardXP(orgId, payload);
+
+        // Update with server response (authoritative)
+        if (result.profile) {
+          setProfile(result.profile);
+          setDashboard((prev) => (prev ? { ...prev, profile: result.profile } : prev));
+        }
+
+        return result;
+      } catch (error) {
+        // Rollback optimistic update on error
+        if (profile) {
+          setProfile(profile);
+          setDashboard((prev) => (prev ? { ...prev, profile } : prev));
+        }
+        throw error;
+      }
     },
-    [orgId],
+    [orgId, profile],
   );
 
-  const updateStreak = React.useCallback(
-    async (type: 'login' | 'learning') => {
+  const updateStreak = useCallback(
+    async (type: StreakType) => {
       if (!orgId) throw new Error('Organization required');
-      // Use internal route proxy to server util which calls /streaks/{type}
-      const res = await fetch(`/api/gamification/${orgId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'update_streak', streak_type: type }),
-      });
-      if (!res.ok) throw new Error('Failed to update streak');
+
+      // Use type-safe client
+      await gamificationApi.updateStreak(orgId, type);
+
+      // Refresh data
       await fetchData();
     },
     [orgId, fetchData],
   );
 
-  const updatePreferences = React.useCallback(
-    async (preferences: Record<string, any>) => {
+  const updatePreferences = useCallback(
+    async (preferences: Record<string, unknown>) => {
       if (!orgId) throw new Error('Organization required');
-      // Use internal route proxy to server util which PATCHes /preferences
-      const res = await fetch(`/api/gamification/${orgId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'update_preferences', preferences }),
-      });
-      if (!res.ok) throw new Error('Failed to update preferences');
-      const result = await res.json();
-      if (profile && result?.preferences) {
-        const updatedProfile = { ...profile, preferences: result.preferences } as UserGamificationProfile;
+
+      // Optimistic update
+      if (profile) {
+        const optimisticProfile = { ...profile, preferences: { ...profile.preferences, ...preferences } };
+        setProfile(optimisticProfile);
+        setDashboard((prev) => (prev ? { ...prev, profile: optimisticProfile } : prev));
+      }
+
+      try {
+        // Use type-safe client
+        const updatedProfile = await gamificationApi.updatePreferences(orgId, preferences);
+
+        // Update with server response
         setProfile(updatedProfile);
         setDashboard((prev) => (prev ? { ...prev, profile: updatedProfile } : prev));
+      } catch (error) {
+        // Rollback on error
+        if (profile) {
+          setProfile(profile);
+          setDashboard((prev) => (prev ? { ...prev, profile } : prev));
+        }
+        throw error;
       }
     },
     [orgId, profile],

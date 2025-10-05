@@ -180,7 +180,7 @@ export function Leaderboard({
                         variant="outline"
                         className="px-1 text-xs"
                       >
-                        {t('leaderboard.levelShort', { level: entry.current_level })}
+                        {t('leaderboard.levelShort', { level: entry.level })}
                       </Badge>
                     </div>
                   </TooltipTrigger>
@@ -188,7 +188,7 @@ export function Leaderboard({
                     <p>
                       {t('leaderboard.tooltipUser', {
                         user: entry.username || t('leaderboard.user', { id: entry.user_id }),
-                        level: entry.current_level,
+                        level: entry.level,
                         xp: entry.total_xp.toLocaleString(),
                       })}
                     </p>
@@ -264,7 +264,7 @@ export function Leaderboard({
                         <div className="text-muted-foreground flex items-center gap-3 text-xs">
                           <span className="flex items-center gap-1">
                             <TrendingUp className="h-3 w-3" />
-                            {t('leaderboard.levelLabel', { level: entry.current_level })}
+                            {t('leaderboard.levelLabel', { level: entry.level })}
                           </span>
                           <span>{t('leaderboard.xp', { xp: entry.total_xp.toLocaleString() })}</span>
                         </div>
@@ -281,7 +281,7 @@ export function Leaderboard({
                   <div className="text-center">
                     <p className="font-medium">{entry.username || t('leaderboard.user', { id: entry.user_id })}</p>
                     <p className="text-sm">
-                      {t('leaderboard.rankLevel', { rank: entry.rank, level: entry.current_level })}
+                      {t('leaderboard.rankLevel', { rank: entry.rank, level: entry.level })}
                     </p>
                     <p className="text-sm">{t('leaderboard.xpEarned', { xp: entry.total_xp.toLocaleString() })}</p>
                   </div>

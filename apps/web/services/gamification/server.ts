@@ -152,11 +152,23 @@ export async function getServerGamificationDashboard(
       created_at: tx?.created_at || new Date().toISOString(),
     })),
     // Keep API stable: fill optional derived sections with sane defaults
-    leaderboard: { entries: [] },
+    leaderboard: {
+      entries: [],
+      total_participants: 0,
+      last_updated: new Date().toISOString(),
+    },
+    user_rank: null, // Will be populated separately if needed
     streak_info: {
-      current_streak: Number(profile.login_streak) || 0,
-      longest_streak: Number(profile.longest_login_streak) || 0,
-      last_activity: profile.last_login_date ?? null,
+      login: {
+        current: Number(profile.login_streak) || 0,
+        longest: Number(profile.longest_login_streak) || 0,
+        lastDate: profile.last_login_date ?? null,
+      },
+      learning: {
+        current: Number(profile.learning_streak) || 0,
+        longest: Number(profile.longest_learning_streak) || 0,
+        lastDate: profile.last_learning_date ?? null,
+      },
     },
   };
 
@@ -192,10 +204,11 @@ export async function getServerOrganizationLeaderboard(
       user_id: Number(entry.user_id) || 0,
       total_xp: Number(entry.total_xp) || 0,
       level: Number(entry.level) || 1,
-      current_level: Number(entry.level) || 1,
       rank: Number(entry.rank ?? index + 1),
       username: entry.username ?? null,
     })),
+    total_participants: Number(json?.total_participants) || 0,
+    last_updated: json?.last_updated || new Date().toISOString(),
   };
   return transformed;
 }
