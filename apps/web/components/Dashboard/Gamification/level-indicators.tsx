@@ -7,41 +7,72 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-interface LevelProgressBarProps {
-  profile: UserGamificationProfile;
-  variant?: 'default' | 'compact';
-  showLabels?: boolean;
-  animated?: boolean;
+// ---------------------
+// 1. LEVEL BADGE (Simple)
+// ---------------------
+export function LevelBadge({
+  level,
+  size = 'md',
+  showIcon = true,
+  className,
+}: {
+  level: number;
+  size?: 'sm' | 'md' | 'lg';
+  showIcon?: boolean;
   className?: string;
+}) {
+  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
+  const levelInfo = getLevelInfo(level, t);
+  const Icon = levelInfo.icon;
+
+  const sizeClasses = {
+    sm: 'text-xs px-2 py-0.5',
+    md: 'text-sm px-3 py-1',
+    lg: 'text-base px-4 py-1.5',
+  };
+
+  const iconSizes = {
+    sm: 'h-3 w-3',
+    md: 'h-4 w-4',
+    lg: 'h-5 w-5',
+  };
+
+  return (
+    <Badge className={cn(levelInfo.color, sizeClasses[size], 'flex items-center gap-1 text-primary-foreground', className)}>
+      {showIcon && <Icon className={iconSizes[size]} />}
+      {t('levelIndicators.level')} {level}
+    </Badge>
+  );
 }
 
-interface LevelDisplayProps {
-  profile: UserGamificationProfile;
-  variant?: 'full' | 'compact' | 'badge';
-  showProgress?: boolean;
-  showXP?: boolean;
-  className?: string;
-}
-
-export function LevelProgressBar({
+// ---------------------
+// 2. LEVEL PROGRESS (Flexible)
+// ---------------------
+export function LevelProgress({
   profile,
-  variant = 'default',
+  variant = 'bar',
   showLabels = true,
   animated = true,
   className,
-}: LevelProgressBarProps) {
+}: {
+  profile: UserGamificationProfile;
+  variant?: 'bar' | 'compact';
+  showLabels?: boolean;
+  animated?: boolean;
+  className?: string;
+}) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const format = useFormatter();
   const levelInfo = getLevelInfo(profile.level, t);
-  // Server-provided values are authoritative
-  const progressPercentage = (profile as any).level_progress_percent ?? 0;
+
+  const progressPercent = (profile as any).level_progress_percent ?? 0;
   const xpToNext = (profile as any).xp_to_next_level ?? 0;
 
   if (variant === 'compact') {
     return (
       <div className={cn('space-y-1', className)}>
         <Progress
-          value={progressPercentage}
+          value={progressPercent}
           className={cn('h-1.5', animated && 'transition-all duration-500 ease-out')}
         />
         {showLabels && (
@@ -51,7 +82,7 @@ export function LevelProgressBar({
               {profile.level}
             </span>
             <span>
-              {xpToNext} {t('levelIndicators.xpToNext')}
+              {format.number(xpToNext)} {t('levelIndicators.xpToNext')}
             </span>
           </div>
         )}
@@ -63,23 +94,25 @@ export function LevelProgressBar({
     <div className={cn('space-y-2', className)}>
       {showLabels && (
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium">
-            {t('levelIndicators.level')} {profile.level}
+          <span className={cn('font-medium', levelInfo.color)}>
+            {t('levelIndicators.level')} {profile.level} - {levelInfo.title}
           </span>
-          <span className="text-muted-foreground">{t('levelIndicators.xpToLevel', { level: profile.level + 1 })}</span>
+          <span className="text-muted-foreground">
+            {format.number(xpToNext)} {t('levelIndicators.xpToNext')}
+          </span>
         </div>
       )}
 
       <div className="relative">
         <Progress
-          value={progressPercentage}
+          value={progressPercent}
           className={cn('h-3', animated && 'transition-all duration-500 ease-out')}
         />
 
         {/* Level icon overlay */}
         <div className={cn('absolute top-0 left-2 flex h-full items-center', levelInfo.color)}>
           {(() => {
-            const Icon = (levelInfo as any)?.icon;
+            const Icon = levelInfo.icon;
             return Icon ? <Icon className="h-3 w-3" /> : null;
           })()}
         </div>
@@ -87,88 +120,18 @@ export function LevelProgressBar({
 
       {showLabels && (
         <div className="text-muted-foreground flex justify-between text-xs">
-          <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}</span>
-          <span>{t('levelIndicators.progress', { percentage: format.number(Math.round(progressPercentage)) })}</span>
-          <span>{t('levelIndicators.totalXp', { total: format.number(profile.total_xp + xpToNext) })}</span>
+          <span>{format.number(profile.total_xp)} XP</span>
+          <span>{Math.round(progressPercent)}%</span>
+          <span>{format.number(profile.total_xp + xpToNext)} XP</span>
         </div>
       )}
     </div>
   );
 }
 
-export function LevelDisplay({
-  profile,
-  variant = 'full',
-  showProgress = true,
-  showXP = true,
-  className,
-}: LevelDisplayProps) {
-  const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const format = useFormatter();
-  const levelInfo = getLevelInfo(profile.level, t);
-  const xpToNext = (profile as any).xp_to_next_level ?? 0;
-  const Icon = levelInfo.icon;
-
-  if (variant === 'compact') {
-    return (
-      <div className={cn('flex items-center gap-3', className)}>
-        <div className={cn('flex items-center gap-2', levelInfo.color)}>
-          <Icon className="h-5 w-5" />
-          <div>
-            <span className="font-semibold">
-              {t('levelIndicators.levelAbbrev')}
-              {profile.level}
-            </span>
-            <span className="ml-2 text-sm font-medium">{levelInfo.title}</span>
-          </div>
-        </div>
-        {showXP && (
-          <div className="text-right">
-            <div className="text-sm font-medium">
-              {t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className={cn('space-y-3', className)}>
-      <div className="flex items-center justify-between">
-        <div className={cn('flex items-center gap-2', levelInfo.color)}>
-          <Icon className="h-6 w-6" />
-          <div>
-            <span className="text-lg font-bold">
-              {t('levelIndicators.level')} {profile.level}
-            </span>
-            <span className="ml-2 text-base font-medium">{levelInfo.title}</span>
-          </div>
-        </div>
-        {showXP && (
-          <div className="text-right">
-            <div className="text-base font-semibold">
-              {t('levelIndicators.totalXp', { total: format.number(profile.total_xp) })}
-            </div>
-            <div className="text-muted-foreground text-sm">
-              {t('levelIndicators.xpToNextLevel', { xp: format.number(xpToNext) })}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {showProgress && (
-        <LevelProgressBar
-          profile={profile}
-          showLabels
-          animated
-        />
-      )}
-    </div>
-  );
-}
-
-// Animation components for level up effects
+// ---------------------
+// 3. LEVEL UP ANIMATION (Unchanged)
+// ---------------------
 export function LevelUpAnimation({ newLevel, onComplete }: { newLevel: number; onComplete?: () => void }) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const levelInfo = getLevelInfo(newLevel, t);

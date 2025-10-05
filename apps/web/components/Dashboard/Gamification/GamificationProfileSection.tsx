@@ -7,7 +7,7 @@ import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { AVATAR_UNLOCKS, getLevelInfo } from '@/lib/gamification/levels';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { Separator } from '@/components/ui/separator';
-import { LevelDisplay } from './LevelIndicators';
+import { LevelBadge, LevelProgress } from './level-indicators';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -130,11 +130,26 @@ export function GamificationProfileSection({
             className="shrink-0"
           />
           <div className="flex-1 space-y-3">
-            <LevelDisplay
+            {/* Level Badge and Progress */}
+            <div className="flex items-center justify-between">
+              <LevelBadge
+                level={profile.level}
+                size="lg"
+                showIcon
+              />
+              <div className="text-right text-sm">
+                <div className="font-semibold">{profile.total_xp.toLocaleString()} XP</div>
+                <div className="text-muted-foreground text-xs">
+                  {(profile as any).xp_to_next_level?.toLocaleString() || 0} {t('levelIndicators.xpToNext')}
+                </div>
+              </div>
+            </div>
+
+            <LevelProgress
               profile={profile}
-              variant="full"
-              showXP
-              showProgress
+              variant="bar"
+              showLabels
+              animated
             />
 
             {/* Quick Stats */}
@@ -187,7 +202,9 @@ export function GamificationProfileSection({
           </div>
         )}
 
-        {/* Unlocked Features */}
+        {/* Unlocked Features - HIDDEN until avatar customization backend is ready */}
+        {/* TODO: Re-enable when backend supports equipped_frame_id and equipped_accessories
+            See: docs/gamification/AVATAR_CUSTOMIZATION.md
         {showUnlocks && (
           <div className="space-y-3">
             <h4 className="flex items-center gap-2 text-sm font-medium">
@@ -196,7 +213,6 @@ export function GamificationProfileSection({
             </h4>
 
             <div className="grid grid-cols-1 gap-3">
-              {/* Avatar Frames */}
               {unlockedFrames.length > 0 && (
                 <div>
                   <p className="text-muted-foreground mb-2 text-xs font-medium">
@@ -216,7 +232,6 @@ export function GamificationProfileSection({
                 </div>
               )}
 
-              {/* Avatar Accessories */}
               {unlockedAccessories.length > 0 && (
                 <div>
                   <p className="text-muted-foreground mb-2 text-xs font-medium">
@@ -239,6 +254,7 @@ export function GamificationProfileSection({
             </div>
           </div>
         )}
+        */}
       </CardContent>
     </Card>
   );

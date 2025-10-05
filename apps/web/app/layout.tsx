@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           src="//unpkg.com/react-scan/dist/auto.global.js"
         /> */}
       </head>
-      <body className="bg-background/50">
+      <body className="bg-background/20">
         {!isDevEnv && (
           <Script
             defer

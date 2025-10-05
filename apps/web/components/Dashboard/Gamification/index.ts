@@ -1,6 +1,13 @@
 // Core gamification exports
 
-export { GamificationDashboard } from './GamificationDashboard';
 export { GamificationProfileSection } from './GamificationProfileSection';
 export { Leaderboard } from './Leaderboard';
-export { LevelDisplay, LevelProgressBar, LevelUpAnimation } from './LevelIndicators';
+
+// Dashboard cards
+export { ProfileCard } from './profile-card';
+export { QuickStatsCard } from './quick-stats-card';
+export { RecentActivityFeed } from './recent-activity-feed';
+export { LeaderboardCard } from './leaderboard-card';
+
+// Level indicators (simplified version)
+export { LevelBadge, LevelProgress, LevelUpAnimation } from './level-indicators';

@@ -5,7 +5,7 @@ import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCours
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement';
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
-import LearnerDashboardServer from '@components/Dashboard/LearnerDashboard.server';
+import GamificationDashboard from '@/components/Dashboard/gamification-dashboard';
 import { getUriWithOrg } from '@services/config/config';
 import CourseGridClient from './CourseGridClient';
 import { useTranslations } from 'next-intl';
@@ -105,14 +105,10 @@ const LandingClassic = ({
   return (
     <div className="w-full">
       <GeneralWrapperStyled>
-        {/* Learner Dashboard Section */}
+        {/* Gamification Dashboard Section */}
         {showLearnerDashboard && (
           <section className="mb-8">
-            <LearnerDashboardServer
-              orgId={org_id}
-              orgSlug={orgslug}
-              courses={courses}
-            />
+            <GamificationDashboard orgId={org_id} />
           </section>
         )}
 

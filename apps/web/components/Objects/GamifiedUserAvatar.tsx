@@ -72,6 +72,11 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const params = useParams();
   const [userData, setUserData] = useState<any>(null);
 
+  // FEATURE FLAG: Avatar customization (frames/accessories)
+  // TODO: Enable when backend supports equipped_frame_id and equipped_accessories
+  // See: docs/gamification/AVATAR_CUSTOMIZATION.md
+  const ENABLE_AVATAR_CUSTOMIZATION = false;
+
   const {
     size = 'md',
     variant = 'default',
@@ -86,9 +91,13 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
     showLevelBadge = false,
     gamificationProfile,
     levelIndicatorPosition = 'bottom-right',
-    showAvatarFrame = false,
-    showAvatarAccessories = false,
+    showAvatarFrame: _showAvatarFrame = false,
+    showAvatarAccessories: _showAvatarAccessories = false,
   } = props;
+
+  // Apply feature flag to avatar customization props
+  const showAvatarFrame = ENABLE_AVATAR_CUSTOMIZATION && _showAvatarFrame;
+  const showAvatarAccessories = ENABLE_AVATAR_CUSTOMIZATION && _showAvatarAccessories;
 
   useEffect(() => {
     const fetchUserByUsername = async () => {
