@@ -83,6 +83,7 @@ Before responding to any request, follow these steps:
 - Use shadcn UI best practices
 - This project is not deployed and doesn't have users yer. So you can do breaking changes, leaving
   no legacy/compatibility code.
+- Don't write .md doc files
 
 ---
 

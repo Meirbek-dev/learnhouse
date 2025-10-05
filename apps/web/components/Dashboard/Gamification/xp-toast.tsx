@@ -1,10 +1,11 @@
 'use client';
 
-import { Award, Sparkles, TrendingUp, Zap, Trophy } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { getXPSourceIcon, getXPSourceColor } from '@/lib/gamification/constants';
 
 interface XPToastProps {
   amount: number;
@@ -14,16 +15,6 @@ interface XPToastProps {
   onComplete?: () => void;
   showSourceLabel?: boolean;
 }
-
-const sourceIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  activity_completion: Award,
-  course_completion: Sparkles,
-  quiz_completion: Zap,
-  assignment_submission: Trophy,
-  streak_bonus: TrendingUp,
-  login_bonus: Zap,
-  default: Award,
-};
 
 export function XPToast({
   amount,
@@ -35,7 +26,8 @@ export function XPToast({
 }: XPToastProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const [isVisible, setIsVisible] = useState(true);
-  const IconComponent = (sourceIcons[source] || sourceIcons.default) as React.ComponentType<{ className?: string }>;
+  const IconComponent = getXPSourceIcon(source);
+  const iconColor = getXPSourceColor(source);
 
   // Get localized source label
   const getSourceLabel = (sourceKey: string): string => {
@@ -96,7 +88,7 @@ export function XPToast({
               animate={{ rotate: 0, scale: 1 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
-              <IconComponent className={cn('h-6 w-6', triggeredLevelUp ? 'text-yellow-500' : 'text-primary')} />
+              <IconComponent className={cn('h-6 w-6', triggeredLevelUp ? 'text-yellow-500' : iconColor)} />
             </motion.div>
 
             <div className="flex flex-col">

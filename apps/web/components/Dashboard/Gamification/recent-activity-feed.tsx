@@ -1,26 +1,18 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Award, Trophy, Zap, TrendingUp } from 'lucide-react';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import type { XPTransaction } from '@/types/gamification';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 import { useTranslations } from 'next-intl';
+import { getXPSourceIcon, getXPSourceColor } from '@/lib/gamification/constants';
 
 interface RecentActivityFeedProps {
   transactions: XPTransaction[];
   isLoading?: boolean;
 }
-
-const activityIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  course_completion: Trophy,
-  quiz_completion: Award,
-  daily_login: Zap,
-  streak_bonus: TrendingUp,
-  default: Award,
-};
 
 export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFeedProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
@@ -75,7 +67,8 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
         <ScrollArea className="h-[400px] pr-4">
           <div className="space-y-4">
             {transactions.map((transaction) => {
-              const IconComponent = activityIcons[transaction.source] || Award;
+              const IconComponent = getXPSourceIcon(transaction.source);
+              const iconColor = getXPSourceColor(transaction.source);
               const timeAgo = transaction.created_at
                 ? formatDistanceToNow(new Date(transaction.created_at), {
                     addSuffix: true,
@@ -89,7 +82,7 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
                   className="flex items-start gap-3"
                 >
                   <div className="bg-primary/10 rounded-full p-2">
-                    <IconComponent className="text-primary h-4 w-4" />
+                    <IconComponent className={`h-4 w-4 ${iconColor}`} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{t(`xpSources.${transaction.source}` as any)}</p>

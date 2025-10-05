@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { LucideIcon } from 'lucide-react';
 
 /**
  * User Profile and Level Types
@@ -44,11 +45,12 @@ export interface UserGamificationProfile {
 export interface LevelInfo {
   level: number;
   title: string;
-  titleKey: string; // Translation key
+  titleKey?: string; // Translation key (optional for backward compatibility)
   color: string; // Tailwind color class
+  icon: LucideIcon; // Icon component
   minXP: number;
   maxXP?: number; // undefined for max level
-  unlocks: string[]; // Translation keys for unlocked features
+  unlocks?: string[]; // Translation keys for unlocked features (optional)
 }
 
 // Streak information
@@ -116,11 +118,12 @@ export const UserGamificationProfileSchema = z.object({
 export const LevelInfoSchema = z.object({
   level: z.number(),
   title: z.string(),
-  titleKey: z.string(),
+  titleKey: z.string().optional(),
   color: z.string(),
+  icon: z.any(), // Can't validate React component with Zod
   minXP: z.number(),
   maxXP: z.number().optional(),
-  unlocks: z.array(z.string()),
+  unlocks: z.array(z.string()).optional(),
 });
 
 export const StreakInfoSchema = z.object({
@@ -191,4 +194,57 @@ export function calculateLevelProgress(profile: UserGamificationProfile): {
     progressPercent: Math.min(progressPercent, 100),
     xpToNext,
   };
+}
+
+// ===================================
+// TYPE GUARDS
+// ===================================
+
+/**
+ * Check if a profile has valid XP data
+ */
+export function hasValidXP(profile: unknown): profile is UserGamificationProfile {
+  return (
+    typeof profile === 'object' &&
+    profile !== null &&
+    'total_xp' in profile &&
+    typeof (profile as UserGamificationProfile).total_xp === 'number' &&
+    (profile as UserGamificationProfile).total_xp >= 0
+  );
+}
+
+/**
+ * Check if profile has active streak
+ */
+export function hasActiveStreak(profile: UserGamificationProfile): boolean {
+  return profile.login_streak > 0 || profile.learning_streak > 0;
+}
+
+/**
+ * Check if profile is at max level
+ */
+export function isMaxLevel(profile: UserGamificationProfile): boolean {
+  return profile.level >= 100;
+}
+
+/**
+ * Check if profile can earn more XP today
+ */
+export function canEarnMoreXPToday(profile: UserGamificationProfile, dailyLimit = 500): boolean {
+  return profile.daily_xp_earned < dailyLimit;
+}
+
+/**
+ * Type guard for LevelInfo
+ */
+export function isLevelInfo(value: unknown): value is LevelInfo {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'level' in value &&
+    'title' in value &&
+    'color' in value &&
+    'icon' in value &&
+    'minXP' in value
+  );
 }

@@ -4,29 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { LeaderboardEntry } from '@/types/gamification';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Trophy, Medal, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { getRankIcon, getRankColor, getRankBgColor } from '@/lib/gamification/constants';
 
 interface LeaderboardCardProps {
   entries: LeaderboardEntry[];
   currentUserId?: number;
   isLoading?: boolean;
 }
-
-const rankIcons: Record<number, React.ComponentType<{ className?: string }>> = {
-  1: Trophy,
-  2: Medal,
-  3: Award,
-};
-
-const rankColors: Record<number, string> = {
-  1: 'text-yellow-500',
-  2: 'text-gray-400',
-  3: 'text-amber-600',
-};
 
 export function LeaderboardCard({ entries, currentUserId, isLoading }: LeaderboardCardProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
@@ -81,8 +69,9 @@ export function LeaderboardCard({ entries, currentUserId, isLoading }: Leaderboa
         <ScrollArea className="h-[400px] pr-4">
           <div className="space-y-3">
             {entries.map((entry) => {
-              const RankIcon = rankIcons[entry.rank];
-              const rankColor = rankColors[entry.rank];
+              const RankIcon = getRankIcon(entry.rank);
+              const rankColor = getRankColor(entry.rank);
+              const rankBgColor = getRankBgColor(entry.rank);
               const isCurrentUser = entry.user_id === currentUserId;
 
               return (
@@ -94,9 +83,9 @@ export function LeaderboardCard({ entries, currentUserId, isLoading }: Leaderboa
                   )}
                 >
                   {/* Rank */}
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center">
+                  <div className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full', RankIcon && rankBgColor)}>
                     {RankIcon ? (
-                      <RankIcon className={cn('h-5 w-5', rankColor)} />
+                      <RankIcon className={cn('h-4 w-4', rankColor)} />
                     ) : (
                       <span className="text-muted-foreground text-sm font-medium">{entry.rank}</span>
                     )}

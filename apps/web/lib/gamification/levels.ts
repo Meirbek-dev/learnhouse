@@ -1,16 +1,12 @@
-// Shared gamification level utilities
-// Centralizes level config, unlocks, and helpers
-
-export interface LevelInfo {
-  level: number;
-  title: string;
-  color: string;
-  icon: React.ComponentType<{ className?: string }>;
-  minXP: number;
-  unlocks?: string[];
-}
+/**
+ * Shared gamification level utilities
+ * Centralizes level config, unlocks, and helpers
+ *
+ * Note: Imports LevelInfo from types for consistency
+ */
 
 import { Crown, Star, Target, Trophy, Zap } from 'lucide-react';
+import type { LevelInfo } from '@/types/gamification/profile';
 
 // Level configuration with RPG-style progression (translation keys)
 export const LEVEL_CONFIG: Record<number, LevelInfo> = {

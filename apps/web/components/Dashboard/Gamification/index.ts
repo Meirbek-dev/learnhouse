@@ -1,6 +1,11 @@
-export { Leaderboard } from './leaderboard';
-// Core gamification exports
+/**
+ * Gamification Components Index
+ *
+ * Exports all gamification UI components with centralized constants
+ */
 
+// Core gamification exports
+export { Leaderboard } from './leaderboard';
 export { GamificationProfileSection } from './GamificationProfileSection';
 
 // Dashboard cards
